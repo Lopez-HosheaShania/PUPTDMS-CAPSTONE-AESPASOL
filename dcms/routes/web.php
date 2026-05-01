@@ -546,6 +546,7 @@ Route::prefix('admin')
 
         Route::get('/service-types', [ServiceTypeController::class, 'index'])->name('service-types');
         Route::post('/service-types', [ServiceTypeController::class, 'store'])->name('service-types.store');
+        Route::put('/service-types/{id}', [ServiceTypeController::class, 'update'])->name('service-types.update');
         Route::delete('/service-types/{id}', [ServiceTypeController::class, 'destroy'])->name('service-types.destroy');
     });
 

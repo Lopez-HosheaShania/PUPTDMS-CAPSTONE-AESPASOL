@@ -204,7 +204,8 @@ class AppointmentController extends Controller
 
         $diseases = Disease::orderBy('sort_order')->get();
 
-        $serviceTypes = ServiceType::orderBy('name')
+        $serviceTypes = ServiceType::where('is_active_for_booking', true)
+            ->orderBy('name')
             ->get()
             ->map(function ($service) {
                 return [
@@ -282,7 +283,9 @@ class AppointmentController extends Controller
         ]);
 
 
-        if (!ServiceType::where('name', $request->service_type)->exists()) {
+        if (!ServiceType::where('name', $request->service_type)
+             ->where('is_active_for_booking', true)
+            ->exists()) {
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Invalid service type selected.');

@@ -1080,6 +1080,343 @@
         transition: opacity .15s ease;
     }
 
+    [data-theme="dark"] .document-requests-page {
+        background: #0b1117 !important;
+    }
+
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .tbl-wrap,
+    [data-theme="dark"] .panel-card,
+    [data-theme="dark"] .request-card {
+        background: #161b22 !important;
+        border-color: #21262d !important;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .stat-card:hover,
+    [data-theme="dark"] .request-card:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .28) !important;
+        border-color: #2b313a !important;
+    }
+
+    [data-theme="dark"] .stat-card.total.stat-active {
+        border-color: #6b7280 !important;
+        box-shadow: 0 0 0 3px rgba(107, 114, 128, .16) !important;
+    }
+
+    [data-theme="dark"] .stat-card.pending.stat-active {
+        border-color: #f59e0b !important;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, .16) !important;
+    }
+
+    [data-theme="dark"] .stat-card.approved.stat-active {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, .16) !important;
+    }
+
+    [data-theme="dark"] .stat-card.ready.stat-active {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, .16) !important;
+    }
+
+    [data-theme="dark"] .stat-card.released.stat-active {
+        border-color: #8b5cf6 !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, .16) !important;
+    }
+
+    [data-theme="dark"] .stat-card.rejected.stat-active {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, .16) !important;
+    }
+
+    [data-theme="dark"] .stat-card.total .stat-icon {
+        background: #21262d !important;
+        color: #9ca3af !important;
+    }
+
+    [data-theme="dark"] .stat-card.pending .stat-icon {
+        background: rgba(245, 158, 11, .12) !important;
+        color: #fbbf24 !important;
+    }
+
+    [data-theme="dark"] .stat-card.approved .stat-icon {
+        background: rgba(16, 185, 129, .12) !important;
+        color: #34d399 !important;
+    }
+
+    [data-theme="dark"] .stat-card.ready .stat-icon {
+        background: rgba(59, 130, 246, .12) !important;
+        color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] .stat-card.released .stat-icon {
+        background: rgba(139, 92, 246, .12) !important;
+        color: #a78bfa !important;
+    }
+
+    [data-theme="dark"] .stat-card.rejected .stat-icon {
+        background: rgba(239, 68, 68, .12) !important;
+        color: #f87171 !important;
+    }
+
+    [data-theme="dark"] .stat-card.total .stat-val {
+        color: #f3f4f6 !important;
+    }
+
+    [data-theme="dark"] .stat-card.pending .stat-val {
+        color: #fbbf24 !important;
+    }
+
+    [data-theme="dark"] .stat-card.approved .stat-val {
+        color: #34d399 !important;
+    }
+
+    [data-theme="dark"] .stat-card.ready .stat-val {
+        color: #60a5fa !important;
+    }
+
+    [data-theme="dark"] .stat-card.released .stat-val {
+        color: #a78bfa !important;
+    }
+
+    [data-theme="dark"] .stat-card.rejected .stat-val {
+        color: #f87171 !important;
+    }
+
+    [data-theme="dark"] .stat-lbl,
+    [data-theme="dark"] .request-card-label,
+    [data-theme="dark"] .request-card-id,
+    [data-theme="dark"] .tbl th,
+    [data-theme="dark"] .tbl-pagination,
+    [data-theme="dark"] .filter-date-wrap label,
+    [data-theme="dark"] .panel-header div.text-\[11px\],
+    [data-theme="dark"] .empty-state,
+    [data-theme="dark"] .empty-state p,
+    [data-theme="dark"] .text-gray-400,
+    [data-theme="dark"] .text-gray-500 {
+        color: #9ca3af !important;
+    }
+
+    [data-theme="dark"] .stat-card.pending .stat-trend {
+        background: rgba(245, 158, 11, .12) !important;
+        color: #fbbf24 !important;
+    }
+
+    [data-theme="dark"] .stat-card.rejected .stat-trend {
+        background: rgba(239, 68, 68, .12) !important;
+        color: #f87171 !important;
+    }
+
+    [data-theme="dark"] .search-wrap,
+    [data-theme="dark"] .view-toggle,
+    [data-theme="dark"] .filter-btn {
+        background: #0d1117 !important;
+        border-color: #21262d !important;
+        color: #9ca3af !important;
+    }
+
+    [data-theme="dark"] .search-wrap:focus-within,
+    [data-theme="dark"] .filter-btn:hover,
+    [data-theme="dark"] .filter-btn.active {
+        border-color: #8B0000 !important;
+        background: #161b22 !important;
+        color: #f3f4f6 !important;
+        box-shadow: 0 0 0 3px rgba(139, 0, 0, .14) !important;
+    }
+
+    [data-theme="dark"] .search-wrap input {
+        color: #f3f4f6 !important;
+    }
+
+    [data-theme="dark"] .search-wrap input::placeholder {
+        color: #6b7280 !important;
+    }
+
+    [data-theme="dark"] .search-wrap .search-icon,
+    [data-theme="dark"] .search-wrap.voice-search-wrap .voice-search-mic {
+        color: #f87171 !important;
+    }
+
+    [data-theme="dark"] .search-clear-btn {
+        color: #f87171 !important;
+    }
+
+    [data-theme="dark"] .search-clear-btn:hover {
+        color: #fecaca !important;
+    }
+
+    [data-theme="dark"] .search-wrap.voice-search-wrap [data-voice-status] {
+        background: #161b22 !important;
+        border-color: #2b313a !important;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .search-wrap.voice-search-wrap [data-voice-status].is-listening {
+        color: #93c5fd !important;
+        border-color: #1d4ed8 !important;
+        background: rgba(29, 78, 216, .14) !important;
+    }
+
+    [data-theme="dark"] .search-wrap.voice-search-wrap [data-voice-status].is-error {
+        color: #fca5a5 !important;
+        border-color: #b91c1c !important;
+        background: rgba(185, 28, 28, .14) !important;
+    }
+
+    [data-theme="dark"] .search-wrap.voice-search-wrap [data-voice-status].is-success {
+        color: #86efac !important;
+        border-color: #166534 !important;
+        background: rgba(22, 101, 52, .14) !important;
+    }
+
+    [data-theme="dark"] .view-toggle-btn {
+        color: #9ca3af !important;
+    }
+
+    [data-theme="dark"] .view-toggle-btn:hover {
+        background: #1c2128 !important;
+        color: #f3f4f6 !important;
+    }
+
+    [data-theme="dark"] .view-toggle-btn.active {
+        background: #8B0000 !important;
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .btn-secondary {
+        background: #161b22 !important;
+        color: #e5e7eb !important;
+        border-color: #2b313a !important;
+    }
+
+    [data-theme="dark"] .btn-secondary:hover {
+        background: #1c2128 !important;
+    }
+
+    [data-theme="dark"] .btn-primary {
+        background: #8B0000 !important;
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .btn-primary:hover {
+        background: #6b0000 !important;
+    }
+
+    [data-theme="dark"] .tbl th {
+        background: #0d1117 !important;
+        border-bottom-color: #21262d !important;
+    }
+
+    [data-theme="dark"] .tbl td {
+        color: #d1d5db !important;
+        border-bottom-color: #1c2128 !important;
+    }
+
+    [data-theme="dark"] .tbl tbody tr:hover td {
+        background: #1c2128 !important;
+    }
+
+    [data-theme="dark"] .cell-patient-name,
+    [data-theme="dark"] .request-card-name,
+    [data-theme="dark"] .request-card-ref,
+    [data-theme="dark"] .panel-header .font-bold,
+    [data-theme="dark"] #panelRefNo {
+        color: #f3f4f6 !important;
+    }
+
+    [data-theme="dark"] .cell-purpose,
+    [data-theme="dark"] .request-card-value {
+        color: #d1d5db !important;
+    }
+
+    [data-theme="dark"] .document-badge {
+        background: rgba(139, 0, 0, .14) !important;
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .document-badge:hover {
+        background: #8B0000 !important;
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .request-card-avatar,
+    [data-theme="dark"] .panel-header-icon {
+        background: linear-gradient(135deg, #8B0000, #6b0000) !important;
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .tbl-pagination {
+        background: #0d1117 !important;
+        border-top-color: #21262d !important;
+    }
+
+    [data-theme="dark"] .panel-header {
+        background: #0d1117 !important;
+        border-bottom-color: #21262d !important;
+    }
+
+    [data-theme="dark"] #panelBody {
+        color: #d1d5db !important;
+    }
+
+    [data-theme="dark"] #panelFoot {
+        background: #0d1117 !important;
+        border-top-color: #21262d !important;
+    }
+
+    [data-theme="dark"] #panelBody [style*="background:#fef2f2"] {
+        background: rgba(139, 0, 0, .12) !important;
+        border-color: rgba(139, 0, 0, .24) !important;
+    }
+
+    [data-theme="dark"] #panelBody [style*="color:#111"] {
+        color: #f3f4f6 !important;
+    }
+
+    [data-theme="dark"] #panelBody [style*="color:#374151"] {
+        color: #d1d5db !important;
+    }
+
+    [data-theme="dark"] #panelBody [style*="color:#9ca3af"] {
+        color: #9ca3af !important;
+    }
+
+    [data-theme="dark"] #panelBody [style*="border-left:2px solid #f0eaea"] {
+        border-left-color: #2b313a !important;
+    }
+
+    [data-theme="dark"] .act-btn.view {
+        background: rgba(139, 0, 0, .12) !important;
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .act-btn.view:hover {
+        background: #8B0000 !important;
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .act-btn.tog-on {
+        background: rgba(22, 101, 52, .14) !important;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .act-btn.tog-on:hover {
+        background: #166534 !important;
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .act-btn.del {
+        color: #f87171 !important;
+    }
+
+    [data-theme="dark"] .act-btn.del:hover {
+        background: rgba(239, 68, 68, .12) !important;
+    }
+
+    [data-theme="dark"] .empty-state i {
+        color: #374151 !important;
+    }
+
     @media (max-width: 1280px) {
         .stats-grid { grid-template-columns: repeat(3, 1fr); }
     }

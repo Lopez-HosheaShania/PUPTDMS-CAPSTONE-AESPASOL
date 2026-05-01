@@ -344,8 +344,8 @@
         .access-select {
             width: 100%;
             border: 1.5px solid #e0ddd8;
-            border-radius: 10px; 
-            padding: .6rem .85rem; 
+            border-radius: 10px;
+            padding: .6rem .85rem;
             font-size: .9rem;
             line-height: 1.3;
             background: #fff;
@@ -353,11 +353,11 @@
             outline: none;
             transition: all .15s ease;
             box-sizing: border-box;
-            height: 46px; 
+            height: 46px;
         }
         
         .access-select {
-            height: 58px;
+            height: 46px;
             padding-right: 3.2rem;
             appearance: none;
             -webkit-appearance: none;
@@ -398,8 +398,8 @@
         }
 
         .synced-user-layout .access-input {
-            height: 58px;
-            border-radius: 14px;
+            height: 46px;
+            border-radius: 10px;
             border-color: #bdbdbd;
         }
 
@@ -897,7 +897,7 @@
 
             .synced-user-layout .access-input,
             .synced-user-layout .access-select {
-                height: 54px;
+                height: 46px;
             }
 
             .access-card-footer {

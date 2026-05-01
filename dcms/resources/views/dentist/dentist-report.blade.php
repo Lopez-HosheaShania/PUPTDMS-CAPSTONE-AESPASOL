@@ -266,6 +266,10 @@
         }
 
         .chart-empty {
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -401,6 +405,7 @@
             border-radius: 18px;
             box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
             padding: 20px;
+            min-height: 220px;
         }
 
         .service-list {
@@ -1220,7 +1225,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="chart-empty h-[220px]">
+                        <div class="chart-empty py-6">
                             <i class="fa-solid fa-tooth"></i>
                             <p>No service data available</p>
                             <span>Top performed treatments will appear here.</span>
