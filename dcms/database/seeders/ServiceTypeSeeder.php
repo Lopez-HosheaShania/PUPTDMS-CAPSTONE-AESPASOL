@@ -30,8 +30,12 @@ class ServiceTypeSeeder extends Seeder
 
         foreach ($defaults as $service) {
             ServiceType::firstOrCreate(
-                ['name' => $service['name']], // prevents duplicates
-                ['description' => $service['description']]
+                ['name' => $service['name']], 
+                [
+                    'description' => $service['description'],
+                    'is_active_for_booking' => true,
+                    'is_default' => true,
+                ]
             );
         }
     }

@@ -13,6 +13,8 @@ return new class extends Migration
                 $table->id();
                 $table->string('name')->unique();
                 $table->string('description')->nullable();
+                $table->boolean('is_active_for_booking')->default(true);
+                $table->boolean('is_default')->default(false);
                 $table->timestamps();
             });
         }

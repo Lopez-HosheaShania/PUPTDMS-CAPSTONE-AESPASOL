@@ -1676,7 +1676,7 @@
 
     <div id="toastContainer"></div>
 
-    <main id="mainContent" class="pt-[100px] px-3 md:px-6 py-6 min-h-screen flex-1">
+    <main id="mainContent" class="pt-[100px] px-3 md:px-6 py-6 flex-1">
         <div class="w-full fade-in">
 
             <div class="mb-5">
@@ -1805,6 +1805,7 @@
                     <div></div>
                 </div>
             </div>
+        </div>
     </main>
 
     <div class="filter-overlay" id="filterOverlay" onclick="closeFilterPanel()"></div>

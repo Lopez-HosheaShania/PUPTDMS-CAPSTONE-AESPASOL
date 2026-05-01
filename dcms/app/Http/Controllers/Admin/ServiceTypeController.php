@@ -27,9 +27,30 @@ class ServiceTypeController extends Controller
         ServiceType::create([
             'name' => $request->name,
             'description' => $request->description,
+            'is_active_for_booking' => true,
+            'is_default' => false,
         ]);
 
         return back()->with('success', 'Service type added');
+    }
+
+
+    public function update(Request $request, $id)
+    {
+        $service = ServiceType::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255|unique:service_types,name,' . $service->id,
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $service->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'is_active_for_booking' => $request->has('is_active_for_booking'),
+        ]);
+
+        return back()->with('success', 'Service updated');
     }
 
 
@@ -37,19 +58,12 @@ class ServiceTypeController extends Controller
     {
         $service = ServiceType::findOrFail($id);
 
-        $defaultServices = [
-            'Oral Check-Up',
-            'Dental Cleaning',
-            'Restoration & Prosthesis',
-            'Dental Surgery',
-        ];
+        if ($service->is_default) {
+                return back()->with('error', 'Default services cannot be deleted.');
+            }
 
-        if (in_array($service->name, $defaultServices)) {
-            return back()->with('error', 'Default services cannot be deleted.');
-        }
+            $service->delete();
 
-        $service->delete();
-
-        return back()->with('success', 'Service type deleted');
+            return back()->with('success', 'Service type deleted');
     }
 }

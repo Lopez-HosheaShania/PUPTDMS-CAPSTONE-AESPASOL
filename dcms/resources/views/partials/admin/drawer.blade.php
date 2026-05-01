@@ -37,13 +37,13 @@
                 <i class="fa-solid fa-users"></i> Patients
             </a>
 
+            <a href="{{ route('admin.admin.dashboard') }}" class="drawer-link"><i class="fa-solid fa-tooth"></i> Dental
+                Records
+            </a>
+
             <a href="{{ route('admin.admin.appointments') }}"
                 class="drawer-link {{ request()->routeIs('admin.admin.appointments') ? 'active' : '' }}">
                 <i class="fa-solid fa-calendar-check"></i> Appointments
-            </a>
-
-            <a href="{{ route('admin.admin.dashboard') }}" class="drawer-link"><i class="fa-solid fa-tooth"></i> Dental
-                Records
             </a>
 
             <a href="{{ route('admin.document-requests.index') }}"
@@ -61,24 +61,15 @@
         <div class="drawer-group">
             <div class="drawer-group-header"><i class="drawer-group-icon fa-solid fa-screwdriver-wrench"></i><span
                     class="drawer-group-label">Maintenance</span></div>
-                    
+            
             <a href="{{ route('admin.user_management') }}"
                 class="drawer-link {{ request()->routeIs('admin.user_management*') ? 'active' : '' }}"><i
-                    class="fa-solid fa-user-gear"></i> User Management</a>
+                    class="fa-solid fa-user-gear"></i> User Management
+            </a>
 
             <a href="{{ route('admin.role_permissions') }}"
                 class="drawer-link {{ request()->routeIs('admin.role_permissions') ? 'active' : '' }}">
                 <i class="fa-solid fa-user-shield"></i> Roles & Permissions
-            </a>
-
-            <a href="{{ route('admin.academic_periods') }}"
-                class="drawer-link {{ request()->routeIs('admin.academic_periods*') ? 'active' : '' }}"><i
-                    class="fa-solid fa-school"></i> Academic Periods
-            </a>
-
-            <a href="{{ route('admin.clinic_schedule') }}"
-                class="drawer-link {{ request()->routeIs('admin.clinic_schedule*') ? 'active' : '' }}"><i
-                    class="fa-solid fa-calendar-days"></i> Clinic Schedule
             </a>
 
             <a href="{{ route('admin.service-types') }}"
@@ -86,15 +77,25 @@
                     class="fa-solid fa-list-check"></i> Service Types
             </a>
 
-            <a href="{{ route('admin.document-template') }}"
-                    class="drawer-link {{ request()->routeIs('admin.document-template*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-file-pen"></i>
-                    Document Templates
+            <a href="{{ route('admin.clinic_schedule') }}"
+                class="drawer-link {{ request()->routeIs('admin.clinic_schedule*') ? 'active' : '' }}"><i
+                    class="fa-solid fa-calendar-days"></i> Clinic Schedule
+            </a>
+
+            <a href="{{ route('admin.academic_periods') }}"
+                class="drawer-link {{ request()->routeIs('admin.academic_periods*') ? 'active' : '' }}"><i
+                    class="fa-solid fa-school"></i> Academic Periods
             </a>
 
             <a href="{{ route('admin.inventory') }}"
                 class="drawer-link {{ request()->routeIs('admin.inventory*') ? 'active' : '' }}">
                 <i class="fa-solid fa-boxes-stacked"></i> Inventory
+            </a>
+
+            <a href="{{ route('admin.document-template') }}"
+                    class="drawer-link {{ request()->routeIs('admin.document-template*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-file-pen"></i>
+                    Document Templates
             </a>
         </div>
 
@@ -104,16 +105,6 @@
                     class="drawer-group-label">System</span>
             </div>
 
-            <a href="{{ route('admin.data_backup') }}"
-                class="drawer-link {{ request()->routeIs('admin.data_backup') ? 'active' : '' }}">
-                <i class="fa-solid fa-database"></i> Data Backup
-            </a>
-
-            <a href="{{ route('admin.system_logs') }}"
-                class="drawer-link {{ request()->routeIs('admin.system_logs') ? 'active' : '' }}"><i
-                    class="fa-solid fa-clipboard-list"></i> System Logs
-            </a>
-            
             <a href="{{ route('admin.system_settings') }}"
                 class="drawer-link {{ request()->routeIs('admin.system_settings*') ? 'active' : '' }}">
                 <i class="fa-solid fa-sliders"></i> System Settings
@@ -127,6 +118,16 @@
             <a href="{{ route('admin.faculty.integration') }}"
                 class="drawer-link {{ request()->routeIs('admin.faculty.integration') ? 'active' : '' }}">
                 <i class="fa-solid fa-user-plus"></i> Faculty Integration
+            </a>
+
+            <a href="{{ route('admin.data_backup') }}"
+                class="drawer-link {{ request()->routeIs('admin.data_backup') ? 'active' : '' }}">
+                <i class="fa-solid fa-database"></i> Data Backup
+            </a>
+
+            <a href="{{ route('admin.system_logs') }}"
+                class="drawer-link {{ request()->routeIs('admin.system_logs') ? 'active' : '' }}"><i
+                    class="fa-solid fa-clipboard-list"></i> System Logs
             </a>
         </div>
     </div>

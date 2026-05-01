@@ -772,6 +772,86 @@
             color: #f3f4f6;
         }
 
+        [data-theme="dark"] .faculty-page {
+            background: #0b1117 !important;
+        }
+
+        [data-theme="dark"] .access-input[readonly] {
+            background: #0d1117 !important;
+            border-color: #2b313a !important;
+            color: #f3f4f6 !important;
+        }
+
+        [data-theme="dark"] .search-results {
+            background: #161b22 !important;
+            border-color: #21262d !important;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .35) !important;
+        }
+
+        [data-theme="dark"] .search-item {
+            background: #161b22 !important;
+            border-bottom-color: #21262d !important;
+        }
+
+        [data-theme="dark"] .search-item:hover {
+            background: #1c2128 !important;
+        }
+
+        [data-theme="dark"] .search-name {
+            color: #f3f4f6 !important;
+        }
+
+        [data-theme="dark"] .search-email,
+        [data-theme="dark"] .search-empty {
+            color: #9ca3af !important;
+        }
+
+        [data-theme="dark"] .btn-cancel {
+            background: #161b22 !important;
+            color: #d1d5db !important;
+            border-color: #2b313a !important;
+        }
+
+        [data-theme="dark"] .btn-cancel:hover {
+            background: #1c2128 !important;
+        }
+
+        [data-theme="dark"] .status-alert.success {
+            background: rgba(22, 101, 52, .14) !important;
+            color: #86efac !important;
+            border-color: #166534 !important;
+        }
+
+        [data-theme="dark"] .status-alert.error {
+            background: rgba(185, 28, 28, .14) !important;
+            color: #fca5a5 !important;
+            border-color: #991b1b !important;
+        }
+
+        [data-theme="dark"] .preview-card::before {
+            background: rgba(139, 0, 0, .10) !important;
+        }
+
+        [data-theme="dark"] .preview-card::after {
+            background: rgba(192, 57, 43, .08) !important;
+        }
+
+        [data-theme="dark"] .entry-badge {
+            background: rgba(139, 0, 0, .16) !important;
+            color: #fca5a5 !important;
+            border-color: rgba(248, 113, 113, .18) !important;
+        }
+
+        [data-theme="dark"] .card-header-icon {
+            background: linear-gradient(135deg, rgba(139, 0, 0, .18) 0%, rgba(192, 57, 43, .12) 100%) !important;
+            color: #fca5a5 !important;
+            border-color: rgba(248, 113, 113, .12) !important;
+        }
+
+        [data-theme="dark"] .search-results::-webkit-scrollbar-thumb {
+            background: #374151 !important;
+        }
+
         @media (max-width: 1100px) {
             .faculty-layout {
                 grid-template-columns: 1fr;
@@ -808,7 +888,10 @@
 
             .access-input,
             .access-select {
-                height: 54px;
+                height: 46px;
+                padding-top: .55rem;
+                padding-bottom: .55rem;
+                border-radius: 10px;
             }
 
             .access-card-footer {

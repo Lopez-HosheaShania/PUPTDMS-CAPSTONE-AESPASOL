@@ -129,7 +129,6 @@
             color: #6b7280;
         }
 
-        /* Dark mode overrides for Toasts */
         [data-theme="dark"] #toastContainer .toast {
             background: #161b22 !important;
             box-shadow: 0 10px 40px rgba(0, 0, 0, .4) !important;
@@ -146,8 +145,8 @@
         [data-theme="dark"] .toast.success .toast-icon-wrap {
             background: rgba(34, 197, 94, .1);
         }
-        /* Page Banner */
-       .page-banner {
+
+        .page-banner {
             background: linear-gradient(135deg, var(--crimson-dark) 0%, var(--crimson) 60%, #c0392b 100%);
             padding: 1.75rem 2rem 2rem;
             position: relative;
@@ -174,29 +173,11 @@
             gap: 1rem;
         }
 
-        .page-greeting {
-            font-size: .75rem;
-            font-weight: 600;
-            color: rgba(255, 255, 255, .65);
-            letter-spacing: .05em;
-            text-transform: uppercase;
-            margin-bottom: .3rem;
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-        }
-
         .page-title {
             font-size: 2rem;
             font-weight: 900;
             color: #fff;
             line-height: 1.1;
-        }
-
-        .page-subtitle {
-            font-size: .78rem;
-            color: rgba(255, 255, 255, .6);
-            margin-top: .4rem;
         }
 
         .content-lift {
@@ -253,9 +234,6 @@
             color: #1a202c;
         }
 
-        /* ══════════════════════════════════════
-                               SERVICE TYPES SPECIFIC
-                            ══════════════════════════════════════ */
         .st-form-group {
             margin-bottom: 1.1rem;
         }
@@ -457,7 +435,6 @@
             background: #f0fdf4;
         }
 
-        /* Character Counter Styles */
         .st-char-count {
             position: absolute;
             bottom: 8px;
@@ -475,6 +452,57 @@
 
         .st-char-count.at-limit {
             color: #ef4444;
+        }
+
+        .st-copy-bullet-wrap {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .st-copy-bullet-box {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            padding: 6px 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fafafa;
+            color: #4b5563;
+            font-size: .74rem;
+            font-weight: 700;
+            line-height: 1;
+            user-select: none;
+            cursor: default;
+        }
+
+        .st-copy-bullet-symbol {
+            font-size: .95rem;
+            color: var(--crimson);
+            line-height: 1;
+            user-select: all;
+            cursor: text;
+            display: inline-block;
+            padding: 1px 2px;
+        }
+
+        .st-copy-bullet-label {
+            font-size: .68rem;
+            font-weight: 700;
+            color: #6b7280;
+            letter-spacing: .02em;
+            user-select: none;
+        }
+
+        [data-theme="dark"] .st-copy-bullet-box {
+            background: #111827;
+            border-color: #374151;
+            color: #e5e7eb;
+        }
+
+        [data-theme="dark"] .st-copy-bullet-label {
+            color: #9ca3af;
         }
 
         .st-field-error {
@@ -557,10 +585,32 @@
             font-weight: 700;
         }
 
-        .btn-delete-sm {
-            background: #fef2f2;
-            color: #ef4444;
-            border: 1px solid #fee2e2;
+        .service-visibility-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            height: 24px;
+            padding: 0 10px;
+            border-radius: 999px;
+            font-size: .66rem;
+            font-weight: 800;
+            letter-spacing: .02em;
+        }
+
+        .service-visibility-badge.is-visible {
+            background: #ecfdf5;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .service-visibility-badge.is-hidden {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #fed7aa;
+        }
+
+        .btn-delete-sm,
+        .btn-manage-sm {
             width: 28px;
             height: 28px;
             border-radius: 8px;
@@ -572,11 +622,30 @@
             transition: all .15s;
         }
 
+        .btn-delete-sm {
+            background: #fef2f2;
+            color: #ef4444;
+            border: 1px solid #fee2e2;
+        }
+
         .btn-delete-sm:hover {
             background: #ef4444;
             color: #fff;
             border-color: #ef4444;
             box-shadow: 0 2px 8px rgba(239, 68, 68, .3);
+        }
+
+        .btn-manage-sm {
+            background: #fef2f2;
+            color: var(--crimson);
+            border: 1px solid #fee2e2;
+        }
+
+        .btn-manage-sm:hover {
+            background: var(--crimson);
+            color: #fff;
+            border-color: var(--crimson);
+            box-shadow: 0 2px 8px rgba(139, 0, 0, .25);
         }
 
         .empty-state {
@@ -597,19 +666,19 @@
             color: #d1d5db;
         }
 
-        /* ══════════════════════════════════════
-                   DELETE MODAL STYLES (MODERN)
-                ══════════════════════════════════════ */
         #deleteServiceModal {
             border: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             padding: 32px 24px 24px;
             border-radius: 20px;
-            width: min(90vw, 380px);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             background: #ffffff;
-            text-align: center;
             overflow: visible;
-            /* Allows the icon to breathe */
+            width: min(90vw, 380px);
+            text-align: center;
         }
 
         #deleteServiceModal::backdrop {
@@ -637,6 +706,7 @@
             font-weight: 800;
             color: #111827;
             margin: 0 0 8px;
+            text-align: center;
         }
 
         .del-modal-body {
@@ -644,6 +714,7 @@
             color: #6b7280;
             line-height: 1.6;
             margin: 0 0 24px;
+            text-align: center;
         }
 
         .del-modal-name {
@@ -709,7 +780,50 @@
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
         }
 
-        [data-theme="dark"] #deleteServiceModal {
+        .data-table tbody tr {
+            height: 60px;
+        }
+
+        .data-table tbody td {
+            vertical-align: middle !important;
+        }
+
+        .manage-service-body {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .manage-toggle-row {
+            display: flex;
+            align-items: flex-start;
+            gap: .7rem;
+            padding: .8rem .9rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fafafa;
+        }
+
+        .manage-toggle-copy {
+            min-width: 0;
+        }
+
+        .manage-toggle-title {
+            font-size: .8rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .manage-toggle-desc {
+            font-size: .72rem;
+            color: #6b7280;
+            line-height: 1.5;
+            margin-top: 2px;
+        }
+
+        [data-theme="dark"] #deleteServiceModal,
+        [data-theme="dark"] #manageServiceModal {
             background: #1f2937;
         }
 
@@ -742,7 +856,6 @@
             background: #4b5563;
         }
 
-        /* Dark mode overrides (optional) */
         [data-theme="dark"] .card {
             background: #161b22;
             border-color: #21262d;
@@ -777,7 +890,19 @@
         [data-theme="dark"] .data-table tbody tr:hover td {
             background: #1c2128;
         }
-        
+
+        [data-theme="dark"] .manage-toggle-row {
+            background: #111827;
+            border-color: #374151;
+        }
+
+        [data-theme="dark"] .manage-toggle-title {
+            color: #f9fafb;
+        }
+
+        [data-theme="dark"] .manage-toggle-desc {
+            color: #9ca3af;
+        }
 
         .service-type-view-toggle {
             display: inline-flex;
@@ -956,6 +1081,517 @@
             color: #d1d5db;
         }
 
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(139, 0, 0, .18), rgba(0, 0, 0, .55));
+            backdrop-filter: blur(4px);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity .2s ease, visibility .2s ease;
+        }
+
+        .modal-overlay.open {
+            display: flex !important;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+
+        .st-modal-box {
+            position: relative;
+            z-index: 100000;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            background: #fff;
+            width: min(980px, calc(100vw - 2rem));
+            max-width: 980px;
+            max-height: min(88vh, calc(100dvh - 2rem));
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 28px 70px rgba(0, 0, 0, .28);
+            border: 1px solid rgba(255,255,255,.35);
+            transform: scale(.96) translateY(12px);
+            transition: transform .25s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .modal-overlay.open .st-modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .st-manage-form {
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .st-modal-header {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem 1rem;
+            border-bottom: 1px solid #eef2f7;
+            background: #ffffff;
+        }
+
+        .st-modal-header::before {
+            content: '';
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 5px;
+            background: linear-gradient(90deg, #8b0000, #dc2626);
+        }
+
+        .st-modal-header-left {
+            display: flex;
+            align-items: center;
+            gap: .95rem;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .st-modal-header-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: linear-gradient(145deg, #8b0000, #b80000);
+            box-shadow: 0 12px 24px rgba(139, 0, 0, 0.18);
+            flex-shrink: 0;
+        }
+
+        .st-modal-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .st-modal-subtitle {
+            margin: .28rem 0 0;
+            font-size: .85rem;
+            color: #64748b;
+            font-weight: 500;
+            line-height: 1.35;
+        }
+
+        .st-modal-close {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #94a3b8;
+            transition: all .2s ease;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .st-modal-close:hover {
+            color: #8b0000;
+            border-color: #fecaca;
+            background: #fff5f5;
+        }
+
+        .st-modal-body {
+            padding: 1.2rem 1.5rem 1rem;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem 1.1rem;
+            align-content: start;
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        }
+
+
+        .st-panel {
+            border: 1px solid #e9eef5;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 1rem;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+        }
+
+        .st-col-span-2 {
+            grid-column: span 2;
+        }
+
+        .st-modal-field-wrap,
+        .st-modal-textarea-wrap {
+            position: relative;
+            width: 100%;
+            display: block;
+        }
+
+        .st-modal-field-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: #9ca3af;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .st-modal-input {
+            width: 100% !important;
+            max-width: 100%;
+            display: block;
+            height: 54px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 0 16px 0 42px;
+            font-size: 14px;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .st-modal-textarea {
+            width: 100% !important;
+            max-width: 100%;
+            display: block;
+            min-height: 154px;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 13px;
+            line-height: 1.45;
+            resize: none;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .st-panel > .st-modal-field-wrap,
+        .st-panel > .st-modal-textarea-wrap {
+            width: 100%;
+        }
+
+        .st-panel input,
+        .st-panel textarea {
+            width: 100% !important;
+        }
+
+        .st-modal-box .voice-input-wrap,
+        .st-modal-box [data-voice-field] {
+            width: 100% !important;
+            display: block !important;
+            position: relative !important;
+        }
+
+        .st-modal-box .voice-mic-btn {
+            position: absolute !important;
+            right: 14px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 18px !important;
+            height: 18px !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            line-height: 1 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #8B0000 !important;
+            z-index: 4 !important;
+        }
+
+        .st-modal-box .st-modal-textarea-wrap .voice-mic-btn {
+            top: 14px !important;
+            transform: none !important;
+        }
+
+        .st-modal-box [data-voice-status] {
+            position: absolute !important;
+            right: 0 !important;
+            top: -1.35rem !important;
+        }
+
+        .st-modal-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: .5rem;
+        }
+
+        .st-input-shell {
+            position: relative;
+        }
+
+        .st-input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .st-modal-input {
+            width: 100%;
+            height: 50px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding-left: 42px;
+            padding-right: 16px;
+            font-size: 14px;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .st-modal-textarea {
+            width: 100%;
+            min-height: 140px;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 13px;
+            resize: none;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .st-modal-input:focus,
+        .st-modal-textarea:focus {
+            outline: none;
+            border-color: #8B0000;
+            box-shadow: 0 0 0 4px rgba(139, 0, 0, 0.10);
+        }
+
+        .st-active-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            border: 1px solid #f3d4d4;
+            border-radius: 18px;
+            background: linear-gradient(90deg, #fff7f7 0%, #ffffff 100%);
+            padding: 1rem 1.05rem;
+        }
+
+        .st-active-card-left {
+            display: flex;
+            align-items: center;
+            gap: .85rem;
+            min-width: 0;
+        }
+
+        .st-active-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #8B0000;
+            box-shadow: 0 4px 14px rgba(139, 0, 0, 0.08);
+            flex-shrink: 0;
+        }
+
+        .st-active-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #111827;
+            margin: 0 0 2px;
+        }
+
+        .st-active-desc {
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .st-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .st-switch input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .st-switch-slider {
+            width: 48px;
+            height: 28px;
+            border-radius: 999px;
+            background: #d1d5db;
+            position: relative;
+            transition: .2s ease;
+        }
+
+        .st-switch-slider::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            background: #fff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .18);
+            transition: .2s ease;
+        }
+
+        .st-switch input:checked + .st-switch-slider {
+            background: #8B0000;
+        }
+
+        .st-switch input:checked + .st-switch-slider::after {
+            transform: translateX(20px);
+        }
+
+        .st-default-note {
+            margin-top: .75rem;
+            font-size: 12px;
+            font-weight: 600;
+            color: #8B0000;
+        }
+
+        .st-modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: .75rem;
+            padding: 1rem 1.5rem 1.15rem;
+            border-top: 1px solid #eef2f7;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(10px);
+        }
+
+        .st-btn {
+            height: 46px;
+            border-radius: 14px;
+            padding: 0 1.2rem;
+            font-size: 13px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .55rem;
+            border: 1px solid transparent;
+            transition: all .2s ease;
+        }
+
+        .st-btn-ghost {
+            background: #fff;
+            color: #4b5563;
+            border-color: #e5e7eb;
+        }
+
+        .st-btn-ghost:hover {
+            background: #f9fafb;
+            border-color: #cbd5e1;
+        }
+
+        .st-btn-primary {
+            background: linear-gradient(145deg, #8b0000, #760000);
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(139, 0, 0, 0.16);
+        }
+
+        .st-btn-primary:hover {
+            filter: brightness(1.04);
+        }
+
+        [data-theme="dark"] .st-modal-box,
+        [data-theme="dark"] .st-panel,
+        [data-theme="dark"] .st-modal-header,
+        [data-theme="dark"] .st-modal-footer,
+        [data-theme="dark"] .st-modal-close {
+            background: #161b22 !important;
+            border-color: #2b313a !important;
+        }
+
+        [data-theme="dark"] .st-modal-title,
+        [data-theme="dark"] .st-active-title {
+            color: #e5e7eb !important;
+        }
+
+        [data-theme="dark"] .st-modal-subtitle,
+        [data-theme="dark"] .st-active-desc,
+        [data-theme="dark"] .st-modal-label {
+            color: #9ca3af !important;
+        }
+
+        [data-theme="dark"] .st-modal-input,
+        [data-theme="dark"] .st-modal-textarea {
+            background: #0d1117 !important;
+            border-color: #2b313a !important;
+            color: #e5e7eb !important;
+        }
+
+        [data-theme="dark"] .st-active-card {
+            background: #0f141a !important;
+            border-color: #2b313a !important;
+        }
+
+        @media (max-width: 767px) {
+            .st-modal-box {
+                width: 100%;
+                max-width: 100%;
+                max-height: calc(100dvh - 10px);
+                border-radius: 22px 22px 0 0;
+            }
+
+            .st-modal-header,
+            .st-modal-body,
+            .st-modal-footer {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .st-modal-body {
+                grid-template-columns: 1fr;
+            }
+
+            .st-col-span-2 {
+                grid-column: span 1;
+            }
+
+            .st-active-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .st-modal-footer {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .st-btn {
+                width: 100%;
+            }
+        }
+
         @media (max-width: 900px) {
             .service-types-grid {
                 grid-template-columns: 1fr;
@@ -1046,8 +1682,7 @@
                         </div>
 
                         <div style="padding:1.25rem;">
-                            <form id="addServiceForm" method="POST" action="{{ route('admin.service-types.store') }}"
-                                novalidate>
+                            <form id="addServiceForm" method="POST" action="{{ route('admin.service-types.store') }}" novalidate>
                                 @csrf
 
                                 <div class="st-form-group">
@@ -1068,13 +1703,19 @@
                                     </div>
 
                                     @error('name')
-                                        <div class="st-field-error"><i class="fa-solid fa-circle-exclamation"></i>
-                                            {{ $message }}</div>
+                                        <div class="st-field-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="st-form-group">
                                     <label class="st-label">Description (Optional)</label>
+
+                                    <div class="st-copy-bullet-wrap">
+                                        <div class="st-copy-bullet-box" title="Copy this bullet and paste into the description">
+                                            <span class="st-copy-bullet-symbol">•</span>
+                                            <span class="st-copy-bullet-label">Copy this bullet</span>
+                                        </div>
+                                    </div>
 
                                     <div class="st-voice-row is-textarea">
                                         <div class="st-input-wrap st-textarea-wrap">
@@ -1082,17 +1723,16 @@
                                                 name="description"
                                                 placeholder="Brief details about the service..."
                                                 class="st-input st-textarea"
-                                                maxlength="100">{{ old('description') }}</textarea>
+                                                maxlength="255">{{ old('description') }}</textarea>
 
-                                            <div id="serviceDescCount" class="st-char-count">0 / 100</div>
+                                            <div id="serviceDescCount" class="st-char-count">0 / 255</div>
                                         </div>
 
                                         <button type="button" id="serviceDescClearBtn" class="st-voice-clear-btn hidden">Clear</button>
                                     </div>
 
                                     @error('description')
-                                        <div class="st-field-error"><i class="fa-solid fa-circle-exclamation"></i>
-                                            {{ $message }}</div>
+                                        <div class="st-field-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</div>
                                     @enderror
                                 </div>
 
@@ -1117,25 +1757,17 @@
                                 {{ $services->count() }} {{ Str::plural('Item', $services->count()) }}
                             </span>
                         </div>
-                        
-                        @php
-                            $defaultServices = [
-                                'Oral Check-Up',
-                                'Dental Cleaning',
-                                'Restoration & Prosthesis',
-                                'Dental Surgery',
-                            ];
-                        @endphp
-                        
-                                                <div class="service-type-view" id="serviceTypeListView">
+
+                        <div class="service-type-view" id="serviceTypeListView">
                             <div style="overflow-x:auto;">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
                                             <th style="width:70px;">ID</th>
-                                            <th style="width:220px;">Service Name</th>
+                                            <th style="width:250px;">Service Name</th>
                                             <th>Description</th>
-                                            <th style="width:80px; text-align:center;">Action</th>
+                                            <th style="width:220px; text-align:center;">Booking Visibility</th>
+                                            <th style="width:100px; text-align:center;">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1143,33 +1775,72 @@
                                             <tr>
                                                 <td><span class="service-badge">#{{ $service->id }}</span></td>
                                                 <td>
-                                                    <div style="display:flex; align-items:center; gap:.6rem;">
+                                                    <div style = "display:flex; align-items:center; gap:.6em; min-height:40px;">
                                                         <div
                                                             style="width:26px; height:26px; background:#fef2f2; color:var(--crimson); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px;">
                                                             <i class="fa-solid fa-tooth"></i>
                                                         </div>
-                                                        <span style="font-size:.78rem;font-weight:700;color:#1a202c;">{{ $service->name }}</span>
-                                                    </div>
-                                                </td>
+
+                                                            <span style="font-size:.78rem;font-weight:700;color:#1a202c;">
+                                                                {{ $service->name }}
+                                                            </span>
+                                                        </div>
+                                                    </td>
                                                 <td style="font-size:.72rem; line-height:1.5;">
                                                     {{ $service->description ?: '—' }}
                                                 </td>
                                                 <td style="text-align:center;">
-                                                    @if (!in_array($service->name, $defaultServices))
-                                                        <button type="button" class="btn-delete-sm" title="Delete"
-                                                            onclick="openDeleteModal('{{ route('admin.service-types.destroy', $service->id) }}', '{{ addslashes($service->name) }}')">
-                                                            <i class="fa-solid fa-trash-can"></i>
+                                                    <div style="display:inline-flex; align-items:center; justify-content:center; gap:.45rem; flex-wrap:wrap;">
+                                                        @if ($service->is_active_for_booking)
+                                                            <span class="service-visibility-badge is-visible">
+                                                                <i class="fa-solid fa-thumbtack"></i> Visible
+                                                            </span>
+                                                        @else
+                                                            <span class="service-visibility-badge is-hidden">
+                                                                <i class="fa-solid fa-eye-slash"></i> Hidden
+                                                            </span>
+                                                        @endif
+
+                                                        @if ($service->is_default)
+                                                            <span class="service-badge" style="background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;">
+                                                                Default
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                                <td style="text-align:center;">
+                                                    <div style="display:flex; align-items:center; justify-content:center; gap:.4rem;">
+                                                        <button
+                                                            type="button"
+                                                            class="btn-manage-sm"
+                                                            title="Manage"
+                                                            onclick="openManageServiceModal(
+                                                                '{{ route('admin.service-types.update', $service->id) }}',
+                                                                @js($service->name),
+                                                                @js($service->description),
+                                                                {{ $service->is_active_for_booking ? 'true' : 'false' }},
+                                                                {{ $service->is_default ? 'true' : 'false' }}
+                                                            )"
+                                                        >
+                                                            <i class="fa-solid fa-pen-to-square"></i>
                                                         </button>
-                                                    @else
-                                                        <span class="service-badge" style="background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;">
-                                                            Default
-                                                        </span>
-                                                    @endif
+
+                                                        @if (!$service->is_default)
+                                                            <button
+                                                                type="button"
+                                                                class="btn-delete-sm"
+                                                                title="Delete"
+                                                                onclick="openDeleteModal('{{ route('admin.service-types.destroy', $service->id) }}', '{{ addslashes($service->name) }}')"
+                                                            >
+                                                                <i class="fa-solid fa-trash-can"></i>
+                                                            </button>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4">
+                                                <td colspan="5">
                                                     <div class="empty-state">
                                                         <div class="empty-icon"><i class="fa-solid fa-folder-open"></i></div>
                                                         <p style="font-size:.82rem;font-weight:700;color:#6b7280;margin-bottom:.25rem;">
@@ -1195,7 +1866,7 @@
                                             <div class="service-type-card-top">
                                                 <div class="service-type-card-id">#{{ $service->id }}</div>
 
-                                                @if (in_array($service->name, $defaultServices))
+                                                @if ($service->is_default)
                                                     <span class="service-badge" style="background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;">
                                                         Default
                                                     </span>
@@ -1217,12 +1888,41 @@
                                             </div>
 
                                             <div class="service-type-card-footer">
-                                                <span class="service-badge">Service Type</span>
+                                                <div style="display:flex; align-items:center; gap:.45rem; flex-wrap:wrap;">
+                                                    @if ($service->is_active_for_booking)
+                                                        <span class="service-visibility-badge is-visible">
+                                                            <i class="fa-solid fa-thumbtack"></i> Visible
+                                                        </span>
+                                                    @else
+                                                        <span class="service-visibility-badge is-hidden">
+                                                            <i class="fa-solid fa-eye-slash"></i> Hidden
+                                                        </span>
+                                                    @endif
+                                                </div>
 
                                                 <div class="service-type-card-actions">
-                                                    @if (!in_array($service->name, $defaultServices))
-                                                        <button type="button" class="btn-delete-sm" title="Delete"
-                                                            onclick="openDeleteModal('{{ route('admin.service-types.destroy', $service->id) }}', '{{ addslashes($service->name) }}')">
+                                                    <button
+                                                        type="button"
+                                                        class="btn-manage-sm"
+                                                        title="Manage"
+                                                        onclick="openManageServiceModal(
+                                                            '{{ route('admin.service-types.update', $service->id) }}',
+                                                            @js($service->name),
+                                                            @js($service->description),
+                                                            {{ $service->is_active_for_booking ? 'true' : 'false' }},
+                                                            {{ $service->is_default ? 'true' : 'false' }}
+                                                        )"
+                                                    >
+                                                        <i class="fa-solid fa-pen-to-square"></i>
+                                                    </button>
+
+                                                    @if (!$service->is_default)
+                                                        <button
+                                                            type="button"
+                                                            class="btn-delete-sm"
+                                                            title="Delete"
+                                                            onclick="openDeleteModal('{{ route('admin.service-types.destroy', $service->id) }}', '{{ addslashes($service->name) }}')"
+                                                        >
                                                             <i class="fa-solid fa-trash-can"></i>
                                                         </button>
                                                     @endif
@@ -1267,33 +1967,112 @@
             </div>
         </dialog>
 
+        <div class="modal-overlay st-manage-modal" id="manageServiceModal" onclick="closeModalOutside(event, 'manageServiceModal')">
+            <div class="st-modal-box">
+                <form id="manageServiceForm" method="POST" class="st-manage-form">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="st-modal-header">
+                        <div class="st-modal-header-left">
+                            <div class="st-modal-header-icon">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </div>
+                            <div>
+                                <h3 class="st-modal-title">Manage Service Type</h3>
+                                <p class="st-modal-subtitle">Update service details and booking visibility</p>
+                            </div>
+                        </div>
+
+                        <button type="button" class="st-modal-close" onclick="closeModal('manageServiceModal')">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="st-modal-body">
+                        <div class="st-panel">
+                            <label class="st-modal-label">Service Name <span class="text-red-500">*</span></label>
+                            <div class="st-modal-field-wrap">
+                                <span class="st-modal-field-icon"><i class="fa-solid fa-tag"></i></span>
+                                <input type="text" id="manageServiceName" name="name" class="st-modal-input" maxlength="255" required>
+                            </div>
+                        </div>
+
+                        <div class="st-panel">
+                            <label class="st-modal-label">Description</label>
+
+                            <div class="st-copy-bullet-wrap">
+                                <div class="st-copy-bullet-box" title="Copy this bullet and paste into the description">
+                                    <span class="st-copy-bullet-symbol">•</span>
+                                    <span class="st-copy-bullet-label">Copy this bullet</span>
+                                </div>
+                            </div>
+
+                            <div class="st-modal-textarea-wrap">
+                                <textarea id="manageServiceDescription" name="description" class="st-modal-textarea" maxlength="255"
+                                    placeholder="Brief details about the service..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="st-panel st-col-span-2">
+                            <div class="st-active-card">
+                                <div class="st-active-card-left">
+                                    <div class="st-active-badge">
+                                        <i class="fa-solid fa-thumbtack"></i>
+                                    </div>
+                                    <div>
+                                        <p class="st-active-title">Show in Book Appointment</p>
+                                        <p class="st-active-desc">Turn this off if you want the service hidden from booking but still kept in Service Types.</p>
+                                    </div>
+                                </div>
+
+                                <label class="st-switch">
+                                    <input type="checkbox" id="manageServiceBookingToggle" name="is_active_for_booking" value="1">
+                                    <span class="st-switch-slider"></span>
+                                </label>
+                            </div>
+
+                            <div id="manageDefaultNote" class="st-default-note" style="display:none;">
+                                This is a default service type. It can be edited and hidden from booking, but it cannot be deleted.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="st-modal-footer">
+                        <button type="button" class="st-btn st-btn-ghost" onclick="closeModal('manageServiceModal')">
+                            Cancel
+                        </button>
+                        <button type="submit" class="st-btn st-btn-primary">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </main>
 @endsection
 
 @section('scripts')
     <script>
-        // Frontend Validation Logic
         document.getElementById('addServiceForm').addEventListener('submit', function(e) {
             const nameInput = document.getElementById('serviceNameInput');
             const errorDiv = document.getElementById('nameClientError');
 
-            // Check if field is empty (ignoring whitespace)
             if (nameInput.value.trim() === '') {
-                e.preventDefault(); // Stop the form from submitting
-
-                errorDiv.style.display = 'flex'; // Show our custom error
-                nameInput.classList.add('is-invalid'); // Add red border styling
+                e.preventDefault();
+                errorDiv.style.display = 'flex';
+                nameInput.classList.add('is-invalid');
                 nameInput.focus();
             }
         });
 
-        // Remove the error as soon as the user starts typing
         document.getElementById('serviceNameInput').addEventListener('input', function() {
             document.getElementById('nameClientError').style.display = 'none';
             this.classList.remove('is-invalid');
         });
 
-        // Delete Modal Logic
         function openDeleteModal(actionUrl, serviceName) {
             document.getElementById('deleteServiceName').textContent = serviceName;
             document.getElementById('deleteServiceForm').action = actionUrl;
@@ -1302,6 +2081,56 @@
 
         function closeDeleteModal() {
             document.getElementById('deleteServiceModal').close();
+        }
+
+        function openManageServiceModal(actionUrl, serviceName, serviceDescription, isActiveForBooking, isDefault) {
+            const modal = document.getElementById('manageServiceModal');
+            const form = document.getElementById('manageServiceForm');
+            const nameInput = document.getElementById('manageServiceName');
+            const descInput = document.getElementById('manageServiceDescription');
+            const bookingToggle = document.getElementById('manageServiceBookingToggle');
+            const defaultNote = document.getElementById('manageDefaultNote');
+
+            if (!modal || !form || !nameInput || !descInput || !bookingToggle || !defaultNote) {
+                console.error('Manage modal elements not found.');
+                return;
+            }
+
+            form.action = actionUrl;
+            nameInput.value = serviceName ?? '';
+            descInput.value = serviceDescription ?? '';
+            bookingToggle.checked = Boolean(isActiveForBooking);
+            defaultNote.style.display = isDefault ? 'block' : 'none';
+
+            modal.style.display = 'flex';
+
+            requestAnimationFrame(() => {
+                modal.classList.add('open');
+            });
+
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+
+            modal.classList.remove('open');
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+
+                const stillOpen = document.querySelector('.modal-overlay.open');
+                if (!stillOpen) {
+                    document.body.style.overflow = '';
+                }
+            }, 200);
+        }
+
+        function closeModalOutside(event, id) {
+            if (event.target && event.target.id === id) {
+                closeModal(id);
+            }
         }
 
         function getPreferredServiceTypeView() {
@@ -1391,7 +2220,7 @@
 
             const descInput = document.getElementById('serviceDescInput');
             const charCount = document.getElementById('serviceDescCount');
-            const maxChars = 100;
+            const maxChars = 255;
 
             if (descInput && charCount) {
                 function updateCharCount() {
@@ -1409,19 +2238,9 @@
                     }
                 }
 
-                // Run on load (for old data) and on input
                 updateCharCount();
                 descInput.addEventListener('input', updateCharCount);
             }
-
-            // Trigger Toast Notifications based on Session
-            @if (session('success'))
-                showToast('Success', '{!! addslashes(session('success')) !!}', 'success');
-            @endif
-
-            @if (session('error'))
-                showToast('Error', '{!! addslashes(session('error')) !!}', 'error');
-            @endif
         });
 
         window.addEventListener('resize', () => {
