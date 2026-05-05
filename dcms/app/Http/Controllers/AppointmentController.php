@@ -131,6 +131,35 @@ class AppointmentController extends Controller
 
         $notifications = [];
 
+        $chartStart = now()->startOfMonth()->subMonths(5)->toDateString();
+        $chartEnd = now()->endOfMonth()->toDateString();
+
+        $activityRows = Appointment::query()
+            ->where('patient_id', $patientId)
+            ->whereBetween('appointment_date', [$chartStart, $chartEnd])
+            ->selectRaw("DATE_FORMAT(appointment_date, '%Y-%m') as ym")
+            ->selectRaw("SUM(CASE WHEN TRIM(LOWER(COALESCE(status, ''))) = 'completed' THEN 1 ELSE 0 END) as completed")
+            ->selectRaw("SUM(CASE WHEN TRIM(LOWER(COALESCE(status, ''))) IN ('cancelled', 'declined') THEN 1 ELSE 0 END) as cancelled")
+            ->groupBy('ym')
+            ->get()
+            ->keyBy('ym');
+
+        $appointmentActivityChart = collect(range(5, 0))
+            ->map(function ($offset) use ($activityRows) {
+                $month = now()->startOfMonth()->subMonths($offset);
+                $key = $month->format('Y-m');
+                $row = $activityRows->get($key);
+
+                return [
+                    'key' => $key,
+                    'label' => $month->format('M'),
+                    'completed' => (int) ($row->completed ?? 0),
+                    'cancelled' => (int) ($row->cancelled ?? 0),
+                ];
+            })
+            ->values()
+            ->all();
+
         AuditLogger::log(
             'view',
             'appointments',
@@ -151,7 +180,8 @@ class AppointmentController extends Controller
             'unavailableDates',
             'philippineHolidays',
             'notifications',
-            'odontogramTeeth'
+            'odontogramTeeth',
+            'appointmentActivityChart'
         ));
     }
 

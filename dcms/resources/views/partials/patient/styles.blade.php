@@ -16,32 +16,6 @@
         --gold: #C9A84C;
     }
 
-    @keyframes pageEnter {
-        from {
-            opacity: 0;
-            transform: translateY(18px) scale(.985);
-            filter: blur(8px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0);
-        }
-    }
-
-    .page-enter {
-        animation: pageEnter .55s cubic-bezier(.22, 1, .36, 1) both;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .page-enter {
-            animation: none !important;
-            transform: none !important;
-            filter: none !important;
-        }
-    }
-
     [data-theme="dark"] body {
         background-color: #000D1A;
         color: #E5E7EB;
