@@ -698,7 +698,7 @@
                 <i class="fas fa-tooth"></i>
             </div>
             <div>
-                <div>PUP Dental AI Assistant</div>
+                <div>PUP SmileGuide AI</div>
                 <div class="chatbot-status">
                     <span class="chatbot-status-dot"></span>
                     <span>AI Online</span>
@@ -756,7 +756,8 @@
 </div>
 
 <script>
-    window.authUserName = "{{ auth()->user()->name }}";
+    window.authUserName = "{{ optional(auth()->user())->name ?? '' }}";
+    window.chatbotBotName = 'PUP SmileGuide AI';
 </script>
 
 <script>
@@ -764,6 +765,10 @@
     const input = document.getElementById('user-input');
     const msgDiv = document.getElementById('chat-messages');
     const sendBtn = document.getElementById('send-btn');
+    const chatbotContext = window.chatbotContext || {};
+    const isLoginPage = chatbotContext.page === 'login' || window.location.pathname === '/login';
+    const botName = window.chatbotBotName || 'PUP SmileGuide AI';
+    let introShown = false;
 
     function toggleChat(forceClose = false) {
 
@@ -790,8 +795,21 @@
         document.body.classList.toggle('chatbot-open-mobile', isNowOpen && isMobile);
 
         if (isNowOpen) {
+            if (!introShown) {
+                showIntroMessage();
+                introShown = true;
+            }
+
             setTimeout(() => input.focus(), 100);
         }
+    }
+
+    function showIntroMessage() {
+        const introText = isLoginPage
+            ? `Hi! I’m <strong>${botName}</strong>. This is the <strong>login page</strong>, so I can help you with <strong>signing in</strong>, <strong>SSO access</strong>, and what you can do after you log in.`
+            : `Hi! I’m <strong>${botName}</strong>. I’m ready to help with <strong>appointments</strong>, <strong>dental records</strong>, <strong>schedules</strong>, and <strong>document requests</strong>.`;
+
+        addMessage('ai', introText, { allowHtml: true });
     }
 
     function escapeHTML(text) {
@@ -818,7 +836,7 @@
 
         const bubble = document.createElement('div');
         bubble.className = 'chat-bubble';
-        bubble.innerHTML = escapeHTML(text);
+        bubble.innerHTML = options.allowHtml ? text : escapeHTML(text);
 
         if (type === 'user' && options.status) {
             bubble.innerHTML += `<span class="chat-status-text">${options.status}</span>`;
@@ -899,14 +917,14 @@
             message.toLowerCase().includes('high demand') ||
             message.toLowerCase().includes('unavailable')
         ) {
-            return 'Busy ngayon ang AI. Try again.';
+            return 'AI is busy. Please try again.';
         }
 
         if (message.toLowerCase().includes('api key')) {
-            return 'May problema sa AI setup. Pakicheck ang API key.';
+            return 'There is an issue with the AI setup. Please check the API key.';
         }
 
-        return 'Temporary unavailable ang AI assistant.';
+        return 'AI assistant temporarily unavailable.';
     }
 
     function smartDelay() {
@@ -979,13 +997,15 @@
         showTyping();
 
         try {
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : (document.querySelector('input[name="_token"]') ? document.querySelector('input[name="_token"]').value : '');
+
             const response = await fetch('/chat/send', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                        'content')
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 body: JSON.stringify({
                     message,
@@ -1000,7 +1020,7 @@
                 data = await response.json();
             } catch (e) {
                 data = {
-                    error: 'Temporary unavailable ang AI assistant.'
+                    error: 'AI assistant temporarily unavailable.'
                 };
             }
 
@@ -1010,12 +1030,10 @@
                 throw new Error(cleanErrorMessage(data));
             }
 
-            const aiBubble = addMessage('ai', '');
             let reply = data.reply || 'No response from AI.';
 
-            if (reply.toLowerCase().startsWith('hello')) {
-                const name = window.authUserName || 'there';
-                reply = reply.replace('Hello', `Hello ${name}`);
+            if (window.authUserName && reply.toLowerCase().startsWith('hello')) {
+                reply = reply.replace(/^hello(?:\s+there)?[!,.\s]*/i, `Hello ${window.authUserName}! `).replace(/\s+/g, ' ').trim();
             }
 
             addMessage('ai', reply);
@@ -1032,6 +1050,10 @@
     }
 
     function handleSmartActions(reply) {
+        if (isLoginPage) {
+            return;
+        }
+
         const text = reply.toLowerCase();
 
         if (text.includes('appointment') || text.includes('book')) {
@@ -1104,6 +1126,11 @@
     });
 
     const pageChips = {
+        '/login': [
+            ['Log in', 'How do I log in to the clinic system?'],
+            ['SSO', 'How do I use the SSO login option?'],
+            ['Help', 'What can I do on this login page?']
+        ],
         '/homepage': [
             ['Book', 'How do I book an appointment from the patient dashboard?'],
             ['Schedule', 'Where can I check available appointment dates and clinic schedule?'],
@@ -1130,7 +1157,7 @@
         const chipWrap = document.querySelector('.chatbot-quick-chips');
         if (!chipWrap) return;
 
-        const chips = pageChips[window.location.pathname] || pageChips['/homepage'];
+        const chips = pageChips[window.location.pathname] || pageChips[isLoginPage ? '/login' : '/homepage'];
 
         chipWrap.innerHTML = chips.map(([label, message]) => `
         <button type="button" class="chatbot-chip" onclick="sendQuickMessage('${message}')">

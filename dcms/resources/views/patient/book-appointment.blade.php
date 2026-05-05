@@ -1309,28 +1309,6 @@
         }
     }
 
-    [data-theme="dark"] .calendar-day:hover {
-        background: #1f2937 !important;
-        /* dark gray */
-        color: #e5e7eb !important;
-    }
-
-    /* kung may button style */
-    [data-theme="dark"] .calendar-day {
-        color: #9ca3af;
-    }
-
-    [data-theme="dark"] .calendar-day.active {
-        background: #8B0000 !important;
-        color: #fff !important;
-    }
-
-    /* hover effect kapag selectable */
-    [data-theme="dark"] .calendar-day:not(.disabled):hover {
-        background: #111827 !important;
-        border-color: #374151 !important;
-    }
-
     [data-theme="dark"] #clearSlotSelection {
         background: #161b22 !important;
         border-color: rgba(252, 165, 165, 0.25) !important;
@@ -1779,18 +1757,246 @@
     }
 
     #introBookingModal::backdrop {
-        background: rgba(0, 0, 0, 0.65);
-        backdrop-filter: blur(8px);
+        background: rgba(17, 24, 39, 0.45);
+        backdrop-filter: blur(12px);
     }
 
     #introBookingModal {
         margin: auto !important;
         transform: scale(.96) translateY(10px);
         opacity: 0;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        width: min(calc(100vw - 1rem), 560px);
+        border-radius: 28px;
+        overflow: hidden;
     }
 
     #introBookingModal[open] {
         animation: introModalPop .34s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+
+    html.intro-modal-open,
+    body.intro-modal-open {
+        overflow: hidden !important;
+    }
+
+    body.intro-modal-open {
+        position: fixed;
+        width: 100%;
+    }
+
+    #introBookingModal .intro-booking-modal-panel {
+        overflow: hidden;
+        border-radius: 28px;
+        background: linear-gradient(180deg, #fffdfa 0%, #fff6f2 100%);
+        background-clip: padding-box;
+        border: 1px solid #eaded8;
+        box-shadow: 0 28px 90px rgba(78, 19, 19, 0.18), 0 10px 28px rgba(0, 0, 0, 0.08);
+        color: #2f221d;
+    }
+
+    #introBookingModal .intro-booking-modal-hero {
+        position: relative;
+        padding: 1.1rem 1.25rem 0.95rem;
+        color: #ffffff;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 40%),
+            linear-gradient(135deg, #8B0000 0%, #660000 100%);
+    }
+
+    #introBookingModal .intro-booking-modal-hero::after {
+        content: "";
+        position: absolute;
+        inset: auto -30% -42% 38%;
+        height: 180px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.16), transparent 64%);
+        pointer-events: none;
+    }
+
+    #introBookingModal .intro-booking-modal-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 0.7rem;
+        font-size: 0.73rem;
+        font-weight: 800;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.78);
+    }
+
+    #introBookingModal .intro-booking-modal-title {
+        margin: 0;
+        font-size: clamp(1.45rem, 2.2vw, 2rem);
+        line-height: 1.04;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+    }
+
+    #introBookingModal .intro-booking-modal-subtitle {
+        margin: 0.65rem 0 0;
+        max-width: 34rem;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    #introBookingModal .intro-booking-modal-body {
+        padding: 1rem 1.25rem 1.05rem;
+    }
+
+    #introBookingModal .intro-step-strip {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.42rem;
+        margin-bottom: 0.85rem;
+    }
+
+    #introBookingModal .intro-step-pill {
+        border-radius: 14px;
+        border: 1px solid #eaded8;
+        background: linear-gradient(180deg, #ffffff 0%, #fff8f5 100%);
+        color: #5b4a44;
+        padding: 0.58rem 0.38rem;
+        text-align: center;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.03);
+        font-size: 0.68rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    #introBookingModal .intro-step-pill span {
+        display: block;
+        margin-top: 0.1rem;
+        font-size: 0.78rem;
+        letter-spacing: -0.02em;
+        color: #231815;
+    }
+
+    #introBookingModal .intro-checklist {
+        display: grid;
+        gap: 0.65rem;
+        margin-top: 0.1rem;
+    }
+
+    #introBookingModal .intro-check-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.72rem;
+        padding: 0.72rem 0.8rem;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #ffffff 0%, #fffaf8 100%);
+        border: 1px solid #efe3de;
+        color: #564640;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.03);
+    }
+
+    #introBookingModal .intro-check-icon {
+        width: 1.7rem;
+        height: 1.7rem;
+        flex: 0 0 1.7rem;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(139, 0, 0, 0.08);
+        color: #8B0000;
+        margin-top: 0.03rem;
+        font-size: 0.8rem;
+    }
+
+    #introBookingModal .intro-check-item p {
+        margin: 0;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        color: inherit;
+    }
+
+    #introBookingModal .intro-check-item b {
+        color: #8B0000;
+    }
+
+    #introBookingModal .intro-modal-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-top: 0.95rem;
+    }
+
+    #introBookingModal .intro-action-btn {
+        min-height: 44px;
+        flex: 1 1 0;
+        min-width: 148px;
+        justify-content: center;
+        border-radius: 14px;
+        text-decoration: none;
+        font-size: 0.84rem;
+    }
+
+    #introBookingModal .intro-action-primary {
+        background: linear-gradient(135deg, #8B0000, #b00000);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow: 0 14px 30px rgba(139, 0, 0, 0.28);
+    }
+
+    #introBookingModal .intro-action-secondary {
+        background: linear-gradient(180deg, #fffefc 0%, #f8f2ef 100%);
+        color: #4b3c37;
+        border: 1px solid #e6d9d3;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    #introBookingModal .intro-action-muted {
+        background: linear-gradient(180deg, #fffefc 0%, #f7f4f2 100%);
+        color: #5f524d;
+        border: 1px solid #e6d9d3;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+    }
+
+    [data-theme="dark"] #introBookingModal .intro-booking-modal-panel {
+        background: linear-gradient(180deg, #0d1117 0%, #111827 100%);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.52), 0 12px 30px rgba(0, 0, 0, 0.38);
+        color: #e5e7eb;
+    }
+
+    [data-theme="dark"] #introBookingModal .intro-booking-modal-hero {
+        background:
+            radial-gradient(circle at top right, rgba(252, 165, 165, 0.12), transparent 40%),
+            linear-gradient(135deg, #8B0000 0%, #660000 100%);
+    }
+
+    [data-theme="dark"] #introBookingModal .intro-booking-modal-subtitle {
+        color: rgba(229, 231, 235, 0.8);
+    }
+
+    [data-theme="dark"] #introBookingModal .intro-step-pill,
+    [data-theme="dark"] #introBookingModal .intro-check-item,
+    [data-theme="dark"] #introBookingModal .intro-action-secondary,
+    [data-theme="dark"] #introBookingModal .intro-action-muted {
+        background: linear-gradient(180deg, #111827 0%, #0d1117 100%);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #d1d5db;
+    }
+
+    [data-theme="dark"] #introBookingModal .intro-step-pill span {
+        color: #f9fafb;
+    }
+
+    [data-theme="dark"] #introBookingModal .intro-check-item {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    [data-theme="dark"] #introBookingModal .intro-check-icon {
+        background: rgba(252, 165, 165, 0.14);
+        color: #fca5a5;
+    }
+
+    [data-theme="dark"] #introBookingModal .intro-check-item b {
+        color: #fca5a5;
     }
 
     @keyframes introModalPop {
@@ -2858,51 +3064,45 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
             <span id="miniTabText">Please complete all required fields.</span>
         </div>
 
-        <dialog id="introBookingModal"
-            class="m-auto border-0 p-0 rounded-3xl overflow-hidden max-w-[560px] w-[calc(100vw-2rem)] bg-transparent">
-            <div
-                class="bg-[linear-gradient(145deg,#0d1117,#111827)] border border-white/10 shadow-[0_30px_90px_rgba(0,0,0,.45)]">
-                <div class="px-7 py-6 bg-[linear-gradient(135deg,#8B0000,#660000)] text-white">
-                    <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-white/75 mb-2">
-                        PUP Taguig Dental Clinic
-                    </p>
-                    <h2 class="text-2xl font-black leading-tight">Let’s get your dental appointment ready.</h2>
-                    <p class="text-sm text-white/80 mt-2 leading-6">
+        <dialog id="introBookingModal" class="m-auto w-[calc(100vw-1.5rem)] max-w-[620px]">
+            <div class="intro-booking-modal-panel">
+                <div class="intro-booking-modal-hero">
+                    <p class="intro-booking-modal-eyebrow">PUP Taguig Dental Clinic</p>
+                    <h2 class="intro-booking-modal-title">Let’s get your dental appointment ready.</h2>
+                    <p class="intro-booking-modal-subtitle">
                         This form will help the clinic prepare safe and proper care for your visit.
                     </p>
                 </div>
 
-                <div class="px-7 py-6 text-[#d1d5db]">
-                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 mb-5">
-                        <div
-                            class="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-center text-xs font-bold">
-                            1 Date</div>
-                        <div
-                            class="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-center text-xs font-bold">
-                            2 Service</div>
-                        <div
-                            class="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-center text-xs font-bold">
-                            3 Dental</div>
-                        <div
-                            class="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-center text-xs font-bold">
-                            4 Medical</div>
-                        <div
-                            class="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-center text-xs font-bold">
-                            5 Confirm</div>
+                <div class="intro-booking-modal-body">
+                    <div class="intro-step-strip">
+                        <div class="intro-step-pill">1<span>Date</span></div>
+                        <div class="intro-step-pill">2<span>Service</span></div>
+                        <div class="intro-step-pill">3<span>Dental</span></div>
+                        <div class="intro-step-pill">4<span>Medical</span></div>
+                        <div class="intro-step-pill">5<span>Confirm</span></div>
                     </div>
 
-                    <div class="space-y-3 text-sm leading-6">
-                        <p><i class="fa-solid fa-check text-[#fca5a5] mr-2"></i> Fill out all required fields marked
-                            with <b>*</b>.</p>
-                        <p><i class="fa-solid fa-check text-[#fca5a5] mr-2"></i> Prepare your emergency contact
-                            information.</p>
-                        <p><i class="fa-solid fa-check text-[#fca5a5] mr-2"></i> Prepare your patient signature image.
-                        </p>
-                        <p><i class="fa-solid fa-check text-[#fca5a5] mr-2"></i> Review your information before
-                            submitting.</p>
+                    <div class="intro-checklist">
+                        <div class="intro-check-item">
+                            <div class="intro-check-icon"><i class="fa-solid fa-check"></i></div>
+                            <p>Fill out all required fields marked with <b>*</b>.</p>
+                        </div>
+                        <div class="intro-check-item">
+                            <div class="intro-check-icon"><i class="fa-solid fa-phone-volume"></i></div>
+                            <p>Prepare your emergency contact information.</p>
+                        </div>
+                        <div class="intro-check-item">
+                            <div class="intro-check-icon"><i class="fa-solid fa-signature"></i></div>
+                            <p>Prepare your patient signature image.</p>
+                        </div>
+                        <div class="intro-check-item">
+                            <div class="intro-check-icon"><i class="fa-solid fa-list-check"></i></div>
+                            <p>Review your information before submitting.</p>
+                        </div>
                     </div>
 
-                    <div class="intro-modal-actions flex flex-col sm:flex-row gap-2 mt-6">
+                    <div class="intro-modal-actions">
                         <button type="button" id="introStartBtn" class="intro-action-btn intro-action-primary">
                             <i class="fa-solid fa-play"></i>
                             <span>Start Booking</span>
@@ -3001,6 +3201,27 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
     const isFemalePatient = @json($isFemalePatient);
     const DRAFT_KEY = "appointmentDraft:v1";
 
+    const appointmentCountsPerDay = @json($appointmentCountsPerDay ?? []);
+    const MAX_SLOTS_PER_DAY = 5;
+
+    function hasSavedDraft() {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (!raw) return false;
+
+        try {
+            const parsed = JSON.parse(raw);
+            const values = Object.entries(parsed).filter(([key, value]) => {
+                if (key === "__meta") return false;
+                if (value === null || value === undefined) return false;
+                return String(value).trim() !== "";
+            });
+
+            return values.length >= 2;
+        } catch {
+            return false;
+        }
+    }
+
     function saveDraftData() {
         const form = document.getElementById("appointmentForm");
         if (!form) return;
@@ -3012,9 +3233,18 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
             else if (Array.isArray(obj[key])) obj[key].push(value);
             else obj[key] = [obj[key], value];
         }
+
+        const draftFields = Object.keys(obj).filter(key => key !== "__meta");
+
+        if (!draftFields.length) {
+            clearDraft();
+            return;
+        }
+
         obj.__meta = {
             step: typeof step !== "undefined" ? step : 0,
-            savedAt: new Date().toISOString()
+            savedAt: new Date().toISOString(),
+            fieldCount: draftFields.length
         };
         localStorage.setItem(DRAFT_KEY, JSON.stringify(obj));
     }
@@ -3030,7 +3260,7 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
         radio.addEventListener("change", markFormDirty);
     });
 
-    function restoreDraft() {
+    async function restoreDraft() {
         const raw = localStorage.getItem(DRAFT_KEY);
         if (!raw) return;
         let obj;
@@ -3067,17 +3297,23 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
         const restoredDate = document.getElementById("appointment_date")?.value;
         const restoredTime = document.getElementById("appointment_time")?.value;
         if (restoredDate) {
-            selectedDate = restoredDate;
-            selectDate(restoredDate);
-            if (restoredTime) {
-                selectedTime = restoredTime;
-                document.querySelectorAll(".slot-chip").forEach(c => {
-                    if (c.dataset.time === restoredTime) c.classList.add("selected");
-                });
-                const txt = document.getElementById("selectedSlotText");
-                const disp = document.getElementById("selectedSlotDisplay");
-                if (txt) txt.textContent = restoredTime;
-                if (disp) disp.classList.remove("hidden");
+            const appointmentCount = appointmentCountsPerDay[restoredDate] || 0;
+            if (appointmentCount >= MAX_SLOTS_PER_DAY) {
+                showSlotFullWarning(restoredDate);
+            } else {
+                await selectDate(restoredDate);
+                if (restoredTime) {
+                    const restoredTimeChip = Array.from(document.querySelectorAll(".slot-chip")).find(c =>
+                        c.dataset.time === restoredTime && !c.classList.contains("disabled")
+                    );
+
+                    if (restoredTimeChip) {
+                        restoredTimeChip.click();
+                    } else {
+                        const timeInput = document.getElementById("appointment_time");
+                        if (timeInput) timeInput.value = "";
+                    }
+                }
             }
         }
         formIsDirty = true;
@@ -3576,6 +3812,25 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
     const confirmMessage = document.getElementById("confirmMessage");
     const okBtn = document.getElementById("okBtn");
 
+    function showSlotFullWarning(date) {
+        const slotFullModal = document.getElementById("slotFullModal");
+        if (!slotFullModal) return;
+
+        const dateDisplay = new Date(date + "T00:00:00").toLocaleDateString("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        });
+
+        const msg = document.getElementById("slotFullMessage");
+        if (msg) {
+            msg.innerHTML = `<strong>The appointment slots for ${dateDisplay} are fully booked.</strong><br>Please select a different date to continue with your booking.`;
+        }
+
+        slotFullModal.showModal();
+    }
+
     const finalSubmitBtn = document.getElementById('finalSubmitBtn');
     const finalConfirm = document.getElementById('finalConfirm');
 
@@ -3935,6 +4190,11 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
 
     document.getElementById('cancelLeaveBtn')?.addEventListener('click', closeLeaveModal);
 
+    document.getElementById('slotFullOkBtn')?.addEventListener('click', () => {
+        const modal = document.getElementById('slotFullModal');
+        if (modal) modal.close();
+    });
+
     document.getElementById('saveDraftBtn')?.addEventListener('click', () => {
         saveDraftData();
         formIsDirty = false;
@@ -4092,24 +4352,48 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
 
         if (!modal) return;
 
-        const hasDraft = !!localStorage.getItem(DRAFT_KEY);
+        const hasDraft = hasSavedDraft();
 
         if (hasDraft) {
             continueDraftBtn?.classList.remove("hidden");
+        } else {
+            continueDraftBtn?.classList.add("hidden");
         }
+
+        function lockPageScroll() {
+            const scrollY = window.scrollY || window.pageYOffset || 0;
+            document.body.dataset.lockedScrollY = String(scrollY);
+            document.body.style.top = `-${scrollY}px`;
+            document.documentElement.classList.add("intro-modal-open");
+            document.body.classList.add("intro-modal-open");
+        }
+
+        function unlockPageScroll() {
+            const scrollY = parseInt(document.body.dataset.lockedScrollY || "0", 10);
+            document.documentElement.classList.remove("intro-modal-open");
+            document.body.classList.remove("intro-modal-open");
+            document.body.style.top = "";
+            delete document.body.dataset.lockedScrollY;
+            window.scrollTo(0, Number.isNaN(scrollY) ? 0 : scrollY);
+        }
+
+        modal.addEventListener("close", unlockPageScroll);
 
         startBtn?.addEventListener("click", () => {
             modal.close();
         });
 
-        continueDraftBtn?.addEventListener("click", () => {
-            restoreDraft();
+        continueDraftBtn?.addEventListener("click", async () => {
             modal.close();
+            await restoreDraft();
             showMiniTab("Saved draft loaded.");
         });
 
         setTimeout(() => {
-            if (!modal.open) modal.showModal();
+            if (!modal.open) {
+                lockPageScroll();
+                modal.showModal();
+            }
         }, 350);
     }
 

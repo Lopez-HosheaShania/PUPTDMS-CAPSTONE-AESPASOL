@@ -33,6 +33,9 @@ class ChatbotController extends Controller
             'user_id' => auth()->id(),
         ]);
 
+        $context = (string) $request->context;
+        $isLoginPage = str_contains($context, '/login');
+
         $patient = Patient::with(['appointments', 'teeth', 'dentalHistory'])
             ->where('user_id', auth()->id())
             ->first();
@@ -42,7 +45,7 @@ class ChatbotController extends Controller
 
         $patientContext = "
 Patient Information:
-- Name: " . ($patient?->name ?? auth()->user()->name ?? 'Unknown') . "
+    - Name: " . ($patient?->name ?? optional(auth()->user())->name ?? 'Unknown') . "
 - Latest Appointment Date: " . ($appointment->appointment_date ?? 'None') . "
 - Latest Appointment Time: " . ($appointment->appointment_time ?? 'None') . "
 - Latest Appointment Status: " . ($appointment->status ?? 'None') . "
@@ -50,7 +53,7 @@ Patient Information:
 - Last Diagnosis: " . ($record->diagnosis ?? 'None') . "
 ";
 
-        $localReply = $this->getLocalSystemReply($request->message, $request->context, $patient);
+        $localReply = $this->getLocalSystemReply($request->message, $context, $patient, $isLoginPage);
 
         if ($localReply) {
             return response()->json([
@@ -80,16 +83,18 @@ You are the official AI assistant of the PUP Taguig Dental Clinic Management Sys
 
 ' . $patientContext . '
 
-Current page/context: ' . ($request->context ?? 'unknown') . '
+Current page/context: ' . ($context ?: 'unknown') . '
 
 System route guide:
+- /login = login page for signing in and accessing the system
 - /homepage = patient dashboard
 - /patient/appointments = appointments page
 - /book-appointment = booking page / available dates
 - /record = dental records
 - /document-requests = document requests
 
-Only answer questions about appointments, booking, clinic schedule, dentist availability, document requests, odontogram, dental records, account navigation, and system features.
+If the current page is /login, only answer questions about signing in, login help, login buttons, or what the login page does.
+Otherwise, only answer questions about appointments, booking, clinic schedule, dentist availability, document requests, odontogram, dental records, account navigation, and system features.
 
 If the user asks about their own appointment, record, treatment, or diagnosis, answer using Patient Information above.
 If the information is None, say that there is no available record yet.
@@ -144,9 +149,29 @@ User message: ' . $request->message,
             );
         }
     }
-    private function getLocalSystemReply(string $message, ?string $context = null, ?Patient $patient = null): ?string
+    private function getLocalSystemReply(string $message, ?string $context = null, ?Patient $patient = null, bool $isLoginPage = false): ?string
     {
         $text = strtolower($message);
+
+        if ($isLoginPage) {
+            if (str_contains($text, 'hello') || str_contains($text, 'hi')) {
+                return 'Hello! This is the login page. Please sign in using your account to access appointments, records, schedules, and document requests.';
+            }
+
+            if (str_contains($text, 'log in') || str_contains($text, 'login') || str_contains($text, 'sign in')) {
+                return 'On the login page, enter your credentials and use the Log In button or SSO option to access the system.';
+            }
+
+            if (str_contains($text, 'sso') || str_contains($text, 'google') || str_contains($text, 'account')) {
+                return 'You can use the available login method on this page to sign in and access the clinic system.';
+            }
+
+            if (str_contains($text, 'book') || str_contains($text, 'appointment') || str_contains($text, 'record') || str_contains($text, 'schedule') || str_contains($text, 'document')) {
+                return 'Those features are available after login. Please sign in first to access appointments, records, schedules, and document requests.';
+            }
+
+            return 'This is the login page. You can sign in here to access appointments, records, schedules, and document requests.';
+        }
 
         if (str_contains($text, 'hello') || str_contains($text, 'hi')) {
             $name = $patient?->name ?? auth()->user()->name ?? 'there';

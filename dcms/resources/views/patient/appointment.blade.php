@@ -181,6 +181,155 @@
         }
     }
 
+    .appt-calendar-side {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+    }
+
+    .appt-calendar-side-card {
+        border-radius: 1rem;
+        border: 1px solid #f1e4e4;
+        background: linear-gradient(145deg, #fffefe, #fff7f7);
+        padding: 1rem;
+        box-shadow: 0 8px 22px rgba(139, 0, 0, 0.06);
+    }
+
+    .appt-calendar-side-stat {
+        border-radius: 0.85rem;
+        border: 1px solid #f2e8e8;
+        background: #ffffff;
+        padding: 0.7rem 0.85rem;
+    }
+
+    .appt-mini-chart {
+        margin-top: 0.75rem;
+        border-radius: 0.9rem;
+        border: 1px solid #f2e8e8;
+        background: #ffffff;
+        padding: 0.7rem 0.8rem;
+    }
+
+    .appt-mini-chart canvas {
+        width: 100% !important;
+        height: 150px !important;
+    }
+
+    .appt-mini-chart-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 0.45rem;
+        align-items: end;
+    }
+
+    .appt-mini-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .appt-mini-bars {
+        height: 76px;
+        width: 100%;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 3px;
+    }
+
+    .appt-mini-bar {
+        width: 8px;
+        border-radius: 999px;
+    }
+
+    .appt-mini-bar-completed {
+        background: linear-gradient(180deg, #10b981, #059669);
+    }
+
+    .appt-mini-bar-cancelled {
+        background: linear-gradient(180deg, #f97316, #ea580c);
+    }
+
+    .appt-quick-actions {
+        margin-top: 0.95rem;
+        border-radius: 1rem;
+        border: 1px solid #f1e4e4;
+        background: linear-gradient(145deg, #fffefe, #fff7f7);
+        padding: 0.8rem;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.6rem;
+    }
+
+    .appt-quick-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        border-radius: 0.8rem;
+        border: 1px solid #f1d7d7;
+        padding: 0.65rem 0.7rem;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #7a0000;
+        background: #fff;
+        transition: all 0.18s ease;
+    }
+
+    .appt-quick-btn:hover {
+        transform: translateY(-1px);
+        border-color: #d79a9a;
+        background: #fff4f4;
+    }
+
+    [data-theme="dark"] .appt-calendar-side-card {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(32, 11, 11, 0.9));
+    }
+
+    [data-theme="dark"] .appt-calendar-side-stat {
+        border-color: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    [data-theme="dark"] .appt-mini-chart {
+        border-color: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    [data-theme="dark"] .appt-quick-actions {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(32, 11, 11, 0.9));
+    }
+
+    [data-theme="dark"] .appt-quick-btn {
+        border-color: rgba(252, 165, 165, 0.25);
+        color: #fecaca;
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    [data-theme="dark"] .appt-quick-btn:hover {
+        border-color: rgba(252, 165, 165, 0.4);
+        background: rgba(127, 29, 29, 0.24);
+    }
+
+    @media (max-width: 1023px) {
+        .appt-quick-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media only screen and (min-width: 1200px) {
+        #calendarSkeletonContainer {
+            min-height: 100%;
+        }
+
+        .appt-calendar-side {
+            min-height: 100%;
+        }
+    }
+
     dialog#appt_detail_modal::backdrop {
         background: rgba(16, 16, 16, .45);
     }
@@ -2120,6 +2269,7 @@ $appt->service_type .
 
 <script>
     window.patientOdontogramTeeth = @json($odontogramTeeth ?? []);
+    window.apptActivityChartData = @json($appointmentActivityChart ?? []);
 </script>
 
 <main id="mainContent"
@@ -2132,6 +2282,38 @@ $appt->service_type .
         $latestPastVisit && $latestPastVisit->appointment_date
         ? \Carbon\Carbon::parse($latestPastVisit->appointment_date)->format('M d, Y')
         : 'No record yet';
+
+        $allAppointments = collect($appointments ?? [])->filter(fn($appt) => !empty($appt->appointment_date));
+
+        $serviceStats = $allAppointments
+            ->groupBy(fn($appt) => trim((string)($appt->service_type ?? 'General Consultation')))
+            ->map(fn($group) => $group->count())
+            ->sortDesc();
+
+        $mostVisitedService = $serviceStats->keys()->first() ?: 'No visit yet';
+        $mostVisitedCount = (int) ($serviceStats->first() ?? 0);
+
+        $latestCompleted = collect($pastVisits ?? [])
+            ->filter(function ($appt) {
+                $status = strtolower(trim((string) ($appt->status ?? '')));
+                return !empty($appt->appointment_date) && $status === 'completed';
+            })
+            ->sortByDesc('appointment_date')
+            ->first();
+
+        $latestCompletedText = $latestCompleted && $latestCompleted->appointment_date
+            ? \Carbon\Carbon::parse($latestCompleted->appointment_date)->format('M d, Y')
+            : 'No completed visit yet';
+
+        $nextRecommendedDate = $latestCompleted && $latestCompleted->appointment_date
+            ? \Carbon\Carbon::parse($latestCompleted->appointment_date)->addMonthsNoOverflow(6)
+            : \Carbon\Carbon::today()->addMonthsNoOverflow(6);
+
+        $nextRecommendedText = $nextRecommendedDate->format('M d, Y');
+        $daysUntilRecommended = \Carbon\Carbon::today()->diffInDays($nextRecommendedDate->copy()->startOfDay(), false);
+        $recommendedHint = $daysUntilRecommended < 0
+            ? 'Due now'
+            : ($daysUntilRecommended === 0 ? 'Due today' : 'In ' . $daysUntilRecommended . ' days');
         @endphp
 
         <section class="appt-section-reveal mb-5">
@@ -2206,7 +2388,71 @@ $appt->service_type .
         </section>
 
         <section class="fade-up mb-6 sm:mb-8">
-            <div id="calendarSkeletonContainer" class="w-full h-full min-h-[420px] skeleton-fade-swap"></div>
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
+                <div class="xl:col-span-4">
+                    <div class="appt-calendar-side">
+                        <div class="appt-calendar-side-card">
+                            <p class="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#8B0000] dark:text-[#FCA5A5]">
+                                Monthly Highlights
+                            </p>
+                            <h3 class="mt-1 text-lg font-extrabold text-gray-900 dark:text-gray-100">Your Visit Patterns</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Personalized summary based on your appointment history.</p>
+
+                            <div class="mt-4 space-y-2.5">
+                                <div class="appt-calendar-side-stat flex items-center justify-between">
+                                    <span class="text-xs font-bold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400">Most Visited Service</span>
+                                    <span class="text-sm font-extrabold text-emerald-700 dark:text-emerald-300">{{ $mostVisitedCount > 0 ? $mostVisitedCount . 'x' : '—' }}</span>
+                                </div>
+                                <p class="px-1 -mt-1 text-xs font-semibold text-gray-700 dark:text-gray-200 truncate">{{ $mostVisitedService }}</p>
+
+                                <div class="appt-calendar-side-stat flex items-center justify-between">
+                                    <span class="text-xs font-bold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400">Last Completed Visit</span>
+                                    <span class="text-xs font-extrabold text-blue-700 dark:text-blue-300">{{ $latestCompletedText }}</span>
+                                </div>
+
+                                <div class="appt-calendar-side-stat flex items-center justify-between">
+                                    <span class="text-xs font-bold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400">Next Recommended Checkup</span>
+                                    <span class="text-xs font-extrabold text-amber-700 dark:text-amber-300">{{ $nextRecommendedText }}</span>
+                                </div>
+                                <p class="px-1 -mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $recommendedHint }}</p>
+                            </div>
+                        </div>
+
+                        <div class="appt-calendar-side-card">
+                            <div class="flex items-center justify-between gap-2">
+                                <p class="text-xs font-extrabold text-gray-800 dark:text-gray-200">6-Month Activity</p>
+                                <div class="flex items-center gap-2 text-[10px] font-bold">
+                                    <span class="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300"><i class="fa-solid fa-circle text-[8px]"></i>Completed</span>
+                                    <span class="inline-flex items-center gap-1 text-orange-700 dark:text-orange-300"><i class="fa-solid fa-circle text-[8px]"></i>Cancelled</span>
+                                </div>
+                            </div>
+
+                            <div class="appt-mini-chart">
+                                <canvas id="apptActivityChart" aria-label="Appointment activity chart" role="img"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="xl:col-span-8">
+                    <div id="calendarSkeletonContainer" class="w-full h-full min-h-[420px] skeleton-fade-swap"></div>
+                </div>
+            </div>
+
+            <div class="appt-quick-actions">
+                <a href="{{ route('patient.book.appointment') }}" class="appt-quick-btn">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    Rebook Appointment
+                </a>
+                <button type="button" class="appt-quick-btn" onclick="apptShowPast(); document.getElementById('apptPastPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    View Past Visits
+                </button>
+                <button type="button" class="appt-quick-btn" onclick="scrollToAppointmentCalendar()">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    Focus Calendar
+                </button>
+            </div>
         </section>
 
         <section class="fade-up mb-8 sm:mb-10">
@@ -2773,7 +3019,102 @@ $appt->service_type .
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
+    let apptActivityChartInstance = null;
+
+    function initAppointmentActivityChart() {
+        const canvas = document.getElementById('apptActivityChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        const dataRows = Array.isArray(window.apptActivityChartData) ? window.apptActivityChartData : [];
+        const labels = dataRows.map(row => row.label || '');
+        const completed = dataRows.map(row => Number(row.completed || 0));
+        const cancelled = dataRows.map(row => Number(row.cancelled || 0));
+
+        if (apptActivityChartInstance) {
+            apptActivityChartInstance.destroy();
+        }
+
+        apptActivityChartInstance = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Completed',
+                        data: completed,
+                        backgroundColor: '#10B981',
+                        hoverBackgroundColor: '#059669',
+                        borderColor: 'rgba(4, 120, 87, 0.18)',
+                        hoverBorderColor: '#047857',
+                        borderWidth: 1,
+                        hoverBorderWidth: 2,
+                        borderRadius: 8,
+                        maxBarThickness: 16,
+                    },
+                    {
+                        label: 'Cancelled',
+                        data: cancelled,
+                        backgroundColor: '#F97316',
+                        hoverBackgroundColor: '#EA580C',
+                        borderColor: 'rgba(194, 65, 12, 0.18)',
+                        hoverBorderColor: '#C2410C',
+                        borderWidth: 1,
+                        hoverBorderWidth: 2,
+                        borderRadius: 8,
+                        maxBarThickness: 16,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#6B7280',
+                            font: { size: 10, weight: '700' }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            color: '#9CA3AF',
+                            font: { size: 10 }
+                        },
+                        grid: {
+                            color: 'rgba(148, 163, 184, 0.18)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                        borderColor: 'rgba(255, 255, 255, 0.16)',
+                        borderWidth: 1,
+                        titleColor: '#F9FAFB',
+                        bodyColor: '#E5E7EB',
+                        cornerRadius: 10,
+                        padding: 10,
+                        boxPadding: 4,
+                        displayColors: true,
+                        usePointStyle: true,
+                    }
+                }
+            }
+        });
+    }
+
     function apptAnimatePanel(panel) {
         if (!panel) return;
 
@@ -2878,7 +3219,10 @@ $appt->service_type .
         }, 310);
     }
 
-    document.addEventListener('DOMContentLoaded', initApptAccordions);
+    document.addEventListener('DOMContentLoaded', function () {
+        initApptAccordions();
+        initAppointmentActivityChart();
+    });
 
     let viewOdontogramData = [];
 

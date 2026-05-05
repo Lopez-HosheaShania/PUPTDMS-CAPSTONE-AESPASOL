@@ -868,61 +868,6 @@
         }
     }
 
-    .day-smart-tooltip {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
-    }
-
-    .group:hover .day-smart-tooltip {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .day-smart-tooltip.tooltip-center {
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%) translateY(4px);
-    }
-
-    .group:hover .day-smart-tooltip.tooltip-center {
-        transform: translateX(-50%) translateY(0);
-    }
-
-    .day-smart-tooltip.tooltip-left {
-        left: auto;
-        right: 0;
-        transform: translateX(0) translateY(4px);
-    }
-
-    .group:hover .day-smart-tooltip.tooltip-left {
-        transform: translateX(0) translateY(0);
-    }
-
-    .day-smart-tooltip.tooltip-right {
-        left: 0;
-        right: auto;
-        transform: translateX(0) translateY(4px);
-    }
-
-    .group:hover .day-smart-tooltip.tooltip-right {
-        transform: translateX(0) translateY(0);
-    }
-
-    .day-smart-tooltip.tooltip-center>div {
-        left: 50%;
-        transform: translateX(-50%);
-    }
-
-    .day-smart-tooltip.tooltip-left>div {
-        right: 14px;
-    }
-
-    .day-smart-tooltip.tooltip-right>div {
-        left: 14px;
-    }
-
     @media only screen and (min-width: 1200px) {
         #profileSkeletonContainer>div {
             min-height: 100%;

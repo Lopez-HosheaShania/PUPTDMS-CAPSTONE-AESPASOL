@@ -14,6 +14,32 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(.985);
+        filter: blur(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.page-enter {
+    animation: pageEnter .55s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-enter {
+        animation: none !important;
+        transform: none !important;
+        filter: none !important;
+    }
+}
+
 :root {
     --float-right: 22px;
     --fab-size: 56px;
@@ -38,6 +64,48 @@
     --text-muted: #8B949E;
     --brand-red: #8B0000;
     --brand-red-soft: rgba(139, 0, 0, 0.18);
+}
+
+.auth-theme-toggle {
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(229, 231, 235, 0.95);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    background: rgba(255, 255, 255, 0.68);
+    color: #8B0000;
+    box-shadow: 0 10px 24px rgba(139, 0, 0, 0.08);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.auth-theme-toggle:hover {
+    transform: translateY(-1px);
+    border-color: rgba(139, 0, 0, 0.28);
+    box-shadow: 0 14px 28px rgba(139, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .auth-theme-toggle {
+    background: rgba(13, 17, 23, 0.82);
+    border-color: rgba(255, 255, 255, 0.10);
+    color: #F3F4F6;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme="dark"] .auth-theme-toggle:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+}
+
+@media (max-width: 768px) {
+    .auth-theme-toggle {
+        width: 40px;
+        height: 40px;
+    }
 }
 
 body.role-patient {
@@ -1004,7 +1072,8 @@ body.role-patient {
 }
 
 .cal-cell-wrap {
-    min-height: 46px;
+    height: 50px;
+    min-height: 50px;
     padding: 2px 0;
 }
 
@@ -1023,13 +1092,6 @@ body.role-patient {
 .cal-cell {
     transition: all 0.18s ease;
     user-select: none;
-}
-
-.cal-day:hover:not(.disabled):not(.other-month):not(.today),
-.cal-cell:hover:not(.disabled):not(.other-month):not(.today) {
-    background: #f9e8e8;
-    color: #8B0000;
-    transform: translateY(-1px);
 }
 
 .cal-day.today:hover,
@@ -1075,7 +1137,7 @@ body.role-patient {
     transition: all 0.18s ease;
 }
 
-.cal-cell:hover:not(.disabled):not(.today):not(.selected) {
+.cal-cell:hover:not(.disabled):not(.today):not(.selected):not(.holiday):not(.full) {
     background: rgba(139, 0, 0, 0.08);
     border-color: rgba(139, 0, 0, 0.25);
     color: #8B0000;
@@ -1131,7 +1193,7 @@ body.role-patient {
         inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
-[data-theme="dark"] .cal-cell:hover:not(.disabled):not(.today):not(.selected) {
+[data-theme="dark"] .cal-cell:hover:not(.disabled):not(.today):not(.selected):not(.holiday):not(.full) {
     background: rgba(139, 0, 0, 0.16) !important;
     border-color: rgba(252, 165, 165, 0.28) !important;
     color: #FCA5A5 !important;
@@ -1183,6 +1245,80 @@ body.role-patient {
 .cal-shell hr,
 .cal-legend {
     border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+.day-smart-tooltip {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+.group:hover .day-smart-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.day-smart-tooltip.tooltip-center {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(4px);
+}
+
+.group:hover .day-smart-tooltip.tooltip-center {
+    transform: translateX(-50%) translateY(0);
+}
+
+.day-smart-tooltip.tooltip-left {
+    left: auto;
+    right: 0;
+    transform: translateX(0) translateY(4px);
+}
+
+.group:hover .day-smart-tooltip.tooltip-left {
+    transform: translateX(0) translateY(0);
+}
+
+.day-smart-tooltip.tooltip-right {
+    left: 0;
+    right: auto;
+    transform: translateX(0) translateY(4px);
+}
+
+.group:hover .day-smart-tooltip.tooltip-right {
+    transform: translateX(0) translateY(0);
+}
+
+.day-smart-tooltip.tooltip-center>div {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.day-smart-tooltip.tooltip-left>div {
+    right: 0;
+    transform: none;
+}
+
+.day-smart-tooltip.tooltip-right>div {
+    left: 0;
+    transform: none;
+}
+
+.day-smart-tooltip.tooltip-center>div::after {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.day-smart-tooltip.tooltip-left>div::after {
+    right: 18px;
+    left: auto;
+    transform: none;
+}
+
+.day-smart-tooltip.tooltip-right>div::after {
+    left: 18px;
+    right: auto;
+    transform: none;
 }
 
 [data-theme="dark"] .cal-shell hr,
@@ -1418,74 +1554,6 @@ body.role-patient {
     #bookAppointmentPage #calendarSkeletonContainer .cal-shell {
         min-height: auto;
     }
-}
-
-.day-smart-tooltip {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
-}
-
-.group:hover .day-smart-tooltip {
-    opacity: 1;
-    visibility: visible;
-}
-
-.day-smart-tooltip.tooltip-center {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%) translateY(4px);
-}
-
-.group:hover .day-smart-tooltip.tooltip-center {
-    transform: translateX(-50%) translateY(0);
-}
-
-.day-smart-tooltip.tooltip-left {
-    left: auto;
-    right: 0;
-    transform: translateX(0) translateY(4px);
-}
-
-.group:hover .day-smart-tooltip.tooltip-left {
-    transform: translateX(0) translateY(0);
-}
-
-.day-smart-tooltip.tooltip-right {
-    left: 0;
-    right: auto;
-    transform: translateX(0) translateY(4px);
-}
-
-.group:hover .day-smart-tooltip.tooltip-right {
-    transform: translateX(0) translateY(0);
-}
-
-.day-smart-tooltip.tooltip-center>div {
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.day-smart-tooltip.tooltip-left>div {
-    right: 0;
-}
-
-.day-smart-tooltip.tooltip-left>div::after {
-    right: 18px;
-}
-
-.day-smart-tooltip.tooltip-right>div {
-    left: 0;
-}
-
-.day-smart-tooltip.tooltip-right>div::after {
-    left: 18px;
-}
-
-.day-smart-tooltip.tooltip-center>div::after {
-    left: 50%;
-    transform: translateX(-50%);
 }
 
 #mainContent #slotGrid .slot-chip.selected,

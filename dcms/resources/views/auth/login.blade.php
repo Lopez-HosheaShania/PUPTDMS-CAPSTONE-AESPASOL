@@ -1,19 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.auth')
 
-<head>
-  <meta charset="UTF-8" />
-  <title>@yield('title', 'PUP Taguig Dental Clinic')</title>
-  <link rel="icon" type="image/png" href="{{ asset('images/PUPT-DMS-Logo.png') }}">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet">
-
+@section('styles')
   <style>
     *,
     *::before,
@@ -1382,10 +1369,134 @@
 
       .dentist-tags { gap: 8px; }
     }
-  </style>
-</head>
 
-<body>
+    /* ─── DARK MODE SUPPORT ─── */
+    html[data-theme="dark"] {
+      --crimson: #8B0000;
+      --crimson-dark: #C1121F;
+      --white: #0D1117;
+      --bg-main: #000D1A;
+      --bg-card: #0D1117;
+      --bg-card-soft: #111827;
+      --bg-panel: #161B22;
+      --bg-panel-soft: #1C2128;
+      --bg-light: #000D1A;
+      --gray-100: #111827;
+      --gray-200: #1C2128;
+      --border-dark: rgba(255, 255, 255, 0.10);
+      --text-primary: #F3F4F6;
+      --text-secondary: #C9D1D9;
+      --text-main: #F3F4F6;
+      --text-muted: #8B949E;
+    }
+
+    html[data-theme="dark"] body {
+      background: var(--bg-main);
+      color: var(--text-main);
+    }
+
+    html[data-theme="dark"] .nav-brand-text,
+    html[data-theme="dark"] .nav-links a,
+    html[data-theme="dark"] .hero-title {
+      color: var(--text-primary);
+    }
+
+    html[data-theme="dark"] .nav-cta {
+      color: var(--text-primary) !important;
+    }
+
+    html[data-theme="dark"] nav {
+      background: rgba(13, 17, 23, 0.88);
+      border-bottom-color: var(--border-dark);
+    }
+
+    html[data-theme="dark"] .hero {
+      background-color: var(--bg-main);
+    }
+
+    html[data-theme="dark"] .hero::before {
+      background: linear-gradient(to bottom, rgba(0, 13, 26, 0.78) 0%, rgba(0, 13, 26, 0.95) 100%);
+    }
+
+    html[data-theme="dark"] .hero-desc,
+    html[data-theme="dark"] .eyebrow-text,
+    html[data-theme="dark"] .hero-features li {
+      color: var(--text-secondary);
+    }
+
+    html[data-theme="dark"] .btn-sso {
+      color: var(--text-primary);
+      background: rgba(22, 27, 34, 0.82);
+      border-color: rgba(139, 0, 0, 0.24);
+      box-shadow: 0 8px 32px 0 rgba(139, 0, 0, 0.18);
+    }
+
+    html[data-theme="dark"] .btn-sso:hover {
+      background: rgba(28, 33, 40, 0.92);
+      border-color: rgba(139, 0, 0, 0.38);
+      box-shadow: 0 12px 40px 0 rgba(139, 0, 0, 0.24);
+    }
+
+    html[data-theme="dark"] .hero-title {
+      background: linear-gradient(
+        to right,
+        #8B0000 0%,
+        #b5282a 25%,
+        #FFD700 50%,
+        #b5282a 75%,
+        #8B0000 100%
+      );
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    html[data-theme="dark"] .section-wrap {
+      color: var(--text-main);
+    }
+
+    html[data-theme="dark"] .about-statement,
+    html[data-theme="dark"] .section-heading,
+    html[data-theme="dark"] .faq-section-title,
+    html[data-theme="dark"] .closing-heading {
+      color: var(--text-main);
+    }
+
+    html[data-theme="dark"] .pillar-card {
+      background: var(--bg-card);
+      border-color: var(--border-dark);
+    }
+
+    html[data-theme="dark"] .svc-card {
+      background: var(--bg-card);
+      border-color: var(--border-dark);
+    }
+
+    html[data-theme="dark"] .faq-item-new {
+      background: var(--bg-card);
+      border-color: var(--border-dark);
+    }
+
+    html[data-theme="dark"] .faq-body-inner {
+      color: var(--text-muted);
+    }
+
+    html[data-theme="dark"] .closing {
+      background: var(--bg-main);
+    }
+
+    html[data-theme="dark"] .mobile-menu {
+      background: rgba(13, 17, 23, 0.97);
+    }
+
+    html[data-theme="dark"] .mobile-menu a {
+      color: var(--text-primary);
+    }
+  </style>
+@endsection
+
+@section('content')
 
   <nav>
     <div class="nav-brand">
@@ -1400,6 +1511,10 @@
       <li><a href="#team">Team</a></li>
       <li><a href="/auth/oidc/redirect" class="nav-cta">Login</a></li>
     </ul>
+
+    <button class="auth-theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+      <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
 
     <button class="nav-hamburger" id="hamburgerBtn" aria-label="Toggle menu" onclick="toggleMobileMenu()">
       <span></span>
@@ -1723,8 +1838,6 @@
     </div>
   </section>
 
-  @include('partials.footer')
-
   <script>
     function toggleMobileMenu() {
       const menu = document.getElementById('mobileMenu');
@@ -1769,6 +1882,4 @@
 
     document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
   </script>
-</body>
-
-</html>
+@endsection
