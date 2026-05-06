@@ -24,7 +24,7 @@ class DocumentRequestApprovedNotification extends Notification
         return [
             'title' => 'Document Request Approved',
             'message' => 'Your document request is approved and ready for pick up.',
-            'url' => route('patient.dashboard'), // palitan if needed
+            'url' => route('patient.document.approved', $this->documentRequest->id),
             'icon' => 'fa-file-circle-check',
             'document_request_id' => $this->documentRequest->id,
             'status' => $this->documentRequest->status,
