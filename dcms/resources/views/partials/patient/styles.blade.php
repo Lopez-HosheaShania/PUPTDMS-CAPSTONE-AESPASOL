@@ -669,4 +669,83 @@
         opacity: 1;
         visibility: visible;
     }
+
+    /* Patient sidebar dark mode polish */
+    [data-theme="dark"] #sidebar {
+        background: #07111F !important;
+        border-right-color: #1E293B !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, .35) !important;
+    }
+
+    [data-theme="dark"] .nav-section-label {
+        color: #64748B;
+    }
+
+    [data-theme="dark"] .nav-link {
+        color: #CBD5E1;
+    }
+
+    [data-theme="dark"] .nav-icon-wrap {
+        background: rgba(139, 0, 0, .18);
+        color: #f87171;
+        transition: all .15s ease;
+    }
+
+    [data-theme="dark"] .nav-link:hover {
+        background: linear-gradient(135deg, rgba(139, 0, 0, .45), rgba(90, 0, 0, .35));
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] .nav-link:hover .nav-icon-wrap {
+        background: rgba(248, 113, 113, .22);
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] .nav-link.active {
+        background: linear-gradient(135deg, #8B0000, #6b0000);
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] .nav-link.active .nav-icon-wrap {
+        background: rgba(255, 255, 255, .18);
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] .sidebar-bottom {
+        border-top-color: #1E293B;
+    }
+
+    [data-theme="dark"] .sidebar-toggle-btn {
+        background: rgba(139, 0, 0, .18);
+        color: #f87171;
+    }
+
+    [data-theme="dark"] .sidebar-toggle-btn:hover {
+        background: rgba(248, 113, 113, .22);
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] .logout-btn {
+        color: #f87171;
+    }
+
+    [data-theme="dark"] .logout-icon {
+        background: rgba(239, 68, 68, .15);
+        color: #f87171;
+    }
+
+    [data-theme="dark"] .logout-btn:hover {
+        background: rgba(239, 68, 68, .18);
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] .logout-btn:hover .logout-icon {
+        background: rgba(248, 113, 113, .22);
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] #mobileBottomNav {
+        background: #07111F !important;
+        border-color: #1E293B !important;
+    }
 </style>

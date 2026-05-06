@@ -6,7 +6,9 @@ window.Chart = Chart;
 import {
     swapSkeletonContent,
     renderWithStagger,
-    runEnterpriseLoading
+    runEnterpriseLoading,
+    setDashboardLoadingStatus,
+    finishDashboardLoading
 } from './skeleton';
 
 import flatpickr from "flatpickr";
@@ -263,6 +265,8 @@ document.addEventListener('DOMContentLoaded', initFlatpickrSwipeClose);
 window.swapSkeletonContent = swapSkeletonContent;
 window.renderWithStagger = renderWithStagger;
 window.runEnterpriseLoading = runEnterpriseLoading;
+window.setDashboardLoadingStatus = setDashboardLoadingStatus;
+window.finishDashboardLoading = finishDashboardLoading;
 
 function initBackToTop() {
     if (document.querySelector('.back-to-top')) return;

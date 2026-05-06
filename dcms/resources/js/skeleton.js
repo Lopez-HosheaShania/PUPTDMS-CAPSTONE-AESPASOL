@@ -23,6 +23,39 @@ export function swapSkeletonContent(targetId, html, options = {}) {
     }, leaveDuration);
 }
 
+export function setDashboardLoadingStatus(label, percent) {
+    const text = document.getElementById('dashboardLoadingText');
+    const pct = document.getElementById('dashboardLoadingPercent');
+    const bar = document.getElementById('dashboardLoadingBar');
+
+    if (text && label) {
+        text.innerHTML =
+            '<span class="w-2 h-2 rounded-full bg-[#8B0000] dashboard-loading-dot"></span>' +
+            label;
+    }
+
+    if (pct && typeof percent !== 'undefined') {
+        pct.textContent = percent + '%';
+    }
+
+    if (bar && typeof percent !== 'undefined') {
+        bar.style.width = percent + '%';
+    }
+}
+
+export function finishDashboardLoading() {
+    setDashboardLoadingStatus('Dashboard ready', 100);
+
+    setTimeout(() => {
+        const status = document.getElementById('dashboardLoadingStatus');
+        if (status) status.classList.add('is-done');
+
+        setTimeout(() => {
+            if (status) status.remove();
+        }, 380);
+    }, 420);
+}
+
 export function renderWithStagger(tasks, initialDelay = 500, step = 120) {
     setTimeout(() => {
         tasks.forEach((task, index) => {
@@ -42,8 +75,11 @@ export function runEnterpriseLoading(phases = [], options = {}) {
 
     phases.forEach((phase) => {
         setTimeout(() => {
-            if (phase.label && typeof window.setDashboardLoadingStatus === 'function') {
-                window.setDashboardLoadingStatus(phase.label);
+            if (phase.label) {
+                const updater = window.setDashboardLoadingStatus || setDashboardLoadingStatus;
+                if (typeof updater === 'function') {
+                    updater(phase.label);
+                }
             }
 
             (phase.tasks || []).forEach((task, index) => {
@@ -57,8 +93,9 @@ export function runEnterpriseLoading(phases = [], options = {}) {
     });
 
     setTimeout(() => {
-        if (typeof window.finishDashboardLoading === 'function') {
-            window.finishDashboardLoading();
+        const finisher = window.finishDashboardLoading || finishDashboardLoading;
+        if (typeof finisher === 'function') {
+            finisher();
         }
     }, cursor + 260);
 }

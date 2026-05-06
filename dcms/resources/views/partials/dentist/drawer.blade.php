@@ -29,8 +29,7 @@
     <div class="drawer-footer">
         <form method="POST" action="{{ route('logout') }}" style="margin:0;">
             @csrf
-            <button type="submit"
-                style="width:100%;display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border-radius:10px;border:1px solid #fce8e8;background:#fdf5f5;color:#8B0000;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">
+            <button type="submit" class="drawer-logout-btn">
                 <i class="fa-solid fa-right-from-bracket"></i> Log out
             </button>
         </form>

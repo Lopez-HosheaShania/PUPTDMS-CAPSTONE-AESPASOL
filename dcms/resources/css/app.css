@@ -1006,6 +1006,26 @@ body.role-patient {
     border-color: #d1d5db !important;
 }
 
+.chip-val {
+    background-color: #f3f4f6;
+    color: #374151;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+[data-theme="dark"] .chip-val {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .status-badge {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #e5e7eb;
+}
+
 [data-theme="dark"] .cal-pill-green {
     background: rgba(20, 184, 166, .20) !important;
     color: #5eead4 !important;
@@ -2052,5 +2072,272 @@ span.flatpickr-weekday {
 
     body.flatpickr-sheet-open {
         overflow: hidden !important;
+    }
+}
+
+/* Records View Details Modal */
+@keyframes modalEnter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalExit {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+.patient-record-modal-inner {
+    animation: modalEnter 0.35s ease-out forwards;
+}
+
+dialog#record_modal {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    padding: 0;
+    border: none;
+    background: transparent;
+    width: min(92vw, 560px);
+    max-width: 560px;
+    max-height: 90vh;
+    overflow: visible;
+    z-index: 9999;
+}
+
+dialog#record_modal[open] {
+    display: block;
+}
+
+dialog#record_modal::backdrop {
+    background: rgba(0, 0, 0, 0.58);
+    backdrop-filter: blur(3px);
+}
+
+.patient-record-modal-inner {
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(139, 0, 0, 0.18);
+    background: #fff8ef;
+    color: #111827;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+}
+
+.prm-head {
+    position: relative;
+    padding: 1.5rem;
+    color: #fff;
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, .16), transparent 28%),
+        linear-gradient(135deg, #8B0000, #6b0000);
+    flex-shrink: 0; 
+}
+
+.prm-eyebrow {
+    font-size: .65rem;
+    font-weight: 900;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .78);
+    margin-bottom: .35rem;
+}
+
+.prm-title {
+    font-size: 1.45rem;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.prm-close-btn {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .16);
+    border: 1px solid rgba(255, 255, 255, .25);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.prm-meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .65rem;
+    margin-top: 1rem;
+}
+
+.prm-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .35rem .75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .22);
+    font-size: .78rem;
+    font-weight: 800;
+}
+
+.prm-body {
+    padding: 1.25rem;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.prm-chip-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+    margin-bottom: 1.2rem;
+}
+
+.prm-chip-box,
+.prm-sec-card {
+    background: #fff;
+    border: 1px solid rgba(139, 0, 0, 0.13);
+    border-radius: .95rem;
+}
+
+.prm-chip-box {
+    padding: .9rem 1rem;
+}
+
+.prm-chip-lbl,
+.prm-sec-lbl {
+    font-size: .64rem;
+    font-weight: 900;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: #8B0000;
+}
+
+.chip-val {
+    display: inline-flex;
+    align-items: center;
+    margin-top: .45rem;
+    padding: .25rem .75rem;
+    border-radius: 999px;
+    font-size: .76rem;
+    font-weight: 900;
+}
+
+.prm-sec {
+    margin-bottom: 1rem;
+}
+
+.prm-sec-head {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    margin-bottom: .5rem;
+}
+
+.prm-sec-rule {
+    flex: 1;
+    height: 1px;
+    background: rgba(139, 0, 0, 0.18);
+}
+
+.prm-sec-card {
+    padding: 1rem;
+    color: #4b5563;
+    font-size: .86rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    min-height: 3.5rem;
+}
+
+.prm-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(139, 0, 0, 0.12);
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.prm-close-main {
+    padding: .7rem 1.4rem;
+    border-radius: 999px;
+    background: #fff;
+    color: #8B0000;
+    border: 1px solid #f0cccc;
+    font-size: .8rem;
+    font-weight: 900;
+}
+
+[data-theme="dark"] .patient-record-modal-inner {
+    background: #0D1117 !important;
+    color: #F3F4F6 !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+}
+
+[data-theme="dark"] .prm-head {
+    background:
+        radial-gradient(circle at top right, rgba(139, 0, 0, .32), transparent 30%),
+        linear-gradient(135deg, #111827, #0D1117) !important;
+}
+
+[data-theme="dark"] .prm-chip-box,
+[data-theme="dark"] .prm-sec-card {
+    background: #111827 !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #C9D1D9 !important;
+}
+
+[data-theme="dark"] .prm-chip-lbl,
+[data-theme="dark"] .prm-sec-lbl {
+    color: #ffe8e8 !important;
+}
+
+[data-theme="dark"] .prm-sec-rule {
+    background: rgba(255, 255, 255, .12) !important;
+}
+
+[data-theme="dark"] .prm-footer {
+    border-top-color: rgba(255, 255, 255, .12) !important;
+}
+
+[data-theme="dark"] .prm-close-main {
+    background: #161B22 !important;
+    color: #F3F4F6 !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+}
+
+@media (max-width: 640px) {
+    dialog#record_modal {
+        inset: auto 0 0 0;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+    }
+
+    .patient-record-modal-inner {
+        border-radius: 1.5rem 1.5rem 0 0;
+        max-height: 88vh;
+    }
+
+    .prm-chip-row {
+        grid-template-columns: 1fr;
     }
 }

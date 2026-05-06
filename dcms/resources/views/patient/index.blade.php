@@ -1337,19 +1337,7 @@ isset($upcomingAppointment) && $upcomingAppointment
     class="pt-[78px] px-3 md:px-5 xl:px-6 pb-5 page-enter min-h-screen flex-1 bg-gray-50 dark:bg-[#000D1A] text-gray-900 dark:text-[#F3F4F6]">
     <div class="w-full fade-in space-y-4 xl:space-y-5">
 
-        <div id="dashboardLoadingStatus"
-            class="dashboard-loading-status rounded-[1rem] border border-gray-200 bg-white/70 px-4 py-3 text-xs font-bold text-gray-500 shadow-sm backdrop-blur-md">
-            <div class="flex items-center justify-between gap-3">
-                <span id="dashboardLoadingText" class="inline-flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-[#8B0000] dashboard-loading-dot"></span>
-                    Preparing your dashboard
-                </span>
-                <span id="dashboardLoadingPercent" class="text-[#8B0000]">0%</span>
-            </div>
-            <div class="mt-2 h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                <div id="dashboardLoadingBar" class="h-full w-0 rounded-full bg-[#8B0000] dashboard-loading-bar"></div>
-            </div>
-        </div>
+        <x-dashboard-loading-status />
 
         <div id="greetingContent" class="greeting-row">
             <div class="greeting-banner w-full">
@@ -1579,77 +1567,6 @@ isset($upcomingAppointment) && $upcomingAppointment
                 </div>
             </div>
 
-            <dialog id="record_modal" class="modal">
-                <div class="modal-box p-0 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[0.85rem] bg-gray-50">
-                    <div class="bg-gradient-to-r from-[#5A0000] to-[#8B0000] px-6 sm:px-8 py-6 text-white relative">
-                        <button onclick="document.getElementById('record_modal').close()"
-                            class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                        <p class="text-[10px] font-bold tracking-widest text-white/60 mb-1 uppercase">Treatment
-                            Details
-                        </p>
-                        <h3 id="m_service" class="text-2xl sm:text-3xl font-extrabold leading-tight">—</h3>
-                        <div class="mt-4 flex flex-wrap items-center gap-3 text-sm font-medium">
-                            <div
-                                class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/20">
-                                <i class="fa-regular fa-calendar"></i> <span id="m_date">—</span>
-                            </div>
-                            <div
-                                class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/20">
-                                <i class="fa-regular fa-clock"></i> <span id="m_time">—</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-5 sm:p-8 space-y-6">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-white border border-gray-200 shadow-sm rounded-[0.85rem] p-4 text-center">
-                                <div class="text-[10px] font-bold tracking-widest text-gray-400 mb-2 uppercase">
-                                    Status
-                                </div>
-                                <div><span id="m_status"
-                                        class="inline-flex px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider">—</span>
-                                </div>
-                            </div>
-                            <div class="bg-white border border-gray-200 shadow-sm rounded-[0.85rem] p-4 text-center">
-                                <div class="text-[10px] font-bold tracking-widest text-gray-400 mb-2 uppercase">
-                                    Duration
-                                </div>
-                                <div><span id="m_duration"
-                                        class="inline-flex px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider bg-gray-100 text-gray-700">—</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4">
-                            @foreach ([['TREATMENT REMARKS', 'm_remarks', 'fa-notes-medical'], ['ORAL EXAMINATION',
-                            'm_oral', 'fa-tooth'], ['DIAGNOSIS', 'm_diagnosis', 'fa-stethoscope'], ['PRESCRIPTION',
-                            'm_prescription', 'fa-pills']] as [$label, $mid, $icon])
-                            <div class="bg-white border border-gray-200 rounded-[0.85rem] overflow-hidden shadow-sm">
-                                <div class="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center gap-2">
-                                    <i class="fa-solid {{ $icon }} text-[#8B0000] opacity-80"></i>
-                                    <span class="text-xs font-bold tracking-widest text-gray-700 uppercase">{{
-                                        $label
-                                        }}</span>
-                                </div>
-                                <div class="p-4 text-gray-600 text-sm leading-relaxed break-words whitespace-pre-wrap">
-                                    <span id="{{ $mid }}">—</span>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                        <div class="flex justify-end pt-2">
-                            <form method="dialog">
-                                <button
-                                    class="px-8 py-2.5 rounded-[0.85rem] bg-gray-200 text-gray-800 font-bold hover:bg-gray-300 transition text-sm">Close</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <form method="dialog" class="modal-backdrop"><button>close</button></form>
-            </dialog>
-
             <dialog id="activeAppointmentModal" class="modal">
                 <div class="modal-box p-8 rounded-[1.5rem] bg-white text-center shadow-2xl w-[min(92vw,400px)]">
                     <div
@@ -1831,6 +1748,7 @@ isset($upcomingAppointment) && $upcomingAppointment
         @endif
 
         renderGreeting();
+        initRecordModal();
 
         if (quickAction === 'record') {
             setTimeout(() => {
@@ -1849,39 +1767,6 @@ isset($upcomingAppointment) && $upcomingAppointment
             cleanUrl.searchParams.delete('quick_action');
             window.history.replaceState({}, '', cleanUrl.toString());
         }
-
-        window.setDashboardLoadingStatus = function (label, percent) {
-            const text = document.getElementById('dashboardLoadingText');
-            const pct = document.getElementById('dashboardLoadingPercent');
-            const bar = document.getElementById('dashboardLoadingBar');
-
-            if (text && label) {
-                text.innerHTML =
-                    '<span class="w-2 h-2 rounded-full bg-[#8B0000] dashboard-loading-dot"></span>' +
-                    label;
-            }
-
-            if (pct && typeof percent !== 'undefined') {
-                pct.textContent = percent + '%';
-            }
-
-            if (bar && typeof percent !== 'undefined') {
-                bar.style.width = percent + '%';
-            }
-        };
-
-        window.finishDashboardLoading = function () {
-            window.setDashboardLoadingStatus('Dashboard ready', 100);
-
-            setTimeout(() => {
-                const status = document.getElementById('dashboardLoadingStatus');
-                if (status) status.classList.add('is-done');
-
-                setTimeout(() => {
-                    if (status) status.remove();
-                }, 380);
-            }, 420);
-        };
 
         runEnterpriseLoading([
             {
@@ -2028,9 +1913,13 @@ isset($upcomingAppointment) && $upcomingAppointment
                 'bg-green-100 text-green-800 border-green-200';
 
             var statusDotCls = d.isRescheduled ? 'bg-yellow-500' : 'bg-green-500';
+            
+            var statusDarkPill = d.isRescheduled ? 
+                'dark:bg-yellow-400/20 dark:text-yellow-100 dark:border-yellow-400/30' : 
+                'dark:bg-emerald-500/20 dark:text-emerald-100 dark:border-emerald-500/30';
 
             swapSkeletonContent('upcomingAppointmentWrapper',
-                '<div class="upcoming-card-polished bg-white rounded-[1rem] border border-gray-200 shadow-sm overflow-hidden">' +
+                '<div class="upcoming-card-polished bg-white dark:bg-[#161B22] rounded-[1rem] border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">' +
 
                 '<div class="px-4 sm:px-5 py-4 sm:py-4.5">' +
                 '<div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-4 xl:gap-5 items-center">' +
@@ -2042,41 +1931,38 @@ isset($upcomingAppointment) && $upcomingAppointment
                 '<div class="upcoming-tooth-glass w-12 h-12 rounded-[0.95rem] text-white flex items-center justify-center">' +
                 '<i class="fa-solid fa-tooth text-[15px] relative z-[1] drop-shadow-[0_1px_2px_rgba(0,0,0,0.22)]"></i>' +
                 '</div>' +
-                '<span class="upcoming-live-dot absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full ' +
-                statusDotCls + ' border-2 border-white"></span>' +
+                '<span class="upcoming-live-dot absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full ' + statusDotCls + ' border-2 border-white dark:border-[#161B22]"></span>' +
                 '</div>' +
 
                 '<div class="min-w-0 flex-1">' +
                 '<div class="flex flex-wrap items-center gap-2">' +
-                '<h3 class="text-lg sm:text-[1.15rem] font-extrabold text-gray-900 leading-tight truncate">' +
-                escapeHtml(d.service) + '</h3>' +
-                '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ' +
-                statusPillCls + '">' +
+                '<h3 class="text-lg sm:text-[1.15rem] font-extrabold text-gray-900 dark:text-[#F3F4F6] leading-tight truncate">' + escapeHtml(d.service) + '</h3>' +
+                '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ' + statusPillCls + ' ' + statusDarkPill + '">' +
                 '<span class="w-1.5 h-1.5 rounded-full ' + statusDotCls + '"></span>' +
                 escapeHtml(d.status) +
                 '</span>' +
                 '</div>' +
 
-                '<div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600">' +
+                '<div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-400">' +
                 '<span class="inline-flex items-center gap-2">' +
-                '<i class="fa-regular fa-calendar text-gray-400"></i>' +
+                '<i class="fa-regular fa-calendar text-gray-400 dark:text-gray-500"></i>' +
                 '<span class="font-medium">' + escapeHtml(d.date) + '</span>' +
                 '</span>' +
 
                 '<span class="inline-flex items-center gap-2">' +
-                '<i class="fa-regular fa-clock text-gray-400"></i>' +
+                '<i class="fa-regular fa-clock text-gray-400 dark:text-gray-500"></i>' +
                 '<span class="font-medium">' + escapeHtml(d.time_fmt) + '</span>' +
                 '</span>' +
 
                 '<span class="inline-flex items-center gap-2 min-w-0">' +
-                '<i class="fa-solid fa-user-doctor text-gray-400"></i>' +
+                '<i class="fa-solid fa-user-doctor text-gray-400 dark:text-gray-500"></i>' +
                 '<span class="font-medium truncate">' + escapeHtml(d.dentist) + '</span>' +
                 '</span>' +
                 '</div>' +
 
                 '<div class="mt-3 flex items-center gap-3">' +
-                '<div class="h-[2px] w-10 rounded-full bg-gradient-to-r from-red-200 to-red-300"></div>' +
-                '<span class="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-400">Upcoming Visit</span>' +
+                '<div class="h-[2px] w-10 rounded-full bg-gradient-to-r from-red-200 to-red-300 dark:from-red-900/50 dark:to-red-800/50"></div>' +
+                '<span class="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">Upcoming Visit</span>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
@@ -2088,7 +1974,7 @@ isset($upcomingAppointment) && $upcomingAppointment
                 '<span class="upcoming-reminder-icon">' +
                 '<i class="fa-regular fa-bell text-[12px]"></i>' +
                 '</span>' +
-                '<span class="text-[0.76rem] font-bold text-[#7f1d1d]">Please arrive 10 minutes early</span>' +
+                '<span class="text-[0.76rem] font-bold text-[#7f1d1d] dark:text-[#FCA5A5]">Please arrive 10 minutes early</span>' +
                 '</div>' +
 
                 '<a href="' + escapeHtml(d.indexUrl) +
@@ -2108,7 +1994,7 @@ isset($upcomingAppointment) && $upcomingAppointment
         }
 
         swapSkeletonContent('upcomingAppointmentWrapper',
-            '<div class="upcoming-card-polished bg-white rounded-[1rem] border border-gray-200 shadow-sm overflow-hidden">' +
+            '<div class="upcoming-card-polished bg-white dark:bg-[#161B22] rounded-[1rem] border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">' +
             '<div class="px-4 sm:px-5 py-4">' +
             '<div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">' +
 
@@ -2118,11 +2004,11 @@ isset($upcomingAppointment) && $upcomingAppointment
             '</div>' +
 
             '<div class="min-w-0">' +
-            '<h3 class="text-lg sm:text-[1.1rem] font-extrabold text-gray-900">No upcoming appointment</h3>' +
-            '<p class="mt-1 text-sm text-gray-500 leading-relaxed max-w-[560px]">Choose a preferred date and time from the calendar, or book now to secure your next dental visit.</p>' +
+            '<h3 class="text-lg sm:text-[1.1rem] font-extrabold text-gray-900 dark:text-[#F3F4F6]">No upcoming appointment</h3>' +
+            '<p class="mt-1 text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-[560px]">Choose a preferred date and time from the calendar, or book now to secure your next dental visit.</p>' +
             '<div class="mt-3 flex items-center gap-3">' +
             '<div class="upcoming-ready-line h-[2px] w-10 rounded-full"></div>' +
-            '<span class="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-400">Ready when you are</span>' +
+            '<span class="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">Ready when you are</span>' +
             '</div>' +
             '</div>' +
             '</div>' +
@@ -2396,28 +2282,20 @@ isset($upcomingAppointment) && $upcomingAppointment
     function renderRecords() {
         var container = document.getElementById("dentalOverviewContainer");
         var viewAll = document.getElementById("viewAllContainer");
-        var visitCount = document.getElementById("recordsVisitCount");
-        var latestDate = document.getElementById("recordsLatestDate");
-        var overviewStatus = document.getElementById("recordsOverviewStatus");
 
         if (!container) return;
 
         var count = HOME_RECORDS && HOME_RECORDS.length ? HOME_RECORDS.length : 0;
         var latestRecord = count ? HOME_RECORDS[0] : null;
 
-        if (visitCount) visitCount.textContent = String(count);
-        if (latestDate) latestDate.textContent = latestRecord && latestRecord.date ? shortDate(latestRecord.date) :
-            "No record yet";
-        if (overviewStatus) {
-            overviewStatus.textContent = count === 0 ?
-                "Waiting for first completed visit" :
-                (count === 1 ? "1 completed visit recorded" : count + " completed visits recorded");
-        }
+        var dispLatestDate = latestRecord && latestRecord.date ? latestRecord.date : "No record yet";
+        var dispOverviewStatus = count === 0 ?
+            "Waiting for first completed visit" :
+            (count === 1 ? "1 completed visit recorded" : count + " completed visits recorded");
 
         if (!HOME_RECORDS || HOME_RECORDS.length === 0) {
             swapSkeletonContent('dentalOverviewContainer',
                 '<div class="dashboard-card-polished dental-overview-card bg-gradient-to-br from-[#ffffff] via-[#fff3f3] to-[#ffeaea] border border-[#eadede] shadow-sm rounded-[1rem] overflow-hidden h-full flex flex-col">' +
-
                 '<div class="px-5 sm:px-6 py-4 border-b border-[#efe3e3] bg-gradient-to-r from-[#fff6f6] via-[#fffdfd] to-[#fff1f1]">' +
                 '<div class="flex items-start justify-between gap-4">' +
                 '<div class="min-w-0">' +
@@ -2431,7 +2309,6 @@ isset($upcomingAppointment) && $upcomingAppointment
                 '<i class="fa-solid fa-chart-line text-base"></i>' +
                 '</div>' +
                 '</div>' +
-
                 '<div class="mt-4 grid grid-cols-2 xl:grid-cols-3 gap-2.5">' +
                 '<div class="rounded-[0.85rem] bg-white border border-gray-200 px-3 py-3">' +
                 '<p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total Visits</p>' +
@@ -2447,7 +2324,6 @@ isset($upcomingAppointment) && $upcomingAppointment
                 '</div>' +
                 '</div>' +
                 '</div>' +
-
                 '<div class="p-5 sm:p-5 flex-1 flex flex-col bg-gradient-to-b from-[#fffefe] via-[#fff8f8] to-[#fff3f3]">' +
                 '<div class="flex-1 flex flex-col justify-center">' +
                 '<div class="rounded-[0.95rem] border border-dashed border-gray-200 bg-gradient-to-b from-[#fffdfd] to-[#fff6f6] px-5 py-7 text-center">' +
@@ -2461,8 +2337,7 @@ isset($upcomingAppointment) && $upcomingAppointment
                 '<span class="inline-flex items-center rounded-full bg-white border border-gray-200 text-gray-600 px-3 py-1 text-xs font-semibold">Treatments</span>' +
                 '<span class="inline-flex items-center rounded-full bg-white border border-gray-200 text-gray-600 px-3 py-1 text-xs font-semibold">Diagnosis summary</span>' +
                 '</div>' +
-                '<a href="' + ROUTE_BOOK +
-                '" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-[0.85rem] bg-[#8B0000] hover:bg-[#660000] text-white text-sm font-bold transition-all duration-300 hover:-translate-y-0.5">' +
+                '<a href="' + ROUTE_BOOK + '" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-[0.85rem] bg-[#8B0000] hover:bg-[#660000] text-white text-sm font-bold transition-all duration-300 hover:-translate-y-0.5">' +
                 '<i class="fa-solid fa-calendar-plus"></i> Book First Appointment' +
                 '</a>' +
                 '</div>' +
@@ -2480,75 +2355,90 @@ isset($upcomingAppointment) && $upcomingAppointment
         HOME_RECORDS.slice(0, 3).forEach(function (r, idx) {
             var encoded = encodeURIComponent(JSON.stringify(r));
             var dispTime = formatTime(r.time);
-            var dispDate = shortDate(r.date);
+            var dispDate = r.date;
 
             html +=
-                '<div class="dashboard-card-polished rounded-[1rem] border border-gray-200 bg-white p-4 hover:border-red-200 hover:shadow-sm transition-all duration-300 hover:-translate-y-0.5">' +
-                '<div class="flex items-start justify-between gap-3">' +
-                '<div class="flex items-start gap-3 min-w-0">' +
-                '<div class="w-10 h-10 rounded-[0.85rem] ' + (idx === 0 ? 'bg-red-50 text-[#8B0000]' :
-                    'bg-gray-50 text-gray-600') + ' flex items-center justify-center flex-shrink-0">' +
-                '<i class="fa-solid fa-tooth text-sm"></i>' +
-                '</div>' +
-                '<div class="min-w-0">' +
-                '<div class="flex flex-wrap items-center gap-2">' +
-                '<p class="text-sm font-extrabold text-gray-900 truncate">' + escapeHtml(r.service) + '</p>' +
-                (idx === 0 ?
-                    '<span class="inline-flex items-center rounded-full bg-red-50 text-[#8B0000] px-2 py-0.5 text-[10px] font-bold border border-red-100">Latest</span>' :
-                    '') +
-                '</div>' +
-                '<div class="mt-2 flex flex-wrap items-center gap-2">' +
-                '<span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 px-2.5 py-1 text-[11px] font-bold">' +
-                '<i class="fa-regular fa-calendar opacity-70"></i>' + escapeHtml(dispDate) +
-                '</span>' +
-                '<span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 px-2.5 py-1 text-[11px] font-bold">' +
-                '<i class="fa-regular fa-clock opacity-70"></i>' + escapeHtml(dispTime) +
-                '</span>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '<button type="button" class="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-[#8B0000] hover:text-white text-gray-700 text-[11px] font-bold border border-gray-200 hover:border-transparent transition-all duration-300 flex-shrink-0" onclick="openRecordModalFromData(\'' +
-                encoded + '\')">' +
-                'Open <i class="fa-solid fa-arrow-right text-[10px]"></i>' +
-                '</button>' +
-                '</div>' +
-                '</div>';
+            '<div class="dashboard-card-polished rounded-[1rem] border border-gray-200 bg-white p-4 hover:border-red-200 hover:shadow-sm transition-all duration-300 hover:-translate-y-0.5">' +
+            '<div class="flex items-start justify-between gap-3">' +
+            '<div class="flex items-start gap-3 min-w-0">' +
+            '<div class="w-10 h-10 rounded-[0.85rem] ' + (idx === 0 ? 'bg-red-50 text-[#8B0000]' : 'bg-gray-50 text-gray-600') + ' flex items-center justify-center flex-shrink-0">' +
+            '<i class="fa-solid fa-tooth text-sm"></i>' +
+            '</div>' +
+            '<div class="min-w-0">' +
+            '<div class="flex flex-wrap items-center gap-2">' +
+            '<p class="text-sm font-extrabold text-gray-900 truncate">' + escapeHtml(r.service) + '</p>' +
+            '<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border ' +
+            ((r.status || '').toLowerCase() === 'completed' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100') + '">' +
+            escapeHtml((r.status || '').toLowerCase() === 'completed' ? 'Completed' : 'Cancelled') +
+            '</span>' +
+            '</div>' +
+            '<div class="mt-2 flex flex-wrap items-center gap-2">' +
+            '<span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 px-2.5 py-1 text-[11px] font-bold">' +
+            '<i class="fa-regular fa-calendar opacity-70"></i>' + escapeHtml(dispDate) +
+            '</span>' +
+            '<span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 px-2.5 py-1 text-[11px] font-bold">' +
+            '<i class="fa-regular fa-clock opacity-70"></i>' + escapeHtml(dispTime) +
+            '</span>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '<button type="button" class="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-[#8B0000] hover:text-white text-gray-700 text-[11px] font-bold border border-gray-200 hover:border-transparent transition-all duration-300 flex-shrink-0" onclick="openRecordModalFromData(\'' + encoded + '\')">' +
+            '<i class="fa-solid fa-eye text-[10px]"></i>' +
+            '<span>View Details</span>' +
+            '</button>' +
+            '</div>' +
+            '</div>';
         });
 
-        html += '</div>';
-        swapSkeletonContent('dentalOverviewContainer', html);
-    }
+        html +=
+            '<div class="pt-2">' +
+            '<a href="' + ROUTE_RECORD + '" class="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[0.85rem] bg-[#8B0000] hover:bg-[#660000] text-white text-sm font-bold transition-all duration-300 hover:-translate-y-0.5">' +
+            '<i class="fa-solid fa-folder-open"></i>' +
+            '<span>View All Records</span>' +
+            '<i class="fa-solid fa-arrow-right text-[11px]"></i>' +
+            '</a>' +
+            '</div>' +
+            '</div>';
 
-    function openRecordModalFromData(encodedJson) {
-        openRecordModal(JSON.parse(decodeURIComponent(encodedJson)));
-    }
+        swapSkeletonContent('dentalOverviewContainer',
+            '<div class="dashboard-card-polished dental-overview-card bg-gradient-to-br from-[#ffffff] via-[#fff3f3] to-[#ffeaea] border border-[#eadede] shadow-sm rounded-[1rem] overflow-hidden h-full flex flex-col">' +
+            '<div class="px-5 sm:px-6 py-4 border-b border-[#efe3e3] bg-gradient-to-r from-[#fff6f6] via-[#fffdfd] to-[#fff1f1]">' +
+            '<div class="flex items-start justify-between gap-4">' +
+            '<div class="min-w-0">' +
+            '<div class="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.18em] uppercase text-[#8B0000] mb-2">' +
+            '<i class="fa-solid fa-tooth"></i><span>Patient Dental Summary</span>' +
+            '</div>' +
+            '<h2 class="text-lg sm:text-xl font-extrabold text-gray-900 leading-tight">Dental Overview</h2>' +
+            '<p class="text-sm text-gray-500 mt-1">Latest 3 records from your dental activity.</p>' +
+            '</div>' +
+            '<div class="hidden sm:flex w-11 h-11 rounded-[0.85rem] glass-icon-red items-center justify-center flex-shrink-0">' +
+            '<i class="fa-solid fa-chart-line text-base"></i>' +
+            '</div>' +
+            '</div>' +
 
-    function openRecordModal(data) {
-        var modal = document.getElementById('record_modal');
-        if (!modal) return;
-        document.getElementById('m_service').textContent = data.service || '—';
-        document.getElementById('m_date').textContent = data.date || '—';
-        document.getElementById('m_time').textContent = formatTime(data.time);
-        var BADGE = 'inline-flex px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider';
-        var status = (data.status || 'completed').trim();
-        var sEl = document.getElementById('m_status');
-        sEl.textContent = status;
-        sEl.className = BADGE;
-        var s = status.toLowerCase();
-        if (s === 'completed') sEl.classList.add('bg-green-100', 'text-green-800');
-        else if (s === 'rescheduled') sEl.classList.add('bg-yellow-100', 'text-yellow-800');
-        else if (s === 'cancelled') sEl.classList.add('bg-red-100', 'text-red-800');
-        else sEl.classList.add('bg-gray-100', 'text-gray-700');
+            '<div class="mt-4 grid grid-cols-2 xl:grid-cols-3 gap-2.5">' +
+            '<div class="rounded-[0.85rem] bg-white border border-gray-200 px-3 py-3">' +
+            '<p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total Visits</p>' +
+            '<p class="mt-1 text-base font-extrabold text-gray-900">' + count + '</p>' +
+            '</div>' +
 
-        var dEl = document.getElementById('m_duration');
-        dEl.textContent = (data.duration || '—').trim() || '—';
-        dEl.className = BADGE + ' bg-gray-100 text-gray-700';
+            '<div class="rounded-[0.85rem] bg-white border border-gray-200 px-3 py-3">' +
+            '<p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Latest Record</p>' +
+            '<p class="mt-1 text-sm font-extrabold text-gray-900">' + escapeHtml(dispLatestDate) + '</p>' +
+            '</div>' +
 
-        document.getElementById('m_remarks').textContent = (data.remarks || '').trim() || '—';
-        document.getElementById('m_oral').textContent = (data.oral || '').trim() || '—';
-        document.getElementById('m_diagnosis').textContent = (data.diagnosis || '').trim() || '—';
-        document.getElementById('m_prescription').textContent = (data.prescription || '').trim() || '—';
-        modal.showModal();
+            '<div class="rounded-[0.85rem] bg-white border border-gray-200 px-3 py-3 col-span-2 xl:col-span-1">' +
+            '<p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Status</p>' +
+            '<p class="overview-status-text mt-1 text-sm font-extrabold text-[#8B0000]">' + escapeHtml(dispOverviewStatus) + '</p>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+
+            '<div class="p-5 sm:p-5 flex-1 bg-gradient-to-b from-[#fffefe] via-[#fff8f8] to-[#fff3f3]">' +
+            html +
+            '</div>' +
+            '</div>'
+        );
     }
 
     function initRequestDocInteractions() {
@@ -2601,7 +2491,6 @@ isset($upcomingAppointment) && $upcomingAppointment
 
             const btn = event.currentTarget;
 
-            // ripple effect
             const rect = btn.getBoundingClientRect();
             const ripple = document.createElement("span");
             const size = Math.max(rect.width, rect.height);

@@ -14,7 +14,7 @@
         <a href="{{ route('patient.appointment.index') }}"
             class="flex flex-col items-center justify-center w-full h-full relative pb-1 transition-all duration-300 {{ $isAppt ? 'text-[#8B0000] dark:text-[#ff6b6b]' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500' }}">
             <i class="fa-solid fa-calendar-check text-[18px] mb-1 transition-transform duration-300 {{ $isAppt ? 'scale-110' : '' }}"></i>
-            <span class="text-[10px] font-bold">Appts</span>
+            <span class="text-[10px] font-bold">Appointment</span>
             <span class="absolute bottom-1 w-1 h-1 rounded-full bg-[#8B0000] dark:bg-[#ff6b6b] transition-opacity duration-300 {{ $isAppt ? 'opacity-100' : 'opacity-0' }}"></span>
         </a>
 
@@ -30,7 +30,7 @@
         <a href="{{ route('patient.record') }}"
             class="flex flex-col items-center justify-center w-full h-full relative pb-1 transition-all duration-300 {{ $isRec ? 'text-[#8B0000] dark:text-[#ff6b6b]' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500' }}">
             <i class="fa-solid fa-folder-open text-[18px] mb-1 transition-transform duration-300 {{ $isRec ? 'scale-110' : '' }}"></i>
-            <span class="text-[10px] font-bold">Records</span>
+            <span class="text-[10px] font-bold">Record</span>
             <span class="absolute bottom-1 w-1 h-1 rounded-full bg-[#8B0000] dark:bg-[#ff6b6b] transition-opacity duration-300 {{ $isRec ? 'opacity-100' : 'opacity-0' }}"></span>
         </a>
 

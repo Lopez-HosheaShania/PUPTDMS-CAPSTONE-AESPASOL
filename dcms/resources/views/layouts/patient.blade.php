@@ -20,7 +20,7 @@
         })();
     </script>
     <title>@yield('title', 'PUP Taguig Dental Clinic')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <link rel="icon" type="image/png" href="{{ asset('images/PUPT-DMS-Logo.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
@@ -65,6 +65,8 @@
     @include('partials.patient.sidebar')
     @include('partials.patient.mobile-nav')
     @include('components.patient-document-modals')
+    @include('components.patient-record-modal')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @include('partials.impersonation-banner')
 
     @yield('content')
