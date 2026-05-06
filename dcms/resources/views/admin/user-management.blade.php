@@ -1958,88 +1958,87 @@
                                 title="Clear">Clear</button>
                         </div>
 
-                            <div class="um-view-toggle" id="umViewToggle">
-                                <button type="button" class="um-view-toggle-btn active" id="umListViewBtn"
-                                    title="List view" aria-label="List view">
-                                    <i class="fa-solid fa-table-list"></i>
-                                </button>
-                                <button type="button" class="um-view-toggle-btn" id="umGridViewBtn" title="Grid view"
-                                    aria-label="Grid view">
-                                    <i class="fa-solid fa-grip"></i>
-                                </button>
-                            </div>
+                        <div class="um-view-toggle" id="umViewToggle">
+                            <button type="button" class="um-view-toggle-btn active" id="umListViewBtn"
+                                title="List view" aria-label="List view">
+                                <i class="fa-solid fa-table-list"></i>
+                            </button>
+                            <button type="button" class="um-view-toggle-btn" id="umGridViewBtn" title="Grid view"
+                                aria-label="Grid view">
+                                <i class="fa-solid fa-grip"></i>
+                            </button>
                         </div>
-                    </form>
                 </div>
+                </form>
+            </div>
 
-                <div class="um-view" id="umListView">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-gray-50 border-b border-gray-100">
-                                <tr class="text-[10px] uppercase tracking-wide text-[#8B0000] font-bold">
-                                    <th class="py-3 px-3 sm:px-5 text-left w-12 hidden sm:table-cell">#</th>
-                                    <th class="py-3 px-4 text-left">User</th>
-                                    <th class="py-3 px-4 text-left">Role</th>
-                                    <th class="py-3 px-4 text-center">Status</th>
-                                    <th class="py-3 px-4 text-left hidden lg:table-cell">Registered</th>
-                                    <th class="py-3 px-5 text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="umTableBody">
-                                @forelse($users as $user)
-                                    <tr class="user-table-row border-b border-gray-50 last:border-0"
-                                        data-name="{{ strtolower($user->name) }}"
-                                        data-email="{{ strtolower($user->email) }}"
-                                        data-role="{{ strtolower(optional($user->role)->name ?? '') }}">
-                                        <td class="py-3.5 px-3 sm:px-5 hidden sm:table-cell">
-                                            <span
-                                                class="text-xs text-gray-400 font-medium">{{ $users->firstItem() + $loop->index }}</span>
-                                        </td>
+            <div class="um-view" id="umListView">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 border-b border-gray-100">
+                            <tr class="text-[10px] uppercase tracking-wide text-[#8B0000] font-bold">
+                                <th class="py-3 px-3 sm:px-5 text-left w-12 hidden sm:table-cell">#</th>
+                                <th class="py-3 px-4 text-left">User</th>
+                                <th class="py-3 px-4 text-left">Role</th>
+                                <th class="py-3 px-4 text-center">Status</th>
+                                <th class="py-3 px-4 text-left hidden lg:table-cell">Registered</th>
+                                <th class="py-3 px-5 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="umTableBody">
+                            @forelse($users as $user)
+                                <tr class="user-table-row border-b border-gray-50 last:border-0"
+                                    data-name="{{ strtolower($user->name) }}" data-email="{{ strtolower($user->email) }}"
+                                    data-role="{{ strtolower(optional($user->role)->name ?? '') }}">
+                                    <td class="py-3.5 px-3 sm:px-5 hidden sm:table-cell">
+                                        <span
+                                            class="text-xs text-gray-400 font-medium">{{ $users->firstItem() + $loop->index }}</span>
+                                    </td>
 
-                                        <td class="py-3.5 px-3 sm:px-4">
-                                            <div class="flex items-center gap-2 sm:gap-3">
-                                                <div
-                                                    class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8B0000] to-[#b00000] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
-                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    <td class="py-3.5 px-3 sm:px-4">
+                                        <div class="flex items-center gap-2 sm:gap-3">
+                                            <div
+                                                class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8B0000] to-[#b00000] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
+                                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <div class="font-semibold text-gray-800 text-sm leading-tight">
+                                                    {{ $user->name }}
                                                 </div>
-                                                <div>
-                                                    <div class="font-semibold text-gray-800 text-sm leading-tight">
-                                                        {{ $user->name }}
-                                                    </div>
-                                                    <div class="text-[11px] text-gray-400 mt-0.5 hidden sm:block">
-                                                        {{ $user->email }}
-                                                    </div>
+                                                <div class="text-[11px] text-gray-400 mt-0.5 hidden sm:block">
+                                                    {{ $user->email }}
                                                 </div>
                                             </div>
-                                        </td>
+                                        </div>
+                                    </td>
 
-                                        <td class="py-3.5 px-4">
-                                            @php $roleSlug = optional($user->role)->slug; @endphp
-                                            <span class="badge-role"
-                                                style="background:
+                                    <td class="py-3.5 px-4">
+                                        @php $roleSlug = optional($user->role)->slug; @endphp
+                                        <span class="badge-role"
+                                            style="background:
                 {{ $roleSlug === 'patient' ? '#dbeafe' : ($roleSlug === 'dentist' ? '#d1fae5' : '#fee2e2') }};
                 color:
                 {{ $roleSlug === 'patient' ? '#1d4ed8' : ($roleSlug === 'dentist' ? '#065f46' : '#8B0000') }};">
-                                                {{ optional($user->role)->name ?? 'No Role' }}
-                                            </span>
-                                        </td>
+                                            {{ optional($user->role)->name ?? 'No Role' }}
+                                        </span>
+                                    </td>
 
-                                        <td class="py-3.5 px-4 text-center">
-                                            <span
-                                                class="text-[11px] font-bold px-2.5 py-1 rounded-full {{ $user->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
-                                                {{ ucfirst($user->status) }}
-                                            </span>
-                                        </td>
+                                    <td class="py-3.5 px-4 text-center">
+                                        <span
+                                            class="text-[11px] font-bold px-2.5 py-1 rounded-full {{ $user->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
+                                            {{ ucfirst($user->status) }}
+                                        </span>
+                                    </td>
 
-                                        <td class="py-3.5 px-4 hidden lg:table-cell">
-                                            <span
-                                                class="text-xs text-gray-400">{{ $user->created_at->format('M d, Y') }}</span>
-                                        </td>
+                                    <td class="py-3.5 px-4 hidden lg:table-cell">
+                                        <span
+                                            class="text-xs text-gray-400">{{ $user->created_at->format('M d, Y') }}</span>
+                                    </td>
 
-                                        <td class="py-3.5 px-2 sm:px-5">
-                                            <div class="flex items-center justify-center gap-1">
-                                                <button type="button"
-                                                    onclick="openEditModal(
+                                    <td class="py-3.5 px-2 sm:px-5">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <button type="button"
+                                                onclick="openEditModal(
                                                     'users',
                                                     {{ $user->id }},
                                                     @js($user->name),
@@ -2047,26 +2046,26 @@
                                                     @js($user->role_id),
                                                     @js($user->status)
                                                   )"
-                                                    class="action-btn btn-edit" title="Edit account">
-                                                    <i class="fa-solid fa-pen text-[11px]"></i>
-                                                </button>
+                                                class="action-btn btn-edit" title="Edit account">
+                                                <i class="fa-solid fa-pen text-[11px]"></i>
+                                            </button>
 
-                                                <button type="button"
-                                                    onclick="openToggleConfirm({{ $user->id }}, @js($user->status), @js($user->name))"
-                                                    class="action-btn {{ $user->status === 'active' ? 'btn-toggle-on' : 'btn-toggle-off' }}"
-                                                    title="{{ $user->status === 'active' ? 'Deactivate' : 'Activate' }}">
-                                                    <i
-                                                        class="fa-solid {{ $user->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }} text-[11px]"></i>
-                                                </button>
+                                            <button type="button"
+                                                onclick="openToggleConfirm({{ $user->id }}, @js($user->status), @js($user->name))"
+                                                class="action-btn {{ $user->status === 'active' ? 'btn-toggle-on' : 'btn-toggle-off' }}"
+                                                title="{{ $user->status === 'active' ? 'Deactivate' : 'Activate' }}">
+                                                <i
+                                                    class="fa-solid {{ $user->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }} text-[11px]"></i>
+                                            </button>
 
-                                                <button type="button"
-                                                    onclick="openResetModal('users', {{ $user->id }}, @js($user->name))"
-                                                    class="action-btn btn-reset" title="Reset password">
-                                                    <i class="fa-solid fa-key text-[11px]"></i>
-                                                </button>
+                                            <button type="button"
+                                                onclick="openResetModal('users', {{ $user->id }}, @js($user->name))"
+                                                class="action-btn btn-reset" title="Reset password">
+                                                <i class="fa-solid fa-key text-[11px]"></i>
+                                            </button>
 
-                                                <button type="button"
-                                                    onclick="openViewModal(
+                                            <button type="button"
+                                                onclick="openViewModal(
                                                     @js($user->name),
                                                     @js($user->email),
                                                     @js(optional($user->role)->name ?? 'No Role'),
@@ -2074,99 +2073,99 @@
                                                     'Users',
                                                     @js($user->created_at ? $user->created_at->format('M d, Y h:i A') : 'N/A')
                                                   )"
-                                                    class="action-btn" style="background:#f3f4f6;color:#374151;"
-                                                    title="View details">
-                                                    <i class="fa-solid fa-eye text-[11px]"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr id="dbEmptyRow">
-                                        <td colspan="6" style="padding:3.5rem 1rem;text-align:center;">
-                                            <div
-                                                style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:#f3f4f6;border-radius:18px;margin-bottom:1rem;">
-                                                <i class="fa-solid fa-magnifying-glass"
-                                                    style="font-size:1.6rem;color:#d1d5db;"></i>
-                                            </div>
-                                            <p style="font-size:.9rem;font-weight:700;color:#374151;margin:0 0 .3rem;">No
-                                                users
-                                                found</p>
-                                            <p style="font-size:.78rem;color:#9ca3af;margin:0;">Try adjusting your filters.
-                                            </p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="um-view" id="umGridView" hidden>
-                    <div class="um-grid-wrap">
-                        <div class="um-grid" id="umGridBody">
-                            @forelse($users as $user)
-                                @php
-                                    $roleSlug = optional($user->role)->slug;
-                                    $roleName = optional($user->role)->name ?? 'No Role';
-                                    $roleBg =
-                                        $roleSlug === 'patient'
-                                            ? '#dbeafe'
-                                            : ($roleSlug === 'dentist'
-                                                ? '#d1fae5'
-                                                : '#fee2e2');
-                                    $roleColor =
-                                        $roleSlug === 'patient'
-                                            ? '#1d4ed8'
-                                            : ($roleSlug === 'dentist'
-                                                ? '#065f46'
-                                                : '#8B0000');
-                                @endphp
-
-                                <div class="um-grid-card">
-                                    <div class="um-grid-top">
-                                        <div class="um-grid-number">#{{ $users->firstItem() + $loop->index }}</div>
-                                        <span
-                                            class="text-[11px] font-bold px-2.5 py-1 rounded-full {{ $user->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
-                                            {{ ucfirst($user->status) }}
-                                        </span>
-                                    </div>
-
-                                    <div class="flex items-center gap-3">
+                                                class="action-btn" style="background:#f3f4f6;color:#374151;"
+                                                title="View details">
+                                                <i class="fa-solid fa-eye text-[11px]"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr id="dbEmptyRow">
+                                    <td colspan="6" style="padding:3.5rem 1rem;text-align:center;">
                                         <div
-                                            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8B0000] to-[#b00000] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
-                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                            style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:#f3f4f6;border-radius:18px;margin-bottom:1rem;">
+                                            <i class="fa-solid fa-magnifying-glass"
+                                                style="font-size:1.6rem;color:#d1d5db;"></i>
                                         </div>
-                                        <div class="min-w-0">
-                                            <div class="font-semibold text-gray-800 text-sm leading-tight">
-                                                {{ $user->name }}
-                                            </div>
-                                            <div class="text-[11px] text-gray-400 mt-0.5">
-                                                {{ $user->email }}
-                                            </div>
+                                        <p style="font-size:.9rem;font-weight:700;color:#374151;margin:0 0 .3rem;">No
+                                            users
+                                            found</p>
+                                        <p style="font-size:.78rem;color:#9ca3af;margin:0;">Try adjusting your filters.
+                                        </p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="um-view" id="umGridView" hidden>
+                <div class="um-grid-wrap">
+                    <div class="um-grid" id="umGridBody">
+                        @forelse($users as $user)
+                            @php
+                                $roleSlug = optional($user->role)->slug;
+                                $roleName = optional($user->role)->name ?? 'No Role';
+                                $roleBg =
+                                    $roleSlug === 'patient'
+                                        ? '#dbeafe'
+                                        : ($roleSlug === 'dentist'
+                                            ? '#d1fae5'
+                                            : '#fee2e2');
+                                $roleColor =
+                                    $roleSlug === 'patient'
+                                        ? '#1d4ed8'
+                                        : ($roleSlug === 'dentist'
+                                            ? '#065f46'
+                                            : '#8B0000');
+                            @endphp
+
+                            <div class="um-grid-card">
+                                <div class="um-grid-top">
+                                    <div class="um-grid-number">#{{ $users->firstItem() + $loop->index }}</div>
+                                    <span
+                                        class="text-[11px] font-bold px-2.5 py-1 rounded-full {{ $user->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
+                                        {{ ucfirst($user->status) }}
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8B0000] to-[#b00000] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-semibold text-gray-800 text-sm leading-tight">
+                                            {{ $user->name }}
+                                        </div>
+                                        <div class="text-[11px] text-gray-400 mt-0.5">
+                                            {{ $user->email }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="um-grid-meta">
+                                    <div class="um-grid-field">
+                                        <div class="um-grid-label">Role</div>
+                                        <div class="um-grid-value">
+                                            <span class="badge-role"
+                                                style="background:{{ $roleBg }};color:{{ $roleColor }};">
+                                                {{ $roleName }}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    <div class="um-grid-meta">
-                                        <div class="um-grid-field">
-                                            <div class="um-grid-label">Role</div>
-                                            <div class="um-grid-value">
-                                                <span class="badge-role"
-                                                    style="background:{{ $roleBg }};color:{{ $roleColor }};">
-                                                    {{ $roleName }}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div class="um-grid-field">
-                                            <div class="um-grid-label">Registered</div>
-                                            <div class="um-grid-value">{{ $user->created_at->format('M d, Y') }}</div>
-                                        </div>
+                                    <div class="um-grid-field">
+                                        <div class="um-grid-label">Registered</div>
+                                        <div class="um-grid-value">{{ $user->created_at->format('M d, Y') }}</div>
                                     </div>
+                                </div>
 
-                                    <div class="flex items-center justify-end gap-1 flex-wrap">
-                                        <button type="button"
-                                            onclick="openEditModal(
+                                <div class="flex items-center justify-end gap-1 flex-wrap">
+                                    <button type="button"
+                                        onclick="openEditModal(
                                                 'users',
                                                 {{ $user->id }},
                                                 @js($user->name),
@@ -2174,26 +2173,26 @@
                                                 @js($user->role_id),
                                                 @js($user->status)
                                             )"
-                                            class="action-btn btn-edit" title="Edit account">
-                                            <i class="fa-solid fa-pen text-[11px]"></i>
-                                        </button>
+                                        class="action-btn btn-edit" title="Edit account">
+                                        <i class="fa-solid fa-pen text-[11px]"></i>
+                                    </button>
 
-                                        <button type="button"
-                                            onclick="openToggleConfirm({{ $user->id }}, @js($user->status), @js($user->name))"
-                                            class="action-btn {{ $user->status === 'active' ? 'btn-toggle-on' : 'btn-toggle-off' }}"
-                                            title="{{ $user->status === 'active' ? 'Deactivate' : 'Activate' }}">
-                                            <i
-                                                class="fa-solid {{ $user->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }} text-[11px]"></i>
-                                        </button>
+                                    <button type="button"
+                                        onclick="openToggleConfirm({{ $user->id }}, @js($user->status), @js($user->name))"
+                                        class="action-btn {{ $user->status === 'active' ? 'btn-toggle-on' : 'btn-toggle-off' }}"
+                                        title="{{ $user->status === 'active' ? 'Deactivate' : 'Activate' }}">
+                                        <i
+                                            class="fa-solid {{ $user->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }} text-[11px]"></i>
+                                    </button>
 
-                                        <button type="button"
-                                            onclick="openResetModal('users', {{ $user->id }}, @js($user->name))"
-                                            class="action-btn btn-reset" title="Reset password">
-                                            <i class="fa-solid fa-key text-[11px]"></i>
-                                        </button>
+                                    <button type="button"
+                                        onclick="openResetModal('users', {{ $user->id }}, @js($user->name))"
+                                        class="action-btn btn-reset" title="Reset password">
+                                        <i class="fa-solid fa-key text-[11px]"></i>
+                                    </button>
 
-                                        <button type="button"
-                                            onclick="openViewModal(
+                                    <button type="button"
+                                        onclick="openViewModal(
                                                 @js($user->name),
                                                 @js($user->email),
                                                 @js($roleName),
@@ -2201,28 +2200,28 @@
                                                 'Users',
                                                 @js($user->created_at ? $user->created_at->format('M d, Y h:i A') : 'N/A')
                                             )"
-                                            class="action-btn" style="background:#f3f4f6;color:#374151;"
-                                            title="View details">
-                                            <i class="fa-solid fa-eye text-[11px]"></i>
-                                        </button>
-                                    </div>
+                                        class="action-btn" style="background:#f3f4f6;color:#374151;"
+                                        title="View details">
+                                        <i class="fa-solid fa-eye text-[11px]"></i>
+                                    </button>
                                 </div>
-                            @empty
-                            @endforelse
-                        </div>
+                            </div>
+                        @empty
+                        @endforelse
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div
-                class="px-4 sm:px-5 py-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <p class="text-xs text-gray-500 um-pagebar-info">
-                    Showing
-                    <strong>{{ $users->firstItem() ?? 0 }}</strong>–<strong>{{ $users->lastItem() ?? 0 }}</strong>
-                    of <strong>{{ $users->total() }}</strong> users
-                </p>
-                <div class="um-pagination-wrap flex items-center gap-1.5"></div>
-            </div>
+        <div
+            class="px-4 sm:px-5 py-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-xs text-gray-500 um-pagebar-info">
+                Showing
+                <strong>{{ $users->firstItem() ?? 0 }}</strong>–<strong>{{ $users->lastItem() ?? 0 }}</strong>
+                of <strong>{{ $users->total() }}</strong> users
+            </p>
+            <div class="um-pagination-wrap flex items-center gap-1.5"></div>
+        </div>
         </div>
         </div>
     </main>
@@ -2918,6 +2917,15 @@
                 document.getElementById('editStatusInactive').disabled = true;
             } else {
                 form.action = `/admin/user-management/${id}`;
+                // I-set explicitly yung _method
+                let methodInput = form.querySelector('input[name="_method"]');
+                if (!methodInput) {
+                    methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    form.appendChild(methodInput);
+                }
+                methodInput.value = 'PUT';
                 document.getElementById('editRole').disabled = false;
                 document.getElementById('editStatusActive').disabled = false;
                 document.getElementById('editStatusInactive').disabled = false;
@@ -3596,7 +3604,16 @@
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
 
-                    var formData = new FormData(form);
+                    // Gamitin mo URLSearchParams instead ng FormData
+                    // para siguradong naka-include lahat ng fields kasama ang _method
+                    var params = new URLSearchParams();
+                    params.append('_token', '{{ csrf_token() }}');
+                    params.append('_method', 'PUT');
+                    params.append('name', document.getElementById('editName').value);
+                    params.append('email', document.getElementById('editEmail').value);
+                    params.append('role_id', document.getElementById('editRole').value);
+                    params.append('status', form.querySelector('input[name="status"]:checked')?.value ??
+                    '');
 
                     fetch(url, {
                             method: 'POST',
@@ -3604,8 +3621,9 @@
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                 'X-Requested-With': 'XMLHttpRequest',
                                 'Accept': 'application/json',
+                                'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: formData
+                            body: params.toString()
                         })
                         .then(function(res) {
                             return res.json().then(function(data) {

@@ -189,7 +189,7 @@
             background: linear-gradient(180deg, #fff 0%, #fcfbfb 100%);
         }
 
-        .section-block + .section-block {
+        .section-block+.section-block {
             margin-top: 1rem;
         }
 
@@ -274,7 +274,7 @@
             align-items: end;
         }
 
-        .synced-row + .synced-row {
+        .synced-row+.synced-row {
             margin-top: .9rem;
         }
 
@@ -355,7 +355,7 @@
             box-sizing: border-box;
             height: 46px;
         }
-        
+
         .access-select {
             height: 46px;
             padding-right: 3.2rem;
@@ -371,11 +371,11 @@
         }
 
         .access-select:invalid {
-            color: #6b7280; 
+            color: #6b7280;
         }
 
         .access-select:not(:invalid) {
-            color: #111827; 
+            color: #111827;
         }
 
         .access-select option {
@@ -891,7 +891,7 @@
                 gap: .85rem;
             }
 
-            .synced-row + .synced-row {
+            .synced-row+.synced-row {
                 margin-top: .85rem;
             }
 
@@ -987,8 +987,8 @@
                                                 </button>
                                             </div>
 
-                                            <button type="button" id="userSearchClearBtn" class="user-search-clear-btn hidden"
-                                                onclick="clearUserSearch()">
+                                            <button type="button" id="userSearchClearBtn"
+                                                class="user-search-clear-btn hidden" onclick="clearUserSearch()">
                                                 Clear
                                             </button>
                                         </div>
@@ -1016,53 +1016,62 @@
                                     <div class="synced-row synced-row-top">
                                         <div class="field-group">
                                             <label for="fname" class="field-label">First Name</label>
-                                            <input type="text" name="fname" id="fname" class="access-input" readonly>
+                                            <input type="text" name="fname" id="fname" class="access-input"
+                                                readonly>
                                         </div>
 
                                         <div class="field-group">
                                             <label for="lname" class="field-label">Last Name</label>
-                                            <input type="text" name="lname" id="lname" class="access-input" readonly>
+                                            <input type="text" name="lname" id="lname" class="access-input"
+                                                readonly>
                                         </div>
 
                                         <div class="field-group">
                                             <label for="age" class="field-label">Age</label>
-                                            <input type="number" name="age" id="age" class="access-input" readonly>
+                                            <input type="number" name="age" id="age" class="access-input"
+                                                readonly>
                                         </div>
                                     </div>
 
                                     <div class="synced-row synced-row-mid">
                                         <div class="field-group">
                                             <label for="email" class="field-label">Email</label>
-                                            <input type="email" name="email" id="email" class="access-input" readonly>
+                                            <input type="email" name="email" id="email" class="access-input"
+                                                readonly>
                                         </div>
 
                                         <div class="field-group">
                                             <label for="office" class="field-label">Office</label>
-                                            <input type="text" name="office" id="office" class="access-input" readonly>
+                                            <input type="text" name="office" id="office" class="access-input"
+                                                readonly>
                                         </div>
                                     </div>
 
                                     <div class="synced-row synced-row-full">
                                         <div class="field-group">
                                             <label for="address" class="field-label">Address</label>
-                                            <input type="text" name="address" id="address" class="access-input" readonly>
+                                            <input type="text" name="address" id="address" class="access-input"
+                                                readonly>
                                         </div>
                                     </div>
 
                                     <div class="synced-row synced-row-bottom">
                                         <div class="field-group">
                                             <label for="contact_number" class="field-label">Contact Number</label>
-                                            <input type="text" name="contact_number" id="contact_number" class="access-input" readonly>
+                                            <input type="text" name="contact_number" id="contact_number"
+                                                class="access-input" readonly>
                                         </div>
 
                                         <div class="field-group">
                                             <label for="gender" class="field-label">Gender</label>
-                                            <input type="text" name="gender" id="gender" class="access-input" readonly>
+                                            <input type="text" name="gender" id="gender" class="access-input"
+                                                readonly>
                                         </div>
 
                                         <div class="field-group">
                                             <label for="senior_pwd" class="field-label">Senior / PWD</label>
-                                            <input type="text" name="senior_pwd" id="senior_pwd" class="access-input" readonly>
+                                            <input type="text" name="senior_pwd" id="senior_pwd" class="access-input"
+                                                readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -1129,7 +1138,8 @@
                             </div>
 
                             <div class="preview-name" id="preview_name">No user selected</div>
-                            <div class="preview-email" id="preview_email">Select a user to preview synced information.</div>
+                            <div class="preview-email" id="preview_email">Select a user to preview synced information.
+                            </div>
 
                             <div class="preview-meta">
                                 <div class="preview-meta-item">
@@ -1166,15 +1176,18 @@
                         <div class="tip-list">
                             <div class="tip-item">
                                 <i class="fa-solid fa-check"></i>
-                                <span>Select from the dropdown first to avoid manually typing inconsistent user details.</span>
+                                <span>Select from the dropdown first to avoid manually typing inconsistent user
+                                    details.</span>
                             </div>
                             <div class="tip-item">
                                 <i class="fa-solid fa-user-gear"></i>
-                                <span>Assign the appropriate CMS role before saving so the account is mapped correctly.</span>
+                                <span>Assign the appropriate CMS role before saving so the account is mapped
+                                    correctly.</span>
                             </div>
                             <div class="tip-item">
                                 <i class="fa-solid fa-shield"></i>
-                                <span>Use <strong>Inactive</strong> status when the user record should remain stored but access must be disabled.</span>
+                                <span>Use <strong>Inactive</strong> status when the user record should remain stored but
+                                    access must be disabled.</span>
                             </div>
                         </div>
                     </div>
@@ -1185,305 +1198,306 @@
 @endsection
 
 @section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('user_search');
-        const toggleButton = document.getElementById('toggleUserDropdown');
-        const clearSearchButton = document.getElementById('userSearchClearBtn');
-        const resultsBox = document.getElementById('searchResults');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('user_search');
+            const toggleButton = document.getElementById('toggleUserDropdown');
+            const clearSearchButton = document.getElementById('userSearchClearBtn');
+            const resultsBox = document.getElementById('searchResults');
 
-        const externalAdminId = document.getElementById('external_admin_id');
-        const fname = document.getElementById('fname');
-        const lname = document.getElementById('lname');
-        const email = document.getElementById('email');
-        const office = document.getElementById('office');
-        const address = document.getElementById('address');
-        const age = document.getElementById('age');
-        const gender = document.getElementById('gender');
-        const contactNumber = document.getElementById('contact_number');
-        const seniorPwd = document.getElementById('senior_pwd');
+            const externalAdminId = document.getElementById('external_admin_id');
+            const fname = document.getElementById('fname');
+            const lname = document.getElementById('lname');
+            const email = document.getElementById('email');
+            const office = document.getElementById('office');
+            const address = document.getElementById('address');
+            const age = document.getElementById('age');
+            const gender = document.getElementById('gender');
+            const contactNumber = document.getElementById('contact_number');
+            const seniorPwd = document.getElementById('senior_pwd');
 
-        const previewName = document.getElementById('preview_name');
-        const previewEmail = document.getElementById('preview_email');
-        const previewOffice = document.getElementById('preview_office');
-        const previewContact = document.getElementById('preview_contact');
-        const previewAddress = document.getElementById('preview_address');
-        const cancelAssignCmsBtn = document.getElementById('cancelAssignCmsBtn');
+            const previewName = document.getElementById('preview_name');
+            const previewEmail = document.getElementById('preview_email');
+            const previewOffice = document.getElementById('preview_office');
+            const previewContact = document.getElementById('preview_contact');
+            const previewAddress = document.getElementById('preview_address');
+            const cancelAssignCmsBtn = document.getElementById('cancelAssignCmsBtn');
 
-        let abortController = null;
-        let fullUserList = [];
-        let dropdownOpen = false;
-        let fullListLoaded = false;
-        let isDropdownMode = false;
+            let fullUserList = [];
+            let dropdownOpen = false;
+            let fullListLoaded = false;
+            let isDropdownMode = false;
+            let usersFetchPromise = null;
 
-        function toggleUserSearchClear(input) {
-            if (!clearSearchButton) return;
+            function toggleUserSearchClear(input) {
+                if (!clearSearchButton) return;
 
-            if ((input.value || '').trim().length > 0) {
-                clearSearchButton.classList.remove('hidden');
-            } else {
-                clearSearchButton.classList.add('hidden');
-            }
-        }
-
-        window.clearUserSearch = function() {
-            if (!searchInput) return;
-
-            searchInput.value = '';
-            clearFormFields();
-            hideResults();
-            toggleUserSearchClear(searchInput);
-            searchInput.focus();
-        };
-
-        function hideResults() {
-            resultsBox.style.display = 'none';
-            resultsBox.innerHTML = '';
-            dropdownOpen = false;
-            isDropdownMode = false;
-        }
-
-        function showResults() {
-            resultsBox.style.display = 'block';
-            dropdownOpen = true;
-        }
-
-        function resetPreview() {
-            previewName.textContent = 'No user selected';
-            previewEmail.textContent = 'Select a user to preview synced information.';
-            previewOffice.textContent = '—';
-            previewContact.textContent = '—';
-            previewAddress.textContent = '—';
-        }
-
-        function clearFormFields() {
-            externalAdminId.value = '';
-            fname.value = '';
-            lname.value = '';
-            email.value = '';
-            office.value = '';
-            address.value = '';
-            age.value = '';
-            gender.value = '';
-            contactNumber.value = '';
-            seniorPwd.value = '';
-            resetPreview();
-        }
-
-        function resetAssignCmsForm() {
-            searchInput.value = '';
-            externalAdminId.value = '';
-
-            fname.value = '';
-            lname.value = '';
-            email.value = '';
-            office.value = '';
-            address.value = '';
-            age.value = '';
-            gender.value = '';
-            contactNumber.value = '';
-            seniorPwd.value = '';
-
-            document.getElementById('cms_role').value = '';
-            document.getElementById('cms_status').value = '';
-
-            if (abortController) {
-                abortController.abort();
+                if ((input.value || '').trim().length > 0) {
+                    clearSearchButton.classList.remove('hidden');
+                } else {
+                    clearSearchButton.classList.add('hidden');
+                }
             }
 
-            hideResults();
-            toggleUserSearchClear(searchInput);
-            resetPreview();
-        }
+            window.clearUserSearch = function() {
+                if (!searchInput) return;
 
-        function fillUser(user) {
-            externalAdminId.value = user.admin_id ?? '';
-            searchInput.value = user.full_name ?? '';
-            fname.value = user.fname ?? '';
-            lname.value = user.lname ?? '';
-            email.value = user.email ?? '';
-            office.value = user.office ?? '';
-            address.value = user.address ?? '';
-            age.value = user.age ?? '';
-            gender.value = user.gender ?? '';
-            contactNumber.value = user.contact_number ?? '';
-            seniorPwd.value = user.senior_pwd ?? '';
+                searchInput.value = '';
+                clearFormFields();
+                hideResults();
+                toggleUserSearchClear(searchInput);
+                searchInput.focus();
+            };
 
-            previewName.textContent = user.full_name ?? 'Selected user';
-            previewEmail.textContent = user.email ?? 'No email available';
-            previewOffice.textContent = user.office ?? '—';
-            previewContact.textContent = user.contact_number ?? '—';
-            previewAddress.textContent = user.address ?? '—';
+            function hideResults() {
+                resultsBox.style.display = 'none';
+                resultsBox.innerHTML = '';
+                dropdownOpen = false;
+                isDropdownMode = false;
+            }
 
-            toggleUserSearchClear(searchInput);
-            hideResults();
-        }
+            function showResults() {
+                resultsBox.style.display = 'block';
+                dropdownOpen = true;
+            }
 
-        function renderNoResults(message = 'No results found.') {
-            resultsBox.innerHTML = `<div class="search-empty">${message}</div>`;
-            showResults();
-        }
+            function resetPreview() {
+                previewName.textContent = 'No user selected';
+                previewEmail.textContent = 'Select a user to preview synced information.';
+                previewOffice.textContent = '—';
+                previewContact.textContent = '—';
+                previewAddress.textContent = '—';
+            }
 
-        function renderResults(users) {
-            resultsBox.innerHTML = '';
+            function clearFormFields() {
+                externalAdminId.value = '';
+                fname.value = '';
+                lname.value = '';
+                email.value = '';
+                office.value = '';
+                address.value = '';
+                age.value = '';
+                gender.value = '';
+                contactNumber.value = '';
+                seniorPwd.value = '';
+                resetPreview();
+            }
 
-            users.forEach(user => {
-                const item = document.createElement('button');
-                item.type = 'button';
-                item.className = 'search-item';
+            function resetAssignCmsForm() {
+                searchInput.value = '';
+                externalAdminId.value = '';
 
-                item.innerHTML = `
+                fname.value = '';
+                lname.value = '';
+                email.value = '';
+                office.value = '';
+                address.value = '';
+                age.value = '';
+                gender.value = '';
+                contactNumber.value = '';
+                seniorPwd.value = '';
+
+                document.getElementById('cms_role').value = '';
+                document.getElementById('cms_status').value = '';
+
+                hideResults();
+                toggleUserSearchClear(searchInput);
+                resetPreview();
+            }
+
+            function fillUser(user) {
+                externalAdminId.value = user.admin_id ?? '';
+                searchInput.value = user.full_name ?? '';
+                fname.value = user.fname ?? '';
+                lname.value = user.lname ?? '';
+                email.value = user.email ?? '';
+                office.value = user.office ?? '';
+                address.value = user.address ?? '';
+                age.value = user.age ?? '';
+                gender.value = user.gender ?? '';
+                contactNumber.value = user.contact_number ?? '';
+                seniorPwd.value = user.senior_pwd ?? '';
+
+                previewName.textContent = user.full_name ?? 'Selected user';
+                previewEmail.textContent = user.email ?? 'No email available';
+                previewOffice.textContent = user.office ?? '—';
+                previewContact.textContent = user.contact_number ?? '—';
+                previewAddress.textContent = user.address ?? '—';
+
+                toggleUserSearchClear(searchInput);
+                hideResults();
+            }
+
+            function renderNoResults(message = 'No results found.') {
+                resultsBox.innerHTML = `<div class="search-empty">${message}</div>`;
+                showResults();
+            }
+
+            function renderResults(users) {
+                resultsBox.innerHTML = '';
+
+                users.forEach(user => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'search-item';
+
+                    item.innerHTML = `
                     <div class="search-name">${user.full_name ?? ''}</div>
                     <div class="search-email">${user.email ?? ''}</div>
                 `;
 
-                item.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    fillUser(user);
+                    item.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        fillUser(user);
+                    });
+
+                    resultsBox.appendChild(item);
                 });
 
-                resultsBox.appendChild(item);
-            });
-
-            showResults();
-        }
-
-        async function fetchAllUsers() {
-            if (abortController) {
-                abortController.abort();
+                showResults();
             }
 
-            abortController = new AbortController();
+            async function fetchAllUsers() {
+                if (fullListLoaded) {
+                    return fullUserList;
+                }
 
-            try {
-                const response = await fetch('/admin/external-admins/search', {
-                    method: 'GET',
-                    signal: abortController.signal,
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                if (usersFetchPromise) {
+                    return usersFetchPromise;
+                }
+
+                usersFetchPromise = fetch('/admin/external-admins/search', {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(async response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+
+                        const data = await response.json();
+
+                        if (!data || !data.success || !Array.isArray(data.data)) {
+                            throw new Error('Invalid response format');
+                        }
+
+                        fullUserList = data.data;
+                        fullListLoaded = true;
+
+                        return fullUserList;
+                    })
+                    .catch(error => {
+                        console.error('Fetch all users error:', error);
+                        return fullUserList;
+                    })
+                    .finally(() => {
+                        usersFetchPromise = null;
+                    });
+
+                return usersFetchPromise;
+            }
+
+            function filterUsersLocally(query) {
+                const term = query.trim().toLowerCase();
+
+                if (term === '') {
+                    return [];
+                }
+
+                return fullUserList.filter(user => {
+                    return String(user.full_name ?? '').toLowerCase().includes(term) ||
+                        String(user.fname ?? '').toLowerCase().includes(term) ||
+                        String(user.lname ?? '').toLowerCase().includes(term) ||
+                        String(user.email ?? '').toLowerCase().includes(term) ||
+                        String(user.office ?? '').toLowerCase().includes(term);
                 });
+            }
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+            searchInput.addEventListener('input', async function() {
+                const query = this.value.trim();
+                toggleUserSearchClear(this);
+
+                clearFormFields();
+
+                // kapag nagtype habang bukas ang dropdown, automatic lumalabas sa dropdown mode
+                isDropdownMode = false;
+
+                if (query.length === 0) {
+                    hideResults();
+                    return;
                 }
 
-                const data = await response.json();
-
-                if (!data || !data.success || !Array.isArray(data.data)) {
-                    throw new Error('Invalid response format');
+                // siguraduhing may base full list muna bago mag local search
+                if (!fullListLoaded) {
+                    await fetchAllUsers();
                 }
 
-                fullUserList = data.data;
-                fullListLoaded = true;
+                const filteredUsers = filterUsersLocally(query);
 
-                return data.data;
-            } catch (error) {
-                if (error.name === 'AbortError') return [];
-                console.error('Fetch all users error:', error);
-                return [];
-            }
-        }
+                if (filteredUsers.length === 0) {
+                    renderNoResults('No results found.');
+                    return;
+                }
 
-        function filterUsersLocally(query) {
-            const term = query.trim().toLowerCase();
-
-            if (term === '') {
-                return [];
-            }
-
-            return fullUserList.filter(user => {
-                return String(user.full_name ?? '').toLowerCase().includes(term)
-                    || String(user.fname ?? '').toLowerCase().includes(term)
-                    || String(user.lname ?? '').toLowerCase().includes(term)
-                    || String(user.email ?? '').toLowerCase().includes(term)
-                    || String(user.office ?? '').toLowerCase().includes(term);
+                renderResults(filteredUsers);
             });
-        }
 
-        searchInput.addEventListener('input', async function() {
-            const query = this.value.trim();
-            toggleUserSearchClear(this);
+            toggleButton.addEventListener('click', async function(event) {
+                event.preventDefault();
+                event.stopPropagation();
 
-            clearFormFields();
+                if (dropdownOpen && isDropdownMode) {
+                    hideResults();
+                    return;
+                }
 
-            // kapag nagtype habang bukas ang dropdown, automatic lumalabas sa dropdown mode
-            isDropdownMode = false;
+                // dropdown mode ito
+                isDropdownMode = true;
 
-            if (query.length === 0) {
-                hideResults();
-                return;
-            }
+                if (!fullListLoaded) {
+                    await fetchAllUsers();
+                }
 
-            // siguraduhing may base full list muna bago mag local search
-            if (!fullListLoaded) {
-                await fetchAllUsers();
-            }
+                if (!fullUserList.length) {
+                    renderNoResults('No users available.');
+                    return;
+                }
 
-            const filteredUsers = filterUsersLocally(query);
-
-            if (filteredUsers.length === 0) {
-                renderNoResults('No results found.');
-                return;
-            }
-
-            renderResults(filteredUsers);
-        });
-
-        toggleButton.addEventListener('click', async function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            if (dropdownOpen && isDropdownMode) {
-                hideResults();
-                return;
-            }
-
-            // dropdown mode ito
-            isDropdownMode = true;
-
-            if (!fullListLoaded) {
-                await fetchAllUsers();
-            }
-
-            if (!fullUserList.length) {
-                renderNoResults('No users available.');
-                return;
-            }
-
-            renderResults(fullUserList);
-        });
-
-        searchInput.addEventListener('focus', function() {
-            // no auto-open
-        });
-
-        searchInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                hideResults();
-            }
-        });
-
-        document.addEventListener('click', function(event) {
-            const clickedInside =
-                searchInput.contains(event.target) ||
-                toggleButton.contains(event.target) ||
-                resultsBox.contains(event.target);
-
-            if (!clickedInside) {
-                hideResults();
-            }
-        });
-
-        if (cancelAssignCmsBtn) {
-            cancelAssignCmsBtn.addEventListener('click', function() {
-                resetAssignCmsForm();
+                renderResults(fullUserList);
             });
-        }
 
-        toggleUserSearchClear(searchInput);
-        resetPreview();
-    });
+            searchInput.addEventListener('focus', function() {
+                // no auto-open
+            });
+
+            searchInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    hideResults();
+                }
+            });
+
+            document.addEventListener('click', function(event) {
+                const clickedInside =
+                    searchInput.contains(event.target) ||
+                    toggleButton.contains(event.target) ||
+                    resultsBox.contains(event.target);
+
+                if (!clickedInside) {
+                    hideResults();
+                }
+            });
+
+            if (cancelAssignCmsBtn) {
+                cancelAssignCmsBtn.addEventListener('click', function() {
+                    resetAssignCmsForm();
+                });
+            }
+
+            toggleUserSearchClear(searchInput);
+            resetPreview();
+        });
     </script>
-@endsection 
+@endsection

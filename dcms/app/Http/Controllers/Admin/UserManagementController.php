@@ -207,7 +207,8 @@ class UserManagementController extends Controller
                     'phone' => $request->phone ?? ($patient->phone ?? ''),
                     'birthdate' => $request->birthdate ?? ($patient->birthdate ?? now()->toDateString()),
                     'gender' => $request->gender ?? ($patient->gender ?? 'Male'),
-                    'password' => $user->password,
+                    'password' => $user->password ?? $patient->password ?? Hash::make(\Str::random(16)),
+                
                 ]);
 
                 $patient->user_id = $user->id;

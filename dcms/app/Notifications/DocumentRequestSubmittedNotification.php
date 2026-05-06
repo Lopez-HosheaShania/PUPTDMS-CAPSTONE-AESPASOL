@@ -30,6 +30,9 @@ class DocumentRequestSubmittedNotification extends Notification
             'document_request_id' => $this->documentRequest->id ?? null,
             'patient_id' => $this->documentRequest->patient_id ?? null,
             'type' => 'document_request_submitted',
+
+            'url' => url('/dentist/document-requests'),
+
         ];
     }
 
