@@ -748,6 +748,10 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
     Route::get('/appointments', [AppointmentController::class, 'index'])
         ->middleware('permission:view_own_appointments')
         ->name('book.appointment.index');
+
+    Route::get('/patient/appointments/cancelled', function () {
+        return view('patient.cancelled'); // <-- include 'patient.'
+    })->name('patient.appointment.cancelled.view');
 });
 
 /*
@@ -1001,9 +1005,6 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
     Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])
         ->middleware('permission:manage_inventory')
         ->name('dentist.dentist.inventory.destroy');
-
-     Route::post('dentist/appointments/{id}/cancel', [DentistAppointmentController::class, 'cancel'])
-    ->name('dentist.dentist.appointments.cancel');
 });
 
 
