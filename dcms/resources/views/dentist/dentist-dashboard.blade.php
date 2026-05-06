@@ -194,58 +194,158 @@
 
     .kpi-grid {
         display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .kpi-card {
+        min-height: 135px;
+        height: 135px;
+        aspect-ratio: auto !important;
+        padding: 1rem !important;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    #scheduledTodayContainer .card {
+        min-height: 250px;
+        border-radius: 1.25rem;
+    }
+
+    .dashboard-side-card {
+        min-height: 150px;
+    }
+
+    #scheduledTodayContainer>.card,
+    #scheduledTodayContainer .card {
+        min-height: 260px;
+    }
+
+    #gadAnalyticsContainer,
+    #gadAnalyticsContainer > div,
+    .row3-grid > .flex {
+        height: 100%;
+    }
+
+    #gadAnalyticsContainer > div {
+        min-height: 420px;
+    }
+
+    .row3-grid > .flex > div {
+        flex: 1;
+    }
+
+    #medicalSuppliesContainer > div,
+    #medicineSuppliesContainer > div {
+        height: 100%;
+    }
+
+    .inventory-grid {
+        display: grid;
         grid-template-columns: 1fr;
         gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    @media (min-width: 640px) {
-        .kpi-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
     }
 
     @media (min-width: 1024px) {
-        .kpi-grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
 
-    @media (min-width: 1200px) {
-        .kpi-grid {
-            grid-template-columns: repeat(5, 1fr);
-        }
-    }
-
-    .row2-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    @media (min-width: 1024px) {
         .row2-grid {
-            grid-template-columns: 7fr 5fr;
+            display: grid;
+            grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr);
+            margin-bottom: 1.5rem !important;
+            gap: 1.5rem;
             align-items: stretch;
         }
-    }
 
-    .row3-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    @media (min-width: 1024px) {
         .row3-grid {
-            grid-template-columns: 7fr 5fr;
+            display: grid;
+            grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr);
+            gap: 1rem;
+            align-items: stretch;
         }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            height: 100%;
+        }
+    }
+
+    .dashboard-side-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        min-width: 0;
+        height: 100%;
+    }
+
+    #upcomingAppointmentsContainer {
+        height: 100%;
+    }
+
+    .dashboard-side-card {
+        background: #fff;
+        border: 1px solid #f3e3e3;
+        border-radius: 1.25rem;
+        box-shadow: 0 10px 26px rgba(139, 0, 0, 0.07);
+        overflow: hidden;
+    }
+
+    .dashboard-side-card-head {
+        padding: 1rem 1rem 0.85rem;
+        border-bottom: 1px solid #f4ecec;
+        background: linear-gradient(180deg, #fffdfd, #fff8f7);
+    }
+
+    .dashboard-side-card-title {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: #8B0000;
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .dashboard-side-card-body {
+        padding: 1rem;
+    }
+
+    .dashboard-quick-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+    }
+
+    .dashboard-quick-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        border-radius: 0.9rem;
+        border: 1px solid #f1d9d9;
+        padding: 0.8rem 0.9rem;
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #7a0000;
+        background: linear-gradient(180deg, #fffefe, #fff7f7);
+        transition: all 0.18s ease;
+    }
+
+    .dashboard-quick-btn:hover {
+        transform: translateY(-1px);
+        border-color: #d79a9a;
+        background: #fff1f1;
     }
 
     @media (max-width: 1023px) {
         #dentistCalendarContainer {
             min-height: 360px !important;
+        }
+
+        .dashboard-quick-actions {
+            grid-template-columns: 1fr;
         }
 
         .inventory-scroll-wrap {
@@ -261,6 +361,15 @@
             background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, .9));
             pointer-events: none;
             margin-top: -24px;
+        }
+
+        .kpi-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+
+        .kpi-card {
+            height: 125px;
+            min-height: 125px;
         }
     }
 
@@ -303,6 +412,139 @@
         opacity: .96;
     }
 
+    .upcoming-card {
+        background: #fff;
+        border: 1px solid #f3e3e3;
+        border-radius: 1.25rem;
+        box-shadow: 0 10px 26px rgba(139, 0, 0, 0.07);
+        overflow: hidden;
+        height: 100%;
+        min-height: 420px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .upcoming-date-strip {
+        display: flex;
+        gap: 0.55rem;
+        overflow-x: auto;
+        overflow-y: visible;
+        padding: 0.75rem 0.25rem 1rem;
+        justify-content: center;
+    }
+
+    .upcoming-date-btn.active {
+        position: relative;
+        z-index: 2;
+    }
+
+    .upcoming-card .dashboard-side-card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .upcoming-list-area {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .upcoming-empty-state {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transform: translateY(-28px);
+    }
+
+    .upcoming-date-btn {
+        min-width: 54px;
+        border-radius: 1rem;
+        border: 1px solid #f1d9d9;
+        background: #fff8f8;
+        padding: 0.55rem 0.4rem;
+        text-align: center;
+        transition: all .18s ease;
+    }
+
+    .upcoming-date-btn.active {
+        background: #8B0000;
+        color: white;
+        border-color: #8B0000;
+        box-shadow: 0 8px 18px rgba(139, 0, 0, .25);
+    }
+
+    .upcoming-item {
+        display: flex;
+        position: relative;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 0.5rem;
+    }
+
+    .upcoming-status-line {
+        width: 4px;
+        border-radius: 999px;
+        flex-shrink: 0;
+    }
+
+    .upcoming-status-confirmed {
+        background: #22c55e;
+    }
+
+    .upcoming-status-pending {
+        background: #eab308;
+    }
+
+    .upcoming-status-cancelled {
+        background: #ef4444;
+    }
+
+    .upcoming-status-default {
+        background: #8B0000;
+    }
+
+    .upcoming-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #fff5f5;
+        color: #8B0000;
+        font-size: 0.75rem;
+        font-weight: 900;
+        border: 2px solid #8B0000;
+        flex-shrink: 0;
+    }
+
+    .upcoming-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-confirmed { border-color: #22c55e; }
+    .avatar-pending { border-color: #eab308; }
+    .avatar-cancelled { border-color: #ef4444; }
+    .avatar-default { border-color: #8B0000; }
+
+    .upcoming-time-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: #8B0000;
+        box-shadow: 0 0 0 4px #fff1f1;
+        flex-shrink: 0;
+    }
+
     @media (max-width: 767px) {
 
         .greeting-row {
@@ -322,8 +564,7 @@
         }
 
         .kpi-grid {
-            display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
             gap: 8px !important;
         }
 
@@ -347,7 +588,7 @@
             padding: 2px 6px !important;
         }
 
-        .kpi-grid>div p.text-4xl {
+        .kpi-grid>div p.text-3xl {
             font-size: 1.5rem !important;
             margin-top: 4px !important;
             margin-bottom: 2px !important;
@@ -454,6 +695,868 @@
             font-size: 0.9em;
         }
     }
+
+    [data-theme="dark"] body,
+    .dark body {
+        background-color: var(--bg-main, #0D1117) !important;
+        color: var(--text-primary, #F8FAFC) !important;
+    }
+
+    [data-theme="dark"] #mainContent,
+    .dark #mainContent {
+        background:
+            radial-gradient(circle at 12% 4%, rgba(139, 0, 0, 0.18), transparent 30%),
+            radial-gradient(circle at 88% 12%, rgba(252, 165, 165, 0.08), transparent 28%),
+            var(--bg-main, #0D1117) !important;
+        color: var(--text-primary, #F8FAFC) !important;
+    }
+
+    [data-theme="dark"] #mainContent .greeting-banner,
+    .dark #mainContent .greeting-banner {
+        background:
+            radial-gradient(circle at top left, rgba(139, 0, 0, 0.30), transparent 34%),
+            linear-gradient(135deg, rgba(13, 17, 23, 0.86), rgba(22, 27, 34, 0.76)) !important;
+        border: 1px solid rgba(255, 255, 255, 0.10) !important;
+        box-shadow: 0 18px 38px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+        backdrop-filter: blur(18px) saturate(145%) !important;
+        -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+    }
+
+    [data-theme="dark"] #mainContent .kpi-card,
+    [data-theme="dark"] #mainContent .upcoming-card,
+    [data-theme="dark"] #mainContent .dashboard-side-card,
+    [data-theme="dark"] #mainContent .cal-shell,
+    [data-theme="dark"] #mainContent .skeleton-shell,
+    [data-theme="dark"] #mainContent .bg-white,
+    [data-theme="dark"] #mainContent #gadAnalyticsContainer > div,
+    [data-theme="dark"] #mainContent #scheduledTodayContainer .card,
+    [data-theme="dark"] #mainContent #medicalSuppliesContainer > div,
+    [data-theme="dark"] #mainContent #medicineSuppliesContainer > div,
+    .dark #mainContent .kpi-card,
+    .dark #mainContent .upcoming-card,
+    .dark #mainContent .dashboard-side-card,
+    .dark #mainContent .cal-shell,
+    .dark #mainContent .skeleton-shell,
+    .dark #mainContent .bg-white,
+    .dark #mainContent #gadAnalyticsContainer > div,
+    .dark #mainContent #scheduledTodayContainer .card,
+    .dark #mainContent #medicalSuppliesContainer > div,
+    .dark #mainContent #medicineSuppliesContainer > div {
+        background:
+            radial-gradient(circle at top left, rgba(139, 0, 0, 0.18), transparent 36%),
+            linear-gradient(145deg, rgba(13, 17, 23, 0.78), rgba(22, 27, 34, 0.66)) !important;
+        border: 1px solid var(--border-dark, rgba(255, 255, 255, 0.10)) !important;
+        box-shadow: 0 18px 38px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+        backdrop-filter: blur(18px) saturate(145%) !important;
+        -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+    }
+
+    [data-theme="dark"] #mainContent .dashboard-side-card-head,
+    .dark #mainContent .dashboard-side-card-head {
+        background: linear-gradient(180deg, rgba(139, 0, 0, 0.16), rgba(22, 27, 34, 0.18)) !important;
+        border-bottom: 1px solid var(--border-dark, rgba(255, 255, 255, 0.10)) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+    }
+
+    [data-theme="dark"] #mainContent .bg-gradient-to-br,
+    [data-theme="dark"] #mainContent .bg-gradient-to-b,
+    [data-theme="dark"] #mainContent .bg-gradient-to-r,
+    [data-theme="dark"] #mainContent .bg-gray-50,
+    [data-theme="dark"] #mainContent .bg-gray-100,
+    [data-theme="dark"] #mainContent .bg-red-50,
+    [data-theme="dark"] #mainContent .bg-green-50,
+    [data-theme="dark"] #mainContent .bg-emerald-50,
+    [data-theme="dark"] #mainContent .bg-yellow-50,
+    .dark #mainContent .bg-gradient-to-br,
+    .dark #mainContent .bg-gradient-to-b,
+    .dark #mainContent .bg-gradient-to-r,
+    .dark #mainContent .bg-gray-50,
+    .dark #mainContent .bg-gray-100,
+    .dark #mainContent .bg-red-50,
+    .dark #mainContent .bg-green-50,
+    .dark #mainContent .bg-emerald-50,
+    .dark #mainContent .bg-yellow-50 {
+        background: var(--bg-panel, rgba(22, 27, 34, 0.72)) !important;
+    }
+
+    [data-theme="dark"] #mainContent .text-gray-900,
+    [data-theme="dark"] #mainContent .text-gray-800,
+    [data-theme="dark"] #mainContent .text-gray-700,
+    [data-theme="dark"] #mainContent h3,
+    .dark #mainContent .text-gray-900,
+    .dark #mainContent .text-gray-800,
+    .dark #mainContent .text-gray-700,
+    .dark #mainContent h3 {
+        color: var(--text-primary, #F8FAFC) !important;
+    }
+
+    [data-theme="dark"] #mainContent .text-gray-600,
+    [data-theme="dark"] #mainContent .text-gray-500,
+    [data-theme="dark"] #mainContent p,
+    .dark #mainContent .text-gray-600,
+    .dark #mainContent .text-gray-500,
+    .dark #mainContent p {
+        color: var(--text-secondary, #C9D1D9) !important;
+    }
+
+    [data-theme="dark"] #mainContent .text-gray-400,
+    [data-theme="dark"] #mainContent .text-gray-300,
+    .dark #mainContent .text-gray-400,
+    .dark #mainContent .text-gray-300 {
+        color: var(--text-muted, #8B949E) !important;
+    }
+
+    [data-theme="dark"] #mainContent .text-\[\#8B0000\],
+    [data-theme="dark"] #mainContent .dashboard-side-card-title,
+    [data-theme="dark"] #mainContent .cal-month-label,
+    [data-theme="dark"] #mainContent .dashboard-quick-btn,
+    .dark #mainContent .text-\[\#8B0000\],
+    .dark #mainContent .dashboard-side-card-title,
+    .dark #mainContent .cal-month-label,
+    .dark #mainContent .dashboard-quick-btn {
+        color: #FCA5A5 !important;
+    }
+
+    [data-theme="dark"] #mainContent .border-gray-100,
+    [data-theme="dark"] #mainContent .border-gray-200,
+    [data-theme="dark"] #mainContent .border-red-100,
+    [data-theme="dark"] #mainContent .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+    .dark #mainContent .border-gray-100,
+    .dark #mainContent .border-gray-200,
+    .dark #mainContent .border-red-100,
+    .dark #mainContent .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+        border-color: var(--border-dark, rgba(255, 255, 255, 0.10)) !important;
+    }
+
+    [data-theme="dark"] #mainContent .upcoming-date-btn,
+    [data-theme="dark"] #mainContent .dashboard-quick-btn,
+    [data-theme="dark"] #mainContent .cal-nav-btn,
+    [data-theme="dark"] #mainContent .cal-cell,
+    [data-theme="dark"] #mainContent .rounded-xl.border,
+    .dark #mainContent .upcoming-date-btn,
+    .dark #mainContent .dashboard-quick-btn,
+    .dark #mainContent .cal-nav-btn,
+    .dark #mainContent .cal-cell,
+    .dark #mainContent .rounded-xl.border {
+        background: rgba(22, 27, 34, 0.48) !important;
+        border-color: var(--border-dark, rgba(255, 255, 255, 0.10)) !important;
+        color: var(--text-secondary, #C9D1D9) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+    }
+
+    [data-theme="dark"] #mainContent .upcoming-date-btn.active,
+    [data-theme="dark"] #mainContent .cal-cell.today,
+    .dark #mainContent .upcoming-date-btn.active,
+    .dark #mainContent .cal-cell.today {
+        background: linear-gradient(135deg, #8B0000, #B91C1C) !important;
+        color: #FFFFFF !important;
+        border-color: rgba(252, 165, 165, 0.46) !important;
+        box-shadow: 0 10px 24px rgba(139, 0, 0, 0.35) !important;
+    }
+
+    [data-theme="dark"] #mainContent .upcoming-avatar,
+    [data-theme="dark"] #mainContent .upcoming-time-dot,
+    .dark #mainContent .upcoming-avatar,
+    .dark #mainContent .upcoming-time-dot {
+        background: rgba(139, 0, 0, 0.28) !important;
+        color: #FCA5A5 !important;
+        border-color: rgba(252, 165, 165, 0.42) !important;
+    }
+
+    [data-theme="dark"] #mainContent .upcoming-empty-state i,
+    .dark #mainContent .upcoming-empty-state i {
+        color: rgba(252, 165, 165, 0.58) !important;
+    }
+
+    [data-theme="dark"] #mainContent .day-hover-card,
+    .dark #mainContent .day-hover-card {
+        background: rgba(13, 17, 23, 0.92) !important;
+        border-color: var(--border-dark, rgba(255, 255, 255, 0.10)) !important;
+        color: var(--text-primary, #F8FAFC) !important;
+        box-shadow: 0 22px 50px rgba(0, 0, 0, 0.55) !important;
+        backdrop-filter: blur(18px) saturate(145%) !important;
+        -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+    }
+
+    .gad-analytics-card {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        min-height: 420px;
+        border-radius: 28px;
+        border: 1px solid rgba(139, 0, 0, 0.10);
+        background:
+            radial-gradient(circle at 12% 8%, rgba(139, 0, 0, 0.14), transparent 28%),
+            radial-gradient(circle at 88% 18%, rgba(255, 215, 0, 0.12), transparent 24%),
+            linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 248, 0.94));
+        box-shadow: 0 18px 45px rgba(139, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+
+    .gad-analytics-card::before,
+    .gad-analytics-card::after {
+        content: '';
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .gad-analytics-card::before {
+        width: 220px;
+        height: 220px;
+        right: -95px;
+        top: -90px;
+        background: rgba(139, 0, 0, 0.10);
+    }
+
+    .gad-analytics-card::after {
+        width: 170px;
+        height: 170px;
+        left: -75px;
+        bottom: -80px;
+        background: rgba(255, 215, 0, 0.12);
+    }
+
+    .gad-header-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #8B0000;
+        background: linear-gradient(135deg, #fff3f3, #ffe8e8);
+        border: 1px solid #f4caca;
+        box-shadow: 0 10px 20px rgba(139, 0, 0, 0.10);
+    }
+
+    .gad-metric-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        border-radius: 999px;
+        padding: 0.48rem 0.72rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+        border: 1px solid rgba(139, 0, 0, 0.10);
+        background: rgba(255, 255, 255, 0.72);
+        color: #7a0000;
+        box-shadow: 0 8px 18px rgba(139, 0, 0, 0.06);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .gad-empty-panel {
+        width: min(100%, 620px);
+        border-radius: 26px;
+        border: 1px dashed rgba(139, 0, 0, 0.20);
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.80), rgba(255, 244, 244, 0.70));
+        padding: 1.35rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    }
+
+    .gad-empty-icon-wrap {
+        position: relative;
+        width: 94px;
+        height: 94px;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 28px;
+        color: #8B0000;
+        background: linear-gradient(135deg, #fff6f6, #ffe8e8);
+        border: 1px solid #f3c9c9;
+        box-shadow: 0 18px 34px rgba(139, 0, 0, 0.12);
+    }
+
+    .gad-empty-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.65rem;
+        margin-top: 1rem;
+    }
+
+    .gad-empty-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.55rem 0.75rem;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid #f0d5d5;
+        color: #8B0000;
+        font-size: 0.72rem;
+        font-weight: 800;
+    }
+
+    .gad-chart-shell {
+        min-height: 250px;
+        border-radius: 24px;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid rgba(139, 0, 0, 0.08);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+
+    [data-theme="dark"] #mainContent .gad-analytics-card,
+    .dark #mainContent .gad-analytics-card {
+        background:
+            radial-gradient(circle at 12% 8%, rgba(139, 0, 0, 0.24), transparent 30%),
+            radial-gradient(circle at 88% 18%, rgba(252, 165, 165, 0.10), transparent 24%),
+            linear-gradient(145deg, rgba(13, 17, 23, 0.82), rgba(22, 27, 34, 0.70)) !important;
+        border-color: rgba(255, 255, 255, 0.10) !important;
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(18px) saturate(145%) !important;
+        -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-header-badge,
+    .dark #mainContent .gad-header-badge{
+        background:
+            linear-gradient(
+                135deg,
+                rgba(255,245,245,.96),
+                rgba(255,228,228,.88)
+            ) !important;
+
+        border: 1px solid rgba(252,165,165,.18) !important;
+
+        box-shadow:
+            0 10px 24px rgba(139,0,0,.22),
+            0 0 18px rgba(252,165,165,.10),
+            inset 0 1px 0 rgba(255,255,255,.55);
+
+        color: #8B0000 !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-header-badge i,
+        .dark #mainContent .gad-header-badge i{
+            color: #8B0000 !important;
+
+            filter:
+                drop-shadow(0 0 6px rgba(139,0,0,.22));
+        }
+
+    [data-theme="dark"] #mainContent .gad-metric-chip:nth-child(1),
+    .dark #mainContent .gad-metric-chip:nth-child(1){
+        color: #E5B5B5 !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-metric-chip:nth-child(2),
+    .dark #mainContent .gad-metric-chip:nth-child(2){
+        color: #89CFF0 !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-metric-chip:nth-child(3),
+    .dark #mainContent .gad-metric-chip:nth-child(3){
+        color: #FCA5A5 !important;
+    }
+
+    [data-theme="dark"] #mainContent .upcoming-card,
+    .dark #mainContent .upcoming-card {
+        background: linear-gradient(145deg, #0D1117, #111827) !important;
+        border-color: rgba(252, 165, 165, 0.18) !important;
+    }
+
+    [data-theme="dark"] #mainContent .upcoming-date-btn,
+    .dark #mainContent .upcoming-date-btn {
+        background: rgba(255,255,255,0.04) !important;
+        color: #C9D1D9 !important;
+        border-color: rgba(255,255,255,0.12) !important;
+    }
+
+    [data-theme="dark"] #mainContent .upcoming-date-btn.active,
+    .dark #mainContent .upcoming-date-btn.active {
+        background: linear-gradient(135deg, #B91C1C, #7F1D1D) !important;
+        color: #fff !important;
+        border-color: rgba(252, 165, 165, 0.45) !important;
+    }
+
+    [data-theme="dark"] #mainContent .upcoming-empty-state p,
+    .dark #mainContent .upcoming-empty-state p {
+        color: #D1D5DB !important;
+    }
+
+    [data-theme="dark"] #mainContent .dashboard-side-card-title,
+    .dark #mainContent .dashboard-side-card-title {
+        color: #FCA5A5 !important;
+    }
+
+    [data-theme="dark"] #mainContent .kpi-card i,
+    [data-theme="dark"] #mainContent .dashboard-side-card-title i,
+    [data-theme="dark"] #mainContent .gad-header-badge i,
+    [data-theme="dark"] #mainContent .upcoming-empty-state i,
+    [data-theme="dark"] #mainContent .status-icon-badge i,
+    .dark #mainContent .kpi-card i,
+    .dark #mainContent .dashboard-side-card-title i,
+    .dark #mainContent .gad-header-badge i,
+    .dark #mainContent .upcoming-empty-state i,
+    .dark #mainContent .status-icon-badge i {
+        filter:
+            drop-shadow(0 0 6px rgba(252, 165, 165, 0.45))
+            drop-shadow(0 0 12px rgba(139, 0, 0, 0.35));
+
+        transition:
+            transform 0.25s ease,
+            filter 0.25s ease;
+    }
+
+    [data-theme="dark"] #mainContent .kpi-card:hover i,
+    [data-theme="dark"] #mainContent .dashboard-side-card:hover i,
+    [data-theme="dark"] #mainContent .gad-header-badge:hover i,
+    .dark #mainContent .kpi-card:hover i,
+    .dark #mainContent .dashboard-side-card:hover i,
+    .dark #mainContent .gad-header-badge:hover i {
+        transform: scale(1.08);
+
+        filter:
+            drop-shadow(0 0 8px rgba(252, 165, 165, 0.65))
+            drop-shadow(0 0 18px rgba(185, 28, 28, 0.55));
+    }
+
+    [data-theme="dark"] #mainContent .w-9.h-9,
+    [data-theme="dark"] #mainContent .gad-header-badge,
+    [data-theme="dark"] #mainContent .status-icon-badge,
+    .dark #mainContent .w-9.h-9,
+    .dark #mainContent .gad-header-badge,
+    .dark #mainContent .status-icon-badge {
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,0.04),
+            0 0 18px rgba(139, 0, 0, 0.22),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    [data-theme="dark"] #mainContent .animate-pulse,
+    .dark #mainContent .animate-pulse {
+        box-shadow:
+            0 0 8px rgba(255,255,255,0.6),
+            0 0 16px rgba(252, 165, 165, 0.6);
+    }
+
+    .kpi-card .status-change-btn{
+        background: linear-gradient(135deg,#8B0000,#660000) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(139,0,0,0.18) !important;
+
+        transition:
+            background 0.22s ease,
+            color 0.22s ease,
+            transform 0.22s ease,
+            box-shadow 0.22s ease;
+
+        box-shadow:
+            0 8px 18px rgba(139,0,0,0.18),
+            inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+
+    .kpi-card .status-change-btn:hover{
+        background: linear-gradient(135deg,#A40000,#7A0000) !important;
+        color: #ffffff !important;
+        transform: translateY(-2px) scale(1.03);
+
+        box-shadow:
+            0 10px 24px rgba(139,0,0,0.28),
+            0 0 14px rgba(139,0,0,0.18);
+    }
+
+    [data-theme="dark"] .kpi-card .status-change-btn,
+    .dark .kpi-card .status-change-btn{
+        background: linear-gradient(135deg,#8B0000,#5F0000) !important;
+        color:#fff !important;
+        border:1px solid rgba(255,255,255,0.08) !important;
+
+        box-shadow:
+            0 8px 18px rgba(139,0,0,0.30),
+            inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    [data-theme="dark"] .kpi-card .status-change-btn:hover,
+    .dark .kpi-card .status-change-btn:hover{
+        background: linear-gradient(135deg,#B91C1C,#7F1D1D) !important;
+
+        box-shadow:
+            0 10px 24px rgba(185,28,28,0.38),
+            0 0 18px rgba(252,165,165,0.20);
+    }
+
+    .kpi-card button[onclick="openStatusModal()"]:active{
+        transform: scale(0.97);
+    }
+
+    .greeting-subtitle{
+        position: relative;
+        min-height: 22px;
+        transition: opacity .35s ease;
+    }
+
+    .greeting-icon{
+        animation: greetingGlow 2.5s ease-in-out infinite;
+    }
+
+    @keyframes greetingGlow{
+        0%,100%{
+            transform: scale(1);
+            opacity: 1;
+        }
+        50%{
+            transform: scale(1.08);
+            opacity: .82;
+        }
+    }
+
+    .status-change-btn{
+        background: #fff5f5;
+        color: #8B0000;
+        border: 1px solid rgba(139,0,0,0.08);
+    }
+
+    .status-change-btn:hover{
+        background: #8B0000;
+        color: #fff;
+    }
+
+    [data-theme="dark"] .status-change-btn,
+    .dark .status-change-btn{
+        background: linear-gradient(135deg,#8B0000,#5F0000) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+
+        box-shadow:
+            0 8px 18px rgba(139,0,0,0.30),
+            inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    [data-theme="dark"] .status-change-btn:hover,
+    .dark .status-change-btn:hover{
+        background: linear-gradient(135deg,#B91C1C,#7F1D1D) !important;
+
+        box-shadow:
+            0 10px 22px rgba(185,28,28,0.40),
+            0 0 16px rgba(252,165,165,0.18);
+    }
+
+    [data-theme="dark"] .status-change-btn,
+    .dark .status-change-btn{
+        background: linear-gradient(135deg,#8B0000,#5F0000) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+
+        box-shadow:
+            0 8px 18px rgba(139,0,0,0.30),
+            inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    [data-theme="dark"] .status-change-btn:hover,
+    .dark .status-change-btn:hover{
+        background: linear-gradient(135deg,#B91C1C,#7F1D1D) !important;
+
+        box-shadow:
+            0 10px 22px rgba(185,28,28,0.40),
+            0 0 16px rgba(252,165,165,0.18);
+    }
+
+    [data-theme="dark"] #mainContent #medicalSuppliesContainer > div,
+    .dark #mainContent #medicalSuppliesContainer > div{
+        background:
+            radial-gradient(circle at top left,
+                rgba(139,0,0,.20),
+                transparent 34%),
+            linear-gradient(
+                145deg,
+                rgba(10,14,20,.92),
+                rgba(17,24,39,.86)
+            ) !important;
+
+        border: 1px solid rgba(255,255,255,.08) !important;
+
+        box-shadow:
+            0 20px 40px rgba(0,0,0,.42),
+            0 0 20px rgba(139,0,0,.10),
+            inset 0 1px 0 rgba(255,255,255,.05) !important;
+    }
+
+    [data-theme="dark"] #mainContent #medicalSuppliesContainer .w-9.h-9,
+    .dark #mainContent #medicalSuppliesContainer .w-9.h-9{
+        background:
+            linear-gradient(
+                135deg,
+                rgba(139,0,0,.22),
+                rgba(255,255,255,.04)
+            ) !important;
+
+        border: 1px solid rgba(252,165,165,.18) !important;
+
+        box-shadow:
+            0 0 18px rgba(139,0,0,.24),
+            inset 0 1px 0 rgba(255,255,255,.06);
+    }
+
+    [data-theme="dark"] #mainContent #medicalSuppliesContainer .w-9.h-9 i,
+    .dark #mainContent #medicalSuppliesContainer .w-9.h-9 i,
+    [data-theme="dark"] #mainContent #medicalSuppliesContainer .fa-box-open,
+    .dark #mainContent #medicalSuppliesContainer .fa-box-open {
+        color: #FCA5A5 !important;
+    }
+
+    [data-theme="dark"] #mainContent #medicalSuppliesContainer h3,
+    .dark #mainContent #medicalSuppliesContainer h3{
+        color: #FCA5A5 !important;
+    }
+
+    [data-theme="dark"] #mainContent #medicalSuppliesContainer a,
+    .dark #mainContent #medicalSuppliesContainer a{
+        background:
+            linear-gradient(
+                135deg,
+                #8B0000,
+                #5F0000
+            ) !important;
+
+        color: #fff !important;
+
+        border: 1px solid rgba(255,255,255,.06);
+
+        box-shadow:
+            0 8px 18px rgba(139,0,0,.28),
+            inset 0 1px 0 rgba(255,255,255,.08);
+
+        transition: all .22s ease;
+    }
+
+    [data-theme="dark"] #mainContent #medicalSuppliesContainer a:hover,
+    .dark #mainContent #medicalSuppliesContainer a:hover{
+        transform: translateY(-2px);
+
+        background:
+            linear-gradient(
+                135deg,
+                #B91C1C,
+                #7F1D1D
+            ) !important;
+
+        box-shadow:
+            0 12px 24px rgba(185,28,28,.38),
+            0 0 18px rgba(252,165,165,.18);
+    }
+
+    [data-theme="dark"] #mainContent #medicineSuppliesContainer > div,
+    .dark #mainContent #medicineSuppliesContainer > div{
+        background:
+            radial-gradient(circle at top left,
+                rgba(250,204,21,.18),
+                transparent 34%),
+            radial-gradient(circle at bottom right,
+                rgba(202,138,4,.10),
+                transparent 28%),
+            linear-gradient(
+                145deg,
+                rgba(10,14,20,.92),
+                rgba(17,24,39,.86)
+            ) !important;
+
+        border: 1px solid rgba(250,204,21,.14) !important;
+
+        box-shadow:
+            0 20px 40px rgba(0,0,0,.42),
+            0 0 24px rgba(250,204,21,.10),
+            inset 0 1px 0 rgba(255,255,255,.05) !important;
+    }
+
+    [data-theme="dark"] #mainContent #medicineSuppliesContainer .w-9.h-9,
+    .dark #mainContent #medicineSuppliesContainer .w-9.h-9{
+        background:
+            linear-gradient(
+                135deg,
+                rgba(250,204,21,.20),
+                rgba(202,138,4,.12)
+            ) !important;
+
+        border: 1px solid rgba(250,204,21,.28) !important;
+
+        box-shadow:
+            0 0 18px rgba(250,204,21,.18),
+            inset 0 1px 0 rgba(255,255,255,.06);
+    }
+
+    [data-theme="dark"] #mainContent #medicineSuppliesContainer .w-9.h-9 i,
+    .dark #mainContent #medicineSuppliesContainer .w-9.h-9 i{
+        color: #FACC15 !important;
+
+        filter:
+            drop-shadow(0 0 8px rgba(250,204,21,.65))
+            drop-shadow(0 0 18px rgba(202,138,4,.45));
+    }
+
+    [data-theme="dark"] #mainContent #medicineSuppliesContainer h3,
+    .dark #mainContent #medicineSuppliesContainer h3{
+        color: #FACC15 !important;
+    }
+
+    [data-theme="dark"] #mainContent #medicineSuppliesContainer a,
+    .dark #mainContent #medicineSuppliesContainer a{
+        background:
+            linear-gradient(
+                135deg,
+                #FACC15,
+                #CA8A04
+            ) !important;
+
+        color: #111827 !important;
+
+        border: 1px solid rgba(250,204,21,.34) !important;
+
+        box-shadow:
+            0 10px 24px rgba(250,204,21,.24),
+            0 0 18px rgba(250,204,21,.14),
+            inset 0 1px 0 rgba(255,255,255,.22);
+
+        transition: all .22s ease;
+    }
+
+    [data-theme="dark"] #mainContent #medicineSuppliesContainer a:hover,
+    .dark #mainContent #medicineSuppliesContainer a:hover{
+        transform: translateY(-2px);
+
+        background:
+            linear-gradient(
+                135deg,
+                #FDE047,
+                #EAB308
+            ) !important;
+
+        color: #111827 !important;
+
+        box-shadow:
+            0 14px 28px rgba(250,204,21,.30),
+            0 0 22px rgba(250,204,21,.20);
+    }
+
+    #medicineSuppliesContainer h3{
+        color: #CA8A04 !important;
+    }
+
+    [data-theme="dark"] #mainContent #medicineSuppliesContainer p,
+    .dark #mainContent #medicineSuppliesContainer p{
+        color: var(--text-secondary, #C9D1D9) !important;
+    }
+    
+    .gad-header-badge{
+        background: linear-gradient(135deg,#fff3f3,#ffe8e8) !important;
+        color:#8B0000 !important;
+        border:1px solid #f4caca !important;
+    }
+
+    .gad-metric-chip{
+        background: rgba(255,255,255,.82) !important;
+        border:1px solid rgba(139,0,0,.10) !important;
+        color:#8B0000 !important;
+    }
+
+    .gad-empty-panel{
+        background:
+            linear-gradient(135deg,rgba(255,255,255,.86),rgba(255,247,247,.76)) !important;
+        border:1px dashed rgba(139,0,0,.20) !important;
+        color:#1F2937 !important;
+    }
+
+    .gad-empty-panel p:first-of-type{
+        color:#1F2937 !important;
+    }
+
+    .gad-empty-panel p:nth-of-type(2){
+        color:#667085 !important;
+    }
+
+    .gad-empty-pill{
+        background:rgba(255,255,255,.88) !important;
+        color:#8B0000 !important;
+        border:1px solid #f0d5d5 !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-empty-panel,
+    .dark #mainContent .gad-empty-panel{
+        background:
+            radial-gradient(circle at top left, rgba(252,165,165,.08), transparent 35%),
+            linear-gradient(145deg, rgba(13,17,23,.78), rgba(22,27,34,.62)) !important;
+
+        border:1px dashed rgba(255,255,255,.13) !important;
+
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.06),
+            0 18px 36px rgba(0,0,0,.20) !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-empty-panel p:first-of-type,
+    .dark #mainContent .gad-empty-panel p:first-of-type{
+        color:#F8FAFC !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-empty-panel p:nth-of-type(2),
+    .dark #mainContent .gad-empty-panel p:nth-of-type(2){
+        color:#C9D1D9 !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-empty-icon-wrap,
+    .dark #mainContent .gad-empty-icon-wrap{
+        background:rgba(255, 228, 228, 0.293) !important;
+
+        color:#8B0000 !important;
+        border:1px solid rgba(252,165,165,.25) !important;
+
+        box-shadow:
+            0 16px 34px rgba(250, 250, 250, 0.159),
+            0 0 24px rgba(208, 208, 208, 0.14),
+            inset 0 1px 0 rgba(255,255,255,.45) !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-empty-icon-wrap i,
+    .dark #mainContent .gad-empty-icon-wrap i{
+        color:#c6c6c6 !important;
+        filter:drop-shadow(0 0 7px rgba(235, 235, 235, 0.34)) !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-empty-pill,
+    .dark #mainContent .gad-empty-pill{
+        background:rgba(13,17,23,.56) !important;
+        border:1px solid rgba(255,255,255,.12) !important;
+        color:#f5f5f5 !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-metric-chip,
+    .dark #mainContent .gad-metric-chip{
+        background:rgba(13,17,23,.58) !important;
+        border:1px solid rgba(255,255,255,.12) !important;
+        box-shadow:
+            0 10px 22px rgba(0,0,0,.22),
+            inset 0 1px 0 rgba(255,255,255,.06) !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-metric-chip:nth-child(1),
+    .dark #mainContent .gad-metric-chip:nth-child(1){
+        color:#E5B5B5 !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-metric-chip:nth-child(2),
+    .dark #mainContent .gad-metric-chip:nth-child(2){
+        color:#89CFF0 !important;
+    }
+
+    [data-theme="dark"] #mainContent .gad-metric-chip:nth-child(3),
+    .dark #mainContent .gad-metric-chip:nth-child(3){
+        color:#FCA5A5 !important;
+    }
+
+    [data-theme="dark"] #mainContent #medicalSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4 p,
+    [data-theme="dark"] #mainContent #medicineSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4 p,
+    .dark #mainContent #medicalSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4 p,
+    .dark #mainContent #medicineSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4 p{
+        color: var(--text-secondary, #C9D1D9) !important;
+    }
 </style>
 @endsection
 
@@ -481,8 +1584,11 @@ $calendarAppointmentCounts = $appointmentCountsPerDay ?? [];
 $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
 @endphp
 
-<main id="mainContent" class="pt-[100px] px-3 md:px-6 py-6 fade-in min-h-screen flex-1">
-    <div class="w-full fade-in">
+<main id="mainContent"
+    class="pt-[78px] px-3 md:px-5 xl:px-6 pb-5 page-enter min-h-screen flex-1 bg-gray-50 dark:bg-[#000D1A] text-gray-900 dark:text-[#F3F4F6]">
+    <div class="w-full">
+
+        <x-dashboard-loading-status />
 
         <div class="greeting-row">
             <div class="greeting-banner w-full">
@@ -495,10 +1601,10 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                             <span class="greeting-line greeting-name-line">
                                 <span class="greeting-name-prefix">Dr.</span>
                                 <span id="dentistName"></span>
-                                <i class="fa-solid fa-hand text-yellow-300 wave-hand"></i>
+                                <i class="fa-solid fa-heart-pulse text-rose-300"></i>
                             </span>
                         </h1>
-                        <p>Wishing you a healthy and happy day!</p>
+                        <p id="rotatingSubtitle" class="greeting-subtitle"></p>
                     </div>
 
                     <div class="greeting-banner-actions">
@@ -528,395 +1634,133 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
             </div>
         </div>
 
-        <div class="kpi-grid">
-
-            {{-- KPI 1: Dental Cases --}}
-            <div class="relative overflow-hidden rounded-2xl p-5 text-white"
-                style="background:linear-gradient(135deg,#8B0000 0%,#5a0000 100%);box-shadow:0 4px 20px rgba(139,0,0,.35);">
-                <div class="flex items-start justify-between mb-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style="background:rgba(255,255,255,.15);">
-                        <i class="fa-solid fa-tooth text-yellow-300 text-lg"></i>
-                    </div>
-                    @if (!is_null($dentalCasesDelta))
-                    <span class="text-[10px] font-bold px-2 py-1 rounded-full"
-                        style="background:rgba(255,255,255,.15);">
-                        {{ $dentalCasesDelta >= 0 ? '+' : '' }}{{ $dentalCasesDelta }}%
-                    </span>
-                    @endif
-                </div>
-                <p class="text-4xl font-extrabold leading-none tracking-tight">{{ $dentalCasesThisMonth }}</p>
-                <p class="text-xs font-semibold mt-1 uppercase tracking-widest" style="opacity:.65;">Dental Cases</p>
-                <p class="text-xs mt-0.5" style="opacity:.45;">{{ now()->format('F Y') }}</p>
-                <div class="absolute -bottom-5 -right-5 w-24 h-24 rounded-full"
-                    style="background:rgba(255,255,255,.05);"></div>
+        <div id="kpiGridContainer" class="kpi-grid skeleton-section skeleton-fade-swap">
+            <div class="skeleton-shell space-y-4">
+                @for ($i = 0; $i <5; $i++) <div class="rounded-2xl h-32 skeleton-block">
             </div>
-
-            {{-- KPI 2: Total Appointments --}}
-            <div class="relative overflow-hidden rounded-2xl p-5 bg-white"
-                style="border:1.5px solid #fce8e8;box-shadow:0 2px 12px rgba(139,0,0,.08);">
-                <div class="flex items-start justify-between mb-3">
-                    <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-regular fa-calendar-check text-[#8B0000] text-lg"></i>
-                    </div>
-                    @if (!is_null($totalApptsDelta))
-                    <span
-                        class="text-[10px] font-bold px-2 py-1 rounded-full {{ $totalApptsDelta >= 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' }}">
-                        {{ $totalApptsDelta >= 0 ? '+' : '' }}{{ $totalApptsDelta }}%
-                    </span>
-                    @endif
-                </div>
-                <p class="text-4xl font-extrabold leading-none tracking-tight text-[#8B0000]">{{ $totalApptsThisMonth }}
-                </p>
-                <p class="text-xs font-semibold mt-1 uppercase tracking-widest text-[#8B0000]/50">Total Appointments</p>
-                <p class="text-xs text-gray-400 mt-0.5">{{ now()->format('F Y') }}</p>
-                <div class="absolute -bottom-5 -right-5 w-24 h-24 rounded-full bg-red-50/40"></div>
-            </div>
-
-            {{-- KPI 3: Today's Patients --}}
-            <div class="relative overflow-hidden rounded-2xl p-5 bg-white"
-                style="border:1.5px solid #fce8e8;box-shadow:0 2px 12px rgba(139,0,0,.08);">
-                <div class="flex items-start justify-between mb-3">
-                    <div class="w-10 h-10 rounded-xl bg-red-50 flex-shrink-0"
-                        style="display:flex;align-items:center;justify-content:center;">
-                        <i class="fa-solid fa-user-clock text-[#8B0000] text-lg"></i>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-green-50 text-green-700">Today</span>
-                </div>
-                <p class="text-4xl font-extrabold leading-none tracking-tight text-[#8B0000]">
-                    {{ $todayAppointments->count() }}</p>
-                <p class="text-xs font-semibold mt-1 uppercase tracking-widest text-[#8B0000]/50">Today's Patients</p>
-                <p class="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
-                    <span class="text-green-500 font-bold">{{ $todayAppointments->where('status', 'confirmed')->count()
-                        }}
-                        confirmed</span>
-                    <span class="text-gray-300">·</span>
-                    <span class="text-yellow-500 font-bold">{{ $todayAppointments->where('status', 'pending')->count()
-                        }}
-                        pending</span>
-                </p>
-                <div class="absolute -bottom-5 -right-5 w-24 h-24 rounded-full bg-red-50/40"></div>
-            </div>
-
-            {{-- KPI 4: Live Clock --}}
-            <div class="relative overflow-hidden rounded-2xl p-5"
-                style="background:linear-gradient(135deg,#7b0c0c 0%,#4a0606 100%);box-shadow:0 4px 20px rgba(100,0,0,.3);">
-                <div class="flex items-start justify-between mb-3">
-                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                        <i id="kpi-clock-icon" class="fa-solid fa-sun text-yellow-300 text-lg"></i>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-1 rounded-full text-white"
-                        style="background:rgba(255,255,255,.15);">
-                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse mr-1"
-                            style="vertical-align:middle;"></span>Live
-                    </span>
-                </div>
-                <p class="leading-none text-white">
-                    <span id="kpi-clock-hhmm" class="text-3xl font-extrabold tracking-tight"
-                        style="font-variant-numeric:tabular-nums;">00:00</span>
-                    <span id="kpi-clock-ss" class="text-xl font-semibold opacity-50"
-                        style="font-variant-numeric:tabular-nums;">:00</span>
-                    <span id="kpi-clock-ampm" class="text-xs font-bold opacity-60 ml-1 align-super">AM</span>
-                </p>
-                <p class="text-xs font-semibold mt-1 uppercase tracking-widest text-white" style="opacity:.55;">Live
-                    Time</p>
-                <p class="text-xs mt-0.5 text-white flex items-center gap-1.5" style="opacity:.45;">
-                    <i id="kpi-clock-dayicon" class="fa-solid fa-sun text-xs flex-shrink-0" style="color:#fde68a;"></i>
-                    <span id="kpi-clock-date"></span>
-                </p>
-                <div class="absolute -bottom-5 -right-5 w-24 h-24 rounded-full"
-                    style="background:rgba(255,255,255,.04);"></div>
-            </div>
-
-            {{-- KPI 5: Clinic Status --}}
-            <div class="relative overflow-hidden rounded-2xl p-5 bg-white"
-                style="border:1.5px solid #d1fae5;box-shadow:0 2px 12px rgba(16,185,129,.08);">
-                <div class="flex items-start justify-between mb-3">
-                    <div class="w-10 h-10 rounded-xl flex-shrink-0"
-                        style="background:#e6f4ea; display:flex; align-items:center; justify-content:center;">
-                        <i id="statusKpiIcon" class="fa-solid fa-door-open text-lg" style="color:#00A96E;"></i>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-1 rounded-full"
-                        style="background:#e6f4ea; color:#00A96E;">Live</span>
-                </div>
-                <p id="statusKpiLabel" class="text-4xl font-extrabold leading-none tracking-tight"
-                    style="color:#00A96E;">Open</p>
-                <p class="text-xs font-semibold mt-1 uppercase tracking-widest text-[#8B0000]/50">Clinic Status</p>
-                <button onclick="openStatusModal()"
-                    class="mt-2 text-[11px] font-bold text-[#8B0000] hover:text-[#660000] transition flex items-center gap-1">
-                    Change <i class="fa-solid fa-arrow-right"></i>
-                </button>
-                <div class="absolute -bottom-5 -right-5 w-24 h-24 rounded-full"
-                    style="background:#e6f4ea; opacity: 0.5;"></div>
-            </div>
-
+            @endfor
         </div>
+    </div>
 
-        <div class="row2-grid">
-            <div>
-                <div id="dentistCalendarContainer" class="w-full h-full min-h-[420px]">
-                    <div class="cal-shell skeleton-shell p-5 sm:p-6 h-full border-none shadow-sm">
-                        <div class="animate-pulse space-y-4">
-                            <div class="h-6 w-40 bg-gray-200 rounded mx-auto"></div>
-                            <div class="grid grid-cols-7 gap-2">
-                                @for ($i = 0; $i < 35; $i++) <div class="h-9 bg-gray-200 rounded-lg">
+    <div class="row2-grid">
+        {{-- LEFT: Calendar --}}
+        <div class="min-w-0">
+            <div id="dentistCalendarContainer" class="w-full h-full min-h-[420px] skeleton-section skeleton-fade-swap">
+                <div class="cal-shell skeleton-shell p-5 sm:p-6 h-full border-none shadow-sm">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="w-8 h-8 rounded-full skeleton-block"></div>
+                            <div class="text-center space-y-2">
+                                <div class="h-5 w-28 skeleton-block rounded mx-auto"></div>
+                                <div class="h-3 w-16 skeleton-line rounded mx-auto"></div>
                             </div>
-                            @endfor
+                            <div class="w-8 h-8 rounded-full skeleton-block"></div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div>
-            <div class="card bg-gradient-to-b from-[#8B0000] to-[#660000] text-white shadow rounded-xl h-full">
-                <div class="card-body flex flex-col">
-                    <div class="flex items-center justify-between mb-3">
-                        <h2 class="text-base font-bold flex items-center gap-2">
-                            <i class="fa-regular fa-clock text-yellow-300"></i> Scheduled Today
-                        </h2>
-                        <span class="badge bg-yellow-400 text-[#660000] font-bold border-none px-3">
-                            {{ $todayAppointments->count() }}
-                            {{ \Illuminate\Support\Str::plural('patient', $todayAppointments->count()) }}
-                        </span>
-                    </div>
-                    <div class="space-y-2 flex-1 overflow-y-auto pr-1">
-                        @forelse($todayAppointments as $appointment)
-                        @php
-                        $name = $appointment->patient->name ?? 'Unknown Patient';
-                        $time = \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A');
-                        $service =
-                        $appointment->service_type === 'others'
-                        ? $appointment->other_services ?? 'Other Service'
-                        : $appointment->service_type;
-                        $isConfirmed = $appointment->status === 'confirmed';
-                        @endphp
-                        <a href="{{ route('dentist.dentist.appointments') }}"
-                            class="flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/20 p-3 rounded-xl w-full transition duration-200 hover:scale-[1.01]">
-                            <div
-                                class="rounded-full w-9 h-9 border-2 border-yellow-300 bg-white/20 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                                {{ strtoupper(substr($name, 0, 1)) }}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-sm truncate">{{ $name }}</p>
-                                <p class="text-xs opacity-70 truncate flex items-center gap-1">
-                                    <i class="fa-solid fa-stethoscope text-yellow-300 flex-shrink-0 text-[10px]"></i>
-                                    {{ ucwords($service) }} · {{ $time }}
-                                </p>
-                            </div>
-                            @if ($isConfirmed)
-                            <span
-                                class="badge badge-sm bg-green-400 text-white border-none flex-shrink-0 text-[10px]">✓</span>
-                            @else
-                            <span
-                                class="badge badge-sm bg-yellow-400 text-[#660000] border-none flex-shrink-0 text-[10px]">!</span>
-                            @endif
-                        </a>
-                        @empty
-                        <div class="flex flex-col items-center justify-center py-10 opacity-60">
-                            <i class="fa-regular fa-calendar-xmark text-4xl mb-3 text-yellow-300"></i>
-                            <p class="text-sm font-semibold">No appointments today</p>
-                            <p class="text-xs opacity-70 mt-1">Enjoy your free day, Doctor!</p>
+
+                        <div class="border-t border-gray-100 mb-3"></div>
+
+                        <div class="grid grid-cols-7 gap-0.5 mb-2">
+                            @for ($i = 0; $i <7; $i++) <div class="h-4 skeleton-line rounded mx-2">
                         </div>
-                        @endforelse
+                        @endfor
                     </div>
-                    <a href="{{ route('dentist.dentist.appointments') }}"
-                        class="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-yellow-300 hover:text-yellow-200 transition border-t border-white/10 pt-3">
-                        View all appointments <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </a>
+
+                    <div class="grid grid-cols-7 gap-1">
+                        @for ($i = 0; $i <35; $i++) <div class="flex items-center justify-center py-1.5">
+                            <div class="w-9 h-9 rounded-xl skeleton-line"></div>
+                    </div>
+                    @endfor
                 </div>
             </div>
         </div>
     </div>
+    </div>
+
+    <div class="dashboard-side-stack min-w-0">
+        <div id="upcomingAppointmentsContainer" class="skeleton-section skeleton-fade-swap h-full">
+            <div class="skeleton-shell bg-white rounded-xl p-4 h-full flex flex-col">
+                <div class="space-y-3 flex flex-col h-full">
+
+                    <div class="h-5 w-40 skeleton-block rounded"></div>
+
+                    <div class="flex gap-2 justify-center">
+                        @for ($i = 0; $i <5; $i++) <div class="h-14 w-14 skeleton-line rounded-xl">
+                    </div>
+                    @endfor
+                </div>
+
+                <div class="flex-1 space-y-2 mt-2">
+                    @for ($i = 0; $i <3; $i++) <div class="h-14 skeleton-block rounded-xl">
+                </div>
+                @endfor
+            </div>
+
+            <div class="h-6 w-40 mx-auto skeleton-line rounded"></div>
+
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
 
     <div class="row3-grid">
 
-        <div class="relative bg-white p-5 rounded-3xl shadow-sm flex flex-col shadow-xl">
-
-            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <div>
-                    <h3 class="text-base font-bold text-[#8B0000]">GAD Analytics</h3>
-                    <p class="text-sm text-gray-600">Gender and Development Data</p>
-                    <p class="text-xs text-gray-400 mt-0.5">Patient cases by category and sex —
-                        {{ now()->format('F Y') }}</p>
-                </div>
-
-                <div class="flex items-center justify-end space-x-4 flex-wrap gap-y-1">
-                    <div class="flex items-center justify-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#E5B5B5] flex-shrink-0"></span>
-                        <span class="text-xs text-gray-600 leading-none">Female</span>
+        <div id="gadAnalyticsContainer" class="skeleton-section skeleton-fade-swap">
+            <div class="skeleton-shell bg-white p-5 rounded-3xl shadow-sm flex flex-col">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="space-y-2 flex-1">
+                            <div class="h-5 w-32 skeleton-block rounded"></div>
+                            <div class="h-4 w-24 skeleton-line rounded"></div>
+                            <div class="h-3 w-40 skeleton-line rounded"></div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="h-6 w-24 skeleton-block rounded"></div>
+                            <div class="h-6 w-24 skeleton-block rounded"></div>
+                        </div>
                     </div>
-                    <div class="flex items-center justify-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#89CFF0] flex-shrink-0"></span>
-                        <span class="text-xs text-gray-600 leading-none">Male</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex-grow flex items-center justify-center w-full min-h-[200px]">
-
-                <canvas id="gadChart" style="display: block; width: 100%; height: 100%;"></canvas>
-
-                <div id="empty-state-container" class="flex flex-col items-center justify-center text-gray-500 gap-4"
-                    style="display: none;">
-
-                    <svg class="w-20 h-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                        </path>
-                        <text x="12" y="16" text-anchor="middle" font-size="6" fill="currentColor"
-                            font-weight="bold">?</text>
-                    </svg>
-
-                    <div class="text-center flex flex-col gap-1 items-center">
-                        <p class="font-semibold text-base text-gray-700 leading-tight">No Treatments Recorded</p>
-                        <p class="text-sm text-gray-400 max-w-xs">There are no completed treatment records for this
-                            month yet.</p>
-                    </div>
+                    <div class="h-48 skeleton-block rounded"></div>
                 </div>
             </div>
         </div>
 
-        <div class="flex flex-col gap-5">
-            <div
-                class="relative bg-white p-5 rounded-3xl shadow-sm flex flex-col overflow-hidden group border border-gray-100">
-                <div
-                    class="absolute -top-6 -right-6 w-24 h-24 bg-red-50 rounded-full z-0 opacity-70 group-hover:scale-110 transition-transform duration-500">
-                </div>
-
-                <div class="relative z-10 flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-[#8B0000] border border-red-100 flex-shrink-0">
-                            <i class="fa-solid fa-boxes-stacked text-lg"></i>
+        <div class="inventory-grid">
+            <div id="medicalSuppliesContainer" class="skeleton-section skeleton-fade-swap">
+                <div class="skeleton-shell bg-white p-5 rounded-3xl shadow-sm flex flex-col">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="space-y-2 flex-1">
+                                <div class="h-5 w-32 skeleton-block rounded"></div>
+                                <div class="h-3 w-24 skeleton-line rounded"></div>
+                            </div>
+                            <div class="h-6 w-20 skeleton-block rounded"></div>
                         </div>
-                        <div>
-                            <h3 class="font-extrabold text-[#8B0000] text-sm">Medical Supplies</h3>
-                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Top
-                                Inventory
-                            </p>
-                        </div>
+                        @for ($i = 0; $i <3; $i++) <div class="h-10 skeleton-block rounded">
                     </div>
-                    <a href="{{ route('dentist.dentist.inventory') }}"
-                        class="text-[11px] font-bold text-[#8B0000] bg-red-50 hover:bg-[#8B0000] hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5">
-                        View All <i class="fa-solid fa-arrow-right"></i>
-                    </a>
+                    @endfor
                 </div>
-
-                @if ($medicalSupplies->count() > 0)
-                <div class="relative z-10 overflow-y-auto overflow-x-auto pr-1" style="max-height: 180px;">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
-                            <tr class="text-[10px] uppercase tracking-widest text-gray-400 border-b border-gray-100">
-                                <th class="pb-2 font-bold">Item</th>
-                                <th class="pb-2 text-center font-bold">Stock</th>
-                                <th class="pb-2 text-center font-bold">Used</th>
-                                <th class="pb-2 text-right font-bold">Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-xs text-gray-700">
-                            @foreach ($medicalSupplies as $item)
-                            @php
-                            $balance = $item->qty - $item->used;
-                            $pct = $item->qty > 0 ? ($balance / $item->qty) * 100 : 100;
-                            $isLow = $pct <= 30; $badgeCls=$isLow
-                                ? 'bg-red-50 text-red-600 border-red-200 animate-pulse'
-                                : 'bg-green-50 text-green-600 border-green-200' ; @endphp <tr
-                                class="border-b border-gray-50 last:border-none hover:bg-gray-50/50 transition-colors">
-                                <td class="py-2.5 max-w-[140px] truncate font-semibold text-gray-800">
-                                    {{ $item->name }}
-                                </td>
-                                <td class="py-2.5 text-center font-medium">{{ $item->qty }}</td>
-                                <td class="py-2.5 text-center text-gray-500">{{ $item->used }}</td>
-                                <td class="py-2.5 text-right">
-                                    <span class="px-2 py-1 rounded-md border text-[10px] font-bold {{ $badgeCls }}">
-                                        {{ $balance }}{{ $isLow ? ' ⚠' : '' }}
-                                    </span>
-                                </td>
-                                </tr>
-                                @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                @else
-                <div
-                    class="relative z-10 flex flex-col items-center justify-center py-6 text-center opacity-60 bg-gray-50 rounded-xl mt-2 border border-dashed border-gray-200">
-                    <i class="fa-solid fa-box-open text-3xl mb-2 text-[#8B0000]/50"></i>
-                    <p class="text-xs font-semibold text-gray-500">No medical supplies yet</p>
-                </div>
-                @endif
             </div>
-
-            <div
-                class="relative bg-white p-5 rounded-3xl shadow-sm flex flex-col overflow-hidden group border border-gray-100">
-                <div
-                    class="absolute -bottom-6 -right-6 w-24 h-24 bg-yellow-50 rounded-full z-0 opacity-70 group-hover:scale-110 transition-transform duration-500">
-                </div>
-
-                <div class="relative z-10 flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center text-[#8B0000] border border-yellow-100 flex-shrink-0">
-                            <i class="fa-solid fa-pills text-lg text-yellow-600"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-[#8B0000] text-sm">Medicine Supplies</h3>
-                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Top
-                                Inventory
-                            </p>
-                        </div>
-                    </div>
-                    <a href="{{ route('dentist.dentist.inventory') }}"
-                        class="text-[11px] font-bold text-yellow-700 bg-yellow-50 hover:bg-yellow-400 hover:text-[#8B0000] px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5">
-                        View All <i class="fa-solid fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                @if ($medicineSupplies->count() > 0)
-                <div class="relative z-10 overflow-y-auto overflow-x-auto pr-1" style="max-height: 180px;">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
-                            <tr class="text-[10px] uppercase tracking-widest text-gray-400 border-b border-gray-100">
-                                <th class="pb-2 font-bold">Medicine</th>
-                                <th class="pb-2 text-center font-bold">Form</th>
-                                <th class="pb-2 text-center font-bold">Stock</th>
-                                <th class="pb-2 text-right font-bold">Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-xs text-gray-700">
-                            @foreach ($medicineSupplies as $item)
-                            @php
-                            $balance = $item->qty - $item->used;
-                            $pct = $item->qty > 0 ? ($balance / $item->qty) * 100 : 100;
-                            $isLow = $pct <= 30; $badgeCls=$isLow
-                                ? 'bg-red-50 text-red-600 border-red-200 animate-pulse'
-                                : 'bg-green-50 text-green-600 border-green-200' ; @endphp <tr
-                                class="border-b border-gray-50 last:border-none hover:bg-gray-50/50 transition-colors">
-                                <td class="py-2.5 max-w-[120px] truncate font-semibold text-gray-800">
-                                    {{ $item->name }}
-                                </td>
-                                <td class="py-2.5 text-center text-gray-500">{{ $item->form ?? '—' }}</td>
-                                <td class="py-2.5 text-center font-medium">{{ $item->qty }}</td>
-                                <td class="py-2.5 text-right">
-                                    <span class="px-2 py-1 rounded-md border text-[10px] font-bold {{ $badgeCls }}">
-                                        {{ $balance }}{{ $isLow ? ' ⚠' : '' }}
-                                    </span>
-                                </td>
-                                </tr>
-                                @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                @else
-                <div
-                    class="relative z-10 flex flex-col items-center justify-center py-6 text-center opacity-60 bg-gray-50 rounded-xl mt-2 border border-dashed border-gray-200">
-                    <i class="fa-solid fa-prescription-bottle-medical text-3xl mb-2 text-[#8B0000]/50"></i>
-                    <p class="text-xs font-semibold text-gray-500">No medicine items yet</p>
-                </div>
-                @endif
-            </div>
-
         </div>
+
+        <div id="medicineSuppliesContainer" class="skeleton-section skeleton-fade-swap">
+            <div class="skeleton-shell bg-white p-5 rounded-3xl shadow-sm flex flex-col">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-2 flex-1">
+                            <div class="h-5 w-32 skeleton-block rounded"></div>
+                            <div class="h-3 w-24 skeleton-line rounded"></div>
+                        </div>
+                        <div class="h-6 w-20 skeleton-block rounded"></div>
+                    </div>
+                    @for ($i = 0; $i <3; $i++) <div class="h-10 skeleton-block rounded">
+                </div>
+                @endfor
+            </div>
+        </div>
+    </div>
+
+    </div>
     </div>
 
     </div>
@@ -960,7 +1804,7 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
         <div class="bg-gradient-to-r from-[#660000] to-[#8B0000] px-6 py-4 text-white">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <h2 class="text-lg font-extrabold">Scheduled Patients</h2>
+                    <h2 class="text-base font-extrabold">Scheduled Patients</h2>
                     <p id="dayAppointmentsModalDate" class="text-sm opacity-80 mt-1"></p>
                 </div>
                 <button type="button" onclick="closeDayAppointmentsModal()"
@@ -983,10 +1827,10 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
     </div>
 </div>
 
-@if (session('activeAppointmentModal'))
+{{-- @if (session('activeAppointmentModal'))
 <dialog id="activeAppointmentModal" class="modal">
     <div class="modal-box">
-        <h3 class="font-bold text-lg">Active Appointment!</h3>
+        <h3 class="font-bold text-base">Active Appointment!</h3>
         <p class="py-4">You have an ongoing appointment setup.</p>
         <div class="modal-action">
             <form method="dialog">
@@ -1001,24 +1845,636 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
         if (modal) modal.showModal();
     });
 </script>
-@endif
+@endif --}}
 @endsection
 
 @section('scripts')
 <script>
+    function buildUpcomingAppointments() {
+        const apptDetails = dashboardData.apptDetails || {};
+        const today = new Date();
+
+        const pad = n => String(n).padStart(2, '0');
+        const dateKey = date => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+        const days = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(today);
+            d.setDate(today.getDate() + i);
+            return d;
+        });
+
+        let selectedKey = dateKey(today);
+
+        function statusClass(status = '') {
+            const s = String(status).toLowerCase();
+            if (s.includes('confirmed')) return 'upcoming-status-confirmed';
+            if (s.includes('pending')) return 'upcoming-status-pending';
+            if (s.includes('cancel')) return 'upcoming-status-cancelled';
+            return 'upcoming-status-default';
+        }
+
+        function avatarClass(status = '') {
+            const s = String(status).toLowerCase();
+            if (s.includes('confirmed')) return 'avatar-confirmed';
+            if (s.includes('pending')) return 'avatar-pending';
+            if (s.includes('cancel')) return 'avatar-cancelled';
+            return 'avatar-default';
+        }
+
+        function getInitials(name = 'Unknown') {
+            return String(name)
+                .trim()
+                .split(/\s+/)
+                .map(n => n[0])
+                .slice(0, 2)
+                .join('')
+                .toUpperCase();
+        }
+
+        function render(selectedDateKey) {
+            selectedKey = selectedDateKey;
+            const appointments = apptDetails[selectedKey] || [];
+
+            const dateButtons = days.map(d => {
+                const key = dateKey(d);
+                const active = key === selectedKey;
+                return `
+                <button type="button" onclick="renderUpcomingAppointmentsDay('${key}')"
+                    class="upcoming-date-btn ${active ? 'active' : ''}">
+                    <div class="text-sm font-extrabold">${d.getDate()}</div>
+                    <div class="text-[10px] font-semibold opacity-70">
+                        ${d.toLocaleDateString('en-US', { weekday: 'short' })}
+                    </div>
+                </button>
+            `;
+            }).join('');
+
+            const items = appointments.length
+                ? appointments.slice(0, 3).map(appt => {
+                    const name = appt.name || 'Unknown Patient';
+const initials = getInitials(name);
+const photo = appt.patientPhotoUrl || appt.profile_photo_url || appt.avatar || null;
+
+return `
+    <a href="${appt.patientProfileUrl || '{{ route('dentist.dentist.appointments') }}'}"
+        class="upcoming-item hover:bg-red-50/40 rounded-xl transition">
+
+        <span class="upcoming-time-dot"></span>
+
+        <div class="upcoming-avatar ${avatarClass(appt.status)}">
+            ${
+                photo
+                    ? `<img src="${escHtml(photo)}" alt="${escHtml(name)}">`
+                    : `<span>${escHtml(initials)}</span>`
+            }
+        </div>
+
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+                <p class="text-sm font-bold text-gray-800 truncate">${escHtml(name)}</p>
+                <span class="text-[11px] font-bold text-[#8B0000] flex-shrink-0">${escHtml(appt.time || '—')}</span>
+            </div>
+            <p class="text-xs text-gray-500 truncate">${escHtml(appt.service || 'General Service')}</p>
+        </div>
+    </a>
+`;
+    }).join('')
+    : `
+                <div class="upcoming-empty-state text-gray-400">
+        <div>
+            <i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-[#8B0000]/40"></i>
+            <p class="text-sm font-semibold">No appointments for this day</p>
+        </div>
+    </div>
+                `;
+
+        const html = `
+                <div class="upcoming-card" >
+                <div class="dashboard-side-card-head">
+                    <h3 class="dashboard-side-card-title">
+                        <i class="fa-regular fa-calendar-days"></i> Upcoming Appointments
+                    </h3>
+                </div>
+
+                <div class="dashboard-side-card-body">
+                    <div class="upcoming-date-strip mb-3">
+                        ${dateButtons}
+                    </div>
+
+                    <div class="upcoming-list-area divide-y divide-gray-100">
+                        ${items}
+                    </div>
+
+                    <a href="{{ route('dentist.dentist.appointments') }}"
+                        class="mt-2 pt-3 border-t border-gray-100 flex items-center justify-center gap-2 text-xs font-bold text-[#8B0000] hover:text-[#660000]">
+                        View all appointments <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div >
+                `;
+
+        const container = document.getElementById('upcomingAppointmentsContainer');
+
+        if (container) {
+            if (!container.dataset.loaded) {
+                swapSkeletonContent('upcomingAppointmentsContainer', html);
+                container.dataset.loaded = 'true';
+            } else {
+                container.innerHTML = html;
+            }
+        }
+    }
+
+    window.renderUpcomingAppointmentsDay = render;
+    render(selectedKey);
+}
+
     const dashboardData = {
-        gadLabels: @json($gadLabels),
-        gadFemale: @json($gadFemale),
-        gadMale: @json($gadMale),
-        apptCounts: @json($calendarAppointmentCounts),
-        apptDetails: @json($calendarAppointmentDetails),
-        unavailableDates: @json($blockedDates ?? []),
-        holidays: @json($philippineHolidays ?? []),
+        gadLabels: {!! json_encode($gadLabels) !!},
+        gadFemale: {!! json_encode($gadFemale) !!},
+        gadMale: {!! json_encode($gadMale) !!},
+        apptCounts: {!! json_encode($calendarAppointmentCounts) !!},
+        apptDetails: {!! json_encode($calendarAppointmentDetails) !!},
+        unavailableDates: {!! json_encode($blockedDates ?? []) !!},
+        holidays: {!! json_encode($philippineHolidays ?? []) !!},
     };
+
+    const KPI_DATA = {!! json_encode((object)[
+        'dentalCases' => $dentalCasesThisMonth ?? 0,
+        'dentalCasesDelta' => $dentalCasesDelta,
+        'totalAppts' => $totalApptsThisMonth ?? 0,
+        'totalApptsDelta' => $totalApptsDelta,
+        'todayCount' => ($todayAppointments?->whereNotIn('status', ['cancelled'])?->count() ?? 0),
+        'todayUpcoming' => ($todayAppointments?->whereIn('status', ['upcoming', 'rescheduled'])?->count() ?? 0),
+        'todayCompleted' => ($todayAppointments?->where('status', 'completed')?->count() ?? 0),
+    ]) !!};
+
+    const TODAY_APPOINTMENTS = {!! json_encode($todayAppointments ?? []) !!};
+    const MEDICAL_SUPPLIES = {!! json_encode($medicalSupplies ?? []) !!};
+    const MEDICINE_SUPPLIES = {!! json_encode($medicineSupplies ?? []) !!};
 
     const GAD_LABELS = dashboardData.gadLabels;
     const GAD_FEMALE = dashboardData.gadFemale;
     const GAD_MALE = dashboardData.gadMale;
+
+    function renderGadChart() {
+        const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const totalFemale = GAD_FEMALE.reduce((sum, value) => sum + Number(value || 0), 0);
+        const totalMale = GAD_MALE.reduce((sum, value) => sum + Number(value || 0), 0);
+        const totalCases = totalFemale + totalMale;
+        const hasData = [...GAD_FEMALE, ...GAD_MALE].some(v => Number(v || 0) > 0);
+
+        const cardHeader = `
+            <div class="relative z-10 flex items-start justify-between mb-5 flex-wrap gap-4">
+                <div class="flex items-start gap-3 min-w-0">
+                    <div class="gad-header-badge flex-shrink-0">
+                        <i class="fa-solid fa-chart-simple text-base"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-base font-extrabold text-[#8B0000] leading-tight">GAD Analytics</h3>
+                            <span class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full bg-[#8B0000]/10 text-[#8B0000]">${monthLabel}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">Gender and Development Data</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Patient cases by category and sex</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 flex-wrap">
+                    <div class="gad-metric-chip">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#E5B5B5]"></span>
+                        Female <span class="font-semibold">${totalFemale}</span>
+                    </div>
+                    <div class="gad-metric-chip">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#89CFF0]"></span>
+                        Male <span class="font-semibold">${totalMale}</span>
+                    </div>
+                    <div class="gad-metric-chip">
+                        <i class="fa-solid fa-users text-[11px]"></i>
+                        Total <span class="font-semibold">${totalCases}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (!hasData) {
+            const html = `
+                <div class="gad-analytics-card p-5 sm:p-6 flex flex-col">
+                    ${cardHeader}
+                    <div class="relative z-10 flex-grow flex items-center justify-center w-full min-h-[255px]">
+                        <div class="gad-empty-panel text-center">
+                            <div class="gad-empty-icon-wrap">
+                                <i class="fa-regular fa-clipboard text-5xl"></i>
+                            </div>
+                            <p class="font-extrabold text-base text-gray-800 leading-tight">No Treatments Recorded</p>
+                            <p class="text-sm text-gray-500 max-w-md mx-auto mt-2">
+                                Completed treatment records for this month will appear here once available.
+                            </p>
+                            <div class="gad-empty-actions">
+                                <span class="gad-empty-pill"><i class="fa-solid fa-chart-column"></i> Category breakdown</span>
+                                <span class="gad-empty-pill"><i class="fa-solid fa-venus-mars"></i> Sex-disaggregated data</span>
+                                <span class="gad-empty-pill"><i class="fa-regular fa-calendar"></i> Monthly view</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            swapSkeletonContent('gadAnalyticsContainer', html);
+            return true;
+        }
+
+        const chartHtml = `
+            <div class="gad-analytics-card p-5 sm:p-6 flex flex-col">
+                ${cardHeader}
+                <div class="gad-chart-shell relative z-10 flex-grow flex items-center justify-center w-full">
+                    <canvas id="gadChart" style="display:block;width:100%;height:100%;min-height:240px;"></canvas>
+                </div>
+            </div>
+        `;
+
+        swapSkeletonContent('gadAnalyticsContainer', chartHtml);
+
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js is not loaded');
+            return false;
+        }
+
+        setTimeout(() => {
+            const newCtx = document.getElementById('gadChart');
+            if (newCtx) {
+                new Chart(newCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: GAD_LABELS,
+                        datasets: [{
+                            label: 'Female',
+                            data: GAD_FEMALE,
+                            backgroundColor: 'rgba(229,181,181,0.88)',
+                            borderColor: '#E5B5B5',
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            borderSkipped: false
+                        },
+                        {
+                            label: 'Male',
+                            data: GAD_MALE,
+                            backgroundColor: 'rgba(137,207,240,0.88)',
+                            borderColor: '#89CFF0',
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            borderSkipped: false
+                        }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(13,17,23,0.92)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                padding: 12,
+                                cornerRadius: 12
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#6B7280', font: { weight: '700' } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(139,0,0,0.08)' },
+                                ticks: { precision: 0, color: '#9CA3AF' }
+                            }
+                        }
+                    }
+                });
+            }
+        }, 160);
+
+        return true;
+    }
+
+    function buildKpiGrid() {
+        const kpiData = KPI_DATA;
+
+        const html = `
+            <div class="kpi-card relative overflow-hidden rounded-xl p-4 text-white" style="background:linear-gradient(135deg,#8B0000 0%,#5a0000 100%);box-shadow:0 4px 15px rgba(139,0,0,.2);">
+                <div class="z-10 flex items-start justify-between w-full">
+                    <div class="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-tooth text-yellow-300 text-sm"></i>
+                    </div>
+                    ${kpiData.dentalCasesDelta !== null ? `<span class="text-[9px] font-bold px-2 py-1 rounded-full bg-white/20">${kpiData.dentalCasesDelta >= 0 ? '+' : ''}${kpiData.dentalCasesDelta}%</span>` : ''}
+                </div>
+                <div class="z-10 mt-4">
+                    <p class="text-3xl font-extrabold leading-none">${kpiData.dentalCases}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest mt-1 opacity-80">Dental Cases</p>
+                </div>
+                <div class="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-white/5"></div>
+            </div>
+
+            <div class="kpi-card relative overflow-hidden rounded-xl p-4 bg-white border border-red-50 shadow-sm">
+                <div class="z-10 flex items-start justify-between w-full">
+                    <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-regular fa-calendar-check text-[#8B0000] text-sm"></i>
+                    </div>
+                    ${kpiData.totalApptsDelta !== null ? `<span class="text-[9px] font-bold px-2 py-1 rounded-full ${kpiData.totalApptsDelta >= 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}">${kpiData.totalApptsDelta >= 0 ? '+' : ''}${kpiData.totalApptsDelta}%</span>` : ''}
+                </div>
+                <div class="z-10 mt-4">
+                    <p class="text-3xl font-extrabold leading-none text-[#8B0000]">${kpiData.totalAppts}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest mt-1 text-[#8B0000]/60">Appointments</p>
+                </div>
+            </div>
+
+            <div class="kpi-card relative overflow-hidden rounded-xl p-4 bg-white border border-red-50 shadow-sm">
+                <div class="z-10 flex items-start justify-between w-full">
+                    <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-user-clock text-[#8B0000] text-sm"></i>
+                    </div>
+                    <span class="text-[9px] font-bold px-2 py-1 rounded-full bg-green-100 text-green-700">Today</span>
+                </div>
+                <div class="z-10 mt-4 flex items-end justify-between w-full">
+                    <div>
+                        <p class="text-3xl font-extrabold leading-none text-[#8B0000]">${kpiData.todayCount}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest mt-1 text-[#8B0000]/60">Today's Patients</p>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-[9px] text-green-600 font-bold">${kpiData.todayCompleted} Completed</span>
+                        <span class="text-[9px] text-blue-600 font-bold">${kpiData.todayUpcoming} Upcoming</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card relative overflow-hidden rounded-xl p-4 bg-white border shadow-sm" style="border-color:#d1fae5;">
+                <div class="z-10 flex items-start justify-between w-full">
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#e6f4ea;">
+                        <i id="statusKpiIcon" class="fa-solid fa-door-open text-sm" style="color:#00A96E;"></i>
+                    </div>
+                    
+                    <div class="text-right">
+                        <span class="flex items-center justify-end gap-1 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span> Live
+                        </span>
+                        <div class="text-gray-800 flex items-baseline justify-end mt-0.5">
+                            <span id="kpi-clock-hhmm" class="text-lg font-extrabold tabular-nums">00:00</span>
+                            <span id="kpi-clock-ampm" class="text-[9px] font-bold text-gray-500 ml-0.5">AM</span>
+                            <span id="kpi-clock-ss" class="hidden"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="z-10 mt-3 flex items-end justify-between w-full border-t border-gray-200 dark:border-gray-600 pt-2">
+                    <div>
+                        <p id="statusKpiLabel" class="text-2xl font-extrabold leading-none" style="color:#00A96E;">Open</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest mt-1 text-[#8B0000]/50">Clinic Status</p>
+                    </div>
+                    <button onclick="openStatusModal()"
+                        class="status-change-btn text-[9px] font-bold px-3 py-1.5 rounded-lg transition-all duration-200">
+                        Change
+                    </button>
+                </div>
+            </div>
+        `;
+
+        swapSkeletonContent('kpiGridContainer', html);
+    }
+
+    function buildScheduledToday() {
+        const todayAppointments = TODAY_APPOINTMENTS;
+
+        if (todayAppointments.length === 0) {
+            const html = `
+                <div class="card bg-gradient-to-b from-[#8B0000] to-[#660000] text-white shadow rounded-xl h-full" >
+                    <div class="card-body flex flex-col">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold flex items-center gap-2">
+                                <i class="fa-regular fa-clock text-yellow-300"></i> Scheduled Today
+                            </h2>
+                            <span class="badge bg-yellow-400 text-[#660000] font-bold border-none px-3">0 patients</span>
+                        </div>
+                        <div class="flex flex-col items-center justify-center py-10 opacity-60 flex-1">
+                            <i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-yellow-300"></i>
+                            <p class="text-sm font-semibold">No appointments today</p>
+                            <p class="text-xs opacity-70 mt-1">Enjoy your free day, Doctor!</p>
+                        </div>
+                        <a href="{{ route('dentist.dentist.appointments') }}" class="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-yellow-300 hover:text-yellow-200 transition border-t border-white/10 pt-3">
+                            View all appointments <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                </div >
+                `;
+            swapSkeletonContent('scheduledTodayContainer', html);
+        } else {
+            const items = todayAppointments.map(appointment => {
+                const name = appointment.patient?.name || 'Unknown Patient';
+                const time = new Date(appointment.appointment_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                const service = appointment.service_type === 'others' ? appointment.other_services || 'Other Service' : appointment.service_type;
+                const isConfirmed = appointment.status === 'confirmed';
+                const initial = name.charAt(0).toUpperCase();
+
+                return `
+                <a href = "{{ route('dentist.dentist.appointments') }}" class="flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/20 p-3 rounded-xl w-full transition duration-200 hover:scale-[1.01]" >
+                        <div class="rounded-full w-9 h-9 border-2 border-yellow-300 bg-white/20 flex items-center justify-center font-bold text-sm flex-shrink-0">${initial}</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-sm truncate">${name}</p>
+                            <p class="text-xs opacity-70 truncate flex items-center gap-1">
+                                <i class="fa-solid fa-stethoscope text-yellow-300 flex-shrink-0 text-[10px]"></i>
+                                ${service} · ${time}
+                            </p>
+                        </div>
+                        <span class="badge badge-sm ${isConfirmed ? 'bg-green-400 text-white' : 'bg-yellow-400 text-[#660000]'} border-none flex-shrink-0 text-[10px]">${isConfirmed ? '✓' : '!'}</span>
+                    </a >
+                `;
+            }).join('');
+
+            const html = `
+                <div class="card bg-gradient-to-b from-[#8B0000] to-[#660000] text-white shadow rounded-xl h-full" >
+                    <div class="card-body flex flex-col">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold flex items-center gap-2">
+                                <i class="fa-regular fa-clock text-yellow-300"></i> Scheduled Today
+                            </h2>
+                            <span class="badge bg-yellow-400 text-[#660000] font-bold border-none px-3">${todayAppointments.length} ${todayAppointments.length === 1 ? 'patient' : 'patients'}</span>
+                        </div>
+                        <div class="space-y-2 flex-1 overflow-y-auto pr-1">
+                            ${items}
+                        </div>
+                        <a href="{{ route('dentist.dentist.appointments') }}" class="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-yellow-300 hover:text-yellow-200 transition border-t border-white/10 pt-3">
+                            View all appointments <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                </div >
+                `;
+            swapSkeletonContent('scheduledTodayContainer', html);
+        }
+    }
+
+    function buildMedicalSupplies() {
+        const medicalSupplies = MEDICAL_SUPPLIES;
+
+        let tableHtml = '';
+        if (medicalSupplies.length > 0) {
+            const rows = medicalSupplies.map(item => {
+                const balance = item.qty - item.used;
+                const pct = item.qty > 0 ? (balance / item.qty) * 100 : 100;
+                const isLow = pct <= 30;
+                const badgeCls = isLow ? 'bg-red-50 text-red-600 border-red-200 animate-pulse' : 'bg-green-50 text-green-600 border-green-200';
+
+                return `
+                <tr class="border-b border-gray-50 last:border-none hover:bg-gray-50/50 transition-colors" >
+                        <td class="py-2.5 max-w-[140px] truncate font-semibold text-gray-800">${item.name}</td>
+                        <td class="py-2.5 text-center font-medium">${item.qty}</td>
+                        <td class="py-2.5 text-center text-gray-500">${item.used}</td>
+                        <td class="py-2.5 text-right">
+                            <span class="px-2 py-1 rounded-md border text-[10px] font-bold ${badgeCls}">
+                                ${balance}${isLow ? ' ⚠' : ''}
+                            </span>
+                        </td>
+                    </tr >
+                `;
+            }).join('');
+
+            tableHtml = `
+                <div class="relative z-10 overflow-y-auto overflow-x-auto pr-1" style = "max-height: 180px;" >
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
+                            <tr class="text-[10px] uppercase tracking-widest text-gray-400 border-b border-gray-100">
+                                <th class="pb-2 font-bold">Item</th>
+                                <th class="pb-2 text-center font-bold">Stock</th>
+                                <th class="pb-2 text-center font-bold">Used</th>
+                                <th class="pb-2 text-right font-bold">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs text-gray-700">
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div >
+                `;
+        } else {
+            tableHtml = `
+                <div class="relative z-10 flex flex-col items-center justify-center py-6 text-center opacity-60 bg-gray-50 rounded-xl mt-2 border border-dashed border-gray-200" >
+                    <i class="fa-solid fa-box-open text-3xl mb-2 text-[#8B0000]/50"></i>
+                    <p class="text-xs font-semibold text-gray-500">No medical supplies yet</p>
+                </div >
+                `;
+        }
+
+        const html = `
+                <div class="relative bg-white p-5 rounded-3xl shadow-sm flex flex-col overflow-hidden group border border-gray-100" >
+                <div class="absolute -top-6 -right-6 w-24 h-24 bg-red-50 rounded-full z-0 opacity-70 group-hover:scale-110 transition-transform duration-500"></div>
+                <div class="relative z-10 flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center text-[#8B0000] border border-red-100 flex-shrink-0">
+                            <i class="fa-solid fa-boxes-stacked text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-[#8B0000] text-sm">Medical Supplies</h3>
+                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Top Inventory</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('dentist.dentist.inventory') }}" class="text-[11px] font-bold text-[#8B0000] bg-red-50 hover:bg-[#8B0000] hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5">
+                        View All <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+                ${ tableHtml }
+            </div >
+                `;
+
+        swapSkeletonContent('medicalSuppliesContainer', html);
+    }
+
+    function buildMedicineSupplies() {
+        const medicineSupplies = MEDICINE_SUPPLIES;
+
+        let tableHtml = '';
+        if (medicineSupplies.length > 0) {
+            const rows = medicineSupplies.map(item => {
+                const balance = item.qty - item.used;
+                const pct = item.qty > 0 ? (balance / item.qty) * 100 : 100;
+                const isLow = pct <= 30;
+                const badgeCls = isLow ? 'bg-red-50 text-red-600 border-red-200 animate-pulse' : 'bg-green-50 text-green-600 border-green-200';
+
+                return `
+                <tr class="border-b border-gray-50 last:border-none hover:bg-gray-50/50 transition-colors" >
+                        <td class="py-2.5 max-w-[120px] truncate font-semibold text-gray-800">${item.name}</td>
+                        <td class="py-2.5 text-center text-gray-500">${item.form || '—'}</td>
+                        <td class="py-2.5 text-center font-medium">${item.qty}</td>
+                        <td class="py-2.5 text-right">
+                            <span class="px-2 py-1 rounded-md border text-[10px] font-bold ${badgeCls}">
+                                ${balance}${isLow ? ' ⚠' : ''}
+                            </span>
+                        </td>
+                    </tr >
+                `;
+            }).join('');
+
+            tableHtml = `
+                <div class="relative z-10 overflow-y-auto overflow-x-auto pr-1" style = "max-height: 180px;" >
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
+                            <tr class="text-[10px] uppercase tracking-widest text-gray-400 border-b border-gray-100">
+                                <th class="pb-2 font-bold">Medicine</th>
+                                <th class="pb-2 text-center font-bold">Form</th>
+                                <th class="pb-2 text-center font-bold">Stock</th>
+                                <th class="pb-2 text-right font-bold">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs text-gray-700">
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div >
+                `;
+        } else {
+            tableHtml = `
+                <div class="relative z-10 flex flex-col items-center justify-center py-6 text-center opacity-60 bg-gray-50 rounded-xl mt-2 border border-dashed border-gray-200" >
+                    <i class="fa-solid fa-prescription-bottle-medical text-3xl mb-2 text-[#FACC15]"></i>
+                    <p class="text-xs font-semibold text-[#9CA3AF]">No medicine items yet</p>
+                </div >
+                `;
+        }
+
+        const html = `
+                <div class="relative bg-white p-5 rounded-3xl shadow-sm flex flex-col overflow-hidden group border border-gray-100" >
+                <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-yellow-50 rounded-full z-0 opacity-70 group-hover:scale-110 transition-transform duration-500"></div>
+                <div class="relative z-10 flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-yellow-50 flex items-center justify-center text-[#8B0000] border border-yellow-100 flex-shrink-0">
+                            <i class="fa-solid fa-pills text-base text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-[#8B0000] text-sm">Medicine Supplies</h3>
+                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Top Inventory</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('dentist.dentist.inventory') }}" class="text-[11px] font-bold text-yellow-700 bg-yellow-50 hover:bg-yellow-400 hover:text-[#8B0000] px-3 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5">
+                        View All <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+                ${ tableHtml }
+            </div >
+                `;
+
+        swapSkeletonContent('medicineSuppliesContainer', html);
+    }
+
+    function scrollToTodayPatients() {
+        document.getElementById('scheduledTodayContainer')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+
+    function scrollToDashboardAnalytics() {
+        document.getElementById('gadAnalyticsContainer')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
         const nameEl = document.getElementById("dentistName");
@@ -1029,15 +2485,93 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
         const h = new Date().getHours();
         let greeting = "";
 
-        if (h < 12) {
+        if (h <12) {
             greeting = "Good Morning,";
-        } else if (h < 18) {
+        } else if (h <18) {
             greeting = "Good Afternoon,";
         } else {
             greeting = "Good Evening,";
         }
 
         greetingEl.textContent = greeting + " ";
+
+        const subtitleEl = document.getElementById('rotatingSubtitle');
+
+        const subtitles = [
+            'Delivering brighter smiles today.',
+            'Healthy smiles start here.',
+            'Providing quality dental care.',
+            'Creating confident smiles every day.',
+            'Another day of patient care excellence.',
+            'Ready for today’s consultations.',
+            'Compassionate care for every patient.',
+            'Helping every patient smile with confidence.'
+        ];
+
+        if (subtitleEl) {
+            const randomIndex = Math.floor(Math.random() * subtitles.length);
+            subtitleEl.textContent = subtitles[randomIndex];
+        }
+
+        const loadingPhases = [
+            {
+                label: 'Loading clinic dashboard',
+                tasks: [buildKpiGrid]
+            },
+            {
+                label: 'Loading charts and summaries',
+                tasks: [renderGadChart, buildScheduledToday, buildUpcomingAppointments]
+            },
+            {
+                label: 'Loading inventory',
+                tasks: [buildMedicalSupplies, buildMedicineSupplies]
+            },
+            {
+                label: 'Loading appointments calendar',
+                tasks: [loadDentistCalendar]
+            }
+        ];
+
+        if (typeof window.runEnterpriseLoading === 'function') {
+            window.runEnterpriseLoading(loadingPhases, {
+                initialDelay: 80,
+                phaseGap: 220,
+                taskGap: 120
+            });
+            return;
+        }
+
+        if (typeof window.setDashboardLoadingStatus === 'function') {
+            window.setDashboardLoadingStatus('Loading clinic dashboard', 18);
+        }
+
+        setTimeout(() => {
+            buildKpiGrid();
+
+            if (typeof window.setDashboardLoadingStatus === 'function') {
+                window.setDashboardLoadingStatus('Loading charts and summaries', 62);
+            }
+
+            renderGadChart();
+            buildScheduledToday();
+
+            if (typeof window.setDashboardLoadingStatus === 'function') {
+                window.setDashboardLoadingStatus('Loading inventory', 70);
+            }
+
+            buildMedicalSupplies();
+            buildMedicineSupplies();
+
+            if (typeof window.setDashboardLoadingStatus === 'function') {
+                window.setDashboardLoadingStatus('Loading appointments calendar', 44);
+            }
+
+            loadDentistCalendar();
+
+            if (typeof window.finishDashboardLoading === 'function') {
+                window.finishDashboardLoading();
+            }
+        }, 80);
     });
 
     (function () {
@@ -1050,7 +2584,7 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                 m = now.getMinutes(),
                 s = now.getSeconds();
             const ampm = h >= 12 ? 'PM' : 'AM';
-            const isDaytime = h >= 6 && h < 18;
+            const isDaytime = h >= 6 && h <18;
             const displayHour = h % 12 || 12;
 
             const hmEl = document.getElementById('kpi-clock-hhmm');
@@ -1068,7 +2602,7 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                 dayicon.className = isDaytime ? 'fa-solid fa-sun text-xs flex-shrink-0' :
                     'fa-solid fa-moon text-xs flex-shrink-0';
                 dayicon.style.color = isDaytime ? '#fde68a' : '#bfdbfe';
-                bigicon.className = isDaytime ? 'fa-solid fa-sun text-lg' : 'fa-solid fa-moon text-lg';
+                bigicon.className = isDaytime ? 'fa-solid fa-sun text-base' : 'fa-solid fa-moon text-base';
                 bigicon.style.color = isDaytime ? '#fde68a' : '#bfdbfe';
             }
         }
@@ -1134,7 +2668,7 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                 kpiLabel.style.color = '#00A96E';
             }
             if (kpiIcon) {
-                kpiIcon.className = 'fa-solid fa-door-open text-lg';
+                kpiIcon.className = 'fa-solid fa-door-open text-base';
                 kpiIcon.style.color = '#00A96E';
             }
         } else {
@@ -1145,7 +2679,7 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                 kpiLabel.style.color = '#EF4444';
             }
             if (kpiIcon) {
-                kpiIcon.className = 'fa-solid fa-door-closed text-lg';
+                kpiIcon.className = 'fa-solid fa-door-closed text-base';
                 kpiIcon.style.color = '#EF4444';
             }
         }
@@ -1154,65 +2688,6 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
 
     document.getElementById('statusModal').addEventListener('click', function (e) {
         if (e.target === this) closeStatusModal();
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(() => {
-            const ctx = document.getElementById('gadChart');
-            if (!ctx) return;
-
-            if (typeof Chart === 'undefined') {
-                console.warn('Chart.js is not loaded');
-                return;
-            }
-
-            const hasData = [...GAD_FEMALE, ...GAD_MALE].some(v => v > 0);
-            const emptyState = document.getElementById('empty-state-container');
-
-            if (!hasData) {
-                ctx.style.display = 'none';
-                if (emptyState) emptyState.style.display = 'flex';
-                return;
-            }
-
-            ctx.style.display = 'block';
-            if (emptyState) emptyState.style.display = 'none';
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: GAD_LABELS,
-                    datasets: [{
-                        label: 'Female',
-                        data: GAD_FEMALE,
-                        backgroundColor: 'rgba(255,192,203,0.85)',
-                        borderColor: '#FFB6C1',
-                        borderWidth: 1,
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Male',
-                        data: GAD_MALE,
-                        backgroundColor: 'rgba(137,207,240,0.85)',
-                        borderColor: '#7EC8E3',
-                        borderWidth: 1,
-                        borderRadius: 6
-                    }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        }, 150);
-
-        loadDentistCalendar();
     });
 
     function escHtml(str = '') {
@@ -1244,7 +2719,7 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
 
         if (!safeAppointments.length) {
             return `
-        <div class="day-hover-card absolute left-1/2 top-full z-[70] mt-1 w-[320px] -translate-x-1/2 rounded-2xl border border-[#efe6df] bg-white p-4 shadow-2xl opacity-0 invisible pointer-events-none transition-all duration-150 group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto">
+                <div class="day-hover-card absolute left-1/2 top-full z-[70] mt-1 w-[320px] -translate-x-1/2 rounded-2xl border border-[#efe6df] bg-white p-4 shadow-2xl opacity-0 invisible pointer-events-none transition-all duration-150 group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto" >
             <div class="absolute -top-3 left-0 right-0 h-3"></div>
             <div class="flex items-center justify-between mb-2">
                 <div>
@@ -1259,8 +2734,8 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                 <p class="text-sm font-semibold text-gray-700">No scheduled patients</p>
                 <p class="text-[12px] text-gray-500 mt-1">This date has no booked appointments.</p>
             </div>
-        </div>
-        `;
+        </div >
+                `;
         }
 
         const items = safeAppointments.slice(0, 3).map(appt => {
@@ -1270,12 +2745,12 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
 
             const safeName = escJs(appt.name || 'Unknown Patient');
             const safeService = escJs(appt.service || 'General Service');
-            const safeSchedule = escJs(`${formatModalDate(appt.date || dateStr)} • ${appt.time || '—'}`);
+            const safeSchedule = escJs(`${ formatModalDate(appt.date || dateStr) } • ${ appt.time || '—' } `);
             const rawProfileUrl = appt.patientProfileUrl || '#';
-            const profileUrl = `${rawProfileUrl}${rawProfileUrl.includes('?') ? '&' : '?'}from=dashboard`;
+            const profileUrl = `${ rawProfileUrl }${ rawProfileUrl.includes('?') ? '&' : '?' } from = dashboard`;
 
             return `
-        <div class="rounded-xl border border-gray-100 p-3 bg-white">
+                <div class="rounded-xl border border-gray-100 p-3 bg-white" >
             <div class="flex items-center justify-between gap-3 mb-2">
                 <div class="min-w-0">
                     <p class="text-[12px] font-bold text-gray-800 truncate">${escHtml(appt.name || 'Unknown Patient')}</p>
@@ -1309,12 +2784,12 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                             </button>
                         ` : ''}
             </div>
-        </div>
-        `;
+        </div >
+                `;
         }).join('');
 
         return `
-        <div class="day-hover-card absolute left-1/2 top-full z-[70] mt-1 w-[340px] -translate-x-1/2 rounded-2xl border border-[#efe6df] bg-white p-3 shadow-2xl opacity-0 invisible pointer-events-none transition-all duration-150 group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto">
+                <div class="day-hover-card absolute left-1/2 top-full z-[70] mt-1 w-[340px] -translate-x-1/2 rounded-2xl border border-[#efe6df] bg-white p-3 shadow-2xl opacity-0 invisible pointer-events-none transition-all duration-150 group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto" >
             <div class="absolute -top-3 left-0 right-0 h-3"></div>
             <div class="flex items-center justify-between mb-2">
                 <div>
@@ -1329,8 +2804,8 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
             <div class="space-y-2">
                 ${items}
             </div>
-        </div>
-        `;
+        </div >
+                `;
     }
 
     function loadDentistCalendar() {
@@ -1339,7 +2814,7 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
             if (mode !== 'dentist') return '';
 
             return `
-        <div class="cal-legend mt-4">
+                <div class="cal-legend mt-4" >
             <div class="cal-legend-item">
                 <span class="cal-pill cal-pill-maroon">
                     <i class="fa-solid fa-calendar-day text-[10px]"></i> Today
@@ -1365,8 +2840,8 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                     <i class="fa-solid fa-circle-minus text-[10px]"></i> Unavailable
                 </span>
             </div>
-        </div>
-        `;
+        </div >
+                `;
         }
 
         const MAX_PER_DAY = 5;
@@ -1405,11 +2880,11 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
             const holidays = getHolidaysForMonth(year, month);
 
             const headerHtml = dayLabels.map((l, i) =>
-                `<div class="text-center text-[0.6rem] font-bold py-1 pb-2 uppercase tracking-widest ${(i === 0 || i === 6) ? 'cal-day-weekend' : 'cal-day-label'}">${l}</div>`
+                `<div class="text-center text-[0.6rem] font-bold py-1 pb-2 uppercase tracking-widest ${(i === 0 || i === 6) ? 'cal-day-weekend' : 'cal-day-label'}" > ${ l }</div > `
             ).join('');
 
             let cells = '';
-            for (let i = 0; i < firstDow; i++) cells += `<div></div>`;
+            for (let i = 0; i <firstDow; i++) cells += `<div ></div > `;
 
             for (let d = 1; d <= totalDays; d++) {
                 const dateStr = `${year}-${pad(month + 1)}-${pad(d)}`;
@@ -1427,47 +2902,45 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
 
                 let badgeHtml = '', tooltipTxt = '', tooltipTone = 'dark';
 
-                // 1. Tooltip and Badge Evaluation
                 if (holiday) {
                     badgeHtml = `
-                <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 text-[10px] leading-none flex items-center justify-center text-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] border border-white">
+                <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 text-[10px] leading-none flex items-center justify-center text-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] border border-white" >
                     <i class="fa-solid fa-star text-[8px]"></i>
-                </span>`;
-                    tooltipTxt = `<i class="fa-solid fa-star mr-1 text-white"></i>${holiday}`;
+                </span > `;
+                    tooltipTxt = `<i class="fa-solid fa-star mr-1 text-white" ></i > ${ holiday } `;
                     tooltipTone = 'yellow';
                 }
 
                 if (hasAppts && !isUnavail) {
                     if (isFull) {
-                        tooltipTxt = `<i class="fa-solid fa-circle-xmark mr-1 text-red-300"></i>Fully booked — ${count} patient${count > 1 ? 's' : ''}`;
+                        tooltipTxt = `<i class="fa-solid fa-circle-xmark mr-1 text-red-300" ></i > Fully booked — ${ count } patient${ count > 1 ? 's' : '' } `;
                         tooltipTone = 'red';
                     } else {
-                        tooltipTxt = `<i class="fa-solid fa-user-clock mr-1 text-emerald-300"></i>${count} patient${count > 1 ? 's' : ''} scheduled`;
+                        tooltipTxt = `<i class="fa-solid fa-user-clock mr-1 text-emerald-300" ></i > ${ count } patient${ count > 1 ? 's' : '' } scheduled`;
                         tooltipTone = 'green';
                     }
                     const dotClass = isFull ? 'bg-red-600' : 'bg-emerald-600';
                     badgeHtml = `
-                <span class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full ${dotClass} text-[9px] font-bold leading-none flex items-center justify-center text-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] border border-white">
-                    ${count}
-                </span>`;
+                <span class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full ${dotClass} text-[9px] font-bold leading-none flex items-center justify-center text-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] border border-white" >
+                    ${ count }
+                </span > `;
                 }
 
                 if (isToday && !hasAppts && !holiday) {
-                    tooltipTxt = `<i class="fa-solid fa-calendar-day mr-1 text-white/90"></i>Today`;
+                    tooltipTxt = `<i class="fa-solid fa-calendar-day mr-1 text-white/90" ></i > Today`;
                     tooltipTone = 'today';
                 } else if (isUnavail && !holiday && !hasAppts) {
                     badgeHtml = `
-                <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gray-500 text-[10px] leading-none flex items-center justify-center text-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] border border-white">
+                <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gray-500 text-[10px] leading-none flex items-center justify-center text-white shadow-[0_2px_8px_rgba(0,0,0,0.18)] border border-white" >
                     <i class="fa-solid fa-minus text-[8px]"></i>
-                </span>`;
-                    tooltipTxt = weekend ? `<i class="fa-solid fa-ban mr-1 text-gray-300"></i>Clinic closed` : `<i class="fa-solid fa-ban mr-1 text-gray-300"></i>Not available`;
+                </span > `;
+                    tooltipTxt = weekend ? `<i class="fa-solid fa-ban mr-1 text-gray-300" ></i > Clinic closed` : ` <i class="fa-solid fa-ban mr-1 text-gray-300" ></i > Not available`;
                     tooltipTone = 'gray';
                 } else if (!hasAppts && !holiday && !isToday && !isUnavail) {
-                    tooltipTxt = `<i class="fa-regular fa-calendar mr-1 text-gray-300"></i>No scheduled patients`;
+                    tooltipTxt = `<i class="fa-regular fa-calendar mr-1 text-gray-300" ></i > No scheduled patients`;
                     tooltipTone = 'gray';
                 }
 
-                // 2. Exact unified cal-cell classes
                 let cellClass = "cal-cell";
                 if (isToday) {
                     cellClass += " today";
@@ -1483,7 +2956,6 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                     cellClass += " cursor-pointer hover:bg-gray-100 text-[#333]";
                 }
 
-                // 3. Perfecting the Smart Tooltip HTML
                 const col = (firstDow + d - 1) % 7;
                 const tooltipSide = col >= 5 ? "tooltip-left" : col <= 1 ? "tooltip-right" : "tooltip-center";
                 const tooltipPalette = {
@@ -1499,49 +2971,49 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                 const showHoverCard = isHoverDevice && hasAppts && !holiday;
 
                 const tooltipHtml = (!showHoverCard && tooltipTxt) ? `
-                <div class="day-smart-tooltip ${tooltipSide} absolute bottom-[calc(100%+10px)] z-[9999] pointer-events-none">
+                <div class="day-smart-tooltip ${tooltipSide} absolute bottom-[calc(100%+10px)] z-[9999] pointer-events-none" >
                     <div class="${palette.bg} relative text-white text-[0.65rem] font-bold px-3 py-2 rounded-lg whitespace-nowrap shadow-xl
                         after:content-[''] after:absolute after:top-full after:border-4 after:border-transparent ${palette.arrow}">
                         ${tooltipTxt}
                     </div>
-                </div>
-            ` : '';
+                </div >
+                ` : '';
 
                 const hoverCardHtml = showHoverCard ? buildDayHoverCard(dateStr, dayAppointments) : '';
-                const clickOpen = canOpenModal && !isHoverDevice ? `onclick="openDayAppointmentsModal('${dateStr}', decodeURIComponent('${encodedAppointments}'))"` : '';
+                const clickOpen = canOpenModal && !isHoverDevice ? `onclick = "openDayAppointmentsModal('${dateStr}', decodeURIComponent('${encodedAppointments}'))"` : '';
 
-                // 4. Using unified cal-cell-wrap 
                 cells += `
-                <div class="cal-cell-wrap relative flex items-center justify-center group" ${clickOpen}>
-                    ${tooltipHtml}
-                    ${hoverCardHtml}
-                    <div class="${cellClass}" data-date="${dateStr}">
-                        <span>${d}</span>
-                        ${badgeHtml}
-                    </div>
-                </div>`;
+                <div class="cal-cell-wrap relative flex items-center justify-center group" ${ clickOpen }>
+                    ${ tooltipHtml }
+                    ${ hoverCardHtml }
+            <div class="${cellClass}" data-date="${dateStr}">
+                <span>${d}</span>
+                ${badgeHtml}
+            </div>
+                </div > `;
             }
 
             const container = document.getElementById('dentistCalendarContainer');
             if (container) {
-                // Replicates exactly the Patient UI structure (.cal-shell, .cal-nav-btn, .cal-month-label)
-                container.innerHTML = `
-            <div class="cal-shell flex flex-col justify-between h-full bg-white shadow-sm border-none p-5 sm:p-6">
-                <div>
-                    <div class="flex items-center justify-between mb-5">
-                        <button onclick="changeDentistMonth(-1)" class="cal-nav-btn w-8 h-8 rounded-full border border-[#e8e2dd] flex items-center justify-center text-[#8B0000] text-xs transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
-                        <div class="text-center">
-                            <p class="cal-month-label text-base font-extrabold">${monthNames[month]}</p>
-                            <p class="text-[0.65rem] text-[#9e9690] font-semibold tracking-widest">${year}</p>
+                const html = `
+                <div class="cal-shell flex flex-col justify-between h-full bg-white shadow-sm border-none p-5 sm:p-6" >
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <button onclick="changeDentistMonth(-1)" class="cal-nav-btn w-8 h-8 rounded-full border border-[#e8e2dd] flex items-center justify-center text-[#8B0000] text-xs transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
+                            <div class="text-center">
+                                <p class="cal-month-label text-base font-extrabold">${monthNames[month]}</p>
+                                <p class="text-[0.65rem] text-[#9e9690] font-semibold tracking-widest">${year}</p>
+                            </div>
+                            <button onclick="changeDentistMonth(1)" class="cal-nav-btn w-8 h-8 rounded-full border border-[#e8e2dd] flex items-center justify-center text-[#8B0000] text-xs transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
                         </div>
-                        <button onclick="changeDentistMonth(1)" class="cal-nav-btn w-8 h-8 rounded-full border border-[#e8e2dd] flex items-center justify-center text-[#8B0000] text-xs transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
+                        <hr class="border-[#f0ebe6] mb-3">
+                            <div class="cal-grid">${headerHtml}</div>
+                            <div class="cal-grid" style="row-gap: 0.5rem;">${cells}</div>
                     </div>
-                    <hr class="border-[#f0ebe6] mb-3">
-                    <div class="cal-grid">${headerHtml}</div>
-                    <div class="cal-grid" style="row-gap: 0.5rem;">${cells}</div>
-                </div>
-                ${renderUnifiedCalendarLegend('dentist')}
-            </div>`;
+                ${ renderUnifiedCalendarLegend('dentist') }
+            </div > `;
+
+                swapSkeletonContent('dentistCalendarContainer', html);
             }
         }
 
@@ -1551,7 +3023,7 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                 currentMonth = 0;
                 currentYear++;
             }
-            if (currentMonth < 0) {
+            if (currentMonth <0) {
                 currentMonth = 11;
                 currentYear--;
             }
@@ -1605,11 +3077,11 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
 
         if (!appointments.length) {
             listEl.innerHTML = `
-<div class="flex flex-col items-center justify-center py-10 text-center opacity-60">
-<i class="fa-regular fa-calendar-xmark text-4xl mb-3 text-[#8B0000]"></i>
+                <div class="flex flex-col items-center justify-center py-10 text-center opacity-60" >
+<i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-[#8B0000]"></i>
 <p class="text-sm font-semibold text-gray-700">No appointments for this date</p>
-</div>
-`;
+</div >
+                `;
         } else {
             listEl.innerHTML = appointments.map(appt => {
                 const badgeClass = getStatusBadgeClass(appt.status);
@@ -1621,14 +3093,14 @@ $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
                 const canReschedule = ['pending', 'confirmed', 'upcoming', 'rescheduled'].includes(status);
                 const canCancel = ['pending', 'confirmed', 'upcoming', 'rescheduled'].includes(status);
                 const safeName = (appt.name || 'Unknown Patient').replace(/'/g, "\'");
-                const safeSchedule = `${formatModalDate(appt.date || dateStr)} • ${appt.time || '—'}`.replace(
+                const safeSchedule = `${ formatModalDate(appt.date || dateStr) } • ${ appt.time || '—' } `.replace(
                     /'/g, "\'");
 
                 return `
-<div class="border border-gray-100 rounded-xl p-3 hover:bg-gray-50 transition">
+                <div class="border border-gray-100 rounded-xl p-3 hover:bg-gray-50 transition" >
 <div class="flex items-center gap-3">
 <a href="${profileUrl}${profileUrl.includes('?') ? '&' : '?'}from=dashboard" onclick="closeDayAppointmentsModal()"
-class="rounded-full w-10 h-10 border-2 border-[#8B0000]/10 bg-[#8B0000]/10 flex items-center justify-center font-bold text-sm text-[#8B0000] flex-shrink-0">
+class="rounded-full w-9 h-9 border-2 border-[#8B0000]/10 bg-[#8B0000]/10 flex items-center justify-center font-bold text-sm text-[#8B0000] flex-shrink-0">
 ${initial}
 </a>
 
@@ -1673,7 +3145,7 @@ ${canCancel ? `
             </button>
             ` : ''}
 </div>
-</div>
+</div >
 `;
             }).join('');
         }

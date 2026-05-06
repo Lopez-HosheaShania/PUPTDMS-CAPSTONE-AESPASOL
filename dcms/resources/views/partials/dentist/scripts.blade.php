@@ -101,8 +101,8 @@
 
         if (isCollapsed) {
             sidebar.classList.add('collapsed');
-            sidebar.style.width = '56px';
-            mainContent.style.marginLeft = '56px';
+            sidebar.style.width = '64px';
+            mainContent.style.marginLeft = '64px';
             icon.className = 'fa-solid fa-bars';
         } else {
             sidebar.classList.remove('collapsed');

@@ -1702,6 +1702,8 @@
 
     <main id="mainContent" style="padding-top: var(--header-h); min-height: 100vh;">
 
+        <x-dashboard-loading-status />
+
         <div class="page-banner">
             <div class="page-banner-inner">
                 <div>
@@ -1994,76 +1996,77 @@
                                     </div>
                                 </div>
 
-                                <div id="inventoryOverviewContent" style="display:none;">
-                                    <div class="inventory-top-layout">
-                                        <div class="inventory-donut-wrap">
-                                            <div class="inventory-donut-box">
-                                                <div class="inventory-donut-center">
-                                                    <span id="inventoryDonutTotal">0</span>
-                                                    <small>Items</small>
-                                                </div>
-                                                <canvas id="inventoryDonutChart"></canvas>
-                                            </div>
-                                        </div>
-
-                                        <div class="inventory-legend">
-                                            <div class="inventory-legend-item" data-stock-filter="in-stock">
-                                                <span class="legend-bubble"></span>
-                                                <span class="legend-bubble-sm"></span>
-                                                <div class="inventory-legend-left">
-                                                    <span class="inventory-legend-dot in-stock"></span>
-                                                    <div>
-                                                        <div class="inventory-legend-label">In Stock</div>
-                                                        <div class="inventory-legend-sub">Sufficient supply</div>
+                                    <div id="inventoryOverviewContent" class="skeleton-fade-swap">
+                                        <div class="space-y-4">
+                                            <div class="inventory-top-layout">
+                                                <div class="inventory-donut-wrap">
+                                                    <div class="inventory-donut-box">
+                                                        <div class="inventory-donut-center">
+                                                            <span class="skeleton-line" style="width: 42px; height: 18px;"></span>
+                                                            <small class="skeleton-line" style="width: 34px; height: 8px; margin-top: 8px;"></small>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="inventory-legend-value" id="inventoryInStockValue">0</div>
-                                            </div>
 
-                                            <div class="inventory-legend-item" data-stock-filter="low-stock">
-                                                <span class="legend-bubble"></span>
-                                                <span class="legend-bubble-sm"></span>
-                                                <div class="inventory-legend-left">
-                                                    <span class="inventory-legend-dot low-stock"></span>
-                                                    <div>
-                                                        <div class="inventory-legend-label">Low Stock</div>
-                                                        <div class="inventory-legend-sub">Replenishment required</div>
+                                                <div class="inventory-legend">
+                                                    <div class="inventory-legend-item pointer-events-none" data-stock-filter="in-stock">
+                                                        <span class="legend-bubble"></span>
+                                                        <span class="legend-bubble-sm"></span>
+                                                        <div class="inventory-legend-left">
+                                                            <span class="inventory-legend-dot in-stock"></span>
+                                                            <div class="space-y-2">
+                                                                <div class="skeleton-line" style="width: 74px; height: 12px;"></div>
+                                                                <div class="skeleton-line" style="width: 102px; height: 10px;"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="skeleton-line" style="width: 32px; height: 18px;"></div>
+                                                    </div>
+
+                                                    <div class="inventory-legend-item pointer-events-none" data-stock-filter="low-stock">
+                                                        <span class="legend-bubble"></span>
+                                                        <span class="legend-bubble-sm"></span>
+                                                        <div class="inventory-legend-left">
+                                                            <span class="inventory-legend-dot low-stock"></span>
+                                                            <div class="space-y-2">
+                                                                <div class="skeleton-line" style="width: 66px; height: 12px;"></div>
+                                                                <div class="skeleton-line" style="width: 110px; height: 10px;"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="skeleton-line" style="width: 32px; height: 18px;"></div>
+                                                    </div>
+
+                                                    <div class="inventory-legend-item pointer-events-none" data-stock-filter="out-stock">
+                                                        <span class="legend-bubble"></span>
+                                                        <span class="legend-bubble-sm"></span>
+                                                        <div class="inventory-legend-left">
+                                                            <span class="inventory-legend-dot out-stock"></span>
+                                                            <div class="space-y-2">
+                                                                <div class="skeleton-line" style="width: 82px; height: 12px;"></div>
+                                                                <div class="skeleton-line" style="width: 122px; height: 10px;"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="skeleton-line" style="width: 32px; height: 18px;"></div>
                                                     </div>
                                                 </div>
-                                                <div class="inventory-legend-value" id="inventoryLowStockValue">0</div>
                                             </div>
 
-                                            <div class="inventory-legend-item" data-stock-filter="out-stock">
-                                                <span class="legend-bubble"></span>
-                                                <span class="legend-bubble-sm"></span>
-                                                <div class="inventory-legend-left">
-                                                    <span class="inventory-legend-dot out-stock"></span>
-                                                    <div>
-                                                        <div class="inventory-legend-label">Out of Stock</div>
-                                                        <div class="inventory-legend-sub">Currently unavailable</div>
-                                                    </div>
+                                            <div class="inventory-mini-stats-row">
+                                                <div class="inventory-mini-pill total">
+                                                    <div class="inventory-mini-pill-label">Total</div>
+                                                    <div class="inventory-mini-pill-value skeleton-line" style="width: 42px; height: 18px; margin: 0 auto;"></div>
                                                 </div>
-                                                <div class="inventory-legend-value" id="inventoryOutStockValue">0</div>
+
+                                                <div class="inventory-mini-pill medicine">
+                                                    <div class="inventory-mini-pill-label">Medicine</div>
+                                                    <div class="inventory-mini-pill-value skeleton-line" style="width: 42px; height: 18px; margin: 0 auto;"></div>
+                                                </div>
+
+                                                <div class="inventory-mini-pill supplies">
+                                                    <div class="inventory-mini-pill-label">Supplies</div>
+                                                    <div class="inventory-mini-pill-value skeleton-line" style="width: 42px; height: 18px; margin: 0 auto;"></div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="inventory-mini-stats-row">
-                                        <div class="inventory-mini-pill total">
-                                            <div class="inventory-mini-pill-label">Total</div>
-                                            <div class="inventory-mini-pill-value" id="inventoryTotalValue">0</div>
-                                        </div>
-
-                                        <div class="inventory-mini-pill medicine">
-                                            <div class="inventory-mini-pill-label">Medicine</div>
-                                            <div class="inventory-mini-pill-value" id="inventoryMedicineValue">0</div>
-                                        </div>
-
-                                        <div class="inventory-mini-pill supplies">
-                                            <div class="inventory-mini-pill-label">Supplies</div>
-                                            <div class="inventory-mini-pill-value" id="inventorySuppliesValue">0</div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2263,6 +2266,80 @@
     <script>
         let adminInventoryOverviewChart = null;
 
+        function buildInventoryOverviewHtml(values) {
+            return `
+                <div class="inventory-top-layout">
+                    <div class="inventory-donut-wrap">
+                        <div class="inventory-donut-box">
+                            <div class="inventory-donut-center">
+                                <span id="inventoryDonutTotal">${values.total}</span>
+                                <small>Items</small>
+                            </div>
+                            <canvas id="inventoryDonutChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="inventory-legend">
+                        <div class="inventory-legend-item" data-stock-filter="in-stock">
+                            <span class="legend-bubble"></span>
+                            <span class="legend-bubble-sm"></span>
+                            <div class="inventory-legend-left">
+                                <span class="inventory-legend-dot in-stock"></span>
+                                <div>
+                                    <div class="inventory-legend-label">In Stock</div>
+                                    <div class="inventory-legend-sub">Sufficient supply</div>
+                                </div>
+                            </div>
+                            <div class="inventory-legend-value" id="inventoryInStockValue">${values.inStock}</div>
+                        </div>
+
+                        <div class="inventory-legend-item" data-stock-filter="low-stock">
+                            <span class="legend-bubble"></span>
+                            <span class="legend-bubble-sm"></span>
+                            <div class="inventory-legend-left">
+                                <span class="inventory-legend-dot low-stock"></span>
+                                <div>
+                                    <div class="inventory-legend-label">Low Stock</div>
+                                    <div class="inventory-legend-sub">Replenishment required</div>
+                                </div>
+                            </div>
+                            <div class="inventory-legend-value" id="inventoryLowStockValue">${values.lowStock}</div>
+                        </div>
+
+                        <div class="inventory-legend-item" data-stock-filter="out-stock">
+                            <span class="legend-bubble"></span>
+                            <span class="legend-bubble-sm"></span>
+                            <div class="inventory-legend-left">
+                                <span class="inventory-legend-dot out-stock"></span>
+                                <div>
+                                    <div class="inventory-legend-label">Out of Stock</div>
+                                    <div class="inventory-legend-sub">Currently unavailable</div>
+                                </div>
+                            </div>
+                            <div class="inventory-legend-value" id="inventoryOutStockValue">${values.outStock}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="inventory-mini-stats-row">
+                    <div class="inventory-mini-pill total">
+                        <div class="inventory-mini-pill-label">Total</div>
+                        <div class="inventory-mini-pill-value" id="inventoryTotalValue">${values.total}</div>
+                    </div>
+
+                    <div class="inventory-mini-pill medicine">
+                        <div class="inventory-mini-pill-label">Medicine</div>
+                        <div class="inventory-mini-pill-value" id="inventoryMedicineValue">${values.medicine}</div>
+                    </div>
+
+                    <div class="inventory-mini-pill supplies">
+                        <div class="inventory-mini-pill-label">Supplies</div>
+                        <div class="inventory-mini-pill-value" id="inventorySuppliesValue">${values.supplies}</div>
+                    </div>
+                </div>
+            `;
+        }
+
         function animateInventoryLegendCard(card) {
             if (!card) return;
             card.classList.remove('pulse-pop');
@@ -2324,8 +2401,12 @@
         }
 
         async function loadAdminDashboardInventoryOverview() {
-            const ctx = document.getElementById('inventoryDonutChart');
-            if (!ctx) return;
+            const contentEl = document.getElementById('inventoryOverviewContent');
+            if (!contentEl) return;
+
+            if (typeof window.setDashboardLoadingStatus === 'function') {
+                window.setDashboardLoadingStatus('Loading inventory overview', 58);
+            }
 
             try {
                 const res = await fetch("{{ route('admin.inventory.data') }}", {
@@ -2366,67 +2447,92 @@
 
                 if (total <= 0) {
                     setInventoryOverviewEmptyState('No inventory records yet', false);
+                    if (typeof window.finishDashboardLoading === 'function') {
+                        window.finishDashboardLoading();
+                    }
                     return;
                 }
 
-                showInventoryOverviewContent();
-
-                document.getElementById('inventoryInStockValue').textContent = inStock;
-                document.getElementById('inventoryLowStockValue').textContent = lowStock;
-                document.getElementById('inventoryOutStockValue').textContent = outStock;
-                document.getElementById('inventoryTotalValue').textContent = total;
-                const donutTotalEl = document.getElementById('inventoryDonutTotal');
-                if (donutTotalEl) donutTotalEl.textContent = total;
-                document.getElementById('inventoryMedicineValue').textContent = medicine;
-                document.getElementById('inventorySuppliesValue').textContent = supplies;
-
-                if (adminInventoryOverviewChart) {
-                    adminInventoryOverviewChart.destroy();
-                }
-
-                adminInventoryOverviewChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['In Stock', 'Low Stock', 'Out of Stock'],
-                        datasets: [{
-                            data: [inStock, lowStock, outStock],
-                            backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
-                            hoverBackgroundColor: ['#16a34a', '#d97706', '#dc2626'],
-                            borderColor: '#ffffff',
-                            borderWidth: 3,
-                            hoverOffset: 7
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '70%',
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-
-                bindInventoryLegendClicks();
-
-                console.log('Dashboard inventory overview loaded:', {
+                swapSkeletonContent('inventoryOverviewContent', buildInventoryOverviewHtml({
                     total,
                     medicine,
                     supplies,
                     inStock,
                     lowStock,
-                    outStock
-                });
+                    outStock,
+                }));
+
+                showInventoryOverviewContent();
+
+                setTimeout(() => {
+                    const ctx = document.getElementById('inventoryDonutChart');
+                    if (!ctx) {
+                        if (typeof window.finishDashboardLoading === 'function') {
+                            window.finishDashboardLoading();
+                        }
+                        return;
+                    }
+
+                    if (adminInventoryOverviewChart) {
+                        adminInventoryOverviewChart.destroy();
+                    }
+
+                    adminInventoryOverviewChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+                            datasets: [{
+                                data: [inStock, lowStock, outStock],
+                                backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+                                hoverBackgroundColor: ['#16a34a', '#d97706', '#dc2626'],
+                                borderColor: '#ffffff',
+                                borderWidth: 3,
+                                hoverOffset: 7
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '70%',
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+
+                    bindInventoryLegendClicks();
+
+                    console.log('Dashboard inventory overview loaded:', {
+                        total,
+                        medicine,
+                        supplies,
+                        inStock,
+                        lowStock,
+                        outStock
+                    });
+
+                    if (typeof window.finishDashboardLoading === 'function') {
+                        window.finishDashboardLoading();
+                    }
+                }, 170);
 
             } catch (error) {
                 console.error('Dashboard inventory overview error:', error);
                 setInventoryOverviewEmptyState('Failed to load inventory overview', true);
+
+                if (typeof window.finishDashboardLoading === 'function') {
+                    window.finishDashboardLoading();
+                }
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.setDashboardLoadingStatus === 'function') {
+                window.setDashboardLoadingStatus('Loading system dashboard', 22);
+            }
+
             loadAdminDashboardInventoryOverview();
         });
 

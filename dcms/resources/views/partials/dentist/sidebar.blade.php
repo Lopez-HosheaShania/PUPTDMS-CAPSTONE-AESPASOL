@@ -1,9 +1,7 @@
 <aside id="sidebar">
     <div class="sidebar-inner">
         <div class="toggle-row flex justify-end mb-3">
-            <button onclick="toggleSidebar()" id="sidebarToggleBtn"
-                style="width:30px;height:30px;border-radius:8px;border:none;background:#fef2f2;color:#8B0000;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;"
-                onmouseover="this.style.background='#fce8e8'" onmouseout="this.style.background='#fef2f2'">
+            <button type="button" onclick="toggleSidebar()" id="sidebarToggleBtn" class="sidebar-toggle-btn" aria-label="Toggle sidebar">
                 <i id="sidebarIcon" class="fa-solid fa-xmark"></i>
             </button>
         </div>
