@@ -263,7 +263,7 @@
 
         .st-input {
             width: 100%;
-            padding: 10px 14px;
+             padding: 10px 50px 10px 14px;
             border: 1px solid #e5e7eb;
             border-radius: 10px;
             font-size: .8rem;
@@ -326,6 +326,7 @@
             align-items: stretch;
             gap: .5rem;
             width: 100%;
+            position: relative; 
         }
 
         .st-voice-row .st-input-wrap {
@@ -338,18 +339,24 @@
         }
 
         .st-voice-clear-btn {
+            position: absolute; 
+            right: 10px;        
+            top: 50%;           
+            transform: translateY(-50%); 
+
             border: none;
             background: transparent;
             color: #dc2626;
             font-size: .78rem;
             font-weight: 600;
-            line-height: 1;
-            padding: 0 .1rem;
-            margin: 0;
             cursor: pointer;
-            align-self: center;
-            flex: 0 0 auto;
-            transition: color .15s ease;
+            z-index: 5;
+        }
+
+        .st-voice-clear-btn.hidden {
+            visibility: hidden !important;
+            display: inline-flex !important;
+            pointer-events: none;
         }
 
         .st-voice-row.is-textarea .st-voice-clear-btn {
@@ -867,7 +874,35 @@
         }
 
         [data-theme="dark"] .card-title {
-            color: #f3f4f6;
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] .card-header-icon {
+            background: rgba(139,0,0,.16) !important;
+            border: 1px solid rgba(220,38,38,.18) !important;
+
+            color: #b91c1c !important;
+
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.04),
+                0 4px 12px rgba(0,0,0,.18);
+        }
+
+        [data-theme="dark"] .card-header > span {
+            background: rgba(255,255,255,.06) !important;
+            border: 1px solid rgba(255,255,255,.10) !important;
+
+            color: #FCA5A5 !important;
+
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.04),
+                0 4px 12px rgba(0,0,0,.18);
         }
 
         [data-theme="dark"] .st-input {
@@ -889,6 +924,69 @@
 
         [data-theme="dark"] .data-table tbody tr:hover td {
             background: #1c2128;
+        }
+
+        [data-theme="dark"] td div[style*="width:26px"][style*="background:#fef2f2"] {
+            background: rgba(255,255,255,.05) !important;
+            border: 1px solid rgba(255,255,255,.10) !important;
+
+            color: rgba(255,255,255,.72) !important;
+
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.04),
+                0 4px 12px rgba(0,0,0,.18);
+        }
+
+        [data-theme="dark"] .service-visibility-badge.is-visible {
+            background: rgba(16,185,129,.12) !important;
+            border: 1px solid rgba(52,211,153,.24) !important;
+
+            color: #d1fae5 !important;
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.04);    
+        }
+
+        [data-theme="dark"] .service-badge {
+            background: rgba(16,185,129,.10) !important;
+            border: 1px solid rgba(52,211,153,.22) !important;
+
+            color: #d1fae5 !important;
+
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.04);
+        }
+
+        [data-theme="dark"] .btn-manage-sm {
+            background: rgba(255,255,255,.06) !important;
+            border: 1px solid rgba(255,255,255,.10) !important;
+            color: #fecaca !important;
+
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.05),
+                0 4px 12px rgba(0,0,0,.18);
+        }
+
+        [data-theme="dark"] .btn-manage-sm:hover {
+            background: rgba(139,0,0,.35) !important;
+            border-color: rgba(252,165,165,.22) !important;
+            color: #fff !important;
+        }
+
+        [data-theme="dark"] #serviceTypeListView .data-table tbody td:nth-child(2) > div > span {
+            color: #FCA5A5 !important;
         }
 
         [data-theme="dark"] .manage-toggle-row {
@@ -1055,8 +1153,24 @@
         }
 
         [data-theme="dark"] .service-type-view-toggle {
-            background: #0d1117;
-            border-color: #21262d;
+            background: rgba(255,255,255,.10) !important;
+            border: 1px solid rgba(255,255,255,.18) !important;
+
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.05),
+                0 4px 14px rgba(0,0,0,.18);
+        }
+
+        [data-theme="dark"] .service-type-view-btn {
+            color: rgba(255,255,255,.72) !important;
+        }
+
+        [data-theme="dark"] .service-type-view-btn:hover {
+            background: rgba(255,255,255,.08) !important;
+            color: #fff !important;
         }
 
         [data-theme="dark"] .service-type-view-btn {
@@ -1074,7 +1188,7 @@
         }
 
         [data-theme="dark"] .service-type-card-name {
-            color: #f9fafb;
+            color: #FCA5A5 !important;
         }
 
         [data-theme="dark"] .service-type-card-desc {
@@ -1552,6 +1666,14 @@
         [data-theme="dark"] .st-active-card {
             background: #0f141a !important;
             border-color: #2b313a !important;
+        }
+
+        [data-theme="dark"] .st-modal-body {
+            background: linear-gradient(180deg, #0d1117 0%, #161b22 100%) !important;
+        }
+
+        [data-theme="dark"] .st-modal-footer {
+            background: #161b22 !important;
         }
 
         @media (max-width: 767px) {

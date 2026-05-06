@@ -353,17 +353,69 @@
     .pill-low { background: #FAEEDA; color: #854F0B; }
     .pill-critical { background: #FCEBEB; color: #A32D2D; }
 
-    [data-theme="dark"] .metric-card,
-    [data-theme="dark"] .appt-card,
     [data-theme="dark"] .card {
         background: #161b22 !important;
         border-color: #21262d !important;
+    }
+
+    [data-theme="dark"] .metric-card {
+        background:
+            radial-gradient(circle at bottom right, rgba(255,255,255,.08), transparent 40%),
+            linear-gradient(135deg, rgba(22,27,34,.65), rgba(13,17,23,.55)) !important;
+
+        border: 1px solid rgba(255,255,255,.10) !important;
+
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.10),
+            0 0 0 1px rgba(255,255,255,.03),
+            0 10px 24px rgba(0,0,0,.35) !important;
+    }
+
+    [data-theme="dark"] .appt-card {
+        background:
+            radial-gradient(circle at bottom right, rgba(255,255,255,.07), transparent 40%),
+            linear-gradient(135deg, rgba(22,27,34,.65), rgba(13,17,23,.55)) !important;
+
+        border: 1px solid rgba(255,255,255,.10) !important;
+
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.10),
+            0 10px 24px rgba(0,0,0,.35) !important;
+    }
+
+    [data-theme="dark"] .metric-card:hover,
+    [data-theme="dark"] .appt-card:hover {
+        border-color: rgba(255,255,255,.16) !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.12),
+            0 0 18px rgba(255,255,255,.04),
+            0 14px 28px rgba(0,0,0,.45) !important;
     }
 
     [data-theme="dark"] .card-header {
         background: #0d1117 !important;
         border-color: #21262d !important;
     }
+
+    [data-theme="dark"] .card-header-icon {
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.10);
+        color: #FCA5A5 !important;
+
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+
+    [data-theme="dark"] .card-title {
+        color: #FCA5A5 !important;
+    }
+
 
     [data-theme="dark"] .card-title,
     [data-theme="dark"] .m-value,
@@ -455,6 +507,15 @@
         margin-bottom: .9rem;
         color: #c08484;
         font-size: 1.2rem;
+    }
+
+    [data-theme="dark"] .empty-state-icon {
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.10);
+        color: #FCA5A5;
+
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
     }
 
     .empty-state-title {

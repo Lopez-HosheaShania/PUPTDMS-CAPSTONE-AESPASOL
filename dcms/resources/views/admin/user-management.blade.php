@@ -2,7 +2,7 @@
 
 @section('title', 'User Management | PUP Taguig Dental Clinic')
 
-@section('body-class', 'bg-[#f4f5f7]')
+@section('body-class', 'bg-[#f4f5f7] dark:bg-[#000D1A]')
 
 @section('styles')
 
@@ -1844,6 +1844,113 @@
                 flex: 1 1 0;
                 justify-content: center;
             }
+        }
+
+        [data-theme="dark"] body,
+        [data-theme="dark"] main,
+        [data-theme="dark"] #mainContent {
+            background: #000D1A !important;
+            color: #e5e7eb !important;
+        }
+
+        [data-theme="dark"] .um-stat-card,
+        [data-theme="dark"] .um-panel,
+        [data-theme="dark"] .um-grid-card,
+        [data-theme="dark"] .bg-white {
+            background: linear-gradient(180deg, #161b22 0%, #0d1117 100%) !important;
+            border-color: #21262d !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .28) !important;
+        }
+
+        [data-theme="dark"] .um-stat-trend,
+        [data-theme="dark"] .search-wrap,
+        [data-theme="dark"] #statusFilter,
+        [data-theme="dark"] .um-view-toggle,
+        [data-theme="dark"] .um-role-tabs,
+        [data-theme="dark"] .bg-gray-50 {
+            background: #0d1117 !important;
+            border-color: #21262d !important;
+            color: #e5e7eb !important;
+        }
+
+        [data-theme="dark"] .um-stat-value,
+        [data-theme="dark"] .um-panel-title,
+        [data-theme="dark"] .um-grid-value,
+        [data-theme="dark"] .text-gray-800,
+        [data-theme="dark"] .font-semibold.text-gray-800 {
+            color: #f3f4f6 !important;
+        }
+
+        [data-theme="dark"] .um-stat-label,
+        [data-theme="dark"] .um-stat-caption,
+        [data-theme="dark"] .um-panel-subtitle,
+        [data-theme="dark"] .um-grid-label,
+        [data-theme="dark"] .text-gray-500,
+        [data-theme="dark"] .text-gray-400 {
+            color: #9ca3af !important;
+        }
+
+        [data-theme="dark"] #umListView thead,
+        [data-theme="dark"] #umListView thead tr,
+        [data-theme="dark"] table thead tr {
+            background: #0d1117 !important;
+        }
+
+        [data-theme="dark"] .user-table-row td {
+            border-color: #21262d !important;
+        }
+
+        [data-theme="dark"] .user-table-row:hover {
+            background: #161b22 !important;
+        }
+
+        [data-theme="dark"] .modal-box,
+        [data-theme="dark"] .modal-box .sticky,
+        [data-theme="dark"] .um-user-modal-header,
+        [data-theme="dark"] .um-user-modal-footer {
+            background: #161b22 !important;
+            border-color: #21262d !important;
+        }
+
+        [data-theme="dark"] .um-user-main-card,
+        [data-theme="dark"] .um-user-side-card,
+        [data-theme="dark"] .um-status-card,
+        [data-theme="dark"] .um-password-note {
+            background: #0d1117 !important;
+            border-color: #21262d !important;
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea,
+        [data-theme="dark"] .field-input {
+            background: #0d1117 !important;
+            border-color: #21262d !important;
+            color: #e5e7eb !important;
+        }
+
+        [data-theme="dark"] input::placeholder {
+            color: #6b7280 !important;
+        }
+
+        [data-theme="dark"] .page-btn,
+        [data-theme="dark"] .um-pagination-wrap button,
+        [data-theme="dark"] .um-pagination-wrap span {
+            background: #161b22 !important;
+            border-color: #21262d !important;
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] .um-pagination-wrap span {
+            background: linear-gradient(135deg, #8B0000, #6b0000) !important;
+            border-color: #8B0000 !important;
+            color: #fff !important;
+        }
+
+        [data-theme="dark"] .action-btn[style*="background:#f3f4f6"] {
+            background: #21262d !important;
+            color: #e5e7eb !important;
         }
     </style>
 @endsection

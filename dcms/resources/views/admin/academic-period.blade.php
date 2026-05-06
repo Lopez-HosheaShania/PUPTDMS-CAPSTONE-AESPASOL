@@ -2323,6 +2323,265 @@
         }
     }
 
+        [data-theme="dark"] #mainContent {
+            background: #020c16 !important;
+        }
+
+        [data-theme="dark"] .bg-white.rounded-xl.shadow.border.border-gray-100,
+        [data-theme="dark"] .cal-card,
+        [data-theme="dark"] .active-banner,
+        [data-theme="dark"] .academic-card {
+            background: linear-gradient(145deg, rgba(22,27,34,.90), rgba(13,17,23,.82)) !important;
+            border-color: rgba(255,255,255,.10) !important;
+            box-shadow: 0 14px 34px rgba(0,0,0,.32) !important;
+        }
+
+        [data-theme="dark"] .bg-gray-50,
+        [data-theme="dark"] .ap-toolbar,
+        [data-theme="dark"] .border-t.bg-gray-50 {
+            background: rgba(13,17,23,.90) !important;
+            border-color: rgba(255,255,255,.08) !important;
+        }
+
+        [data-theme="dark"] .search-wrap,
+        [data-theme="dark"] .filter-select,
+        [data-theme="dark"] .reset-btn,
+        [data-theme="dark"] .academic-view-toggle {
+            background: rgba(255,255,255,.06) !important;
+            border-color: rgba(255,255,255,.12) !important;
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] .search-wrap input {
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] .tbl-row,
+        [data-theme="dark"] .ap-table tbody tr {
+            background: rgba(255,255,255,.02) !important;
+        }
+
+        [data-theme="dark"] .tbl-row.is-active {
+            background: rgba(252,165,165,.08) !important;
+        }
+
+        [data-theme="dark"] .tbl-row:hover {
+            background: rgba(255,255,255,.05) !important;
+        }
+
+        [data-theme="dark"] .ap-table td,
+        [data-theme="dark"] .ap-table td span,
+        [data-theme="dark"] .academic-card-value,
+        [data-theme="dark"] .academic-card-year-text,
+        [data-theme="dark"] #liveDate {
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] h2.text-gray-800,
+        [data-theme="dark"] .ap-toolbar-left h2,
+        [data-theme="dark"] .cal-card h2 {
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] #liveClock {
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] .act,
+        [data-theme="dark"] .sem-pill,
+        [data-theme="dark"] .status-badge,
+        [data-theme="dark"] #calYear {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        [data-theme="dark"] .act-edit {
+            background: rgba(37,99,235,.13) !important;
+            border: 1px solid rgba(96,165,250,.20) !important;
+        }
+
+        [data-theme="dark"] .act-star,
+        [data-theme="dark"] .act-pinned {
+            background: rgba(16,185,129,.13) !important;
+            border: 1px solid rgba(52,211,153,.20) !important;
+        }
+
+        [data-theme="dark"] .act-del {
+            background: rgba(239,68,68,.12) !important;
+            border: 1px solid rgba(248,113,113,.20) !important;
+        }
+
+        [data-theme="dark"] .group {
+            background: rgba(255,255,255,.04) !important;
+            border-color: rgba(255,255,255,.10) !important;
+        }
+
+        [data-theme="dark"] .group > div:first-child {
+            background: rgba(255,255,255,.07) !important;
+            border-color: rgba(255,255,255,.12) !important;
+        }
+
+        [data-theme="dark"] #calendarList > div {
+            border-color: rgba(255,255,255,.10) !important;
+        }
+
+        [data-theme="dark"] #calendarList div[style*="background"] {
+            background: rgba(255,255,255,.08) !important;
+            border-color: rgba(255,255,255,.12) !important;
+        }
+
+        [data-theme="dark"] .ap-table tbody tr.tbl-row {
+            background: rgba(255,255,255,.025) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+        }
+
+        [data-theme="dark"] .ap-table tbody tr.tbl-row.is-active {
+            background: rgba(252,165,165,.055) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
+        }
+
+        [data-theme="dark"] .ap-table tbody tr.tbl-row:hover {
+            background: rgba(255,255,255,.04) !important;
+        }
+
+        /*  SEMESTER / STATUS ONLY */
+        [data-theme="dark"] .sem-pill,
+        [data-theme="dark"] .status-badge {
+            background: rgba(255,255,255,.06) !important;
+            border: 1px solid rgba(255,255,255,.12) !important;
+            color: #d1d5db !important;
+
+            backdrop-filter: blur(12px) saturate(150%) !important;
+            -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
+
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.10),
+                0 4px 12px rgba(0,0,0,.22) !important;
+
+            text-shadow: none !important;
+        }
+
+        [data-theme="dark"] .sem-pill::before,
+        [data-theme="dark"] .status-badge::before {
+            display: none !important;
+        }
+
+        /* FINAL: semester color glass override using data-semester */
+        [data-theme="dark"] .academic-item[data-semester="Summer"] .sem-pill {
+            background: linear-gradient(135deg, rgba(251,191,36,.24), rgba(245,158,11,.10)) !important;
+            border: 1px solid rgba(252,211,77,.32) !important;
+            color: #fcd34d !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.08),
+                0 2px 6px rgba(245,158,11,.12) !important;
+        }
+
+        [data-theme="dark"] .academic-item[data-semester="2nd Semester"] .sem-pill {
+            background: linear-gradient(135deg, rgba(96,165,250,.24), rgba(37,99,235,.10)) !important;
+            border: 1px solid rgba(147,197,253,.32) !important;
+            color: #93c5fd !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.08),
+                0 2px 6px rgba(59,130,246,.12) !important;
+        }
+
+        [data-theme="dark"] .academic-item[data-semester="1st Semester"] .sem-pill {
+            background: linear-gradient(135deg, rgba(248,113,113,.24), rgba(239,68,68,.10)) !important;
+            border: 1px solid rgba(252,165,165,.32) !important;
+            color: #fca5a5 !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.08),
+                0 2px 6px rgba(239,68,68,.12) !important;
+        }
+
+        [data-theme="dark"] .academic-item .sem-pill i {
+            color: currentColor !important;
+        }
+
+        [data-theme="dark"] .status-badge.s-upcoming {
+            background: rgba(37,99,235,.13) !important;
+            border-color: rgba(96,165,250,.20) !important;
+            color: #93c5fd !important;
+        }
+
+        [data-theme="dark"] .status-badge.s-active {
+            background: rgba(236,72,153,.13) !important;
+            border-color: rgba(244,114,182,.20) !important;
+            color: #f9a8d4 !important;
+        }
+
+        [data-theme="dark"] .status-badge.s-ended {
+            background: rgba(107,114,128,.13) !important;
+            border-color: rgba(156,163,175,.20) !important;
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] .status-badge.s-inactive {
+            background: rgba(245,158,11,.13) !important;
+            border-color: rgba(251,191,36,.20) !important;
+            color: #facc15 !important;
+        }
+
+        [data-theme="dark"] .sem-pill i {
+            color: currentColor !important;
+            opacity: .8;
+        }
+
+        [data-theme="dark"] #openAddPeriodQuickBtn .font-bold,
+        [data-theme="dark"] #openEditPeriodQuickBtn .font-bold {
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] #calendarList div {
+            color: #FCA5A5 !important; 
+        }
+
+        [data-theme="dark"] #calendarList div > div:first-child {
+            color: #E5E7EB !important; /* Month abbreviation */
+        }
+
+        [data-theme="dark"] #calendarList div > div:nth-child(2) {
+            color: #FCA5A5 !important; /* Event label / year text */
+        }
+
+        [data-theme="dark"] .ap-add-modal .modal-box,
+        [data-theme="dark"] .ap-add-header,
+        [data-theme="dark"] .ap-add-body,
+        [data-theme="dark"] .ap-add-footer,
+        [data-theme="dark"] .ap-panel,
+        [data-theme="dark"] .ap-panel-soft,
+        [data-theme="dark"] .ap-active-card,
+        [data-theme="dark"] .ap-semester-card,
+        [data-theme="dark"] .ap-input,
+        [data-theme="dark"] .ap-textarea {
+            background: #161b22 !important; 
+            border-color: #2b313a !important; 
+            color: #e5e7eb !important; 
+        }
+
+        [data-theme="dark"] .ap-add-header-title,
+        [data-theme="dark"] .ap-active-title {
+            color: #e5e7eb !important;
+        }
+
+        [data-theme="dark"] .ap-add-header-subtitle,
+        [data-theme="dark"] .ap-active-desc,
+        [data-theme="dark"] .ap-label-text,
+        [data-theme="dark"] .ap-label-hint {
+            color: #9ca3af !important; /* muted gray text */
+        }
+
+        [data-theme="dark"] .ap-add-close {
+            background: #161b22 !important;
+            border-color: #2b313a !important;
+            color: #9ca3af !important;
+        }
+
+        [data-theme="dark"] .ap-add-close:hover {
+            color: #f87171 !important; /* hover red highlight */
+            background: rgba(255,255,255,.05) !important;
+        }
+
         input[type="date"] {
             color: #111827;
         }
@@ -2333,6 +2592,10 @@
 
         input[type="date"]:invalid::-webkit-datetime-edit {
             color: #9ca3af;
+        }
+
+        [data-theme="dark"] .ap-add-header-title {
+            color: #FCA5A5 !important;
         }
     </style>
 @endsection

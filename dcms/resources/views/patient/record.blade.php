@@ -535,8 +535,13 @@
             background: linear-gradient(135deg, #7A0000, #4A0000) !important;
         }
 
-        [data-theme="dark"] .upcoming-card .text-\\[\\#8B0000\\] { color: #FCA5A5 !important; }
+        [data-theme="dark"] .upcoming-service-text {color: #FCA5A5 !important;}
         [data-theme="dark"] .upcoming-card .text-\\[\\#1C1410\\] { color: #F3F4F6 !important; }
+
+        [data-theme="dark"] .upcoming-card > div.bg-white > div:nth-child(2) p:last-child,
+        [data-theme="dark"] .upcoming-card > div.bg-white > div:nth-child(3) p:last-child {
+            color: #F3F4F6 !important;
+        }
 
         [data-theme="dark"] .records-hero {
             background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.1), transparent 30%),
@@ -691,7 +696,7 @@
                     <div class="bg-white px-5 py-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
                         <div>
                             <p class="text-[9px] font-extrabold uppercase tracking-[0.15em] text-gray-400 mb-1">Service</p>
-                            <p class="text-sm font-extrabold text-[#8B0000]">
+                            <p class="text-sm font-extrabold text-[#8B0000] upcoming-service-text">
                                 {{ $upcomingAppointment->service_type ?? '—' }}</p>
                         </div>
                         <div>
