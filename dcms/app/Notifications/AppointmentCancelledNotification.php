@@ -16,8 +16,7 @@ class AppointmentCancelledNotification extends Notification
         private readonly Appointment $appointment,
         private readonly string $cancelledBy = 'the dentist',
         private readonly ?string $reason = null
-    ) {
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {
@@ -56,8 +55,8 @@ class AppointmentCancelledNotification extends Notification
         return [
             'title' => 'Appointment Cancelled',
             'message' => $message,
-            'url' => route('patient.appointment.index'),
             'icon' => 'fa-calendar-xmark',
+            'url' => route('patient.appointment.index'), 
             'appointment_id' => $this->appointment->id,
             'patient_id' => $this->appointment->patient_id,
             'status' => $this->appointment->status,

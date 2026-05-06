@@ -1001,6 +1001,9 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
     Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])
         ->middleware('permission:manage_inventory')
         ->name('dentist.dentist.inventory.destroy');
+
+     Route::post('dentist/appointments/{id}/cancel', [DentistAppointmentController::class, 'cancel'])
+    ->name('dentist.dentist.appointments.cancel');
 });
 
 

@@ -201,7 +201,7 @@ class OIDCController extends Controller
         $lastName   = trim((string) ($profile['last_name'] ?? ''));
         $suffixName = trim((string) ($profile['name_suffix'] ?? ''));
 
-        $nameParts = array_filter([$firstName, $middleName, $lastName, $suffixName], fn ($value) => $value !== '');
+        $nameParts = array_filter([$firstName, $middleName, $lastName, $suffixName], fn($value) => $value !== '');
         $fullName  = trim(implode(' ', $nameParts));
         $name      = $profile['name'] ?? ($fullName !== '' ? $fullName : $email);
 
@@ -296,6 +296,7 @@ class OIDCController extends Controller
 
             if (!empty($facultyAccess->user->role?->slug)) {
                 $roleSlug = $facultyAccess->user->role->slug;
+                $roleId = Role::where('slug', $roleSlug)->value('id');
             }
         }
 
@@ -341,6 +342,8 @@ class OIDCController extends Controller
                 'refresh_token' => $refreshToken,
             ]);
 
+
+
             Log::info('OIDC user created', [
                 'user_id' => $user->id,
                 'email'   => $user->email,
@@ -354,28 +357,26 @@ class OIDCController extends Controller
         $user->last_name     = $lastName !== '' ? $lastName : $user->last_name;
         $user->suffix_name   = $suffixName !== '' ? $suffixName : $user->suffix_name;
         $user->email         = $email;
-        $user->role_id       = $roleId;
+        if ($user->wasRecentlyCreated) {
+            $user->role_id = $roleId;
+        }
         $user->sso_user_id   = $ssoUserId ?: $user->sso_user_id;
         $user->access_token  = $accessToken;
         $user->refresh_token = $refreshToken;
         $user->last_login_at = now();
         $user->status        = 'active';
         $user->save();
-
+        // I-reload para makuha yung actual role na naka-set sa DB
+        $user->refresh();
+        $actualRoleSlug = optional($user->role)->slug ?? $roleSlug;
         $patient = Patient::where('email', $email)->first();
 
         if ($patient && !$patient->user_id) {
             $patient->user_id = $user->id;
             $patient->save();
-
-            Log::info('Patient linked to user', [
-                'patient_id' => $patient->id,
-                'user_id'    => $user->id,
-                'email'      => $email,
-            ]);
         }
 
-        if ($roleSlug === 'patient') {
+        if ($actualRoleSlug === 'patient') {
             $patient = $this->syncPatientRecord(
                 $user,
                 $name,
@@ -389,7 +390,6 @@ class OIDCController extends Controller
         }
 
         $jwt = JWTAuth::fromUser($user);
-
         Cookie::queue(
             Cookie::make(
                 'jwt_token',
@@ -408,7 +408,7 @@ class OIDCController extends Controller
         $request->session()->regenerate();
         session()->save();
 
-        if ($roleSlug === 'patient') {
+        if ($actualRoleSlug === 'patient') {
             session([
                 'role'         => 'patient',
                 'patient_id'   => $patient?->id,
@@ -425,10 +425,10 @@ class OIDCController extends Controller
                 ->with('show_terms_modal', true);
         }
 
-        if (in_array($roleSlug, ['admin', 'super_admin'], true)) {
+        if (in_array($actualRoleSlug, ['admin', 'super_admin'], true)) {
             session([
                 'admin_logged_in' => true,
-                'role'            => $roleSlug,
+                'role'            => $actualRoleSlug,
                 'admin_id'        => $user->id,
                 'admin_name'      => $user->name ?: $name ?: $email,
                 'admin_email'     => $user->email,
@@ -443,7 +443,7 @@ class OIDCController extends Controller
                 ->with('show_terms_modal', true);
         }
 
-        if ($roleSlug === 'dentist') {
+        if ($actualRoleSlug === 'dentist') {
             session([
                 'role'          => 'dentist',
                 'dentist_id'    => $user->id,
