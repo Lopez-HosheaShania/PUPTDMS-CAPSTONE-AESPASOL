@@ -60,6 +60,7 @@
         border: 1px solid #f0eaea;
         border-radius: 14px;
         padding: 1.1rem 1.1rem 1rem;
+        padding-top: 2.3rem;
         position: relative;
         overflow: hidden;
         transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, opacity .15s ease;
@@ -172,12 +173,13 @@
 
     .stat-trend {
         position: absolute;
-        bottom: .9rem;
-        right: .9rem;
+        top: .7rem;
+        right: .7rem;
         font-size: .62rem;
         font-weight: 700;
-        padding: .2rem .45rem;
+        padding: .22rem .5rem;
         border-radius: 999px;
+        z-index: 2;
     }
 
     .stat-card.pending .stat-trend { background: #fef3c7; color: #92400e; }
@@ -754,14 +756,12 @@
 
     .tbl th,
     .tbl td {
-        padding: .9rem 1rem;
+        padding: .75rem .55rem;
         vertical-align: middle;
     }
 
     .tbl th:nth-child(1),
     .tbl td:nth-child(1),
-    .tbl th:nth-child(2),
-    .tbl td:nth-child(2),
     .tbl th:nth-child(3),
     .tbl td:nth-child(3),
     .tbl th:nth-child(5),
@@ -783,19 +783,19 @@
     }
 
     .tbl th:nth-child(1),
-    .tbl td:nth-child(1) { width: 16%; }
+    .tbl td:nth-child(1) { width: 14%; }
     .tbl th:nth-child(2),
-    .tbl td:nth-child(2) { width: 18%; }
+    .tbl td:nth-child(2) { width: 23%; }
     .tbl th:nth-child(3),
-    .tbl td:nth-child(3) { width: 17%; }
+    .tbl td:nth-child(3) { width: 14%; }
     .tbl th:nth-child(4),
-    .tbl td:nth-child(4) { width: 14%; }
+    .tbl td:nth-child(4) { width: 13%; }
     .tbl th:nth-child(5),
-    .tbl td:nth-child(5) { width: 13%; }
+    .tbl td:nth-child(5) { width: 12%; }
     .tbl th:nth-child(6),
-    .tbl td:nth-child(6) { width: 12%; }
+    .tbl td:nth-child(6) { width: 10%; }
     .tbl th:nth-child(7),
-    .tbl td:nth-child(7) { width: 10%; }
+    .tbl td:nth-child(7) { width: 14%; }
 
     .cell-document,
     .cell-patient-name {
@@ -803,8 +803,14 @@
     }
 
     .cell-patient-name {
-        font-size: .8rem;
+        font-size: .78rem;
         font-weight: 600;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        display: block;
+        max-width: none;
+        line-height: 1.15;
     }
 
     .cell-purpose {
@@ -834,11 +840,16 @@
     }
 
     .tbl td {
-        padding: .9rem 1rem;
+        padding: .65rem .55rem;
         font-size: .8rem;
         color: #374151;
         border-bottom: 1px solid #f8f5f5;
         vertical-align: middle;
+        overflow: hidden;
+    }
+
+    .tbl td > div {
+        min-width: 0;
     }
 
     .tbl tbody tr:last-child td { border-bottom: none; }
@@ -1084,7 +1095,6 @@
         background: #0b1117 !important;
     }
 
-    [data-theme="dark"] .stat-card,
     [data-theme="dark"] .tbl-wrap,
     [data-theme="dark"] .panel-card,
     [data-theme="dark"] .request-card {
@@ -1093,10 +1103,30 @@
         box-shadow: none !important;
     }
 
-    [data-theme="dark"] .stat-card:hover,
+    [data-theme="dark"] .stat-card {
+        background:
+            radial-gradient(circle at bottom right, rgba(255,255,255,.07), transparent 42%),
+            linear-gradient(135deg, rgba(22, 27, 34, .68), rgba(17, 24, 39, .50)) !important;
+        border: 1px solid rgba(255,255,255,.10) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.10),
+            0 0 0 1px rgba(255,255,255,.025),
+            0 8px 18px rgba(0,0,0,.16) !important;
+    }
+
     [data-theme="dark"] .request-card:hover {
         box-shadow: 0 10px 24px rgba(0, 0, 0, .28) !important;
         border-color: #2b313a !important;
+    }
+
+    [data-theme="dark"] .stat-card:hover {
+        border-color: rgba(255,255,255,.16) !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.13),
+            0 0 18px rgba(255,255,255,.045),
+            0 12px 24px rgba(0,0,0,.20) !important;
     }
 
     [data-theme="dark"] .stat-card.total.stat-active {
@@ -1269,6 +1299,25 @@
         background: rgba(22, 101, 52, .14) !important;
     }
 
+    [data-theme="dark"] .filter-modal-close {
+        background: rgba(255,255,255,.06) !important;
+        color: #fca5a5 !important;
+        border: 1px solid rgba(255,255,255,.12);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+
+    [data-theme="dark"] .filter-modal-close:hover {
+        background: rgba(139, 0, 0, .9) !important;
+        color: #fff !important;
+        border-color: rgba(139, 0, 0, .9);
+        box-shadow: 0 0 14px rgba(139, 0, 0, .45);
+    }
+
+    [data-theme="dark"] #panelRefNo {
+        color: #FCA5A5 !important;
+    }
+
     [data-theme="dark"] .view-toggle-btn {
         color: #9ca3af !important;
     }
@@ -1319,9 +1368,12 @@
     [data-theme="dark"] .cell-patient-name,
     [data-theme="dark"] .request-card-name,
     [data-theme="dark"] .request-card-ref,
-    [data-theme="dark"] .panel-header .font-bold,
-    [data-theme="dark"] #panelRefNo {
+    [data-theme="dark"] .panel-header .font-bold {
         color: #f3f4f6 !important;
+    }
+
+    [data-theme="dark"] #panelRefNo {
+        color: #FCA5A5 !important;
     }
 
     [data-theme="dark"] .cell-purpose,
@@ -1748,7 +1800,7 @@
                     </div>
                 </div>
 
-                <div class="content-grid" style="display:grid;grid-template-columns:1fr 360px;gap:1.25rem;align-items:start;">
+                <div class="content-grid" style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:1rem;align-items:start;">
 
                     <div class="tbl-wrap">
                         @if(empty($requests) || $requests->isEmpty())

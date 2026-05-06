@@ -880,6 +880,48 @@
             transform: scale(1);
         }
 
+        /* DARK MODE - GLASS TAB STAT CARDS */
+        [data-theme="dark"] .tab-btn {
+            background:
+                radial-gradient(circle at bottom right, rgba(255,255,255,.07), transparent 42%),
+                linear-gradient(135deg, rgba(22, 27, 34, .68), rgba(17, 24, 39, .50)) !important;
+            border: 1px solid rgba(255,255,255,.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.10),
+                0 0 0 1px rgba(255,255,255,.025),
+                0 8px 18px rgba(0,0,0,.16);
+        }
+
+        [data-theme="dark"] .tab-btn:hover,
+        [data-theme="dark"] .tab-btn.tab-active {
+            border-color: rgba(252,165,165,.24);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.13),
+                0 0 18px rgba(252,165,165,.08),
+                0 12px 24px rgba(0,0,0,.20);
+        }
+
+        [data-theme="dark"] .tab-count {
+            color: #f3f4f6 !important;
+        }
+
+        [data-theme="dark"] .tab-label {
+            color: #9ca3af !important;
+        }
+
+        [data-theme="dark"] .tab-icon-wrap {
+            background: rgba(255,255,255,.10) !important;
+            border: 1px solid rgba(255,255,255,.12);
+        }
+
+        [data-theme="dark"] .card-title,
+        [data-theme="dark"] .patient-name,
+        [data-theme="dark"] .patient-grid-name {
+            color: #FCA5A5 !important;
+        }
+
         [data-theme="dark"] .stat-card,
         [data-theme="dark"] .card,
         [data-theme="dark"] .patient-card,
@@ -894,9 +936,7 @@
             border-color: #21262d !important;
         }
 
-        [data-theme="dark"] .patient-name,
         [data-theme="dark"] .detail-value,
-        [data-theme="dark"] .card-title,
         [data-theme="dark"] .stat-value {
             color: #f3f4f6 !important;
         }
@@ -923,6 +963,91 @@
             color: #f3f4f6;
             border-color: #21262d;
         }
+
+        [data-theme="dark"] .card-header-icon {
+            background: rgba(252, 165, 165, 0.10) !important;
+            border: 1px solid rgba(252, 165, 165, 0.15);
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] .detail-icon {
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        [data-theme="dark"] .patient-id,
+        [data-theme="dark"] .patient-grid-id {
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #9ca3af !important;
+        }
+
+        [data-theme="dark"] .status-pill {
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+        }
+
+        [data-theme="dark"] .card-arrow-btn {
+            background: rgba(255,255,255,0.05) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+        }
+
+        [data-theme="dark"] .patient-grid-card {
+            background: #161b22 !important;
+            border-color: #21262d !important;
+        }
+
+        [data-theme="dark"] .patient-grid-card:hover {
+            border-color: rgba(252,165,165,.24) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.08),
+                0 0 18px rgba(252,165,165,.08),
+                0 12px 24px rgba(0,0,0,.22);
+        }
+
+        [data-theme="dark"] .patient-grid-id {
+            color: #9ca3af !important;
+        }
+
+        [data-theme="dark"] .patient-avatar {
+            border-color: rgba(255,255,255,.10) !important;
+        }
+
+        [data-theme="dark"] .divider-y {
+            background: rgba(255,255,255,.08) !important;
+        }
+
+        [data-theme="dark"] .tab-icon-wrap,
+        [data-theme="dark"] .detail-icon,
+        [data-theme="dark"] .card-header-icon,
+        [data-theme="dark"] .status-pill,
+        [data-theme="dark"] .patient-id,
+        [data-theme="dark"] .patient-grid-id,
+        [data-theme="dark"] .card-arrow-btn {
+            background: rgba(255,255,255,.045) !important;
+            border-color: rgba(255,255,255,.075) !important;
+        }
+
+        [data-theme="dark"] .view-toggle {
+            background: rgba(255,255,255,0.04) !important;
+            border-color: rgba(255,255,255,0.08) !important;
+        }
+
+        [data-theme="dark"] .view-toggle-btn {
+            color: rgba(255,255,255,0.6) !important;
+        }
+
+        [data-theme="dark"] .view-toggle-btn.active {
+            background: rgba(139, 0, 0, 0.85) !important;
+            color: #fff !important;
+        }
+
+        [data-theme="dark"] .entry-badge {
+            background: rgba(255,255,255,0.06) !important;
+            border-color: rgba(255,255,255,0.1) !important;
+            color: #FCA5A5 !important;
+        }
+
 
         .view-toggle {
             display: inline-flex;
