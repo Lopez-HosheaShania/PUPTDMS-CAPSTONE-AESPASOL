@@ -7,6 +7,7 @@
             <div class="group-trigger {{ request()->routeIs(
                 'admin.admin.dashboard',
                 'admin.patient_directory',
+                'admin.dental-records*',
                 'admin.admin.appointments',
                 'admin.document-requests*',
                 'admin.reports'
@@ -26,7 +27,7 @@
                     class="nav-link {{ request()->routeIs('admin.patient_directory') ? 'active' : '' }}">
                     <i class="fa-solid fa-users"></i> Patients
                 </a>
-                <a href="{{ route('admin.admin.dashboard') }}" class="nav-link"><i class="fa-solid fa-tooth"></i> Dental
+                <a href="{{ route('admin.dental-records.index') }}" class="nav-link {{ request()->routeIs('admin.dental-records*') ? 'active' : '' }}"><i class="fa-solid fa-tooth"></i> Dental
                     Records</a>
                 <a href="{{ route('admin.admin.appointments') }}"
                     class="nav-link {{ request()->routeIs('admin.admin.appointments') ? 'active' : '' }}">

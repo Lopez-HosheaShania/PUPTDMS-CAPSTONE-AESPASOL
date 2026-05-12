@@ -264,7 +264,23 @@ Route::prefix('admin')
             ->name('admin.admin.dashboard');
 
         Route::get('/dental-records', [DentalRecordController::class, 'index'])
-            ->name('dental-records.index');
+            ->name('admin.dental-records.index');
+
+        // Safe stub routes used by blades to avoid missing-route exceptions.
+        // These redirect to the index until full handlers are implemented.
+
+        Route::get('/dental-records/{id}', function ($id) {
+            return redirect()->route('admin.dental-records.index');
+        })->name('admin.dental-records.show');
+
+        // Route aliases for blade views
+        Route::get('/reports-index', function () {
+            return redirect()->route('admin.reports');
+        })->name('admin.reports.index');
+
+        Route::get('/appointments-alias', function () {
+            return redirect()->route('admin.admin.appointments');
+        })->name('admin.appointments');
 
         /*
         |--------------------------------------------------------------------------
