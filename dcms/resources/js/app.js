@@ -1,7 +1,9 @@
 import './bootstrap';
 import Chart from 'chart.js/auto';
+import JSVoice from 'jsvoice';
 
 window.Chart = Chart;
+window.JSVoice = JSVoice;
 
 import {
     swapSkeletonContent,

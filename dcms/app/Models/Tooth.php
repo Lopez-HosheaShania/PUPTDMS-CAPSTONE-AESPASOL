@@ -26,7 +26,7 @@ class Tooth extends Model
 
     public function legends()
     {
-        return $this->belongsToMany(ToothLegend::class, 'tooth_legends')
+        return $this->belongsToMany(ToothLegend::class, 'tooth_legends', 'tooth_id', 'legend_id')
             ->withTimestamps();
     }
 }

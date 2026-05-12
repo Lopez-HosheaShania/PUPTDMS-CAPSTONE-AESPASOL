@@ -16,6 +16,11 @@
             }
         }
 
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4); }
+            50%       { box-shadow: 0 0 0 8px rgba(192, 57, 43, 0); }
+        }
+
         .cms-page {
             min-height: 100vh;
             background: #f5f6fa;
@@ -460,36 +465,17 @@
             color: #991b1b;
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-input.has-voice-padding {
-            padding-right: 2.9rem;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-mic {
-            position: absolute;
-            right: calc(var(--faculty-toggle-width) + var(--faculty-search-gap) + .72rem);
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            border: none;
-            background: transparent;
-            padding: 0;
-            margin: 0;
-            line-height: 1;
+        /* ── External circular mic button (matches Add User style) ── */
+        .patient-voice-toggle {
+            position: relative;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            color: #8B0000;
-            cursor: pointer;
-            z-index: 5;
+            flex-shrink: 0;
+            z-index: 30;
+            pointer-events: auto;
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-mic i {
-            font-size: 13px;
-            line-height: 1;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status] {
+        .patient-voice-status {
             position: absolute;
             right: 0;
             top: -1.35rem;
@@ -508,36 +494,43 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].hidden {
-            display: none;
+        .patient-voice-status.hidden     { display: none; }
+        .patient-voice-status.is-listening { color: #1d4ed8; border-color: #bfdbfe; background: #eff6ff; }
+        .patient-voice-status.is-error     { color: #b91c1c; border-color: #fecaca; background: #fef2f2; }
+        .patient-voice-status.is-success   { color: #166534; border-color: #bbf7d0; background: #f0fdf4; }
+
+        .voice-search-mic.external {
+            display: inline-flex !important;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            background: #4b5563;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(75, 85, 99, 0.12);
+            border: none;
+            margin-left: 0;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            position: relative;
+            z-index: 31;
+            pointer-events: auto;
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].is-listening {
-            color: #1d4ed8;
-            border-color: #bfdbfe;
-            background: #eff6ff;
+        .voice-search-mic.external:hover { background: #374151; }
+        .voice-search-mic.external i     { font-size: 12px; line-height: 1; }
+
+        .voice-search-mic.external.mic-active {
+            background: #c0392b;
+            transform: scale(1.1);
+            animation: micPulse 1.2s ease-in-out infinite;
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].is-error {
-            color: #b91c1c;
-            border-color: #fecaca;
-            background: #fef2f2;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].is-success {
-            color: #166534;
-            border-color: #bbf7d0;
-            background: #f0fdf4;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].is-default {
-            color: #4b5563;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-mic:hover,
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-mic.text-\[\#8B0000\] {
-            color: #660000;
-        }
+        /* Hide any mic injected inside the search-input-wrap by global helper */
+        .search-input-wrap .voice-search-mic,
+        .search-input-wrap [data-voice-trigger] { display: none !important; }
 
         .dropdown-toggle-btn {
             border: 1.5px solid #E0DDD8;
@@ -919,6 +912,11 @@
             .user-search-row {
                 gap: .5rem;
             }
+
+            .voice-search-mic.external {
+                width: 36px;
+                height: 36px;
+            }
         }
     </style>
 @endsection
@@ -977,7 +975,7 @@
                                         </label>
 
                                         <div class="user-search-row">
-                                            <div class="search-input-wrap search-wrap">
+                                            <div class="search-input-wrap">
                                                 <input type="text" id="user_search" class="access-input"
                                                     placeholder="Search faculty by name or email" autocomplete="off">
 
@@ -991,6 +989,19 @@
                                                 class="user-search-clear-btn hidden" onclick="clearUserSearch()">
                                                 Clear
                                             </button>
+
+                                            {{-- External circular mic button (matches Add User style) --}}
+                                            <div class="patient-voice-toggle">
+                                                <button type="button" id="cmsSearchMicBtn"
+                                                    class="voice-search-mic external"
+                                                    aria-label="Toggle voice input"
+                                                    aria-pressed="false">
+                                                    <i class="fa-solid fa-microphone"></i>
+                                                </button>
+                                                <span id="cmsSearchVoiceStatus"
+                                                    class="patient-voice-status hidden"
+                                                    aria-live="polite"></span>
+                                            </div>
                                         </div>
 
                                         <div id="searchResults" class="search-results"></div>
@@ -1199,49 +1210,47 @@
 
 @section('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('user_search');
-            const toggleButton = document.getElementById('toggleUserDropdown');
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // ─── Search / Dropdown logic ────────────────────────────────────────────────
+            const searchInput       = document.getElementById('user_search');
+            const toggleButton      = document.getElementById('toggleUserDropdown');
             const clearSearchButton = document.getElementById('userSearchClearBtn');
-            const resultsBox = document.getElementById('searchResults');
+            const resultsBox        = document.getElementById('searchResults');
 
             const externalAdminId = document.getElementById('external_admin_id');
-            const fname = document.getElementById('fname');
-            const lname = document.getElementById('lname');
-            const email = document.getElementById('email');
-            const office = document.getElementById('office');
-            const address = document.getElementById('address');
-            const age = document.getElementById('age');
-            const gender = document.getElementById('gender');
-            const contactNumber = document.getElementById('contact_number');
-            const seniorPwd = document.getElementById('senior_pwd');
+            const fname           = document.getElementById('fname');
+            const lname           = document.getElementById('lname');
+            const email           = document.getElementById('email');
+            const office          = document.getElementById('office');
+            const address         = document.getElementById('address');
+            const age             = document.getElementById('age');
+            const gender          = document.getElementById('gender');
+            const contactNumber   = document.getElementById('contact_number');
+            const seniorPwd       = document.getElementById('senior_pwd');
 
-            const previewName = document.getElementById('preview_name');
-            const previewEmail = document.getElementById('preview_email');
-            const previewOffice = document.getElementById('preview_office');
+            const previewName    = document.getElementById('preview_name');
+            const previewEmail   = document.getElementById('preview_email');
+            const previewOffice  = document.getElementById('preview_office');
             const previewContact = document.getElementById('preview_contact');
             const previewAddress = document.getElementById('preview_address');
-            const cancelAssignCmsBtn = document.getElementById('cancelAssignCmsBtn');
+            const cancelBtn      = document.getElementById('cancelAssignCmsBtn');
 
-            let fullUserList = [];
-            let dropdownOpen = false;
-            let fullListLoaded = false;
-            let isDropdownMode = false;
+            let fullUserList     = [];
+            let dropdownOpen     = false;
+            let fullListLoaded   = false;
+            let isDropdownMode   = false;
             let usersFetchPromise = null;
 
             function toggleUserSearchClear(input) {
                 if (!clearSearchButton) return;
-
-                if ((input.value || '').trim().length > 0) {
-                    clearSearchButton.classList.remove('hidden');
-                } else {
-                    clearSearchButton.classList.add('hidden');
-                }
+                (input.value || '').trim().length > 0
+                    ? clearSearchButton.classList.remove('hidden')
+                    : clearSearchButton.classList.add('hidden');
             }
 
-            window.clearUserSearch = function() {
+            window.clearUserSearch = function () {
                 if (!searchInput) return;
-
                 searchInput.value = '';
                 clearFormFields();
                 hideResults();
@@ -1251,8 +1260,8 @@
 
             function hideResults() {
                 resultsBox.style.display = 'none';
-                resultsBox.innerHTML = '';
-                dropdownOpen = false;
+                resultsBox.innerHTML     = '';
+                dropdownOpen   = false;
                 isDropdownMode = false;
             }
 
@@ -1262,67 +1271,52 @@
             }
 
             function resetPreview() {
-                previewName.textContent = 'No user selected';
-                previewEmail.textContent = 'Select a user to preview synced information.';
-                previewOffice.textContent = '—';
+                previewName.textContent    = 'No user selected';
+                previewEmail.textContent   = 'Select a user to preview synced information.';
+                previewOffice.textContent  = '—';
                 previewContact.textContent = '—';
                 previewAddress.textContent = '—';
             }
 
             function clearFormFields() {
                 externalAdminId.value = '';
-                fname.value = '';
-                lname.value = '';
-                email.value = '';
-                office.value = '';
-                address.value = '';
-                age.value = '';
-                gender.value = '';
-                contactNumber.value = '';
-                seniorPwd.value = '';
+                fname.value = lname.value = email.value = office.value =
+                    address.value = age.value = gender.value =
+                    contactNumber.value = seniorPwd.value = '';
                 resetPreview();
             }
 
             function resetAssignCmsForm() {
-                searchInput.value = '';
+                searchInput.value     = '';
                 externalAdminId.value = '';
-
-                fname.value = '';
-                lname.value = '';
-                email.value = '';
-                office.value = '';
-                address.value = '';
-                age.value = '';
-                gender.value = '';
-                contactNumber.value = '';
-                seniorPwd.value = '';
-
-                document.getElementById('cms_role').value = '';
+                fname.value = lname.value = email.value = office.value =
+                    address.value = age.value = gender.value =
+                    contactNumber.value = seniorPwd.value = '';
+                document.getElementById('cms_role').value   = '';
                 document.getElementById('cms_status').value = '';
-
                 hideResults();
                 toggleUserSearchClear(searchInput);
                 resetPreview();
             }
 
             function fillUser(user) {
-                externalAdminId.value = user.admin_id ?? '';
-                searchInput.value = user.full_name ?? '';
-                fname.value = user.fname ?? '';
-                lname.value = user.lname ?? '';
-                email.value = user.email ?? '';
-                office.value = user.office ?? '';
-                address.value = user.address ?? '';
-                age.value = user.age ?? '';
-                gender.value = user.gender ?? '';
-                contactNumber.value = user.contact_number ?? '';
-                seniorPwd.value = user.senior_pwd ?? '';
+                externalAdminId.value = user.admin_id        ?? '';
+                searchInput.value     = user.full_name       ?? '';
+                fname.value           = user.fname           ?? '';
+                lname.value           = user.lname           ?? '';
+                email.value           = user.email           ?? '';
+                office.value          = user.office          ?? '';
+                address.value         = user.address         ?? '';
+                age.value             = user.age             ?? '';
+                gender.value          = user.gender          ?? '';
+                contactNumber.value   = user.contact_number  ?? '';
+                seniorPwd.value       = user.senior_pwd      ?? '';
 
-                previewName.textContent = user.full_name ?? 'Selected user';
-                previewEmail.textContent = user.email ?? 'No email available';
-                previewOffice.textContent = user.office ?? '—';
+                previewName.textContent    = user.full_name      ?? 'Selected user';
+                previewEmail.textContent   = user.email          ?? 'No email available';
+                previewOffice.textContent  = user.office         ?? '—';
                 previewContact.textContent = user.contact_number ?? '—';
-                previewAddress.textContent = user.address ?? '—';
+                previewAddress.textContent = user.address        ?? '—';
 
                 toggleUserSearchClear(searchInput);
                 hideResults();
@@ -1335,169 +1329,212 @@
 
             function renderResults(users) {
                 resultsBox.innerHTML = '';
-
                 users.forEach(user => {
                     const item = document.createElement('button');
-                    item.type = 'button';
+                    item.type      = 'button';
                     item.className = 'search-item';
-
                     item.innerHTML = `
-                    <div class="search-name">${user.full_name ?? ''}</div>
-                    <div class="search-email">${user.email ?? ''}</div>
-                `;
-
-                    item.addEventListener('click', function(event) {
-                        event.preventDefault();
+                        <div class="search-name">${user.full_name ?? ''}</div>
+                        <div class="search-email">${user.email ?? ''}</div>
+                    `;
+                    item.addEventListener('click', function (e) {
+                        e.preventDefault();
                         fillUser(user);
                     });
-
                     resultsBox.appendChild(item);
                 });
-
                 showResults();
             }
 
             async function fetchAllUsers() {
-                if (fullListLoaded) {
-                    return fullUserList;
-                }
-
-                if (usersFetchPromise) {
-                    return usersFetchPromise;
-                }
+                if (fullListLoaded) return fullUserList;
+                if (usersFetchPromise) return usersFetchPromise;
 
                 usersFetchPromise = fetch('/admin/external-admins/search', {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(async response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}`);
-                        }
-
-                        const data = await response.json();
-
-                        if (!data || !data.success || !Array.isArray(data.data)) {
-                            throw new Error('Invalid response format');
-                        }
-
-                        fullUserList = data.data;
-                        fullListLoaded = true;
-
-                        return fullUserList;
-                    })
-                    .catch(error => {
-                        console.error('Fetch all users error:', error);
-                        return fullUserList;
-                    })
-                    .finally(() => {
-                        usersFetchPromise = null;
-                    });
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(async res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const data = await res.json();
+                    if (!data || !data.success || !Array.isArray(data.data)) throw new Error('Invalid response format');
+                    fullUserList   = data.data;
+                    fullListLoaded = true;
+                    return fullUserList;
+                })
+                .catch(err => { console.error('Fetch all users error:', err); return fullUserList; })
+                .finally(() => { usersFetchPromise = null; });
 
                 return usersFetchPromise;
             }
 
             function filterUsersLocally(query) {
                 const term = query.trim().toLowerCase();
-
-                if (term === '') {
-                    return [];
-                }
-
-                return fullUserList.filter(user => {
-                    return String(user.full_name ?? '').toLowerCase().includes(term) ||
-                        String(user.fname ?? '').toLowerCase().includes(term) ||
-                        String(user.lname ?? '').toLowerCase().includes(term) ||
-                        String(user.email ?? '').toLowerCase().includes(term) ||
-                        String(user.office ?? '').toLowerCase().includes(term);
-                });
+                if (!term) return [];
+                return fullUserList.filter(u =>
+                    [u.full_name, u.fname, u.lname, u.email, u.office]
+                        .some(v => String(v ?? '').toLowerCase().includes(term))
+                );
             }
 
-            searchInput.addEventListener('input', async function() {
+            searchInput.addEventListener('input', async function () {
                 const query = this.value.trim();
                 toggleUserSearchClear(this);
-
                 clearFormFields();
-
-                // kapag nagtype habang bukas ang dropdown, automatic lumalabas sa dropdown mode
                 isDropdownMode = false;
 
-                if (query.length === 0) {
-                    hideResults();
-                    return;
-                }
+                if (!query) { hideResults(); return; }
+                if (!fullListLoaded) await fetchAllUsers();
 
-                // siguraduhing may base full list muna bago mag local search
-                if (!fullListLoaded) {
-                    await fetchAllUsers();
-                }
-
-                const filteredUsers = filterUsersLocally(query);
-
-                if (filteredUsers.length === 0) {
-                    renderNoResults('No results found.');
-                    return;
-                }
-
-                renderResults(filteredUsers);
+                const filtered = filterUsersLocally(query);
+                filtered.length ? renderResults(filtered) : renderNoResults('No results found.');
             });
 
-            toggleButton.addEventListener('click', async function(event) {
-                event.preventDefault();
-                event.stopPropagation();
+            toggleButton.addEventListener('click', async function (e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-                if (dropdownOpen && isDropdownMode) {
-                    hideResults();
-                    return;
-                }
-
-                // dropdown mode ito
+                if (dropdownOpen && isDropdownMode) { hideResults(); return; }
                 isDropdownMode = true;
 
-                if (!fullListLoaded) {
-                    await fetchAllUsers();
-                }
-
-                if (!fullUserList.length) {
-                    renderNoResults('No users available.');
-                    return;
-                }
-
-                renderResults(fullUserList);
+                if (!fullListLoaded) await fetchAllUsers();
+                fullUserList.length ? renderResults(fullUserList) : renderNoResults('No users available.');
             });
 
-            searchInput.addEventListener('focus', function() {
-                // no auto-open
+            searchInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') hideResults();
             });
 
-            searchInput.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape') {
-                    hideResults();
-                }
+            document.addEventListener('click', function (e) {
+                const inside = searchInput.contains(e.target) ||
+                               toggleButton.contains(e.target) ||
+                               resultsBox.contains(e.target);
+                if (!inside) hideResults();
             });
 
-            document.addEventListener('click', function(event) {
-                const clickedInside =
-                    searchInput.contains(event.target) ||
-                    toggleButton.contains(event.target) ||
-                    resultsBox.contains(event.target);
-
-                if (!clickedInside) {
-                    hideResults();
-                }
-            });
-
-            if (cancelAssignCmsBtn) {
-                cancelAssignCmsBtn.addEventListener('click', function() {
-                    resetAssignCmsForm();
-                });
-            }
+            if (cancelBtn) cancelBtn.addEventListener('click', resetAssignCmsForm);
 
             toggleUserSearchClear(searchInput);
             resetPreview();
+
+            // ─── Voice input for CMS user search (external circular button) ────────────
+            (function () {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const micBtn = document.getElementById('cmsSearchMicBtn');
+                const status = document.getElementById('cmsSearchVoiceStatus');
+
+                if (!micBtn || !status || !SpeechRecognition) {
+                    if (micBtn) { micBtn.disabled = true; }
+                    return;
+                }
+
+                let recognition = null;
+                let listening   = false;
+                let manualStop  = false;
+
+                const setStatus = (text, state) => {
+                    status.textContent = text;
+                    status.className   = 'patient-voice-status' + (state ? ' is-' + state : '');
+                    text ? status.classList.remove('hidden') : status.classList.add('hidden');
+                };
+
+                const hideStatus = (delay) => setTimeout(() => status.classList.add('hidden'), delay || 0);
+
+                const setMicState = (isActive) => {
+                    micBtn.classList.toggle('mic-active', isActive);
+                    micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    micBtn.innerHTML = isActive
+                        ? '<i class="fa-solid fa-stop"></i>'
+                        : '<i class="fa-solid fa-microphone"></i>';
+                };
+
+                const stopNow = () => {
+                    manualStop = true;
+                    listening  = false;
+                    setMicState(false);
+                    setStatus('Voice captured.', 'success');
+                    hideStatus(1200);
+                    if (recognition) { try { recognition.abort(); } catch (e) {} }
+                };
+
+                const createRecognition = () => {
+                    const r = new SpeechRecognition();
+                    r.lang           = 'en-US';
+                    r.continuous     = false;
+                    r.interimResults = true;
+                    r.maxAlternatives = 1;
+
+                    let sawSpeech = false;
+                    let timeoutId = null;
+
+                    r.onstart = () => {
+                        timeoutId = setTimeout(() => {
+                            if (listening && !sawSpeech) { try { r.stop(); } catch (e) {} }
+                        }, 6000);
+                    };
+
+                    r.onspeechend = () => { clearTimeout(timeoutId); try { r.stop(); } catch (e) {} };
+
+                    r.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const res   = event.results[i];
+                            const chunk = (res && res[0] ? res[0].transcript : '').trim();
+                            if (!chunk) continue;
+                            sawSpeech = true;
+                            if (res.isFinal) transcript = (transcript + ' ' + chunk).trim();
+                            else if (!transcript) transcript = chunk;
+                        }
+                        if (transcript) {
+                            clearTimeout(timeoutId);
+                            searchInput.value = transcript;
+                            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            setStatus('Listening...', 'listening');
+                        }
+                    };
+
+                    r.onerror = () => {
+                        clearTimeout(timeoutId);
+                        listening = false;
+                        if (manualStop) { manualStop = false; return; }
+                        setMicState(false);
+                        setStatus("Didn't catch that. Try again.", 'error');
+                        hideStatus(2500);
+                    };
+
+                    r.onend = () => {
+                        clearTimeout(timeoutId);
+                        if (manualStop) { manualStop = false; listening = false; setMicState(false); return; }
+                        const hadSpeech = sawSpeech || !!searchInput.value.trim();
+                        listening = false;
+                        setMicState(false);
+                        hadSpeech
+                            ? (setStatus('Voice captured.', 'success'), hideStatus(2200))
+                            : (setStatus("Didn't catch that. Try again.", 'error'), hideStatus(2500));
+                    };
+
+                    return r;
+                };
+
+                micBtn.addEventListener('click', () => {
+                    if (listening && recognition) { stopNow(); return; }
+
+                    recognition = createRecognition();
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        setStatus('Unable to start voice input.', 'error');
+                        hideStatus(2500);
+                        setMicState(false);
+                        listening = false;
+                        return;
+                    }
+                    listening = true;
+                    setMicState(true);
+                    setStatus('Listening...', 'listening');
+                });
+            })();
+
         });
     </script>
 @endsection

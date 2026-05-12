@@ -16,6 +16,11 @@
             }
         }
 
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4); }
+            50%       { box-shadow: 0 0 0 8px rgba(192, 57, 43, 0); }
+        }
+
         .faculty-page {
             min-height: 100vh;
             background: #f5f6fa;
@@ -313,36 +318,17 @@
             color: #991b1b;
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-input.has-voice-padding {
-            padding-right: 2.9rem;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-mic {
-            position: absolute;
-            right: calc(var(--faculty-toggle-width) + var(--faculty-search-gap) + .72rem);
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            border: none;
-            background: transparent;
-            padding: 0;
-            margin: 0;
-            line-height: 1;
+        /* ── External circular mic button (matches Add User style) ── */
+        .patient-voice-toggle {
+            position: relative;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            color: #8B0000;
-            cursor: pointer;
-            z-index: 5;
+            flex-shrink: 0;
+            z-index: 30;
+            pointer-events: auto;
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-mic i {
-            font-size: 13px;
-            line-height: 1;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status] {
+        .patient-voice-status {
             position: absolute;
             right: 0;
             top: -1.35rem;
@@ -361,36 +347,42 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].hidden {
-            display: none;
+        .patient-voice-status.hidden      { display: none; }
+        .patient-voice-status.is-listening { color: #1d4ed8; border-color: #bfdbfe; background: #eff6ff; }
+        .patient-voice-status.is-error     { color: #b91c1c; border-color: #fecaca; background: #fef2f2; }
+        .patient-voice-status.is-success   { color: #166534; border-color: #bbf7d0; background: #f0fdf4; }
+
+        .voice-search-mic.external {
+            display: inline-flex !important;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            background: #4b5563;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(75, 85, 99, 0.12);
+            border: none;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            position: relative;
+            z-index: 31;
+            pointer-events: auto;
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].is-listening {
-            color: #1d4ed8;
-            border-color: #bfdbfe;
-            background: #eff6ff;
+        .voice-search-mic.external:hover      { background: #374151; }
+        .voice-search-mic.external i          { font-size: 12px; line-height: 1; }
+
+        .voice-search-mic.external.mic-active {
+            background: #c0392b;
+            transform: scale(1.1);
+            animation: micPulse 1.2s ease-in-out infinite;
         }
 
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].is-error {
-            color: #b91c1c;
-            border-color: #fecaca;
-            background: #fef2f2;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].is-success {
-            color: #166534;
-            border-color: #bbf7d0;
-            background: #f0fdf4;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap [data-voice-status].is-default {
-            color: #4b5563;
-        }
-
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-mic:hover,
-        .search-input-wrap.search-wrap.voice-search-wrap .voice-search-mic.text-\[\#8B0000\] {
-            color: #660000;
-        }
+        /* Hide any mic injected inside the search-input-wrap by global helper */
+        .search-input-wrap .voice-search-mic,
+        .search-input-wrap [data-voice-trigger] { display: none !important; }
 
         .dropdown-toggle-btn {
             border: 1.5px solid #E0DDD8;
@@ -506,8 +498,8 @@
         .access-select {
             width: 100%;
             border: 1.5px solid #e0ddd8;
-            border-radius: 10px; /* mas nipis */
-            padding: .6rem .85rem; /* from .85 → .6 */
+            border-radius: 10px;
+            padding: .6rem .85rem;
             font-size: .9rem;
             line-height: 1.3;
             background: #fff;
@@ -515,7 +507,7 @@
             outline: none;
             transition: all .15s ease;
             box-sizing: border-box;
-            height: 46px; /* from 58 → 46 */
+            height: 46px;
         }
 
         .access-input:focus,
@@ -543,21 +535,10 @@
             cursor: pointer;
         }
 
-        .access-select:invalid {
-            color: #6b7280; 
-        }
-
-        .access-select:not(:invalid) {
-            color: #111827;
-        }
-
-        .access-select option {
-            color: #111827; 
-        }
-
-        .access-select option[value=""] {
-            color: #6b7280;
-        }
+        .access-select:invalid     { color: #6b7280; }
+        .access-select:not(:invalid) { color: #111827; }
+        .access-select option       { color: #111827; }
+        .access-select option[value=""] { color: #6b7280; }
 
         .field-help {
             margin-top: .45rem;
@@ -720,9 +701,7 @@
             border: 1.5px solid #E0DDD8;
         }
 
-        .btn-cancel:hover {
-            background: #f3f4f6;
-        }
+        .btn-cancel:hover { background: #f3f4f6; }
 
         .btn-save {
             background: #8B0000;
@@ -752,17 +731,13 @@
         [data-theme="dark"] .card-title,
         [data-theme="dark"] .section-title,
         [data-theme="dark"] .preview-name,
-        [data-theme="dark"] .preview-meta-value {
-            color: #f3f4f6 !important;
-        }
+        [data-theme="dark"] .preview-meta-value { color: #f3f4f6 !important; }
 
         [data-theme="dark"] .card-subtitle,
         [data-theme="dark"] .field-help,
         [data-theme="dark"] .section-note,
         [data-theme="dark"] .preview-email,
-        [data-theme="dark"] .tip-item {
-            color: #9ca3af !important;
-        }
+        [data-theme="dark"] .tip-item { color: #9ca3af !important; }
 
         [data-theme="dark"] .access-input,
         [data-theme="dark"] .access-select,
@@ -772,9 +747,7 @@
             color: #f3f4f6;
         }
 
-        [data-theme="dark"] .faculty-page {
-            background: #0b1117 !important;
-        }
+        [data-theme="dark"] .faculty-page { background: #0b1117 !important; }
 
         [data-theme="dark"] .access-input[readonly] {
             background: #0d1117 !important;
@@ -793,18 +766,11 @@
             border-bottom-color: #21262d !important;
         }
 
-        [data-theme="dark"] .search-item:hover {
-            background: #1c2128 !important;
-        }
-
-        [data-theme="dark"] .search-name {
-            color: #f3f4f6 !important;
-        }
+        [data-theme="dark"] .search-item:hover { background: #1c2128 !important; }
+        [data-theme="dark"] .search-name       { color: #f3f4f6 !important; }
 
         [data-theme="dark"] .search-email,
-        [data-theme="dark"] .search-empty {
-            color: #9ca3af !important;
-        }
+        [data-theme="dark"] .search-empty { color: #9ca3af !important; }
 
         [data-theme="dark"] .btn-cancel {
             background: #161b22 !important;
@@ -812,9 +778,7 @@
             border-color: #2b313a !important;
         }
 
-        [data-theme="dark"] .btn-cancel:hover {
-            background: #1c2128 !important;
-        }
+        [data-theme="dark"] .btn-cancel:hover { background: #1c2128 !important; }
 
         [data-theme="dark"] .status-alert.success {
             background: rgba(22, 101, 52, .14) !important;
@@ -828,13 +792,8 @@
             border-color: #991b1b !important;
         }
 
-        [data-theme="dark"] .preview-card::before {
-            background: rgba(139, 0, 0, .10) !important;
-        }
-
-        [data-theme="dark"] .preview-card::after {
-            background: rgba(192, 57, 43, .08) !important;
-        }
+        [data-theme="dark"] .preview-card::before { background: rgba(139, 0, 0, .10) !important; }
+        [data-theme="dark"] .preview-card::after  { background: rgba(192, 57, 43, .08) !important; }
 
         [data-theme="dark"] .entry-badge {
             background: rgba(139, 0, 0, .16) !important;
@@ -848,14 +807,16 @@
             border-color: rgba(248, 113, 113, .12) !important;
         }
 
-        [data-theme="dark"] .search-results::-webkit-scrollbar-thumb {
-            background: #374151 !important;
+        [data-theme="dark"] .search-results::-webkit-scrollbar-thumb { background: #374151 !important; }
+
+        [data-theme="dark"] .patient-voice-status {
+            background: rgba(13, 17, 23, .92) !important;
+            border-color: #21262d !important;
+            color: #d1d5db !important;
         }
 
         @media (max-width: 1100px) {
-            .faculty-layout {
-                grid-template-columns: 1fr;
-            }
+            .faculty-layout { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 767px) {
@@ -864,27 +825,16 @@
                 margin-bottom: 1rem;
             }
 
-            .page-title {
-                font-size: 1.45rem !important;
-            }
-
-            .page-subtitle {
-                font-size: .84rem;
-            }
+            .page-title    { font-size: 1.45rem !important; }
+            .page-subtitle { font-size: .84rem; }
 
             .card-header,
-            .section-head {
-                align-items: flex-start;
-            }
+            .section-head  { align-items: flex-start; }
 
-            .card-body {
-                padding: 1rem;
-            }
+            .card-body { padding: 1rem; }
 
             .faculty-grid,
-            .faculty-grid-3 {
-                grid-template-columns: 1fr;
-            }
+            .faculty-grid-3 { grid-template-columns: 1fr; }
 
             .access-input,
             .access-select {
@@ -894,9 +844,7 @@
                 border-radius: 10px;
             }
 
-            .access-card-footer {
-                flex-direction: column;
-            }
+            .access-card-footer { flex-direction: column; }
 
             .btn-cancel,
             .btn-save {
@@ -910,8 +858,11 @@
                 grid-template-columns: 1fr var(--faculty-toggle-width);
             }
 
-            .faculty-search-row {
-                gap: .5rem;
+            .faculty-search-row { gap: .5rem; }
+
+            .voice-search-mic.external {
+                width: 36px;
+                height: 36px;
             }
         }
     </style>
@@ -987,20 +938,35 @@
                                         </label>
 
                                         <div class="faculty-search-row">
-                                            <div class="search-input-wrap search-wrap">
+                                            <div class="search-input-wrap">
                                                 <input type="text" id="faculty_search" class="access-input"
-                                                    placeholder="Search faculty by name, email, or faculty code" autocomplete="off">
+                                                    placeholder="Search faculty by name, email, or faculty code"
+                                                    autocomplete="off">
 
-                                                <button type="button" id="toggleFacultyDropdown" class="dropdown-toggle-btn"
-                                                    aria-label="Show faculty list">
+                                                <button type="button" id="toggleFacultyDropdown"
+                                                    class="dropdown-toggle-btn" aria-label="Show faculty list">
                                                     <i class="fa-solid fa-chevron-down"></i>
                                                 </button>
                                             </div>
 
-                                            <button type="button" id="facultySearchClearBtn" class="faculty-search-clear-btn hidden"
+                                            <button type="button" id="facultySearchClearBtn"
+                                                class="faculty-search-clear-btn hidden"
                                                 onclick="clearFacultySearch()">
                                                 Clear
                                             </button>
+
+                                            {{-- External circular mic button (matches Add User style) --}}
+                                            <div class="patient-voice-toggle">
+                                                <button type="button" id="facultyMicBtn"
+                                                    class="voice-search-mic external"
+                                                    aria-label="Toggle voice input"
+                                                    aria-pressed="false">
+                                                    <i class="fa-solid fa-microphone"></i>
+                                                </button>
+                                                <span id="facultyVoiceStatus"
+                                                    class="patient-voice-status hidden"
+                                                    aria-live="polite"></span>
+                                            </div>
                                         </div>
 
                                         <div id="facultyResults" class="search-results"></div>
@@ -1237,56 +1203,55 @@
 
 @section('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('faculty_search');
-            const toggleButton = document.getElementById('toggleFacultyDropdown');
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // ─── Element refs ───────────────────────────────────────────────────────────
+            const searchInput       = document.getElementById('faculty_search');
+            const toggleButton      = document.getElementById('toggleFacultyDropdown');
             const clearSearchButton = document.getElementById('facultySearchClearBtn');
-            const resultsBox = document.getElementById('facultyResults');
+            const resultsBox        = document.getElementById('facultyResults');
 
-            const facultyJson = document.getElementById('faculty_json');
-            const facultyId = document.getElementById('faculty_id');
-            const firstName = document.getElementById('first_name');
-            const middleName = document.getElementById('middle_name');
-            const lastName = document.getElementById('last_name');
-            const suffixName = document.getElementById('suffix_name');
-            const facultyCode = document.getElementById('faculty_code');
-            const facultyType = document.getElementById('faculty_type');
-            const department = document.getElementById('department');
-            const email = document.getElementById('email');
-            const birthday = document.getElementById('birthday');
-            const gender = document.getElementById('gender');
-            const houseNum = document.getElementById('house_num');
-            const street = document.getElementById('street');
-            const barangay = document.getElementById('barangay');
-            const city = document.getElementById('city');
-            const province = document.getElementById('province');
-            const country = document.getElementById('country');
-            const zipcode = document.getElementById('zipcode');
+            const facultyJson  = document.getElementById('faculty_json');
+            const facultyId    = document.getElementById('faculty_id');
+            const firstName    = document.getElementById('first_name');
+            const middleName   = document.getElementById('middle_name');
+            const lastName     = document.getElementById('last_name');
+            const suffixName   = document.getElementById('suffix_name');
+            const facultyCode  = document.getElementById('faculty_code');
+            const facultyType  = document.getElementById('faculty_type');
+            const department   = document.getElementById('department');
+            const email        = document.getElementById('email');
+            const birthday     = document.getElementById('birthday');
+            const gender       = document.getElementById('gender');
+            const houseNum     = document.getElementById('house_num');
+            const street       = document.getElementById('street');
+            const barangay     = document.getElementById('barangay');
+            const city         = document.getElementById('city');
+            const province     = document.getElementById('province');
+            const country      = document.getElementById('country');
+            const zipcode      = document.getElementById('zipcode');
 
-            const previewName = document.getElementById('preview_name');
-            const previewEmail = document.getElementById('preview_email');
-            const previewCode = document.getElementById('preview_code');
+            const previewName       = document.getElementById('preview_name');
+            const previewEmail      = document.getElementById('preview_email');
+            const previewCode       = document.getElementById('preview_code');
             const previewDepartment = document.getElementById('preview_department');
-            const previewType = document.getElementById('preview_type');
-            const cancelFacultyBtn = document.getElementById('cancelFacultyBtn');
+            const previewType       = document.getElementById('preview_type');
+            const cancelFacultyBtn  = document.getElementById('cancelFacultyBtn');
 
-            let faculties = [];
-            let dropdownOpen = false;
+            let faculties      = [];
+            let dropdownOpen   = false;
             let isDropdownMode = false;
 
+            // ─── Helpers ────────────────────────────────────────────────────────────────
             function toggleFacultySearchClear(input) {
                 if (!clearSearchButton) return;
-
-                if ((input.value || '').trim().length > 0) {
-                    clearSearchButton.classList.remove('hidden');
-                } else {
-                    clearSearchButton.classList.add('hidden');
-                }
+                (input.value || '').trim().length > 0
+                    ? clearSearchButton.classList.remove('hidden')
+                    : clearSearchButton.classList.add('hidden');
             }
 
-            window.clearFacultySearch = function() {
+            window.clearFacultySearch = function () {
                 if (!searchInput) return;
-
                 searchInput.value = '';
                 clearFields();
                 hideResults();
@@ -1301,82 +1266,69 @@
 
             function hideResults() {
                 resultsBox.style.display = 'none';
-                resultsBox.innerHTML = '';
-                dropdownOpen = false;
+                resultsBox.innerHTML     = '';
+                dropdownOpen   = false;
                 isDropdownMode = false;
             }
 
             function resetPreview() {
-                previewName.textContent = 'No faculty selected';
-                previewEmail.textContent = 'Select a faculty record to preview the synced information.';
-                previewCode.textContent = '—';
+                previewName.textContent       = 'No faculty selected';
+                previewEmail.textContent      = 'Select a faculty record to preview the synced information.';
+                previewCode.textContent       = '—';
                 previewDepartment.textContent = '—';
-                previewType.textContent = '—';
+                previewType.textContent       = '—';
             }
 
             function clearFields() {
                 facultyJson.value = '';
-                facultyId.value = '';
-                firstName.value = '';
-                middleName.value = '';
-                lastName.value = '';
-                suffixName.value = '';
-                facultyCode.value = '';
-                facultyType.value = '';
-                department.value = '';
-                email.value = '';
-                birthday.value = '';
-                gender.value = '';
-                houseNum.value = '';
-                street.value = '';
-                barangay.value = '';
-                city.value = '';
-                province.value = '';
-                country.value = '';
-                zipcode.value = '';
+                facultyId.value = firstName.value = middleName.value = lastName.value =
+                    suffixName.value = facultyCode.value = facultyType.value =
+                    department.value = email.value = birthday.value = gender.value =
+                    houseNum.value = street.value = barangay.value = city.value =
+                    province.value = country.value = zipcode.value = '';
                 resetPreview();
             }
 
             function resetFacultyForm() {
                 searchInput.value = '';
                 clearFields();
-                document.getElementById('cms_role').value = '';
+                document.getElementById('cms_role').value      = '';
                 document.getElementById('account_status').value = '';
                 hideResults();
                 toggleFacultySearchClear(searchInput);
             }
 
             function fillFaculty(faculty) {
-                const profile = faculty.profile ?? {};
-                const address = profile.address ?? {};
+                const profile  = faculty.profile  ?? {};
+                const addr     = profile.address  ?? {};
 
-                facultyJson.value = JSON.stringify(faculty);
-                searchInput.value = `${faculty.first_name ?? ''} ${faculty.last_name ?? ''}`.trim();
+                facultyJson.value  = JSON.stringify(faculty);
+                searchInput.value  = `${faculty.first_name ?? ''} ${faculty.last_name ?? ''}`.trim();
 
-                facultyId.value = faculty.faculty_id ?? '';
-                firstName.value = faculty.first_name ?? '';
-                middleName.value = faculty.middle_name ?? '';
-                lastName.value = faculty.last_name ?? '';
-                suffixName.value = faculty.suffix_name ?? '';
-                facultyCode.value = faculty.faculty_code ?? '';
-                facultyType.value = faculty.faculty_type ?? '';
-                department.value = faculty.department ?? '';
-                email.value = faculty.email ?? '';
-                birthday.value = profile.birthday ?? '';
-                gender.value = profile.gender ?? '';
-                houseNum.value = address.house_num ?? '';
-                street.value = address.street ?? '';
-                barangay.value = address.barangay ?? '';
-                city.value = address.city ?? '';
-                province.value = address.province ?? '';
-                country.value = address.country ?? '';
-                zipcode.value = address.zipcode ?? '';
+                facultyId.value    = faculty.faculty_id   ?? '';
+                firstName.value    = faculty.first_name   ?? '';
+                middleName.value   = faculty.middle_name  ?? '';
+                lastName.value     = faculty.last_name    ?? '';
+                suffixName.value   = faculty.suffix_name  ?? '';
+                facultyCode.value  = faculty.faculty_code ?? '';
+                facultyType.value  = faculty.faculty_type ?? '';
+                department.value   = faculty.department   ?? '';
+                email.value        = faculty.email        ?? '';
+                birthday.value     = profile.birthday     ?? '';
+                gender.value       = profile.gender       ?? '';
+                houseNum.value     = addr.house_num       ?? '';
+                street.value       = addr.street          ?? '';
+                barangay.value     = addr.barangay        ?? '';
+                city.value         = addr.city            ?? '';
+                province.value     = addr.province        ?? '';
+                country.value      = addr.country         ?? '';
+                zipcode.value      = addr.zipcode         ?? '';
 
-                previewName.textContent = `${faculty.first_name ?? ''} ${faculty.last_name ?? ''}`.trim() || 'Selected faculty';
-                previewEmail.textContent = faculty.email ?? 'No email available';
-                previewCode.textContent = faculty.faculty_code ?? '—';
-                previewDepartment.textContent = faculty.department ?? '—';
-                previewType.textContent = faculty.faculty_type ?? '—';
+                previewName.textContent       = `${faculty.first_name ?? ''} ${faculty.last_name ?? ''}`.trim() || 'Selected faculty';
+                previewEmail.textContent      = faculty.email        ?? 'No email available';
+                previewCode.textContent       = faculty.faculty_code ?? '—';
+                previewDepartment.textContent = faculty.department   ?? '—';
+                previewType.textContent       = faculty.faculty_type ?? '—';
 
                 toggleFacultySearchClear(searchInput);
                 hideResults();
@@ -1396,20 +1348,20 @@
                 }
 
                 list.forEach(faculty => {
-                    const item = document.createElement('button');
-                    item.type = 'button';
+                    const item     = document.createElement('button');
+                    item.type      = 'button';
                     item.className = 'search-item';
 
-                    const fullName =
-                        `${faculty.first_name ?? ''} ${faculty.middle_name ?? ''} ${faculty.last_name ?? ''}`.replace(/\s+/g, ' ').trim();
+                    const fullName = `${faculty.first_name ?? ''} ${faculty.middle_name ?? ''} ${faculty.last_name ?? ''}`
+                        .replace(/\s+/g, ' ').trim();
 
                     item.innerHTML = `
                         <div class="search-name">${fullName || 'Unnamed Faculty'}</div>
                         <div class="search-email">${faculty.email ?? faculty.faculty_code ?? ''}</div>
                     `;
 
-                    item.addEventListener('click', function(event) {
-                        event.preventDefault();
+                    item.addEventListener('click', function (e) {
+                        e.preventDefault();
                         fillFaculty(faculty);
                     });
 
@@ -1421,107 +1373,185 @@
 
             function filterFaculties(query) {
                 const q = query.trim().toLowerCase();
+                if (!q) return [];
 
-                if (q === '') {
-                    return [];
-                }
-
-                return faculties.filter(faculty => {
-                    const fullName =
-                        `${faculty.first_name ?? ''} ${faculty.middle_name ?? ''} ${faculty.last_name ?? ''}`.toLowerCase();
-                    const mail = (faculty.email ?? '').toLowerCase();
-                    const code = (faculty.faculty_code ?? '').toLowerCase();
-                    const dept = (faculty.department ?? '').toLowerCase();
-                    return fullName.includes(q) || mail.includes(q) || code.includes(q) || dept.includes(q);
+                return faculties.filter(f => {
+                    const name = `${f.first_name ?? ''} ${f.middle_name ?? ''} ${f.last_name ?? ''}`.toLowerCase();
+                    return name.includes(q) ||
+                        (f.email        ?? '').toLowerCase().includes(q) ||
+                        (f.faculty_code ?? '').toLowerCase().includes(q) ||
+                        (f.department   ?? '').toLowerCase().includes(q);
                 });
             }
 
+            // ─── Load faculty list ──────────────────────────────────────────────────────
             fetch('/faculties', {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    faculties = Array.isArray(data) ? data : [];
-                })
-                .catch(error => {
-                    console.error('Failed to load faculties:', error);
-                    faculties = [];
-                });
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then(data => { faculties = Array.isArray(data) ? data : []; })
+            .catch(err  => { console.error('Failed to load faculties:', err); faculties = []; });
 
-            searchInput.addEventListener('input', function() {
+            // ─── Search input ───────────────────────────────────────────────────────────
+            searchInput.addEventListener('input', function () {
                 const query = this.value.trim();
                 toggleFacultySearchClear(this);
-
                 clearFields();
                 isDropdownMode = false;
 
-                if (query.length === 0) {
-                    hideResults();
-                    return;
-                }
+                if (!query) { hideResults(); return; }
 
                 const filtered = filterFaculties(query);
-
-                if (filtered.length === 0) {
-                    renderNoResults('No results found.');
-                    return;
-                }
-
-                renderResults(filtered);
+                filtered.length ? renderResults(filtered) : renderNoResults('No results found.');
             });
 
-            toggleButton.addEventListener('click', function(event) {
-                event.preventDefault();
-                event.stopPropagation();
+            // ─── Dropdown toggle ────────────────────────────────────────────────────────
+            toggleButton.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-                if (dropdownOpen && isDropdownMode) {
-                    hideResults();
-                    return;
-                }
-
+                if (dropdownOpen && isDropdownMode) { hideResults(); return; }
                 isDropdownMode = true;
-
-                if (!faculties.length) {
-                    renderNoResults('No faculty records available.');
-                    return;
-                }
-
-                renderResults(faculties);
+                faculties.length ? renderResults(faculties) : renderNoResults('No faculty records available.');
             });
 
-            searchInput.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape') {
-                    hideResults();
-                }
+            searchInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') hideResults();
             });
 
-            document.addEventListener('click', function(event) {
-                const clickedInside =
-                    searchInput.contains(event.target) ||
-                    toggleButton.contains(event.target) ||
-                    resultsBox.contains(event.target);
-
-                if (!clickedInside) {
-                    hideResults();
-                }
+            document.addEventListener('click', function (e) {
+                const inside = searchInput.contains(e.target) ||
+                               toggleButton.contains(e.target) ||
+                               resultsBox.contains(e.target);
+                if (!inside) hideResults();
             });
 
-            if (cancelFacultyBtn) {
-                cancelFacultyBtn.addEventListener('click', function() {
-                    resetFacultyForm();
-                });
-            }
+            if (cancelFacultyBtn) cancelFacultyBtn.addEventListener('click', resetFacultyForm);
 
             toggleFacultySearchClear(searchInput);
             resetPreview();
+
+            // ─── Voice input for faculty search (external circular button) ──────────────
+            (function () {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const micBtn = document.getElementById('facultyMicBtn');
+                const status = document.getElementById('facultyVoiceStatus');
+
+                if (!micBtn || !status || !SpeechRecognition) {
+                    if (micBtn) micBtn.disabled = true;
+                    return;
+                }
+
+                let recognition = null;
+                let listening   = false;
+                let manualStop  = false;
+
+                const setStatus = (text, state) => {
+                    status.textContent = text;
+                    status.className   = 'patient-voice-status' + (state ? ' is-' + state : '');
+                    text ? status.classList.remove('hidden') : status.classList.add('hidden');
+                };
+
+                const hideStatus = (delay) => setTimeout(() => status.classList.add('hidden'), delay || 0);
+
+                const setMicState = (isActive) => {
+                    micBtn.classList.toggle('mic-active', isActive);
+                    micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    micBtn.innerHTML = isActive
+                        ? '<i class="fa-solid fa-stop"></i>'
+                        : '<i class="fa-solid fa-microphone"></i>';
+                };
+
+                const stopNow = () => {
+                    manualStop = true;
+                    listening  = false;
+                    setMicState(false);
+                    setStatus('Voice captured.', 'success');
+                    hideStatus(1200);
+                    if (recognition) { try { recognition.abort(); } catch (e) {} }
+                };
+
+                const createRecognition = () => {
+                    const r = new SpeechRecognition();
+                    r.lang            = 'en-US';
+                    r.continuous      = false;
+                    r.interimResults  = true;
+                    r.maxAlternatives = 1;
+
+                    let sawSpeech = false;
+                    let timeoutId = null;
+
+                    r.onstart = () => {
+                        timeoutId = setTimeout(() => {
+                            if (listening && !sawSpeech) { try { r.stop(); } catch (e) {} }
+                        }, 6000);
+                    };
+
+                    r.onspeechend = () => { clearTimeout(timeoutId); try { r.stop(); } catch (e) {} };
+
+                    r.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const res   = event.results[i];
+                            const chunk = (res && res[0] ? res[0].transcript : '').trim();
+                            if (!chunk) continue;
+                            sawSpeech = true;
+                            if (res.isFinal) transcript = (transcript + ' ' + chunk).trim();
+                            else if (!transcript) transcript = chunk;
+                        }
+                        if (transcript) {
+                            clearTimeout(timeoutId);
+                            searchInput.value = transcript;
+                            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            setStatus('Listening...', 'listening');
+                        }
+                    };
+
+                    r.onerror = () => {
+                        clearTimeout(timeoutId);
+                        listening = false;
+                        if (manualStop) { manualStop = false; return; }
+                        setMicState(false);
+                        setStatus("Didn't catch that. Try again.", 'error');
+                        hideStatus(2500);
+                    };
+
+                    r.onend = () => {
+                        clearTimeout(timeoutId);
+                        if (manualStop) { manualStop = false; listening = false; setMicState(false); return; }
+                        const hadSpeech = sawSpeech || !!searchInput.value.trim();
+                        listening = false;
+                        setMicState(false);
+                        hadSpeech
+                            ? (setStatus('Voice captured.', 'success'), hideStatus(2200))
+                            : (setStatus("Didn't catch that. Try again.", 'error'), hideStatus(2500));
+                    };
+
+                    return r;
+                };
+
+                micBtn.addEventListener('click', () => {
+                    if (listening && recognition) { stopNow(); return; }
+
+                    recognition = createRecognition();
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        setStatus('Unable to start voice input.', 'error');
+                        hideStatus(2500);
+                        setMicState(false);
+                        listening = false;
+                        return;
+                    }
+                    listening = true;
+                    setMicState(true);
+                    setStatus('Listening...', 'listening');
+                });
+            })();
+
         });
     </script>
 @endsection
