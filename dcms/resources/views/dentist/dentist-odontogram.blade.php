@@ -2728,11 +2728,51 @@ $today = Carbon::now()->format('F d, Y');
 
         window.addEventListener('resize', handleResize);
 
-        document.getElementById('finishProcedureBtn').addEventListener('click', function () {
-            console.log('Odontogram Data:', odontogramDataInput.value);
-            console.log('Oral Examination:', document.getElementById('oralExaminationNotes').value);
-            console.log('Diagnosis:', document.getElementById('diagnosisNotes').value);
-            console.log('Prescriptions:', document.getElementById('prescriptionsNotes').value);
+        document.getElementById('finishProcedureBtn').addEventListener('click', async function () {
+            const finishBtn = this;
+            const originalButtonHtml = finishBtn.innerHTML;
+
+            const payload = {
+                odontogram_data: JSON.parse(odontogramDataInput.value || '[]'),
+                oral_examination: document.getElementById('oralExaminationNotes').value,
+                diagnosis: document.getElementById('diagnosisNotes').value,
+                prescriptions: document.getElementById('prescriptionsNotes').value,
+            };
+
+            finishBtn.disabled = true;
+            finishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving Procedure...';
+
+            try {
+                const response = await fetch(@json(route('dentist.odontogram.save', $patient->id)), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': @json(csrf_token()),
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    console.error(result);
+                    alert(result.message || 'Failed to save odontogram. Please check your inputs and try again.');
+                    return;
+                }
+
+                alert(result.message || 'Odontogram saved successfully.');
+
+                if (result.redirect_url) {
+                    window.location.href = result.redirect_url;
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Something went wrong while saving the odontogram.');
+            } finally {
+                finishBtn.disabled = false;
+                finishBtn.innerHTML = originalButtonHtml;
+            }
         });
 
         if (clearSelectionBtn) {

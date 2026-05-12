@@ -2,9 +2,105 @@
 (() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-        console.warn('Your browser does not support Voice Recognition.');
-        return;
+    function getJSVoice() {
+        return window.JSVoice;
+    }
+
+    function normalizeVoiceError(error) {
+        if (!error) return 'unknown';
+        if (typeof error === 'string') return error;
+        if (typeof error.error === 'string') return error.error;
+        if (typeof error.code === 'string') return error.code;
+        return 'unknown';
+    }
+
+    function createRecognizer(input, handlers) {
+        const lang = input.dataset.voiceLang || 'en-US';
+        const JSVoice = getJSVoice();
+
+        if (JSVoice && (typeof JSVoice.isApiSupported === 'undefined' || JSVoice.isApiSupported)) {
+            const voice = new JSVoice({
+                lang,
+                continuous: false,
+                interimResults: false,
+                autoRestart: false,
+                commands: {},
+                patternCommands: [],
+                onCommandRecognized: (phrase, raw) => {
+                    const transcript = (raw || phrase || '').trim();
+                    if (transcript) handlers.onResult(transcript);
+                },
+                onCommandNotRecognized: (raw) => {
+                    const transcript = (raw || '').trim();
+                    if (transcript) handlers.onResult(transcript);
+                },
+                onMicrophonePermissionDenied: () => handlers.onError('not-allowed'),
+                onError: (error) => handlers.onError(normalizeVoiceError(error)),
+                onSpeechEnd: () => handlers.onEnd()
+            });
+
+            return {
+                start: () => Promise.resolve(voice.start()),
+                stop: () => {
+                    voice.stop();
+                }
+            };
+        }
+
+        if (!SpeechRecognition) return null;
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = lang;
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        let processedFinalIndex = -1;
+
+        recognition.onresult = (event) => {
+            let transcript = '';
+            let hasNewFinal = false;
+
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                const chunk = result?.[0]?.transcript?.trim() || '';
+                if (!chunk) continue;
+
+                if (result.isFinal) {
+                    if (i > processedFinalIndex) {
+                        transcript += ` ${chunk}`;
+                        processedFinalIndex = i;
+                        hasNewFinal = true;
+                    }
+                } else if (!transcript) {
+                    transcript = chunk;
+                }
+            }
+
+            transcript = transcript.trim();
+
+            if (hasNewFinal && transcript) {
+                handlers.onResult(transcript);
+            }
+        };
+
+        recognition.onerror = (event) => {
+            handlers.onError(event?.error || 'unknown');
+        };
+
+        recognition.onend = () => {
+            handlers.onEnd();
+        };
+
+        return {
+            start: () => {
+                recognition.start();
+                return Promise.resolve();
+            },
+            stop: () => {
+                recognition.stop();
+            }
+        };
     }
 
     let activeController = null;
@@ -19,6 +115,11 @@
 
     function initializeVoiceInputs(root = document) {
     const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+    if (!SpeechRecognition && !getJSVoice()) {
+        console.warn('Your browser does not support Voice Recognition.');
+        return;
+    }
+
     const inputs = scope.querySelectorAll(selector);
 
     inputs.forEach((input) => {
@@ -148,20 +249,65 @@
 
         input.dataset.voiceReady = 'true';
 
-        const recognition = new SpeechRecognition();
-        recognition.lang = input.dataset.voiceLang || 'en-US';
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
-
         let hasRecognizedSpeech = false;
-let processedFinalIndex = -1;
+
+        const recognizer = createRecognizer(input, {
+            onResult: (transcript) => {
+                hasRecognizedSpeech = true;
+                if (isTextarea && input.value.trim()) {
+                    input.value = `${input.value.trim()} ${transcript}`.trim();
+                } else {
+                    input.value = transcript;
+                }
+
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+
+                showStatus('Voice captured.', 'success');
+                hideStatus(1500);
+            },
+            onError: (errorCode) => {
+                if (errorCode === 'no-speech') {
+                    showStatus("Didn't catch that. Try again.", 'error');
+                } else if (errorCode === 'not-allowed') {
+                    showStatus('Microphone permission denied.', 'error');
+                } else if (errorCode === 'aborted') {
+                    statusLabel.classList.add('hidden');
+                } else {
+                    showStatus('Voice input stopped.', 'error');
+                }
+                hideStatus(2200);
+            },
+            onEnd: () => {
+                resetVisualState();
+
+                if (activeController === controller) {
+                    activeController = null;
+                }
+
+                if (statusLabel.textContent === 'Listening...') {
+                    if (!hasRecognizedSpeech) {
+                        showStatus("Didn't catch that. Try again.", 'error');
+                        hideStatus(1800);
+                    } else {
+                        statusLabel.classList.add('hidden');
+                    }
+                }
+            }
+        });
+
+        if (!recognizer) {
+            micBtn.disabled = true;
+            micBtn.title = 'Voice input is not supported in this browser';
+            input.dataset.voiceReady = 'unsupported';
+            return;
+        }
 
         const controller = {
             input,
             micBtn,
             statusLabel,
-            recognition
+            recognizer
         };
 
         function enforcePatientSearchLayout() {
@@ -226,99 +372,30 @@ let processedFinalIndex = -1;
             const isSameActive = activeController === controller;
 
             if (isSameActive) {
-                recognition.stop();
+                recognizer.stop();
                 return;
             }
 
             if (activeController) {
                 try {
-                    activeController.recognition.stop();
+                    activeController.recognizer.stop();
                 } catch (err) {}
             }
 
             activeController = controller;
 
-            try {
-                hasRecognizedSpeech = false;
-                recognition.start();
+            hasRecognizedSpeech = false;
+            Promise.resolve(recognizer.start()).then(() => {
                 micBtn.classList.add('is-listening', 'text-[#8B0000]');
                 micBtn.innerHTML = '<span aria-hidden="true" style="display:block;width:10px;height:10px;border-radius:2px;background:currentColor;"></span>';
                 showStatus('Listening...', 'listening');
-            } catch (err) {
+            }).catch(() => {
                 showStatus('Unable to start voice input.', 'error');
                 hideStatus(2500);
                 resetVisualState();
                 activeController = null;
-            }
+            });
         });
-
-        recognition.onresult = (event) => {
-            let transcript = '';
-let hasNewFinal = false;
-
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const result = event.results[i];
-                const chunk = result?.[0]?.transcript?.trim() || '';
-                if (!chunk) continue;
-
-                if (result.isFinal) {
-                    if (i > processedFinalIndex) {
-                                    transcript += ` ${chunk}`;
-                                    processedFinalIndex = i;
-                                    hasNewFinal = true;
-                                }
-                } else if (!transcript) {
-                    transcript = chunk;
-                }
-            }
-
-            transcript = transcript.trim();
-
-            if (hasNewFinal && transcript) {
-                hasRecognizedSpeech = true;
-                if (isTextarea && input.value.trim()) {
-                    input.value = `${input.value.trim()} ${transcript}`.trim();
-                } else {
-                    input.value = transcript;
-                }
-
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-
-                showStatus('Voice captured.', 'success');
-                hideStatus(1500);
-            }
-        };
-
-        recognition.onerror = (event) => {
-            if (event.error === 'no-speech') {
-                showStatus("Didn't catch that. Try again.", 'error');
-            } else if (event.error === 'not-allowed') {
-                showStatus('Microphone permission denied.', 'error');
-            } else if (event.error === 'aborted') {
-                statusLabel.classList.add('hidden');
-            } else {
-                showStatus('Voice input stopped.', 'error');
-            }
-            hideStatus(2200);
-        };
-
-        recognition.onend = () => {
-            resetVisualState();
-
-            if (activeController === controller) {
-                activeController = null;
-            }
-
-            if (statusLabel.textContent === 'Listening...') {
-                if (!hasRecognizedSpeech) {
-                    showStatus("Didn't catch that. Try again.", 'error');
-                    hideStatus(1800);
-                } else {
-                    statusLabel.classList.add('hidden');
-                }
-            }
-        };
     });
     }
 

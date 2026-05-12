@@ -139,7 +139,17 @@
         flex-wrap: wrap;
     }
 
-    .search-wrap {
+    .template-search-row {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        width: 100%;
+        max-width: 430px;
+        margin-bottom: 0;
+        flex: 0 0 auto;
+    }
+
+    .template-search-row .search-wrap {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -149,24 +159,24 @@
         padding: 0 14px;
         height: 38px;
         transition: border-color .2s, box-shadow .2s;
-        flex: 1;
-        min-width: 200px;
-        max-width: 320px;
+        min-width: 0;
+        flex-shrink: 1;
+        width: 260px;
+        box-shadow: none;
     }
 
-    .search-wrap:focus-within {
-        border-color: #8B0000;
+    .template-search-row .search-wrap:focus-within {
+        border-color: var(--crimson);
         box-shadow: 0 0 0 3px rgba(139, 0, 0, .1);
     }
 
-    .search-wrap .search-icon {
-        color: #8B0000;
+    .template-search-row .search-wrap .search-icon {
+        color: var(--crimson);
         font-size: 13px;
         flex-shrink: 0;
-        pointer-events: none;
     }
 
-    .search-wrap input {
+    .template-search-row .search-wrap input {
         border: none;
         background: none;
         outline: none;
@@ -176,12 +186,8 @@
         padding: 0;
     }
 
-    .search-wrap input::placeholder { color: #B0ABA6; }
-
-    .template-search-row {
-        display: flex;
-        align-items: center;
-        gap: .5rem;
+    .template-search-row .search-wrap input::placeholder {
+        color: #B0ABA6;
     }
 
     .template-search-clear-btn {
@@ -194,13 +200,110 @@
         padding: 0 .1rem;
         margin: 0;
         cursor: pointer;
-        align-self: center;
         flex: 0 0 auto;
         transition: color .15s ease;
     }
 
     .template-search-clear-btn:hover {
         color: #991b1b;
+    }
+
+    .template-search-clear-btn.hidden {
+        display: none;
+    }
+
+    .template-voice-toggle {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .template-voice-status {
+        position: absolute;
+        right: 0;
+        top: -1.15rem;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        font-size: .74rem;
+        font-weight: 700;
+        line-height: 1;
+        padding: .18rem .48rem;
+        border-radius: 999px;
+        pointer-events: none;
+        z-index: 6;
+        background: #f0fdf4;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+    }
+
+    .template-voice-status.hidden {
+        display: none;
+    }
+
+    .template-voice-status.is-listening {
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+        background: #eff6ff;
+    }
+
+    .template-voice-status.is-error {
+        color: #b91c1c;
+        border-color: #fecaca;
+        background: #fef2f2;
+    }
+
+    .template-voice-status.is-success {
+        color: #166534;
+        border-color: #bbf7d0;
+        background: #f0fdf4;
+    }
+
+    .template-search-row .voice-search-mic.external {
+        display: inline-flex !important;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        align-items: center;
+        justify-content: center;
+        background: #4b5563;
+        color: #ffffff;
+        box-shadow: 0 6px 18px rgba(75, 85, 99, 0.12);
+        border: none;
+        margin-left: 0;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+
+    .template-search-row .voice-search-mic.external:hover {
+        background: #374151;
+    }
+
+    .template-search-row .voice-search-mic.external.mic-active {
+        background: #c0392b;
+        transform: scale(1.1);
+        animation: templateMicPulse 1.2s ease-in-out infinite;
+    }
+
+    .template-search-row .voice-search-mic.external i {
+        font-size: 12px;
+        line-height: 1;
+    }
+
+    @keyframes templateMicPulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(192, 57, 43, .35);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(192, 57, 43, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(192, 57, 43, 0);
+        }
     }
 
     .search-wrap.voice-search-wrap {
@@ -743,7 +846,6 @@
 @endsection
 
 @section('content')
-        .template-search-row { width: 100%; }
 <div class="document-templates-page">
     <main class="w-full">
         <div class="max-w-[1280px] mx-auto">
@@ -787,14 +889,21 @@
 
             <div class="toolbar">
                 <div class="template-search-row">
-                    <div class="search-wrap" style="width:200px;">
-                        <i class="fa fa-search search-icon"></i>
-                        <input type="text" id="templateSearch" placeholder="Search templates..." autocomplete="off">
+                    <div class="search-wrap">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="templateSearch" class="no-voice" placeholder="Search templates..." autocomplete="off">
                     </div>
 
                     <button type="button" id="templateSearchClear" class="template-search-clear-btn hidden" title="Clear">
                         Clear
                     </button>
+
+                    <div class="template-voice-toggle">
+                        <button type="button" id="templateMicToggleBtn" class="voice-search-mic external" aria-label="Toggle voice input" aria-pressed="false">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        <span id="templateVoiceStatus" class="template-voice-status hidden" aria-live="polite"></span>
+                    </div>
                 </div>
 
                 <div class="tab-bar" style="flex:none;width:auto;margin-bottom:0;">
@@ -1116,7 +1225,25 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        function toggleSearchClear(input) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const searchInput = document.getElementById('templateSearch');
+        const clearBtn = document.getElementById('templateSearchClear');
+        const micBtn = document.getElementById('templateMicToggleBtn');
+        const status = document.getElementById('templateVoiceStatus');
+
+        if (!searchInput || !clearBtn || !micBtn || !status) return;
+
+        if (!SpeechRecognition) {
+            micBtn.disabled = true;
+            micBtn.setAttribute('aria-disabled', 'true');
+            return;
+        }
+
+        let listening = false;
+        let manualStop = false;
+        let recognition = null;
+
+        const toggleSearchClear = (input) => {
             if (!clearBtn) return;
 
             if ((input?.value || '').trim().length > 0) {
@@ -1124,16 +1251,143 @@
             } else {
                 clearBtn.classList.add('hidden');
             }
-        }
+        };
 
-        function clearSearch() {
-            if (!searchInput) return;
+        const setStatus = (text, state) => {
+            status.textContent = text;
+            status.className = 'template-voice-status';
+            if (state) status.classList.add(`is-${state}`);
+            status.classList.remove('hidden');
+        };
 
+        const hideStatus = (delay = 0) => {
+            window.setTimeout(() => status.classList.add('hidden'), delay);
+        };
+
+        const setMicState = (isActive) => {
+            micBtn.classList.toggle('mic-active', isActive);
+            micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            micBtn.innerHTML = isActive
+                ? '<i class="fa-solid fa-stop"></i>'
+                : '<i class="fa-solid fa-microphone"></i>';
+        };
+
+        const stopListeningNow = () => {
+            manualStop = true;
+            listening = false;
+            setMicState(false);
+            setStatus('Voice input stopped.', 'success');
+            hideStatus(1200);
+
+            if (recognition) {
+                try {
+                    recognition.abort();
+                } catch (error) {
+                    try { recognition.stop(); } catch (err) {}
+                }
+            }
+        };
+
+        const createRecognition = () => {
+            const r = new SpeechRecognition();
+            r.lang = 'en-US';
+            r.continuous = false;
+            r.interimResults = true;
+            r.maxAlternatives = 1;
+
+            let sawSpeech = false;
+            let timeoutId = null;
+            const LISTEN_TIMEOUT = 6000;
+
+            const clearTimeout_ = () => {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    timeoutId = null;
+                }
+            };
+
+            r.onstart = () => {
+                timeoutId = window.setTimeout(() => {
+                    if (listening && !sawSpeech) {
+                        r.stop();
+                    }
+                }, LISTEN_TIMEOUT);
+            };
+
+            r.onspeechend = () => {
+                clearTimeout_();
+                try { r.stop(); } catch (error) {}
+            };
+
+            r.onresult = (event) => {
+                let transcript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    const chunk = result?.[0]?.transcript?.trim() || '';
+                    if (!chunk) continue;
+
+                    sawSpeech = true;
+
+                    if (result.isFinal) {
+                        transcript = `${transcript} ${chunk}`.trim();
+                    } else if (!transcript) {
+                        transcript = chunk;
+                    }
+                }
+
+                transcript = transcript.trim();
+
+                if (transcript) {
+                    clearTimeout_();
+                    searchInput.value = transcript;
+                    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    setStatus('Listening...', 'listening');
+                }
+            };
+
+            r.onerror = () => {
+                clearTimeout_();
+                listening = false;
+                if (manualStop) {
+                    manualStop = false;
+                    return;
+                }
+                setMicState(false);
+                setStatus("Didn't catch that. Try again.", 'error');
+                hideStatus(2500);
+            };
+
+            r.onend = () => {
+                clearTimeout_();
+                if (manualStop) {
+                    manualStop = false;
+                    listening = false;
+                    setMicState(false);
+                    return;
+                }
+
+                const hadSpeech = sawSpeech || !!searchInput.value.trim();
+                listening = false;
+                setMicState(false);
+                if (hadSpeech) {
+                    setStatus('Voice captured.', 'success');
+                    hideStatus(2200);
+                } else {
+                    setStatus("Didn't catch that. Try again.", 'error');
+                    hideStatus(2500);
+                }
+            };
+
+            return r;
+        };
+
+        const clearSearch = () => {
             searchInput.value = '';
             toggleSearchClear(searchInput);
             filterTemplateCards();
             searchInput.focus();
-        }
+        };
 
         document.querySelectorAll('.tab-btn[data-filter-type]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1144,19 +1398,39 @@
             });
         });
 
-        const searchInput = document.getElementById('templateSearch');
-        const clearBtn = document.getElementById('templateSearchClear');
-
-        searchInput?.addEventListener('input', () => {
+        searchInput.addEventListener('input', () => {
             toggleSearchClear(searchInput);
             filterTemplateCards();
         });
 
-        clearBtn?.addEventListener('click', () => {
+        clearBtn.addEventListener('click', () => {
             clearSearch();
         });
 
         toggleSearchClear(searchInput);
+
+        micBtn.addEventListener('click', () => {
+            if (listening && recognition) {
+                stopListeningNow();
+                return;
+            }
+
+            recognition = createRecognition();
+
+            try {
+                recognition.start();
+            } catch (error) {
+                setStatus('Unable to start voice input.', 'error');
+                hideStatus(2500);
+                setMicState(false);
+                listening = false;
+                return;
+            }
+
+            listening = true;
+            setMicState(true);
+            setStatus('Listening...', 'listening');
+        });
 
         document.getElementById('closeTemplatePreview')?.addEventListener('click', closePreviewModal);
 

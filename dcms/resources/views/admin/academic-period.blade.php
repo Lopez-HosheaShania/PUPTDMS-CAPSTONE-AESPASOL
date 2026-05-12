@@ -576,23 +576,6 @@
             width: 100%;
         }
 
-        .ap-voice-row {
-            display: flex;
-            align-items: stretch;
-            gap: .5rem;
-            width: 100%;
-        }
-
-        .ap-voice-row .ap-input-wrap,
-        .ap-voice-row .ap-textarea-wrap {
-            flex: 1 1 auto;
-            min-width: 0;
-        }
-
-        .ap-voice-row.is-textarea {
-            align-items: flex-start;
-        }
-
         .ap-input-wrap.voice-input-wrap {
             position: relative;
             width: 100%;
@@ -632,73 +615,27 @@
             margin: 0;
         }
 
-        .ap-input-wrap .voice-mic-btn,
-        .ap-input-wrap[data-voice-field] .voice-mic-btn {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            padding: 0;
-            margin: 0;
-            border: 0;
-            background: transparent;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-            z-index: 4;
-        }
-
-        .ap-input-wrap .voice-mic-btn i,
-        .ap-input-wrap[data-voice-field] .voice-mic-btn i {
-            font-size: 14px;
-            line-height: 1;
-        }
-
-        .ap-input-wrap .voice-status,
-        .ap-input-wrap[data-voice-field] .voice-status {
-            position: absolute;
-            right: 0;
-            top: calc(100% + 6px);
-            z-index: 5;
-        }
-
-        .ap-voice-clear-btn {
-            border: none;
-            background: transparent;
-            color: #dc2626;
-            font-size: .78rem;
-            font-weight: 600;
-            line-height: 1;
-            padding: 0 .1rem;
-            margin: 0;
-            cursor: pointer;
-            align-self: center;
-            flex: 0 0 auto;
-            transition: color .15s ease;
-        }
-
-        .ap-voice-clear-btn.hidden {
-            display: none;
-        }
-
-        .ap-voice-clear-btn:hover {
-            color: #991b1b;
-        }
-
+        /* ── Description textarea wrap: flex row so mic sits outside ── */
         .ap-textarea-wrap {
             position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
             width: 100%;
+        }
+
+        .ap-textarea-wrap .ap-textarea-inner {
+            position: relative;
+            flex: 1;
+            min-width: 0;
         }
 
         .ap-textarea-wrap .ap-placeholder {
             position: absolute;
-            top: 16px;
-            left: 18px;
-            right: 60px;
-            font-size: 12px;
+            top: 14px;
+            left: 15px;
+            right: 15px;
+            font-size: 11px;
             line-height: 1.35;
             color: #9ca3af;
             pointer-events: none;
@@ -714,96 +651,64 @@
             visibility: hidden;
         }
 
-        .ap-textarea-wrap .ap-textarea,
-        .ap-textarea-wrap[data-voice-field] .ap-textarea {
+        .ap-textarea-wrap .ap-textarea {
             width: 100%;
-            padding-right: 132px;
+            padding-right: 16px;
         }
 
-        .ap-textarea-wrap .voice-mic-btn,
-        .ap-textarea-wrap[data-voice-field] .voice-mic-btn {
-            position: absolute;
-            right: 16px;
-            top: 14px;
+        /* ── External circular mic button (description) ── */
+        .ap-textarea-wrap .voice-mic-btn {
+            position: relative;
+            top: auto;
+            right: auto;
             transform: none;
-            width: 34px;
-            height: 34px;
-            border: 1px solid #dbe2ea;
-            border-radius: 12px;
-            background: #ffffff;
-            color: #64748b;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            margin: 0;
-            line-height: 1;
-            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
-            z-index: 5;
-            transition: all .18s ease;
-        }
-
-        .ap-textarea-wrap .voice-mic-btn:hover,
-        .ap-textarea-wrap[data-voice-field] .voice-mic-btn:hover {
-            border-color: #cbd5e1;
-            background: #f8fafc;
-            color: #334155;
-        }
-
-        .ap-textarea-wrap .voice-mic-btn i,
-        .ap-textarea-wrap[data-voice-field] .voice-mic-btn i {
-            font-size: 15px;
-            line-height: 1;
-        }
-
-        .ap-textarea-wrap .voice-mic-btn.is-listening,
-        .ap-textarea-wrap[data-voice-field] .voice-mic-btn.is-listening {
-            background: #ffffff;
-            border-color: #fecaca;
-            color: #8B0000 !important;
-            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
-        }
-
-        .ap-textarea-wrap .voice-status,
-        .ap-textarea-wrap[data-voice-field] .voice-status {
-            position: absolute;
-            right: 46px;
-            top: 18px;
-            left: auto;
-            bottom: auto;
-            z-index: 7;
-            pointer-events: none;
-        }
-
-        .ap-textarea-wrap .voice-status.hidden,
-        .ap-textarea-wrap[data-voice-field] .voice-status.hidden {
-            display: none !important;
-        }
-
-        .ap-textarea-wrap .voice-status.is-listening,
-        .ap-textarea-wrap[data-voice-field] .voice-status.is-listening {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 32px;
-            padding: 0 14px;
+            width: 40px;
+            height: 40px;
             border-radius: 999px;
-            background: linear-gradient(180deg, #f3f8ff 0%, #e6f0ff 100%);
-            border: 1px solid #b9d2ff;
-            color: #2563eb;
-            font-size: 11px;
-            font-weight: 800;
-            line-height: 1;
-            white-space: nowrap;
-            letter-spacing: .01em;
-            box-shadow:
-                0 4px 10px rgba(37, 99, 235, 0.10),
-                inset 0 1px 0 rgba(255, 255, 255, 0.75);
+            background: #4b5563;
+            color: #fff;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(75, 85, 99, 0.22);
+            margin-top: 6px;
         }
 
-        .ap-textarea-wrap .voice-status:not(.is-listening),
-        .ap-textarea-wrap[data-voice-field] .voice-status:not(.is-listening) {
-            display: none !important;
+        .ap-textarea-wrap .voice-mic-btn:hover {
+            background: #374151;
+        }
+
+        .ap-textarea-wrap .voice-mic-btn.is-listening {
+            background: #c0392b;
+            box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.18);
+            border: none;
+            color: #fff !important;
+            animation: micPulse 1.2s ease-in-out infinite;
+        }
+
+        .ap-textarea-wrap .voice-mic-btn i {
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        /* voice status badge for textarea mic */
+        .ap-textarea-wrap .voice-status {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            z-index: 5;
+        }
+
+        .ap-textarea {
+            min-height: 140px;
+            height: 140px;
+            max-height: 140px;
+            font-size: 12px;
+            padding: 14px 15px;
         }
 
         .ap-input,
@@ -832,7 +737,7 @@
             resize: none;
             border-radius: 16px;
             padding: 16px 18px;
-            font-size: 12px; 
+            font-size: 12px;
             line-height: 1.4;
             box-sizing: border-box;
             vertical-align: top;
@@ -1162,10 +1067,6 @@
         .ap-desc-panel {
             display: flex;
             flex-direction: column;
-        }
-
-        .ap-desc-panel .ap-textarea {
-            flex: 1;
         }
 
         .ap-desc-panel .field-error {
@@ -1607,19 +1508,115 @@
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1
-            }
-
-            50% {
-                opacity: .35
-            }
+            0%, 100% { opacity: 1 }
+            50% { opacity: .35 }
         }
 
         .dot-pulse {
             animation: pulse 2s cubic-bezier(.4, 0, .6, 1) infinite;
+        }
+
+        /* ── Voice mic pulse animation ── */
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4); }
+            50%       { box-shadow: 0 0 0 8px rgba(192, 57, 43, 0); }
+        }
+
+        /* ── External circular mic button (search bar) ── */
+        .ap-voice-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .ap-voice-mic-ext {
+            display: inline-flex;
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            background: #4b5563;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(75, 85, 99, 0.12);
+            border: none;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+
+        .ap-voice-mic-ext:hover {
+            background: #374151;
+        }
+
+        .ap-voice-mic-ext i {
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .ap-voice-mic-ext.mic-active {
+            background: #c0392b;
+            transform: scale(1.1);
+            animation: micPulse 1.2s ease-in-out infinite;
+        }
+
+        .ap-voice-status {
+            position: absolute;
+            right: 0;
+            top: -1.55rem;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            font-size: .74rem;
+            font-weight: 700;
+            line-height: 1;
+            padding: .18rem .48rem;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: 6;
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+        }
+
+        .ap-voice-status.hidden { display: none; }
+
+        .ap-voice-status.is-listening {
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+            background: #eff6ff;
+        }
+
+        .ap-voice-status.is-error {
+            color: #b91c1c;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .ap-voice-status.is-success {
+            color: #166534;
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+        }
+
+        /* Dark mode for the mic buttons */
+        [data-theme="dark"] .ap-voice-mic-ext,
+        [data-theme="dark"] .ap-textarea-wrap .voice-mic-btn {
+            background: rgba(255, 255, 255, 0.10) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #d1d5db !important;
+        }
+
+        [data-theme="dark"] .ap-voice-mic-ext:hover,
+        [data-theme="dark"] .ap-textarea-wrap .voice-mic-btn:hover {
+            background: rgba(255, 255, 255, 0.16) !important;
+        }
+
+        [data-theme="dark"] .ap-voice-mic-ext.mic-active,
+        [data-theme="dark"] .ap-textarea-wrap .voice-mic-btn.is-listening {
+            background: #c0392b !important;
+            color: #fff !important;
         }
 
         .search-wrap {
@@ -1699,120 +1696,30 @@
             color: #B0ABA6;
         }
 
-        .ap-search-row {
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-            width: 220px;
-            max-width: 100%;
-        }
-
-        .ap-search-row .search-wrap {
-            flex: 1 1 auto;
-            min-width: 0;
-            width: auto !important;
-        }
-
         .search-clear-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
             border: none;
-            background: transparent;
-            color: #dc2626;
-            font-size: .78rem;
-            font-weight: 600;
-            line-height: 1;
-            padding: 0 .1rem;
-            margin: 0;
+            background: #E0DDD8;
+            color: #7A7370;
+            font-size: 10px;
             cursor: pointer;
-            flex: 0 0 auto;
-            transition: color .15s ease;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all .2s;
+            padding: 0;
         }
 
         .search-clear-btn:hover {
-            color: #991b1b;
+            background: #8b000076;
+            color: #fff;
         }
 
-        .search-clear-btn.hidden {
-            display: none;
-        }
-
-        .search-wrap.voice-search-wrap {
-            position: relative;
-            padding-right: 42px;
-        }
-
-        .search-wrap.voice-search-wrap .voice-search-input {
-            padding-right: 0 !important;
-        }
-
-        .search-wrap.voice-search-wrap .voice-search-mic {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            border: none;
-            background: transparent;
-            padding: 0;
-            margin: 0;
-            line-height: 1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #8B0000;
-            cursor: pointer;
-            z-index: 5;
-        }
-
-        .search-wrap.voice-search-wrap .voice-search-mic i {
-            font-size: 13px;
-            line-height: 1;
-        }
-
-        .search-wrap.voice-search-wrap .voice-search-mic:hover,
-        .search-wrap.voice-search-wrap .voice-search-mic.text-\[\#8B0000\] {
-            color: #660000;
-        }
-
-        .search-wrap.voice-search-wrap [data-voice-status] {
-            position: absolute;
-            right: 0;
-            top: -1.35rem;
-            display: inline-flex;
-            align-items: center;
-            white-space: nowrap;
-            font-size: .74rem;
-            font-weight: 700;
-            line-height: 1;
-            padding: .18rem .48rem;
-            border-radius: 999px;
-            pointer-events: none;
-            z-index: 6;
-            background: rgba(255, 255, 255, .92);
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
-        }
-
-        .search-wrap.voice-search-wrap [data-voice-status].hidden {
-            display: none;
-        }
-
-        .search-wrap.voice-search-wrap [data-voice-status].is-listening {
-            color: #1d4ed8;
-            border-color: #bfdbfe;
-            background: #eff6ff;
-        }
-
-        .search-wrap.voice-search-wrap [data-voice-status].is-error {
-            color: #b91c1c;
-            border-color: #fecaca;
-            background: #fef2f2;
-        }
-
-        .search-wrap.voice-search-wrap [data-voice-status].is-success {
-            color: #166534;
-            border-color: #bbf7d0;
-            background: #f0fdf4;
+        .search-clear-btn.visible {
+            display: flex;
         }
 
         .filter-select {
@@ -2191,6 +2098,11 @@
                 width: 100% !important;
             }
 
+            .ap-voice-toggle {
+                width: 100%;
+                justify-content: center;
+            }
+
             .filter-select,
             .filter-btn,
             .reset-btn {
@@ -2444,20 +2356,16 @@
             background: rgba(255,255,255,.04) !important;
         }
 
-        /*  SEMESTER / STATUS ONLY */
         [data-theme="dark"] .sem-pill,
         [data-theme="dark"] .status-badge {
             background: rgba(255,255,255,.06) !important;
             border: 1px solid rgba(255,255,255,.12) !important;
             color: #d1d5db !important;
-
             backdrop-filter: blur(12px) saturate(150%) !important;
             -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
-
             box-shadow:
                 inset 0 1px 0 rgba(255,255,255,.10),
                 0 4px 12px rgba(0,0,0,.22) !important;
-
             text-shadow: none !important;
         }
 
@@ -2466,7 +2374,6 @@
             display: none !important;
         }
 
-        /* FINAL: semester color glass override using data-semester */
         [data-theme="dark"] .academic-item[data-semester="Summer"] .sem-pill {
             background: linear-gradient(135deg, rgba(251,191,36,.24), rgba(245,158,11,.10)) !important;
             border: 1px solid rgba(252,211,77,.32) !important;
@@ -2533,15 +2440,15 @@
         }
 
         [data-theme="dark"] #calendarList div {
-            color: #FCA5A5 !important; 
+            color: #FCA5A5 !important;
         }
 
         [data-theme="dark"] #calendarList div > div:first-child {
-            color: #E5E7EB !important; /* Month abbreviation */
+            color: #E5E7EB !important;
         }
 
         [data-theme="dark"] #calendarList div > div:nth-child(2) {
-            color: #FCA5A5 !important; /* Event label / year text */
+            color: #FCA5A5 !important;
         }
 
         [data-theme="dark"] .ap-add-modal .modal-box,
@@ -2554,9 +2461,9 @@
         [data-theme="dark"] .ap-semester-card,
         [data-theme="dark"] .ap-input,
         [data-theme="dark"] .ap-textarea {
-            background: #161b22 !important; 
-            border-color: #2b313a !important; 
-            color: #e5e7eb !important; 
+            background: #161b22 !important;
+            border-color: #2b313a !important;
+            color: #e5e7eb !important;
         }
 
         [data-theme="dark"] .ap-add-header-title,
@@ -2568,7 +2475,7 @@
         [data-theme="dark"] .ap-active-desc,
         [data-theme="dark"] .ap-label-text,
         [data-theme="dark"] .ap-label-hint {
-            color: #9ca3af !important; /* muted gray text */
+            color: #9ca3af !important;
         }
 
         [data-theme="dark"] .ap-add-close {
@@ -2578,7 +2485,7 @@
         }
 
         [data-theme="dark"] .ap-add-close:hover {
-            color: #f87171 !important; /* hover red highlight */
+            color: #f87171 !important;
             background: rgba(255,255,255,.05) !important;
         }
 
@@ -2760,14 +2667,23 @@
                             <form method="GET" action="{{ route('admin.academic_periods') }}" id="filterForm"
                                 class="ap-toolbar-right">
 
-                                <div class="ap-search-row">
-                                    <div class="search-wrap">
-                                        <i class="fa fa-search"></i>
-                                        <input id="searchInput" name="search" type="text" placeholder="Search periods…"
-                                            value="{{ request('search') }}" autocomplete="off">
-                                    </div>
+                                <div class="search-wrap" style="width:220px;">
+                                    <i class="fa fa-search"></i>
+                                    <input id="searchInput" name="search" type="text" placeholder="Search periods…"
+                                        value="{{ request('search') }}" autocomplete="off">
                                     <button type="button" id="clearSearch"
-                                        class="search-clear-btn {{ request('search') ? '' : 'hidden' }}" title="Clear">Clear</button>
+                                        class="search-clear-btn {{ request('search') ? 'visible' : '' }}" title="Clear">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+
+                                {{-- ── External circular mic button (search bar) ── --}}
+                                <div class="ap-voice-toggle">
+                                    <button type="button" id="apMicToggleBtn" class="ap-voice-mic-ext"
+                                        aria-label="Toggle voice search" aria-pressed="false">
+                                        <i class="fa-solid fa-microphone"></i>
+                                    </button>
+                                    <span id="apVoiceStatus" class="ap-voice-status hidden" aria-live="polite"></span>
                                 </div>
 
                                 <select name="semester" id="semesterFilter" class="filter-select">
@@ -3169,6 +3085,9 @@
         </div>
     </main>
 
+    {{-- ════════════════════════════════════════════════
+         ADD MODAL
+    ════════════════════════════════════════════════ --}}
     <div class="modal-overlay ap-add-modal" id="addModal" onclick="closeModalOutside(event,'addModal')">
         <div class="modal-box">
             <form method="POST" action="{{ route('admin.academic_periods.store') }}" class="ap-add-form">
@@ -3197,15 +3116,20 @@
                             <span class="ap-label-text">Academic Year <span class="text-red-500">*</span></span>
                         </div>
 
-                        <div class="ap-voice-row">
-                            <div class="ap-input-wrap" id="addAcademicYearWrap">
+                        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <div class="ap-input-wrap" id="addAcademicYearWrap" style="flex: 1;">
                                 <span class="ap-input-icon">
                                     <i class="fa-solid fa-calendar"></i>
                                 </span>
-                                <input id="addYear" name="academic_year" type="text" placeholder="e.g. 2026-2027"
-                                    class="ap-input field-input" required>
+                                <input name="academic_year" type="text" placeholder="e.g. 2026-2027"
+                                    class="ap-input field-input no-voice" required>
                             </div>
-                            <button type="button" id="addYearClearBtn" class="ap-voice-clear-btn hidden">Clear</button>
+                            <div class="ap-voice-toggle" style="margin-top: 0; position: relative;">
+                                <button type="button" class="ap-voice-mic-ext" id="addYearMicBtn" aria-label="Voice input for academic year" aria-pressed="false">
+                                    <i class="fa-solid fa-microphone"></i>
+                                </button>
+                                <span id="addYearVoiceStatus" class="ap-voice-status hidden" aria-live="polite"></span>
+                            </div>
                         </div>
 
                         <span class="field-error hidden text-xs font-semibold text-red-500 mt-1.5"></span>
@@ -3256,7 +3180,7 @@
                                     <span class="ap-input-icon">
                                         <i class="fa-solid fa-calendar-day"></i>
                                     </span>
-                                    <input name="start_date" type="date" class="ap-input field-input" 
+                                    <input name="start_date" type="date" class="ap-input field-input"
                                         required min="1900-01-01" max="9999-12-31" inputmode="numeric">
                                 </div>
                                 <span class="field-error hidden text-xs font-semibold text-red-500 mt-1.5"></span>
@@ -3271,7 +3195,7 @@
                                     <span class="ap-input-icon">
                                         <i class="fa-solid fa-calendar-check"></i>
                                     </span>
-                                    <input name="end_date" type="date" class="ap-input field-input" 
+                                    <input name="end_date" type="date" class="ap-input field-input"
                                         required min="1900-01-01" max="9999-12-31" inputmode="numeric">
                                 </div>
                                 <span class="field-error hidden text-xs font-semibold text-red-500 mt-1.5"></span>
@@ -3279,23 +3203,30 @@
                         </div>
                     </div>
 
+                    {{-- ── Description with external circular mic button ── --}}
                     <div class="ap-col-span-2 ap-panel ap-desc-panel">
                         <div class="ap-label">
                             <span class="ap-label-text">Description</span>
                             <span class="ap-label-hint">Optional</span>
                         </div>
 
-                        <div class="ap-voice-row is-textarea">
-                            <div class="ap-textarea-wrap">
-                                <textarea name="description" rows="6" placeholder="Add any notes about this academic period..."
-                                    class="ap-textarea field-input" id="addDesc" data-word-limit="150" maxlength="150"></textarea>
+                        <div class="ap-textarea-wrap" id="addDescWrap">
+                            <div class="ap-textarea-inner">
+                                <span class="ap-placeholder">Add any notes about this academic period...</span>
+                                <textarea name="description" rows="6"
+                                    class="ap-textarea field-input no-voice" id="addDesc" data-word-limit="150" maxlength="150"></textarea>
                             </div>
-                            <button type="button" id="addDescClearBtn" class="ap-voice-clear-btn hidden">Clear</button>
+                            <div style="position: relative;">
+                                <button type="button" class="ap-voice-mic-ext" id="addDescMicBtn" aria-label="Voice input for description" aria-pressed="false">
+                                    <i class="fa-solid fa-microphone"></i>
+                                </button>
+                                <span id="addDescVoiceStatus" class="ap-voice-status hidden" aria-live="polite"></span>
+                            </div>
                         </div>
 
                         <div class="ap-desc-meta">
                             <span class="ap-desc-help">Maximum of 150 characters</span>
-                            <span class="ap-word-counter" id="addDescCounter">0 / 150 words</span>
+                            <span class="ap-word-counter" id="addDescCounter">0 / 150 characters</span>
                         </div>
                         <span class="field-error hidden text-xs font-semibold text-red-500 mt-1.5"></span>
                     </div>
@@ -3336,6 +3267,9 @@
         </div>
     </div>
 
+    {{-- ════════════════════════════════════════════════
+         EDIT MODAL
+    ════════════════════════════════════════════════ --}}
     <div class="modal-overlay ap-add-modal" id="editModal" onclick="closeModalOutside(event,'editModal')">
         <div class="modal-box">
             <form method="POST" id="editForm" class="ap-add-form">
@@ -3365,15 +3299,20 @@
                             <span class="ap-label-text">Academic Year <span class="text-red-500">*</span></span>
                         </div>
 
-                        <div class="ap-voice-row">
-                            <div class="ap-input-wrap" id="editAcademicYearWrap">
+                        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <div class="ap-input-wrap" id="editAcademicYearWrap" style="flex: 1;">
                                 <span class="ap-input-icon">
                                     <i class="fa-solid fa-calendar"></i>
                                 </span>
-                                <input type="text" name="academic_year" id="editYear" class="ap-input field-input"
+                                <input type="text" name="academic_year" id="editYear" class="ap-input field-input no-voice"
                                     placeholder="e.g. 2026-2027" required>
                             </div>
-                            <button type="button" id="editYearClearBtn" class="ap-voice-clear-btn hidden">Clear</button>
+                            <div class="ap-voice-toggle" style="margin-top: 0; position: relative;">
+                                <button type="button" class="ap-voice-mic-ext" id="editYearMicBtn" aria-label="Voice input for academic year" aria-pressed="false">
+                                    <i class="fa-solid fa-microphone"></i>
+                                </button>
+                                <span id="editYearVoiceStatus" class="ap-voice-status hidden" aria-live="polite"></span>
+                            </div>
                         </div>
 
                         <span class="field-error hidden text-xs font-semibold text-red-500 mt-1.5"></span>
@@ -3426,7 +3365,7 @@
                                         <i class="fa-solid fa-calendar-day"></i>
                                     </span>
                                     <input type="date" name="start_date" id="editStart" class="ap-input field-input"
-                                         required min="1900-01-01" max="9999-12-31" inputmode="numeric">
+                                        required min="1900-01-01" max="9999-12-31" inputmode="numeric">
                                 </div>
                                 <span class="field-error hidden text-xs font-semibold text-red-500 mt-1.5"></span>
                             </div>
@@ -3448,23 +3387,30 @@
                         </div>
                     </div>
 
+                    {{-- ── Description with external circular mic button ── --}}
                     <div class="ap-col-span-2 ap-panel ap-desc-panel">
                         <div class="ap-label">
                             <span class="ap-label-text">Description</span>
                             <span class="ap-label-hint">Optional</span>
                         </div>
 
-                        <div class="ap-voice-row is-textarea">
-                            <div class="ap-textarea-wrap">
-                                <textarea rows="6" name="description" id="editDesc" placeholder="Add any notes about this academic period..."
-                                    class="ap-textarea field-input" data-word-limit="150" maxlength="150"></textarea>
+                        <div class="ap-textarea-wrap" id="editDescWrap">
+                            <div class="ap-textarea-inner">
+                                <span class="ap-placeholder">Add any notes about this academic period...</span>
+                                <textarea rows="6" name="description" id="editDesc"
+                                    class="ap-textarea field-input no-voice" data-word-limit="150" maxlength="150"></textarea>
                             </div>
-                            <button type="button" id="editDescClearBtn" class="ap-voice-clear-btn hidden">Clear</button>
+                            <div style="position: relative;">
+                                <button type="button" class="ap-voice-mic-ext" id="editDescMicBtn" aria-label="Voice input for description" aria-pressed="false">
+                                    <i class="fa-solid fa-microphone"></i>
+                                </button>
+                                <span id="editDescVoiceStatus" class="ap-voice-status hidden" aria-live="polite"></span>
+                            </div>
                         </div>
 
                         <div class="ap-desc-meta">
                             <span class="ap-desc-help">Maximum of 150 characters</span>
-                            <span class="ap-word-counter" id="editDescCounter">0 / 150 words</span>
+                            <span class="ap-word-counter" id="editDescCounter">0 / 150 characters</span>
                         </div>
                         <span class="field-error hidden text-xs font-semibold text-red-500 mt-1.5"></span>
                     </div>
@@ -3507,6 +3453,9 @@
         </div>
     </div>
 
+    {{-- ════════════════════════════════════════════════
+         DELETE MODAL
+    ════════════════════════════════════════════════ --}}
     <div class="modal-overlay modal-sm" id="deleteModal" onclick="closeModalOutside(event,'deleteModal')">
         <div class="modal-box ap-delete-shell">
             <form method="POST" id="deleteForm">
@@ -3546,62 +3495,27 @@
             const semRadios = addForm.querySelectorAll('[name="semester"]');
             const addDesc = addForm.querySelector('#addDesc');
             const addDescCounter = addForm.querySelector('#addDescCounter');
-            const addYear = addForm.querySelector('#addYear');
-            const editYearInput = document.getElementById('editYear');
             const editDesc = document.getElementById('editDesc');
             const editDescCounter = document.getElementById('editDescCounter');
 
-            function bindVoiceClear(field, clearBtn) {
-                if (!field || !clearBtn) return () => {};
-
-                const toggleClear = () => {
-                    clearBtn.classList.toggle('hidden', (field.value || '').trim().length === 0);
-                };
-
-                field.addEventListener('input', toggleClear);
-
-                clearBtn.addEventListener('click', () => {
-                    field.value = '';
-                    field.dispatchEvent(new Event('input', {
-                        bubbles: true
-                    }));
-                    field.dispatchEvent(new Event('change', {
-                        bubbles: true
-                    }));
-
-                    const status = field.closest('.voice-input-wrap')?.querySelector('[data-voice-status]') ||
-                        field.closest('.ap-input-wrap, .ap-textarea-wrap')?.querySelector('[data-voice-status]');
-                    if (status) status.classList.add('hidden');
-
-                    toggleClear();
-                    field.focus();
-                });
-
-                toggleClear();
-                return toggleClear;
-            }
-
-            const syncAddYearClear = bindVoiceClear(addYear, document.getElementById('addYearClearBtn'));
-            const syncAddDescClear = bindVoiceClear(addDesc, document.getElementById('addDescClearBtn'));
-            const syncEditYearClear = bindVoiceClear(editYearInput, document.getElementById('editYearClearBtn'));
-            const syncEditDescClear = bindVoiceClear(editDesc, document.getElementById('editDescClearBtn'));
-
-            window.syncAcademicVoiceClearButtons = function() {
-                syncAddYearClear();
-                syncAddDescClear();
-                syncEditYearClear();
-                syncEditDescClear();
-            };
-
             function getErr(field) {
-                const panel = field.closest('.ap-panel, .ap-panel-soft, .ap-desc-panel, .ap-input-wrap, div');
-                if (!panel) return null;
-
+                // For description fields
                 if (field.id === 'addDesc' || field.id === 'editDesc') {
                     return field.closest('.ap-desc-panel')?.querySelector('.field-error') || null;
                 }
 
-                return panel.querySelector('.field-error');
+                // For other fields, search up to the nearest .ap-panel or parent wrapper
+                let current = field;
+                while (current) {
+                    // Check if we're in a .ap-panel or .ap-panel-soft
+                    const panel = current.closest('.ap-panel, .ap-panel-soft, .ap-col-span-2');
+                    if (panel) {
+                        return panel.querySelector('.field-error');
+                    }
+                    current = current.parentElement;
+                }
+
+                return null;
             }
 
             function setError(field, msg) {
@@ -3713,12 +3627,8 @@
 
             yearInput.addEventListener('input', validateYear);
             yearInput.addEventListener('blur', validateYear);
-            startInput.addEventListener('change', () => {
-                validateDates();
-            });
-            endInput.addEventListener('change', () => {
-                validateDates();
-            });
+            startInput.addEventListener('change', () => { validateDates(); });
+            endInput.addEventListener('change', () => { validateDates(); });
 
             if (addDesc) {
                 addDesc.addEventListener('input', () => {
@@ -3756,8 +3666,6 @@
 
                 if (!y || !s || !d || !descOk) e.preventDefault();
             });
-
-            window.syncAcademicVoiceClearButtons();
         });
 
         function countChars(value) {
@@ -3874,9 +3782,7 @@
                 const d = new Date(e.date + 'T00:00:00');
                 const isToday = e.date === today;
                 const isPast = e.date < today;
-                const mon = d.toLocaleDateString('en-US', {
-                    month: 'short'
-                });
+                const mon = d.toLocaleDateString('en-US', { month: 'short' });
                 const day = d.getDate();
                 const isHoliday = e.type === 'holiday';
                 let color = e.color;
@@ -3908,9 +3814,7 @@
 
         function todayStr() {
             const now = new Date();
-            const ph = new Date(now.toLocaleString('en-US', {
-                timeZone: 'Asia/Manila'
-            }));
+            const ph = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
             return `${ph.getFullYear()}-${String(ph.getMonth() + 1).padStart(2, '0')}-${String(ph.getDate()).padStart(2, '0')}`;
         }
 
@@ -3980,9 +3884,6 @@
 
         window.openModal = function(id) {
             setModalState(id, true);
-            if (typeof window.syncAcademicVoiceClearButtons === 'function') {
-                window.syncAcademicVoiceClearButtons();
-            }
         };
 
         window.closeModal = function(id) {
@@ -3995,7 +3896,7 @@
             }
         };
 
-       window.openEditModal = function(period) {
+        window.openEditModal = function(period) {
             document.getElementById('editForm').action = `/admin/academic-periods/${period.id}`;
             document.getElementById('editYear').value = period.academic_year ?? '';
             document.getElementById('editStart').value = period.start_date ?? '';
@@ -4014,9 +3915,7 @@
             if (typeof updateWordCounter === 'function') {
                 updateWordCounter(editDesc, document.getElementById('editDescCounter'));
             }
-            if (typeof window.syncAcademicVoiceClearButtons === 'function') {
-                window.syncAcademicVoiceClearButtons();
-            }
+
             document.getElementById('editIsActive').checked = !!period.is_active;
 
             const semMap = {
@@ -4042,9 +3941,7 @@
 
         function updateClock() {
             const now = new Date();
-            const ph = new Date(now.toLocaleString('en-US', {
-                timeZone: 'Asia/Manila'
-            }));
+            const ph = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
             let h = ph.getHours();
             const m = String(ph.getMinutes()).padStart(2, '0');
             const s = String(ph.getSeconds()).padStart(2, '0');
@@ -4054,8 +3951,7 @@
 
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-                'October', 'November', 'December'
-            ];
+                'October', 'November', 'December'];
 
             const liveClock = document.getElementById('liveClock');
             const liveAmPm = document.getElementById('liveAmPm');
@@ -4087,7 +3983,7 @@
             const clearBtn = document.getElementById('clearSearch');
 
             if (searchInput) searchInput.value = '';
-            if (clearBtn) clearBtn.classList.add('hidden');
+            if (clearBtn) clearBtn.classList.remove('visible');
 
             const items = document.querySelectorAll('.academic-item');
             items.forEach(item => item.style.display = '');
@@ -4129,21 +4025,14 @@
             if (searchInput) searchInput.value = '';
             if (semesterFilter) semesterFilter.value = '';
             if (statusFilter) statusFilter.value = '';
-            if (clearBtn) clearBtn.classList.add('hidden');
+            if (clearBtn) clearBtn.classList.remove('visible');
 
             items.forEach(item => item.style.display = '');
 
-            const jsEmpty = document.getElementById('jsEmptyState');
-            if (jsEmpty) jsEmpty.style.display = 'none';
-
-            const jsEmptyGrid = document.getElementById('jsEmptyStateGrid');
-            if (jsEmptyGrid) jsEmptyGrid.style.display = 'none';
-
-            const jsFilterEmpty = document.getElementById('jsFilterEmptyState');
-            if (jsFilterEmpty) jsFilterEmpty.style.display = 'none';
-
-            const jsFilterEmptyGrid = document.getElementById('jsFilterEmptyStateGrid');
-            if (jsFilterEmptyGrid) jsFilterEmptyGrid.style.display = 'none';
+            ['jsEmptyState', 'jsEmptyStateGrid', 'jsFilterEmptyState', 'jsFilterEmptyStateGrid'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
 
             const serverEmpty = document.getElementById('serverEmptyState');
             if (serverEmpty) {
@@ -4413,7 +4302,7 @@
                 if (serverEmptyGrid) serverEmptyGrid.style.display = 'none';
 
                 if (clearBtn) {
-                    clearBtn.classList.toggle('hidden', searchValue === '');
+                    clearBtn.classList.toggle('visible', searchValue !== '');
                 }
             }
 
@@ -4507,6 +4396,524 @@
 
             bindTextareaPlaceholder('addDesc', 'addDescWrap');
             bindTextareaPlaceholder('editDesc', 'editDescWrap');
+
+            // ── Search bar voice (external circular mic) ──
+            (function () {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const input  = document.getElementById('searchInput');
+                const micBtn = document.getElementById('apMicToggleBtn');
+                const status = document.getElementById('apVoiceStatus');
+
+                if (!input || !micBtn || !status) return;
+
+                if (!SpeechRecognition) {
+                    micBtn.disabled = true;
+                    micBtn.setAttribute('aria-disabled', 'true');
+                    return;
+                }
+
+                let listening   = false;
+                let manualStop  = false;
+                let recognition = null;
+
+                const setStatus = (text, state) => {
+                    status.textContent = text;
+                    status.className = 'ap-voice-status';
+                    if (state) status.classList.add(`is-${state}`);
+                    status.classList.remove('hidden');
+                };
+
+                const hideStatus = (delay = 0) =>
+                    window.setTimeout(() => status.classList.add('hidden'), delay);
+
+                const setMicState = (isActive) => {
+                    listening = isActive;
+                    micBtn.classList.toggle('mic-active', isActive);
+                    micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    micBtn.innerHTML = isActive
+                        ? '<i class="fa-solid fa-stop"></i>'
+                        : '<i class="fa-solid fa-microphone"></i>';
+                };
+
+                const createRecognition = () => {
+                    const r = new SpeechRecognition();
+                    r.lang = 'en-US';
+                    r.continuous = false;
+                    r.interimResults = true;
+                    r.maxAlternatives = 1;
+
+                    let sawSpeech = false;
+                    let timeoutId = null;
+
+                    const clearT = () => {
+                        if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+                    };
+
+                    r.onstart = () => {
+                        timeoutId = window.setTimeout(() => {
+                            if (listening && !sawSpeech) r.stop();
+                        }, 6000);
+                    };
+
+                    r.onspeechend = () => { clearT(); try { r.stop(); } catch (e) {} };
+
+                    r.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const res   = event.results[i];
+                            const chunk = res?.[0]?.transcript?.trim() || '';
+                            if (!chunk) continue;
+                            sawSpeech = true;
+                            if (res.isFinal) transcript = `${transcript} ${chunk}`.trim();
+                            else if (!transcript) transcript = chunk;
+                        }
+                        transcript = transcript.trim();
+                        if (transcript) {
+                            clearT();
+                            input.value = transcript;
+                            input.dispatchEvent(new Event('input', { bubbles: true }));
+                            setStatus('Listening...', 'listening');
+                        }
+                    };
+
+                    r.onerror = () => {
+                        clearT();
+                        if (manualStop) { manualStop = false; return; }
+                        setMicState(false);
+                        setStatus("Didn't catch that. Try again.", 'error');
+                        hideStatus(2500);
+                    };
+
+                    r.onend = () => {
+                        clearT();
+                        if (manualStop) { manualStop = false; setMicState(false); return; }
+                        const hadSpeech = sawSpeech || !!input.value.trim();
+                        setMicState(false);
+                        if (hadSpeech) { setStatus('Voice captured.', 'success'); hideStatus(2200); }
+                        else { setStatus("Didn't catch that. Try again.", 'error'); hideStatus(2500); }
+                    };
+
+                    return r;
+                };
+
+                micBtn.addEventListener('click', () => {
+                    if (listening && recognition) {
+                        manualStop = true;
+                        setMicState(false);
+                        setStatus('Voice input stopped.', 'success');
+                        hideStatus(1200);
+                        try { recognition.abort(); } catch (e) { try { recognition.stop(); } catch (err) {} }
+                        return;
+                    }
+
+                    recognition = createRecognition();
+                    try { recognition.start(); }
+                    catch (err) {
+                        setStatus('Unable to start voice input.', 'error');
+                        hideStatus(2500);
+                        setMicState(false);
+                        return;
+                    }
+                    setMicState(true);
+                    setStatus('Listening...', 'listening');
+                });
+            })();
+
+            // ── Academic Year voice mic (Add modal) ──
+            (function () {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const input  = document.getElementById('addAcademicYearWrap')?.querySelector('input');
+                const micBtn = document.getElementById('addYearMicBtn');
+                const status = document.getElementById('addYearVoiceStatus');
+
+                if (!input || !micBtn) return;
+                if (!SpeechRecognition) { micBtn.disabled = true; return; }
+
+                let listening = false;
+                let manualStop = false;
+                let recognition = null;
+                let statusTimeout = null;
+
+                const setStatus = (msg, type) => {
+                    if (status) {
+                        status.textContent = msg;
+                        status.className = `ap-voice-status is-${type}`;
+                    }
+                };
+
+                const hideStatus = (delay = 1500) => {
+                    if (statusTimeout) clearTimeout(statusTimeout);
+                    statusTimeout = setTimeout(() => {
+                        if (status) status.classList.add('hidden');
+                    }, delay);
+                };
+
+                const setMicState = (isActive) => {
+                    listening = isActive;
+                    micBtn.classList.toggle('mic-active', isActive);
+                    micBtn.innerHTML = isActive
+                        ? '<i class="fa-solid fa-stop"></i>'
+                        : '<i class="fa-solid fa-microphone"></i>';
+                    micBtn.setAttribute('aria-pressed', isActive);
+                };
+
+                micBtn.addEventListener('click', () => {
+                    if (listening && recognition) {
+                        manualStop = true;
+                        setMicState(false);
+                        setStatus('Voice input stopped.', 'success');
+                        hideStatus(1200);
+                        try { recognition.abort(); } catch (e) {}
+                        return;
+                    }
+
+                    const r = new SpeechRecognition();
+                    r.lang = 'en-US';
+                    r.continuous = false;
+                    r.interimResults = true;
+                    r.maxAlternatives = 1;
+                    recognition = r;
+
+                    r.onstart = () => { 
+                        setMicState(true); 
+                        setStatus('Listening...', 'listening');
+                    };
+                    r.onend = () => { 
+                        setMicState(false); 
+                        manualStop = false; 
+                    };
+                    r.onerror = () => { 
+                        if (!manualStop) {
+                            setMicState(false);
+                            setStatus("Didn't catch that. Try again.", 'error');
+                            hideStatus(2500);
+                        }
+                        manualStop = false; 
+                    };
+
+                    r.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            if (event.results[i].isFinal) {
+                                transcript = event.results[i][0].transcript.trim();
+                            }
+                        }
+                        if (transcript) {
+                            input.value = transcript;
+                            input.dispatchEvent(new Event('input', { bubbles: true }));
+                            setStatus('Voice captured.', 'success');
+                            hideStatus(2200);
+                        }
+                    };
+
+                    try { r.start(); }
+                    catch (e) { 
+                        setMicState(false);
+                        setStatus('Unable to start voice input.', 'error');
+                        hideStatus(2500);
+                    }
+                });
+            })();
+
+            // ── Academic Year voice mic (Edit modal) ──
+            (function () {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const input  = document.getElementById('editYear');
+                const micBtn = document.getElementById('editYearMicBtn');
+                const status = document.getElementById('editYearVoiceStatus');
+
+                if (!input || !micBtn) return;
+                if (!SpeechRecognition) { micBtn.disabled = true; return; }
+
+                let listening = false;
+                let manualStop = false;
+                let recognition = null;
+                let statusTimeout = null;
+
+                const setStatus = (msg, type) => {
+                    if (status) {
+                        status.textContent = msg;
+                        status.className = `ap-voice-status is-${type}`;
+                    }
+                };
+
+                const hideStatus = (delay = 1500) => {
+                    if (statusTimeout) clearTimeout(statusTimeout);
+                    statusTimeout = setTimeout(() => {
+                        if (status) status.classList.add('hidden');
+                    }, delay);
+                };
+
+                const setMicState = (isActive) => {
+                    listening = isActive;
+                    micBtn.classList.toggle('mic-active', isActive);
+                    micBtn.innerHTML = isActive
+                        ? '<i class="fa-solid fa-stop"></i>'
+                        : '<i class="fa-solid fa-microphone"></i>';
+                    micBtn.setAttribute('aria-pressed', isActive);
+                };
+
+                micBtn.addEventListener('click', () => {
+                    if (listening && recognition) {
+                        manualStop = true;
+                        setMicState(false);
+                        setStatus('Voice input stopped.', 'success');
+                        hideStatus(1200);
+                        try { recognition.abort(); } catch (e) {}
+                        return;
+                    }
+
+                    const r = new SpeechRecognition();
+                    r.lang = 'en-US';
+                    r.continuous = false;
+                    r.interimResults = true;
+                    r.maxAlternatives = 1;
+                    recognition = r;
+
+                    r.onstart = () => { 
+                        setMicState(true); 
+                        setStatus('Listening...', 'listening');
+                    };
+                    r.onend = () => { 
+                        setMicState(false); 
+                        manualStop = false; 
+                    };
+                    r.onerror = () => { 
+                        if (!manualStop) {
+                            setMicState(false);
+                            setStatus("Didn't catch that. Try again.", 'error');
+                            hideStatus(2500);
+                        }
+                        manualStop = false; 
+                    };
+
+                    r.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            if (event.results[i].isFinal) {
+                                transcript = event.results[i][0].transcript.trim();
+                            }
+                        }
+                        if (transcript) {
+                            input.value = transcript;
+                            input.dispatchEvent(new Event('input', { bubbles: true }));
+                            setStatus('Voice captured.', 'success');
+                            hideStatus(2200);
+                        }
+                    };
+
+                    try { r.start(); }
+                    catch (e) { 
+                        setMicState(false);
+                        setStatus('Unable to start voice input.', 'error');
+                        hideStatus(2500);
+                    }
+                });
+            })();
+
+            // ── Description textarea voice mic (Add modal) ──
+            (function () {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const textarea = document.getElementById('addDesc');
+                const micBtn   = document.getElementById('addDescMicBtn');
+                const counter  = document.getElementById('addDescCounter');
+                const status   = document.getElementById('addDescVoiceStatus');
+
+                if (!textarea || !micBtn) return;
+                if (!SpeechRecognition) { micBtn.disabled = true; return; }
+
+                let listening   = false;
+                let manualStop  = false;
+                let recognition = null;
+                let statusTimeout = null;
+
+                const setStatus = (msg, type) => {
+                    if (status) {
+                        status.textContent = msg;
+                        status.className = `ap-voice-status is-${type}`;
+                    }
+                };
+
+                const hideStatus = (delay = 1500) => {
+                    if (statusTimeout) clearTimeout(statusTimeout);
+                    statusTimeout = setTimeout(() => {
+                        if (status) status.classList.add('hidden');
+                    }, delay);
+                };
+
+                const setMicState = (isActive) => {
+                    listening = isActive;
+                    micBtn.classList.toggle('mic-active', isActive);
+                    micBtn.innerHTML = isActive
+                        ? '<i class="fa-solid fa-stop"></i>'
+                        : '<i class="fa-solid fa-microphone"></i>';
+                    micBtn.setAttribute('aria-pressed', isActive);
+                };
+
+                micBtn.addEventListener('click', () => {
+                    if (listening && recognition) {
+                        manualStop = true;
+                        setMicState(false);
+                        setStatus('Voice input stopped.', 'success');
+                        hideStatus(1200);
+                        try { recognition.abort(); } catch (e) {}
+                        return;
+                    }
+
+                    const r = new SpeechRecognition();
+                    r.lang = 'en-US';
+                    r.continuous = false;
+                    r.interimResults = true;
+                    r.maxAlternatives = 1;
+                    recognition = r;
+
+                    let sawSpeech = false;
+
+                    r.onstart = () => { 
+                        setMicState(true); 
+                        setStatus('Listening...', 'listening');
+                    };
+
+                    r.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const res   = event.results[i];
+                            const chunk = res?.[0]?.transcript?.trim() || '';
+                            if (!chunk) continue;
+                            sawSpeech = true;
+                            if (res.isFinal) transcript = `${transcript} ${chunk}`.trim();
+                            else if (!transcript) transcript = chunk;
+                        }
+                        transcript = transcript.trim();
+                        if (transcript) {
+                            const limit = Number(textarea.dataset.wordLimit || 150);
+                            const appended = (textarea.value + (textarea.value ? ' ' : '') + transcript).slice(0, limit);
+                            textarea.value = appended;
+                            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                            if (typeof updateWordCounter === 'function') updateWordCounter(textarea, counter);
+                        }
+                    };
+
+                    r.onerror = () => { 
+                        if (!manualStop) {
+                            setMicState(false);
+                            setStatus("Didn't catch that. Try again.", 'error');
+                            hideStatus(2500);
+                        }
+                        manualStop = false; 
+                    };
+                    r.onend   = () => { setMicState(false); manualStop = false; };
+
+                    try { r.start(); setMicState(true); }
+                    catch (e) { 
+                        setMicState(false);
+                        setStatus('Unable to start voice input.', 'error');
+                        hideStatus(2500);
+                    }
+                });
+            })();
+
+            // ── Description textarea voice mic (Edit modal) ──
+            (function () {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const textarea = document.getElementById('editDesc');
+                const micBtn   = document.getElementById('editDescMicBtn');
+                const counter  = document.getElementById('editDescCounter');
+                const status   = document.getElementById('editDescVoiceStatus');
+
+                if (!textarea || !micBtn) return;
+                if (!SpeechRecognition) { micBtn.disabled = true; return; }
+
+                let listening   = false;
+                let manualStop  = false;
+                let recognition = null;
+                let statusTimeout = null;
+
+                const setStatus = (msg, type) => {
+                    if (status) {
+                        status.textContent = msg;
+                        status.className = `ap-voice-status is-${type}`;
+                    }
+                };
+
+                const hideStatus = (delay = 1500) => {
+                    if (statusTimeout) clearTimeout(statusTimeout);
+                    statusTimeout = setTimeout(() => {
+                        if (status) status.classList.add('hidden');
+                    }, delay);
+                };
+
+                const setMicState = (isActive) => {
+                    listening = isActive;
+                    micBtn.classList.toggle('mic-active', isActive);
+                    micBtn.innerHTML = isActive
+                        ? '<i class="fa-solid fa-stop"></i>'
+                        : '<i class="fa-solid fa-microphone"></i>';
+                    micBtn.setAttribute('aria-pressed', isActive);
+                };
+
+                micBtn.addEventListener('click', () => {
+                    if (listening && recognition) {
+                        manualStop = true;
+                        setMicState(false);
+                        setStatus('Voice input stopped.', 'success');
+                        hideStatus(1200);
+                        try { recognition.abort(); } catch (e) {}
+                        return;
+                    }
+
+                    const r = new SpeechRecognition();
+                    r.lang = 'en-US';
+                    r.continuous = false;
+                    r.interimResults = true;
+                    r.maxAlternatives = 1;
+                    recognition = r;
+
+                    let sawSpeech = false;
+
+                    r.onstart = () => { 
+                        setMicState(true); 
+                        setStatus('Listening...', 'listening');
+                    };
+
+                    r.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const res   = event.results[i];
+                            const chunk = res?.[0]?.transcript?.trim() || '';
+                            if (!chunk) continue;
+                            sawSpeech = true;
+                            if (res.isFinal) transcript = `${transcript} ${chunk}`.trim();
+                            else if (!transcript) transcript = chunk;
+                        }
+                        transcript = transcript.trim();
+                        if (transcript) {
+                            const limit = Number(textarea.dataset.wordLimit || 150);
+                            const appended = (textarea.value + (textarea.value ? ' ' : '') + transcript).slice(0, limit);
+                            textarea.value = appended;
+                            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                            if (typeof updateWordCounter === 'function') updateWordCounter(textarea, counter);
+                        }
+                    };
+
+                    r.onerror = () => { 
+                        if (!manualStop) {
+                            setMicState(false);
+                            setStatus("Didn't catch that. Try again.", 'error');
+                            hideStatus(2500);
+                        }
+                        manualStop = false; 
+                    };
+                    r.onend   = () => { setMicState(false); manualStop = false; };
+
+                    try { r.start(); setMicState(true); }
+                    catch (e) { 
+                        setMicState(false);
+                        setStatus('Unable to start voice input.', 'error');
+                        hideStatus(2500);
+                    }
+                });
+            })();
         });
     </script>
 @endsection

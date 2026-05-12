@@ -27,6 +27,12 @@
                 transform: translateY(0);
             }
         }
+
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4); }
+            50%       { box-shadow: 0 0 0 8px rgba(192, 57, 43, 0); }
+        }
+
         /* Page Banner */
         .page-banner {
             background: linear-gradient(135deg, var(--crimson-dark) 0%, var(--crimson) 60%, #c0392b 100%);
@@ -242,6 +248,7 @@
             margin-left: .2rem;
         }
 
+        /* Search bar matches the lighter User Management style */
         .search-wrap {
             display: flex;
             align-items: center;
@@ -254,7 +261,8 @@
             transition: border-color .2s, box-shadow .2s;
             min-width: 0;
             flex-shrink: 1;
-            width: 220px;
+            width: 260px;
+            box-shadow: none;
         }
 
         .search-wrap:focus-within {
@@ -275,6 +283,7 @@
             font-size: 13px;
             color: #333;
             width: 100%;
+            padding: 0;
         }
 
         .search-wrap input::placeholder {
@@ -282,43 +291,40 @@
         }
 
         .search-clear-btn {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
             border: none;
-            background: #E0DDD8;
-            color: #7A7370;
-            font-size: 10px;
+            background: transparent;
+            color: #dc2626;
+            font-size: .78rem;
+            font-weight: 600;
+            line-height: 1;
+            padding: 0 .1rem;
+            margin: 0;
             cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all .2s;
-            padding: 0;
+            flex: 0 0 auto;
+            transition: color .15s ease;
         }
 
         .search-clear-btn:hover {
-            background: #8b000076;
-            color: #fff;
+            color: #991b1b;
         }
 
-        .search-clear-btn.visible {
-            display: flex;
+        .search-clear-btn.hidden {
+            display: none;
         }
 
         .search-wrap.voice-search-wrap {
             position: relative;
             overflow: visible;
+            padding-right: 42px;
         }
 
         .search-wrap.voice-search-wrap input.has-voice-padding {
-            padding-right: 2.9rem;
+            padding-right: 0 !important;
         }
 
         .search-wrap.voice-search-wrap .voice-search-mic {
             position: absolute;
-            right: 34px;
+            right: 14px;
             top: 50%;
             transform: translateY(-50%);
             width: 18px;
@@ -333,7 +339,95 @@
             justify-content: center;
             color: #8B0000;
             cursor: pointer;
-            z-index: 4;
+            z-index: 5;
+        }
+
+        /* ── External circular mic button ── */
+        .voice-search-mic.external {
+            display: inline-flex !important;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            background: #4b5563;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(75,85,99,0.12);
+            border: none;
+            margin-left: 0;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+
+        .voice-search-mic.external:hover {
+            background: #374151;
+        }
+
+        .voice-search-mic.external i {
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .patient-voice-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .patient-voice-status {
+            position: absolute;
+            right: 0;
+            top: -1.35rem;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            font-size: .74rem;
+            font-weight: 700;
+            line-height: 1;
+            padding: .18rem .48rem;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: 6;
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+        }
+
+        .patient-voice-status.hidden {
+            display: none;
+        }
+
+        .patient-voice-status.is-listening {
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+            background: #eff6ff;
+        }
+
+        .patient-voice-status.is-error {
+            color: #b91c1c;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .patient-voice-status.is-success {
+            color: #166534;
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+        }
+
+        /* Active / listening state — red with pulse ring */
+        .voice-search-mic.external.mic-active {
+            background: #c0392b;
+            transform: scale(1.1);
+            animation: micPulse 1.2s ease-in-out infinite;
+        }
+
+        /* Hide any mic injected inside the search-wrap */
+        .search-wrap .voice-search-mic,
+        .search-wrap [data-voice-trigger] {
+            display: none !important;
         }
 
         .search-wrap.voice-search-wrap .voice-search-mic i {
@@ -1351,18 +1445,203 @@
                     <div class="card-header-right">
                         <div class="search-wrap">
                             <i class="fa-solid fa-magnifying-glass"></i>
-                            <input id="searchInput" type="text" placeholder="Search patients...">
-                            <button type="button" id="searchClearBtn" class="search-clear-btn" title="Clear">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
+                            <input id="searchInput" class="no-voice" type="text" placeholder="Search patients...">
                         </div>
+
+                        <button type="button" id="searchClearBtn" class="search-clear-btn hidden" title="Clear">Clear</button>
+
+                        <div class="patient-voice-toggle">
+                            <button type="button" id="micToggleBtn" class="voice-search-mic external" aria-label="Toggle voice input" aria-pressed="false">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
+                            <span id="patientVoiceStatus" class="patient-voice-status hidden" aria-live="polite"></span>
+                        </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                const input = document.getElementById('searchInput');
+                                const micBtn = document.getElementById('micToggleBtn');
+                                const status = document.getElementById('patientVoiceStatus');
+
+                                if (!input || !micBtn || !status) return;
+
+                                if (!SpeechRecognition) {
+                                    micBtn.disabled = true;
+                                    micBtn.setAttribute('aria-disabled', 'true');
+                                    return;
+                                }
+
+                                let listening = false;
+                                let manualStop = false;
+
+                                const setStatus = (text, state) => {
+                                    status.textContent = text;
+                                    status.className = 'patient-voice-status';
+                                    if (state) status.classList.add(`is-${state}`);
+                                    status.classList.remove('hidden');
+                                };
+
+                                const hideStatus = (delay = 0) => {
+                                    window.setTimeout(() => status.classList.add('hidden'), delay);
+                                };
+
+                                const setMicState = (isActive) => {
+                                    micBtn.classList.toggle('mic-active', isActive);
+                                    micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                                    micBtn.innerHTML = isActive
+                                        ? '<i class="fa-solid fa-stop"></i>'
+                                        : '<i class="fa-solid fa-microphone"></i>';
+                                };
+
+                                const stopListeningNow = () => {
+                                    manualStop = true;
+                                    listening = false;
+                                    setMicState(false);
+                                    setStatus('Voice input stopped.', 'success');
+                                    hideStatus(1200);
+
+                                    if (recognition) {
+                                        try {
+                                            recognition.abort();
+                                        } catch (e) {
+                                            try { recognition.stop(); } catch (err) {}
+                                        }
+                                    }
+                                };
+
+                                // Create a fresh recognition instance each time to avoid state bugs
+                                const createRecognition = () => {
+                                    const r = new SpeechRecognition();
+                                    r.lang = 'en-US';
+                                    r.continuous = false;
+                                    r.interimResults = true;
+                                    r.maxAlternatives = 1;
+
+                                    let sawSpeech = false;
+                                    let timeoutId = null;
+                                    const LISTEN_TIMEOUT = 6000; // 6 seconds
+
+                                    const clearTimeout_ = () => {
+                                        if (timeoutId) {
+                                            clearTimeout(timeoutId);
+                                            timeoutId = null;
+                                        }
+                                    };
+
+                                    r.onstart = () => {
+                                        timeoutId = window.setTimeout(() => {
+                                            if (listening && !sawSpeech) {
+                                                r.stop();
+                                            }
+                                        }, LISTEN_TIMEOUT);
+                                    };
+
+                                    r.onspeechend = () => {
+                                        clearTimeout_(timeoutId);
+                                        try { r.stop(); } catch (e) {}
+                                    };
+
+                                    r.onresult = (event) => {
+                                        let transcript = '';
+
+                                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                                            const result = event.results[i];
+                                            const chunk = result?.[0]?.transcript?.trim() || '';
+                                            if (!chunk) continue;
+
+                                            sawSpeech = true;
+
+                                            if (result.isFinal) {
+                                                transcript = `${transcript} ${chunk}`.trim();
+                                            } else if (!transcript) {
+                                                transcript = chunk;
+                                            }
+                                        }
+
+                                        transcript = transcript.trim();
+
+                                        if (transcript) {
+                                            clearTimeout_(timeoutId);
+                                            input.value = transcript;
+                                            input.dispatchEvent(new Event('input', { bubbles: true }));
+                                            input.dispatchEvent(new Event('change', { bubbles: true }));
+
+                                            setStatus('Listening...', 'listening');
+                                        }
+                                    };
+
+                                    r.onerror = () => {
+                                        clearTimeout_();
+                                        listening = false;
+                                        if (manualStop) {
+                                            manualStop = false;
+                                            return;
+                                        }
+                                        setMicState(false);
+                                        setStatus("Didn't catch that. Try again.", 'error');
+                                        hideStatus(2500);
+                                    };
+
+                                    r.onend = () => {
+                                        clearTimeout_();
+                                        if (manualStop) {
+                                            manualStop = false;
+                                            listening = false;
+                                            setMicState(false);
+                                            return;
+                                        }
+
+                                        const hadSpeech = sawSpeech || !!input.value.trim();
+                                        listening = false;
+                                        setMicState(false);
+                                        if (hadSpeech) {
+                                            setStatus('Voice captured.', 'success');
+                                            hideStatus(2200);
+                                        } else {
+                                            setStatus("Didn't catch that. Try again.", 'error');
+                                            hideStatus(2500);
+                                        }
+                                    };
+
+                                    return r;
+                                };
+
+                                let recognition = null;
+
+                                micBtn.addEventListener('click', () => {
+                                    if (listening && recognition) {
+                                        stopListeningNow();
+                                        return;
+                                    }
+
+                                    // create fresh instance and start
+                                    recognition = createRecognition();
+
+                                    try {
+                                        recognition.start();
+                                    } catch (error) {
+                                        setStatus('Unable to start voice input.', 'error');
+                                        hideStatus(2500);
+                                        setMicState(false);
+                                        listening = false;
+                                        return;
+                                    }
+
+                                    listening = true;
+                                    setMicState(true);
+                                    setStatus('Listening...', 'listening');
+                                });
+                            });
+                        </script>
 
                         <button type="button" id="openFilterBtn" class="filter-btn">
                             <i class="fa-solid fa-sliders"></i>
                             <span>Filter</span>
                             <span id="filterDot" class="filter-dot"></span>
                         </button>
-                            <div class="view-toggle" id="patientViewToggle">
+
+                        <div class="view-toggle" id="patientViewToggle">
                             <button type="button" class="view-toggle-btn active" data-view="list" id="patientListViewBtn" title="List view" aria-label="List view">
                                 <i class="fa-solid fa-table-list"></i>
                             </button>
@@ -1766,7 +2045,7 @@
                 return localStorage.getItem('patientView') || 'list';
             }
 
-             function applyPatientView(view, save = true) {
+            function applyPatientView(view, save = true) {
                 if (!patientListView || !patientGridView) return;
 
                 const finalView = window.innerWidth <= 767 ? 'grid' : view;
@@ -1790,7 +2069,7 @@
 
             function updateSearchClear() {
                 if (!searchClearBtn || !searchInput) return;
-                searchClearBtn.classList.toggle('visible', searchInput.value.trim().length > 0);
+                searchClearBtn.classList.toggle('hidden', searchInput.value.trim().length === 0);
             }
 
             function hasActiveFilters() {
@@ -1915,10 +2194,16 @@
 
             if (searchClearBtn) {
                 searchClearBtn.addEventListener('click', function () {
+                    const micBtn = document.getElementById('micToggleBtn');
+                    if (micBtn && micBtn.classList.contains('mic-active')) {
+                        micBtn.click();
+                    }
+
                     searchInput.value = '';
                     filters.search = '';
                     updateSearchClear();
                     applyCardFilters();
+                    document.getElementById('patientVoiceStatus')?.classList.add('hidden');
                     searchInput.focus();
                 });
             }

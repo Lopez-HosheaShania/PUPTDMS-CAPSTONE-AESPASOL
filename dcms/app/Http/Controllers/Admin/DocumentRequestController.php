@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DocumentRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use App\Notifications\DocumentRequestApprovedNotification;
 use App\Notifications\DocumentRequestRejectedNotification;
@@ -286,7 +287,7 @@ class DocumentRequestController extends Controller
     public function printQueue()
     {
         $requests = DocumentRequest::with('patient')
-            ->whereIn(\DB::raw('LOWER(status)'), ['pending', 'approved', 'ready'])
+            ->whereIn(DB::raw('LOWER(status)'), ['pending', 'approved', 'ready'])
             ->orderBy('created_at', 'asc')
             ->get();
 

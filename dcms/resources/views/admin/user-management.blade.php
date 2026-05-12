@@ -886,6 +886,103 @@
             background: #f0fdf4;
         }
 
+        .patient-voice-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 30;
+            pointer-events: auto;
+        }
+
+        .patient-voice-status {
+            position: absolute;
+            right: 0;
+            top: -1.35rem;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            font-size: .74rem;
+            font-weight: 700;
+            line-height: 1;
+            padding: .18rem .48rem;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: 6;
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+        }
+
+        .patient-voice-status.hidden {
+            display: none;
+        }
+
+        .patient-voice-status.is-listening {
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+            background: #eff6ff;
+        }
+
+        .patient-voice-status.is-error {
+            color: #b91c1c;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .patient-voice-status.is-success {
+            color: #166534;
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+        }
+
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4); }
+            50%       { box-shadow: 0 0 0 8px rgba(192, 57, 43, 0); }
+        }
+
+        /* External circular mic button */
+        .voice-search-mic.external {
+            display: inline-flex !important;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            background: #4b5563;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(75,85,99,0.12);
+            border: none;
+            margin-left: 0;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            position: relative;
+            z-index: 31;
+            pointer-events: auto;
+        }
+
+        .voice-search-mic.external:hover {
+            background: #374151;
+        }
+
+        .voice-search-mic.external i {
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .voice-search-mic.external.mic-active {
+            background: #c0392b;
+            transform: scale(1.1);
+            animation: micPulse 1.2s ease-in-out infinite;
+        }
+
+        /* Hide any mic injected inside the search-wrap by global helper */
+        .search-wrap .voice-search-mic,
+        .search-wrap [data-voice-trigger] {
+            display: none !important;
+        }
+
         .tab-btn {
             padding: 6px 14px;
             border-radius: 7px;
@@ -2056,13 +2153,21 @@
                         <div class="um-search-mobile um-search-row">
                             <div class="search-wrap">
                                 <i class="fa fa-search" style="color:#8B0000;font-size:13px;flex-shrink:0;"></i>
-                                <input id="umSearch" name="search" placeholder="Search name or email…"
+                                <input id="umSearch" name="search" class="no-voice" placeholder="Search name or email…"
                                     value="{{ $search ?? '' }}" autocomplete="off" oninput="toggleSearchClear(this)"
                                     onkeydown="if(event.key==='Enter'){event.preventDefault();}" />
                             </div>
+
                             <button type="button" id="searchClearBtn"
                                 class="search-clear-btn {{ $search ?? '' ? '' : 'hidden' }}" onclick="clearSearch()"
                                 title="Clear">Clear</button>
+
+                            <div class="patient-voice-toggle">
+                                <button type="button" id="umMicToggleBtn" class="voice-search-mic external" aria-label="Toggle voice input" aria-pressed="false">
+                                    <i class="fa-solid fa-microphone"></i>
+                                </button>
+                                <span id="umVoiceStatus" class="patient-voice-status hidden" aria-live="polite"></span>
+                            </div>
                         </div>
 
                         <div class="um-view-toggle" id="umViewToggle">
@@ -2360,6 +2465,7 @@
             </div>
 
             <form method="POST" action="{{ route('admin.user_management.store') }}"
+                id="addUserForm"
                 class="flex-1 flex flex-col min-h-0">
                 @csrf
 
@@ -2394,10 +2500,17 @@
                                         class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
                                         Full Name <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="text" name="name" value="{{ old('name') }}"
-                                        placeholder="e.g. Juan dela Cruz"
-                                        class="field-input w-full border border-gray-200 px-3.5 py-3 text-sm bg-white"
-                                        required>
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" id="addNameInput" name="name"
+                                            value="{{ old('name') }}" class="no-voice field-input flex-1 min-w-0 border border-gray-200 px-3.5 py-3 text-sm bg-white"
+                                            placeholder="e.g. Juan dela Cruz" required>
+                                        <div class="patient-voice-toggle">
+                                            <button type="button" id="addNameMicBtn" class="voice-search-mic external" aria-label="Voice input for full name">
+                                                <i class="fa-solid fa-microphone"></i>
+                                            </button>
+                                            <span id="addNameVoiceStatus" class="patient-voice-status hidden" aria-live="polite"></span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="um-field-full">
@@ -2405,13 +2518,17 @@
                                         class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
                                         Email Address <span class="text-red-500">*</span>
                                     </label>
-                                    <div class="relative">
-                                        <i
-                                            class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                                        <input type="email" name="email" value="{{ old('email') }}"
-                                            placeholder="user@pup.edu.ph"
-                                            class="field-input w-full border border-gray-200 pl-10 pr-3.5 py-3 text-sm bg-white"
-                                            required>
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid fa-envelope text-gray-400 text-xs flex-shrink-0 pl-1"></i>
+                                        <input type="email" id="addEmailInput" name="email"
+                                            value="{{ old('email') }}" class="no-voice field-input flex-1 min-w-0 border border-gray-200 px-3.5 py-3 text-sm bg-white"
+                                            placeholder="user@pup.edu.ph" required>
+                                        <div class="patient-voice-toggle">
+                                            <button type="button" id="addEmailMicBtn" class="voice-search-mic external" aria-label="Voice input for email">
+                                                <i class="fa-solid fa-microphone"></i>
+                                            </button>
+                                            <span id="addEmailVoiceStatus" class="patient-voice-status hidden" aria-live="polite"></span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -3024,7 +3141,6 @@
                 document.getElementById('editStatusInactive').disabled = true;
             } else {
                 form.action = `/admin/user-management/${id}`;
-                // I-set explicitly yung _method
                 let methodInput = form.querySelector('input[name="_method"]');
                 if (!methodInput) {
                     methodInput = document.createElement('input');
@@ -3115,9 +3231,22 @@
             var input = document.getElementById('umSearch');
             if (!input) return;
 
+            if (window.umListening && window.umRecognition) {
+                try {
+                    window.umRecognition.stop();
+                } catch (e) {}
+                window.umListening = false;
+            }
+
             input.value = '';
             document.getElementById('searchClearBtn')?.classList.add('hidden');
-            input.closest('.search-wrap')?.querySelector('[data-voice-status]')?.classList.add('hidden');
+            document.getElementById('umVoiceStatus')?.classList.add('hidden');
+            var micBtn = document.getElementById('umMicToggleBtn');
+            if (micBtn) {
+                micBtn.classList.remove('mic-active');
+                micBtn.setAttribute('aria-pressed', 'false');
+                micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+            }
             umState.search = '';
             umState.page = 1;
             umFetch();
@@ -3711,16 +3840,13 @@
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
 
-                    // Gamitin mo URLSearchParams instead ng FormData
-                    // para siguradong naka-include lahat ng fields kasama ang _method
                     var params = new URLSearchParams();
                     params.append('_token', '{{ csrf_token() }}');
                     params.append('_method', 'PUT');
                     params.append('name', document.getElementById('editName').value);
                     params.append('email', document.getElementById('editEmail').value);
                     params.append('role_id', document.getElementById('editRole').value);
-                    params.append('status', form.querySelector('input[name="status"]:checked')?.value ??
-                    '');
+                    params.append('status', form.querySelector('input[name="status"]:checked')?.value ?? '');
 
                     fetch(url, {
                             method: 'POST',
@@ -3818,6 +3944,327 @@
                         });
                 });
             }
+
+            // ─── Voice input for Add New User form fields ───────────────────────────
+            (function initAddFormVoice() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) return;
+
+                const inputs = [
+                    { inputId: 'addNameInput',  micId: 'addNameMicBtn',  statusId: 'addNameVoiceStatus'  },
+                    { inputId: 'addEmailInput', micId: 'addEmailMicBtn', statusId: 'addEmailVoiceStatus' }
+                ];
+
+                inputs.forEach(function(config) {
+                    const input   = document.getElementById(config.inputId);
+                    const micBtn  = document.getElementById(config.micId);
+                    const status  = document.getElementById(config.statusId);
+
+                    if (!input || !micBtn || !status) return;
+
+                    let listening   = false;
+                    let recognition = null;
+                    let manualStop  = false;
+
+                    // ── helpers ──────────────────────────────────────────────────────
+                    const setStatus = function(text, state) {
+                        status.textContent = text;
+                        status.className   = 'patient-voice-status';
+                        if (state) status.classList.add('is-' + state);
+                        if (text) {
+                            status.classList.remove('hidden');
+                        } else {
+                            status.classList.add('hidden');
+                        }
+                    };
+
+                    const hideStatus = function(delay) {
+                        window.setTimeout(function() {
+                            status.classList.add('hidden');
+                        }, delay || 0);
+                    };
+
+                    const setMicState = function(isActive) {
+                        micBtn.classList.toggle('mic-active', isActive);
+                        micBtn.innerHTML = isActive
+                            ? '<i class="fa-solid fa-stop"></i>'
+                            : '<i class="fa-solid fa-microphone"></i>';
+                    };
+
+                    const stopListeningNow = function() {
+                        manualStop  = true;
+                        listening   = false;
+                        setMicState(false);
+                        setStatus('Voice captured.', 'success');
+                        hideStatus(1200);
+                        if (recognition) {
+                            try { recognition.abort(); } catch (e) {
+                                try { recognition.stop(); } catch (err) {}
+                            }
+                        }
+                    };
+
+                    // ── recognition factory ──────────────────────────────────────────
+                    const createRecognition = function() {
+                        const r = new SpeechRecognition();
+                        r.lang            = 'en-US';
+                        r.continuous      = false;
+                        r.interimResults  = true;
+                        r.maxAlternatives = 1;
+
+                        let sawSpeech     = false;
+                        let timeoutId     = null;
+                        const LISTEN_TIMEOUT = 6000;
+
+                        const clearTimeout_ = function() {
+                            if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+                        };
+
+                        r.onstart = function() {
+                            timeoutId = window.setTimeout(function() {
+                                if (listening && !sawSpeech) {
+                                    try { r.stop(); } catch (e) {}
+                                }
+                            }, LISTEN_TIMEOUT);
+                        };
+
+                        r.onspeechend = function() {
+                            clearTimeout_();
+                            try { r.stop(); } catch (e) {}
+                        };
+
+                        r.onresult = function(event) {
+                            let transcript = '';
+                            for (let i = event.resultIndex; i < event.results.length; i++) {
+                                const result = event.results[i];
+                                const chunk  = (result && result[0] && result[0].transcript
+                                    ? result[0].transcript : '').trim();
+                                if (!chunk) continue;
+                                sawSpeech = true;
+                                if (result.isFinal) {
+                                    transcript = (transcript + ' ' + chunk).trim();
+                                } else if (!transcript) {
+                                    transcript = chunk;
+                                }
+                            }
+                            transcript = transcript.trim();
+                            if (transcript) {
+                                clearTimeout_();
+                                input.value = transcript;
+                                input.dispatchEvent(new Event('input',  { bubbles: true }));
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                                setStatus('Listening...', 'listening');
+                            }
+                        };
+
+                        r.onerror = function() {
+                            clearTimeout_();
+                            listening = false;
+                            if (manualStop) { manualStop = false; return; }
+                            setMicState(false);
+                            setStatus("Didn't catch that. Try again.", 'error');
+                            hideStatus(2500);
+                        };
+
+                        r.onend = function() {
+                            clearTimeout_();
+                            if (manualStop) {
+                                manualStop = false;
+                                listening  = false;
+                                setMicState(false);
+                                return;
+                            }
+                            const hadSpeech = sawSpeech || !!input.value.trim();
+                            listening = false;
+                            setMicState(false);
+                            if (hadSpeech) {
+                                setStatus('Voice captured.', 'success');
+                                hideStatus(2200);
+                            } else {
+                                setStatus("Didn't catch that. Try again.", 'error');
+                                hideStatus(2500);
+                            }
+                        };
+
+                        return r;
+                    };
+
+                    // ── click handler ────────────────────────────────────────────────
+                    micBtn.addEventListener('click', function() {
+                        if (listening && recognition) { stopListeningNow(); return; }
+
+                        recognition = createRecognition();
+                        try {
+                            recognition.start();
+                        } catch (error) {
+                            setStatus('Unable to start voice input.', 'error');
+                            hideStatus(2500);
+                            setMicState(false);
+                            listening = false;
+                            return;
+                        }
+                        listening = true;
+                        setMicState(true);
+                        setStatus('Listening...', 'listening');
+                    });
+                });
+            })();
+
+            // ─── Voice input for search bar ─────────────────────────────────────────
+            (function() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const input   = document.getElementById('umSearch');
+                const micBtn  = document.getElementById('umMicToggleBtn');
+                const status  = document.getElementById('umVoiceStatus');
+
+                if (!input || !micBtn || !status || !SpeechRecognition) {
+                    if (micBtn) {
+                        micBtn.disabled = true;
+                        micBtn.setAttribute('aria-disabled', 'true');
+                    }
+                    return;
+                }
+
+                window.umRecognition = null;
+                window.umListening   = false;
+                window.umManualStop  = false;
+
+                const setStatus = function(text, state) {
+                    status.textContent = text;
+                    status.className   = 'patient-voice-status';
+                    if (state) status.classList.add('is-' + state);
+                    status.classList.remove('hidden');
+                };
+
+                const hideStatus = function(delay) {
+                    window.setTimeout(function() {
+                        status.classList.add('hidden');
+                    }, delay || 0);
+                };
+
+                const setMicState = function(isActive) {
+                    micBtn.classList.toggle('mic-active', isActive);
+                    micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    micBtn.innerHTML = isActive
+                        ? '<i class="fa-solid fa-stop"></i>'
+                        : '<i class="fa-solid fa-microphone"></i>';
+                };
+
+                const stopListeningNow = function() {
+                    window.umManualStop = true;
+                    window.umListening  = false;
+                    setMicState(false);
+                    setStatus('Voice input stopped.', 'success');
+                    hideStatus(1200);
+                    if (window.umRecognition) {
+                        try { window.umRecognition.abort(); } catch (e) {
+                            try { window.umRecognition.stop(); } catch (err) {}
+                        }
+                    }
+                };
+
+                const createRecognition = function() {
+                    const recognition = new SpeechRecognition();
+                    recognition.lang            = 'en-US';
+                    recognition.continuous      = false;
+                    recognition.interimResults  = true;
+                    recognition.maxAlternatives = 1;
+
+                    let sawSpeech       = false;
+                    let listenTimeoutId = null;
+                    const LISTEN_TIMEOUT = 6000;
+
+                    const clearListenTimeout = function() {
+                        if (listenTimeoutId) { clearTimeout(listenTimeoutId); listenTimeoutId = null; }
+                    };
+
+                    recognition.onstart = function() {
+                        listenTimeoutId = window.setTimeout(function() {
+                            if (window.umListening && !sawSpeech) {
+                                try { recognition.stop(); } catch (e) {}
+                            }
+                        }, LISTEN_TIMEOUT);
+                    };
+
+                    recognition.onspeechend = function() {
+                        clearListenTimeout();
+                        try { recognition.stop(); } catch (e) {}
+                    };
+
+                    recognition.onresult = function(event) {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const result = event.results[i];
+                            const chunk  = (result && result[0] && result[0].transcript
+                                ? result[0].transcript : '').trim();
+                            if (!chunk) continue;
+                            sawSpeech = true;
+                            if (result.isFinal) {
+                                transcript = (transcript + ' ' + chunk).trim();
+                            } else if (!transcript) {
+                                transcript = chunk;
+                            }
+                        }
+                        transcript = transcript.trim();
+                        if (transcript) {
+                            clearListenTimeout();
+                            input.value = transcript;
+                            input.dispatchEvent(new Event('input',  { bubbles: true }));
+                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                            setStatus('Listening...', 'listening');
+                        }
+                    };
+
+                    recognition.onerror = function() {
+                        clearListenTimeout();
+                        window.umListening = false;
+                        if (window.umManualStop) { window.umManualStop = false; return; }
+                        setMicState(false);
+                        setStatus("Didn't catch that. Try again.", 'error');
+                        hideStatus(2500);
+                    };
+
+                    recognition.onend = function() {
+                        clearListenTimeout();
+                        if (window.umManualStop) {
+                            window.umManualStop = false;
+                            window.umListening  = false;
+                            setMicState(false);
+                            return;
+                        }
+                        const hadSpeech = sawSpeech || !!input.value.trim();
+                        window.umListening = false;
+                        setMicState(false);
+                        if (hadSpeech) {
+                            setStatus('Voice captured.', 'success');
+                            hideStatus(2200);
+                        } else {
+                            setStatus("Didn't catch that. Try again.", 'error');
+                            hideStatus(2500);
+                        }
+                    };
+
+                    return recognition;
+                };
+
+                micBtn.addEventListener('click', function() {
+                    if (window.umListening && window.umRecognition) { stopListeningNow(); return; }
+
+                    window.umRecognition = createRecognition();
+                    try {
+                        window.umRecognition.start();
+                    } catch (error) {
+                        setStatus('Unable to start voice input.', 'error');
+                        hideStatus(2500);
+                        setMicState(false);
+                        window.umListening = false;
+                        return;
+                    }
+                    window.umListening = true;
+                    setMicState(true);
+                    setStatus('Listening...', 'listening');
+                });
+            })();
         });
 
         window.addEventListener('resize', function() {

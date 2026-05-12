@@ -699,125 +699,129 @@
             box-shadow: 0 8px 18px rgba(139, 0, 0, .18);
         }
 
-      
-.voice-input-wrap {
-    position: relative !important; 
-}
+        /* ── Notes voice row layout ── */
+        .rule-notes-voice-row {
+            display: flex;
+            align-items: flex-start;
+            gap: .5rem;
+            width: 100%;
+        }
 
-.rule-notes-section .voice-input-wrap {
-    display: flex !important;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    margin-bottom: 0.5rem;
-}
+        .rule-notes-textarea-wrap {
+            position: relative;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
 
-.rule-notes-voice-row {
-    display: flex;
-    align-items: stretch;
-    gap: .5rem;
-    width: 100%;
-}
+        /* ── Circular mic button — matches service-types style ── */
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4); }
+            50%       { box-shadow: 0 0 0 8px rgba(192, 57, 43, 0); }
+        }
 
-.rule-notes-voice-row .voice-input-wrap {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin-bottom: 0;
-}
+        .rule-notes-voice-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
 
-.rule-notes-section .voice-input-wrap textarea {
-    flex: 1;
-    height: 100%;
-    margin-bottom: 0 !important;
-}
+        .rule-notes-voice-toggle .voice-search-mic.external {
+            display: inline-flex !important;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            background: #4b5563;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(75, 85, 99, 0.12);
+            border: none;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
 
-.rule-notes-section .voice-input-wrap textarea.has-voice-padding {
-    padding-right: 2.4rem;
-}
+        .rule-notes-voice-toggle .voice-search-mic.external:hover {
+            background: #374151;
+        }
 
-.rule-notes-section .voice-input-wrap .voice-mic-btn {
-    position: absolute;
-    right: .8rem;
-    top: .8rem;
-    transform: none;
-    width: 18px;
-    height: 18px;
-    border: none;
-    background: transparent;
-    padding: 0;
-    margin: 0;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #8B0000;
-    cursor: pointer;
-    z-index: 4;
-}
+        .rule-notes-voice-toggle .voice-search-mic.external i {
+            font-size: 12px;
+            line-height: 1;
+        }
 
-.rule-notes-section .voice-input-wrap [data-voice-status] {
-    position: absolute;
-    right: 0;
-    top: -1.35rem;
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-    font-size: .74rem;
-    font-weight: 700;
-    line-height: 1;
-    padding: .18rem .48rem;
-    border-radius: 999px;
-    pointer-events: none;
-    z-index: 6;
-    background: rgba(255, 255, 255, .92);
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
-}
+        .rule-notes-voice-toggle .voice-search-mic.external.mic-active {
+            background: #c0392b;
+            transform: scale(1.1);
+            animation: micPulse 1.2s ease-in-out infinite;
+        }
 
-.rule-notes-section .voice-input-wrap [data-voice-status].hidden {
-    display: none;
-}
+        .rule-notes-voice-toggle .rule-notes-voice-status {
+            position: absolute;
+            right: 0;
+            top: -1.35rem;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            font-size: .62rem;
+            font-weight: 700;
+            line-height: 1;
+            padding: .08rem .28rem;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: 6;
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+        }
 
-.rule-notes-section .voice-input-wrap [data-voice-status].is-listening {
-    color: #1d4ed8;
-    border-color: #bfdbfe;
-    background: #eff6ff;
-}
+        .rule-notes-voice-toggle .rule-notes-voice-status.hidden {
+            display: none;
+        }
 
-.rule-notes-section .voice-input-wrap [data-voice-status].is-error {
-    color: #b91c1c;
-    border-color: #fecaca;
-    background: #fef2f2;
-}
+        .rule-notes-voice-toggle .rule-notes-voice-status.is-listening {
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+            background: #eff6ff;
+        }
 
-.rule-notes-section .voice-input-wrap [data-voice-status].is-success {
-    color: #166534;
-    border-color: #bbf7d0;
-    background: #f0fdf4;
-}
+        .rule-notes-voice-toggle .rule-notes-voice-status.is-error {
+            color: #b91c1c;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
 
-.rule-notes-clear-btn {
-    border: none;
-    background: transparent;
-    color: #dc2626;
-    font-size: .78rem;
-    font-weight: 600;
-    line-height: 1;
-    padding: 0 .1rem;
-    margin: 0;
-    cursor: pointer;
-    align-self: center;
-    flex: 0 0 auto;
-    transition: color .15s ease;
-}
+        .rule-notes-voice-toggle .rule-notes-voice-status.is-success {
+            color: #166534;
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+        }
 
-.rule-notes-clear-btn.hidden {
-    display: none;
-}
+        /* ── Clear button inside textarea wrap ── */
+        .rule-notes-clear-btn {
+            border: none;
+            background: transparent;
+            color: #dc2626;
+            font-size: .78rem;
+            font-weight: 600;
+            line-height: 1;
+            padding: 0 .1rem;
+            margin: 0;
+            cursor: pointer;
+            align-self: center;
+            flex: 0 0 auto;
+            transition: color .15s ease;
+        }
 
-.rule-notes-clear-btn:hover {
-    color: #991b1b;
-}
+        .rule-notes-clear-btn.hidden {
+            display: none;
+        }
+
+        .rule-notes-clear-btn:hover {
+            color: #991b1b;
+        }
 
         .break-chip-group {
             display: grid;
@@ -2875,6 +2879,7 @@
                                 <div id="ruleDaysError" class="field-error"></div>
                             </div>
 
+                            {{-- ── Additional Notes section with new circular mic button ── --}}
                             <div class="modal-section rule-notes-section m-0 flex-1 flex flex-col">
                                 <div class="modal-section-head">
                                     <div class="modal-section-icon">
@@ -2887,11 +2892,20 @@
                                 </div>
 
                                 <label class="form-label" for="ruleNotes">Notes (optional)</label>
+
+                                {{-- Voice row: textarea wrap + circular mic button --}}
                                 <div class="rule-notes-voice-row mb-2">
-                                    <textarea id="ruleNotes" class="form-ctrl resize-none rule-notes-textarea" maxlength="150"
-                                        placeholder="e.g. Reduced operations due to holiday program..."></textarea>
-                                    <button type="button" id="ruleNotesClearBtn" class="rule-notes-clear-btn hidden">Clear</button>
+                                    <div class="rule-notes-textarea-wrap">
+                                        <textarea id="ruleNotes"
+                                            class="form-ctrl resize-none rule-notes-textarea"
+                                            maxlength="150"
+                                            placeholder="e.g. Reduced operations due to holiday program..."></textarea>
+                                        <button type="button" id="ruleNotesClearBtn" class="rule-notes-clear-btn hidden">Clear</button>
+                                    </div>
+                                    {{-- Circular mic button injected here by JS --}}
+                                    <div class="rule-notes-voice-toggle" id="ruleNotesVoiceToggle"></div>
                                 </div>
+
                                 <div class="form-help flex items-center justify-between gap-2 mt-auto">
                                     <span>Maximum of 150 characters.</span>
                                     <span id="ruleNotesCount" class="notes-counter">0/150</span>
@@ -3079,7 +3093,6 @@
     <script>
         const scheduleRules = @json($schedules);
         const weeklyAppointments = @json($weeklyAppointments ?? []);
-        if (!weeklyAppointments || weeklyAppointments.length === 0) {}
 
         // Toast
         function showToast(title, message, type = 'error') {
@@ -3128,14 +3141,8 @@
                 errorEl.textContent = '';
                 errorEl.classList.remove('show');
             }
-
-            if (inputId) {
-                document.getElementById(inputId)?.classList.remove('is-invalid');
-            }
-
-            if (groupId) {
-                document.getElementById(groupId)?.classList.remove('is-invalid');
-            }
+            if (inputId) document.getElementById(inputId)?.classList.remove('is-invalid');
+            if (groupId) document.getElementById(groupId)?.classList.remove('is-invalid');
         }
 
         function setFieldError(errorId, message, inputId = null, groupId = null) {
@@ -3144,14 +3151,8 @@
                 errorEl.textContent = message;
                 errorEl.classList.add('show');
             }
-
-            if (inputId) {
-                document.getElementById(inputId)?.classList.add('is-invalid');
-            }
-
-            if (groupId) {
-                document.getElementById(groupId)?.classList.add('is-invalid');
-            }
+            if (inputId) document.getElementById(inputId)?.classList.add('is-invalid');
+            if (groupId) document.getElementById(groupId)?.classList.add('is-invalid');
         }
 
         function clearRuleErrors() {
@@ -3168,10 +3169,6 @@
             clearFieldError('blockDateError', 'blockDate');
             clearFieldError('blockReasonError', 'blockReason');
             clearFieldError('blockNoteError', 'blockNote');
-        }
-
-        function confirmBlockedDateRemoval(dateLabel, reasonLabel) {
-            return window.confirm(`Remove blocked date for ${dateLabel} (${reasonLabel})?`);
         }
 
         function openAppointmentDetailModal(appt) {
@@ -3196,35 +3193,15 @@
                 backdrop.style.display = 'none';
             }
         }
+
         // Weekly Calendar
         const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const DAY_ABBRS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const TIME_ROWS = [{
-                h: 9,
-                l: '9:00 AM'
-            }, {
-                h: 10,
-                l: '10:00 AM'
-            }, {
-                h: 11,
-                l: '11:00 AM'
-            }, {
-                h: 12,
-                l: '12:00 PM'
-            },
-            {
-                h: 13,
-                l: '1:00 PM'
-            }, {
-                h: 14,
-                l: '2:00 PM'
-            }, {
-                h: 15,
-                l: '3:00 PM'
-            }, {
-                h: 16,
-                l: '4:00 PM'
-            }
+        const TIME_ROWS = [
+            { h: 9,  l: '9:00 AM'  }, { h: 10, l: '10:00 AM' },
+            { h: 11, l: '11:00 AM' }, { h: 12, l: '12:00 PM' },
+            { h: 13, l: '1:00 PM'  }, { h: 14, l: '2:00 PM'  },
+            { h: 15, l: '3:00 PM'  }, { h: 16, l: '4:00 PM'  }
         ];
 
         let weekOffset = 0;
@@ -3257,29 +3234,17 @@
 
         function normalizeToHourMinute(timeValue) {
             if (!timeValue) return '';
-
-            // already like 09:00
-            if (/^\d{2}:\d{2}$/.test(timeValue)) {
-                return timeValue;
-            }
-
-            // like 09:00:00
-            if (/^\d{2}:\d{2}:\d{2}$/.test(timeValue)) {
-                return timeValue.slice(0, 5);
-            }
-
-            // fallback for 9:00 AM style strings
+            if (/^\d{2}:\d{2}$/.test(timeValue)) return timeValue;
+            if (/^\d{2}:\d{2}:\d{2}$/.test(timeValue)) return timeValue.slice(0, 5);
             const temp = new Date(`1970-01-01 ${timeValue}`);
             if (!isNaN(temp.getTime())) {
                 return `${String(temp.getHours()).padStart(2, '0')}:${String(temp.getMinutes()).padStart(2, '0')}`;
             }
-
             return String(timeValue).trim();
         }
 
         function getAppointmentsForSlot(isoDate, hour) {
             const slotTime = to24Hour(hour);
-
             return weeklyAppointments.filter(appt =>
                 appt.appointment_date === isoDate &&
                 normalizeToHourMinute(appt.appointment_time) === slotTime
@@ -3288,46 +3253,16 @@
 
         function getServiceColor(serviceType) {
             const s = (serviceType || '').toLowerCase();
-
-            if (s.includes('oral check')) {
-                return {
-                    box: 'background:#dbeafe;border-left:3px solid #3b82f6;color:#1e3a8a;',
-                    badge: 'Check-up'
-                };
-            }
-
-            if (s.includes('cleaning')) {
-                return {
-                    box: 'background:#dcfce7;border-left:3px solid #22c55e;color:#166534;',
-                    badge: 'Cleaning'
-                };
-            }
-
-            if (s.includes('surgery')) {
-                return {
-                    box: 'background:#fef3c7;border-left:3px solid #f59e0b;color:#92400e;',
-                    badge: 'Surgery'
-                };
-            }
-
-            if (s.includes('restoration') || s.includes('prosthesis')) {
-                return {
-                    box: 'background:#f3e8ff;border-left:3px solid #a855f7;color:#6b21a8;',
-                    badge: 'Prosthesis'
-                };
-            }
-
-            return {
-                box: 'background:#f3f4f6;border-left:3px solid #6b7280;color:#374151;',
-                badge: 'Other'
-            };
+            if (s.includes('oral check')) return { box: 'background:#dbeafe;border-left:3px solid #3b82f6;color:#1e3a8a;', badge: 'Check-up' };
+            if (s.includes('cleaning'))   return { box: 'background:#dcfce7;border-left:3px solid #22c55e;color:#166534;', badge: 'Cleaning' };
+            if (s.includes('surgery'))    return { box: 'background:#fef3c7;border-left:3px solid #f59e0b;color:#92400e;', badge: 'Surgery' };
+            if (s.includes('restoration') || s.includes('prosthesis')) return { box: 'background:#f3e8ff;border-left:3px solid #a855f7;color:#6b21a8;', badge: 'Prosthesis' };
+            return { box: 'background:#f3f4f6;border-left:3px solid #6b7280;color:#374151;', badge: 'Other' };
         }
 
         function buildWeekGrid() {
             const ws = weekStart(weekOffset);
-            const days = Array.from({
-                length: 7
-            }, (_, i) => {
+            const days = Array.from({ length: 7 }, (_, i) => {
                 const d = new Date(ws);
                 d.setDate(d.getDate() + i);
                 return d;
@@ -3336,96 +3271,48 @@
             today.setHours(0, 0, 0, 0);
 
             document.getElementById('weekRangeLabel').textContent =
-                `${SHORT_MONTHS[days[0].getMonth()]} ${days[0].getDate()} – ${SHORT_MONTHS[days[6].getMonth()]} 
-                    ${days[6].getDate()}, ${days[6].getFullYear()}`;
+                `${SHORT_MONTHS[days[0].getMonth()]} ${days[0].getDate()} – ${SHORT_MONTHS[days[6].getMonth()]} ${days[6].getDate()}, ${days[6].getFullYear()}`;
 
-            // Header row
             let html = `<div class="wk-hdr empty"></div>`;
             days.forEach((d, i) => {
                 const isTod = d.getTime() === today.getTime();
                 const cls = isTod ? 'today-hdr' : i >= 5 ? 'weekend-hdr' : '';
                 html += `<div class="wk-hdr ${cls}">
-      <div style="font-size:.65rem;opacity:.75">${DAY_ABBRS[d.getDay()]}</div>
-      <div style="font-size:1rem;font-weight:800;line-height:1.2">${d.getDate()}</div>
-      ${isTod ? '<div style="font-size:.55rem;background:rgba(255,255,255,.25);border-radius:999px;padding:1px 6px;margin-top:2px">Today</div>' : ''}
-    </div>`;
+                    <div style="font-size:.65rem;opacity:.75">${DAY_ABBRS[d.getDay()]}</div>
+                    <div style="font-size:1rem;font-weight:800;line-height:1.2">${d.getDate()}</div>
+                    ${isTod ? '<div style="font-size:.55rem;background:rgba(255,255,255,.25);border-radius:999px;padding:1px 6px;margin-top:2px">Today</div>' : ''}
+                </div>`;
             });
 
-            TIME_ROWS.forEach(({
-                h,
-                l
-            }) => {
+            TIME_ROWS.forEach(({ h, l }) => {
                 html += `<div class="time-lbl">${l}</div>`;
-
                 days.forEach((d, i) => {
-                    const isoDate =
-                        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                    const abbr = d.toLocaleDateString('en-US', {
-                        weekday: 'short'
-                    }).replace('.', '');
-
-                    const state =
-                        i >= 5 ?
-                        'wk-weekend' :
-                        slotState(abbr, h) === 'break' ?
-                        'wk-break' :
-                        slotState(abbr, h) === 'closed' ?
-                        'wk-closed' :
-                        '';
+                    const isoDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    const abbr = d.toLocaleDateString('en-US', { weekday: 'short' }).replace('.', '');
+                    const state = i >= 5 ? 'wk-weekend' :
+                        slotState(abbr, h) === 'break'  ? 'wk-break'  :
+                        slotState(abbr, h) === 'closed' ? 'wk-closed' : '';
 
                     let inner = '';
-
-                    if (state === 'wk-break') {
-                        inner = '<span class="slot-label">BREAK</span>';
-                    } else if (state === 'wk-closed') {
-                        inner = '<span class="slot-label">CLOSED</span>';
-                    } else if (state === 'wk-weekend') {
-                        inner = '<span class="slot-label">CLOSED</span>';
-                    } else {
+                    if (state === 'wk-break')   inner = '<span class="slot-label">BREAK</span>';
+                    else if (state === 'wk-closed' || state === 'wk-weekend') inner = '<span class="slot-label">CLOSED</span>';
+                    else {
                         const slotAppointments = getAppointmentsForSlot(isoDate, h);
-
                         if (slotAppointments.length > 0) {
                             inner = slotAppointments.map(appt => {
-                                const service = appt.service_type === 'Others' ?
-                                    (appt.other_services || 'Other Service') :
-                                    appt.service_type;
-
+                                const service = appt.service_type === 'Others' ? (appt.other_services || 'Other Service') : appt.service_type;
                                 const style = getServiceColor(service);
-
-                                return `
-            <button
-              type="button"
-              onclick='openAppointmentDetailModal(${JSON.stringify(appt)})'
-              style="
-                ${style.box}
-                margin:4px;
-                border-radius:8px;
-                padding:6px 7px;
-                font-size:.62rem;
-                line-height:1.25;
-                font-weight:600;
-                box-shadow:0 1px 3px rgba(0,0,0,.06);
-                width:calc(100% - 8px);
-                text-align:left;
-                cursor:pointer;
-                transition:transform .15s ease, box-shadow .15s ease;
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(0,0,0,.10)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,.06)'"
-              title="Click to view details"
-            >
-              <div style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                ${appt.patient_name}
-              </div>
-              <div style="font-size:.58rem; opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                ${service}
-              </div>
-            </button>
-          `;
+                                return `<button type="button" onclick='openAppointmentDetailModal(${JSON.stringify(appt)})'
+                                    style="${style.box}margin:4px;border-radius:8px;padding:6px 7px;font-size:.62rem;line-height:1.25;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.06);width:calc(100% - 8px);text-align:left;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;"
+                                    onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(0,0,0,.10)'"
+                                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,.06)'"
+                                    title="Click to view details">
+                                    <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${appt.patient_name}</div>
+                                    <div style="font-size:.58rem;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${service}</div>
+                                </button>`;
                             }).join('');
                         }
                     }
-
                     html += `<div class="cal-slot ${state}">${inner}</div>`;
                 });
             });
@@ -3433,18 +3320,9 @@
             document.getElementById('weekGrid').innerHTML = html;
         }
 
-        document.getElementById('prevWeek').addEventListener('click', () => {
-            weekOffset--;
-            buildWeekGrid();
-        });
-        document.getElementById('nextWeek').addEventListener('click', () => {
-            weekOffset++;
-            buildWeekGrid();
-        });
-        document.getElementById('todayBtn').addEventListener('click', () => {
-            weekOffset = 0;
-            buildWeekGrid();
-        });
+        document.getElementById('prevWeek').addEventListener('click', () => { weekOffset--; buildWeekGrid(); });
+        document.getElementById('nextWeek').addEventListener('click', () => { weekOffset++; buildWeekGrid(); });
+        document.getElementById('todayBtn').addEventListener('click', () => { weekOffset = 0; buildWeekGrid(); });
 
         // Schedule Rule Modal
         let selectedBreak = '12:00-13:00';
@@ -3453,20 +3331,19 @@
         function openRuleModal(mode = 'create', ruleId = null, rule = null) {
             editingId = null;
 
-            const backdrop = document.getElementById('ruleModalBackdrop');
-            const form = document.getElementById('ruleForm');
+            const backdrop   = document.getElementById('ruleModalBackdrop');
+            const form       = document.getElementById('ruleForm');
             const methodField = document.getElementById('ruleMethodField');
-            const title = document.getElementById('ruleModalTitle');
-            const status = document.getElementById('ruleStatus');
-            const openTime = document.getElementById('ruleOpenTime');
-            const closeTime = document.getElementById('ruleCloseTime');
-            const maxSlots = document.getElementById('ruleMaxSlots');
-            const notes = document.getElementById('ruleNotes');
+            const title      = document.getElementById('ruleModalTitle');
+            const status     = document.getElementById('ruleStatus');
+            const openTime   = document.getElementById('ruleOpenTime');
+            const closeTime  = document.getElementById('ruleCloseTime');
+            const maxSlots   = document.getElementById('ruleMaxSlots');
+            const notes      = document.getElementById('ruleNotes');
             const timeFields = document.getElementById('ruleTimeFields');
             const defaultBreak = document.querySelector('.break-chip[data-val="12:00-13:00"]');
 
-            if (!backdrop || !form || !methodField || !title || !status || !openTime || !closeTime || !maxSlots || !notes ||
-                !timeFields) {
+            if (!backdrop || !form || !methodField || !title || !status || !openTime || !closeTime || !maxSlots || !notes || !timeFields) {
                 console.error('Rule modal elements not found.');
                 return;
             }
@@ -3483,14 +3360,15 @@
             if (defaultBreak) defaultBreak.classList.add('selected');
 
             selectedBreak = '12:00-13:00';
-            status.value = 'open';
-            openTime.value = '09:00';
+            status.value  = 'open';
+            openTime.value  = '09:00';
             closeTime.value = '17:00';
-            maxSlots.value = '5';
+            maxSlots.value  = '5';
             notes.value = '';
+            timeFields.style.display = '';
+
             const ruleNotesCount = document.getElementById('ruleNotesCount');
             if (ruleNotesCount) ruleNotesCount.textContent = '0/150';
-            timeFields.style.display = '';
 
             if (mode === 'edit' && rule) {
                 editingId = ruleId;
@@ -3506,24 +3384,20 @@
                 status.value = rule.status || 'open';
                 toggleStatusFields(rule.status || 'open');
 
-                if (rule.open_time) openTime.value = String(rule.open_time).substring(0, 5);
+                if (rule.open_time)  openTime.value  = String(rule.open_time).substring(0, 5);
                 if (rule.close_time) closeTime.value = String(rule.close_time).substring(0, 5);
 
                 maxSlots.value = rule.max_slots || 5;
-                notes.value = rule.notes || '';
-                const ruleNotesCount = document.getElementById('ruleNotesCount');
+                notes.value    = rule.notes || '';
                 if (ruleNotesCount) ruleNotesCount.textContent = `${notes.value.length}/150`;
 
                 selectedBreak = rule.break_time || 'none';
-
                 document.querySelectorAll('#ruleModalBackdrop .break-chip').forEach(c => {
                     c.classList.toggle('selected', c.dataset.val === selectedBreak);
                 });
             }
 
-            if (typeof window.syncRuleNotesVoiceClear === 'function') {
-                window.syncRuleNotesVoiceClear();
-            }
+            if (typeof window.syncRuleNotesClear === 'function') window.syncRuleNotesClear();
 
             backdrop.style.display = 'flex';
             backdrop.classList.add('open');
@@ -3564,10 +3438,10 @@
             clearRuleErrors();
 
             const activeDays = [...document.querySelectorAll('.day-toggle.active')].map(d => d.dataset.day);
-            const status = document.getElementById('ruleStatus').value;
-            const openTime = document.getElementById('ruleOpenTime').value;
-            const closeTime = document.getElementById('ruleCloseTime').value;
-            const maxSlots = parseInt(document.getElementById('ruleMaxSlots').value || '0', 10);
+            const status     = document.getElementById('ruleStatus').value;
+            const openTime   = document.getElementById('ruleOpenTime').value;
+            const closeTime  = document.getElementById('ruleCloseTime').value;
+            const maxSlots   = parseInt(document.getElementById('ruleMaxSlots').value || '0', 10);
 
             let hasError = false;
 
@@ -3575,34 +3449,28 @@
                 setFieldError('ruleDaysError', 'Please select at least one day.', null, 'ruleDaysGroup');
                 hasError = true;
             }
-
             if (!status) {
                 setFieldError('ruleStatusError', 'Please select a clinic status.', 'ruleStatus');
                 hasError = true;
             }
-
             if (status !== 'closed') {
                 if (!openTime) {
                     setFieldError('ruleOpenTimeError', 'Please select an opening time.', 'ruleOpenTime');
                     hasError = true;
                 }
-
                 if (!closeTime) {
                     setFieldError('ruleCloseTimeError', 'Please select a closing time.', 'ruleCloseTime');
                     hasError = true;
                 }
-
                 if (openTime && closeTime && openTime >= closeTime) {
                     setFieldError('ruleCloseTimeError', 'Closing time must be later than opening time.', 'ruleCloseTime');
                     hasError = true;
                 }
-
                 if (!maxSlots || maxSlots < 1) {
                     setFieldError('ruleMaxSlotsError', 'Max appointments must be at least 1.', 'ruleMaxSlots');
                     hasError = true;
                 }
             }
-
             if (hasError) return;
 
             const form = document.getElementById('ruleForm');
@@ -3610,10 +3478,7 @@
 
             const inject = (name, val) => {
                 const inp = document.createElement('input');
-                inp.type = 'hidden';
-                inp.name = name;
-                inp.value = val;
-                inp.className = 'injected-hidden';
+                inp.type = 'hidden'; inp.name = name; inp.value = val; inp.className = 'injected-hidden';
                 form.appendChild(inp);
             };
 
@@ -3621,27 +3486,21 @@
             inject('status', status);
 
             if (status !== 'closed') {
-                inject('open_time', openTime);
+                inject('open_time',  openTime);
                 inject('close_time', closeTime);
-                inject('max_slots', maxSlots);
+                inject('max_slots',  maxSlots);
                 inject('break_time', selectedBreak || 'none');
             }
-
             inject('notes', document.getElementById('ruleNotes').value);
 
             form.submit();
         }
 
-        // Block date 
+        // Block date modal
         function openBlockModal() {
-            const backdrop = document.getElementById('blockModalBackdrop');
+            const backdrop  = document.getElementById('blockModalBackdrop');
             const blockDate = document.getElementById('blockDate');
-
-            if (!backdrop || !blockDate) {
-                console.error('Block modal elements not found.');
-                return;
-            }
-
+            if (!backdrop || !blockDate) { console.error('Block modal elements not found.'); return; }
             clearBlockErrors();
             blockDate.min = new Date().toISOString().split('T')[0];
             backdrop.style.display = 'flex';
@@ -3651,93 +3510,198 @@
 
         function closeBlockModal() {
             const backdrop = document.getElementById('blockModalBackdrop');
-            if (backdrop) {
-                backdrop.classList.remove('open');
-                backdrop.style.display = 'none';
-            }
+            if (backdrop) { backdrop.classList.remove('open'); backdrop.style.display = 'none'; }
             document.body.style.overflow = '';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
 
-            const ruleNotes = document.getElementById('ruleNotes');
+            // ── Notes textarea: char counter + clear button ──────────────
+            const ruleNotes      = document.getElementById('ruleNotes');
             const ruleNotesCount = document.getElementById('ruleNotesCount');
             const ruleNotesClearBtn = document.getElementById('ruleNotesClearBtn');
 
-            function syncRuleNotesVoiceClear() {
+            function syncRuleNotesClear() {
                 if (!ruleNotes || !ruleNotesClearBtn) return;
-                if ((ruleNotes.value || '').trim().length > 0) {
-                    ruleNotesClearBtn.classList.remove('hidden');
-                } else {
-                    ruleNotesClearBtn.classList.add('hidden');
-                }
+                ruleNotesClearBtn.classList.toggle('hidden', !(ruleNotes.value || '').trim().length);
             }
-
-            window.syncRuleNotesVoiceClear = syncRuleNotesVoiceClear;
+            window.syncRuleNotesClear = syncRuleNotesClear;
 
             function updateRuleNotesCount() {
                 if (!ruleNotes || !ruleNotesCount) return;
-
-                const currentLength = ruleNotes.value.length;
-                ruleNotesCount.textContent = `${currentLength}/150`;
-
+                const len = ruleNotes.value.length;
+                ruleNotesCount.textContent = `${len}/150`;
                 ruleNotesCount.classList.remove('is-warning', 'is-danger');
-
-                if (currentLength >= 140) {
-                    ruleNotesCount.classList.add('is-danger');
-                } else if (currentLength >= 110) {
-                    ruleNotesCount.classList.add('is-warning');
-                }
+                if (len >= 140) ruleNotesCount.classList.add('is-danger');
+                else if (len >= 110) ruleNotesCount.classList.add('is-warning');
             }
 
-            ruleNotes?.addEventListener('input', function() {
-                if (this.value.length > 150) {
-                    this.value = this.value.slice(0, 150);
-                }
+            ruleNotes?.addEventListener('input', function () {
+                if (this.value.length > 150) this.value = this.value.slice(0, 150);
                 updateRuleNotesCount();
-                syncRuleNotesVoiceClear();
+                syncRuleNotesClear();
                 clearFieldError('ruleNotesError', 'ruleNotes');
             });
 
-            ruleNotesClearBtn?.addEventListener('click', function() {
+            ruleNotesClearBtn?.addEventListener('click', function () {
                 if (!ruleNotes) return;
-
                 ruleNotes.value = '';
-                ruleNotes.dispatchEvent(new Event('input', {
-                    bubbles: true
-                }));
-                ruleNotes.dispatchEvent(new Event('change', {
-                    bubbles: true
-                }));
-
-                const status = ruleNotes.closest('.voice-input-wrap')?.querySelector('[data-voice-status]');
-                if (status) status.classList.add('hidden');
-
-                syncRuleNotesVoiceClear();
+                ruleNotes.dispatchEvent(new Event('input',  { bubbles: true }));
+                ruleNotes.dispatchEvent(new Event('change', { bubbles: true }));
+                syncRuleNotesClear();
                 ruleNotes.focus();
             });
 
             updateRuleNotesCount();
-            syncRuleNotesVoiceClear();
+            syncRuleNotesClear();
+
+            // ── Circular mic button for Notes textarea ───────────────────
+            // Matches exactly the style used in service-types.blade.php
+            (function initRuleNotesVoice() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const toggleWrapper = document.getElementById('ruleNotesVoiceToggle');
+                const input = document.getElementById('ruleNotes');
+                if (!SpeechRecognition || !toggleWrapper || !input) return;
+
+                // Build the circular mic button
+                const micBtn = document.createElement('button');
+                micBtn.type      = 'button';
+                micBtn.className = 'voice-search-mic external';
+                micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                micBtn.title     = 'Toggle voice input';
+                toggleWrapper.appendChild(micBtn);
+
+                // Build the status chip
+                const status = document.createElement('span');
+                status.className = 'rule-notes-voice-status hidden';
+                status.setAttribute('aria-hidden', 'true');
+                status.setAttribute('aria-live', 'polite');
+                toggleWrapper.appendChild(status);
+
+                let recognition = null, listening = false, manualStop = false, capturedText = false;
+
+                const setStatus = (text, state) => {
+                    status.textContent = text || '';
+                    status.className   = state ? `rule-notes-voice-status is-${state}` : 'rule-notes-voice-status';
+                    if (!text) status.classList.add('hidden');
+                    else       status.classList.remove('hidden');
+                };
+
+                const setMicState = (active) => {
+                    micBtn.classList.toggle('mic-active', !!active);
+                    micBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+                    micBtn.innerHTML = active
+                        ? '<i class="fa-solid fa-stop"></i>'
+                        : '<i class="fa-solid fa-microphone"></i>';
+                };
+
+                const stopNow = () => {
+                    manualStop = true; listening = false; setMicState(false);
+                    if (capturedText) {
+                        setStatus('Voice captured.', 'success');
+                        setTimeout(() => setStatus('', null), 1200);
+                    } else {
+                        setStatus("Didn't catch that. Try again.", 'error');
+                        setTimeout(() => setStatus('', null), 2500);
+                    }
+                    if (recognition) { try { recognition.abort(); } catch (e) { try { recognition.stop(); } catch (_) {} } }
+                };
+
+                const createRecognition = () => {
+                    capturedText = false;
+                    const r = new SpeechRecognition();
+                    r.lang = 'en-US'; r.continuous = false; r.interimResults = true; r.maxAlternatives = 1;
+
+                    let sawSpeech = false, timeoutId = null;
+                    const clear_ = () => { if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; } };
+
+                    r.onstart = () => {
+                        timeoutId = setTimeout(() => {
+                            if (listening && !sawSpeech) { try { r.stop(); } catch (e) {} }
+                        }, 6000);
+                    };
+
+                    r.onspeechend = () => { clear_(); try { r.stop(); } catch (e) {} };
+
+                    r.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const res   = event.results[i];
+                            const chunk = (res?.[0]?.transcript ?? '').trim();
+                            if (!chunk) continue;
+                            sawSpeech = true;
+                            if (res.isFinal) transcript = (transcript + ' ' + chunk).trim();
+                            else if (!transcript) transcript = chunk;
+                        }
+                        transcript = transcript.trim();
+                        if (transcript) {
+                            clear_();
+                            capturedText = true;
+                            input.value  = transcript;
+                            input.dispatchEvent(new Event('input',  { bubbles: true }));
+                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                            setStatus('Listening...', 'listening');
+                        }
+                    };
+
+                    r.onerror = () => {
+                        clear_(); listening = false;
+                        if (manualStop) { manualStop = false; return; }
+                        setMicState(false);
+                        setStatus("Didn't catch that. Try again.", 'error');
+                        setTimeout(() => setStatus('', null), 2500);
+                    };
+
+                    r.onend = () => {
+                        clear_();
+                        if (manualStop) { manualStop = false; listening = false; setMicState(false); return; }
+                        const had = sawSpeech || capturedText;
+                        listening = false; setMicState(false);
+                        if (had) {
+                            setStatus('Voice captured.', 'success');
+                            setTimeout(() => setStatus('', null), 2200);
+                        } else {
+                            setStatus("Didn't catch that. Try again.", 'error');
+                            setTimeout(() => setStatus('', null), 2500);
+                        }
+                    };
+
+                    return r;
+                };
+
+                micBtn.addEventListener('click', () => {
+                    if (listening && recognition) { stopNow(); return; }
+                    recognition = createRecognition();
+                    try { recognition.start(); } catch (e) {
+                        setStatus('Unable to start voice input.', 'error');
+                        setTimeout(() => setStatus('', null), 2500);
+                        setMicState(false); listening = false; return;
+                    }
+                    listening = true; setMicState(true); setStatus('Listening...', 'listening');
+                });
+
+                micBtn.addEventListener('pointerdown', (ev) => {
+                    if (listening && recognition) {
+                        ev.preventDefault(); ev.stopPropagation();
+                        manualStop = true;
+                        try { recognition.stop(); } catch (e) {}
+                    }
+                }, { passive: false });
+            })();
+            // ── End voice init ──────────────────────────────────────────
 
             buildWeekGrid();
 
-            document.getElementById('ruleStatus')?.addEventListener('change', () => clearFieldError(
-                'ruleStatusError', 'ruleStatus'));
-            document.getElementById('ruleOpenTime')?.addEventListener('change', () => clearFieldError(
-                'ruleOpenTimeError', 'ruleOpenTime'));
-            document.getElementById('ruleCloseTime')?.addEventListener('change', () => clearFieldError(
-                'ruleCloseTimeError', 'ruleCloseTime'));
-            document.getElementById('ruleMaxSlots')?.addEventListener('input', () => clearFieldError(
-                'ruleMaxSlotsError', 'ruleMaxSlots'));
+            document.getElementById('ruleStatus')?.addEventListener('change', () => clearFieldError('ruleStatusError', 'ruleStatus'));
+            document.getElementById('ruleOpenTime')?.addEventListener('change', () => clearFieldError('ruleOpenTimeError', 'ruleOpenTime'));
+            document.getElementById('ruleCloseTime')?.addEventListener('change', () => clearFieldError('ruleCloseTimeError', 'ruleCloseTime'));
+            document.getElementById('ruleMaxSlots')?.addEventListener('input', () => clearFieldError('ruleMaxSlotsError', 'ruleMaxSlots'));
 
-            document.getElementById('blockDate')?.addEventListener('input', () => clearFieldError('blockDateError',
-                'blockDate'));
-            document.getElementById('blockReason')?.addEventListener('change', () => clearFieldError(
-                'blockReasonError', 'blockReason'));
-            document.getElementById('blockNote')?.addEventListener('input', () => clearFieldError('blockNoteError',
-                'blockNote'));
+            document.getElementById('blockDate')?.addEventListener('input', () => clearFieldError('blockDateError', 'blockDate'));
+            document.getElementById('blockReason')?.addEventListener('change', () => clearFieldError('blockReasonError', 'blockReason'));
+            document.getElementById('blockNote')?.addEventListener('input', () => clearFieldError('blockNoteError', 'blockNote'));
 
+            // ── View toggle (list / grid) ────────────────────────────────
             function getPreferredScheduleRulesView() {
                 if (window.innerWidth <= 767) return 'list';
                 return localStorage.getItem('scheduleRulesView') || 'list';
@@ -3746,9 +3710,8 @@
             function applyScheduleRulesView(view, save = true) {
                 const listView = document.getElementById('scheduleRulesListView');
                 const gridView = document.getElementById('scheduleRulesGridView');
-                const listBtn = document.getElementById('scheduleRulesListViewBtn');
-                const gridBtn = document.getElementById('scheduleRulesGridViewBtn');
-
+                const listBtn  = document.getElementById('scheduleRulesListViewBtn');
+                const gridBtn  = document.getElementById('scheduleRulesGridViewBtn');
                 if (!listView || !gridView) return;
 
                 const finalView = window.innerWidth <= 767 ? 'list' : view;
@@ -3764,35 +3727,17 @@
                 if (listBtn) listBtn.classList.toggle('active', finalView === 'list');
                 if (gridBtn) gridBtn.classList.toggle('active', finalView === 'grid');
 
-                if (save && window.innerWidth > 767) {
-                    localStorage.setItem('scheduleRulesView', finalView);
-                }
+                if (save && window.innerWidth > 767) localStorage.setItem('scheduleRulesView', finalView);
             }
 
-            const scheduleRulesListViewBtn = document.getElementById('scheduleRulesListViewBtn');
-            const scheduleRulesGridViewBtn = document.getElementById('scheduleRulesGridViewBtn');
+            const listViewBtn = document.getElementById('scheduleRulesListViewBtn');
+            const gridViewBtn = document.getElementById('scheduleRulesGridViewBtn');
 
-            if (scheduleRulesListViewBtn) {
-                scheduleRulesListViewBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    applyScheduleRulesView('list', true);
-                });
-            }
-
-            if (scheduleRulesGridViewBtn) {
-                scheduleRulesGridViewBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    applyScheduleRulesView('grid', true);
-                });
-            }
+            listViewBtn?.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); applyScheduleRulesView('list', true); });
+            gridViewBtn?.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); applyScheduleRulesView('grid', true); });
 
             applyScheduleRulesView(getPreferredScheduleRulesView(), false);
-
-            window.addEventListener('resize', function() {
-                applyScheduleRulesView(getPreferredScheduleRulesView(), false);
-            });
+            window.addEventListener('resize', () => applyScheduleRulesView(getPreferredScheduleRulesView(), false));
         });
     </script>
 @endsection

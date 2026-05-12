@@ -250,20 +250,27 @@
 
         .st-input-wrap {
             position: relative;
+            flex: 1 1 auto;
+            min-width: 0;
         }
 
         .st-input-icon {
             position: absolute;
             left: 12px;
-            top: 13px;
+            top: 50%;
+            transform: translateY(-50%);
             color: #9ca3af;
             font-size: 12px;
             pointer-events: none;
+            z-index: 2;
         }
 
+        /* ── FIX: input takes full width of its wrap; right padding reserves
+           space for the Clear button so text never slides under it ── */
         .st-input {
             width: 100%;
-             padding: 10px 50px 10px 14px;
+            box-sizing: border-box;
+            padding: 10px 44px 10px 34px; /* left=icon, right=clear btn */
             border: 1px solid #e5e7eb;
             border-radius: 10px;
             font-size: .8rem;
@@ -272,22 +279,18 @@
             color: #1f2937;
             outline: none;
             transition: all .2s;
+            display: block;
         }
 
-        .st-input-wrap,
         .st-textarea-wrap {
             width: 100%;
             position: relative;
         }
 
-        .st-input,
         .st-textarea {
             width: 100%;
-            display: block;
             box-sizing: border-box;
-        }
-
-        .st-textarea {
+            display: block;
             min-height: 110px;
             resize: none;
             padding: 10px 14px 26px 14px;
@@ -316,41 +319,41 @@
             box-shadow: 0 0 0 3px rgba(239, 68, 68, .2);
         }
 
-        .st-input-wrap .voice-input-wrap {
-            position: relative;
-            width: 100%;
-        }
-
+        /* ── voice row: input-wrap grows, mic toggle is fixed size ── */
         .st-voice-row {
             display: flex;
-            align-items: stretch;
+            align-items: center;
             gap: .5rem;
             width: 100%;
-            position: relative; 
-        }
-
-        .st-voice-row .st-input-wrap {
-            flex: 1 1 auto;
-            min-width: 0;
         }
 
         .st-voice-row.is-textarea {
             align-items: flex-start;
         }
 
+        /* ── FIX: Clear button sits INSIDE the input, right of text,
+           left of the mic button. Absolute inside .st-input-wrap ── */
         .st-voice-clear-btn {
-            position: absolute; 
-            right: 10px;        
-            top: 50%;           
-            transform: translateY(-50%); 
-
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             border: none;
             background: transparent;
             color: #dc2626;
-            font-size: .78rem;
-            font-weight: 600;
+            font-size: .72rem;
+            font-weight: 700;
             cursor: pointer;
             z-index: 5;
+            line-height: 1;
+            padding: 2px 0;
+        }
+
+        /* textarea variant: align to top */
+        .st-voice-row.is-textarea .st-voice-clear-btn {
+            top: auto;
+            bottom: 30px;
+            transform: none;
         }
 
         .st-voice-clear-btn.hidden {
@@ -359,87 +362,8 @@
             pointer-events: none;
         }
 
-        .st-voice-row.is-textarea .st-voice-clear-btn {
-            margin-top: 10px;
-            align-self: flex-start;
-        }
-
         .st-voice-clear-btn:hover {
             color: #991b1b;
-        }
-
-        .st-input-wrap .voice-input-wrap > .st-input.has-voice-padding {
-            padding-right: 2.35rem;
-        }
-
-        .st-textarea-wrap .voice-input-wrap > .st-textarea.has-voice-padding {
-            padding-right: 2.35rem;
-        }
-
-        .st-input-wrap .voice-input-wrap .voice-mic-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            border: none;
-            background: transparent;
-            padding: 0;
-            margin: 0;
-            line-height: 1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #8B0000;
-            cursor: pointer;
-            z-index: 4;
-        }
-
-        .st-textarea-wrap .voice-input-wrap .voice-mic-btn {
-            top: 10px;
-            transform: none;
-        }
-
-        .st-input-wrap .voice-input-wrap [data-voice-status] {
-            position: absolute;
-            right: 0;
-            top: -1.35rem;
-            display: inline-flex;
-            align-items: center;
-            white-space: nowrap;
-            font-size: .74rem;
-            font-weight: 700;
-            line-height: 1;
-            padding: .18rem .48rem;
-            border-radius: 999px;
-            pointer-events: none;
-            z-index: 6;
-            background: rgba(255, 255, 255, .92);
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
-        }
-
-        .st-input-wrap .voice-input-wrap [data-voice-status].hidden {
-            display: none;
-        }
-
-        .st-input-wrap .voice-input-wrap [data-voice-status].is-listening {
-            color: #1d4ed8;
-            border-color: #bfdbfe;
-            background: #eff6ff;
-        }
-
-        .st-input-wrap .voice-input-wrap [data-voice-status].is-error {
-            color: #b91c1c;
-            border-color: #fecaca;
-            background: #fef2f2;
-        }
-
-        .st-input-wrap .voice-input-wrap [data-voice-status].is-success {
-            color: #166534;
-            border-color: #bbf7d0;
-            background: #f0fdf4;
         }
 
         .st-char-count {
@@ -880,12 +804,9 @@
         [data-theme="dark"] .card-header-icon {
             background: rgba(139,0,0,.16) !important;
             border: 1px solid rgba(220,38,38,.18) !important;
-
             color: #b91c1c !important;
-
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-
             box-shadow:
                 inset 0 1px 0 rgba(255,255,255,.04),
                 0 4px 12px rgba(0,0,0,.18);
@@ -894,12 +815,9 @@
         [data-theme="dark"] .card-header > span {
             background: rgba(255,255,255,.06) !important;
             border: 1px solid rgba(255,255,255,.10) !important;
-
             color: #FCA5A5 !important;
-
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-
             box-shadow:
                 inset 0 1px 0 rgba(255,255,255,.04),
                 0 4px 12px rgba(0,0,0,.18);
@@ -929,12 +847,9 @@
         [data-theme="dark"] td div[style*="width:26px"][style*="background:#fef2f2"] {
             background: rgba(255,255,255,.05) !important;
             border: 1px solid rgba(255,255,255,.10) !important;
-
             color: rgba(255,255,255,.72) !important;
-
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-
             box-shadow:
                 inset 0 1px 0 rgba(255,255,255,.04),
                 0 4px 12px rgba(0,0,0,.18);
@@ -943,37 +858,27 @@
         [data-theme="dark"] .service-visibility-badge.is-visible {
             background: rgba(16,185,129,.12) !important;
             border: 1px solid rgba(52,211,153,.24) !important;
-
             color: #d1fae5 !important;
-
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-
-            box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.04);    
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
         }
 
         [data-theme="dark"] .service-badge {
             background: rgba(16,185,129,.10) !important;
             border: 1px solid rgba(52,211,153,.22) !important;
-
             color: #d1fae5 !important;
-
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,.04);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
         }
 
         [data-theme="dark"] .btn-manage-sm {
             background: rgba(255,255,255,.06) !important;
             border: 1px solid rgba(255,255,255,.10) !important;
             color: #fecaca !important;
-
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-
             box-shadow:
                 inset 0 1px 0 rgba(255,255,255,.05),
                 0 4px 12px rgba(0,0,0,.18);
@@ -1155,10 +1060,8 @@
         [data-theme="dark"] .service-type-view-toggle {
             background: rgba(255,255,255,.10) !important;
             border: 1px solid rgba(255,255,255,.18) !important;
-
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-
             box-shadow:
                 inset 0 1px 0 rgba(255,255,255,.05),
                 0 4px 14px rgba(0,0,0,.18);
@@ -1217,7 +1120,6 @@
             visibility: visible;
             pointer-events: auto;
         }
-
 
         .st-modal-box {
             position: relative;
@@ -1332,7 +1234,6 @@
             background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
         }
 
-
         .st-panel {
             border: 1px solid #e9eef5;
             background: #ffffff;
@@ -1401,89 +1302,8 @@
             width: 100% !important;
         }
 
-        .st-modal-box .voice-input-wrap,
-        .st-modal-box [data-voice-field] {
-            width: 100% !important;
-            display: block !important;
-            position: relative !important;
-        }
-
-        .st-modal-box .voice-mic-btn {
-            position: absolute !important;
-            right: 14px !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            width: 18px !important;
-            height: 18px !important;
-            border: none !important;
-            background: transparent !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            line-height: 1 !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            color: #8B0000 !important;
-            z-index: 4 !important;
-        }
-
-        .st-modal-box .st-modal-textarea-wrap .voice-mic-btn {
-            top: 14px !important;
-            transform: none !important;
-        }
-
-        .st-modal-box [data-voice-status] {
-            position: absolute !important;
-            right: 0 !important;
-            top: -1.35rem !important;
-        }
-
-        .st-modal-label {
-            display: block;
-            font-size: 11px;
-            font-weight: 800;
-            color: #4b5563;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            margin-bottom: .5rem;
-        }
-
         .st-input-shell {
             position: relative;
-        }
-
-        .st-input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 13px;
-            color: #9ca3af;
-            pointer-events: none;
-        }
-
-        .st-modal-input {
-            width: 100%;
-            height: 50px;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            padding-left: 42px;
-            padding-right: 16px;
-            font-size: 14px;
-            background: #fff;
-            box-sizing: border-box;
-        }
-
-        .st-modal-textarea {
-            width: 100%;
-            min-height: 140px;
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 14px 16px;
-            font-size: 13px;
-            resize: none;
-            background: #fff;
-            box-sizing: border-box;
         }
 
         .st-modal-input:focus,
@@ -1753,6 +1573,129 @@
                 gap: .85rem;
             }
         }
+
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4); }
+            50%       { box-shadow: 0 0 0 8px rgba(192, 57, 43, 0); }
+        }
+
+        /* ── Circular mic button ── */
+        .service-voice-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .service-voice-toggle .voice-search-mic.external {
+            display: inline-flex !important;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            background: #4b5563;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(75,85,99,0.12);
+            border: none;
+            margin-left: 0;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+
+        .service-voice-toggle .voice-search-mic.external:hover {
+            background: #374151;
+        }
+
+        .service-voice-toggle .voice-search-mic.external i {
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .service-voice-toggle .patient-voice-status {
+            position: absolute;
+            right: 0;
+            top: -1.35rem;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            font-size: .62rem;
+            font-weight: 700;
+            line-height: 1;
+            padding: .08rem .28rem;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: 6;
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+        }
+
+        .service-voice-toggle .patient-voice-status.hidden {
+            display: none;
+        }
+
+        .service-voice-toggle .patient-voice-status.is-listening {
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+            background: #eff6ff;
+        }
+
+        .service-voice-toggle .patient-voice-status.is-error {
+            color: #b91c1c;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .service-voice-toggle .patient-voice-status.is-success {
+            color: #166534;
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+        }
+
+        .service-voice-toggle .voice-search-mic.external.mic-active {
+            background: #c0392b;
+            transform: scale(1.1);
+            animation: micPulse 1.2s ease-in-out infinite;
+        }
+        /* ── Modal voice rows ── */
+        .st-modal-voice-row {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            width: 100%;
+        }
+
+        .st-modal-voice-row--textarea {
+            align-items: flex-start;
+        }
+
+        .st-modal-voice-row .st-modal-field-wrap,
+        .st-modal-voice-row .st-modal-textarea-wrap {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        /* Shrink the modal input/textarea so the mic button fits inside the panel */
+        .st-modal-voice-row .st-modal-input,
+        .st-modal-voice-row .st-modal-textarea {
+            width: 100%;
+        }
+
+        .st-modal-voice-row .service-voice-toggle {
+            flex-shrink: 0;
+        }
+
+        /* Nudge mic down to align with top of textarea */
+        .st-modal-voice-row--textarea .service-voice-toggle {
+            margin-top: 6px;
+        }
+
+        /* Allow mic button to sit inside the panel without clipping */
+        .st-panel {
+            overflow: visible;
+        }
     </style>
 @endsection
 
@@ -1814,10 +1757,12 @@
                                             <i class="fa-solid fa-tag st-input-icon"></i>
                                             <input type="text" id="serviceNameInput" name="name"
                                                 placeholder="e.g. Tooth Extraction" autocomplete="off"
-                                                value="{{ old('name') }}" class="st-input with-icon">
+                                                value="{{ old('name') }}" class="st-input with-icon no-voice">
+                                            {{-- Clear button lives INSIDE the input-wrap, right of text --}}
+                                            <button type="button" id="serviceNameClearBtn" class="st-voice-clear-btn hidden">Clear</button>
                                         </div>
-
-                                        <button type="button" id="serviceNameClearBtn" class="st-voice-clear-btn hidden">Clear</button>
+                                        {{-- Mic toggle is a sibling of st-input-wrap, not inside it --}}
+                                        <div class="service-voice-toggle" id="serviceNameVoiceToggle"></div>
                                     </div>
 
                                     <div id="nameClientError" class="st-field-error" style="display: none;">
@@ -1844,13 +1789,13 @@
                                             <textarea id="serviceDescInput"
                                                 name="description"
                                                 placeholder="Brief details about the service..."
-                                                class="st-input st-textarea"
+                                                class="st-input st-textarea no-voice"
                                                 maxlength="255">{{ old('description') }}</textarea>
 
                                             <div id="serviceDescCount" class="st-char-count">0 / 255</div>
+                                            <button type="button" id="serviceDescClearBtn" class="st-voice-clear-btn hidden">Clear</button>
                                         </div>
-
-                                        <button type="button" id="serviceDescClearBtn" class="st-voice-clear-btn hidden">Clear</button>
+                                        <div class="service-voice-toggle" id="serviceDescVoiceToggle"></div>
                                     </div>
 
                                     @error('description')
@@ -1897,17 +1842,16 @@
                                             <tr>
                                                 <td><span class="service-badge">#{{ $service->id }}</span></td>
                                                 <td>
-                                                    <div style = "display:flex; align-items:center; gap:.6em; min-height:40px;">
+                                                    <div style="display:flex; align-items:center; gap:.6em; min-height:40px;">
                                                         <div
                                                             style="width:26px; height:26px; background:#fef2f2; color:var(--crimson); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px;">
                                                             <i class="fa-solid fa-tooth"></i>
                                                         </div>
-
-                                                            <span style="font-size:.78rem;font-weight:700;color:#1a202c;">
-                                                                {{ $service->name }}
-                                                            </span>
-                                                        </div>
-                                                    </td>
+                                                        <span style="font-size:.78rem;font-weight:700;color:#1a202c;">
+                                                            {{ $service->name }}
+                                                        </span>
+                                                    </div>
+                                                </td>
                                                 <td style="font-size:.72rem; line-height:1.5;">
                                                     {{ $service->description ?: '—' }}
                                                 </td>
@@ -2114,9 +2058,12 @@
                     <div class="st-modal-body">
                         <div class="st-panel">
                             <label class="st-modal-label">Service Name <span class="text-red-500">*</span></label>
-                            <div class="st-modal-field-wrap">
-                                <span class="st-modal-field-icon"><i class="fa-solid fa-tag"></i></span>
-                                <input type="text" id="manageServiceName" name="name" class="st-modal-input" maxlength="255" required>
+                            <div class="st-modal-voice-row">
+                                <div class="st-modal-field-wrap">
+                                    <span class="st-modal-field-icon"><i class="fa-solid fa-tag"></i></span>
+                                    <input type="text" id="manageServiceName" name="name" class="st-modal-input no-voice" maxlength="255" required>
+                                </div>
+                                <div class="service-voice-toggle" id="manageServiceNameVoiceToggle"></div>
                             </div>
                         </div>
 
@@ -2130,9 +2077,12 @@
                                 </div>
                             </div>
 
-                            <div class="st-modal-textarea-wrap">
-                                <textarea id="manageServiceDescription" name="description" class="st-modal-textarea" maxlength="255"
-                                    placeholder="Brief details about the service..."></textarea>
+                            <div class="st-modal-voice-row st-modal-voice-row--textarea">
+                                <div class="st-modal-textarea-wrap">
+                                    <textarea id="manageServiceDescription" name="description" class="st-modal-textarea no-voice" maxlength="255"
+                                        placeholder="Brief details about the service..."></textarea>
+                                </div>
+                                <div class="service-voice-toggle" id="manageServiceDescVoiceToggle"></div>
                             </div>
                         </div>
 
@@ -2325,11 +2275,6 @@
                     field.value = '';
                     field.dispatchEvent(new Event('input', { bubbles: true }));
                     field.dispatchEvent(new Event('change', { bubbles: true }));
-
-                    const status = field.closest('.voice-input-wrap')?.querySelector('[data-voice-status]')
-                        || field.closest('.st-input-wrap')?.querySelector('[data-voice-status]');
-                    if (status) status.classList.add('hidden');
-
                     toggleClear();
                     field.focus();
                 });
@@ -2340,9 +2285,193 @@
             bindVoiceClear('serviceNameInput', 'serviceNameClearBtn');
             bindVoiceClear('serviceDescInput', 'serviceDescClearBtn');
 
+            // ─────────────────────────────────────────────────────────────
+            // Voice controllers for service inputs
+            // ─────────────────────────────────────────────────────────────
+            (function initServiceVoice() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) return;
+
+                const voiceInputs = [
+                    { inputId: 'serviceNameInput',        toggleWrapperId: 'serviceNameVoiceToggle',       micId: 'serviceNameMicBtn'       },
+                    { inputId: 'serviceDescInput',        toggleWrapperId: 'serviceDescVoiceToggle',        micId: 'serviceDescMicBtn'       },
+                    { inputId: 'manageServiceName',       toggleWrapperId: 'manageServiceNameVoiceToggle',  micId: 'manageServiceNameMicBtn' },
+                    { inputId: 'manageServiceDescription',toggleWrapperId: 'manageServiceDescVoiceToggle',  micId: 'manageServiceDescMicBtn' }
+                ];
+
+                voiceInputs.forEach(config => {
+                    const input        = document.getElementById(config.inputId);
+                    const toggleWrapper = document.getElementById(config.toggleWrapperId);
+                    if (!input || !toggleWrapper) return;
+
+                    // Build mic button
+                    const micBtn = document.createElement('button');
+                    micBtn.type      = 'button';
+                    micBtn.id        = config.micId;
+                    micBtn.className = 'voice-search-mic external';
+                    micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                    micBtn.title     = 'Toggle voice input';
+                    toggleWrapper.appendChild(micBtn);
+
+                    // Build status chip
+                    const status = document.createElement('span');
+                    status.className = 'patient-voice-status hidden';
+                    status.setAttribute('aria-hidden', 'true');
+                    status.setAttribute('aria-live', 'polite');
+                    toggleWrapper.appendChild(status);
+
+                    // State
+                    let recognition  = null;
+                    let listening    = false;
+                    let manualStop   = false;
+                    let capturedText = false; // ← tracks whether any speech was recorded
+
+                    const setStatus = (text, state) => {
+                        status.textContent = text || '';
+                        status.className   = state ? `patient-voice-status is-${state}` : 'patient-voice-status';
+                        if (!text) status.classList.add('hidden');
+                        else       status.classList.remove('hidden');
+                    };
+
+                    const setMicState = (active) => {
+                        micBtn.classList.toggle('mic-active', !!active);
+                        micBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+                        micBtn.innerHTML = active
+                            ? '<i class="fa-solid fa-stop"></i>'
+                            : '<i class="fa-solid fa-microphone"></i>';
+                    };
+
+                    // ── FIX: manual stop now checks whether speech was captured ──
+                    const stopNow = () => {
+                        manualStop = true;
+                        listening  = false;
+                        setMicState(false);
+
+                        if (capturedText) {
+                            setStatus('Voice captured.', 'success');
+                            setTimeout(() => setStatus('', null), 1200);
+                        } else {
+                            setStatus("Didn't catch that. Try again.", 'error');
+                            setTimeout(() => setStatus('', null), 2500);
+                        }
+
+                        if (recognition) {
+                            try { recognition.abort(); } catch (e) {
+                                try { recognition.stop(); } catch (_) {}
+                            }
+                        }
+                    };
+
+                    const createRecognition = () => {
+                        capturedText = false; // reset per session
+
+                        const r           = new SpeechRecognition();
+                        r.lang            = 'en-US';
+                        r.continuous      = false;
+                        r.interimResults  = true;
+                        r.maxAlternatives = 1;
+
+                        let sawSpeech  = false;
+                        let timeoutId  = null;
+                        const LISTEN_TIMEOUT = 6000;
+
+                        const clearTimeout_ = () => {
+                            if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+                        };
+
+                        r.onstart = () => {
+                            timeoutId = setTimeout(() => {
+                                if (listening && !sawSpeech) { try { r.stop(); } catch (e) {} }
+                            }, LISTEN_TIMEOUT);
+                        };
+
+                        r.onspeechend = () => { clearTimeout_(); try { r.stop(); } catch (e) {} };
+
+                        r.onresult = (event) => {
+                            let transcript = '';
+                            for (let i = event.resultIndex; i < event.results.length; i++) {
+                                const result = event.results[i];
+                                const chunk  = (result?.[0]?.transcript ?? '').trim();
+                                if (!chunk) continue;
+                                sawSpeech = true;
+                                if (result.isFinal) {
+                                    transcript = (transcript + ' ' + chunk).trim();
+                                } else if (!transcript) {
+                                    transcript = chunk;
+                                }
+                            }
+                            transcript = transcript.trim();
+                            if (transcript) {
+                                clearTimeout_();
+                                capturedText  = true; // ← speech was actually received
+                                input.value   = transcript;
+                                input.dispatchEvent(new Event('input',  { bubbles: true }));
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                                setStatus('Listening...', 'listening');
+                            }
+                        };
+
+                        r.onerror = () => {
+                            clearTimeout_();
+                            listening = false;
+                            if (manualStop) { manualStop = false; return; }
+                            setMicState(false);
+                            setStatus("Didn't catch that. Try again.", 'error');
+                            setTimeout(() => setStatus('', null), 2500);
+                        };
+
+                        r.onend = () => {
+                            clearTimeout_();
+                            if (manualStop) { manualStop = false; listening = false; setMicState(false); return; }
+                            const hadSpeech = sawSpeech || capturedText;
+                            listening = false;
+                            setMicState(false);
+                            if (hadSpeech) {
+                                setStatus('Voice captured.', 'success');
+                                setTimeout(() => setStatus('', null), 2200);
+                            } else {
+                                setStatus("Didn't catch that. Try again.", 'error');
+                                setTimeout(() => setStatus('', null), 2500);
+                            }
+                        };
+
+                        return r;
+                    };
+
+                    // Click: toggle on / off
+                    micBtn.addEventListener('click', () => {
+                        if (listening && recognition) { stopNow(); return; }
+                        recognition = createRecognition();
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            setStatus('Unable to start voice input.', 'error');
+                            setTimeout(() => setStatus('', null), 2500);
+                            setMicState(false);
+                            listening = false;
+                            return;
+                        }
+                        listening = true;
+                        setMicState(true);
+                        setStatus('Listening...', 'listening');
+                    });
+
+                    // pointerdown: immediate stop while active
+                    micBtn.addEventListener('pointerdown', (ev) => {
+                        if (listening && recognition) {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            manualStop = true;
+                            try { recognition.stop(); } catch (e) {}
+                        }
+                    }, { passive: false });
+                });
+            })();
+
+            // Char counter for description textarea
             const descInput = document.getElementById('serviceDescInput');
             const charCount = document.getElementById('serviceDescCount');
-            const maxChars = 255;
+            const maxChars  = 255;
 
             if (descInput && charCount) {
                 function updateCharCount() {
