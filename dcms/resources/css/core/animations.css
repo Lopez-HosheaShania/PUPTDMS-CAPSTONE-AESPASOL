@@ -1,0 +1,272 @@
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(.985);
+        filter: blur(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.page-enter {
+    animation: pageEnter .55s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-enter {
+        animation: none !important;
+        transform: none !important;
+        filter: none !important;
+    }
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalSlideDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+}
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.calendar-focus-pulse {
+    animation: calendarFocusPulse 1.25s ease-out;
+}
+
+@keyframes calendarFocusPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(139, 0, 0, .35);
+    }
+
+    100% {
+        box-shadow: 0 0 0 14px rgba(139, 0, 0, 0);
+    }
+}
+
+[data-theme="dark"] #mainContent .calendar-focus-pulse {
+    animation: calendarFocusPulseDark 1.25s ease-out;
+}
+
+@keyframes calendarFocusPulseDark {
+    0% {
+        box-shadow: 0 0 0 0 rgba(252, 165, 165, .35);
+    }
+
+    100% {
+        box-shadow: 0 0 0 14px rgba(252, 165, 165, 0);
+    }
+}
+
+@keyframes modalEnter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.toast-item.toast-exit {
+    animation: toastOut .35s ease forwards;
+}
+
+@keyframes modalExit {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+.patient-record-modal-inner {
+    animation: modalEnter 0.35s ease-out forwards;
+}
+
+@keyframes errorSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(60px) scale(.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.toast-item.leaving {
+    animation: toastOut .25s ease forwards;
+}
+
+@keyframes toastOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+        max-height: 100px;
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(60px);
+        max-height: 0;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1
+    }
+
+    50% {
+        opacity: .4
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-up {
+    animation: fadeUp .45s ease both;
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(.9)
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1)
+    }
+}
+
+
+@keyframes patientStatActiveIn {
+    0% {
+        transform: translateY(0) scale(.985);
+        filter: saturate(.92);
+    }
+
+    58% {
+        transform: translateY(-4px) scale(1.018);
+        filter: saturate(1.08);
+    }
+
+    100% {
+        transform: translateY(-2px) scale(1.012);
+        filter: saturate(1);
+    }
+}
+
+@keyframes patientStatActiveShine {
+    0% {
+        transform: translateX(-130%) skewX(-18deg);
+    }
+
+    100% {
+        transform: translateX(160%) skewX(-18deg);
+    }
+}
+
+@keyframes patientStatPulse {
+    0% {
+        box-shadow:
+            0 0 0 0 color-mix(in srgb, var(--stat-accent) 30%, transparent),
+            0 18px 36px color-mix(in srgb, var(--stat-accent) 18%, rgba(15, 23, 42, .14));
+    }
+
+    70% {
+        box-shadow:
+            0 0 0 9px color-mix(in srgb, var(--stat-accent) 0%, transparent),
+            0 22px 44px color-mix(in srgb, var(--stat-accent) 24%, rgba(15, 23, 42, .18));
+    }
+
+    100% {
+        box-shadow:
+            0 0 0 4px color-mix(in srgb, var(--stat-accent) 16%, transparent),
+            0 20px 40px color-mix(in srgb, var(--stat-accent) 24%, rgba(15, 23, 42, .18));
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -468px 0
+    }
+
+    100% {
+        background-position: 468px 0
+    }
+}
+
+
+@keyframes toastProg {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}

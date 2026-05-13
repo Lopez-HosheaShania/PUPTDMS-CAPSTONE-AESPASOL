@@ -1584,8 +1584,7 @@ $calendarAppointmentCounts = $appointmentCountsPerDay ?? [];
 $calendarAppointmentDetails = $calendarAppointmentDetails ?? [];
 @endphp
 
-<main id="mainContent"
-    class="pt-[78px] px-3 md:px-5 xl:px-6 pb-5 page-enter min-h-screen flex-1 bg-gray-50 dark:bg-[#000D1A] text-gray-900 dark:text-[#F3F4F6]">
+<main id="mainContent" class="dentist-page-shell page-enter">
     <div class="w-full">
 
         <x-dashboard-loading-status />

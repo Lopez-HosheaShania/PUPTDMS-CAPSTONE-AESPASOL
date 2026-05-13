@@ -2,933 +2,14 @@
 
 @section('title', 'Patient List | PUP Taguig Dental Clinic')
 
-@section('styles')
-
-<style>
-  .radio-red {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border: 2px solid #8B0000;
-    border-radius: 9999px;
-    display: inline-grid;
-    place-content: center;
-    background: #fff;
-  }
-
-  .radio-red::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 9999px;
-    transform: scale(0);
-    transition: transform 120ms ease-in-out;
-    background: #8B0000;
-  }
-
-  .radio-red:checked::before {
-    transform: scale(1);
-  }
-
-  @keyframes tabSlideUp {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .tab-btn {
-    position: relative;
-    background: #fff;
-    border: 1.5px solid #E5E7EB;
-    border-radius: 16px;
-    padding: 14px 12px 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    cursor: pointer;
-    transition: box-shadow .2s ease, transform .2s ease, border-color .2s;
-    overflow: hidden;
-    animation: tabSlideUp .35s ease both;
-  }
-
-  .tab-btn:nth-child(1) {
-    animation-delay: .03s;
-  }
-
-  .tab-btn:nth-child(2) {
-    animation-delay: .08s;
-  }
-
-  .tab-btn:nth-child(3) {
-    animation-delay: .13s;
-  }
-
-  .tab-btn:nth-child(4) {
-    animation-delay: .18s;
-  }
-
-  .tab-btn:nth-child(5) {
-    animation-delay: .23s;
-  }
-
-  .tab-btn:nth-child(6) {
-    animation-delay: .28s;
-  }
-
-  .tab-btn::before {
-    display: none;
-  }
-
-  .tab-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
-    border-color: transparent;
-  }
-
-  .tab-btn::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    border-radius: 0 0 16px 16px;
-    opacity: 0;
-    transition: opacity .2s;
-  }
-
-  .tab-btn.tab-active {
-    border-color: transparent;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, .10);
-    transform: translateY(-2px);
-  }
-
-  .tab-btn.tab-active::after {
-    opacity: 1;
-  }
-
-  .tab-icon-wrap {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-    font-size: 15px;
-  }
-
-  .tab-top-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    width: 100%;
-    gap: 6px;
-  }
-
-  .tab-count {
-    font-size: 28px;
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -1px;
-    color: #111827;
-  }
-
-  .tab-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .5px;
-    color: #6B7280;
-    text-transform: uppercase;
-    margin-top: 5px;
-    display: block;
-  }
-
-  .tab-scheduled .tab-icon-wrap {
-    background: #EFF6FF;
-    color: #2563EB;
-  }
-
-  .tab-upcoming .tab-icon-wrap {
-    background: #FFF7ED;
-    color: #EA580C;
-  }
-
-  .tab-rescheduled .tab-icon-wrap {
-    background: #fefce8;
-    color: #ca8a04;
-  }
-
-  .tab-cancelled .tab-icon-wrap {
-    background: #ffecec;
-    color: #df0606;
-  }
-
-  .tab-completed .tab-icon-wrap {
-    background: #F0FDF4;
-    color: #16A34A;
-  }
-
-  .tab-all .tab-icon-wrap {
-    background: #FFF7ED;
-    color: #D97706;
-  }
-
-  .tab-scheduled::after {
-    background: #2563EB;
-  }
-
-  .tab-upcoming::after {
-    background: #EA580C;
-  }
-
-  .tab-rescheduled::after {
-    background: #ca8a04;
-  }
-
-  .tab-cancelled::after {
-    background: #df0606;
-  }
-
-  .tab-completed::after {
-    background: #16A34A;
-  }
-
-  .tab-all::after {
-    background: #D97706;
-  }
-
-  .tab-scheduled.tab-active {
-    box-shadow: 0 6px 24px rgba(37, 99, 235, .12);
-  }
-
-  .tab-upcoming.tab-active {
-    box-shadow: 0 6px 24px rgba(234, 88, 12, .12);
-  }
-
-  .tab-rescheduled.tab-active {
-    box-shadow: 0 6px 24px rgba(202, 138, 4, .12);
-  }
-
-  .tab-cancelled.tab-active {
-    box-shadow: 0 6px 24px rgba(247, 85, 85, .12);
-  }
-
-  .tab-completed.tab-active {
-    box-shadow: 0 6px 24px rgba(22, 163, 74, .12);
-  }
-
-  .tab-all.tab-active {
-    box-shadow: 0 6px 24px rgba(217, 119, 6, .12);
-  }
-
-  @keyframes cardIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .patient-card {
-    position: relative;
-    background: #fff;
-    border: 1.5px solid #E5E7EB;
-    border-radius: 16px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: border-color .2s, box-shadow .2s, transform .2s;
-    animation: cardIn .4s ease both;
-  }
-
-  .patient-card:nth-child(even) {
-    background: #FDFAF8;
-  }
-
-  .patient-card:nth-child(1) {
-    animation-delay: .05s;
-  }
-
-  .patient-card:nth-child(2) {
-    animation-delay: .12s;
-  }
-
-  .patient-card:nth-child(3) {
-    animation-delay: .19s;
-  }
-
-  .patient-card:nth-child(4) {
-    animation-delay: .26s;
-  }
-
-  .patient-card:nth-child(5) {
-    animation-delay: .33s;
-  }
-
-  .patient-card:hover {
-    border-color: #D1D5DB;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, .09);
-    transform: translateY(-2px);
-  }
-
-  .patient-card .accent-bar {
-    position: absolute;
-    left: 0;
-    top: 14px;
-    bottom: 14px;
-    width: 4px;
-    border-radius: 0 4px 4px 0;
-  }
-
-  .accent-upcoming {
-    background: linear-gradient(180deg, #E64A19, #BF360C);
-  }
-
-  .accent-today {
-    background: linear-gradient(180deg, #1E88E5, #1565C0);
-  }
-
-  .accent-rescheduled {
-    background: linear-gradient(180deg, #ca8a04, #92400e);
-  }
-
-  .accent-cancelled {
-    background: linear-gradient(180deg, #E53935, #B71C1C);
-  }
-
-  .accent-completed {
-    background: linear-gradient(180deg, #388E3C, #1B5E20);
-  }
-
-  .accent-default {
-    background: linear-gradient(180deg, #333333, #6B7280);
-  }
-
-  .card-arrow-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #F3F4F6;
-    border: 1.5px solid #E5E7EB;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #333333;
-    font-size: 14px;
-    flex-shrink: 0;
-    transition: all .2s;
-  }
-
-  .patient-card:hover .card-arrow-btn {
-    background: #8B0000;
-    border-color: #8B0000;
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(139, 0, 0, .3);
-  }
-
-  .status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 11px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    margin-top: 6px;
-  }
-
-  .status-pill .pill-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-    animation: pillPulse 2s infinite;
-  }
-
-  @keyframes pillPulse {
-
-    0%,
-    100% {
-      opacity: 1
-    }
-
-    50% {
-      opacity: .35
-    }
-  }
-
-  .pill-today {
-    background: #EFF6FF;
-    color: #1D4ED8;
-    border: 1px solid #BFDBFE;
-  }
-
-  .pill-upcoming {
-    background: #FFF7ED;
-    color: #C2410C;
-    border: 1px solid #FED7AA;
-  }
-
-  .pill-rescheduled {
-    background: #fefce8;
-    color: #92400e;
-    border: 1px solid #FDE68A;
-  }
-
-  .pill-cancelled {
-    background: #fbd8d8;
-    color: #df0606;
-    border: 1px solid #FECACA;
-  }
-
-  .pill-completed {
-    background: #F0FDF4;
-    color: #15803D;
-    border: 1px solid #BBF7D0;
-  }
-
-  .pill-default {
-    background: #F9FAFB;
-    color: #374151;
-    border: 1px solid #E5E7EB;
-  }
-
-  .icon-box {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .card-col-header {
-    display: none;
-    grid-template-columns: 30px 180px 100px 176px 50px 1fr 40px;
-    align-items: center;
-    padding: 10px 32px 10px 40px;
-    border-bottom: 1px solid #F3F4F6;
-    background: #FAFAFA;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: #757575;
-    border-radius: 16px 16px 0 0;
-  }
-
-  #searchInput:focus {
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.08);
-  }
-
-  .page-summary {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 4px;
-  }
-
-  .summary-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: #f9f9f9;
-    border: 1px solid #e5e7eb;
-    border-radius: 9999px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-weight: 500;
-    color: #6b7280;
-  }
-
-  .summary-tag-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .card-body-desktop {
-    display: flex;
-  }
-
-  .card-body-mobile {
-    display: none;
-  }
-
-  .active-filters-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-bottom: 16px;
-    margin-bottom: 16px;
-    border-bottom: 1px solid #F3F4F6;
-  }
-
-  .filter-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #8B0000;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #ffffff;
-  }
-
-  #filterBtn.has-filters {
-    border-color: #8B0000;
-    color: #8B0000;
-    background: rgba(139, 0, 0, 0.05);
-  }
-
-  .filter-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: #ffffff;
-    border: 1px solid #E5E7EB;
-    border-radius: 999px;
-    font-size: 11.5px;
-    font-weight: 600;
-    color: #4B5563;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-    transition: all 0.2s;
-  }
-
-  .filter-chip:hover {
-    border-color: #D1D5DB;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-  }
-
-  .filter-chip-remove {
-    color: #333333;
-    cursor: pointer;
-    transition: color 0.2s;
-    display: flex;
-    align-items: center;
-    margin-left: 2px;
-  }
-
-  .filter-chip-remove:hover {
-    color: #EF4444;
-  }
-
-  .clear-all-chips {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: #D97706;
-    background: #FFF7ED;
-    border: 1px solid #FFEDD5;
-    padding: 6px 14px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .clear-all-chips:hover {
-    background: #FFEDD5;
-  }
-
-  .filter-drawer-wrapper {
-    position: fixed;
-    inset: 0;
-    z-index: 1100;
-    visibility: hidden;
-  }
-
-  .filter-drawer-wrapper.open {
-    visibility: visible;
-  }
-
-  .filter-drawer-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(2px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .filter-drawer-wrapper.open .filter-drawer-overlay {
-    opacity: 1;
-  }
-
-  .filter-drawer-panel {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-width: 480px;
-    background: #fff;
-    border-radius: 24px 0 0 24px;
-    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
-    display: flex;
-    flex-direction: column;
-    transform: translateX(100%);
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-  }
-
-  .filter-drawer-wrapper.open .filter-drawer-panel {
-    transform: translateX(0);
-  }
-
-  .ftag {
-    padding: 0.5rem 0.25rem;
-    border-radius: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #4B5563;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-  }
-
-  .ftag:hover {
-    color: #111827;
-  }
-
-  .ftag.ftag-active {
-    background: #8B0000;
-    color: #ffffff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-
-  /* ── VIEW TOGGLE STYLES ── */
-  .view-toggle-container {
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    border: 1px solid #f9eaea;
-    box-shadow: 0 2px 10px rgba(139, 0, 0, 0.04);
-    position: relative;
-  }
-
-  .view-slider {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 36px;
-    height: 36px;
-    background: #8B0000;
-    border-radius: 10px;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1;
-    box-shadow: 0 4px 12px rgba(139, 0, 0, 0.25);
-  }
-
-  .mode-list .view-slider {
-    transform: translateX(0);
-  }
-
-  .mode-grid .view-slider {
-    transform: translateX(40px)
-  }
-
-  .btn-view-mode {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9CA3AF;
-    transition: all 0.3s ease;
-    border: none;
-    background: transparent !important;
-    cursor: pointer;
-    position: relative;
-    z-index: 2;
-  }
-
-  .btn-view-mode:hover:not(.active) {
-    color: #8B0000;
-    background: #fff5f5;
-  }
-
-  .btn-view-mode.active {
-    color: #FFFFFF;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  .mode-list .table-scroll-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    width: 100%;
-  }
-
-  .mode-list .table-scroll-inner {
-    min-width: 950px;
-  }
-
-  .mode-list .card-col-header {
-    display: grid !important;
-  }
-
-  .mode-list .card-body-desktop {
-    display: flex !important;
-  }
-
-  .mode-list .card-body-mobile {
-    display: none !important;
-  }
-
-  .mode-grid .card-col-header {
-    display: none !important;
-  }
-
-  .mode-grid .card-body-desktop {
-    display: none !important;
-  }
-
-  .mode-grid .card-body-mobile {
-    display: flex !important;
-    flex-direction: row;
-    align-items: flex-start;
-    height: 100%;
-  }
-
-  .mode-grid #patientContainer {
-    display: grid !important;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .mode-grid #patientContainer>.patient-item {
-    margin-top: 0 !important;
-    height: 100%;
-  }
-
-  @media (min-width: 640px) {
-    .mode-grid #patientContainer {
-      grid-template-columns: repeat(2, 1fr) !important;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .mode-grid #patientContainer {
-      grid-template-columns: repeat(2, 1fr) !important;
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .mode-grid #patientContainer {
-      grid-template-columns: repeat(3, 1fr) !important;
-    }
-  }
-
-  /* ── MOBILE OVERRIDES ── */
-  @media (max-width: 767px) {
-    .tabs-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-
-    .tab-count {
-      font-size: 22px;
-    }
-
-    .tab-icon-wrap {
-      width: 30px;
-      height: 30px;
-      font-size: 13px;
-    }
-
-    #searchInput {
-      width: 100% !important;
-    }
-
-    #filterBtn {
-      justify-content: center;
-    }
-
-    .page-title-row {
-      flex-direction: column !important;
-      align-items: flex-start !important;
-    }
-
-    .filter-drawer-panel {
-      top: auto;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      height: auto;
-      max-height: 85vh;
-      max-width: 100%;
-      border-radius: 24px 24px 0 0;
-      transform: translateY(100%);
-    }
-
-    .filter-drawer-wrapper.open .filter-drawer-panel {
-      transform: translateY(0);
-    }
-
-    #externalClearFilterBtn {
-      width: 38px;
-      height: 38px;
-      padding: 0;
-    }
-  }
-
-  @media (max-width: 767px) {
-
-    .tabs-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-
-    .tab-count {
-      font-size: 22px;
-    }
-
-    .tab-icon-wrap {
-      width: 30px;
-      height: 30px;
-      font-size: 13px;
-    }
-
-    #searchInput {
-      width: 100% !important;
-    }
-
-    #filterBtn {
-      justify-content: center;
-    }
-
-    .page-title-row {
-      flex-direction: column !important;
-      align-items: flex-start !important;
-    }
-
-    .card-col-header {
-      display: none !important;
-    }
-
-    .card-body-desktop {
-      display: none !important;
-    }
-
-    .card-body-mobile {
-      display: flex !important;
-    }
-
-    #siteFooter {
-      padding: 1rem;
-    }
-
-    .footer-inner {
-      gap: .75rem;
-      font-size: .7rem;
-    }
-
-    .filter-drawer-panel {
-      top: auto;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      height: auto;
-      max-height: 85vh;
-      max-width: 100%;
-      border-radius: 24px 24px 0 0;
-      transform: translateY(100%);
-    }
-
-    .filter-drawer-wrapper.open .filter-drawer-panel {
-      transform: translateY(0);
-    }
-
-    #externalClearFilterBtn {
-      width: 38px;
-      height: 38px;
-      padding: 0;
-    }
-  }
-
-  @media (max-width: 1024px) {
-
-    .tabs-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .tabs-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-
-    .tab-btn {
-      padding: 10px 10px 8px;
-    }
-
-    .tab-count {
-      font-size: 20px;
-    }
-
-    .tab-label {
-      font-size: 9px;
-    }
-
-    #filterModal>div {
-      width: calc(100vw - 24px) !important;
-      margin: 12px;
-      max-height: calc(100vh - 24px);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .card-col-header {
-      display: grid;
-    }
-  }
-
-  .table-card {
-    background: #ffffff;
-    border-radius: 16px;
-    border: 1px solid #E5E7EB;
-    overflow: hidden;
-  }
-
-  [data-theme="dark"] .table-card {
-    background: #111827 !important;
-    border-color: #2a3244 !important;
-  }
-</style>
-@endsection
-
 @section('content')
 @php
 $notifications = collect($notifications ?? []);
 $notifCount = $notifications->count();
 @endphp
 
-<main id="mainContent" class="pt-[100px] px-3 md:px-6 py-6 min-h-screen flex-1 mode-list">
-  <div class="w-full fade-in">
+<main id="mainContent" class="mode-list dentist-page-shell page-enter">
+  <div class="w-full">
 
     @php
     use Carbon\Carbon;
@@ -945,34 +26,42 @@ $notifCount = $notifications->count();
     $allCount = $allCount ?? 0;
     @endphp
 
-    <div class="page-title-row flex flex-col md:flex-row md:items-start justify-between mb-6 gap-4">
-      <div class="mb-2">
-        <div class="flex items-center gap-3">
-          <div>
-            <h2 class="text-xl md:text-2xl font-extrabold text-[#8B0000] tracking-tight leading-none mb-1.5">
-              Patient Directory
-            </h2>
-          </div>
+    <div class="dentist-hero page-title-row mb-6">
+      <div class="dentist-hero-content">
+        <div class="dentist-hero-icon">
+          <i class="fa-solid fa-users"></i>
         </div>
-        <div class="page-summary mt-3">
-          <span class="summary-tag"><span class="summary-tag-dot bg-gray-400"></span>{{ $allCount }}
-            total</span>
-          @if ($todayCount > 0)
-          <span class="summary-tag"><span class="summary-tag-dot bg-blue-500"></span>{{ $todayCount }}
-            today</span>
-          @endif
-          @if ($upcomingCount > 0)
-          <span class="summary-tag"><span class="summary-tag-dot bg-orange-500"></span>{{ $upcomingCount }}
-            upcoming</span>
-          @endif
-          @if ($completedCount > 0)
-          <span class="summary-tag"><span class="summary-tag-dot bg-green-500"></span>{{ $completedCount }}
-            completed</span>
-          @endif
-          @if ($cancelledCount > 0)
-          <span class="summary-tag"><span class="summary-tag-dot bg-red-500"></span>{{ $cancelledCount }}
-            cancelled</span>
-          @endif
+
+        <div class="min-w-0">
+          <div class="dentist-hero-eyebrow">
+            <i class="fa-solid fa-tooth"></i>
+            Patient Management
+          </div>
+
+          <h2 class="dentist-hero-title">
+            Patient Directory
+          </h2>
+
+          <div class="page-summary patient-hero-summary">
+            <span class="summary-tag"><span class="summary-tag-dot bg-gray-400"></span>{{ $allCount }}
+              total</span>
+            @if ($todayCount > 0)
+            <span class="summary-tag"><span class="summary-tag-dot bg-blue-500"></span>{{ $todayCount }}
+              today</span>
+            @endif
+            @if ($upcomingCount > 0)
+            <span class="summary-tag"><span class="summary-tag-dot bg-orange-500"></span>{{ $upcomingCount }}
+              upcoming</span>
+            @endif
+            @if ($completedCount > 0)
+            <span class="summary-tag"><span class="summary-tag-dot bg-green-500"></span>{{ $completedCount }}
+              completed</span>
+            @endif
+            @if ($cancelledCount > 0)
+            <span class="summary-tag"><span class="summary-tag-dot bg-red-500"></span>{{ $cancelledCount }}
+              cancelled</span>
+            @endif
+          </div>
         </div>
       </div>
     </div>
@@ -980,60 +69,9 @@ $notifCount = $notifications->count();
     <div class="w-full">
       <div class="relative">
 
-        <div class="tabs-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3 relative z-20 mb-4">
+        <div class="table-card patient-table-card rounded-2xl border border-gray-200 shadow-sm overflow-visible">
 
-          <button class="filter-btn tab-btn tab-scheduled" data-filter="today" type="button">
-            <div class="tab-top-row">
-              <div class="tab-icon-wrap"><i class="fa-solid fa-calendar-days"></i></div>
-              <span class="tab-count">{{ $todayCount ?? 0 }}</span>
-            </div>
-            <span class="tab-label">Scheduled Today</span>
-          </button>
-
-          <button class="filter-btn tab-btn tab-upcoming" data-filter="upcoming" type="button">
-            <div class="tab-top-row">
-              <div class="tab-icon-wrap"><i class="fa-solid fa-hourglass-half"></i></div>
-              <span class="tab-count">{{ $upcomingCount ?? 0 }}</span>
-            </div>
-            <span class="tab-label">Upcoming</span>
-          </button>
-
-          <button class="filter-btn tab-btn tab-rescheduled" data-filter="rescheduled" type="button">
-            <div class="tab-top-row">
-              <div class="tab-icon-wrap"><i class="fa-solid fa-rotate"></i></div>
-              <span class="tab-count">{{ $rescheduledCount ?? 0 }}</span>
-            </div>
-            <span class="tab-label">Rescheduled</span>
-          </button>
-
-          <button class="filter-btn tab-btn tab-cancelled" data-filter="cancelled" type="button">
-            <div class="tab-top-row">
-              <div class="tab-icon-wrap"><i class="fa-solid fa-xmark"></i></div>
-              <span class="tab-count">{{ $cancelledCount ?? 0 }}</span>
-            </div>
-            <span class="tab-label">Cancelled</span>
-          </button>
-
-          <button class="filter-btn tab-btn tab-completed" data-filter="completed" type="button">
-            <div class="tab-top-row">
-              <div class="tab-icon-wrap"><i class="fa-solid fa-circle-check"></i></div>
-              <span class="tab-count">{{ $completedCount ?? 0 }}</span>
-            </div>
-            <span class="tab-label">Completed</span>
-          </button>
-
-          <button class="filter-btn tab-btn tab-all" data-filter="all" type="button">
-            <div class="tab-top-row">
-              <div class="tab-icon-wrap"><i class="fa-solid fa-clipboard-list"></i></div>
-              <span class="tab-count">{{ $allCount ?? 0 }}</span>
-            </div>
-            <span class="tab-label">All Patients</span>
-          </button>
-        </div>
-
-        <div class="table-card rounded-2xl border border-gray-200 shadow-sm overflow-hidden bg-white">
-
-          <div class="px-4 md:px-6 py-3.5 border-b border-gray-100 bg-[#FAFAFA]/50">
+          <div class="patient-table-toolbar px-4 md:px-6 py-3.5 border-b border-gray-100">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
 
               <div class="order-2 md:order-1">
@@ -1042,7 +80,102 @@ $notifCount = $notifications->count();
                 </span>
               </div>
 
-              <div class="flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-end">
+              <div
+                class="patient-toolbar-actions flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-end">
+
+                <div class="patient-sort-row">
+
+                  <div class="patient-stats-dropdown" id="patientStatsDropdown">
+                    <button type="button" class="patient-stats-trigger" id="patientStatsToggle" aria-expanded="false">
+                      <span class="patient-stats-trigger-left">
+                        <span class="patient-stats-trigger-icon">
+                          <i class="fa-solid fa-calendar-day"></i>
+                        </span>
+
+                        <span class="patient-stats-trigger-text">
+                          <span class="patient-stats-trigger-label">Sort by</span>
+                          <strong id="patientStatsSelectedLabel">Today</strong>
+                        </span>
+                      </span>
+
+                      <span class="patient-stats-trigger-right">
+                        <span class="patient-stats-count-badge" id="patientStatsSelectedCount">{{ $todayCount ?? 0
+                          }}</span>
+                        <i class="fa-solid fa-chevron-down patient-stats-chevron"></i>
+                      </span>
+                    </button>
+
+                    <div class="patient-stats-panel" id="patientStatsPanel">
+                      <div id="tabsGrid" class="patient-stats-grid">
+                        <button type="button" class="patient-stat-option filter-btn tab-active s-today"
+                          data-filter="today">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-clock"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Today</span>
+                          <span class="patient-stat-option-count" id="statUpcoming">{{ $todayCount ?? 0 }}</span>
+                        </button>
+
+                        <button type="button" class="patient-stat-option filter-btn s-upcoming" data-filter="upcoming">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-calendar-check"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Upcoming</span>
+                          <span class="patient-stat-option-count" id="statScheduled">{{ $upcomingCount ?? 0 }}</span>
+                        </button>
+
+                        <button type="button" class="patient-stat-option filter-btn s-rescheduled"
+                          data-filter="rescheduled">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Rescheduled</span>
+                          <span class="patient-stat-option-count" id="statRescheduled">{{ $rescheduledCount ?? 0
+                            }}</span>
+                        </button>
+
+                        <button type="button" class="patient-stat-option filter-btn s-completed"
+                          data-filter="completed">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-check-double"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Completed</span>
+                          <span class="patient-stat-option-count" id="statCompleted">{{ $completedCount ?? 0 }}</span>
+                        </button>
+
+                        <button type="button" class="patient-stat-option filter-btn s-cancelled"
+                          data-filter="cancelled">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Cancelled</span>
+                          <span class="patient-stat-option-count" id="statCancelled">{{ $cancelledCount ?? 0 }}</span>
+                        </button>
+
+                        <button type="button" class="patient-stat-option filter-btn s-all" data-filter="all">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-users"></i>
+                          </span>
+                          <span class="patient-stat-option-label">All Patients</span>
+                          <span class="patient-stat-option-count" id="statAll">{{ $allCount ?? 0 }}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="patient-search-row relative flex-1 md:flex-none flex items-center gap-2">
+                  <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+
+                    <input id="searchInput" type="text" placeholder="Search patient name…" data-search-input
+                      class="search-input" />
+
+                    <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
+                      <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                  </div>
+                </div>
 
                 <div class="view-toggle-container hidden md:flex mr-2">
                   <div class="view-slider"></div>
@@ -1053,33 +186,18 @@ $notifCount = $notifications->count();
                       class="fa-solid fa-border-all text-sm"></i></button>
                 </div>
 
-                <div class="relative flex-1 md:flex-none flex items-center gap-2">
-                  <div class="relative flex-1">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
-                      <i class="fa-solid fa-magnifying-glass text-[#333333] text-xs"></i>
-                    </span>
-                    <input id="searchInput" type="text" placeholder="Search patient name…"
-                      class="pl-9 pr-4 py-2 w-full md:w-64 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000]/10 focus:border-[#8B0000] transition-all" />
-                  </div>
+                <div class="patient-filter-actions">
+                  <button id="filterBtn" type="button" onclick="openFilterModal()" class="global-filter-btn">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Filter</span>
+                    <span id="filterBadge" class="filter-badge" style="display:none;"></span>
+                  </button>
 
-                  <button type="button" id="searchClearBtn"
-                    class="text-xs font-bold text-red-600 hover:text-red-800 transition-colors hidden flex-shrink-0 px-1">
-                    Clear
+                  <button id="externalClearFilterBtn" type="button" onclick="resetAllFilters()"
+                    class="global-filter-reset-btn hidden" title="Reset filters">
+                    <i class="fa-solid fa-rotate-left"></i>
                   </button>
                 </div>
-
-                <button id="filterBtn" type="button"
-                  class="relative flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-600 shadow-sm hover:border-[#8B0000] hover:text-[#8B0000] transition-all flex-shrink-0">
-                  <i class="fa-solid fa-sliders text-sm"></i>
-                  <span class="text-xs md:text-sm font-bold">Filter</span>
-                  <span id="filterBadge" class="filter-badge" style="display:none;"></span>
-                </button>
-
-                <button id="externalClearFilterBtn" type="button"
-                  class="hidden flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-red-600 hover:bg-red-50 hover:border-red-300 transition-all flex-shrink-0"
-                  title="Reset filters">
-                  <i class="fa-solid fa-rotate-left text-sm"></i>
-                </button>
               </div>
             </div>
           </div>
@@ -1097,261 +215,377 @@ $notifCount = $notifications->count();
                 <span></span>
               </div>
 
-              <div id="patientContainer" class="space-y-3 px-3 md:px-6 pb-6 pt-4">
+              <div id="patientSkeleton" class="hidden px-3 md:px-6 pb-6 pt-4">
 
-                @forelse($appointments as $appt)
-                @php
-                $status = strtolower($appt->status ?? '');
-                $isCancelled = $status === 'cancelled';
-                $isCompleted = $status === 'completed';
-                $isRescheduled = $status === 'rescheduled';
-                $isToday =
-                $appt->appointment_date === $today && !$isCancelled && !$isCompleted;
-                $isUpcoming =
-                $appt->appointment_date > $today &&
-                in_array(
-                $status,
-                ['upcoming', 'rescheduled', 'pending', 'confirmed'],
-                true,
-                );
+                <div class="skeleton-list-layout space-y-3">
+                  @for ($i = 0; $i < 3; $i++) <div class="skeleton-shell p-4">
+                    <div class="flex items-center gap-5">
+                      <div class="skeleton-circle w-14 h-14 flex-shrink-0"></div>
 
-                $tabClass = $isCancelled
-                ? 'cancelled'
-                : ($isCompleted
-                ? 'completed'
-                : ($isRescheduled
-                ? 'rescheduled'
-                : ($isToday
-                ? 'today'
-                : ($isUpcoming
-                ? 'upcoming'
-                : 'all'))));
-
-                $patientName = $appt->patient->name ?? 'Unknown Patient';
-                $dateLabel = Carbon::parse($appt->appointment_date)->format('d M Y');
-                $timeLabel = Carbon::parse($appt->appointment_time)->format('g:i A');
-                $serviceLabel =
-                $appt->service_type === 'Others'
-                ? ($appt->other_services ?:
-                'Others')
-                : $appt->service_type;
-
-                $accentClass = $isCancelled
-                ? 'accent-cancelled'
-                : ($isCompleted
-                ? 'accent-completed'
-                : ($isRescheduled
-                ? 'accent-rescheduled'
-                : ($isToday
-                ? 'accent-today'
-                : ($isUpcoming
-                ? 'accent-upcoming'
-                : 'accent-default'))));
-                $iconBg = $isCancelled
-                ? 'bg-red-100'
-                : ($isCompleted
-                ? 'bg-green-100'
-                : ($isRescheduled
-                ? 'bg-yellow-100'
-                : ($isToday
-                ? 'bg-blue-100'
-                : ($isUpcoming
-                ? 'bg-orange-100'
-                : 'bg-gray-100'))));
-                $iconColor = $isCancelled
-                ? 'text-red-600'
-                : ($isCompleted
-                ? 'text-green-600'
-                : ($isRescheduled
-                ? 'text-yellow-600'
-                : ($isToday
-                ? 'text-blue-600'
-                : ($isUpcoming
-                ? 'text-orange-600'
-                : 'text-gray-500'))));
-                $pillClass = $isCancelled
-                ? 'pill-cancelled'
-                : ($isCompleted
-                ? 'pill-completed'
-                : ($isRescheduled
-                ? 'pill-rescheduled'
-                : ($isToday
-                ? 'pill-today'
-                : ($isUpcoming
-                ? 'pill-upcoming'
-                : 'pill-default'))));
-                $pillText = $isCancelled
-                ? 'Cancelled'
-                : ($isCompleted
-                ? 'Completed'
-                : ($isRescheduled
-                ? 'Rescheduled'
-                : ($isToday
-                ? 'Appointment Today'
-                : ($isUpcoming
-                ? ($status === 'upcoming'
-                ? 'Upcoming'
-                : 'Upcoming ·
-                ' . ucfirst($status))
-                : ucfirst($status ?: 'Pending')))));
-                @endphp
-
-                <a href="{{ route('dentist.dentist.patient.profile', ['patient' => $appt->patient_id]) }}"
-                  class="patient-card patient-item all {{ $tabClass }} block">
-
-                  <div class="accent-bar {{ $accentClass }}"></div>
-
-                  <div class="card-body-desktop items-center gap-5 px-8 py-4 pl-10">
-                    <div class="relative flex-shrink-0">
-                      <img
-                        src="{{ $appt->patient->profile_image ? asset('storage/' . $appt->patient->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($patientName) . '&background=660000&color=FFFFFF&rounded=true&size=128' }}"
-                        class="w-14 h-14 rounded-2xl object-cover shadow-sm border-2 border-gray-100"
-                        alt="{{ $patientName }}" />
-                    </div>
-                    <div class="w-44 flex-shrink-0">
-                      <p class="font-semibold text-[#1a1a1a] text-sm leading-tight">
-                        {{ $patientName }}</p>
-                      <span
-                        class="inline-flex px-2.5 py-0.5 rounded-md bg-gray-200 text-gray-600 text-[10px] font-bold tracking-wide w-max">
-                        {{ $appt->patient->course ?: 'No Program' }}
-                      </span>
-                      <span class="patient-info hidden">
-                        {{ $appt->patient->course ?? '' }}|
-                        {{ $appt->patient->year_level ?? '' }}|
-                        {{ $appt->patient->section ?? '' }}|
-                        {{ $appt->appointment_date }}|
-                        {{ $appt->patient->department ?? '' }}
-                      </span>
-                    </div>
-                    <div class="w-px h-10 bg-gray-200 flex-shrink-0"></div>
-                    <div class="flex items-start gap-3 w-44 flex-shrink-0">
-                      <div class="icon-box bg-blue-50">
-                        <i class="fa-regular fa-calendar text-blue-500 text-base"></i>
+                      <div class="w-44 flex-shrink-0 space-y-2">
+                        <div class="skeleton-line h-4 w-36"></div>
+                        <div class="skeleton-pill h-5 w-20"></div>
                       </div>
-                      <div>
-                        <p class="text-[10px] text-gray-400 uppercase tracking-wide mb-1 font-semibold">
-                          Date &amp; Time
-                        </p>
-                        <p class="font-semibold text-[#1a1a1a] text-sm">
-                          {{ $dateLabel }}</p>
-                        <p class="text-gray-500 text-xs mt-0.5">{{ $timeLabel }}</p>
-                      </div>
-                    </div>
-                    <div class="w-px h-10 bg-gray-200 flex-shrink-0"></div>
-                    <div class="flex items-start gap-3 flex-1 min-w-0">
-                      <div class="icon-box {{ $iconBg }} flex-shrink-0">
-                        <i class="fa-solid fa-tooth {{ $iconColor }} text-base"></i>
-                      </div>
-                      <div class="min-w-0">
-                        <p class="text-[10px] text-gray-400 uppercase tracking-wide mb-1 font-semibold">
-                          Service</p>
-                        <p class="font-semibold text-[#1a1a1a] text-sm truncate">
-                          {{ $serviceLabel }}</p>
-                        <span class="status-pill {{ $pillClass }}">
-                          <span class="pill-dot"></span>{{ $pillText }}
-                        </span>
-                      </div>
-                    </div>
-                    <div class="card-arrow-btn ml-auto flex-shrink-0">
-                      <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </div>
-                  </div>
 
-                  <div class="card-body-mobile w-full h-full flex items-start gap-4 p-5 pl-7 relative">
+                      <div class="skeleton-block h-10 w-px hidden lg:block"></div>
 
-                    <div class="flex-shrink-0 pt-1">
-                      <img
-                        src="{{ $appt->patient->profile_image ? asset('storage/' . $appt->patient->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($patientName) . '&background=660000&color=FFFFFF&rounded=true&size=128' }}"
-                        class="w-14 h-14 rounded-full object-cover shadow-sm border-[3px] border-gray-50"
-                        alt="{{ $patientName }}" />
-                    </div>
-
-                    <div class="flex-1 min-w-0 flex flex-col">
-
-                      <div class="flex items-start justify-between gap-2">
-                        <div class="flex flex-col min-w-0 gap-1.5">
-
-                          <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="font-bold text-gray-900 text-[15px] leading-tight truncate max-w-[150px]">
-                              {{ $patientName }}</h3>
-                            <span class="status-pill {{ $pillClass }} !m-0 !px-2 !py-0.5 text-[9.5px]">
-                              <span class="pill-dot"></span>{{ $pillText }}
-                            </span>
-                          </div>
-
-                          <span
-                            class="inline-flex px-2.5 py-0.5 rounded-md bg-gray-200 text-gray-600 text-[10px] font-bold tracking-wide w-max">
-                            {{ $appt->patient->course ?: 'No Program' }}
-                          </span>
-
-                          <span class="patient-info hidden">
-                            {{ $appt->patient->course ?? '' }}|{{ $appt->patient->year_level ?? '' }}|{{
-                            $appt->patient->section ?? '' }}|{{ $appt->appointment_date }}|{{ $appt->patient->department
-                            ?? '' }}
-                          </span>
-                        </div>
-
-                        <div class="card-arrow-btn flex-shrink-0 !w-8 !h-8 bg-gray-50">
-                          <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                      <div class="flex items-center gap-3 w-44 flex-shrink-0">
+                        <div class="skeleton-block w-10 h-10"></div>
+                        <div class="space-y-2">
+                          <div class="skeleton-line h-3 w-20"></div>
+                          <div class="skeleton-line h-4 w-28"></div>
+                          <div class="skeleton-line h-3 w-16"></div>
                         </div>
                       </div>
 
-                      <div class="flex flex-col mt-4 gap-1">
+                      <div class="skeleton-block h-10 w-px hidden lg:block"></div>
 
-                        <div
-                          class="inline-flex items-center gap-3 px-3 py-2 bg-white rounded-xl border border-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.05)] w-fit transition-all ">
-                          <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                            <i class="fa-regular fa-calendar text-blue-500 text-[11px]"></i>
-                          </div>
-                          <span class="text-[12px] text-gray-700 font-bold tracking-tight pr-2 whitespace-nowrap">
-                            {{ $dateLabel }} &middot; {{ $timeLabel }}
-                          </span>
-                        </div>
-
-                        <div
-                          class="inline-flex items-center gap-3 px-3 py-2 bg-white rounded-xl border border-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.05)] w-fit max-w-full transition-all ">
-                          <div class="w-6 h-6 rounded-lg {{ $iconBg }} flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid fa-tooth {{ $iconColor }} text-[11px]"></i>
-                          </div>
-                          <span class="text-[12px] text-gray-600 font-semibold truncate pr-2">
-                            {{ $serviceLabel }}
-                          </span>
+                      <div class="flex items-center gap-3 flex-1">
+                        <div class="skeleton-block w-10 h-10"></div>
+                        <div class="space-y-2 flex-1">
+                          <div class="skeleton-line h-3 w-16"></div>
+                          <div class="skeleton-line h-4 w-32"></div>
+                          <div class="skeleton-pill h-6 w-36"></div>
                         </div>
                       </div>
+
+                      <div class="skeleton-circle w-9 h-9 flex-shrink-0"></div>
                     </div>
-                  </div>
-                </a>
-                @empty
-                <div class="py-20 text-center col-span-full w-full">
-                  <div class="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-tooth text-3xl text-gray-300"></i>
-                  </div>
-                  <p class="text-gray-500 font-semibold text-base">No appointments found</p>
-                  <p class="text-gray-400 text-sm mt-1">There are no appointments in the system
-                    yet.</p>
                 </div>
-                @endforelse
+                @endfor
               </div>
-            </div>
 
-            <div id="pagination"
-              class="flex items-center justify-center gap-2 md:gap-4 py-5 text-sm text-gray-600 border-t border-gray-100 flex-wrap">
-              <button id="prevPage"
-                class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-gray-300 cursor-not-allowed" disabled>
-                <span>‹</span> Previous
-              </button>
-              <div id="pageNumbers" class="flex items-center gap-1 md:gap-2 flex-wrap justify-center">
+              <div class="skeleton-grid-layout">
+                @for ($i = 0; $i < 6; $i++) <div class="skeleton-shell patient-grid-skeleton-card">
+                  <div class="flex items-start gap-3">
+                    <div class="skeleton-circle w-[54px] h-[54px] flex-shrink-0"></div>
+
+                    <div class="flex-1 min-w-0 space-y-2">
+                      <div class="skeleton-line h-4 w-4/5"></div>
+                      <div class="skeleton-line h-4 w-3/5"></div>
+                      <div class="flex gap-2 pt-1">
+                        <div class="skeleton-pill h-5 w-24"></div>
+                        <div class="skeleton-pill h-5 w-20"></div>
+                      </div>
+                    </div>
+
+                    <div class="skeleton-circle w-9 h-9 flex-shrink-0"></div>
+                  </div>
+
+                  <div class="space-y-2 mt-4">
+                    <div class="skeleton-block h-14 w-full"></div>
+                    <div class="skeleton-block h-14 w-full"></div>
+                  </div>
+
+                  <div class="flex items-center justify-between gap-2 mt-4">
+                    <div class="skeleton-pill h-7 w-28"></div>
+                    <div class="skeleton-pill h-7 w-20"></div>
+                  </div>
               </div>
-              <button id="nextPage"
-                class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[#8B0000] hover:bg-[#8B0000]/5 transition">
-                Next <span>›</span>
-              </button>
+              @endfor
             </div>
 
           </div>
+
+          <div id="patientContainer" class="space-y-3 px-3 md:px-6 pb-6 pt-4">
+
+            @forelse($appointments as $appt)
+            @php
+            $status = strtolower($appt->status ?? '');
+            $isCancelled = $status === 'cancelled';
+            $isCompleted = $status === 'completed';
+            $isRescheduled = $status === 'rescheduled';
+            $isToday =
+            $appt->appointment_date === $today && !$isCancelled && !$isCompleted;
+            $isUpcoming =
+            $appt->appointment_date > $today &&
+            in_array(
+            $status,
+            ['upcoming', 'rescheduled', 'pending', 'confirmed'],
+            true,
+            );
+
+            $tabClass = $isCancelled
+            ? 'cancelled'
+            : ($isCompleted
+            ? 'completed'
+            : ($isRescheduled
+            ? 'rescheduled'
+            : ($isToday
+            ? 'today'
+            : ($isUpcoming
+            ? 'upcoming'
+            : 'all'))));
+
+            $patientName = $appt->patient->name ?? 'Unknown Patient';
+            $dateLabel = Carbon::parse($appt->appointment_date)->format('d M Y');
+            $timeLabel = Carbon::parse($appt->appointment_time)->format('g:i A');
+            $serviceLabel =
+            $appt->service_type === 'Others'
+            ? ($appt->other_services ?:
+            'Others')
+            : $appt->service_type;
+
+            $accentClass = $isCancelled
+            ? 'accent-cancelled'
+            : ($isCompleted
+            ? 'accent-completed'
+            : ($isRescheduled
+            ? 'accent-rescheduled'
+            : ($isToday
+            ? 'accent-today'
+            : ($isUpcoming
+            ? 'accent-upcoming'
+            : 'accent-default'))));
+            $iconBg = $isCancelled
+            ? 'bg-red-100'
+            : ($isCompleted
+            ? 'bg-green-100'
+            : ($isRescheduled
+            ? 'bg-yellow-100'
+            : ($isToday
+            ? 'bg-blue-50'
+            : ($isUpcoming
+            ? 'bg-orange-100'
+            : 'bg-gray-100'))));
+            $iconColor = $isCancelled
+            ? 'text-red-600'
+            : ($isCompleted
+            ? 'text-green-600'
+            : ($isRescheduled
+            ? 'text-yellow-600'
+            : ($isToday
+            ? 'text-blue-600'
+            : ($isUpcoming
+            ? 'text-orange-600'
+            : 'text-gray-500'))));
+            $pillClass = $isCancelled
+            ? 'pill-cancelled'
+            : ($isCompleted
+            ? 'pill-completed'
+            : ($isRescheduled
+            ? 'pill-rescheduled'
+            : ($isToday
+            ? 'pill-today'
+            : ($isUpcoming
+            ? 'pill-upcoming'
+            : 'pill-default'))));
+            $pillText = $isCancelled
+            ? 'Cancelled'
+            : ($isCompleted
+            ? 'Completed'
+            : ($isRescheduled
+            ? 'Rescheduled'
+            : ($isToday
+            ? 'Appointment Today'
+            : ($isUpcoming
+            ? ($status === 'upcoming'
+            ? 'Upcoming'
+            : 'Upcoming ·
+            ' . ucfirst($status))
+            : ucfirst($status ?: 'Pending')))));
+
+            $appointmentDate = Carbon::parse($appt->appointment_date)->startOfDay();
+            $todayDate = Carbon::today();
+            $daysDiff = (int) $todayDate->diffInDays($appointmentDate, false);
+
+            $showDateUrgency = !$isCancelled && !$isCompleted && $daysDiff >= 0;
+
+            $urgencyLabel = $showDateUrgency
+            ? ($daysDiff === 0
+            ? 'Today'
+            : ($daysDiff === 1
+            ? 'Tomorrow'
+            : 'In ' . $daysDiff . ' days'))
+            : '';
+
+            $urgencyClass = $showDateUrgency
+            ? ($daysDiff === 0
+            ? 'urgency-today'
+            : ($daysDiff === 1
+            ? 'urgency-tomorrow'
+            : 'urgency-upcoming'))
+            : '';
+            @endphp
+
+            <a href="{{ route('dentist.dentist.patient.profile', ['patient' => $appt->patient_id]) }}"
+              class="patient-card patient-item all {{ $tabClass }} block">
+
+              <div class="accent-bar {{ $accentClass }}"></div>
+
+              <div class="card-body-desktop items-center gap-5 px-8 py-4 pl-10">
+                <div class="relative flex-shrink-0">
+                  <img
+                    src="{{ $appt->patient->profile_image ? asset('storage/' . $appt->patient->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($patientName) . '&background=660000&color=FFFFFF&rounded=true&size=128' }}"
+                    class="patient-avatar w-14 h-14 rounded-full object-cover shadow-sm" alt="{{ $patientName }}" />
+                </div>
+                <div class="w-44 flex-shrink-0">
+                  <p class="font-semibold text-[#1a1a1a] text-sm leading-tight">
+                    {{ $patientName }}</p>
+                  <span
+                    class="inline-flex px-2.5 py-0.5 rounded-md bg-gray-200 text-gray-600 text-[10px] font-bold tracking-wide w-max">
+                    {{ $appt->patient->course ?: 'No Program' }}
+                  </span>
+                  <span class="patient-info hidden">
+                    {{ $appt->patient->course ?? '' }}|
+                    {{ $appt->patient->year_level ?? '' }}|
+                    {{ $appt->patient->section ?? '' }}|
+                    {{ $appt->appointment_date }}|
+                    {{ $appt->patient->department ?? '' }}|
+                    {{ optional($appt->created_at)->toDateTimeString() }}
+                  </span>
+                </div>
+                <div class="w-px h-10 bg-gray-200 flex-shrink-0"></div>
+                <div class="patient-meta-block patient-date-block flex items-start gap-3 w-44 flex-shrink-0">
+                  <div class="icon-box {{ $iconBg }} flex-shrink-0">
+                    <i class="fa-regular fa-calendar {{ $iconColor }} text-base"></i>
+                  </div>
+                  <div>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide mb-1 font-semibold">
+                      Date &amp; Time
+                    </p>
+                    <p class="font-semibold text-[#1a1a1a] text-sm">
+                      {{ $dateLabel }}</p>
+                    <p class="text-gray-500 text-xs mt-0.5">{{ $timeLabel }}</p>
+                    @if ($showDateUrgency)
+                    <span class="urgency-chip {{ $urgencyClass }}">
+                      {{ $urgencyLabel }}
+                    </span>
+                    @endif
+                  </div>
+                </div>
+                <div class="w-px h-10 bg-gray-200 flex-shrink-0"></div>
+                <div class="patient-meta-block patient-service-block flex items-start gap-3 flex-1 min-w-0">
+                  <div class="icon-box {{ $iconBg }} flex-shrink-0">
+                    <i class="fa-solid fa-tooth {{ $iconColor }} text-base"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide mb-1 font-semibold">
+                      Service</p>
+                    <p class="font-semibold text-[#1a1a1a] text-sm">
+                      {{ $serviceLabel }}</p>
+                    <span class="status-pill {{ $pillClass }}">
+                      <span class="pill-dot"></span>{{ $pillText }}
+                    </span>
+                  </div>
+                </div>
+                <div class="patient-actions">
+                  <span class="patient-action-chip">
+                    <i class="fa-regular fa-user"></i>
+                    View
+                  </span>
+                  <span class="patient-action-chip patient-action-primary">
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </span>
+                </div>
+              </div>
+
+              <div class="card-body-mobile redesigned-grid-card w-full h-full relative">
+
+                <div class="grid-card-top mobile-profile-header">
+                  <div class="mobile-avatar-row">
+                    <div class="grid-avatar-wrap">
+                      <img
+                        src="{{ $appt->patient->profile_image ? asset('storage/' . $appt->patient->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($patientName) . '&background=660000&color=FFFFFF&rounded=true&size=128' }}"
+                        class="patient-avatar grid-patient-avatar object-cover shadow-sm" alt="{{ $patientName }}" />
+                    </div>
+
+                    <div class="card-arrow-btn grid-arrow-btn">
+                      <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                  </div>
+
+                  <div class="grid-patient-main">
+                    <h3 class="patient-grid-name">
+                      {{ $patientName }}
+                    </h3>
+
+                    <div class="grid-badge-row">
+                      <span class="status-pill {{ $pillClass }} grid-status-pill">
+                        <span class="pill-dot"></span>{{ $pillText }}
+                      </span>
+
+                      <span class="grid-program-pill">
+                        {{ $appt->patient->course ?: 'No Program' }}
+                      </span>
+                    </div>
+
+                    <span class="patient-info hidden">
+                      {{ $appt->patient->course ?? '' }}|{{ $appt->patient->year_level ?? '' }}|{{
+                      $appt->patient->section ?? '' }}|{{ $appt->appointment_date }}|{{ $appt->patient->department
+                      ?? ''
+                      }}|{{ optional($appt->created_at)->toDateTimeString() }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="grid-info-stack">
+                  <div class="grid-info-item">
+                    <div class="grid-info-icon {{ $iconBg }}">
+                      <i class="fa-regular fa-calendar {{ $iconColor }}"></i>
+                    </div>
+                    <div class="grid-info-text">
+                      <span class="grid-info-label">Date &amp; Time</span>
+                      <strong>{{ $dateLabel }} · {{ $timeLabel }}</strong>
+                    </div>
+                  </div>
+
+                  <div class="grid-info-item">
+                    <div class="grid-info-icon {{ $iconBg }}">
+                      <i class="fa-solid fa-tooth {{ $iconColor }}"></i>
+                    </div>
+                    <div class="grid-info-text">
+                      <span class="grid-info-label">Service</span>
+                      <strong>{{ $serviceLabel }}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid-card-footer">
+                  <span class="grid-action-pill">
+                    <i class="fa-regular fa-user"></i>
+                    View Profile
+                  </span>
+
+                  @if ($showDateUrgency)
+                  <span class="grid-urgency-pill {{ $urgencyClass }}">
+                    {{ $urgencyLabel }}
+                  </span>
+                  @endif
+                </div>
+              </div>
+            </a>
+            @empty
+            <div class="empty-state col-span-full w-full">
+              <div class="empty-state-icon">
+                <i class="fa-solid fa-tooth"></i>
+              </div>
+
+              <p class="empty-state-title">No appointments found</p>
+              <p class="empty-state-sub">There are no appointments in the system yet.</p>
+            </div>
+            @endforelse
+          </div>
         </div>
+
+        <div id="pagination"
+          class="flex items-center justify-center gap-2 md:gap-4 py-5 text-sm text-gray-600 border-t border-gray-100 flex-wrap">
+          <button id="prevPage" class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-gray-300 cursor-not-allowed"
+            disabled>
+            <span>‹</span> Previous
+          </button>
+          <div id="pageNumbers" class="flex items-center gap-1 md:gap-2 flex-wrap justify-center">
+          </div>
+          <button id="nextPage"
+            class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[#8B0000] hover:bg-[#8B0000]/5 transition">
+            Next <span>›</span>
+          </button>
+        </div>
+
       </div>
     </div>
+  </div>
+  </div>
 </main>
 
 <div id="filterModal" class="filter-drawer-wrapper">
@@ -1360,132 +594,138 @@ $notifCount = $notifications->count();
   <div class="filter-drawer-panel flex flex-col bg-white">
 
     <div class="px-6 py-5 flex items-center justify-between flex-shrink-0 bg-white border-b border-gray-100">
-      <div class="flex items-center gap-2 text-[#8B0000]">
-        <i class="fa-solid fa-filter text-xl"></i>
+      <div class="filter-drawer-title flex items-center gap-2">
+        <i class="fa-solid fa-sliders text-xl"></i>
         <h2 class="text-xl font-extrabold">Filters</h2>
       </div>
+
       <button id="closeFilterModalBtn" type="button" class="text-gray-400 hover:text-gray-700 transition-colors">
         <i class="fa-solid fa-xmark text-xl"></i>
       </button>
     </div>
 
-    <div class="px-6 py-4 flex flex-col gap-6 flex-1 overflow-y-auto scroll-smooth bg-white">
+    <div class="px-6 py-5 flex flex-col gap-6 flex-1 overflow-y-auto bg-white">
 
       <div id="activeFiltersSection" class="hidden">
         <div class="flex items-center justify-between mb-2">
           <span class="text-[13px] font-bold text-gray-800">Active Filters</span>
-          <button id="clearAllChipsBtn" type="button" class="text-xs font-bold text-[#8B0000] hover:underline">Clear
-            All</button>
+          <button id="clearAllChipsBtn" type="button" class="text-xs font-bold text-[#8B0000] hover:underline">
+            Clear All
+          </button>
         </div>
         <div id="activeChipsContainer" class="flex flex-wrap gap-2 pb-4 border-b border-gray-100"></div>
       </div>
 
       <div>
-        <h3 class="text-[13px] font-bold text-gray-800 mb-2">Sort Results</h3>
-        <div class="flex bg-gray-100 p-1 rounded-lg w-full gap-2" id="fSortGroup">
-          <button class="ftag ftag-active flex-1 text-[11px] leading-tight" data-val="newest">Newest
-            First</button>
-          <button class="ftag flex-1 text-[11px] leading-tight" data-val="oldest">Oldest First</button>
-          <button class="ftag flex-1 text-[11px] leading-tight" data-val="az">Patient<br>Name A-Z</button>
-          <button class="ftag flex-1 text-[11px] leading-tight" data-val="za">Patient<br>Name Z-A</button>
+        <h3 class="filter-section-title">Sort By</h3>
+        <div class="filter-chip-row" id="fSortGroup">
+          <button type="button" class="ftag ftag-active" data-val="newest">Newest First</button>
+          <button type="button" class="ftag" data-val="oldest">Oldest First</button>
+          <button type="button" class="ftag" data-val="az">Patient Name A-Z</button>
+          <button type="button" class="ftag" data-val="za">Patient Name Z-A</button>
         </div>
       </div>
 
-      <div class="h-px bg-gray-100"></div>
+      <div>
+        <h3 class="filter-section-title">Filter by Date Range</h3>
+        <div class="filter-chip-row" id="datePresetGroup">
+          <button type="button" class="quick-date-chip" data-range="7">Last 7 Days</button>
+          <button type="button" class="quick-date-chip" data-range="30">Last 30 Days</button>
+          <button type="button" class="quick-date-chip" data-range="90">Last 3 Months</button>
+          <button type="button" class="quick-date-chip" data-range="180">Last 6 Months</button>
+          <button type="button" class="quick-date-chip" data-range="365">Last 12 Months</button>
+        </div>
+      </div>
 
       <div>
-        <h3 class="text-[13px] font-bold text-gray-800 mb-2">Date Range</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div class="space-y-1.5 relative">
-            <label class="text-xs font-semibold text-gray-500">From:</label>
-            <input type="text" id="fromDate"
-              class="w-full pl-3 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-[#8B0000] focus:ring-1 focus:ring-[#8B0000] js-flatpickr-date-range-from"
-              placeholder="Select date" />
-            <i class="fa-regular fa-calendar absolute right-3.5 bottom-3.5 text-gray-800 z-0"></i>
+        <h3 class="filter-section-title">Custom Date Range</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="filter-date-input-wrap">
+            <input id="fromDate" type="text" class="js-flatpickr-date-range-from" placeholder="Start date" readonly
+              autocomplete="off" />
+            <i class="fa-regular fa-calendar"></i>
           </div>
-          <div class="space-y-1.5 relative">
-            <label class="text-xs font-semibold text-gray-500">To:</label>
-            <input type="text" id="toDate"
-              class="w-full pl-3 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-[#8B0000] focus:ring-1 focus:ring-[#8B0000] js-flatpickr-date-range-to"
-              placeholder="Select date" />
-            <i class="fa-regular fa-calendar absolute right-3.5 bottom-3.5 text-gray-800 z-0"></i>
+
+          <div class="filter-date-input-wrap">
+            <input id="toDate" type="text" class="js-flatpickr-date-range-to" placeholder="End date" readonly
+              autocomplete="off" />
+            <i class="fa-regular fa-calendar"></i>
           </div>
         </div>
       </div>
 
-      <div class="h-px bg-gray-100"></div>
-
       <div>
-        <h3 class="text-[13px] font-bold text-gray-800 mb-2">Course</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-3">
-          @foreach ([
-          'BSIT',
-          'BSECE',
-          'BSBA - HRM',
-          'BSED - ENG',
-          'BSOA',
-          'BSPSYCH',
-          'DIT',
-          'BSME',
-          'BSBA - MM',
-          'BSED -
-          MATH',
-          'DOMT',
-          ] as $course)
-          <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-              name="course" value="{{ $course }}" class="filter-input radio-red" /> <span
-              class="text-sm font-semibold text-gray-700">{{ $course }}</span></label>
+        <h3 class="filter-section-title">Course</h3>
+        <div class="filter-chip-grid">
+          @foreach (['BSIT', 'BSECE', 'BSBA - HRM', 'BSED - ENG', 'BSOA', 'BSPSYCH', 'DIT', 'BSME', 'BSBA - MM', 'BSED -
+          MATH', 'DOMT'] as $course)
+          <label class="choice-chip">
+            <input type="radio" name="course" value="{{ $course }}" class="filter-input radio-red chip-radio" />
+            <span>{{ $course }}</span>
+          </label>
           @endforeach
         </div>
       </div>
 
-      <div class="h-px bg-gray-100"></div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h3 class="text-[13px] font-bold text-gray-800 mb-2">Year Level</h3>
-          <div class="grid grid-cols-2 gap-y-3">
-            <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-                name="year" value="1st Year" class="filter-input radio-red" />
-              <span class="text-sm font-semibold text-gray-700">1st Year</span></label>
-            <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-                name="year" value="3rd Year" class="filter-input radio-red" />
-              <span class="text-sm font-semibold text-gray-700">3rd Year</span></label>
-            <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-                name="year" value="2nd Year" class="filter-input radio-red" />
-              <span class="text-sm font-semibold text-gray-700">2nd Year</span></label>
-            <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-                name="year" value="4th Year" class="filter-input radio-red" />
-              <span class="text-sm font-semibold text-gray-700">4th Year</span></label>
+          <h3 class="filter-section-title">Year Level</h3>
+          <div class="filter-chip-row">
+            <label class="choice-chip">
+              <input type="radio" name="year" value="1st Year" class="filter-input radio-red chip-radio" />
+              <span>1st Year</span>
+            </label>
+
+            <label class="choice-chip">
+              <input type="radio" name="year" value="2nd Year" class="filter-input radio-red chip-radio" />
+              <span>2nd Year</span>
+            </label>
+
+            <label class="choice-chip">
+              <input type="radio" name="year" value="3rd Year" class="filter-input radio-red chip-radio" />
+              <span>3rd Year</span>
+            </label>
+
+            <label class="choice-chip">
+              <input type="radio" name="year" value="4th Year" class="filter-input radio-red chip-radio" />
+              <span>4th Year</span>
+            </label>
           </div>
         </div>
+
         <div>
-          <h3 class="text-[13px] font-bold text-gray-800 mb-2">Section</h3>
-          <div class="space-y-3">
-            <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-                name="section" value="1" class="filter-input radio-red" /> <span
-                class="text-sm font-semibold text-gray-700">1</span></label>
-            <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-                name="section" value="2" class="filter-input radio-red" /> <span
-                class="text-sm font-semibold text-gray-700">2</span></label>
+          <h3 class="filter-section-title">Section</h3>
+          <div class="filter-chip-row">
+            <label class="choice-chip">
+              <input type="radio" name="section" value="1" class="filter-input radio-red chip-radio" />
+              <span>1</span>
+            </label>
+
+            <label class="choice-chip">
+              <input type="radio" name="section" value="2" class="filter-input radio-red chip-radio" />
+              <span>2</span>
+            </label>
           </div>
         </div>
       </div>
 
-      <div class="h-px bg-gray-100"></div>
-
       <div class="pb-6">
-        <h3 class="text-[13px] font-bold text-gray-800 mb-2">Department</h3>
-        <div class="flex flex-wrap gap-x-6 gap-y-3">
-          <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-              name="department" value="Administrative" class="filter-input radio-red" /> <span
-              class="text-sm font-semibold text-gray-700">Administrative</span></label>
-          <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-              name="department" value="Faculty" class="filter-input radio-red" /> <span
-              class="text-sm font-semibold text-gray-700">Faculty</span></label>
-          <label class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"><input type="radio"
-              name="department" value="Dependent" class="filter-input radio-red" />
-            <span class="text-sm font-semibold text-gray-700">Dependent</span></label>
+        <h3 class="filter-section-title">Department</h3>
+        <div class="filter-chip-row">
+          <label class="choice-chip">
+            <input type="radio" name="department" value="Administrative" class="filter-input radio-red chip-radio" />
+            <span>Administrative</span>
+          </label>
+
+          <label class="choice-chip">
+            <input type="radio" name="department" value="Faculty" class="filter-input radio-red chip-radio" />
+            <span>Faculty</span>
+          </label>
+
+          <label class="choice-chip">
+            <input type="radio" name="department" value="Dependent" class="filter-input radio-red chip-radio" />
+            <span>Dependent</span>
+          </label>
         </div>
       </div>
     </div>
@@ -1494,19 +734,21 @@ $notifCount = $notifications->count();
       class="px-6 py-5 bg-white flex flex-col sm:flex-row items-center justify-between flex-shrink-0 border-t border-gray-100 gap-4 sm:gap-0 relative z-20">
 
       <button id="clearFiltersModal" type="button"
-        class="flex items-center gap-2 text-[#8B0000] hover:text-[#6b0000] transition-colors w-full sm:w-auto justify-center sm:justify-start">
+        class="filter-clear-btn flex items-center gap-2 transition-colors w-full sm:w-auto justify-center sm:justify-start">
         <i class="fa-regular fa-trash-can text-lg"></i>
-        <div class="text-left leading-tight text-[13px] font-bold">Clear<br>Filters</div>
+        <span class="text-[13px] font-bold leading-none whitespace-nowrap">Clear Filters</span>
       </button>
 
       <div class="flex items-center gap-3 w-full sm:w-auto">
         <button id="cancelFilterBtn" type="button"
-          class="flex-1 sm:flex-none px-5 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          class="filter-cancel-btn flex-1 sm:flex-none px-5 py-2.5 text-sm font-bold rounded-lg transition-colors">
           Cancel
         </button>
+
         <button id="applyFilters" type="button"
-          class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-[#8B0000] rounded-lg hover:bg-[#6b0000] transition-colors shadow-sm">
-          <i class="fa-solid fa-check"></i> Apply
+          class="filter-show-results-btn filter-apply-btn flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-colors shadow-sm">
+          <i class="fa-solid fa-check"></i>
+          <span id="showResultsText">Show 0 results</span>
         </button>
       </div>
 
@@ -1521,78 +763,204 @@ $notifCount = $notifications->count();
     const mainContent = document.getElementById('mainContent');
     const btnList = document.getElementById('btnListView');
     const btnGrid = document.getElementById('btnGridView');
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
-    if (!mainContent || !btnList || !btnGrid) return;
+    if (!mainContent) return;
+
+    if (isMobile) {
+      mode = 'grid';
+    }
 
     if (mode === 'grid') {
       mainContent.classList.remove('mode-list');
       mainContent.classList.add('mode-grid');
-      btnList.classList.remove('active');
-      btnGrid.classList.add('active');
-      localStorage.setItem('patientViewMode', 'grid');
+
+      if (btnList) btnList.classList.remove('active');
+      if (btnGrid) btnGrid.classList.add('active');
+
+      if (!isMobile) {
+        localStorage.setItem('patientViewMode', 'grid');
+      }
     } else {
       mainContent.classList.remove('mode-grid');
       mainContent.classList.add('mode-list');
-      btnGrid.classList.remove('active');
-      btnList.classList.add('active');
+
+      if (btnGrid) btnGrid.classList.remove('active');
+      if (btnList) btnList.classList.add('active');
+
       localStorage.setItem('patientViewMode', 'list');
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    if (window.innerWidth <= 767) {
-      switchView('grid');
-    } else {
-      const savedMode = localStorage.getItem('patientViewMode') || 'list';
-      switchView(savedMode);
-    }
-  });
+  function syncResponsivePatientView() {
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
-  window.addEventListener('resize', () => {
-    if (window.innerWidth <= 767) {
+    if (isMobile) {
       switchView('grid');
+      return;
     }
-  });
 
-  document.querySelectorAll('.filter-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      document.querySelectorAll('.filter-btn').forEach(function (b) {
-        b.classList.remove('tab-active');
-      });
-      btn.classList.add('tab-active');
+    const savedMode = localStorage.getItem('patientViewMode') || 'list';
+    switchView(savedMode);
+  }
+
+  document.addEventListener('DOMContentLoaded', syncResponsivePatientView);
+  window.addEventListener('resize', syncResponsivePatientView);
+
+  function getPatientDropdownMeta(status) {
+    const map = {
+      today: {
+        label: 'Today',
+        icon: 'fa-clock',
+        tone: 's-today',
+        countId: 'statUpcoming'
+      },
+      upcoming: {
+        label: 'Upcoming',
+        icon: 'fa-calendar-check',
+        tone: 's-upcoming',
+        countId: 'statScheduled'
+      },
+      rescheduled: {
+        label: 'Rescheduled',
+        icon: 'fa-calendar-plus',
+        tone: 's-rescheduled',
+        countId: 'statRescheduled'
+      },
+      completed: {
+        label: 'Completed',
+        icon: 'fa-check-double',
+        tone: 's-completed',
+        countId: 'statCompleted'
+      },
+      cancelled: {
+        label: 'Cancelled',
+        icon: 'fa-calendar-xmark',
+        tone: 's-cancelled',
+        countId: 'statCancelled'
+      },
+      all: {
+        label: 'All Patients',
+        icon: 'fa-users',
+        tone: 's-all',
+        countId: 'statAll'
+      }
+    };
+
+    return map[status] || map.today;
+  }
+
+  function getPatientDropdownCount(status) {
+    const meta = getPatientDropdownMeta(status);
+    return document.getElementById(meta.countId)?.textContent?.trim() || '0';
+  }
+
+  function updatePatientStatsDropdownLabel() {
+    const activeBtn =
+      document.querySelector('#tabsGrid .filter-btn.tab-active') ||
+      document.querySelector('#tabsGrid .filter-btn[data-filter="today"]');
+
+    const labelEl = document.getElementById('patientStatsSelectedLabel');
+    const countEl = document.getElementById('patientStatsSelectedCount');
+    const leadingIcon = document.querySelector('#patientStatsToggle .patient-stats-trigger-icon');
+
+    if (!activeBtn || !labelEl || !countEl) return;
+
+    const status = activeBtn.getAttribute('data-filter') || 'today';
+    const meta = getPatientDropdownMeta(status);
+
+    labelEl.textContent = meta.label;
+    countEl.textContent = getPatientDropdownCount(status);
+
+    if (leadingIcon) {
+      leadingIcon.className = `patient-stats-trigger-icon ${meta.tone}`;
+      leadingIcon.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
+    }
+
+    document.querySelectorAll('#tabsGrid .filter-btn').forEach(function (btn) {
+      btn.classList.toggle('tab-active', btn.getAttribute('data-filter') === status);
     });
+  }
+
+  window.updatePatientStatsDropdownLabel = updatePatientStatsDropdownLabel;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const dropdown = document.getElementById('patientStatsDropdown');
+    const toggle = document.getElementById('patientStatsToggle');
+    const panel = document.getElementById('patientStatsPanel');
+
+    if (!dropdown || !toggle || !panel) return;
+
+    function closePatientStatsDropdown() {
+      dropdown.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    panel.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+
+    document.querySelectorAll('#tabsGrid .filter-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#tabsGrid .filter-btn').forEach(function (b) {
+          b.classList.remove('tab-active');
+        });
+
+        btn.classList.add('tab-active');
+        updatePatientStatsDropdownLabel();
+        closePatientStatsDropdown();
+      });
+    });
+
+    document.addEventListener('click', closePatientStatsDropdown);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closePatientStatsDropdown();
+    });
+
+    updatePatientStatsDropdownLabel();
   });
 
   document.addEventListener("DOMContentLoaded", function () {
     let patientFilterModal = null;
     let patientSearchInput = null;
-    let patientSearchClearBtn = null;
     let patientFilterBtn = null;
     let patientFilterBadge = null;
     let patientExternalResetBtn = null;
 
     function openFilterModal() {
       if (!patientFilterModal) return;
+
+      window.clearTimeout(window.patientFilterCloseTimer);
+
+      patientFilterModal.classList.remove('closing');
       patientFilterModal.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
 
     function closeFilterModal() {
       if (!patientFilterModal) return;
+
       patientFilterModal.classList.remove('open');
+      patientFilterModal.classList.add('closing');
       document.body.style.overflow = '';
+
+      window.clearTimeout(window.patientFilterCloseTimer);
+      window.patientFilterCloseTimer = window.setTimeout(function () {
+        if (!patientFilterModal) return;
+        patientFilterModal.classList.remove('closing');
+      }, 280);
     }
 
     function onSearch(input) {
       if (!input) return;
       input.dispatchEvent(new Event('input'));
-    }
-
-    function clearSearch() {
-      if (!patientSearchInput) return;
-      patientSearchInput.value = '';
-      patientSearchInput.dispatchEvent(new Event('input'));
-      patientSearchInput.focus();
     }
 
     function resetAllFilters() {
@@ -1610,18 +978,15 @@ $notifCount = $notifications->count();
 
       if (patientSearchInput) {
         patientSearchInput.value = "";
-      }
-
-      if (patientSearchClearBtn) {
-        patientSearchClearBtn.classList.add("hidden");
+        patientSearchInput.dispatchEvent(new Event("input", {
+          bubbles: true
+        }));
       }
 
       activeTab = "today";
-
       document.querySelectorAll('.filter-btn').forEach(function (b) {
         b.classList.remove('tab-active');
       });
-
       var todayBtn = document.querySelector('.filter-btn[data-filter="today"]');
       if (todayBtn) {
         todayBtn.classList.add('tab-active');
@@ -1637,6 +1002,20 @@ $notifCount = $notifications->count();
       var patientContainer = document.getElementById("patientContainer");
       if (!patientContainer) return;
 
+      var patientSkeleton = document.getElementById("patientSkeleton");
+
+      function showPatientSkeleton() {
+        if (!patientSkeleton || !patientContainer) return;
+        patientSkeleton.classList.remove("hidden");
+        patientContainer.classList.add("hidden");
+      }
+
+      function hidePatientSkeleton() {
+        if (!patientSkeleton || !patientContainer) return;
+        patientSkeleton.classList.add("hidden");
+        patientContainer.classList.remove("hidden");
+      }
+
       var allPatients = Array.from(patientContainer.querySelectorAll(".patient-item"));
       var filterModal = document.getElementById("filterModal");
       var filterBtn = document.getElementById("filterBtn");
@@ -1649,19 +1028,9 @@ $notifCount = $notifications->count();
 
       patientFilterModal = filterModal;
       patientSearchInput = searchInput;
-      patientSearchClearBtn = document.getElementById("searchClearBtn");
       patientFilterBtn = filterBtn;
       patientFilterBadge = filterBadge;
       patientExternalResetBtn = externalClearFilterBtn;
-
-      var countEls = {
-        today: document.querySelector('.filter-btn[data-filter="today"] .tab-count'),
-        upcoming: document.querySelector('.filter-btn[data-filter="upcoming"] .tab-count'),
-        rescheduled: document.querySelector('.filter-btn[data-filter="rescheduled"] .tab-count'),
-        cancelled: document.querySelector('.filter-btn[data-filter="cancelled"] .tab-count'),
-        completed: document.querySelector('.filter-btn[data-filter="completed"] .tab-count'),
-        all: document.querySelector('.filter-btn[data-filter="all"] .tab-count')
-      };
 
       var activeTab = "today";
       var searchKeyword = "";
@@ -1670,9 +1039,11 @@ $notifCount = $notifications->count();
         selectedSection = null,
         selectedDepartment = null;
       var nameSort = null,
-        dateSort = null;
+        dateSort = 'desc';
+
       var activeFromDate = "",
-        activeToDate = "";
+        activeToDate = "",
+        activeDatePreset = "";
 
       var deptRadios = Array.from(document.querySelectorAll('input[name="department"]'));
       var courseRadios = Array.from(document.querySelectorAll('input[name="course"]'));
@@ -1685,6 +1056,7 @@ $notifCount = $notifications->count();
           e.preventDefault();
           renderFilterChips();
           syncMutualExclusion();
+          updateShowResultsButton();
           openFilterModal();
         };
       }
@@ -1717,16 +1089,23 @@ $notifCount = $notifications->count();
           filterModal.querySelectorAll("input[type='radio']").forEach(function (i) {
             i.checked = false;
             i.disabled = false;
+
             var lbl = i.closest("label");
             if (lbl) {
               lbl.classList.remove("opacity-50", "cursor-not-allowed");
             }
           });
         }
-        var f = document.getElementById("fromDate"),
-          t = document.getElementById("toDate");
+
+        var f = document.getElementById("fromDate");
+        var t = document.getElementById("toDate");
+
         if (f) f.value = "";
         if (t) t.value = "";
+
+        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(function (b) {
+          b.classList.remove('active');
+        });
 
         selectedDepartment = null;
         selectedProgram = null;
@@ -1734,17 +1113,118 @@ $notifCount = $notifications->count();
         selectedSection = null;
         activeFromDate = "";
         activeToDate = "";
+        activeDatePreset = "";
 
-        document.querySelectorAll('#fSortGroup .ftag').forEach(function (b) {
-          b.classList.remove('ftag-active');
-        });
-        var defSort = document.querySelector('#fSortGroup .ftag[data-val="newest"]');
-        if (defSort) defSort.classList.add('ftag-active');
+        window.syncFilterTagGroup("fSortGroup", "newest");
 
         syncMutualExclusion();
         updateFilterButtonState();
+
         dateSort = 'desc';
         nameSort = null;
+
+        updateShowResultsButton();
+      }
+
+      function getDraftFilterState() {
+        var deptEl = filterModal ? filterModal.querySelector('input[name="department"]:checked') : null;
+        var crsEl = filterModal ? filterModal.querySelector('input[name="course"]:checked') : null;
+        var yrEl = filterModal ? filterModal.querySelector('input[name="year"]:checked') : null;
+        var secEl = filterModal ? filterModal.querySelector('input[name="section"]:checked') : null;
+
+        var fromDateEl = document.getElementById("fromDate");
+        var toDateEl = document.getElementById("toDate");
+
+        return {
+          department: deptEl ? deptEl.value : null,
+          program: crsEl ? crsEl.value : null,
+          year: yrEl ? yrEl.value : null,
+          section: secEl ? secEl.value : null,
+          fromDate: fromDateEl ? fromDateEl.value : "",
+          toDate: toDateEl ? toDateEl.value : ""
+        };
+      }
+
+      function hasDraftFilterChips() {
+        var draft = getDraftFilterState();
+
+        var sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
+        var sortVal = sortActive ? sortActive.getAttribute('data-val') : 'newest';
+
+        return !!(
+          draft.department ||
+          draft.program ||
+          draft.year ||
+          draft.section ||
+          draft.fromDate ||
+          draft.toDate ||
+          activeDatePreset ||
+          sortVal !== 'newest'
+        );
+      }
+
+      function countDraftResults() {
+        var draft = getDraftFilterState();
+        var data = allPatients.slice();
+
+        if (searchKeyword) {
+          data = data.filter(function (p) {
+            return matchesSearch(p, searchKeyword);
+          });
+        } else {
+          /*
+            IMPORTANT:
+            Filter count should preview ALL matching patients,
+            not only the current tab like today/upcoming/completed.
+            Kaya hindi natin ginagamit activeTab dito.
+          */
+
+          if (draft.program) {
+            data = data.filter(function (p) {
+              return ilike(getInfo(p).program, draft.program);
+            });
+          }
+
+          if (draft.year || draft.section) {
+            data = data.filter(function (p) {
+              var i = getInfo(p);
+
+              if (draft.year && !ilike(i.year, draft.year)) return false;
+              if (draft.section && String(i.section).trim() !== String(draft.section)
+                .trim()) return false;
+
+              return true;
+            });
+          }
+
+          if (draft.department) {
+            data = data.filter(function (p) {
+              return ilike(getInfo(p).department, draft.department);
+            });
+          }
+
+          if (draft.fromDate || draft.toDate) {
+            data = data.filter(function (p) {
+              var d = new Date(getInfo(p).dateStr);
+              if (isNaN(d.getTime())) return false;
+              if (draft.fromDate && d < new Date(draft.fromDate)) return false;
+              if (draft.toDate && d > new Date(draft.toDate)) return false;
+              return true;
+            });
+          }
+        }
+
+        return data.length;
+      }
+
+      function updateShowResultsButton() {
+        if (!hasDraftFilterChips()) {
+          window.updateShowResultsText(0);
+          return;
+        }
+
+        var count = countDraftResults();
+        window.updateShowResultsText(count);
       }
 
       function renderFilterChips() {
@@ -1765,6 +1245,7 @@ $notifCount = $notifications->count();
             callback();
             renderFilterChips();
             syncMutualExclusion();
+            updateShowResultsButton();
           };
           container.appendChild(chip);
         }
@@ -1782,12 +1263,23 @@ $notifCount = $notifications->count();
 
         var fDate = document.getElementById("fromDate");
         var tDate = document.getElementById("toDate");
-        if (fDate && tDate && (fDate.value || tDate.value)) {
+        var activePresetBtn = document.querySelector('#datePresetGroup .quick-date-chip.active');
+
+        if (activePresetBtn) {
+          addChip(activePresetBtn.textContent.trim(), function () {
+            activePresetBtn.classList.remove("active");
+            if (fDate) fDate.value = "";
+            if (tDate) tDate.value = "";
+            activeDatePreset = "";
+          });
+        } else if (fDate && tDate && (fDate.value || tDate.value)) {
           var lbl = fDate.value && tDate.value ? (fDate.value + " to " + tDate.value) : (fDate.value ?
             "From " + fDate.value : "Until " + tDate.value);
+
           addChip(lbl, function () {
             fDate.value = "";
             tDate.value = "";
+            activeDatePreset = "";
           });
         }
 
@@ -1834,14 +1326,36 @@ $notifCount = $notifications->count();
         } else {
           section.classList.add("hidden");
         }
+
+        updateShowResultsButton();
       }
 
       if (filterModal) {
-        var allModalInputs = filterModal.querySelectorAll("input");
-        allModalInputs.forEach(function (input) {
-          input.addEventListener("change", renderFilterChips);
+        var radioInputs = filterModal.querySelectorAll('input[type="radio"]');
+
+        radioInputs.forEach(function (input) {
+          input.addEventListener("change", function () {
+            renderFilterChips();
+            syncMutualExclusion();
+            updateShowResultsButton();
+          });
         });
       }
+
+      window.bindQuickDatePresets({
+        groupId: "datePresetGroup",
+        fromId: "fromDate",
+        toId: "toDate",
+        onChange: function () {
+          var activePresetBtn = document.querySelector(
+            "#datePresetGroup .quick-date-chip.active");
+          activeDatePreset = activePresetBtn ? activePresetBtn.getAttribute(
+            "data-range") : "";
+
+          renderFilterChips();
+          updateShowResultsButton();
+        }
+      });
 
       function anyChecked(list) {
         return list.some(function (i) {
@@ -1900,7 +1414,8 @@ $notifCount = $notifications->count();
           year: parts[1] || "",
           section: parts[2] || "",
           dateStr: parts[3] || "",
-          department: parts[4] || p.getAttribute("data-department") || ""
+          department: parts[4] || p.getAttribute("data-department") || "",
+          createdAt: parts[5] || ""
         };
       }
 
@@ -1936,7 +1451,7 @@ $notifCount = $notifications->count();
         if (document.querySelector('input[name="section"]:checked')) count++;
         if (document.querySelector('input[name="department"]:checked')) count++;
 
-        if (activeFromDate || activeToDate) count++;
+        if (activeFromDate || activeToDate || activeDatePreset) count++;
 
         var sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
         if (sortActive && sortActive.getAttribute('data-val') !== 'newest') count++;
@@ -1974,46 +1489,20 @@ $notifCount = $notifications->count();
         };
       }
 
-      var searchClearBtn = document.getElementById("searchClearBtn");
-
       if (searchInput) {
         searchInput.addEventListener("input", function () {
           searchKeyword = searchInput.value.trim().toLowerCase();
-
-          if (searchClearBtn) {
-            if (searchKeyword.length > 0) {
-              searchClearBtn.classList.remove("hidden");
-            } else {
-              searchClearBtn.classList.add("hidden");
-            }
-          }
-
           applyFilters();
         });
       }
 
-      if (searchClearBtn) {
-        searchClearBtn.onclick = function () {
-          if (searchInput) {
-            searchInput.value = "";
-            searchInput.dispatchEvent(new Event("input"));
-            searchInput.focus();
-          }
-        };
-      }
-
-      var fSortGroup = document.getElementById('fSortGroup');
-      if (fSortGroup) {
-        fSortGroup.onclick = function (e) {
-          var btn = e.target.closest('.ftag');
-          if (!btn) return;
-          document.querySelectorAll('#fSortGroup .ftag').forEach(function (b) {
-            b.classList.remove('ftag-active');
-          });
-          btn.classList.add('ftag-active');
+      window.bindFilterTagGroup({
+        groupId: "fSortGroup",
+        onChange: function () {
           renderFilterChips();
-        };
-      }
+          updateShowResultsButton();
+        }
+      });
 
       var tabButtons = document.querySelectorAll('.filter-btn');
       tabButtons.forEach(function (btn) {
@@ -2025,18 +1514,18 @@ $notifCount = $notifications->count();
 
       if (applyFiltersBtn) {
         applyFiltersBtn.onclick = function () {
-          var deptEl = filterModal ? filterModal.querySelector(
-            'input[name="department"]:checked') : null;
-          var crsEl = filterModal ? filterModal.querySelector('input[name="course"]:checked') :
-            null;
-          var yrEl = filterModal ? filterModal.querySelector('input[name="year"]:checked') : null;
-          var secEl = filterModal ? filterModal.querySelector('input[name="section"]:checked') :
-            null;
+          var draft = getDraftFilterState();
 
-          selectedDepartment = deptEl ? deptEl.value : null;
-          selectedProgram = crsEl ? crsEl.value : null;
-          selectedYearLevel = yrEl ? yrEl.value : null;
-          selectedSection = secEl ? secEl.value : null;
+          selectedDepartment = draft.department;
+          selectedProgram = draft.program;
+          selectedYearLevel = draft.year;
+          selectedSection = draft.section;
+          activeFromDate = draft.fromDate;
+          activeToDate = draft.toDate;
+
+          var activePresetBtn = document.querySelector(
+            '#datePresetGroup .quick-date-chip.active');
+          activeDatePreset = activePresetBtn ? activePresetBtn.getAttribute("data-range") : "";
 
           var sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
           var sortVal = sortActive ? sortActive.getAttribute('data-val') : 'newest';
@@ -2055,12 +1544,8 @@ $notifCount = $notifications->count();
             nameSort = null;
           }
 
-          var fromDateEl = document.getElementById("fromDate");
-          var toDateEl = document.getElementById("toDate");
-          activeFromDate = fromDateEl ? fromDateEl.value : "";
-          activeToDate = toDateEl ? toDateEl.value : "";
-
           if (filterModal) closeFilterModal();
+
           syncMutualExclusion();
           applyFilters();
           updateFilterButtonState();
@@ -2146,7 +1631,7 @@ $notifCount = $notifications->count();
             today: {
               icon: "fa-calendar-days",
               title: "No appointments today",
-              sub: "Enjoy the quiet — nothing scheduled for today."
+              sub: "No patient visits today. Enjoy a calm and easy clinic day!"
             },
             upcoming: {
               icon: "fa-hourglass-half",
@@ -2181,13 +1666,13 @@ $notifCount = $notifications->count();
             title = 'No results for "' + searchKeyword + '"';
             sub = "Try a different name, ID, or service type.";
             extraHtml =
-              '<button onclick="document.getElementById(\'searchInput\').value=\'\'; document.getElementById(\'searchInput\').dispatchEvent(new Event(\'input\'));" class="mt-3 px-4 py-2 rounded-full border border-dashed border-gray-400 text-sm text-gray-400 hover:border-[#8B0000] hover:text-[#8B0000] hover:bg-[#8B0000]/5 transition-all duration-200"><i class="fa-solid fa-xmark mr-1.5 text-xs"></i> Clear search</button>';
+              '<button type="button" id="clearSearchInlineBtn" class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-dashed border-gray-300 text-sm font-bold text-gray-400  hover:bg-[#8B0000]/5 transition-all duration-200"><i class="fa-solid fa-xmark text-xs"></i> Clear search</button>';
           } else if (hasFilters) {
             icon = "fa-sliders";
             title = "No matches for your filters";
             sub = "Try removing or adjusting your filter criteria.";
             extraHtml =
-              '<button id="clearFiltersInline" class="mt-3 px-4 py-2 rounded-xl border border-dashed border-gray-300 text-sm text-gray-400 hover:border-[#8B0000] hover:text-[#8B0000] hover:bg-[#8B0000]/5 transition-all duration-200"><i class="fa-solid fa-xmark mr-1.5 text-xs"></i> Reset</button>';
+              '<button id="clearFiltersInline" class="mt-3 px-4 py-2 rounded-xl border border-dashed border-gray-300 text-sm text-gray-400  hover:bg-[#8B0000]/5 transition-all duration-200"><i class="fa-solid fa-xmark mr-1.5 text-xs"></i> Reset</button>';
           } else {
             var msg = emptyMessages[activeTab] || emptyMessages.all;
             icon = msg.icon;
@@ -2195,17 +1680,36 @@ $notifCount = $notifications->count();
             sub = msg.sub;
           }
 
-          patientContainer.innerHTML =
-            '<div class="col-span-full w-full flex flex-col items-center justify-center py-16 text-center gap-2"><div class="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mb-2"><i class="fa-solid ' +
-            icon +
-            ' text-2xl text-gray-300"></i></div><p class="text-base font-bold text-gray-500">' +
-            title + '</p><p class="text-sm text-gray-400 max-w-xs">' + sub + '</p>' + extraHtml +
-            '</div>';
+          patientContainer.innerHTML = `
+  <div class="empty-state col-span-full w-full">
+    <div class="empty-state-icon">
+      <i class="fa-solid ${icon}"></i>
+    </div>
+
+    <p class="empty-state-title">${title}</p>
+    <p class="empty-state-sub">${sub}</p>
+
+    ${extraHtml}
+  </div>
+`;
 
           var inlineClear = document.getElementById("clearFiltersInline");
           if (inlineClear) {
             inlineClear.onclick = function () {
               if (externalClearFilterBtn) externalClearFilterBtn.click();
+            };
+          }
+
+          var inlineSearchClear = document.getElementById("clearSearchInlineBtn");
+          if (inlineSearchClear) {
+            inlineSearchClear.onclick = function () {
+              if (!searchInput) return;
+
+              searchInput.value = "";
+              searchInput.dispatchEvent(new Event("input", {
+                bubbles: true
+              }));
+              searchInput.focus();
             };
           }
 
@@ -2238,97 +1742,74 @@ $notifCount = $notifications->count();
       }
 
       function applyFilters() {
-        var data = allPatients.slice();
+        showPatientSkeleton();
 
-        if (searchKeyword) {
-          data = data.filter(function (p) {
-            return matchesSearch(p, searchKeyword);
+        window.clearTimeout(window.patientDirectoryFilterTimer);
+        window.patientDirectoryFilterTimer = window.setTimeout(function () {
+
+          var data = allPatients.slice();
+
+          if (searchKeyword) {
+            data = data.filter(function (p) {
+              return matchesSearch(p, searchKeyword);
+            });
+          } else {
+            if (activeTab !== "all") data = data.filter(function (p) {
+              return p.classList.contains(activeTab);
+            });
+
+            if (selectedProgram) data = data.filter(function (p) {
+              return ilike(getInfo(p).program, selectedProgram);
+            });
+            if (selectedYearLevel || selectedSection) data = data.filter(function (p) {
+              var i = getInfo(p);
+              if (selectedYearLevel && !ilike(i.year, selectedYearLevel))
+                return false;
+              if (selectedSection && String(i.section).trim() !== String(
+                selectedSection)
+                .trim()) return false;
+              return true;
+            });
+            if (selectedDepartment) data = data.filter(function (p) {
+              return ilike(getInfo(p).department, selectedDepartment);
+            });
+            if (activeFromDate || activeToDate) data = data.filter(function (p) {
+              var d = new Date(getInfo(p).dateStr);
+              if (isNaN(d.getTime())) return false;
+              if (activeFromDate && d < new Date(activeFromDate)) return false;
+              if (activeToDate && d > new Date(activeToDate)) return false;
+              return true;
+            });
+          }
+
+          if (nameSort === "az") data.sort(function (a, b) {
+            return getName(a).localeCompare(getName(b));
           });
-        } else {
-          if (activeTab !== "all") data = data.filter(function (p) {
-            return p.classList.contains(activeTab);
+          if (nameSort === "za") data.sort(function (a, b) {
+            return getName(b).localeCompare(getName(a));
+          });
+          if (dateSort === "asc") data.sort(function (a, b) {
+            return new Date(getInfo(a).createdAt || getInfo(a).dateStr) - new Date(
+              getInfo(b).createdAt || getInfo(b).dateStr);
           });
 
-          if (selectedProgram) data = data.filter(function (p) {
-            return ilike(getInfo(p).program, selectedProgram);
+          if (dateSort === "desc") data.sort(function (a, b) {
+            return new Date(getInfo(b).createdAt || getInfo(b).dateStr) - new Date(
+              getInfo(a).createdAt || getInfo(a).dateStr);
           });
-          if (selectedYearLevel || selectedSection) data = data.filter(function (p) {
-            var i = getInfo(p);
-            if (selectedYearLevel && !ilike(i.year, selectedYearLevel)) return false;
-            if (selectedSection && String(i.section).trim() !== String(selectedSection)
-              .trim()) return false;
-            return true;
-          });
-          if (selectedDepartment) data = data.filter(function (p) {
-            return ilike(getInfo(p).department, selectedDepartment);
-          });
-          if (activeFromDate || activeToDate) data = data.filter(function (p) {
-            var d = new Date(getInfo(p).dateStr);
-            if (isNaN(d.getTime())) return false;
-            if (activeFromDate && d < new Date(activeFromDate)) return false;
-            if (activeToDate && d > new Date(activeToDate)) return false;
-            return true;
-          });
-        }
 
-        if (nameSort === "az") data.sort(function (a, b) {
-          return getName(a).localeCompare(getName(b));
-        });
-        if (nameSort === "za") data.sort(function (a, b) {
-          return getName(b).localeCompare(getName(a));
-        });
-        if (dateSort === "asc") data.sort(function (a, b) {
-          return new Date(getInfo(a).dateStr) - new Date(getInfo(b).dateStr);
-        });
-        if (dateSort === "desc") data.sort(function (a, b) {
-          return new Date(getInfo(b).dateStr) - new Date(getInfo(a).dateStr);
-        });
+          var rowCountEl = document.getElementById("rowCount");
+          if (rowCountEl) {
+            rowCountEl.textContent = data.length + " " + (data.length === 1 ? "patient" :
+              "patients");
+          }
 
-        var rowCountEl = document.getElementById("rowCount");
-        if (rowCountEl) {
-          rowCountEl.textContent = data.length + " " + (data.length === 1 ? "patient" : "patients");
-        }
-
-        currentPage = 1;
-        renderPagination(data);
-        updatePage();
-        updateCounts();
-        updateFilterButtonState();
-      }
-
-      function computeCount(tab) {
-        var data = allPatients.slice();
-        if (tab !== "all") data = data.filter(function (p) {
-          return p.classList.contains(tab);
-        });
-
-        if (selectedProgram) data = data.filter(function (p) {
-          return ilike(getInfo(p).program, selectedProgram);
-        });
-        if (selectedYearLevel || selectedSection) data = data.filter(function (p) {
-          var i = getInfo(p);
-          if (selectedYearLevel && !ilike(i.year, selectedYearLevel)) return false;
-          if (selectedSection && String(i.section).trim() !== String(selectedSection).trim())
-            return false;
-          return true;
-        });
-        if (selectedDepartment) data = data.filter(function (p) {
-          return ilike(getInfo(p).department, selectedDepartment);
-        });
-        if (activeFromDate || activeToDate) data = data.filter(function (p) {
-          var d = new Date(getInfo(p).dateStr);
-          if (isNaN(d.getTime())) return false;
-          if (activeFromDate && d < new Date(activeFromDate)) return false;
-          if (activeToDate && d > new Date(activeToDate)) return false;
-          return true;
-        });
-        return data.length;
-      }
-
-      function updateCounts() {
-        Object.keys(countEls).forEach(function (tab) {
-          if (countEls[tab]) countEls[tab].textContent = computeCount(tab);
-        });
+          currentPage = 1;
+          renderPagination(data);
+          updatePage();
+          updateFilterButtonState();
+          hidePatientSkeleton();
+        }, 600);
       }
 
       syncMutualExclusion();

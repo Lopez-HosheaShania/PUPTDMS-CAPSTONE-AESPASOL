@@ -1,8 +1,15 @@
 <script>
     let selectedCancelUrl = null;
+    let selectedCancelAppointmentId = null;
+
+    function extractAppointmentIdFromCancelUrl(url) {
+        const match = String(url || '').match(/appointments\/(\d+)/);
+        return match ? match[1] : null;
+    }
 
     function cancelAppointmentFromModal(url, patientName = 'this patient', appointmentDate = '—') {
         selectedCancelUrl = url;
+        selectedCancelAppointmentId = extractAppointmentIdFromCancelUrl(url);
         document.getElementById('cancelPatientName').textContent = patientName;
         document.getElementById('cancelAppointmentDate').textContent = appointmentDate;
         document.querySelectorAll('input[name="cancelReason"]').forEach(r => r.checked = false);
@@ -16,6 +23,7 @@
     function closeCancelAppointmentModal() {
         document.getElementById('cancelAppointmentModal').classList.add('hidden');
         selectedCancelUrl = null;
+        selectedCancelAppointmentId = null;
     }
 
     function handleCancelBackdropClick(e) {
@@ -72,6 +80,9 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
+                if (selectedCancelAppointmentId) {
+                    sessionStorage.setItem(`appointmentCancelReason:${selectedCancelAppointmentId}`, selectedReason);
+                }
                 closeCancelAppointmentModal();
                 if (typeof closeDayAppointmentsModal === 'function') {
                     closeDayAppointmentsModal();

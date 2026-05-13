@@ -391,7 +391,6 @@
         font-size: .8rem;
         cursor: pointer;
         transition: all .15s;
-        font-family: 'Inter', sans-serif;
     }
 
     .terms-cancel-btn:hover {
@@ -409,7 +408,6 @@
         font-size: .8rem;
         cursor: not-allowed;
         transition: all .2s;
-        font-family: 'Inter', sans-serif;
     }
 
     .terms-continue-btn:not(:disabled) {

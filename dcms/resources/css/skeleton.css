@@ -20,6 +20,20 @@
     }
 }
 
+[data-theme="dark"] #mainContent .skeleton-line,
+[data-theme="dark"] #mainContent .skeleton-block,
+[data-theme="dark"] #mainContent .skeleton-pill,
+[data-theme="dark"] #mainContent .skeleton-circle {
+    background: linear-gradient(90deg, #161B22, #1C2128, #161B22) !important;
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 936px 100%;
+    animation: shimmer 1.2s infinite;
+    border-radius: 6px;
+}
+
 .skeleton-line,
 .skeleton-block,
 .skeleton-circle,

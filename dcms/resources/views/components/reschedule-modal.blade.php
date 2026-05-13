@@ -5,7 +5,7 @@
         class="reschedule-modal-panel bg-white w-full sm:max-w-5xl rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col">
 
         <div
-            class="relative bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 px-5 sm:px-6 py-4 border-b border-white/20">
+            class="relative bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 px-5 sm:px-6 py-4">
             <button type="button" onclick="closeRescheduleModal()"
                 class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white/80 hover:text-white flex items-center justify-center transition text-sm">
                 <i class="fa-solid fa-xmark"></i>

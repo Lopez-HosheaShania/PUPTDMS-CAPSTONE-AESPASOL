@@ -1,0 +1,141 @@
+#bookAppointmentPage .cal-time-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 420px) !important;
+    gap: 1.5rem !important;
+    align-items: stretch !important;
+}
+
+#bookAppointmentPage .cal-time-layout>.section-card,
+#bookAppointmentPage .cal-time-layout>.time-panel {
+    height: 100%;
+    align-self: stretch;
+}
+
+#bookAppointmentPage .section-card:has(#calendarSkeletonContainer) {
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+#bookAppointmentPage #calendarSkeletonContainer {
+    min-height: 420px;
+}
+
+#bookAppointmentPage #calendarSkeletonContainer .cal-shell {
+    min-height: 420px;
+}
+
+#bookAppointmentPage .time-panel {
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+}
+
+#bookAppointmentPage #slotContainer {
+    flex: 1 1 auto;
+}
+
+#bookAppointmentPage #slotGrid.slot-grid-ui {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(4, 56px);
+    grid-auto-rows: 56px;
+    grid-auto-flow: column;
+    gap: 0.75rem !important;
+    align-items: stretch;
+}
+
+#bookAppointmentPage #slotGrid.slot-grid-ui .slot-chip {
+    width: 100%;
+    min-height: 56px;
+    height: 56px;
+    border-radius: 16px !important;
+    justify-content: center !important;
+    padding: 0 0.9rem !important;
+}
+
+#bookAppointmentPage #slotPlaceholder {
+    min-height: 300px;
+}
+
+@media (max-width: 767px) {
+    #bookAppointmentPage .cal-time-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    #bookAppointmentPage #slotGrid.slot-grid-ui {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: none !important;
+        grid-auto-flow: row !important;
+    }
+
+    #bookAppointmentPage .time-panel,
+    #bookAppointmentPage #calendarSkeletonContainer,
+    #bookAppointmentPage #calendarSkeletonContainer .cal-shell {
+        min-height: auto;
+    }
+}
+
+#calendarSkeletonContainer {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+[data-theme="dark"] #calendarSkeletonContainer {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] #calendarSkeletonContainer .text-gray-900,
+[data-theme="dark"] #calendarSkeletonContainer .text-gray-800,
+[data-theme="dark"] #calendarSkeletonContainer .text-gray-700 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] #calendarSkeletonContainer .text-gray-600,
+[data-theme="dark"] #calendarSkeletonContainer .text-gray-500 {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] #calendarSkeletonContainer .text-gray-400,
+[data-theme="dark"] #calendarSkeletonContainer .text-gray-300 {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] #calendarSkeletonContainer .bg-green-100,
+[data-theme="dark"] #calendarSkeletonContainer .bg-emerald-100 {
+    background: rgba(16, 185, 129, 0.14) !important;
+    color: #6EE7B7 !important;
+    border-color: rgba(16, 185, 129, 0.22) !important;
+}
+
+[data-theme="dark"] #calendarSkeletonContainer .bg-red-100 {
+    background: rgba(239, 68, 68, 0.14) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(239, 68, 68, 0.22) !important;
+}
+
+[data-theme="dark"] #calendarSkeletonContainer .bg-yellow-100,
+[data-theme="dark"] #calendarSkeletonContainer .bg-amber-100 {
+    background: rgba(245, 158, 11, 0.14) !important;
+    color: #FCD34D !important;
+    border-color: rgba(245, 158, 11, 0.22) !important;
+}
+
+[data-theme="dark"] #calendarSkeletonContainer .bg-gray-100,
+[data-theme="dark"] #calendarSkeletonContainer .bg-slate-100 {
+    background: rgba(255, 255, 255, 0.07) !important;
+    color: var(--text-muted) !important;
+    border-color: var(--border-dark) !important;
+}
+
+[data-theme="dark"] #calendarSkeletonContainer .bg-\[\#8B0000\],
+[data-theme="dark"] #calendarSkeletonContainer .bg-red-700,
+[data-theme="dark"] #calendarSkeletonContainer .bg-red-800 {
+    background: #8B0000 !important;
+    color: #ffffff !important;
+}
