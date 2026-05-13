@@ -1,0 +1,198 @@
+:root {
+    --float-right: 22px;
+    --fab-size: 56px;
+    --back-fab-size: 52px;
+    --fab-gap: 14px;
+
+    --patient-nav-height: 0px;
+    --floating-base-bottom: calc(22px + env(safe-area-inset-bottom));
+
+    --widget-bottom: var(--floating-base-bottom);
+    --chatbot-bottom: var(--widget-bottom);
+    --back-top-bottom: calc(var(--widget-bottom) + var(--fab-size) + var(--fab-gap));
+    --menu-bottom: calc(var(--widget-bottom) + var(--fab-size) + 12px);
+    --bg-main: #000D1A;
+    --bg-card: #0D1117;
+    --bg-card-soft: #111827;
+    --bg-panel: #161B22;
+    --bg-panel-soft: #1C2128;
+    --border-dark: rgba(255, 255, 255, 0.10);
+    --text-primary: #F3F4F6;
+    --text-secondary: #C9D1D9;
+    --text-muted: #8B949E;
+    --brand-red: #8B0000;
+    --brand-red-soft: rgba(139, 0, 0, 0.18);
+
+    --filter-panel-bg: #FFFFFF;
+    --filter-panel-soft-bg: #FAFAFA;
+    --filter-panel-text: #1c1c1c;
+    --filter-panel-muted: #6B7280;
+    --filter-panel-border: #E5E7EB;
+    --filter-panel-divider: #ececec;
+
+    --filter-chip-bg: #FFFFFF;
+    --filter-chip-text: #1c1d1f;
+    --filter-chip-border: #a7a7a7;
+
+    --filter-chip-hover-bg: #daecf8;
+    --filter-chip-hover-text: #660000;
+    --filter-chip-hover-border: rgba(29, 47, 128, 0.421);
+
+    --filter-chip-active-bg: #ffe7e7;
+    --filter-chip-active-text: #8B0000;
+    --filter-chip-active-border: rgba(128, 29, 29, 0.421);
+
+    --filter-input-bg: #FFFFFF;
+    --filter-input-text: #1F2937;
+    --filter-input-placeholder: #9CA3AF;
+    --filter-input-border: #E5E7EB;
+    --filter-input-icon: #6B7280;
+
+    --filter-primary-bg: #8B0000;
+    --filter-primary-bg-hover: #6b0000;
+    --filter-primary-text: #FFFFFF;
+
+    --filter-danger-text: #DC2626;
+
+    --status-all-bg: #EFF6FF;
+    --status-all-text: #1E3A8A;
+    --status-all-border: #93C5FD;
+    --status-all-solid: #1E3A8A;
+    --status-all-soft: rgba(30, 58, 138, 0.14);
+
+    /* Today */
+    --status-today-bg: #EFF6FF;
+    --status-today-text: #1D4ED8;
+    --status-today-border: #BFDBFE;
+    --status-today-solid: #1D4ED8;
+    --status-today-soft: rgba(29, 78, 216, 0.12);
+
+    /* Upcoming */
+    --status-upcoming-bg: #FFF7ED;
+    --status-upcoming-text: #C2410C;
+    --status-upcoming-border: #FED7AA;
+    --status-upcoming-solid: #EA580C;
+    --status-upcoming-soft: rgba(234, 88, 12, 0.13);
+
+    /* Rescheduled */
+    --status-rescheduled-bg: #FEFCE8;
+    --status-rescheduled-text: #92400E;
+    --status-rescheduled-border: #FDE68A;
+    --status-rescheduled-solid: #CA8A04;
+    --status-rescheduled-soft: rgba(202, 138, 4, 0.14);
+
+    /* Completed */
+    --status-completed-bg: #F0FDF4;
+    --status-completed-text: #15803D;
+    --status-completed-border: #BBF7D0;
+    --status-completed-solid: #16A34A;
+    --status-completed-soft: rgba(22, 163, 74, 0.13);
+
+    /* Cancelled */
+    --status-cancelled-bg: #FEF2F2;
+    --status-cancelled-text: #B91C1C;
+    --status-cancelled-border: #FECACA;
+    --status-cancelled-solid: #DC2626;
+    --status-cancelled-soft: rgba(220, 38, 38, 0.12);
+
+    /* Default / Past */
+    --status-default-bg: #F8FAFC;
+    --status-default-text: #64748B;
+    --status-default-border: #CBD5E1;
+    --status-default-solid: #64748B;
+    --status-default-soft: rgba(100, 116, 139, 0.12);
+
+    --crimson: #8B0000;
+    --crimson-dark: #6b0000;
+    --crimson-light: #fef2f2;
+    --crimson-mid: #fce8e8;
+
+    --float-right-final: 22px;
+    --fab-final-size: 46px;
+    --fab-final-gap: 14px;
+    --fab-base-bottom: calc(24px + env(safe-area-inset-bottom));
+    --accessibility-bottom-final: var(--fab-base-bottom);
+    --chatbot-bottom-final: calc(var(--accessibility-bottom-final) + var(--fab-final-size) + var(--fab-final-gap));
+    --back-top-bottom-final: calc(var(--chatbot-bottom-final) + var(--fab-final-size) + var(--fab-final-gap));
+}
+
+[data-theme="dark"],
+.dark {
+    --filter-panel-bg: #121314e5;
+    --filter-panel-text: #F8FAFC;
+    --filter-panel-muted: #C9D1D9;
+    --filter-panel-border: #30363D;
+    --filter-panel-divider: #30363D;
+
+    --filter-chip-bg: #1d1d1e;
+    --filter-chip-text: #e4e8eb;
+    --filter-chip-border: #30363D;
+
+    --filter-chip-hover-bg: #161B22;
+    --filter-chip-hover-text: #FFFFFF;
+    --filter-chip-hover-border: #484F58;
+
+    --filter-chip-active-bg: rgba(139, 0, 0, 0.34);
+    --filter-chip-active-text: #FCA5A5;
+    --filter-chip-active-border: rgba(252, 165, 165, 0.28);
+
+    --filter-input-bg: #0D1117;
+    --filter-input-text: #F8FAFC;
+    --filter-input-border: #30363D;
+    --filter-input-icon: #C9D1D9;
+
+    --filter-primary-bg: #8B0000;
+    --filter-primary-bg-hover: #6b0000;
+    --filter-primary-text: #FFFFFF;
+
+    --filter-danger-text: #F87171;
+
+    --status-all-bg: rgba(30, 58, 138, 0.22);
+    --status-all-text: #93C5FD;
+    --status-all-border: rgba(147, 197, 253, 0.30);
+    --status-all-soft: rgba(30, 58, 138, 0.24);
+
+    --status-today-bg: rgba(37, 99, 235, 0.16);
+    --status-today-text: #93C5FD;
+    --status-today-border: rgba(147, 197, 253, 0.28);
+    --status-today-soft: rgba(37, 99, 235, 0.22);
+
+    --status-upcoming-bg: rgba(234, 88, 12, 0.16);
+    --status-upcoming-text: #FDBA74;
+    --status-upcoming-border: rgba(251, 146, 60, 0.30);
+    --status-upcoming-soft: rgba(234, 88, 12, 0.22);
+
+    --status-rescheduled-bg: rgba(202, 138, 4, 0.18);
+    --status-rescheduled-text: #FDE68A;
+    --status-rescheduled-border: rgba(253, 230, 138, 0.30);
+    --status-rescheduled-soft: rgba(202, 138, 4, 0.24);
+
+    --status-completed-bg: rgba(22, 163, 74, 0.16);
+    --status-completed-text: #86EFAC;
+    --status-completed-border: rgba(134, 239, 172, 0.28);
+    --status-completed-soft: rgba(22, 163, 74, 0.22);
+
+    --status-cancelled-bg: rgba(220, 38, 38, 0.16);
+    --status-cancelled-text: #FCA5A5;
+    --status-cancelled-border: rgba(252, 165, 165, 0.30);
+    --status-cancelled-soft: rgba(220, 38, 38, 0.22);
+
+    --status-default-bg: rgba(100, 116, 139, 0.14);
+    --status-default-text: #CBD5E1;
+    --status-default-border: rgba(203, 213, 225, 0.22);
+    --status-default-soft: rgba(100, 116, 139, 0.20);
+}
+
+@media (max-width: 1199px) {
+    :root {
+        --float-right: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    :root {
+        --float-right-final: 18px;
+        --fab-final-size: 48px;
+        --fab-final-gap: clamp(10px, 1.5vw, 14px);
+    }
+}

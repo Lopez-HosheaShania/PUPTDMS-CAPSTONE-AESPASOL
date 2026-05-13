@@ -39,15 +39,6 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <style>
-        html,
-        body {
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            margin: 0;
-        }
-    </style>
-
     @include('partials.patient.styles')
     @include('partials.terms-styles')
     @include('partials.global-toast-styles')

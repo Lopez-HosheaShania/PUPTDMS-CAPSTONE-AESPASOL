@@ -975,7 +975,659 @@
                 gap: 20px;
             }
         }
-    </style>
+
+
+        /* Report page title/actions aligned with global dentist hero */
+        .report-hero-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .summary-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(139, 0, 0, 0.10);
+            color: #6B7280;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .summary-tag-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        .report-hero-actions {
+            position: relative;
+            z-index: 2;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .report-hero-btn {
+            min-height: 42px;
+            padding: 0 16px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #8B0000;
+            color: #FFFFFF;
+            border: 1px solid rgba(139, 0, 0, 0.18);
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1;
+            box-shadow: 0 12px 26px rgba(139, 0, 0, 0.22);
+            transition: all .18s ease;
+        }
+
+        .report-hero-btn:hover {
+            background: #660000;
+            transform: translateY(-1px);
+            box-shadow: 0 16px 32px rgba(139, 0, 0, 0.26);
+        }
+
+        /* Dashboard-matched dark mode for report content */
+        [data-theme="dark"] #mainContent,
+        .dark #mainContent {
+            background:
+                radial-gradient(circle at 12% 4%, rgba(139, 0, 0, 0.18), transparent 30%),
+                radial-gradient(circle at 88% 12%, rgba(252, 165, 165, 0.08), transparent 28%),
+                #0D1117 !important;
+            color: #F8FAFC !important;
+        }
+
+        [data-theme="dark"] #mainContent .kpi-card,
+        [data-theme="dark"] #mainContent .mini-kpi,
+        [data-theme="dark"] #mainContent .chart-card,
+        [data-theme="dark"] #mainContent .pro-card,
+        [data-theme="dark"] #mainContent .section-card,
+        [data-theme="dark"] #mainContent .inventory-shell,
+        [data-theme="dark"] #mainContent .action-card,
+        .dark #mainContent .kpi-card,
+        .dark #mainContent .mini-kpi,
+        .dark #mainContent .chart-card,
+        .dark #mainContent .pro-card,
+        .dark #mainContent .section-card,
+        .dark #mainContent .inventory-shell,
+        .dark #mainContent .action-card {
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, 0.18), transparent 36%),
+                linear-gradient(145deg, rgba(13, 17, 23, 0.78), rgba(22, 27, 34, 0.66)) !important;
+            border-color: rgba(255, 255, 255, 0.10) !important;
+            box-shadow:
+                0 18px 38px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+            color: #F8FAFC !important;
+        }
+
+        [data-theme="dark"] #mainContent .kpi-card:hover,
+        [data-theme="dark"] #mainContent .action-card:hover,
+        .dark #mainContent .kpi-card:hover,
+        .dark #mainContent .action-card:hover {
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, 0.24), transparent 34%),
+                linear-gradient(145deg, rgba(13, 17, 23, 0.88), rgba(22, 27, 34, 0.78)) !important;
+            border-color: rgba(252, 165, 165, 0.22) !important;
+        }
+
+        [data-theme="dark"] #mainContent .kpi-value,
+        [data-theme="dark"] #mainContent .mini-kpi-value,
+        [data-theme="dark"] #mainContent .chart-title,
+        [data-theme="dark"] #mainContent .service-name,
+        [data-theme="dark"] #mainContent .stock-name,
+        [data-theme="dark"] #mainContent .text-gray-800,
+        [data-theme="dark"] #mainContent .text-gray-700,
+        .dark #mainContent .kpi-value,
+        .dark #mainContent .mini-kpi-value,
+        .dark #mainContent .chart-title,
+        .dark #mainContent .service-name,
+        .dark #mainContent .stock-name,
+        .dark #mainContent .text-gray-800,
+        .dark #mainContent .text-gray-700 {
+            color: #F8FAFC !important;
+        }
+
+        [data-theme="dark"] #mainContent .kpi-label,
+        [data-theme="dark"] #mainContent .mini-kpi-label,
+        [data-theme="dark"] #mainContent .chart-empty p,
+        [data-theme="dark"] #mainContent .chart-empty span,
+        [data-theme="dark"] #mainContent .text-gray-500,
+        [data-theme="dark"] #mainContent .text-gray-400,
+        .dark #mainContent .kpi-label,
+        .dark #mainContent .mini-kpi-label,
+        .dark #mainContent .chart-empty p,
+        .dark #mainContent .chart-empty span,
+        .dark #mainContent .text-gray-500,
+        .dark #mainContent .text-gray-400 {
+            color: #C9D1D9 !important;
+        }
+
+        [data-theme="dark"] #mainContent .analytics-section-label,
+        [data-theme="dark"] #mainContent .chart-title i,
+        .dark #mainContent .analytics-section-label,
+        .dark #mainContent .chart-title i {
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] #mainContent .metric-chip,
+        .dark #mainContent .metric-chip {
+            background: rgba(139, 0, 0, 0.18) !important;
+            border-color: rgba(252, 165, 165, 0.22) !important;
+            color: #FCA5A5 !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+        }
+
+        [data-theme="dark"] #mainContent .period-select,
+        .dark #mainContent .period-select {
+            background-color: rgba(13, 17, 23, 0.78) !important;
+            color: #C9D1D9 !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            box-shadow: none !important;
+        }
+
+        [data-theme="dark"] #mainContent .service-row,
+        [data-theme="dark"] #mainContent .stock-bar-bg,
+        [data-theme="dark"] #mainContent .bg-gray-50,
+        .dark #mainContent .service-row,
+        .dark #mainContent .stock-bar-bg,
+        .dark #mainContent .bg-gray-50 {
+            background: rgba(13, 17, 23, 0.72) !important;
+            border-color: rgba(255, 255, 255, 0.10) !important;
+        }
+
+        [data-theme="dark"] #mainContent .kpi-arrow,
+        [data-theme="dark"] #mainContent .action-icon,
+        .dark #mainContent .kpi-arrow,
+        .dark #mainContent .action-icon {
+            background: rgba(139, 0, 0, 0.18) !important;
+            color: #FCA5A5 !important;
+            border: 1px solid rgba(252, 165, 165, 0.18) !important;
+        }
+
+        [data-theme="dark"] #mainContent .kpi-card:hover .kpi-arrow,
+        [data-theme="dark"] #mainContent .action-card:hover .action-icon,
+        .dark #mainContent .kpi-card:hover .kpi-arrow,
+        .dark #mainContent .action-card:hover .action-icon {
+            background: #8B0000 !important;
+            color: #FFFFFF !important;
+        }
+
+        [data-theme="dark"] #mainContent .chart-empty > i,
+        .dark #mainContent .chart-empty > i {
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] #mainContent .summary-tag,
+        .dark #mainContent .summary-tag {
+            background: rgba(13, 17, 23, 0.70) !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            color: #C9D1D9 !important;
+        }
+
+        [data-theme="dark"] #mainContent .report-hero-btn,
+        .dark #mainContent .report-hero-btn {
+            background: linear-gradient(135deg, #8B0000, #5F0000) !important;
+            border-color: rgba(252, 165, 165, 0.18) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 14px 28px rgba(139, 0, 0, 0.30) !important;
+        }
+
+        [data-theme="dark"] #mainContent .inventory-shell a:not(.chart-empty),
+        .dark #mainContent .inventory-shell a:not(.chart-empty) {
+            background: rgba(139, 0, 0, 0.18) !important;
+            color: #FCA5A5 !important;
+            border: 1px solid rgba(252, 165, 165, 0.18) !important;
+        }
+
+        [data-theme="dark"] .ui-modal .ui-modal-card,
+        .dark .ui-modal .ui-modal-card {
+            background: #161B22 !important;
+            color: #F8FAFC !important;
+            border: 1px solid rgba(255, 255, 255, 0.10) !important;
+            box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55) !important;
+        }
+
+        [data-theme="dark"] .ui-modal label,
+        [data-theme="dark"] .ui-modal .text-\[10px\],
+        .dark .ui-modal label,
+        .dark .ui-modal .text-\[10px\] {
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] .ui-modal input,
+        [data-theme="dark"] .ui-modal select,
+        .dark .ui-modal input,
+        .dark .ui-modal select {
+            background: #0D1117 !important;
+            border-color: #30363D !important;
+            color: #F8FAFC !important;
+        }
+
+        [data-theme="dark"] .ui-modal input::placeholder,
+        .dark .ui-modal input::placeholder {
+            color: #6E7681 !important;
+        }
+
+        [data-theme="dark"] .ui-modal .border-t,
+        .dark .ui-modal .border-t {
+            border-color: #30363D !important;
+        }
+
+        [data-theme="dark"] .ui-modal .bg-gray-50,
+        .dark .ui-modal .bg-gray-50 {
+            background: #111827 !important;
+        }
+
+        [data-theme="dark"] .ui-modal button[class*="border-gray-300"],
+        .dark .ui-modal button[class*="border-gray-300"] {
+            background: #0D1117 !important;
+            border-color: #484F58 !important;
+            color: #C9D1D9 !important;
+        }
+
+        @media (max-width: 767px) {
+            .report-hero-actions {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .report-hero-btn {
+                width: 100%;
+            }
+        }
+    
+        #mainContent.dentist-page-shell {
+            background: #F9FAFB !important;
+        }
+
+        #mainContent .report-hero-meta {
+            margin-top: 12px !important;
+        }
+
+        #mainContent .report-hero-actions {
+            margin-left: 0 !important;
+            align-self: flex-end !important;
+            margin-top: 12px !important;
+        }
+
+        #mainContent .report-hero-btn {
+            min-height: 46px !important;
+            padding: 0 20px !important;
+            border-radius: 15px !important;
+        }
+
+        #mainContent .analytics-section-label,
+        #mainContent .chart-title,
+        #mainContent .quick-report-title {
+            letter-spacing: .08em;
+        }
+
+        #mainContent .chart-card,
+        #mainContent .pro-card,
+        #mainContent .inventory-shell,
+        #mainContent .kpi-card,
+        #mainContent .mini-kpi,
+        #mainContent .action-card {
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, 0.06), transparent 35%),
+                linear-gradient(145deg, #FFFFFF, #FFFDFD) !important;
+            border-color: rgba(139, 0, 0, 0.12) !important;
+            box-shadow:
+                0 14px 34px rgba(15, 23, 42, 0.055),
+                inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+        }
+
+        #mainContent .chart-empty,
+        #mainContent .chart-loading {
+            background: transparent !important;
+            border-radius: 16px !important;
+        }
+
+        #mainContent .chart-empty > i {
+            width: 74px !important;
+            height: 74px !important;
+            border-radius: 22px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin-bottom: 8px !important;
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, 0.12), transparent 42%),
+                linear-gradient(145deg, #FFFFFF, #FFF5F5) !important;
+            border: 1px solid rgba(139, 0, 0, 0.10) !important;
+            box-shadow:
+                0 14px 28px rgba(139, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.80) !important;
+            color: #8B0000 !important;
+            font-size: 30px !important;
+        }
+
+        #mainContent .chart-empty p {
+            color: #4B5563 !important;
+            font-weight: 850 !important;
+        }
+
+        #mainContent .chart-empty span {
+            color: #8B949E !important;
+            font-weight: 600 !important;
+        }
+
+        #mainContent .action-card h4,
+        #mainContent .service-name,
+        #mainContent .stock-name,
+        #mainContent .inventory-shell h3 {
+            color: #111827 !important;
+        }
+
+        #mainContent .action-card p,
+        #mainContent .mini-kpi-label,
+        #mainContent .kpi-label {
+            color: #6B7280 !important;
+        }
+
+        #mainContent .service-row {
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, 0.04), transparent 42%),
+                #FFFFFF !important;
+            border-color: rgba(139, 0, 0, 0.10) !important;
+        }
+
+        #mainContent .inventory-shell .col-span-1.bg-gray-50 {
+            background: rgba(255, 255, 255, 0.74) !important;
+            border: 1px solid rgba(139, 0, 0, 0.10) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72) !important;
+        }
+
+        [data-theme="dark"] #mainContent.dentist-page-shell,
+        .dark #mainContent.dentist-page-shell {
+            background:
+                radial-gradient(circle at 12% 4%, rgba(139, 0, 0, 0.18), transparent 30%),
+                radial-gradient(circle at 88% 12%, rgba(252, 165, 165, 0.08), transparent 28%),
+                #0D1117 !important;
+        }
+
+        [data-theme="dark"] #mainContent .chart-card,
+        [data-theme="dark"] #mainContent .pro-card,
+        [data-theme="dark"] #mainContent .inventory-shell,
+        [data-theme="dark"] #mainContent .kpi-card,
+        [data-theme="dark"] #mainContent .mini-kpi,
+        [data-theme="dark"] #mainContent .action-card,
+        .dark #mainContent .chart-card,
+        .dark #mainContent .pro-card,
+        .dark #mainContent .inventory-shell,
+        .dark #mainContent .kpi-card,
+        .dark #mainContent .mini-kpi,
+        .dark #mainContent .action-card {
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, 0.18), transparent 36%),
+                linear-gradient(145deg, rgba(13, 17, 23, 0.82), rgba(22, 27, 34, 0.70)) !important;
+            border-color: rgba(255, 255, 255, 0.10) !important;
+            box-shadow:
+                0 18px 38px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+            color: #F8FAFC !important;
+        }
+
+        [data-theme="dark"] #mainContent .chart-card canvas,
+        [data-theme="dark"] #mainContent .pro-card canvas,
+        [data-theme="dark"] #mainContent .inventory-shell canvas,
+        .dark #mainContent .chart-card canvas,
+        .dark #mainContent .pro-card canvas,
+        .dark #mainContent .inventory-shell canvas {
+            background: transparent !important;
+        }
+
+        [data-theme="dark"] #mainContent .chart-empty,
+        [data-theme="dark"] #mainContent .chart-loading,
+        .dark #mainContent .chart-empty,
+        .dark #mainContent .chart-loading {
+            background: transparent !important;
+            color: #C9D1D9 !important;
+        }
+
+        [data-theme="dark"] #mainContent .chart-empty > i,
+        .dark #mainContent .chart-empty > i {
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, 0.28), transparent 42%),
+                linear-gradient(145deg, rgba(22, 27, 34, 0.95), rgba(13, 17, 23, 0.92)) !important;
+            color: #FCA5A5 !important;
+            border-color: rgba(252, 165, 165, 0.20) !important;
+            box-shadow:
+                0 18px 36px rgba(0, 0, 0, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+        }
+
+        [data-theme="dark"] #mainContent .chart-empty p,
+        [data-theme="dark"] #mainContent .action-card h4,
+        [data-theme="dark"] #mainContent .service-name,
+        [data-theme="dark"] #mainContent .stock-name,
+        [data-theme="dark"] #mainContent .inventory-shell h3,
+        [data-theme="dark"] #mainContent .text-gray-800,
+        .dark #mainContent .chart-empty p,
+        .dark #mainContent .action-card h4,
+        .dark #mainContent .service-name,
+        .dark #mainContent .stock-name,
+        .dark #mainContent .inventory-shell h3,
+        .dark #mainContent .text-gray-800 {
+            color: #F8FAFC !important;
+        }
+
+        [data-theme="dark"] #mainContent .chart-empty span,
+        [data-theme="dark"] #mainContent .action-card p,
+        [data-theme="dark"] #mainContent .text-gray-400,
+        [data-theme="dark"] #mainContent .text-gray-500,
+        .dark #mainContent .chart-empty span,
+        .dark #mainContent .action-card p,
+        .dark #mainContent .text-gray-400,
+        .dark #mainContent .text-gray-500 {
+            color: #C9D1D9 !important;
+        }
+
+        [data-theme="dark"] #mainContent .service-row,
+        [data-theme="dark"] #mainContent .inventory-shell .col-span-1.bg-gray-50,
+        .dark #mainContent .service-row,
+        .dark #mainContent .inventory-shell .col-span-1.bg-gray-50 {
+            background: rgba(13, 17, 23, 0.72) !important;
+            border-color: rgba(255, 255, 255, 0.10) !important;
+            box-shadow: none !important;
+        }
+
+        [data-theme="dark"] #mainContent .period-select,
+        .dark #mainContent .period-select {
+            background-color: rgba(13, 17, 23, 0.78) !important;
+            color: #C9D1D9 !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+        }
+
+        [data-theme="dark"] #mainContent .action-card:hover,
+        .dark #mainContent .action-card:hover {
+            border-color: rgba(252, 165, 165, 0.25) !important;
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, 0.26), transparent 34%),
+                linear-gradient(145deg, rgba(13, 17, 23, 0.90), rgba(22, 27, 34, 0.80)) !important;
+        }
+
+        [data-theme="dark"] #mainContent .stock-bar-bg,
+        .dark #mainContent .stock-bar-bg {
+            background: #30363D !important;
+        }
+
+        [data-theme="dark"] #mainContent .report-hero-btn,
+        .dark #mainContent .report-hero-btn {
+            background: linear-gradient(135deg, #8B0000, #5F0000) !important;
+            border-color: rgba(252, 165, 165, 0.18) !important;
+            color: #FFFFFF !important;
+        }
+
+        @media (max-width: 767px) {
+
+            #mainContent .report-hero-actions {
+                align-self: stretch !important;
+                width: 100% !important;
+            }
+        }
+
+    #mainContent .report-hero-actions {
+        position: relative !important;
+        z-index: 4 !important;
+        margin-left: auto !important;
+        margin-top: 0 !important;
+        align-self: center !important;
+        flex: 0 0 auto !important;
+        width: auto !important;
+        padding-right: 128px !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+    }
+
+    #mainContent .report-hero-btn {
+        width: auto !important;
+        min-width: 158px !important;
+        white-space: nowrap !important;
+    }
+
+    @media (max-width: 1024px) {
+        #mainContent .report-hero-actions {
+            padding-right: 92px !important;
+        }
+    }
+
+    @media (max-width: 767px) {
+        #mainContent.dentist-page-shell {
+            padding-left: 14px !important;
+            padding-right: 14px !important;
+            padding-bottom: 28px !important;
+        }
+
+        #mainContent .report-hero-meta {
+            margin-top: 12px !important;
+            display: flex !important;
+            gap: 7px !important;
+            width: 100% !important;
+        }
+
+        #mainContent .summary-tag {
+            max-width: 100% !important;
+            font-size: 10px !important;
+            padding: 6px 9px !important;
+            line-height: 1.15 !important;
+        }
+
+        #mainContent .report-hero-actions {
+            width: 100% !important;
+            padding-right: 0 !important;
+            margin: 0 !important;
+            align-self: stretch !important;
+            justify-content: stretch !important;
+        }
+
+        #mainContent .report-hero-btn {
+            width: 100% !important;
+            min-width: 0 !important;
+            min-height: 46px !important;
+            border-radius: 14px !important;
+        }
+
+        #mainContent .analytics-section-label {
+            font-size: 0.72rem !important;
+            line-height: 1.3 !important;
+            margin-bottom: 12px !important;
+        }
+
+        #mainContent .kpi-grid-layout,
+        #mainContent .analytics-subgrid,
+        #mainContent .analytics-main-grid,
+        #mainContent .analytics-secondary-grid {
+            grid-template-columns: 1fr !important;
+            gap: 14px !important;
+            margin-bottom: 22px !important;
+        }
+
+        #mainContent .kpi-card,
+        #mainContent .mini-kpi,
+        #mainContent .chart-card,
+        #mainContent .pro-card,
+        #mainContent .inventory-shell,
+        #mainContent .action-card {
+            border-radius: 18px !important;
+        }
+
+        #mainContent .kpi-card {
+            min-height: 104px !important;
+            padding: 14px !important;
+        }
+
+        #mainContent .mini-kpi {
+            min-height: 92px !important;
+        }
+
+        #mainContent .chart-card-header {
+            gap: 10px !important;
+            align-items: flex-start !important;
+        }
+
+        #mainContent .period-select {
+            max-width: 150px !important;
+            font-size: 0.7rem !important;
+        }
+
+        #mainContent #gadChartWrap,
+        #mainContent #weeklyChartWrap {
+            min-height: 230px !important;
+        }
+
+        #mainContent .relative.h-\[280px\] {
+            height: 240px !important;
+        }
+
+        #mainContent .inventory-shell {
+            padding: 16px !important;
+        }
+
+        #mainContent .inventory-shell .grid {
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+        }
+    }
+
+    @media (max-width: 420px) {
+        #mainContent.dentist-page-shell {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+
+        #mainContent .report-hero-meta {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+
+        #mainContent .summary-tag {
+            width: 100% !important;
+            justify-content: flex-start !important;
+        }
+
+        #mainContent .chart-card,
+        #mainContent .pro-card,
+        #mainContent .inventory-shell {
+            padding: 14px !important;
+        }
+    }
+
+</style>
 @endsection
 
 @section('content')
@@ -996,29 +1648,47 @@
         $topServices = collect($topServices ?? []);
     @endphp
 
-    <main id="mainContent" class="pt-[90px] px-3 md:px-6 py-6 fade-in min-h-screen flex-1">
+    <main id="mainContent" class="dentist-page-shell page-enter">
         <div class="w-full fade-in">
 
-            <div class="analytics-hero">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-                    <div>
-                        <h2 class="text-lg md:text-2xl font-extrabold tracking-tight leading-none">
-                            Reports & Analytics
+            <div class="dentist-hero page-title-row mb-6">
+                <div class="dentist-hero-content">
+                    <div class="dentist-hero-icon">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+
+                    <div class="min-w-0">
+                        <div class="dentist-hero-eyebrow">
+                            <i class="fa-solid fa-tooth"></i>
+                            Clinic Insights
+                        </div>
+
+                        <h2 class="dentist-hero-title">
+                            Reports &amp; Analytics
                         </h2>
-                    </div>
 
-                    <div class="analytics-hero-actions">
-                        <button onclick="document.getElementById('createReportModal').showModal()"
-                            class="analytics-hero-btn">
-                            <i class="fa-solid fa-plus"></i>
-                            Create Report
-                        </button>
-
-                        <span class="text-[12px] text-white/75 font-medium">
-                            <i class="fa-regular fa-clock mr-1"></i>
-                            Last updated: {{ now()->format('M d, Y h:i A') }}
-                        </span>
+                        <div class="report-hero-meta">
+                            <span class="summary-tag">
+                                <span class="summary-tag-dot bg-red-700"></span>
+                                {{ $totalAppointmentsThisMonth ?? 0 }} monthly appointments
+                            </span>
+                            <span class="summary-tag">
+                                <span class="summary-tag-dot bg-green-500"></span>
+                                {{ $completedAppointments ?? 0 }} completed
+                            </span>
+                            <span class="summary-tag">
+                                <span class="summary-tag-dot bg-orange-500"></span>
+                                Updated {{ now()->format('M d, Y h:i A') }}
+                            </span>
+                        </div>
                     </div>
+                </div>
+
+                <div class="report-hero-actions">
+                    <button onclick="openModal('createReportModal')" class="report-hero-btn" type="button">
+                        <i class="fa-solid fa-plus"></i>
+                        Create Report
+                    </button>
                 </div>
             </div>
 
@@ -1145,11 +1815,11 @@
                     </div>
                     <div id="gadChartWrap" class="relative flex-1 min-h-[260px]">
                         <canvas id="gadChart"></canvas>
-                        <div id="gadEmptyState" class="chart-empty hidden absolute inset-0 bg-white">
+                        <div id="gadEmptyState" class="chart-empty hidden absolute inset-0">
                             <i class="fa-solid fa-chart-column"></i>
                             <p>No records found</p><span>for the selected period</span>
                         </div>
-                        <div id="gadLoadingState" class="chart-loading hidden absolute inset-0 bg-white"><i
+                        <div id="gadLoadingState" class="chart-loading hidden absolute inset-0"><i
                                 class="fa-solid fa-spinner"></i></div>
                     </div>
                 </div>
@@ -1165,11 +1835,11 @@
                     </div>
                     <div id="weeklyChartWrap" class="relative flex-1 min-h-[260px]">
                         <canvas id="weeklyDentalCasesChart"></canvas>
-                        <div id="weeklyEmptyState" class="chart-empty hidden absolute inset-0 bg-white">
+                        <div id="weeklyEmptyState" class="chart-empty hidden absolute inset-0">
                             <i class="fa-solid fa-chart-line"></i>
                             <p>No appointment data</p><span>for the selected period</span>
                         </div>
-                        <div id="weeklyLoadingState" class="chart-loading hidden absolute inset-0 bg-white"><i
+                        <div id="weeklyLoadingState" class="chart-loading hidden absolute inset-0"><i
                                 class="fa-solid fa-spinner"></i></div>
                     </div>
                 </div>
@@ -1420,8 +2090,8 @@
         </div>
     </main>
 
-    <dialog id="createReportModal" class="modal">
-        <div class="modal-box max-w-xl p-0 rounded-2xl overflow-hidden bg-white shadow-2xl flex flex-col"
+    <div id="createReportModal" class="ui-modal" onclick="closeModalOnBackdrop(event, 'createReportModal')">
+        <div class="ui-modal-card modal-box max-w-xl p-0 rounded-2xl overflow-hidden bg-white shadow-2xl flex flex-col"
             style="max-height:min(90vh,640px);">
             <div
                 class="bg-gradient-to-r from-[#8B0000] to-[#660000] px-6 py-4 flex items-center justify-between flex-shrink-0">
@@ -1541,11 +2211,10 @@
                 </button>
             </div>
         </div>
-        <form method="dialog" class="modal-backdrop"><button onclick="closeCreateModal()"></button></form>
-    </dialog>
+    </div>
 
-    <dialog id="downloadCompleteModal" class="modal">
-        <div class="modal-box p-0 rounded-2xl overflow-hidden bg-white shadow-2xl max-w-sm">
+    <div id="downloadCompleteModal" class="ui-modal" onclick="closeModalOnBackdrop(event, 'downloadCompleteModal')">
+        <div class="ui-modal-card modal-box p-0 rounded-2xl overflow-hidden bg-white shadow-2xl max-w-sm">
             <div class="h-1.5 bg-gradient-to-r from-[#8B0000] to-[#FFD700] w-full"></div>
             <div class="px-8 py-10 text-center">
                 <div
@@ -1559,8 +2228,7 @@
                     class="px-8 py-2.5 rounded-xl bg-[#8B0000] hover:bg-[#6b0000] text-white font-bold text-sm shadow-sm transition-all w-full">Done</button>
             </div>
         </div>
-        <form method="dialog" class="modal-backdrop"><button onclick="closeDownloadModal()"></button></form>
-    </dialog>
+    </div>
 @endsection
 
 @section('scripts')
@@ -1586,6 +2254,15 @@
         const PIE_COLORS = ['#8B0000', '#b30000', '#cc3333', '#e06666', '#f4cccc', '#d9534f', '#c0392b', '#922b21',
             '#641e16', '#f1948a'
         ];
+        const isReportDark = () => document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark');
+        const reportChartTextColor = () => isReportDark() ? '#C9D1D9' : '#374151';
+        const reportChartGridColor = () => isReportDark() ? 'rgba(255,255,255,0.10)' : 'rgba(148,163,184,0.22)';
+        const reportChartBorderColor = () => isReportDark() ? '#161B22' : '#ffffff';
+
+        if (window.Chart) {
+            Chart.defaults.color = reportChartTextColor();
+            Chart.defaults.borderColor = reportChartGridColor();
+        }
     </script>
 
     <script>
@@ -1607,7 +2284,7 @@
                     datasets: [{
                         data: PATIENT_SEGMENT_DATA.values,
                         backgroundColor: ['#8B0000', '#FCA5A5'],
-                        borderColor: '#fff',
+                        borderColor: reportChartBorderColor(),
                         borderWidth: 3
                     }]
                 },
@@ -1634,7 +2311,7 @@
         }
 
         function closeCreateModal() {
-            document.getElementById('createReportModal').close();
+            closeModal('createReportModal');
             document.getElementById('reportForm').reset();
             document.getElementById('reportNameCounter').textContent = '0 / 100';
             document.getElementById('reportNameCounter').classList.replace('text-red-500', 'text-gray-400');
@@ -1663,7 +2340,7 @@
         }
 
         function closeDownloadModal() {
-            document.getElementById('downloadCompleteModal').close();
+            closeModal('downloadCompleteModal');
         }
 
         let gadChartInstance = null,
@@ -1721,12 +2398,12 @@
                     datasets: [{
                         label: 'Female',
                         data: female,
-                        backgroundColor: '#FFC0CB',
+                        backgroundColor: '#8B0000',
                         borderRadius: 4
                     }, {
                         label: 'Male',
                         data: male,
-                        backgroundColor: '#89CFF0',
+                        backgroundColor: '#FCA5A5',
                         borderRadius: 4
                     }]
                 },
@@ -1756,7 +2433,8 @@
                         x: {
                             beginAtZero: true,
                             grid: {
-                                borderDash: [4, 4]
+                                borderDash: [4, 4],
+                                color: reportChartGridColor()
                             },
                             title: {
                                 display: true,
@@ -1769,7 +2447,8 @@
                         },
                         y: {
                             grid: {
-                                display: false
+                                display: false,
+                                color: reportChartGridColor()
                             },
                             ticks: {
                                 font: {
@@ -1818,7 +2497,8 @@
                     scales: {
                         x: {
                             grid: {
-                                display: false
+                                display: false,
+                                color: reportChartGridColor()
                             },
                             ticks: {
                                 font: {
@@ -1830,7 +2510,8 @@
                         y: {
                             beginAtZero: true,
                             grid: {
-                                borderDash: [4, 4]
+                                borderDash: [4, 4],
+                                color: reportChartGridColor()
                             },
                             ticks: {
                                 precision: 0,
@@ -1858,7 +2539,7 @@
                         data: items.map(i => Math.max(0, i.qty - i.used)),
                         backgroundColor: PIE_COLORS.slice(0, items.length),
                         borderWidth: 2,
-                        borderColor: '#fff'
+                        borderColor: reportChartBorderColor()
                     }]
                 },
                 options: {
@@ -2043,8 +2724,8 @@
                 } else {
                     banner.classList.add('hidden');
                     banner.classList.remove('flex');
-                    document.getElementById('createReportModal').close();
-                    document.getElementById('downloadCompleteModal').showModal();
+                    closeModal('createReportModal');
+                    openModal('downloadCompleteModal');
                     document.getElementById('reportForm').reset();
                     document.getElementById('reportNameCounter').textContent = '0 / 100';
                     document.getElementById('reportNameCounter').classList.remove('text-red-500');

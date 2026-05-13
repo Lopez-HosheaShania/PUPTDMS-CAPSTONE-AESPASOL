@@ -1,0 +1,437 @@
+.cal-legend {
+    gap: .55rem !important;
+}
+
+.cal-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: .42rem !important;
+    padding: .36rem .75rem !important;
+    border-radius: 999px !important;
+    font-size: .72rem !important;
+    font-weight: 750 !important;
+    line-height: 1 !important;
+    border: 1px solid transparent !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+
+.cal-pill i {
+    font-size: .7rem !important;
+}
+
+.cal-pill-green {
+    background: #dff7f2 !important;
+    color: #0f8f7f !important;
+    border-color: #b8eee5 !important;
+}
+
+.cal-pill-red {
+    background: #ffe5e5 !important;
+    color: #dc2626 !important;
+    border-color: #ffc9c9 !important;
+}
+
+.cal-pill-maroon {
+    background: #f4dada !important;
+    color: #8B0000 !important;
+    border-color: #e9b8b8 !important;
+}
+
+.cal-pill-yellow {
+    background: #fff2bd !important;
+    color: #b77900 !important;
+    border-color: #ffe58a !important;
+}
+
+.cal-pill-gray {
+    background: #e5e7eb !important;
+    color: #6b7280 !important;
+    border-color: #d1d5db !important;
+}
+
+[data-theme="dark"] .cal-pill-green {
+    background: rgba(20, 184, 166, .20) !important;
+    color: #5eead4 !important;
+    border-color: rgba(45, 212, 191, .28) !important;
+}
+
+[data-theme="dark"] .cal-pill-red {
+    background: rgba(248, 113, 113, .20) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(248, 113, 113, .28) !important;
+}
+
+[data-theme="dark"] .cal-pill-maroon {
+    background: rgba(139, 0, 0, .45) !important;
+    color: #fecaca !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+}
+
+[data-theme="dark"] .cal-pill-yellow {
+    background: rgba(245, 158, 11, .22) !important;
+    color: #fde68a !important;
+    border-color: rgba(251, 191, 36, .30) !important;
+}
+
+[data-theme="dark"] .cal-pill-gray {
+    background: rgba(148, 163, 184, .18) !important;
+    color: #cbd5e1 !important;
+    border-color: rgba(203, 213, 225, .22) !important;
+}
+
+.cal-shell {
+    width: 100%;
+    min-height: 420px;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+}
+
+[data-theme="dark"] .cal-shell {
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+        rgba(13, 17, 23, 0.76) !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.cal-nav-btn {
+    transition: all 0.18s ease;
+}
+
+.cal-nav-btn:hover {
+    background: #f9e8e8;
+    border-color: #8B0000;
+}
+
+.cal-cell-wrap {
+    height: 50px;
+    min-height: 50px;
+    padding: 2px 0;
+}
+
+.cal-tooltip {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+.cal-cell-wrap:hover .cal-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.cal-day,
+.cal-cell {
+    transition: all 0.18s ease;
+    user-select: none;
+}
+
+.cal-day.today:hover,
+.cal-cell.today:hover {
+    background: #8B0000 !important;
+    color: #fff !important;
+    transform: none;
+}
+
+.cal-day.disabled,
+.cal-cell.disabled {
+    cursor: not-allowed;
+    opacity: 0.58;
+}
+
+.cal-day.selected,
+.cal-cell.selected {
+    background: #8B0000 !important;
+    color: #fff !important;
+    font-weight: 800;
+    box-shadow: 0 2px 12px rgba(139, 0, 0, 0.28);
+}
+
+.cal-cell {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline: auto;
+    position: relative;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #4b5563;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(229, 231, 235, 0.95);
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.18s ease;
+}
+
+.cal-cell:hover:not(.disabled):not(.today):not(.selected):not(.holiday):not(.full) {
+    background: rgba(139, 0, 0, 0.08);
+    border-color: rgba(139, 0, 0, 0.25);
+    color: #8B0000;
+    transform: translateY(-1px);
+}
+
+.cal-cell.holiday {
+    background: #fef3c7 !important;
+    color: #a16207 !important;
+    font-weight: 800;
+}
+
+.cal-cell.full {
+    background: #fef2f2;
+    color: #b91c1c;
+    font-weight: 800;
+}
+
+.cal-cell.disabled {
+    color: #c7c2bd;
+    cursor: not-allowed !important;
+}
+
+.cal-cell.today {
+    background: #8B0000;
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 2px 12px rgba(139, 0, 0, 0.25);
+}
+
+.cal-legend {
+    margin-top: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+}
+
+.cal-legend-item {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+}
+
+[data-theme="dark"] .cal-cell {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #C9D1D9 !important;
+    box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .cal-cell:hover:not(.disabled):not(.today):not(.selected):not(.holiday):not(.full) {
+    background: rgba(139, 0, 0, 0.16) !important;
+    border-color: rgba(252, 165, 165, 0.28) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .cal-cell.today,
+[data-theme="dark"] .cal-cell.selected {
+    background: linear-gradient(135deg, #7A0000, #A31212) !important;
+    color: #ffffff !important;
+    border-color: rgba(252, 165, 165, 0.32) !important;
+    box-shadow: 0 8px 20px rgba(139, 0, 0, 0.28) !important;
+}
+
+[data-theme="dark"] .cal-cell.holiday {
+    background: rgba(245, 158, 11, 0.16) !important;
+    color: #FCD34D !important;
+    border-color: rgba(245, 158, 11, 0.28) !important;
+}
+
+[data-theme="dark"] .cal-cell.full {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(239, 68, 68, 0.28) !important;
+}
+
+[data-theme="dark"] .cal-cell.disabled {
+    background: rgba(255, 255, 255, 0.025) !important;
+    color: #6B7280 !important;
+    border-color: rgba(255, 255, 255, 0.07) !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .cal-legend span {
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.cal-month-label {
+    color: #660000;
+}
+
+.cal-day-label {
+    color: #9e9690;
+}
+
+.cal-day-weekend {
+    color: rgba(139, 0, 0, 0.45);
+}
+
+.cal-shell hr,
+.cal-legend {
+    border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+.day-smart-tooltip {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+[data-theme="dark"] #mainContent section .fa-calendar-xmark,
+.dark #mainContent section .fa-calendar-xmark {
+    color: rgba(252, 165, 165, 0.58) !important;
+}
+
+.group:hover .day-smart-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.day-smart-tooltip.tooltip-center {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(4px);
+}
+
+.group:hover .day-smart-tooltip.tooltip-center {
+    transform: translateX(-50%) translateY(0);
+}
+
+.day-smart-tooltip.tooltip-left {
+    left: auto;
+    right: 0;
+    transform: translateX(0) translateY(4px);
+}
+
+.group:hover .day-smart-tooltip.tooltip-left {
+    transform: translateX(0) translateY(0);
+}
+
+.day-smart-tooltip.tooltip-right {
+    left: 0;
+    right: auto;
+    transform: translateX(0) translateY(4px);
+}
+
+.group:hover .day-smart-tooltip.tooltip-right {
+    transform: translateX(0) translateY(0);
+}
+
+.day-smart-tooltip.tooltip-center>div {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.day-smart-tooltip.tooltip-left>div {
+    right: 0;
+    transform: none;
+}
+
+.day-smart-tooltip.tooltip-right>div {
+    left: 0;
+    transform: none;
+}
+
+.day-smart-tooltip.tooltip-center>div::after {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.day-smart-tooltip.tooltip-left>div::after {
+    right: 18px;
+    left: auto;
+    transform: none;
+}
+
+.day-smart-tooltip.tooltip-right>div::after {
+    left: 18px;
+    right: auto;
+    transform: none;
+}
+
+[data-theme="dark"] .cal-shell hr,
+[data-theme="dark"] .cal-legend {
+    border-color: rgba(203, 213, 225, 0.18) !important;
+}
+
+[data-theme="dark"] .cal-month-label {
+    color: #F3F4F6;
+}
+
+[data-theme="dark"] .cal-day-label {
+    color: #9CA3AF;
+}
+
+[data-theme="dark"] .cal-day-weekend {
+    color: rgba(252, 165, 165, 0.6);
+}
+
+[data-theme="dark"] #mainContent .glass-icon-red,
+[data-theme="dark"] #mainContent .upcoming-tooth-glass,
+[data-theme="dark"] #mainContent .book-appointment-btn {
+    background: linear-gradient(135deg, #5A0000 0%, #8B0000 58%, #A31212 100%) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35) !important;
+}
+
+.cal-grid {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+}
+
+#mainContent #slotGrid .slot-chip.selected,
+#mainContent #slotGrid .slot-chip[aria-pressed="true"],
+#mainContent #slotGrid .slot-chip.bg-\[\#8B0000\] {
+    background: linear-gradient(135deg, #8B0000, #660000) !important;
+    border-color: #8B0000 !important;
+    color: #ffffff !important;
+    box-shadow: 0 16px 34px rgba(139, 0, 0, 0.35) !important;
+}
+
+#mainContent #slotGrid .slot-chip.selected i,
+#mainContent #slotGrid .slot-chip[aria-pressed="true"] i,
+#mainContent #slotGrid .slot-chip.bg-\[\#8B0000\] i {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] #mainContent #slotGrid .slot-chip.selected,
+[data-theme="dark"] #mainContent #slotGrid .slot-chip[aria-pressed="true"],
+[data-theme="dark"] #mainContent #slotGrid .slot-chip.bg-\[\#8B0000\] {
+    background: linear-gradient(135deg, #8B0000, #c1121f) !important;
+    border-color: rgba(252, 165, 165, 0.55) !important;
+    color: #ffffff !important;
+    box-shadow:
+        0 0 0 3px rgba(139, 0, 0, 0.25),
+        0 16px 34px rgba(139, 0, 0, 0.42) !important;
+}
+
+[data-theme="dark"] .inventory-form-modal .form-input-custom[readonly],
+[data-theme="dark"] .inventory-form-modal .fp-date-input[readonly],
+[data-theme="dark"] .inventory-form-modal .form-input-custom.js-flatpickr-date[readonly],
+.dark .inventory-form-modal .form-input-custom[readonly],
+.dark .inventory-form-modal .fp-date-input[readonly],
+.dark .inventory-form-modal .form-input-custom.js-flatpickr-date[readonly] {
+    background: rgba(13, 17, 23, 0.86) !important;
+    color: #E5E7EB !important;
+}

@@ -13,6 +13,7 @@ use App\Models\ClinicSchedule;
 use App\Helpers\PhilippineHolidays;
 use App\Notifications\AppointmentCancelledNotification;
 use App\Notifications\AppointmentRescheduledNotification;
+use App\Models\ServiceType;
 
 class DentistAppointmentController extends Controller
 {
@@ -94,6 +95,11 @@ class DentistAppointmentController extends Controller
 
         $philippineHolidays = PhilippineHolidays::range(0, 1);
 
+        $defaultServiceTypes = ServiceType::where('is_default', true)
+            ->where('is_active_for_booking', true)
+            ->orderBy('name')
+            ->get();
+
         AuditLogger::log(
             'view',
             'dentist_appointments',
@@ -111,7 +117,8 @@ class DentistAppointmentController extends Controller
             'schedules',
             'blockedDates',
             'philippineHolidays',
-            'notifications'
+            'notifications',
+            'defaultServiceTypes'
         ));
     }
 

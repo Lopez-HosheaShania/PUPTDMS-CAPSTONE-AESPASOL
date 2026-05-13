@@ -1,0 +1,130 @@
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #bdbdbd transparent;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+body.role-patient {
+    --patient-nav-height: 92px;
+    --floating-base-bottom: calc(var(--patient-nav-height) + 16px + env(safe-area-inset-bottom));
+    --accessibility-bottom-final: calc(24px + env(safe-area-inset-bottom));
+}
+
+body.role-admin,
+body.role-dentist {
+    --floating-base-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f4f4;
+    overflow-x: hidden;
+}
+
+[data-theme="dark"] * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+[data-theme="dark"] *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.30);
+}
+
+[data-theme="dark"] body,
+.dark body {
+    background-color: #0D1117 !important;
+    color: #E5E7EB !important;
+}
+
+@media (max-width: 640px) {
+
+    body.role-patient {
+        --fab-base-bottom: calc(92px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 767px) {
+    
+    #mainContent {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+}
+
+@media (max-width: 768px) {
+
+    #mainContent h1 {
+        font-size: 1.4rem !important;
+    }
+
+    #mainContent>div>div:first-child {
+        margin-bottom: 1.2rem !important;
+    }
+}
+
+@media (max-width:1023px) and (min-width:768px) {
+
+    #mainContent,
+    #siteFooter {
+        margin-left: 220px;
+    }
+}
+
+[data-theme="dark"] #mainContent,
+.dark #mainContent {
+    background: #0D1117 !important;
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #sidebar {
+    background-color: #111827;
+}
+
+[data-theme="dark"] .bg-white {
+    background-color: #111827 !important;
+}
+
+[data-theme="dark"] .theme-toggle-container {
+    background: #1F1F1F;
+    border-color: #2A2A2A;
+}
+
+[data-theme="dark"] .theme-option {
+    color: #6B7280;
+}
+
+[data-theme="dark"] .theme-option.active {
+    color: #F3F4F6;
+}
+
+[data-theme="dark"] .theme-indicator {
+    background: #2A2A2A;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+}

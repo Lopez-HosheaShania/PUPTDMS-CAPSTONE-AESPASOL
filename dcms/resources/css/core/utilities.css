@@ -1,0 +1,768 @@
+.ui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    transition: all .18s ease;
+}
+
+.ui-btn-primary {
+    background: #8B0000;
+    color: #FFFFFF;
+    border: 1px solid #8B0000;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, 0.22);
+}
+
+.ui-btn-primary:hover {
+    background: #660000;
+    transform: translateY(-1px);
+}
+
+.ui-btn-secondary {
+    background: #FFFFFF;
+    color: #374151;
+    border: 1px solid #D1D5DB;
+}
+
+.ui-btn-secondary:hover {
+    background: #F3F4F6;
+}
+
+.ui-btn-danger {
+    background: #C0392B;
+    color: #FFFFFF;
+    border: 1px solid #C0392B;
+    box-shadow: 0 8px 18px rgba(192, 57, 43, 0.22);
+}
+
+.ui-btn-danger:hover {
+    background: #A93226;
+    transform: translateY(-1px);
+}
+
+.ui-icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    transition: all .18s ease;
+    cursor: pointer;
+}
+
+.ui-icon-btn.edit {
+    background: #FFF0F0;
+    color: #8B0000;
+    border-color: rgba(139, 0, 0, 0.08);
+}
+
+.ui-icon-btn.delete {
+    background: #FFF0F0;
+    color: #C0392B;
+    border-color: rgba(192, 57, 43, 0.10);
+}
+
+.ui-icon-btn.edit:hover {
+    background: #8B0000;
+    color: #FFFFFF;
+    border-color: #8B0000;
+}
+
+.ui-icon-btn.delete:hover {
+    background: #C0392B;
+    color: #FFFFFF;
+    border-color: #C0392B;
+}
+
+.chip-val {
+    background-color: #f3f4f6;
+    color: #374151;
+    font-weight: 500;
+
+    display: inline-flex;
+    align-items: center;
+    margin-top: .45rem;
+    padding: .25rem .75rem;
+    border-radius: 999px;
+    font-size: .76rem;
+}
+
+.char-counter {
+    flex-shrink: 0 !important;
+    color: #9CA3AF !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    font-size: 10px;
+    text-align: right;
+    margin-top: 3px;
+    transition: color .2s;
+}
+
+.char-counter.warn {
+    color: #E65100;
+}
+
+.char-counter.over {
+    color: #C0392B;
+    font-weight: 700;
+}
+
+.field-error {
+    font-size: 10px;
+    font-weight: 600;
+    color: #C0392B;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 14px;
+    animation: errorSlide .15s ease-out;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .22rem .7rem;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.status-badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .7;
+}
+
+.status-pill,
+.status-badge,
+.appointment-status-pill,
+.past-status-pill,
+.patient-status-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    min-height: 28px !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    padding: 0 12px !important;
+    border-radius: 999px !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.01em !important;
+    border: 1px solid var(--status-border, var(--status-default-border)) !important;
+    background: var(--status-bg, var(--status-default-bg)) !important;
+    color: var(--status-text, var(--status-default-text)) !important;
+}
+
+.status-dot,
+.pill-dot,
+.status-badge::before {
+    width: 6px !important;
+    height: 6px !important;
+    min-width: 6px !important;
+    min-height: 6px !important;
+    border-radius: 999px !important;
+    background: currentColor !important;
+    flex-shrink: 0 !important;
+}
+
+.status-badge::before {
+    content: "" !important;
+}
+
+.status-today,
+.pill-today,
+.badge-today {
+    --status-bg: var(--status-today-bg);
+    --status-text: var(--status-today-text);
+    --status-border: var(--status-today-border);
+    --status-solid: var(--status-today-solid);
+    --status-soft: var(--status-today-soft);
+}
+
+.status-upcoming,
+.pill-upcoming,
+.badge-upcoming {
+    --status-bg: var(--status-upcoming-bg);
+    --status-text: var(--status-upcoming-text);
+    --status-border: var(--status-upcoming-border);
+    --status-solid: var(--status-upcoming-solid);
+    --status-soft: var(--status-upcoming-soft);
+}
+
+.status-rescheduled,
+.pill-rescheduled,
+.badge-rescheduled {
+    --status-bg: var(--status-rescheduled-bg);
+    --status-text: var(--status-rescheduled-text);
+    --status-border: var(--status-rescheduled-border);
+    --status-solid: var(--status-rescheduled-solid);
+    --status-soft: var(--status-rescheduled-soft);
+}
+
+.status-completed,
+.pill-completed,
+.badge-completed {
+    --status-bg: var(--status-completed-bg);
+    --status-text: var(--status-completed-text);
+    --status-border: var(--status-completed-border);
+    --status-solid: var(--status-completed-solid);
+    --status-soft: var(--status-completed-soft);
+}
+
+.status-cancelled,
+.pill-cancelled,
+.badge-cancelled {
+    --status-bg: var(--status-cancelled-bg);
+    --status-text: var(--status-cancelled-text);
+    --status-border: var(--status-cancelled-border);
+    --status-solid: var(--status-cancelled-solid);
+    --status-soft: var(--status-cancelled-soft);
+}
+
+.status-default,
+.status-past,
+.pill-default,
+.badge-default {
+    --status-bg: var(--status-default-bg);
+    --status-text: var(--status-default-text);
+    --status-border: var(--status-default-border);
+    --status-solid: var(--status-default-solid);
+    --status-soft: var(--status-default-soft);
+}
+
+.status-accent,
+.accent-bar {
+    background: var(--status-solid, var(--status-default-solid)) !important;
+}
+
+.urgency-chip {
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+    margin-top: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    border: 1px solid var(--status-border, var(--status-default-border));
+    background: var(--status-bg, var(--status-default-bg));
+    color: var(--status-text, var(--status-default-text));
+}
+
+.urgency-today {
+    --status-bg: var(--status-today-bg);
+    --status-text: var(--status-today-text);
+    --status-border: var(--status-today-border);
+}
+
+.urgency-tomorrow {
+    --status-bg: var(--status-upcoming-bg);
+    --status-text: var(--status-upcoming-text);
+    --status-border: var(--status-upcoming-border);
+}
+
+.urgency-upcoming,
+.urgency-past {
+    --status-bg: var(--status-default-bg);
+    --status-text: var(--status-default-text);
+    --status-border: var(--status-default-border);
+}
+
+.s-all::before {
+    background: linear-gradient(90deg, #1E3A8A, #1E40AF) !important;
+}
+
+.s-all .stat-num,
+.s-all .stat-count {
+    color: #1E3A8A !important;
+}
+
+.s-all .stat-icon,
+.s-all .stat-icon-wrapper {
+    background: #EFF6FF !important;
+    color: #1E40AF !important;
+}
+
+/* TODAY - Blue */
+.s-today::before {
+    background: linear-gradient(90deg, #2563EB, #3B82F6) !important;
+}
+
+.s-today .stat-num,
+.s-today .stat-count {
+    color: #2563EB !important;
+}
+
+.s-today .stat-icon,
+.s-today .stat-icon-wrapper {
+    background: #DBEAFE !important;
+    color: #2563EB !important;
+}
+
+/* UPCOMING - Orange */
+.s-upcoming::before,
+.s-scheduled::before {
+    background: linear-gradient(90deg, #EA580C, #F97316) !important;
+}
+
+.s-upcoming .stat-num,
+.s-upcoming .stat-count,
+.s-scheduled .stat-num,
+.s-scheduled .stat-count {
+    color: #EA580C !important;
+}
+
+.s-upcoming .stat-icon,
+.s-upcoming .stat-icon-wrapper,
+.s-scheduled .stat-icon,
+.s-scheduled .stat-icon-wrapper {
+    background: #FFEDD5 !important;
+    color: #EA580C !important;
+}
+
+/* RESCHEDULED - Yellow */
+.s-rescheduled::before {
+    background: linear-gradient(90deg, #CA8A04, #EAB308) !important;
+}
+
+.s-rescheduled .stat-num,
+.s-rescheduled .stat-count {
+    color: #CA8A04 !important;
+}
+
+.s-rescheduled .stat-icon,
+.s-rescheduled .stat-icon-wrapper {
+    background: #FEF9C3 !important;
+    color: #CA8A04 !important;
+}
+
+/* CANCELLED - Red */
+.s-cancelled::before {
+    background: linear-gradient(90deg, #DC2626, #EF4444) !important;
+}
+
+.s-cancelled .stat-num,
+.s-cancelled .stat-count {
+    color: #DC2626 !important;
+}
+
+.s-cancelled .stat-icon,
+.s-cancelled .stat-icon-wrapper {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+}
+
+/* COMPLETED - Green */
+.s-completed::before {
+    background: linear-gradient(90deg, #16A34A, #22C55E) !important;
+}
+
+.s-completed .stat-num,
+.s-completed .stat-count {
+    color: #16A34A !important;
+}
+
+.s-completed .stat-icon,
+.s-completed .stat-icon-wrapper {
+    background: #DCFCE7 !important;
+    color: #16A34A !important;
+}
+
+.s-total::before,
+.s-all::before {
+    background: linear-gradient(90deg, #660000, #8B0000);
+}
+
+.s-total .stat-value,
+.s-all .stat-num,
+.s-all .stat-count {
+    color: #8B0000;
+}
+
+.s-total .stat-icon,
+.s-all .stat-icon {
+    background: rgba(139, 0, 0, 0.1);
+    color: #8B0000;
+}
+
+.s-medicine::before,
+.s-pending::before,
+.s-scheduled::before {
+    background: linear-gradient(90deg, #1E88E5, #1565C0);
+}
+
+.s-medicine .stat-value,
+.s-pending .stat-num,
+.s-scheduled .stat-count {
+    color: #1565C0;
+}
+
+.s-medicine .stat-icon,
+.s-pending .stat-icon,
+.s-scheduled .stat-icon {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+
+.s-supplies::before,
+.s-approved::before,
+.s-completed::before {
+    background: linear-gradient(90deg, #388E3C, #1B5E20);
+}
+
+.s-supplies .stat-value,
+.s-approved .stat-num,
+.s-completed .stat-count {
+    color: #1B5E20;
+}
+
+.s-supplies .stat-icon,
+.s-approved .stat-icon,
+.s-completed .stat-icon {
+    background: #F0FDF4;
+    color: #16A34A;
+}
+
+.s-low::before,
+.s-upcoming::before {
+    background: linear-gradient(90deg, #E64A19, #BF360C);
+}
+
+.s-low .stat-value,
+.s-upcoming .stat-count {
+    color: #BF360C;
+}
+
+.s-low .stat-icon,
+.s-upcoming .stat-icon {
+    background: #FFF7ED;
+    color: #EA580C;
+}
+
+.s-rescheduled::before {
+    background: linear-gradient(90deg, #ca8a04, #a16207);
+}
+
+.s-rescheduled .stat-count {
+    color: #a16207;
+}
+
+.s-rescheduled .stat-icon {
+    background: #fefce8;
+    color: #ca8a04;
+}
+
+.s-rejected::before,
+.s-cancelled::before {
+    background: linear-gradient(90deg, #E53935, #B71C1C);
+}
+
+.s-rejected .stat-num,
+.s-cancelled .stat-count {
+    color: #B71C1C;
+}
+
+.s-rejected .stat-icon,
+.s-cancelled .stat-icon {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.accent-today {
+    --status-solid: var(--status-today-solid);
+}
+
+.accent-upcoming {
+    --status-solid: var(--status-upcoming-solid);
+}
+
+.accent-rescheduled {
+    --status-solid: var(--status-rescheduled-solid);
+}
+
+.accent-completed {
+    --status-solid: var(--status-completed-solid);
+}
+
+.accent-cancelled {
+    --status-solid: var(--status-cancelled-solid);
+}
+
+.accent-default {
+    --status-solid: var(--status-default-solid);
+}
+
+.is-today {
+    --status-bg: var(--status-today-bg);
+    --status-text: var(--status-today-text);
+    --status-border: var(--status-today-border);
+    --status-solid: var(--status-today-solid);
+    --status-soft: var(--status-today-soft);
+}
+
+#mainContent #statCards .s-all {
+    --stat-accent: var(--status-all-solid);
+    --stat-soft: var(--status-all-soft);
+    --stat-active-bg: var(--status-all-bg);
+    --stat-active-border: var(--status-all-border);
+}
+
+#mainContent #statCards .s-today {
+    --stat-accent: var(--status-today-solid);
+    --stat-soft: var(--status-today-soft);
+    --stat-active-bg: var(--status-today-bg);
+    --stat-active-border: var(--status-today-border);
+}
+
+#mainContent #statCards .s-upcoming,
+#mainContent #statCards .s-scheduled {
+    --stat-accent: var(--status-upcoming-solid);
+    --stat-soft: var(--status-upcoming-soft);
+    --stat-active-bg: var(--status-upcoming-bg);
+    --stat-active-border: var(--status-upcoming-border);
+}
+
+#mainContent #statCards .s-rescheduled {
+    --stat-accent: var(--status-rescheduled-solid);
+    --stat-soft: var(--status-rescheduled-soft);
+    --stat-active-bg: var(--status-rescheduled-bg);
+    --stat-active-border: var(--status-rescheduled-border);
+}
+
+#mainContent #statCards .s-completed,
+#mainContent #statCards .s-approved {
+    --stat-accent: var(--status-completed-solid);
+    --stat-soft: var(--status-completed-soft);
+    --stat-active-bg: var(--status-completed-bg);
+    --stat-active-border: var(--status-completed-border);
+}
+
+#mainContent #statCards .s-cancelled,
+#mainContent #statCards .s-rejected {
+    --stat-accent: var(--status-cancelled-solid);
+    --stat-soft: var(--status-cancelled-soft);
+    --stat-active-bg: var(--status-cancelled-bg);
+    --stat-active-border: var(--status-cancelled-border);
+}
+
+/* DARK MODE ICON COLORS */
+[data-theme="dark"] .s-all .stat-icon,
+[data-theme="dark"] .s-all .stat-icon-wrapper,
+.dark .s-all .stat-icon,
+.dark .s-all .stat-icon-wrapper {
+    color: #93C5FD !important;
+    background: rgba(30, 58, 138, 0.40) !important;
+}
+
+[data-theme="dark"] .s-today .stat-icon,
+[data-theme="dark"] .s-today .stat-icon-wrapper,
+.dark .s-today .stat-icon,
+.dark .s-today .stat-icon-wrapper {
+    color: #60A5FA !important;
+    background: rgba(37, 99, 235, 0.40) !important;
+}
+
+[data-theme="dark"] .s-upcoming .stat-icon,
+[data-theme="dark"] .s-upcoming .stat-icon-wrapper,
+[data-theme="dark"] .s-scheduled .stat-icon,
+[data-theme="dark"] .s-scheduled .stat-icon-wrapper,
+.dark .s-upcoming .stat-icon,
+.dark .s-upcoming .stat-icon-wrapper,
+.dark .s-scheduled .stat-icon,
+.dark .s-scheduled .stat-icon-wrapper {
+    color: #FB923C !important;
+    background: rgba(234, 88, 12, 0.40) !important;
+}
+
+[data-theme="dark"] .s-rescheduled .stat-icon,
+[data-theme="dark"] .s-rescheduled .stat-icon-wrapper,
+.dark .s-rescheduled .stat-icon,
+.dark .s-rescheduled .stat-icon-wrapper {
+    color: #FDE047 !important;
+    background: rgba(202, 138, 4, 0.40) !important;
+}
+
+[data-theme="dark"] .s-cancelled .stat-icon,
+[data-theme="dark"] .s-cancelled .stat-icon-wrapper,
+.dark .s-cancelled .stat-icon,
+.dark .s-cancelled .stat-icon-wrapper {
+    color: #F87171 !important;
+    background: rgba(220, 38, 38, 0.40) !important;
+}
+
+[data-theme="dark"] .s-completed .stat-icon,
+[data-theme="dark"] .s-completed .stat-icon-wrapper,
+.dark .s-completed .stat-icon,
+.dark .s-completed .stat-icon-wrapper {
+    color: #4ADE80 !important;
+    background: rgba(22, 163, 74, 0.40) !important;
+}
+
+[data-theme="dark"] #mainContent .status-dot-all,
+.dark #mainContent .status-dot-all {
+    color: #93C5FD !important;
+}
+
+[data-theme="dark"] #mainContent .status-dot-pending,
+.dark #mainContent .status-dot-pending {
+    color: #FB923C !important;
+}
+
+[data-theme="dark"] #mainContent .status-dot-approved,
+.dark #mainContent .status-dot-approved {
+    color: #4ADE80 !important;
+}
+
+[data-theme="dark"] #mainContent .status-dot-rejected,
+.dark #mainContent .status-dot-rejected {
+    color: #F87171 !important;
+}
+
+[data-theme="dark"] #mainContent .status-completed,
+.dark #mainContent .status-completed {
+    background: rgba(22, 163, 74, 0.16) !important;
+    color: #86EFAC !important;
+    border-color: rgba(134, 239, 172, 0.24) !important;
+}
+
+[data-theme="dark"] #mainContent .status-cancelled,
+.dark #mainContent .status-cancelled {
+    background: rgba(220, 38, 38, 0.16) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, 0.26) !important;
+}
+
+[data-theme="dark"] #mainContent .status-past,
+.dark #mainContent .status-past {
+    background: rgba(148, 163, 184, 0.12) !important;
+    color: #CBD5E1 !important;
+    border-color: rgba(203, 213, 225, 0.18) !important;
+}
+
+[data-theme="dark"] #mainContent .status-upcoming,
+.dark #mainContent .status-upcoming {
+    background: rgba(245, 158, 11, 0.16) !important;
+    color: #FCD34D !important;
+    border-color: rgba(252, 211, 77, 0.28) !important;
+}
+
+[data-theme="dark"] .status-badge {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .char-counter,
+.dark .char-counter {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .char-counter.warn,
+.dark .char-counter.warn {
+    color: #FCD34D !important;
+}
+
+[data-theme="dark"] .char-counter.over,
+.dark .char-counter.over {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .chip-val {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .ui-btn-secondary,
+.dark .ui-btn-secondary {
+    background: #161B22 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .ui-icon-btn.edit,
+.dark .ui-icon-btn.edit {
+    background: rgba(139, 0, 0, 0.22) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, 0.26) !important;
+}
+
+[data-theme="dark"] .ui-icon-btn.delete,
+.dark .ui-icon-btn.delete {
+    background: rgba(192, 57, 43, 0.22) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, 0.26) !important;
+}
+
+@media (max-width: 480px) {
+    .char-counter {
+        font-size: 9px;
+    }
+
+    .field-error {
+        font-size: 9.5px;
+        min-height: 12px;
+    }
+}
+
+.auth-theme-toggle {
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(229, 231, 235, 0.95);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    background: rgba(255, 255, 255, 0.68);
+    color: #8B0000;
+    box-shadow: 0 10px 24px rgba(139, 0, 0, 0.08);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.auth-theme-toggle:hover {
+    transform: translateY(-1px);
+    border-color: rgba(139, 0, 0, 0.28);
+    box-shadow: 0 14px 28px rgba(139, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .auth-theme-toggle {
+    background: rgba(13, 17, 23, 0.82);
+    border-color: rgba(255, 255, 255, 0.10);
+    color: #F3F4F6;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme="dark"] .auth-theme-toggle:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+}
+
+@media (max-width: 768px) {
+    .auth-theme-toggle {
+        width: 40px;
+        height: 40px;
+    }
+}

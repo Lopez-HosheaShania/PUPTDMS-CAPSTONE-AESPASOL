@@ -1,0 +1,802 @@
+.dentist-page-shell {
+    padding: 90px 0.75rem 1.25rem;
+    min-height: 100vh;
+    flex: 1 1 auto;
+    background: #F9FAFB;
+    color: #111827;
+}
+
+@media (min-width: 768px) {
+    .dentist-page-shell {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}
+
+@media (min-width: 1280px) {
+    .dentist-page-shell {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+[data-theme="dark"] .dentist-page-shell,
+.dark .dentist-page-shell {
+    background: #0D1117 !important;
+    color: #F3F4F6 !important;
+}
+
+@media (max-width: 767px) {
+    #mainContent .table-card {
+        border-radius: 20px !important;
+        overflow: visible !important;
+        margin-top: 0 !important;
+    }
+
+    #mainContent .table-card>div:first-child {
+        border-radius: 20px 20px 0 0 !important;
+    }
+
+    .dentist-hero {
+        padding: 18px 16px;
+        border-radius: 20px;
+    }
+
+    .dentist-hero-content {
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    .dentist-hero-left {
+        gap: 12px;
+    }
+
+    .dentist-hero-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 15px;
+    }
+
+    .dentist-hero-title {
+        font-size: 1.25rem;
+    }
+
+    .dentist-hero-date {
+        font-size: 0.76rem;
+    }
+
+    .dentist-hero-actions {
+        width: 100%;
+        align-items: stretch;
+    }
+
+    .dentist-hero-actions .tab-toggle-wrap {
+        width: 100%;
+    }
+
+    .dentist-hero-actions .tab-btn-toggle {
+        flex: 1;
+        justify-content: center;
+    }
+
+    #mainContent .dentist-hero {
+        overflow: visible !important;
+    }
+
+    #mainContent .dentist-hero-content {
+        width: 100% !important;
+        min-width: 0 !important;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+    }
+
+    #mainContent .dentist-hero-eyebrow {
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        line-height: 1.25 !important;
+        letter-spacing: 0.10em !important;
+    }
+
+    #mainContent .dentist-hero-title,
+    #mainContent h1 {
+        overflow: visible !important;
+        text-overflow: clip !important;
+        line-height: 1.16 !important;
+        letter-spacing: -0.035em !important;
+        padding-left: 2px !important;
+        padding-right: 4px !important;
+        padding-top: 2px !important;
+        padding-bottom: 4px !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent .dentist-hero {
+        overflow: hidden !important;
+    }
+
+    #mainContent .dentist-hero-content {
+        width: 100% !important;
+        min-width: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    #mainContent .dentist-hero-left {
+        display: grid !important;
+        grid-template-columns: 48px minmax(0, 1fr) !important;
+        column-gap: 12px !important;
+        row-gap: 10px !important;
+        align-items: center !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent .dentist-hero-left .dentist-hero-icon {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+    }
+
+    #mainContent .dentist-hero-left>.min-w-0 {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    #mainContent .dentist-hero-summary {
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 5px !important;
+
+        margin-top: 0 !important;
+        overflow: visible !important;
+    }
+}
+
+.dentist-hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    padding-right: 122px;
+}
+
+.dentist-hero-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #8B0000, #B91C1C);
+    color: #ffffff;
+    box-shadow:
+        0 14px 26px rgba(139, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.dentist-hero-icon i {
+    font-size: 20px;
+    line-height: 1;
+    color: currentColor;
+}
+
+.dentist-hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 5px;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8B0000;
+}
+
+.dentist-hero-title {
+    margin: 0;
+    color: #8B0000;
+    font-size: 32px;
+    line-height: 1.02;
+    font-weight: 850;
+    letter-spacing: -0.05em;
+}
+
+[data-theme="dark"] .dentist-hero,
+.dark .dentist-hero {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.30), transparent 34%),
+        radial-gradient(circle at 88% 16%, rgba(252, 165, 165, 0.08), transparent 28%),
+        linear-gradient(135deg, rgba(13, 17, 23, 0.86), rgba(22, 27, 34, 0.76)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="dark"] .dentist-hero-title,
+.dark .dentist-hero-title {
+    background: linear-gradient(90deg, #FCA5A5 0%, #F87171 45%, #B91C1C 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+}
+
+[data-theme="dark"] .dentist-hero-eyebrow,
+.dark .dentist-hero-eyebrow {
+    color: #FCA5A5 !important;
+}
+
+@media (max-width:380px) {
+
+    .stat-card {
+        padding: .85rem .9rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .dentist-hero {
+        min-height: auto;
+        padding: 18px 16px;
+        border-radius: 20px;
+        align-items: flex-start;
+    }
+
+    .dentist-hero-content {
+        width: 100%;
+        gap: 12px;
+        padding-right: 0 !important;
+        align-items: flex-start;
+        flex-direction: row !important;
+    }
+
+    .dentist-hero-left {
+        width: 100%;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        min-width: 0;
+    }
+
+    .dentist-hero-icon {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        border-radius: 15px;
+        flex-shrink: 0;
+    }
+
+    .dentist-hero-eyebrow {
+        margin-bottom: 6px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        white-space: nowrap !important;
+        font-size: 10px !important;
+        line-height: 1 !important;
+    }
+
+    .dentist-hero-title {
+        font-size: 1.20rem;
+        line-height: 1.08;
+    }
+}
+
+.dentist-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    padding: 24px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    background:
+        radial-gradient(circle at 10% 10%, rgba(139, 0, 0, 0.16), transparent 34%),
+        radial-gradient(circle at 90% 12%, rgba(139, 0, 0, 0.06), transparent 28%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 248, 248, 0.92));
+    border: 1px solid rgba(139, 0, 0, 0.10);
+    box-shadow:
+        0 16px 38px rgba(139, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+[data-theme="dark"] #mainContent .dentist-hero,
+.dark #mainContent .dentist-hero {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.30), transparent 34%),
+        radial-gradient(circle at 88% 16%, rgba(252, 165, 165, 0.08), transparent 28%),
+        linear-gradient(135deg, rgba(13, 17, 23, 0.86), rgba(22, 27, 34, 0.76)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+    backdrop-filter: blur(18px) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+}
+
+[data-theme="dark"] #mainContent .dentist-hero-icon,
+.dark #mainContent .dentist-hero-icon {
+    background: linear-gradient(135deg, #8B0000, #5F0000) !important;
+    border: 1px solid rgba(252, 165, 165, 0.18);
+    box-shadow:
+        0 10px 26px rgba(139, 0, 0, 0.34),
+        0 0 18px rgba(252, 165, 165, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] #mainContent .dentist-hero-title,
+.dark #mainContent .dentist-hero-title {
+    background: linear-gradient(90deg,
+            #FCA5A5 0%,
+            #F87171 45%,
+            #B91C1C 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    text-shadow: none !important;
+}
+
+[data-theme="dark"] #mainContent .dentist-hero-eyebrow,
+.dark #mainContent .dentist-hero-eyebrow {
+    color: #FCA5A5 !important;
+}
+
+.dentist-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+[data-theme="dark"] #mainContent .dentist-hero-date,
+.dark #mainContent .dentist-hero-date {
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] #mainContent .dentist-hero-date i,
+.dark #mainContent .dentist-hero-date i {
+    color: #FACC15 !important;
+}
+
+[data-theme="dark"] #mainContent .dentist-hero .tab-toggle-wrap,
+.dark #mainContent .dentist-hero .tab-toggle-wrap {
+    background: rgba(13, 17, 23, 0.70) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] #mainContent .dentist-hero .tab-btn-toggle.active .tab-count-badge,
+.dark #mainContent .dentist-hero .tab-btn-toggle.active .tab-count-badge {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #FFFFFF !important;
+}
+
+#mainContent #statCards {
+    gap: 14px !important;
+    align-items: stretch !important;
+}
+
+@media (max-width:380px) {
+    #statCards {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: .5rem !important;
+    }
+}
+
+@media (max-width:1023px) and (min-width:768px) {
+
+    #statCards {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+#mainContent #statCards .stat-card {
+    min-height: 100px !important;
+    padding: 20px 26px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 18px !important;
+    border-radius: 16px !important;
+}
+
+#mainContent #statCards .stat-card-info {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    text-align: left !important;
+    gap: 7px !important;
+    min-width: 0 !important;
+}
+
+#mainContent #statCards .stat-num {
+    font-size: 32px !important;
+    line-height: .9 !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.04em !important;
+    text-align: left !important;
+}
+
+#mainContent #statCards .stat-label {
+    font-size: 10px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: .09em !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+
+#mainContent #statCards .stat-icon,
+#mainContent #statCards .stat-icon-wrapper {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    min-height: 46px !important;
+    border-radius: 13px !important;
+    font-size: 16px !important;
+    flex: 0 0 46px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#mainContent #statCards .stat-card {
+    --stat-accent: var(--status-default-solid);
+    --stat-soft: var(--status-default-soft);
+    --stat-active-bg: var(--status-default-bg);
+    --stat-active-border: var(--status-default-border);
+}
+
+@media (max-width: 767px) {
+    #mainContent #statCards {
+        gap: 10px !important;
+    }
+
+    #mainContent #statCards .stat-card {
+        min-height: 82px !important;
+        padding: 14px !important;
+        gap: 10px !important;
+        border-radius: 14px !important;
+    }
+
+    #mainContent #statCards .stat-icon,
+    #mainContent #statCards .stat-icon-wrapper {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        flex-basis: 36px !important;
+        border-radius: 11px !important;
+        font-size: 13px !important;
+    }
+
+    #mainContent #statCards .stat-num {
+        font-size: 26px !important;
+    }
+
+    #mainContent #statCards .stat-label {
+        font-size: 8.5px !important;
+        letter-spacing: .06em !important;
+        white-space: normal !important;
+    }
+}
+
+.stat-card {
+    position: relative !important;
+    background: #ffffff !important;
+    border: 1.5px solid #E5E7EB !important;
+    border-radius: 16px !important;
+    padding: 14px 12px 12px !important;
+    min-height: 104px !important;
+    overflow: hidden !important;
+}
+
+.stat-card .stat-icon-wrapper {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    order: -1;
+    margin-bottom: 4px;
+}
+
+.stat-card[data-filter="all"] .stat-icon,
+.stat-card[data-filter="all"] .stat-icon-wrapper {
+    background: #E0E7FF !important;
+    color: #2563EB !important;
+}
+
+.stat-card[data-filter="pending"] .stat-icon,
+.stat-card[data-filter="pending"] .stat-icon-wrapper {
+    background: #FFF7ED !important;
+    color: #F97316 !important;
+    border: 1px solid #FED7AA !important;
+}
+
+.stat-card[data-filter="approved"] .stat-icon,
+.stat-card[data-filter="approved"] .stat-icon-wrapper {
+    background: #DCFCE7 !important;
+    color: #16A34A !important;
+    border: 1px solid #86EFAC !important;
+}
+
+.stat-card[data-filter="rejected"] .stat-icon,
+.stat-card[data-filter="rejected"] .stat-icon-wrapper {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border: 1px solid #FCA5A5 !important;
+}
+
+[data-theme="dark"] .stat-card,
+.dark .stat-card {
+    background: #111827 !important;
+    border-color: #30363D !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+}
+
+[data-theme="dark"] .stat-card[data-filter="all"] .stat-icon,
+[data-theme="dark"] .stat-card[data-filter="all"] .stat-icon-wrapper,
+.dark .stat-card[data-filter="all"] .stat-icon,
+.dark .stat-card[data-filter="all"] .stat-icon-wrapper {
+    background: #E0E7FF !important;
+    color: #2563EB !important;
+}
+
+[data-theme="dark"] .stat-card[data-filter="pending"] .stat-icon,
+[data-theme="dark"] .stat-card[data-filter="pending"] .stat-icon-wrapper,
+.dark .stat-card[data-filter="pending"] .stat-icon,
+.dark .stat-card[data-filter="pending"] .stat-icon-wrapper {
+    background: #FFF7ED !important;
+    color: #F97316 !important;
+    border: 1px solid #FED7AA !important;
+}
+
+[data-theme="dark"] .stat-card[data-filter="approved"] .stat-icon,
+[data-theme="dark"] .stat-card[data-filter="approved"] .stat-icon-wrapper,
+.dark .stat-card[data-filter="approved"] .stat-icon,
+.dark .stat-card[data-filter="approved"] .stat-icon-wrapper {
+    background: #DCFCE7 !important;
+    color: #16A34A !important;
+    border: 1px solid #86EFAC !important;
+}
+
+[data-theme="dark"] .stat-card[data-filter="rejected"] .stat-icon,
+[data-theme="dark"] .stat-card[data-filter="rejected"] .stat-icon-wrapper,
+.dark .stat-card[data-filter="rejected"] .stat-icon,
+.dark .stat-card[data-filter="rejected"] .stat-icon-wrapper {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border: 1px solid #FCA5A5 !important;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 16px;
+    border: 1px solid #E8E4DE;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .09);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #E8E4DE;
+    border-radius: 16px 16px 0 0;
+    transition: background .2s;
+}
+
+.stat-card-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: #9A9490;
+    margin-bottom: 6px;
+}
+
+.stat-value,
+.stat-num,
+.stat-count {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    color: #1F2937;
+}
+
+.stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.stat-footer {
+    font-size: 10px;
+    color: #ADA9A5;
+    margin-top: 6px;
+}
+
+[data-theme="dark"] .stat-card,
+.dark .stat-card {
+    background: #161B22 !important;
+    border-color: #30363D !important;
+}
+
+[data-theme="dark"] .stat-label,
+.dark .stat-label {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .stat-num,
+[data-theme="dark"] .stat-count,
+.dark .stat-value,
+.dark .stat-num,
+.dark .stat-count {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .stat-icon,
+.dark .stat-icon {
+    background: #30363D !important;
+    color: inherit !important;
+}
+
+.view-toggle-container {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #f9eaea;
+    box-shadow: 0 2px 10px rgba(139, 0, 0, 0.04);
+    position: relative;
+}
+
+[data-theme="dark"] .view-toggle-container,
+.dark .view-toggle-container {
+    background: rgba(13, 17, 23, 0.70) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+.view-slider {
+    position: absolute !important;
+    top: 4px !important;
+    left: 4px !important;
+    width: 36px !important;
+    height: 36px !important;
+    background: #8B0000 !important;
+    border-radius: 10px !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 1 !important;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, 0.25) !important;
+}
+
+#mainContent.mode-list .view-slider {
+    transform: translateX(0) !important;
+}
+
+#mainContent.mode-grid .view-slider {
+    transform: translateX(40px) !important;
+}
+
+.btn-view-mode {
+    width: 37px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #9CA3AF !important;
+    transition: color 0.3s ease !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 2 !important;
+    box-shadow: none !important;
+}
+
+.btn-view-mode:hover:not(.active) {
+    color: #8B0000 !important;
+    background: transparent !important;
+}
+
+.btn-view-mode.active {
+    color: #FFFFFF !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .btn-view-mode,
+.dark .btn-view-mode {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] .btn-view-mode.active,
+.dark .btn-view-mode.active {
+    color: #FFFFFF !important;
+}
+
+.table-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #F0F6FC;
+    overflow: hidden;
+}
+
+.table-card>div:first-child {
+    position: relative;
+    z-index: 2;
+}
+
+[data-theme="dark"] .table-card,
+.dark .table-card {
+    background: #161B22 !important;
+    border-color: #30363D !important;
+}
+
+[data-theme="dark"] .table-card>div:first-child,
+.dark .table-card>div:first-child {
+    background: #161B22 !important;
+    border-bottom-color: #30363D !important;
+}

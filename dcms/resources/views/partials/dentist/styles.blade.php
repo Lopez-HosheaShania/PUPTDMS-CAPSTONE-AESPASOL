@@ -70,7 +70,6 @@
 
     .voice-input-wrap>textarea.has-voice-padding,
     .voice-search-wrap>textarea.has-voice-padding {
-        padding-right: 3rem !important;
         resize: none;
     }
 
@@ -556,7 +555,6 @@
         font-size: .8rem;
         font-weight: 700;
         cursor: pointer;
-        font-family: 'Inter', sans-serif;
         transition: background .15s ease, border-color .15s ease, transform .15s ease;
     }
 

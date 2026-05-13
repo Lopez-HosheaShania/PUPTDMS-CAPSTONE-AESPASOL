@@ -142,11 +142,21 @@ function formatRecordDuration(raw) {
 }
 
 function formatRecordStatus(status) {
-    status = String(status || '').trim().toLowerCase();
+    status = String(status || '').trim();
 
     if (!status) return '—';
 
-    return status.charAt(0).toUpperCase() + status.slice(1);
+    return status.split(' - ').map(function (part, index) {
+        if (index === 0) {
+            var base = part.toLowerCase();
+            return base.charAt(0).toUpperCase() + base.slice(1);
+        }
+
+        if (part.toLowerCase() === 'patient no-show') return 'No-show';
+        if (part.toLowerCase() === 'no-show') return 'No-show';
+
+        return part;
+    }).join(' - ');
 }
 
 function setText(id, value) {
@@ -171,7 +181,7 @@ function setRecordModalData(source) {
 
         if (status === 'completed') {
             sEl.classList.add('bg-emerald-100', 'text-emerald-800');
-        } else if (status === 'cancelled' || status === 'canceled') {
+        } else if (status.startsWith('cancelled') || status.startsWith('canceled')) {
             sEl.classList.add('bg-red-100', 'text-red-800');
         } else if (status === 'rescheduled') {
             sEl.classList.add('bg-yellow-100', 'text-yellow-800');

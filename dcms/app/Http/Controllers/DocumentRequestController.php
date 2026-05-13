@@ -22,19 +22,23 @@ class DocumentRequestController extends Controller
             'purpose' => 'required|string|max:150',
         ]);
 
-        if (!session('patient_id')) {
+        $patient = Patient::where('user_id', auth()->id())->first();
+
+        if (!$patient) {
             return response()->json([
                 'success' => false,
-                'message' => 'Patient session not found. Please log in again.',
+                'message' => 'Patient record not found. Please log in again.',
             ], 401);
         }
 
+        session(['patient_id' => $patient->id]);
+
         try {
-            $documentRequest = DB::transaction(function () use ($request) {
+            $documentRequest = DB::transaction(function () use ($request, $patient) {
                 $nextId = (DocumentRequest::max('id') ?? 0) + 1;
 
                 return DocumentRequest::create([
-                    'patient_id' => session('patient_id'),
+                    'patient_id' => $patient->id,
                     'reference_number' => 'DOC-' . now()->format('Y') . '-' . str_pad($nextId, 4, '0', STR_PAD_LEFT),
                     'document_type' => $request->document_type,
                     'purpose' => $request->purpose,
@@ -51,8 +55,6 @@ class DocumentRequestController extends Controller
             foreach ($dentists as $dentist) {
                 $dentist->notify(new DocumentRequestSubmittedNotification($documentRequest));
             }
-
-            $patient = Patient::where('user_id', auth()->id())->first();
 
             if ($patient) {
                 AuditLogger::log(
@@ -80,13 +82,6 @@ class DocumentRequestController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $patient = Patient::where('user_id', auth()->id())->first();
-
-        if ($patient && $patient->user) {
-            $patient->user->notify(
-                new DocumentRequestSubmittedNotification($documentRequest)
-            );
-        }
         return view('document-requests.index', compact('requests'));
     }
 
@@ -123,9 +118,9 @@ class DocumentRequestController extends Controller
                     ->orWhere('document_type', 'like', "%{$search}%")
                     ->orWhere('purpose', 'like', "%{$search}%")
                     ->orWhereHas('patient', function ($patientQuery) use ($search) {
-                        $patientQuery->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('student_id', 'like', "%{$search}%");
+                        $patientQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('student_no', 'like', "%{$search}%");
                     });
             });
         }
@@ -150,12 +145,17 @@ class DocumentRequestController extends Controller
             ->latest('request_time')
             ->get()
             ->map(function ($req) {
-                $fullName = $req->patient->full_name ?? $req->patient->name ?? 'Unknown Patient';
+                $patient = $req->patient;
+
+                $fullName = $patient->full_name ?? $patient->name ?? 'Unknown Patient';
 
                 $parts = explode(' ', trim($fullName));
                 $last = count($parts) > 1 ? array_pop($parts) : ($parts[0] ?? '—');
                 $first = implode(' ', $parts);
                 $displayName = $first ? "{$last}, {$first}" : $last;
+
+                $studentNo = trim((string) ($patient->student_no ?? ''));
+                $identifier = $studentNo !== '' ? 'Student No: ' . $studentNo : null;
 
                 return [
                     'id' => $req->id,
@@ -166,10 +166,8 @@ class DocumentRequestController extends Controller
                     'request_date' => Carbon::parse($req->request_date)->format('M d, Y'),
                     'request_time' => Carbon::parse($req->request_time)->format('h:i A'),
                     'patient_name' => $displayName,
-                    'sub_label' => $req->patient->course_section
-                        ?? $req->patient->department
-                        ?? $req->patient->role
-                        ?? null,
+                    'sub_label' => $identifier,
+                    'patient_identifier' => $identifier,
                 ];
             });
 

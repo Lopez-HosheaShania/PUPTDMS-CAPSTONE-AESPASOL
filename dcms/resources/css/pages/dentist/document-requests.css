@@ -1,0 +1,4740 @@
+.badge-approved {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge-pending {
+    --status-bg: #FFF7ED;
+    --status-text: #EA580C;
+    --status-border: #FED7AA;
+
+    background: #FFF7ED !important;
+    color: #EA580C !important;
+    border-color: #FED7AA !important;
+}
+
+.badge-rejected {
+    --status-bg: #FEE2E2;
+    --status-text: #B91C1C;
+    --status-border: #FCA5A5;
+
+    background: #FEE2E2 !important;
+    color: #B91C1C !important;
+    border-color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .badge-pending,
+.dark .badge-pending {
+    --status-bg: rgba(234, 88, 12, 0.16);
+    --status-text: #FDBA74;
+    --status-border: rgba(251, 146, 60, 0.30);
+
+    background: rgba(234, 88, 12, 0.16) !important;
+    color: #FDBA74 !important;
+    border-color: rgba(251, 146, 60, 0.30) !important;
+}
+
+[data-theme="dark"] .detail-panel {
+    background: #161e2e !important;
+    border-top-color: #2a3244 !important;
+}
+
+.docreq-date-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.docreq-date-wrap input {
+    padding-right: 40px !important;
+    cursor: pointer;
+}
+
+.docreq-date-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    font-size: 14px;
+    pointer-events: none;
+    line-height: 1;
+    z-index: 2;
+}
+
+.docreq-decision-modal {
+    max-width: 460px !important;
+    width: min(460px, calc(100vw - 32px)) !important;
+    max-height: min(88dvh, 720px) !important;
+    border-radius: 22px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    background: #FFFFFF !important;
+}
+
+.docreq-approve-modal {
+    --decision-accent: #15803D;
+    --decision-accent-soft: #DCFCE7;
+    --decision-accent-text: #14532D;
+    --decision-accent-border: #BBF7D0;
+    --decision-hero-start: #052E16;
+    --decision-hero-mid: #14532D;
+    --decision-hero-end: #166534;
+}
+
+.docreq-reject-modal {
+    --decision-accent: #B91C1C;
+    --decision-accent-soft: #FEE2E2;
+    --decision-accent-text: #7F1D1D;
+    --decision-accent-border: #FECACA;
+    --decision-hero-start: #450A0A;
+    --decision-hero-mid: #7F1D1D;
+    --decision-hero-end: #991B1B;
+}
+
+.docreq-decision-modal .approve-hero,
+.docreq-decision-modal .reject-hero {
+    padding: 1.35rem 1.25rem 1.1rem !important;
+    background:
+        radial-gradient(circle at 88% 0%, rgba(255, 255, 255, .10), transparent 34%),
+        radial-gradient(circle at 8% 92%, rgba(255, 255, 255, .07), transparent 30%),
+        linear-gradient(145deg, var(--decision-hero-start), var(--decision-hero-mid) 46%, var(--decision-hero-end)) !important;
+    flex: 0 0 auto !important;
+}
+
+.docreq-decision-body {
+    padding: 1rem 1.25rem 1rem !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    background: #FFFFFF !important;
+}
+
+.docreq-decision-modal .approve-icon-ring,
+.docreq-decision-modal .reject-icon-ring {
+    width: 54px !important;
+    height: 54px !important;
+    margin-bottom: .72rem !important;
+}
+
+.docreq-decision-modal .approve-icon-inner,
+.docreq-decision-modal .reject-icon-inner {
+    width: 38px !important;
+    height: 38px !important;
+}
+
+.docreq-decision-modal .approve-icon-inner i,
+.docreq-decision-modal .reject-icon-inner i {
+    font-size: 1rem !important;
+}
+
+.docreq-decision-modal .approve-hero-title,
+.docreq-decision-modal .reject-hero-title {
+    font-size: 1.18rem !important;
+    margin-bottom: .22rem !important;
+}
+
+.docreq-decision-modal .approve-hero-sub,
+.docreq-decision-modal .reject-hero-sub {
+    font-size: .70rem !important;
+}
+
+.docreq-decision-patient-card {
+    display: grid !important;
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: .8rem !important;
+    padding: .78rem .9rem !important;
+    border-radius: 14px !important;
+    background: color-mix(in srgb, var(--decision-accent-soft) 62%, #FFFFFF) !important;
+    border: 1px solid var(--decision-accent-border) !important;
+}
+
+.docreq-decision-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--decision-accent-soft) !important;
+    color: var(--decision-accent) !important;
+    flex-shrink: 0 !important;
+}
+
+.docreq-decision-avatar i {
+    font-size: .9rem !important;
+    color: currentColor !important;
+}
+
+.docreq-decision-label {
+    font-size: .66rem !important;
+    font-weight: 900 !important;
+    color: var(--decision-accent) !important;
+    text-transform: uppercase !important;
+    letter-spacing: .08em !important;
+    margin-bottom: .2rem !important;
+}
+
+.docreq-decision-patient-name {
+    font-size: .98rem !important;
+    font-weight: 900 !important;
+    color: var(--decision-accent-text) !important;
+    line-height: 1.18 !important;
+}
+
+.docreq-decision-request-card {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: .6rem !important;
+    margin-top: .75rem !important;
+}
+
+.docreq-decision-info {
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: .65rem !important;
+    min-width: 0 !important;
+    padding: .72rem .78rem !important;
+    border-radius: 14px !important;
+    background: #F9FAFB !important;
+    border: 1px solid #E5E7EB !important;
+}
+
+.docreq-decision-info-wide {
+    grid-column: 1 / -1 !important;
+}
+
+.docreq-decision-info-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 11px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: color-mix(in srgb, var(--decision-accent-soft) 72%, #FFFFFF) !important;
+    border: 1px solid var(--decision-accent-border) !important;
+    color: var(--decision-accent) !important;
+}
+
+.docreq-decision-info-icon i {
+    font-size: .82rem !important;
+    color: currentColor !important;
+}
+
+.docreq-decision-info-copy {
+    min-width: 0 !important;
+}
+
+.docreq-decision-info-copy span {
+    display: block !important;
+    font-size: .58rem !important;
+    font-weight: 900 !important;
+    letter-spacing: .10em !important;
+    text-transform: uppercase !important;
+    color: #9CA3AF !important;
+    line-height: 1 !important;
+    margin-bottom: .24rem !important;
+}
+
+.docreq-decision-info-copy strong {
+    display: block !important;
+    color: #111827 !important;
+    font-size: .80rem !important;
+    font-weight: 900 !important;
+    line-height: 1.18 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.docreq-decision-info-copy small {
+    display: block !important;
+    margin-top: .14rem !important;
+    color: #6B7280 !important;
+    font-size: .70rem !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+}
+
+.docreq-decision-modal .approve-info-row,
+.docreq-decision-modal .reject-warning-row {
+    gap: .55rem !important;
+    margin-top: .75rem !important;
+    padding: .62rem .75rem !important;
+    border-radius: 12px !important;
+    font-size: .72rem !important;
+    line-height: 1.4 !important;
+}
+
+.docreq-decision-modal .approve-info-row i,
+.docreq-decision-modal .reject-warning-row i {
+    flex: 0 0 auto !important;
+    margin-top: 1px !important;
+    font-size: .78rem !important;
+}
+
+.docreq-reject-field-group {
+    margin-top: .85rem !important;
+}
+
+.docreq-field-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: .75rem !important;
+    margin-bottom: .42rem !important;
+}
+
+.docreq-decision-modal .reject-field-label {
+    margin: 0 !important;
+    font-size: .68rem !important;
+    font-weight: 900 !important;
+    color: #7F1D1D !important;
+    letter-spacing: .06em !important;
+    text-transform: uppercase !important;
+}
+
+.docreq-decision-modal .reject-field-label span {
+    color: #D1A3A3 !important;
+    font-weight: 700 !important;
+    margin-left: .25rem !important;
+}
+
+.docreq-decision-modal .reject-textarea {
+    min-height: 112px !important;
+    max-height: 150px !important;
+    padding: .78rem .9rem !important;
+    border-radius: 14px !important;
+    font-size: .84rem !important;
+    line-height: 1.45 !important;
+    resize: none !important;
+}
+
+.docreq-decision-modal .approve-footer,
+.docreq-decision-modal .reject-footer {
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+    padding: .9rem 1.25rem 1rem !important;
+    gap: .7rem !important;
+}
+
+.docreq-decision-modal .modal-btn-ghost,
+.docreq-decision-modal .modal-btn-confirm-approve,
+.docreq-decision-modal .modal-btn-confirm-reject {
+    min-height: 40px !important;
+    padding: 0 1rem !important;
+    border-radius: 12px !important;
+    font-size: .78rem !important;
+}
+
+.docreq-decision-modal .btn-confirm-icon {
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 7px !important;
+    font-size: .66rem !important;
+}
+
+.docreq-decision-modal .modal-float-x {
+    top: .82rem !important;
+    right: .82rem !important;
+    width: 30px !important;
+    height: 30px !important;
+    font-size: .74rem !important;
+}
+
+[data-theme="dark"] .req-row {
+    background: #111827;
+    border-bottom-color: #2a3244 !important;
+}
+
+[data-theme="dark"] .req-row:hover {
+    background: #1e2535 !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal,
+.dark .docreq-decision-modal {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.18), transparent 34%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.96), rgba(22, 27, 34, 0.92)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #F8FAFC !important;
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="dark"] .docreq-decision-body,
+.dark .docreq-decision-body {
+    background: transparent !important;
+}
+
+[data-theme="dark"] .docreq-decision-patient-card,
+.dark .docreq-decision-patient-card {
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .docreq-decision-avatar,
+.dark .docreq-decision-avatar,
+[data-theme="dark"] .docreq-decision-info-icon,
+.dark .docreq-decision-info-icon {
+    background: rgba(139, 0, 0, 0.24) !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .docreq-approve-modal .docreq-decision-avatar,
+.dark .docreq-approve-modal .docreq-decision-avatar,
+[data-theme="dark"] .docreq-approve-modal .docreq-decision-info-icon,
+.dark .docreq-approve-modal .docreq-decision-info-icon {
+    background: rgba(22, 163, 74, 0.16) !important;
+    border-color: rgba(134, 239, 172, 0.22) !important;
+    color: #86EFAC !important;
+}
+
+[data-theme="dark"] .docreq-decision-label,
+.dark .docreq-decision-label {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .docreq-approve-modal .docreq-decision-label,
+.dark .docreq-approve-modal .docreq-decision-label {
+    color: #86EFAC !important;
+}
+
+[data-theme="dark"] .docreq-decision-patient-name,
+.dark .docreq-decision-patient-name,
+[data-theme="dark"] .docreq-decision-info-copy strong,
+.dark .docreq-decision-info-copy strong {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .docreq-decision-info,
+.dark .docreq-decision-info {
+    background: rgba(13, 17, 23, 0.72) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] .docreq-decision-info-copy span,
+.dark .docreq-decision-info-copy span,
+[data-theme="dark"] .docreq-decision-info-copy small,
+.dark .docreq-decision-info-copy small {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .reject-field-label,
+.dark .docreq-decision-modal .reject-field-label {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .reject-field-label span,
+.dark .docreq-decision-modal .reject-field-label span {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .reject-textarea,
+.dark .docreq-decision-modal .reject-textarea {
+    background: rgba(13, 17, 23, 0.82) !important;
+    border-color: rgba(252, 165, 165, 0.24) !important;
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .reject-textarea::placeholder,
+.dark .docreq-decision-modal .reject-textarea::placeholder {
+    color: #64748B !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .reject-textarea:focus,
+.dark .docreq-decision-modal .reject-textarea:focus {
+    background: rgba(13, 17, 23, 0.96) !important;
+    border-color: rgba(252, 165, 165, 0.42) !important;
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.28) !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .approve-info-row,
+.dark .docreq-decision-modal .approve-info-row {
+    background: rgba(22, 163, 74, 0.12) !important;
+    color: #BBF7D0 !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .reject-warning-row,
+.dark .docreq-decision-modal .reject-warning-row {
+    background: rgba(185, 28, 28, 0.14) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .approve-footer,
+[data-theme="dark"] .docreq-decision-modal .reject-footer,
+.dark .docreq-decision-modal .approve-footer,
+.dark .docreq-decision-modal .reject-footer {
+    background: rgba(13, 17, 23, 0.76) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .modal-btn-ghost,
+.dark .docreq-decision-modal .modal-btn-ghost {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .docreq-decision-modal .modal-btn-ghost:hover,
+.dark .docreq-decision-modal .modal-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+    color: #F8FAFC !important;
+}
+
+.docreq-header-wrap {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+}
+
+.req-row:last-child {
+    border-bottom: none;
+}
+
+.docreq-page .stat-card:hover,
+.docreq-page .stat-card.stat-active {
+    transform: translateY(-2px) !important;
+    border-color: transparent !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .10) !important;
+}
+
+.docreq-page .stat-card-info {
+    gap: 5px;
+}
+
+.docreq-page .stat-num {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: -1px !important;
+    color: #111827 !important;
+}
+
+.docreq-page .stat-label {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: .5px !important;
+    color: #6B7280 !important;
+}
+
+.docreq-grid {
+    padding: 16px !important;
+    gap: 14px !important;
+}
+
+.docreq-grid-card {
+    border-radius: 20px !important;
+    border: 1.5px solid #E5E7EB !important;
+    box-shadow: none !important;
+    padding: 18px 18px 16px 22px !important;
+    min-height: 245px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.docreq-grid-card:hover {
+    border-color: #D1D5DB !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .09) !important;
+}
+
+.docreq-grid-card::before {
+    top: 14px !important;
+    bottom: 14px !important;
+    width: 4px !important;
+    border-radius: 0 4px 4px 0 !important;
+}
+
+#mainContent.docreq-page .docreq-list-row-modern.docreq-card-selected,
+#mainContent.docreq-page .req-row.docreq-card-selected {
+    background: inherit !important;
+    border-color: inherit !important;
+    box-shadow: none !important;
+}
+
+.docreq-grid-card.docreq-card-selected,
+.mobile-req-card.docreq-card-selected {
+    background:
+        linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--card-accent, #c2410c) 7%, #ffffff) 100%) !important;
+}
+
+.docreq-grid-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 9px !important;
+    margin-top: 14px !important;
+}
+
+.docreq-grid-meta>div {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 14px;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+}
+
+.docreq-grid-meta>div::before {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 13px;
+    color: #8B0000;
+    background: rgba(139, 0, 0, 0.08);
+    border: 1px solid rgba(139, 0, 0, 0.12);
+    grid-row: span 2;
+}
+
+.docreq-grid-meta>div:nth-child(1)::before {
+    content: "\f073";
+}
+
+.docreq-grid-meta>div:nth-child(2)::before {
+    content: "\f017";
+}
+
+.docreq-grid-meta>div:nth-child(3)::before {
+    content: "\f15c";
+}
+
+.docreq-grid-meta>div:nth-child(4)::before {
+    content: "\f05a";
+}
+
+.docreq-grid-label,
+.docreq-grid-value {
+    grid-column: 2;
+}
+
+.docreq-grid-label {
+    font-size: 9px !important;
+    color: #9CA3AF !important;
+}
+
+.docreq-grid-value {
+    color: #111827 !important;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+}
+
+.docreq-grid-actions {
+    margin-top: auto !important;
+    padding-top: 14px;
+}
+
+[data-theme="dark"] .docreq-title-hero,
+.dark .docreq-title-hero {
+    background: radial-gradient(circle at top left, rgba(139, 0, 0, 0.26), transparent 36%), radial-gradient(circle at 88% 16%, rgba(252, 165, 165, 0.08), transparent 28%), linear-gradient(145deg, rgba(13, 17, 23, 0.82), rgba(22, 27, 34, 0.70)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] .docreq-page .stat-card:hover,
+.dark .docreq-page .stat-card:hover,
+[data-theme="dark"] .docreq-page .stat-card.stat-active,
+.dark .docreq-page .stat-card.stat-active {
+    background: #1C2128 !important;
+    border-color: #484F58 !important;
+}
+
+[data-theme="dark"] .docreq-page .stat-num,
+.dark .docreq-page .stat-num {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] .docreq-page .stat-label,
+.dark .docreq-page .stat-label {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] .req-row,
+.dark .req-row,
+[data-theme="dark"] .docreq-grid-card,
+.dark .docreq-grid-card {
+    background: #111827 !important;
+    border-color: #1F2937 !important;
+}
+
+[data-theme="dark"] .req-row:hover,
+.dark .req-row:hover,
+[data-theme="dark"] .docreq-grid-card:hover,
+.dark .docreq-grid-card:hover,
+[data-theme="dark"] .mobile-req-card:hover,
+.dark .mobile-req-card:hover {
+    background: #1C2128 !important;
+    border-color: #484F58 !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .docreq-grid-card.docreq-card-selected,
+.dark .docreq-grid-card.docreq-card-selected,
+[data-theme="dark"] .mobile-req-card.docreq-card-selected,
+.dark .mobile-req-card.docreq-card-selected {
+    background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--card-accent, #c2410c) 18%, transparent), transparent 36%),
+        linear-gradient(145deg, rgba(17, 24, 39, 0.96), rgba(13, 17, 23, 0.92)) !important;
+    border-color: color-mix(in srgb, var(--card-accent, #c2410c) 45%, #30363D) !important;
+}
+
+[data-theme="dark"] .docreq-grid-meta>div,
+.dark .docreq-grid-meta>div,
+[data-theme="dark"] .detail-panel,
+.dark .detail-panel {
+    background: #0D1117 !important;
+    border-color: #30363D !important;
+}
+
+[data-theme="dark"] .docreq-grid-name,
+.dark .docreq-grid-name,
+[data-theme="dark"] .docreq-grid-value,
+.dark .docreq-grid-value,
+[data-theme="dark"] .dv,
+.dark .dv,
+[data-theme="dark"] .mobile-meta-value,
+.dark .mobile-meta-value,
+[data-theme="dark"] .mobile-patient-name,
+.dark .mobile-patient-name {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] .docreq-grid-label,
+.dark .docreq-grid-label,
+[data-theme="dark"] .mobile-meta-label,
+.dark .mobile-meta-label {
+    color: #8B949E !important;
+}
+
+.docreq-page #statCards .stat-card {
+    position: relative !important;
+    min-height: 130px !important;
+    padding: 28px 30px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 18px !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card-info {
+    order: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    text-align: right !important;
+    gap: 10px !important;
+    margin-left: auto !important;
+}
+
+#mainContent.docreq-page #statCards .stat-num {
+    font-size: 38px !important;
+    font-weight: 900 !important;
+    line-height: .9 !important;
+    letter-spacing: -0.04em !important;
+}
+
+#mainContent.docreq-page #statCards .stat-label {
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    letter-spacing: .08em !important;
+    text-align: right !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card::after {
+    height: 5px !important;
+    opacity: 0 !important;
+}
+
+[data-theme="dark"] .docreq-page #statCards .stat-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card-info {
+    gap: 7px !important;
+}
+
+#mainContent.docreq-page #statCards .stat-num {
+    font-size: 30px !important;
+    line-height: .95 !important;
+}
+
+#mainContent.docreq-page #statCards .stat-label {
+    font-size: 10px !important;
+    letter-spacing: .07em !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card::after {
+    height: 4px !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card-info {
+    order: 1 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    text-align: left !important;
+    gap: 7px !important;
+    min-width: 0 !important;
+}
+
+#mainContent.docreq-page #statCards .stat-label {
+    font-size: 10px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: .09em !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card::after {
+    height: 4px !important;
+}
+
+[data-theme="dark"] #mainContent .table-card,
+[data-theme="dark"] #mainContent .stat-card,
+[data-theme="dark"] #mainContent .docreq-grid-card,
+[data-theme="dark"] #mainContent .mobile-req-card,
+[data-theme="dark"] #mainContent .filter-drawer-panel,
+.dark #mainContent .table-card,
+.dark #mainContent .stat-card,
+.dark #mainContent .docreq-grid-card,
+.dark #mainContent .mobile-req-card,
+.dark #mainContent .filter-drawer-panel {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.16), transparent 36%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.82), rgba(22, 27, 34, 0.72)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="dark"] #mainContent .table-card>div:first-child,
+[data-theme="dark"] #mainContent #docreqTableHead,
+[data-theme="dark"] #mainContent .tfoot-bar,
+[data-theme="dark"] #mainContent .toolbar-wrap,
+[data-theme="dark"] #mainContent .detail-panel,
+[data-theme="dark"] #mainContent .mobile-detail-panel,
+[data-theme="dark"] #mainContent .docreq-grid-meta>div,
+[data-theme="dark"] #mainContent .view-toggle-container,
+.dark #mainContent .table-card>div:first-child,
+.dark #mainContent #docreqTableHead,
+.dark #mainContent .tfoot-bar,
+.dark #mainContent .toolbar-wrap,
+.dark #mainContent .detail-panel,
+.dark #mainContent .mobile-detail-panel,
+.dark #mainContent .docreq-grid-meta>div,
+.dark #mainContent .view-toggle-container {
+    background: rgba(13, 17, 23, 0.72) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    color: #C9D1D9 !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] #mainContent .docreq-page .stat-card:hover,
+[data-theme="dark"] #mainContent .docreq-page .stat-card.stat-active,
+[data-theme="dark"] #mainContent .req-row:hover,
+[data-theme="dark"] #mainContent .docreq-grid-card:hover,
+[data-theme="dark"] #mainContent .mobile-req-card:hover,
+.dark #mainContent .docreq-page .stat-card:hover,
+.dark #mainContent .docreq-page .stat-card.stat-active,
+.dark #mainContent .req-row:hover,
+.dark #mainContent .docreq-grid-card:hover,
+.dark #mainContent .mobile-req-card:hover {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.22), transparent 36%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.88), rgba(28, 33, 40, 0.78)) !important;
+    border-color: rgba(252, 165, 165, 0.18) !important;
+}
+
+[data-theme="dark"] #mainContent .docreq-page .stat-num,
+[data-theme="dark"] #mainContent .docreq-grid-name,
+[data-theme="dark"] #mainContent .docreq-grid-value,
+[data-theme="dark"] #mainContent .dv,
+[data-theme="dark"] #mainContent .mobile-meta-value,
+[data-theme="dark"] #mainContent .mobile-patient-name,
+.dark #mainContent .docreq-page .stat-num,
+.dark #mainContent .docreq-grid-name,
+.dark #mainContent .docreq-grid-value,
+.dark #mainContent .dv,
+.dark #mainContent .mobile-meta-value,
+.dark #mainContent .mobile-patient-name {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent .dv,
+[data-theme="dark"] #mainContent .mobile-meta-value,
+[data-theme="dark"] #mainContent .mobile-patient-name,
+.dark #mainContent .dv,
+.dark #mainContent .mobile-meta-value,
+.dark #mainContent .mobile-patient-name {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent .docreq-page .stat-label,
+[data-theme="dark"] #mainContent .docreq-grid-label,
+[data-theme="dark"] #mainContent .docreq-grid-sub,
+[data-theme="dark"] #mainContent .mobile-meta-label,
+[data-theme="dark"] #mainContent .row-count,
+.dark #mainContent .docreq-page .stat-label,
+.dark #mainContent .docreq-grid-label,
+.dark #mainContent .docreq-grid-sub,
+.dark #mainContent .mobile-meta-label,
+.dark #mainContent .row-count {
+    color: #8B949E !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card::after {
+    content: none !important;
+    display: none !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card.stat-active,
+#mainContent.docreq-page #statCards .stat-card.tab-active,
+#mainContent.docreq-page #statCards .stat-card.active {
+    background: #FFFFFF !important;
+    border-color: #E5E7EB !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card:hover {
+    background: #FFFFFF !important;
+    border-color: rgba(139, 0, 0, 0.18) !important;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06) !important;
+    transform: none !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card[data-filter="all"] .stat-icon,
+#mainContent.docreq-page #statCards .stat-card[data-filter="all"] .stat-icon-wrapper {
+    background: #EFF6FF !important;
+    color: #1E40AF !important;
+    border-color: #BFDBFE !important;
+}
+
+#mainContent.docreq-page #statCards .stat-card[data-filter="pending"] .stat-icon,
+#mainContent.docreq-page #statCards .stat-card[data-filter="pending"] .stat-icon-wrapper {
+    background: #F8FAFC !important;
+    color: #64748B !important;
+    border-color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #statCards .stat-card.stat-active,
+[data-theme="dark"] #mainContent.docreq-page #statCards .stat-card.tab-active,
+[data-theme="dark"] #mainContent.docreq-page #statCards .stat-card.active,
+.dark #mainContent.docreq-page #statCards .stat-card.stat-active,
+.dark #mainContent.docreq-page #statCards .stat-card.tab-active,
+.dark #mainContent.docreq-page #statCards .stat-card.active {
+    background:
+        linear-gradient(145deg, rgba(13, 17, 23, 0.86), rgba(22, 27, 34, 0.76)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #statCards .stat-card[data-filter="all"] .stat-icon,
+[data-theme="dark"] #mainContent.docreq-page #statCards .stat-card[data-filter="all"] .stat-icon-wrapper,
+.dark #mainContent.docreq-page #statCards .stat-card[data-filter="all"] .stat-icon,
+.dark #mainContent.docreq-page #statCards .stat-card[data-filter="all"] .stat-icon-wrapper {
+    background: rgba(30, 58, 138, 0.30) !important;
+    color: #93C5FD !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #statCards .stat-card[data-filter="pending"] .stat-icon,
+[data-theme="dark"] #mainContent.docreq-page #statCards .stat-card[data-filter="pending"] .stat-icon-wrapper,
+.dark #mainContent.docreq-page #statCards .stat-card[data-filter="pending"] .stat-icon,
+.dark #mainContent.docreq-page #statCards .stat-card[data-filter="pending"] .stat-icon-wrapper {
+    background: rgba(100, 116, 139, 0.18) !important;
+    color: #CBD5E1 !important;
+    border-color: rgba(203, 213, 225, 0.22) !important;
+}
+
+.docreq-overview-shell {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.12), transparent 38%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(255, 248, 248, 0.88));
+    border: 1px solid rgba(139, 0, 0, 0.10);
+    box-shadow:
+        0 16px 34px rgba(139, 0, 0, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    overflow: visible;
+}
+
+.docreq-overview-copy {
+    min-width: 0;
+}
+
+.docreq-overview-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #8B0000;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.docreq-overview-copy p {
+    margin: 7px 0 0;
+    max-width: 620px;
+    color: #232324;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+.docreq-custom-select {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    z-index: 20;
+}
+
+.docreq-custom-select.open {
+    z-index: 80;
+}
+
+.docreq-select-button {
+    width: 100%;
+    min-height: 48px;
+    padding: 6px 13px;
+    border-radius: 18px;
+    border: 1px solid rgba(139, 0, 0, 0.16);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 250, 0.94));
+    color: #111827;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) 38px 16px;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    cursor: pointer;
+    box-shadow:
+        0 10px 22px rgba(139, 0, 0, 0.055),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78);
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease,
+        background .18s ease;
+}
+
+.docreq-select-button:hover,
+.docreq-custom-select.open .docreq-select-button {
+    border-color: rgba(72, 69, 69, 0.3);
+    box-shadow:
+        0 0 0 4px rgba(139, 0, 0, 0.07),
+        0 14px 28px rgba(67, 63, 63, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.docreq-select-leading,
+.docreq-option-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #323232;
+    background: rgba(18, 18, 18, 0.1);
+    border: 1px solid rgba(39, 39, 39, 0.18);
+}
+
+.docreq-select-leading i,
+.docreq-option-icon i {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.docreq-select-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.docreq-select-text span {
+    color: #84878b;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.docreq-select-text strong {
+    color: #111827;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.docreq-select-count,
+.docreq-option-count {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #8B0000;
+    background: rgba(139, 0, 0, 0.075);
+    border: 1px solid rgba(139, 0, 0, 0.16);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.docreq-select-chevron {
+    color: #94A3B8;
+    font-size: 12px;
+    transition: transform .18s ease, color .18s ease;
+}
+
+.docreq-custom-select.open .docreq-select-chevron {
+    transform: rotate(180deg);
+    color: #8B0000;
+}
+
+.docreq-select-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: auto;
+    width: 100%;
+    min-width: 300px;
+    display: grid;
+    gap: 6px;
+    padding: 8px;
+    border-radius: 18px;
+    border: 1px solid rgba(139, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow:
+        0 22px 46px rgba(15, 23, 42, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px) scale(.98);
+    transform-origin: top center;
+    pointer-events: none;
+    transition: opacity .18s ease, visibility .18s ease, transform .18s ease;
+    z-index: 90;
+}
+
+.docreq-custom-select.open .docreq-select-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.docreq-select-option {
+    width: 100%;
+    min-height: 54px;
+    padding: 9px 10px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: transparent;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.docreq-select-option:hover,
+.docreq-select-option.active {
+    background: rgba(139, 0, 0, 0.055);
+    border-color: rgba(139, 0, 0, 0.12);
+}
+
+.docreq-option-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 13px;
+}
+
+.docreq-option-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.docreq-option-copy strong {
+    color: #111827;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.docreq-option-copy small {
+    color: #747679;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.docreq-option-check {
+    display: none;
+    color: #16A34A;
+    font-size: 13px;
+}
+
+.docreq-select-option.active .docreq-option-check {
+    display: inline-flex;
+}
+
+.docreq-filter-select .docreq-select-button {
+    min-height: 48px;
+    grid-template-columns: 36px minmax(0, 1fr) 18px;
+    border-radius: 999px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.docreq-filter-select .docreq-select-leading,
+.docreq-filter-select .docreq-option-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+}
+
+.docreq-filter-select .docreq-select-menu {
+    position: relative;
+    top: auto;
+    margin-top: 8px;
+    display: none;
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12);
+}
+
+.docreq-filter-select.open .docreq-select-menu {
+    display: grid;
+}
+
+.docreq-select-leading.status-all,
+.docreq-option-icon.status-all {
+    color: #1D4ED8;
+    background: rgba(29, 78, 216, 0.10);
+    border-color: rgba(29, 78, 216, 0.18);
+}
+
+.docreq-select-leading.status-pending,
+.docreq-option-icon.status-pending {
+    color: #EA580C;
+    background: #FFF7ED;
+    border-color: #FED7AA;
+}
+
+.docreq-select-leading.status-approved,
+.docreq-option-icon.status-approved {
+    color: #16A34A;
+    background: #F0FDF4;
+    border-color: #BBF7D0;
+}
+
+.docreq-select-leading.status-rejected,
+.docreq-option-icon.status-rejected {
+    color: #B91C1C;
+    background: #FEF2F2;
+    border-color: #FECACA;
+}
+
+.btn-close-detail {
+    background: #f3f3f3;
+    color: #666;
+    border: none;
+    cursor: pointer;
+    border-radius: 9px;
+    padding: .45rem .9rem;
+    font-weight: 600;
+    font-size: .78rem;
+    transition: background .15s;
+}
+
+.btn-close-detail:hover {
+    background: #e8e8e8;
+}
+
+.state-box {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #ccc;
+}
+
+.state-box i {
+    font-size: 2.5rem;
+    margin-bottom: .75rem;
+    display: block;
+}
+
+.state-box strong {
+    display: block;
+    font-size: .95rem;
+    font-weight: 700;
+    color: #bbb;
+    margin-bottom: .3rem;
+}
+
+.state-box span {
+    font-size: .8rem;
+}
+
+.tfoot-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid #EDE9E4;
+    background: #FAFAF9;
+}
+
+.pag-btn {
+    padding: .38rem .8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: .8rem;
+    border: none;
+    cursor: pointer;
+    transition: all .15s;
+    background: transparent;
+    color: #888;
+}
+
+.pag-btn:disabled {
+    color: #ddd;
+    cursor: not-allowed;
+}
+
+.pag-btn.pag-active {
+    background: #8B0000;
+    color: #fff;
+}
+
+.pag-btn:not(.pag-active):not(:disabled):hover {
+    background: #f3e8e8;
+    color: #8B0000;
+}
+
+.toolbar-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #EDE9E4;
+    background: #FAFAF9;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.row-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6B7280;
+}
+
+#mainContent .docreq-title-hero {
+    overflow: visible !important;
+}
+
+#mainContent .docreq-title-left {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+}
+
+#mainContent .docreq-title-kicker,
+#mainContent .docreq-title-eyebrow {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.10em !important;
+}
+
+#mainContent .docreq-title-heading {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.16 !important;
+    letter-spacing: -0.035em !important;
+    padding-left: 2px !important;
+    padding-right: 4px !important;
+    padding-top: 2px !important;
+    padding-bottom: 4px !important;
+    max-width: 100% !important;
+}
+
+[data-theme="dark"] .mobile-req-card:hover {
+    background: #1e2535 !important;
+}
+
+[data-theme="dark"] #mainContent .mobile-meta-label,
+[data-theme="dark"] #mainContent .row-count,
+.dark #mainContent .mobile-meta-label,
+.dark #mainContent .row-count {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] .toolbar-wrap {
+    background: #1C2128 !important;
+    border-color: #2a3244 !important;
+}
+
+[data-theme="dark"] .table-card>div:first-child,
+.dark .table-card>div:first-child,
+[data-theme="dark"] #docreqTableHead,
+.dark #docreqTableHead,
+[data-theme="dark"] .tfoot-bar,
+.dark .tfoot-bar {
+    background: #111827 !important;
+    border-color: #30363D !important;
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] .tfoot-bar {
+    background: #1C2128 !important;
+    border-color: #2a3244 !important;
+}
+
+[data-theme="dark"] #mainContent .docreq-overview-shell,
+.dark #mainContent .docreq-overview-shell {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.22), transparent 38%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.84), rgba(22, 27, 34, 0.72)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="dark"] #mainContent .docreq-overview-kicker,
+.dark #mainContent .docreq-overview-kicker {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent .docreq-overview-copy p,
+.dark #mainContent .docreq-overview-copy p,
+[data-theme="dark"] #mainContent .docreq-select-text span,
+.dark #mainContent .docreq-select-text span,
+[data-theme="dark"] #mainContent .docreq-option-copy small,
+.dark #mainContent .docreq-option-copy small {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] #mainContent .docreq-select-text strong,
+.dark #mainContent .docreq-select-text strong,
+[data-theme="dark"] #mainContent .docreq-option-copy strong,
+.dark #mainContent .docreq-option-copy strong {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu.docreq-select-menu,
+.dark #mainContent.docreq-page #docreqStatusMenu.docreq-select-menu {
+    background:
+        radial-gradient(circle at 14% 0%, rgba(255, 255, 255, 0.16), transparent 44%),
+        radial-gradient(circle at 92% 8%, rgba(139, 0, 0, 0.22), transparent 38%),
+        linear-gradient(145deg, rgba(17, 24, 39, 0.58), rgba(13, 17, 23, 0.46)) !important;
+
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    box-shadow:
+        0 24px 58px rgba(0, 0, 0, 0.48),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+
+    backdrop-filter: blur(26px) saturate(175%) !important;
+    -webkit-backdrop-filter: blur(26px) saturate(175%) !important;
+    background-clip: padding-box !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu .docreq-select-option,
+.dark #mainContent.docreq-page #docreqStatusMenu .docreq-select-option {
+    background:
+        radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.10), transparent 42%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 8px 18px rgba(0, 0, 0, 0.10) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+}
+
+[data-theme="dark"] #mainContent .docreq-select-leading,
+.dark #mainContent .docreq-select-leading {
+    background: rgba(59, 130, 246, 0.16) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    color: #93C5FD !important;
+}
+
+[data-theme="dark"] #mainContent .docreq-select-count,
+.dark #mainContent .docreq-select-count,
+[data-theme="dark"] #mainContent .docreq-option-count,
+.dark #mainContent .docreq-option-count {
+    background: rgba(139, 0, 0, 0.32) !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusSelect .docreq-select-leading.status-all,
+.dark #mainContent.docreq-page #docreqStatusSelect .docreq-select-leading.status-all {
+    background:
+        radial-gradient(circle at 30% 20%, rgba(147, 197, 253, 0.28), transparent 46%),
+        linear-gradient(145deg, rgba(37, 99, 235, 0.22), rgba(59, 130, 246, 0.10)) !important;
+    color: #93C5FD !important;
+    border: 1px solid rgba(147, 197, 253, 0.26) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 8px 16px rgba(0, 0, 0, 0.16) !important;
+}
+
+#mainContent.docreq-page #requestListContainer.docreq-list-container {
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 16px !important;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%) !important;
+}
+
+#mainContent.docreq-page #requestListContainer.docreq-list-container[style*="display: block"] {
+    display: flex !important;
+}
+
+#mainContent.docreq-page #requestGridContainer.docreq-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    padding: 14px !important;
+    align-items: stretch !important;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%) !important;
+}
+
+/* LIST VIEW */
+
+#mainContent.docreq-page .docreq-list-row-modern {
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    border: 1px solid rgba(229, 231, 235, 0.95) !important;
+    background:
+        radial-gradient(circle at 96% 8%, color-mix(in srgb, var(--card-accent, #8B0000) 8%, transparent), transparent 34%),
+        linear-gradient(145deg, #FFFFFF 0%, #FFFDFD 100%) !important;
+    box-shadow:
+        0 10px 28px rgba(15, 23, 42, 0.055),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+    cursor: pointer !important;
+    transition:
+        transform .22s cubic-bezier(.22, 1, .36, 1),
+        border-color .22s ease,
+        box-shadow .22s ease,
+        background .22s ease !important;
+}
+
+#mainContent.docreq-page .docreq-list-row-modern::before {
+    display: none !important;
+    content: none !important;
+}
+
+#mainContent.docreq-page .docreq-list-row-modern::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 18px !important;
+    right: 18px !important;
+    bottom: 0 !important;
+    height: 0 !important;
+    border-radius: 999px 999px 0 0 !important;
+    background: var(--card-accent, #8B0000) !important;
+    opacity: 0 !important;
+    transition: height .22s ease, opacity .22s ease !important;
+    pointer-events: none !important;
+}
+
+#mainContent.docreq-page .docreq-list-row-modern:hover {
+    transform: translateY(-2px) !important;
+    border-color: color-mix(in srgb, var(--card-accent, #8B0000) 28%, #E5E7EB) !important;
+    box-shadow:
+        0 16px 36px rgba(15, 23, 42, 0.10),
+        0 0 0 3px color-mix(in srgb, var(--card-accent, #8B0000) 9%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.76) !important;
+}
+
+#mainContent.docreq-page .docreq-list-main {
+    display: grid !important;
+    grid-template-columns: minmax(280px, 1fr) minmax(0, 2.45fr) minmax(104px, auto) !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+    padding: 14px 18px !important;
+}
+
+#mainContent.docreq-page .docreq-list-profile,
+#mainContent.docreq-page .docreq-list-action {
+    align-self: center !important;
+}
+
+#mainContent.docreq-page .docreq-list-profile {
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: 52px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 13px !important;
+}
+
+#mainContent.docreq-page .docreq-list-avatar,
+#mainContent.docreq-page .docreq-card-avatar,
+#mainContent.docreq-page .docreq-grid-avatar,
+#mainContent.docreq-page .docreq-mobile-avatar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: linear-gradient(135deg, #8B0000, #660000) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.03em !important;
+    box-shadow:
+        0 14px 30px rgba(139, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+}
+
+#mainContent.docreq-page .docreq-list-avatar {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 99px !important;
+    font-size: 17px !important;
+}
+
+#mainContent.docreq-page .docreq-list-person,
+#mainContent.docreq-page .docreq-card-person,
+#mainContent.docreq-page .docreq-grid-person,
+#mainContent.docreq-page .docreq-mobile-person {
+    min-width: 0 !important;
+}
+
+#mainContent.docreq-page .docreq-list-name,
+#mainContent.docreq-page .docreq-grid-name,
+#mainContent.docreq-page .mobile-patient-name {
+    max-width: 100% !important;
+    color: #111827 !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+#mainContent.docreq-page .docreq-list-name {
+    font-size: 15px !important;
+    line-height: 1.18 !important;
+    white-space: nowrap !important;
+    margin-bottom: 9px !important;
+}
+
+#mainContent.docreq-page .docreq-list-subline,
+#mainContent.docreq-page .docreq-card-chip-row {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+}
+
+#mainContent.docreq-page .docreq-id-pill {
+    width: fit-content !important;
+    max-width: 100% !important;
+    min-height: 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 10px !important;
+    border-radius: 999px !important;
+
+    background: #F3F4F6 !important;
+    border: 1px solid #E5E7EB !important;
+    color: #64748B !important;
+
+    font-size: 10.5px !important;
+    line-height: 1 !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-id-pill,
+.dark #mainContent.docreq-page .docreq-id-pill {
+    background: rgba(148, 163, 184, 0.12) !important;
+    border-color: rgba(203, 213, 225, 0.16) !important;
+    color: #CBD5E1 !important;
+}
+
+#mainContent.docreq-page .docreq-program-pill,
+#mainContent.docreq-page .docreq-grid-sub,
+#mainContent.docreq-page .mobile-sub-label {
+    margin: 0 !important;
+}
+
+#mainContent.docreq-page .docreq-list-meta {
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(225px, 1fr) minmax(230px, 1fr) minmax(300px, 1.25fr) !important;
+    gap: 10px !important;
+}
+
+#mainContent.docreq-page .docreq-list-info,
+#mainContent.docreq-page .docreq-info-tile,
+#mainContent.docreq-page .docreq-mobile-meta>div {
+    min-width: 0 !important;
+    background: rgba(249, 250, 251, 0.88) !important;
+    border: 1px solid rgba(229, 231, 235, 0.95) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+#mainContent.docreq-page .docreq-list-info {
+    min-height: 60px !important;
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 9px !important;
+    padding: 10px 12px !important;
+    border-radius: 16px !important;
+}
+
+#mainContent.docreq-page .docreq-list-info>i,
+#mainContent.docreq-page .docreq-info-icon,
+#mainContent.docreq-page .docreq-mobile-meta i {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: color-mix(in srgb, var(--card-accent, #8B0000) 12%, #FFFFFF) !important;
+    border: 1px solid color-mix(in srgb, var(--card-accent, #8B0000) 20%, #E5E7EB) !important;
+    color: var(--card-accent, #8B0000) !important;
+}
+
+#mainContent.docreq-page .docreq-list-info>i {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 13px !important;
+    font-size: 13px !important;
+}
+
+#mainContent.docreq-page .docreq-list-info span,
+#mainContent.docreq-page .docreq-grid-label,
+#mainContent.docreq-page .docreq-mobile-meta span,
+#mainContent.docreq-page .mobile-meta-label,
+#mainContent.docreq-page .dl {
+    display: block !important;
+    margin-bottom: 5px !important;
+    color: #8B949E !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .06em !important;
+}
+
+#mainContent.docreq-page .docreq-list-info span {
+    white-space: nowrap !important;
+}
+
+#mainContent.docreq-page .docreq-list-info strong,
+#mainContent.docreq-page .docreq-grid-value,
+#mainContent.docreq-page .docreq-mobile-meta strong,
+#mainContent.docreq-page .mobile-meta-value,
+#mainContent.docreq-page .dv {
+    display: block !important;
+    color: #111827 !important;
+    font-size: 13px !important;
+    line-height: 1.28 !important;
+    font-weight: 700 !important;
+    overflow-wrap: anywhere !important;
+}
+
+[data-theme="dark"] .dv {
+    color: #e5e7eb;
+}
+
+#mainContent.docreq-page .docreq-list-info small {
+    display: block !important;
+    margin-top: 3px !important;
+    color: #94A3B8 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+}
+
+#mainContent.docreq-page .docreq-list-action {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+}
+
+#mainContent.docreq-page .docreq-list-direct-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 104px !important;
+}
+
+#mainContent.docreq-page .docreq-list-action-btn {
+    width: 104px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 10px !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    font-size: 12.5px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.docreq-page .docreq-list-action-btn i {
+    font-size: 12px !important;
+}
+
+#mainContent.docreq-page .docreq-review-btn,
+#mainContent.docreq-page .docreq-mobile-view-btn {
+    min-height: 38px !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.docreq-page .docreq-list-state-note,
+#mainContent.docreq-page .docreq-card-footer-note,
+#mainContent.docreq-page .docreq-mobile-state-note {
+    min-height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 0 14px !important;
+    border-radius: 999px !important;
+    background: #F8FAFC !important;
+    color: #64748B !important;
+    border: 1px solid #E2E8F0 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-head-modern {
+    min-width: 0 !important;
+    margin-bottom: 14px !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-profile {
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-avatar {
+    width: 54px !important;
+    height: 54px !important;
+    min-width: 54px !important;
+    min-height: 54px !important;
+    border-radius: 999px !important;
+    font-size: 18px !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-person {
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-name {
+    max-width: 100% !important;
+    color: #111827 !important;
+    font-size: 15px !important;
+    line-height: 1.18 !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.025em !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    margin: 0 0 6px !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-status-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-status-row .status-badge {
+    min-height: 24px !important;
+    padding: 0 10px !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-name,
+.dark #mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-name {
+    color: #F3F4F6 !important;
+}
+
+/* EXPANDED DETAILS */
+
+#mainContent.docreq-page .docreq-row-detail,
+#mainContent.docreq-page .docreq-mobile-detail {
+    overflow: hidden !important;
+    max-height: 0 !important;
+    opacity: 0 !important;
+    padding: 0 20px !important;
+    border-top: 0 solid transparent !important;
+    background: rgba(248, 250, 252, 0.78) !important;
+    transition:
+        max-height .32s cubic-bezier(.22, 1, .36, 1),
+        opacity .22s ease,
+        padding .22s ease,
+        border-color .22s ease !important;
+}
+
+#mainContent.docreq-page .docreq-row-detail.open {
+    max-height: 520px !important;
+    opacity: 1 !important;
+    padding: 18px 20px 20px 24px !important;
+    border-top: 1px solid rgba(229, 231, 235, 0.86) !important;
+}
+
+#mainContent.docreq-page .docreq-actions-only-panel {
+    padding: 18px 22px !important;
+    background: rgba(249, 250, 251, 0.72) !important;
+    border-top: 1px solid rgba(229, 231, 235, 0.85) !important;
+}
+
+#mainContent.docreq-page .docreq-detail-actions-only {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+#mainContent.docreq-page .docreq-mobile-actions-only {
+    padding: 14px !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-actions-only-panel,
+.dark #mainContent.docreq-page .docreq-actions-only-panel {
+    background: rgba(13, 17, 23, 0.72) !important;
+    border-top-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+#mainContent.docreq-page .docreq-detail-topline {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 14px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 16px !important;
+}
+
+#mainContent.docreq-page .docreq-detail-topline span {
+    display: block !important;
+    color: #94A3B8 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .08em !important;
+}
+
+#mainContent.docreq-page .docreq-detail-topline strong {
+    color: #111827 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+}
+
+#mainContent.docreq-page .docreq-detail-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+#mainContent.docreq-page .docreq-detail-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)) !important;
+    gap: 12px !important;
+}
+
+/* COMPACT GRID VIEW */
+
+#mainContent.docreq-page .docreq-grid-card-modern {
+    position: relative !important;
+    isolation: isolate !important;
+    min-height: 0 !important;
+    padding: 18px !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background:
+        radial-gradient(circle at 88% 5%, color-mix(in srgb, var(--card-accent, #8B0000) 9%, transparent), transparent 34%),
+        linear-gradient(145deg, #FFFFFF 0%, #FFFDFD 100%) !important;
+    border: 1px solid rgba(17, 24, 39, 0.08) !important;
+    box-shadow:
+        0 10px 24px rgba(15, 23, 42, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+    cursor: pointer !important;
+    transition:
+        transform .22s cubic-bezier(.22, 1, .36, 1),
+        border-color .22s ease,
+        box-shadow .22s ease,
+        background .22s ease !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 16px !important;
+    bottom: 16px !important;
+    width: 4px !important;
+    border-radius: 0 999px 999px 0 !important;
+    background: var(--card-accent, #8B0000) !important;
+    box-shadow: 0 0 20px color-mix(in srgb, var(--card-accent, #8B0000) 34%, transparent) !important;
+    z-index: 2 !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: auto 18px 0 18px !important;
+    height: 0 !important;
+    border-radius: 999px 999px 0 0 !important;
+    background: var(--card-accent, #8B0000) !important;
+    opacity: 0 !important;
+    transition: opacity .22s ease, height .22s ease !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern:hover {
+    transform: translateY(-2px) !important;
+    border-color: color-mix(in srgb, var(--card-accent, #8B0000) 26%, rgba(17, 24, 39, 0.08)) !important;
+    box-shadow:
+        0 14px 32px rgba(15, 23, 42, 0.10),
+        0 0 0 3px color-mix(in srgb, var(--card-accent, #8B0000) 10%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.76) !important;
+}
+
+#mainContent.docreq-page .docreq-card-arrow {
+    position: absolute !important;
+    top: 18px !important;
+    right: 18px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid rgba(17, 24, 39, 0.12) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    color: #111827 !important;
+    box-shadow:
+        0 10px 22px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    z-index: 4 !important;
+}
+
+#mainContent.docreq-page .docreq-card-profile,
+#mainContent.docreq-page .docreq-grid-profile {
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: center !important;
+    padding-right: 44px !important;
+}
+
+#mainContent.docreq-page .docreq-card-avatar,
+#mainContent.docreq-page .docreq-grid-avatar {
+    width: 54px !important;
+    height: 54px !important;
+    min-width: 54px !important;
+    border-radius: 99px !important;
+    font-size: 18px !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-name {
+    font-size: 15px !important;
+    line-height: 1.18 !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 0 8px !important;
+    color: #111827 !important;
+    display: -webkit-box !important;
+    line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+}
+
+#mainContent.docreq-page .docreq-card-chip-row .status-badge {
+    min-height: 24px !important;
+    padding: 0 10px !important;
+    font-size: 10.5px !important;
+    line-height: 1 !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-meta,
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-meta-modern {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-top: 16px !important;
+}
+
+#mainContent.docreq-page .docreq-info-tile {
+    min-height: 68px !important;
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    gap: 9px !important;
+    align-items: center !important;
+    padding: 10px !important;
+    border-radius: 15px !important;
+}
+
+#mainContent.docreq-page .docreq-info-tile-date-time,
+#mainContent.docreq-page .docreq-info-tile-purpose {
+    grid-column: 1 / -1 !important;
+}
+
+#mainContent.docreq-page .docreq-info-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+}
+
+#mainContent.docreq-page .docreq-info-copy {
+    min-width: 0 !important;
+}
+
+#mainContent.docreq-page .docreq-grid-label {
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    margin-bottom: 4px !important;
+}
+
+#mainContent.docreq-page .docreq-grid-value {
+    color: #111827 !important;
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+}
+
+#mainContent.docreq-page .docreq-grid-subvalue,
+#mainContent.docreq-page .docreq-mobile-subvalue {
+    display: block !important;
+    margin-top: 3px !important;
+    color: #94A3B8 !important;
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-grid-subvalue,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-subvalue,
+.dark #mainContent.docreq-page .docreq-grid-subvalue,
+.dark #mainContent.docreq-page .docreq-mobile-subvalue {
+    color: #8B949E !important;
+}
+
+#mainContent.docreq-page .docreq-grid-actions {
+    margin-top: auto !important;
+    padding-top: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+}
+
+#mainContent.docreq-page .docreq-grid-actions .btn-approve,
+#mainContent.docreq-page .docreq-grid-actions .btn-reject {
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 0 18px !important;
+    border-radius: 9px !important;
+    font-size: .78rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.docreq-page .docreq-mobile-card {
+    display: none !important;
+}
+
+@media (max-width: 1399px) {
+    #mainContent.docreq-page #requestGridContainer.docreq-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 1199px) {
+    #mainContent.docreq-page #requestGridContainer.docreq-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 380px) {
+    #mainContent.docreq-page .docreq-mobile-head {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-head .status-badge {
+        justify-self: flex-start !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta>div.wide {
+        grid-column: auto !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-actions:not(.docreq-mobile-direct-actions) {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-direct-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-end !important;
+    }
+}
+
+#mainContent.docreq-page .docreq-list-name,
+#mainContent.docreq-page .docreq-grid-name,
+#mainContent.docreq-page .mobile-patient-name,
+#mainContent.docreq-page .docreq-list-info strong,
+#mainContent.docreq-page .docreq-grid-value,
+#mainContent.docreq-page .docreq-mobile-meta strong,
+#mainContent.docreq-page .mobile-meta-value,
+#mainContent.docreq-page .dv,
+#mainContent.docreq-page .docreq-detail-topline strong,
+#mainContent.docreq-page .docreq-program-pill,
+#mainContent.docreq-page .status-badge,
+#mainContent.docreq-page .docreq-review-btn,
+#mainContent.docreq-page .docreq-mobile-view-btn,
+#mainContent.docreq-page .btn-approve,
+#mainContent.docreq-page .btn-reject,
+#mainContent.docreq-page .btn-close-detail,
+#mainContent.docreq-page .docreq-list-state-note,
+#mainContent.docreq-page .docreq-card-footer-note,
+#mainContent.docreq-page .docreq-mobile-state-note {
+    font-weight: 700 !important;
+}
+
+#mainContent.docreq-page .docreq-list-info span,
+#mainContent.docreq-page .docreq-grid-label,
+#mainContent.docreq-page .docreq-mobile-meta span,
+#mainContent.docreq-page .mobile-meta-label,
+#mainContent.docreq-page .dl,
+#mainContent.docreq-page .docreq-detail-topline span {
+    font-weight: 700 !important;
+}
+
+
+[data-theme="dark"] #mainContent.docreq-page #requestListContainer.docreq-list-container,
+[data-theme="dark"] #mainContent.docreq-page #requestGridContainer.docreq-grid,
+.dark #mainContent.docreq-page #requestListContainer.docreq-list-container,
+.dark #mainContent.docreq-page #requestGridContainer.docreq-grid {
+    background: rgba(13, 17, 23, 0.42) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-row-modern,
+[data-theme="dark"] #mainContent.docreq-page .docreq-grid-card-modern,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-card,
+.dark #mainContent.docreq-page .docreq-list-row-modern,
+.dark #mainContent.docreq-page .docreq-grid-card-modern,
+.dark #mainContent.docreq-page .docreq-mobile-card {
+    background:
+        radial-gradient(circle at 86% 2%, color-mix(in srgb, var(--card-accent, #8B0000) 16%, transparent), transparent 34%),
+        linear-gradient(145deg, rgba(17, 24, 39, 0.96), rgba(13, 17, 23, 0.94)) !important;
+    border-color: rgba(255, 255, 255, 0.11) !important;
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-row-modern:hover,
+.dark #mainContent.docreq-page .docreq-list-row-modern:hover {
+    background:
+        radial-gradient(circle at 86% 2%, color-mix(in srgb, var(--card-accent, #8B0000) 16%, transparent), transparent 34%),
+        linear-gradient(145deg, rgba(17, 24, 39, 0.96), rgba(13, 17, 23, 0.94)) !important;
+    border-color: rgba(255, 255, 255, 0.11) !important;
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-meta strong,
+.dark #mainContent.docreq-page .docreq-mobile-meta strong {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-subvalue,
+.dark #mainContent.docreq-page .docreq-mobile-subvalue {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-grid-card-modern:hover,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-card:hover,
+.dark #mainContent.docreq-page .docreq-grid-card-modern:hover,
+.dark #mainContent.docreq-page .docreq-mobile-card:hover {
+    background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--card-accent, #c2410c) 18%, transparent), transparent 36%),
+        linear-gradient(145deg, rgba(17, 24, 39, 0.96), rgba(13, 17, 23, 0.92)) !important;
+    border-color: color-mix(in srgb, var(--card-accent, #c2410c) 45%, #30363D) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-name,
+[data-theme="dark"] #mainContent.docreq-page .docreq-grid-name,
+[data-theme="dark"] #mainContent.docreq-page .mobile-patient-name,
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-info strong,
+[data-theme="dark"] #mainContent.docreq-page .docreq-grid-value,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-meta strong,
+[data-theme="dark"] #mainContent.docreq-page .mobile-meta-value,
+[data-theme="dark"] #mainContent.docreq-page .dv,
+[data-theme="dark"] #mainContent.docreq-page .docreq-detail-topline strong,
+.dark #mainContent.docreq-page .docreq-list-name,
+.dark #mainContent.docreq-page .docreq-grid-name,
+.dark #mainContent.docreq-page .mobile-patient-name,
+.dark #mainContent.docreq-page .docreq-list-info strong,
+.dark #mainContent.docreq-page .docreq-grid-value,
+.dark #mainContent.docreq-page .docreq-mobile-meta strong,
+.dark #mainContent.docreq-page .mobile-meta-value,
+.dark #mainContent.docreq-page .dv,
+.dark #mainContent.docreq-page .docreq-detail-topline strong {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-info small,
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-info span,
+[data-theme="dark"] #mainContent.docreq-page .docreq-grid-label,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-meta span,
+[data-theme="dark"] #mainContent.docreq-page .mobile-meta-label,
+[data-theme="dark"] #mainContent.docreq-page .dl,
+[data-theme="dark"] #mainContent.docreq-page .docreq-detail-topline span,
+.dark #mainContent.docreq-page .docreq-list-info small,
+.dark #mainContent.docreq-page .docreq-list-info span,
+.dark #mainContent.docreq-page .docreq-grid-label,
+.dark #mainContent.docreq-page .docreq-mobile-meta span,
+.dark #mainContent.docreq-page .mobile-meta-label,
+.dark #mainContent.docreq-page .dl,
+.dark #mainContent.docreq-page .docreq-detail-topline span {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-state-note,
+[data-theme="dark"] #mainContent.docreq-page .docreq-card-footer-note,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-state-note,
+.dark #mainContent.docreq-page .docreq-list-state-note,
+.dark #mainContent.docreq-page .docreq-card-footer-note,
+.dark #mainContent.docreq-page .docreq-mobile-state-note {
+    background: rgba(148, 163, 184, 0.12) !important;
+    border-color: rgba(203, 213, 225, 0.16) !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-info,
+[data-theme="dark"] #mainContent.docreq-page .docreq-info-tile,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-meta>div,
+[data-theme="dark"] #mainContent.docreq-page .docreq-row-detail,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-detail,
+.dark #mainContent.docreq-page .docreq-list-info,
+.dark #mainContent.docreq-page .docreq-info-tile,
+.dark #mainContent.docreq-page .docreq-mobile-meta>div,
+.dark #mainContent.docreq-page .docreq-row-detail,
+.dark #mainContent.docreq-page .docreq-mobile-detail {
+    background: rgba(7, 12, 20, 0.58) !important;
+    border-color: rgba(255, 255, 255, 0.11) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-info>i,
+[data-theme="dark"] #mainContent.docreq-page .docreq-info-icon,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-meta i,
+.dark #mainContent.docreq-page .docreq-list-info>i,
+.dark #mainContent.docreq-page .docreq-info-icon,
+.dark #mainContent.docreq-page .docreq-mobile-meta i {
+    background: color-mix(in srgb, var(--card-accent, #8B0000) 22%, rgba(13, 17, 23, 0.8)) !important;
+    border-color: color-mix(in srgb, var(--card-accent, #8B0000) 32%, rgba(255, 255, 255, 0.12)) !important;
+    color: color-mix(in srgb, var(--card-accent, #FCA5A5) 55%, #FCA5A5) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-card-arrow,
+.dark #mainContent.docreq-page .docreq-card-arrow {
+    background: rgba(13, 17, 23, 0.78) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: #F8FAFC !important;
+    box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-footer,
+[data-theme="dark"] #mainContent.docreq-page .docreq-row-detail.open,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-detail.open,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-actions,
+.dark #mainContent.docreq-page .docreq-mobile-footer,
+.dark #mainContent.docreq-page .docreq-row-detail.open,
+.dark #mainContent.docreq-page .docreq-mobile-detail.open,
+.dark #mainContent.docreq-page .docreq-mobile-actions {
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-grid-actions-review .btn-reject,
+.dark #mainContent.docreq-page .docreq-grid-actions-review .btn-reject {
+    background: rgba(127, 29, 29, 0.20) !important;
+    border-color: rgba(248, 113, 113, 0.34) !important;
+    color: #FCA5A5 !important;
+}
+
+#mainContent.docreq-page .docreq-toolbar-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+    width: auto !important;
+}
+
+#mainContent.docreq-page .docreq-toolbar-actions #docreqStatusSelect,
+#mainContent.docreq-page .docreq-toolbar-actions .docreq-toolbar-sort {
+    order: 1 !important;
+    flex: 0 0 250px !important;
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+}
+
+#mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap {
+    order: 2 !important;
+    flex: 1 1 420px !important;
+    width: auto !important;
+    min-width: 280px !important;
+}
+
+#mainContent.docreq-page .docreq-toolbar-actions .view-toggle-container {
+    order: 3 !important;
+    flex: 0 0 auto !important;
+    margin-right: 0 !important;
+}
+
+#mainContent.docreq-page .docreq-toolbar-actions #filterBtn {
+    order: 4 !important;
+    flex: 0 0 auto !important;
+}
+
+#mainContent.docreq-page .docreq-toolbar-actions #externalClearFilterBtn {
+    order: 5 !important;
+    flex: 0 0 auto !important;
+}
+
+/* Compact Sort By */
+#mainContent.docreq-page #docreqStatusSelect .docreq-select-button {
+    height: 42px !important;
+    min-height: 42px !important;
+    border-radius: 999px !important;
+    padding: 0 11px !important;
+
+    display: grid !important;
+    grid-template-columns: 28px minmax(0, 1fr) 24px 12px !important;
+    align-items: center !important;
+    gap: 8px !important;
+
+    background: rgba(255, 255, 255, 0.96) !important;
+    border: 1px solid rgba(139, 0, 0, 0.12) !important;
+    color: #111827 !important;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, 0.055) !important;
+}
+
+#mainContent.docreq-page #docreqStatusSelect .docreq-select-button:hover,
+#mainContent.docreq-page #docreqStatusSelect.open .docreq-select-button {
+    border-color: rgba(139, 0, 0, 0.26) !important;
+    background: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(139, 0, 0, 0.07),
+        0 10px 22px rgba(139, 0, 0, 0.08) !important;
+}
+
+#mainContent.docreq-page #docreqStatusSelect .docreq-select-leading {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#mainContent.docreq-page #docreqStatusSelect .docreq-select-leading i {
+    font-size: 12px !important;
+}
+
+#mainContent.docreq-page #docreqStatusSelect .docreq-select-text span {
+    color: #8B949E !important;
+    font-size: 8.5px !important;
+    font-weight: 900 !important;
+    letter-spacing: .10em !important;
+    line-height: 1 !important;
+}
+
+#mainContent.docreq-page #docreqStatusSelect .docreq-select-text strong {
+    color: #111827 !important;
+    font-size: 12.5px !important;
+    font-weight: 900 !important;
+    line-height: 1.1 !important;
+}
+
+#mainContent.docreq-page #docreqStatusSelect .docreq-select-count {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    border-radius: 999px !important;
+    background: #FEE2E2 !important;
+    border: 1px solid rgba(185, 28, 28, 0.18) !important;
+    color: #991B1B !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+}
+
+#mainContent.docreq-page #docreqStatusSelect .docreq-select-chevron {
+    color: #94A3B8 !important;
+    font-size: 12px !important;
+}
+
+/* Search bar same compact size as other dentist search bars */
+#mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap .search-wrap,
+#mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap .global-search,
+#mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap [data-search-wrapper] {
+    width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+}
+
+#mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap .search-input,
+#mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap [data-search-input] {
+    height: 42px !important;
+    min-height: 42px !important;
+    line-height: 42px !important;
+    border-radius: 999px !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu.docreq-select-menu {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: auto !important;
+
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+
+    padding: 12px !important;
+    border-radius: 18px !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 1px solid rgba(229, 231, 235, 0.95) !important;
+    box-shadow:
+        0 16px 36px rgba(15, 23, 42, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.80) !important;
+}
+
+.approve-hero {
+    background: linear-gradient(145deg, #052e16 0%, #14532d 40%, #166534 100%);
+    padding: 2.2rem 1.75rem 1.8rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.approve-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .04);
+}
+
+.approve-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .03);
+}
+
+.approve-icon-ring {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    position: relative;
+    z-index: 1;
+    border: 2px solid rgba(255, 255, 255, .15);
+}
+
+.approve-icon-inner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.approve-icon-inner i {
+    font-size: 1.3rem;
+    color: #86efac;
+}
+
+.approve-hero-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: .3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.approve-hero-sub {
+    font-size: .75rem;
+    color: rgba(255, 255, 255, .55);
+    position: relative;
+    z-index: 1;
+}
+
+.approve-patient-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #f0fdf4;
+    border: 1.5px solid #bbf7d0;
+    border-radius: 14px;
+    padding: .9rem 1.1rem;
+}
+
+.approve-patient-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #dcfce7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.approve-patient-avatar i {
+    color: #15803d;
+    font-size: 1rem;
+}
+
+.approve-info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    background: #f0fdf4;
+    border-radius: 10px;
+    padding: .65rem .85rem;
+    margin-top: .85rem;
+    font-size: .75rem;
+    color: #166534;
+    line-height: 1.5;
+}
+
+.approve-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.75rem 1.5rem;
+    margin-top: 1.25rem;
+    border-top: 1px solid #f0f0f0;
+    background: #fafaf9;
+}
+
+.reject-hero {
+    background: linear-gradient(145deg, #450a0a 0%, #7f1d1d 40%, #991b1b 100%);
+    padding: 2.2rem 1.75rem 1.8rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.reject-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .04);
+}
+
+.reject-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .03);
+}
+
+.reject-icon-ring {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    position: relative;
+    z-index: 1;
+    border: 2px solid rgba(255, 255, 255, .15);
+}
+
+.reject-icon-inner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reject-icon-inner i {
+    font-size: 1.3rem;
+    color: #fca5a5;
+}
+
+.reject-hero-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: .3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.reject-hero-sub {
+    font-size: .75rem;
+    color: rgba(255, 255, 255, .5);
+    position: relative;
+    z-index: 1;
+}
+
+.reject-patient-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #fff5f5;
+    border: 1.5px solid #fecaca;
+    border-radius: 14px;
+    padding: .9rem 1.1rem;
+}
+
+.reject-patient-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #fee2e2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.reject-patient-avatar i {
+    color: #b91c1c;
+    font-size: 1rem;
+}
+
+.reject-field-label {
+    display: block;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #6b2020;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: .45rem;
+}
+
+.reject-textarea {
+    width: 100%;
+    border: 2px solid #fecaca;
+    border-radius: 12px;
+    padding: .7rem .9rem;
+    font-size: .85rem;
+    font-family: inherit;
+    outline: none;
+    resize: none;
+    background: #fff5f5;
+    color: #450a0a;
+    transition: border-color .2s, box-shadow .2s;
+    line-height: 1.5;
+}
+
+.reject-textarea::placeholder {
+    color: #d1a3a3;
+}
+
+.reject-textarea:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, .1);
+    background: #fff;
+}
+
+.reject-warning-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    background: #fff5f5;
+    border-radius: 10px;
+    padding: .65rem .85rem;
+    margin-top: .85rem;
+    font-size: .75rem;
+    color: #991b1b;
+    line-height: 1.5;
+}
+
+.reject-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.75rem 1.5rem;
+    margin-top: 1.25rem;
+    border-top: 1px solid #fef2f2;
+    background: #fffafa;
+}
+
+#filterModal #docTypeSelect .docreq-select-button {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border: 1px solid rgba(139, 0, 0, 0.12) !important;
+    color: #111827 !important;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, 0.055) !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-leading {
+    background: #FEE2E2 !important;
+    color: #8B0000 !important;
+    border: 1px solid #FECACA !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-text span {
+    color: #9CA3AF !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-text strong {
+    color: #111827 !important;
+}
+
+#filterModal #docTypeSelectMenu.docreq-select-menu {
+    max-height: 280px !important;
+    overflow-y: auto !important;
+    padding: 10px !important;
+    border-radius: 18px !important;
+    background:
+        radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.88), transparent 42%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 247, 247, 0.86)) !important;
+    border: 1px solid rgba(229, 231, 235, 0.95) !important;
+    box-shadow:
+        0 18px 42px rgba(15, 23, 42, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(22px) saturate(165%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(165%) !important;
+}
+
+#filterModal #docTypeSelectMenu .doc-type-option {
+    min-height: 58px !important;
+    padding: 10px 12px !important;
+    border-radius: 14px !important;
+    background: rgba(248, 250, 252, 0.88) !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+}
+
+#filterModal #docTypeSelectMenu .doc-type-option:hover,
+#filterModal #docTypeSelectMenu .doc-type-option.active {
+    background: rgba(139, 0, 0, 0.07) !important;
+    border-color: rgba(139, 0, 0, 0.16) !important;
+}
+
+#filterModal #docTypeSelectMenu .docreq-option-copy strong {
+    color: #111827 !important;
+}
+
+#filterModal #docTypeSelectMenu .docreq-option-copy small {
+    color: #9CA3AF !important;
+}
+
+#filterModal #docTypeSelectMenu .docreq-option-check {
+    color: #8B0000 !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-all {
+    background: #E0E7FF !important;
+    color: #2563EB !important;
+    border: 1px solid #C7D2FE !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-blue {
+    background: #DBEAFE !important;
+    color: #2563EB !important;
+    border: 1px solid #BFDBFE !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-orange {
+    background: #FFF7ED !important;
+    color: #F97316 !important;
+    border: 1px solid #FED7AA !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-green {
+    background: #DCFCE7 !important;
+    color: #16A34A !important;
+    border: 1px solid #86EFAC !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-red {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border: 1px solid #FCA5A5 !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-purple {
+    background: #F3E8FF !important;
+    color: #9333EA !important;
+    border: 1px solid #D8B4FE !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-cyan {
+    background: #CFFAFE !important;
+    color: #0891B2 !important;
+    border: 1px solid #67E8F9 !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-amber {
+    background: #FEF3C7 !important;
+    color: #D97706 !important;
+    border: 1px solid #FCD34D !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-button,
+.dark #filterModal #docTypeSelect .docreq-select-button {
+    background:
+        radial-gradient(circle at 14% 0%, rgba(255, 255, 255, 0.10), transparent 42%),
+        linear-gradient(145deg, rgba(15, 23, 42, 0.78), rgba(13, 17, 23, 0.62)) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #F8FAFC !important;
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-leading,
+.dark #filterModal #docTypeSelect .docreq-select-leading {
+    background: rgba(139, 0, 0, 0.24) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-text span,
+.dark #filterModal #docTypeSelect .docreq-select-text span {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-text strong,
+.dark #filterModal #docTypeSelect .docreq-select-text strong {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-chevron,
+.dark #filterModal #docTypeSelect .docreq-select-chevron {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu.docreq-select-menu,
+.dark #filterModal #docTypeSelectMenu.docreq-select-menu {
+    background:
+        radial-gradient(circle at 14% 0%, rgba(255, 255, 255, 0.14), transparent 42%),
+        radial-gradient(circle at 88% 10%, rgba(139, 0, 0, 0.20), transparent 40%),
+        linear-gradient(145deg, rgba(17, 24, 39, 0.76), rgba(13, 17, 23, 0.62)) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    box-shadow:
+        0 24px 58px rgba(0, 0, 0, 0.48),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu .doc-type-option,
+.dark #filterModal #docTypeSelectMenu .doc-type-option {
+    background:
+        radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.10), transparent 42%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 8px 18px rgba(0, 0, 0, 0.10) !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu .doc-type-option:hover,
+[data-theme="dark"] #filterModal #docTypeSelectMenu .doc-type-option.active,
+.dark #filterModal #docTypeSelectMenu .doc-type-option:hover,
+.dark #filterModal #docTypeSelectMenu .doc-type-option.active {
+    background: rgba(139, 0, 0, 0.20) !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu .docreq-option-copy strong,
+.dark #filterModal #docTypeSelectMenu .docreq-option-copy strong {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu .docreq-option-copy small,
+.dark #filterModal #docTypeSelectMenu .docreq-option-copy small {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu .docreq-option-check,
+.dark #filterModal #docTypeSelectMenu .docreq-option-check {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-all,
+.dark #filterModal .docreq-option-icon.doc-type-all,
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-blue,
+.dark #filterModal .docreq-option-icon.doc-type-blue {
+    background: rgba(59, 130, 246, 0.18) !important;
+    color: #93C5FD !important;
+    border: 1px solid rgba(147, 197, 253, 0.25) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-orange,
+.dark #filterModal .docreq-option-icon.doc-type-orange,
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-amber,
+.dark #filterModal .docreq-option-icon.doc-type-amber {
+    background: rgba(249, 115, 22, 0.16) !important;
+    color: #FDBA74 !important;
+    border: 1px solid rgba(251, 146, 60, 0.28) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-green,
+.dark #filterModal .docreq-option-icon.doc-type-green {
+    background: rgba(22, 163, 74, 0.16) !important;
+    color: #86EFAC !important;
+    border: 1px solid rgba(134, 239, 172, 0.24) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-red,
+.dark #filterModal .docreq-option-icon.doc-type-red {
+    background: rgba(220, 38, 38, 0.16) !important;
+    color: #FCA5A5 !important;
+    border: 1px solid rgba(248, 113, 113, 0.26) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-purple,
+.dark #filterModal .docreq-option-icon.doc-type-purple {
+    background: rgba(147, 51, 234, 0.16) !important;
+    color: #D8B4FE !important;
+    border: 1px solid rgba(216, 180, 254, 0.24) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-cyan,
+.dark #filterModal .docreq-option-icon.doc-type-cyan {
+    background: rgba(8, 145, 178, 0.16) !important;
+    color: #67E8F9 !important;
+    border: 1px solid rgba(103, 232, 249, 0.24) !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu.docreq-select-menu::before {
+    content: "" !important;
+    grid-column: 1 / -1 !important;
+    display: block !important;
+    padding: 0 3px 1px !important;
+    color: #111827 !important;
+    font-size: 13.5px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option {
+    width: 100% !important;
+    min-height: 74px !important;
+    padding: 10px 7px !important;
+    border-radius: 14px !important;
+    border: 1px solid #e9e9e9 !important;
+    background: #f7f7f7 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+
+    text-align: center !important;
+    cursor: pointer !important;
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        transform .18s ease,
+        box-shadow .18s ease !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 12px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-icon i {
+    font-size: 15px !important;
+    line-height: 1 !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-copy {
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-copy strong {
+    color: #64748B !important;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+    white-space: normal !important;
+}
+
+/* Dropdown icon colors */
+#mainContent.docreq-page .docreq-select-leading.status-all,
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-icon.status-all {
+    background: #E0E7FF !important;
+    color: #2563EB !important;
+    border: 1px solid #C7D2FE !important;
+}
+
+#mainContent.docreq-page .docreq-select-leading.status-pending,
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-icon.status-pending {
+    background: #FFF7ED !important;
+    color: #F97316 !important;
+    border: 1px solid #FED7AA !important;
+}
+
+#mainContent.docreq-page .docreq-select-leading.status-approved,
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-icon.status-approved {
+    background: #DCFCE7 !important;
+    color: #16A34A !important;
+    border: 1px solid #86EFAC !important;
+}
+
+#mainContent.docreq-page .docreq-select-leading.status-rejected,
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-icon.status-rejected {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border: 1px solid #FCA5A5 !important;
+}
+
+/* Active/hover tile colors should follow the status */
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="all"]:hover,
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="all"].active {
+    background: #EEF2FF !important;
+    border-color: #C7D2FE !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="pending"]:hover,
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="pending"].active {
+    background: #FFF7ED !important;
+    border-color: #FED7AA !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="approved"]:hover,
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="approved"].active {
+    background: #F0FDF4 !important;
+    border-color: #86EFAC !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="rejected"]:hover,
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="rejected"].active {
+    background: #FEF2F2 !important;
+    border-color: #FCA5A5 !important;
+}
+
+/* dark mode glass active per status */
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="all"]:hover,
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="all"].active,
+.dark #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="all"]:hover,
+.dark #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="all"].active {
+    background: rgba(59, 130, 246, 0.12) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 10px 24px rgba(0, 0, 0, 0.22) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="pending"]:hover,
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="pending"].active,
+.dark #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="pending"]:hover,
+.dark #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="pending"].active {
+    background: rgba(249, 115, 22, 0.12) !important;
+    border-color: rgba(251, 146, 60, 0.24) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 10px 24px rgba(0, 0, 0, 0.22) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="approved"]:hover,
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="approved"].active,
+.dark #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="approved"]:hover,
+.dark #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="approved"].active {
+    background: rgba(34, 197, 94, 0.12) !important;
+    border-color: rgba(134, 239, 172, 0.24) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 10px 24px rgba(0, 0, 0, 0.22) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="rejected"]:hover,
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="rejected"].active,
+.dark #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="rejected"]:hover,
+.dark #mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="rejected"].active {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: rgba(252, 165, 165, 0.24) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 10px 24px rgba(0, 0, 0, 0.22) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="all"]:hover .docreq-option-copy strong,
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="all"].active .docreq-option-copy strong {
+    color: #1E40AF !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="pending"]:hover .docreq-option-copy strong,
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="pending"].active .docreq-option-copy strong {
+    color: #EA580C !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="approved"]:hover .docreq-option-copy strong,
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="approved"].active .docreq-option-copy strong {
+    color: #15803D !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="rejected"]:hover .docreq-option-copy strong,
+#mainContent.docreq-page #docreqStatusMenu .docreq-select-option[data-value="rejected"].active .docreq-option-copy strong {
+    color: #B91C1C !important;
+}
+
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-copy small,
+#mainContent.docreq-page #docreqStatusMenu .docreq-option-count {
+    display: none !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusSelect .docreq-select-button,
+.dark #mainContent.docreq-page #docreqStatusSelect .docreq-select-button {
+    background: rgba(13, 17, 23, 0.82) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #F8FAFC !important;
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusSelect .docreq-select-button:hover,
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusSelect.open .docreq-select-button,
+.dark #mainContent.docreq-page #docreqStatusSelect .docreq-select-button:hover,
+.dark #mainContent.docreq-page #docreqStatusSelect.open .docreq-select-button {
+    background: rgba(17, 24, 39, 0.95) !important;
+    border-color: rgba(252, 165, 165, 0.24) !important;
+    box-shadow:
+        0 0 0 3px rgba(139, 0, 0, 0.22),
+        0 12px 28px rgba(0, 0, 0, 0.34) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusSelect .docreq-select-text span,
+.dark #mainContent.docreq-page #docreqStatusSelect .docreq-select-text span {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusSelect .docreq-select-text strong,
+.dark #mainContent.docreq-page #docreqStatusSelect .docreq-select-text strong {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusSelect .docreq-select-count,
+.dark #mainContent.docreq-page #docreqStatusSelect .docreq-select-count {
+    background: rgba(248, 113, 113, 0.16) !important;
+    border-color: rgba(248, 113, 113, 0.28) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page #docreqStatusSelect .docreq-select-chevron,
+.dark #mainContent.docreq-page #docreqStatusSelect .docreq-select-chevron {
+    color: #94A3B8 !important;
+}
+
+@media (max-width: 1280px) and (min-width: 768px) {
+    #mainContent.docreq-page .docreq-toolbar-actions {
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions #docreqStatusSelect,
+    #mainContent.docreq-page .docreq-toolbar-actions .docreq-toolbar-sort {
+        flex: 0 0 250px !important;
+        width: 250px !important;
+        min-width: 250px !important;
+        max-width: 250px !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap {
+        flex: 1 1 0 !important;
+        width: auto !important;
+        min-width: 260px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    #mainContent.docreq-page {
+        padding-top: 88px !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    #mainContent.docreq-page .table-card {
+        margin-top: 0 !important;
+        border-radius: 22px !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.docreq-page .table-card>div:first-child {
+        padding: 10px 12px 12px !important;
+        border-radius: 22px 22px 0 0 !important;
+    }
+
+    #mainContent.docreq-page .table-card>div:first-child>div {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 10px !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions #docreqStatusSelect,
+    #mainContent.docreq-page .docreq-toolbar-actions .docreq-toolbar-sort {
+        order: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        flex: 0 0 100% !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap {
+        order: 2 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 0 0 100% !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions .view-toggle-container,
+    #mainContent.docreq-page .docreq-toolbar-actions #btnListView,
+    #mainContent.docreq-page .docreq-toolbar-actions #btnGridView,
+    #mainContent.docreq-page .docreq-toolbar-actions .view-slider {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions #externalClearFilterBtn.hidden {
+        display: none !important;
+    }
+
+    #mainContent.docreq-page #docreqStatusMenu.docreq-select-menu {
+        position: absolute !important;
+        top: calc(100% + 8px) !important;
+        left: 0 !important;
+        right: auto !important;
+
+        width: min(295px, calc(100vw - 28px)) !important;
+        min-width: 0 !important;
+        max-width: calc(100vw - 28px) !important;
+
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+
+        z-index: 120 !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions #filterBtn {
+        order: 3 !important;
+        flex: 1 1 0 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        min-height: 42px !important;
+        justify-content: center !important;
+        border-radius: 16px !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions #externalClearFilterBtn {
+        order: 3 !important;
+        flex: 0 0 42px !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        min-height: 42px !important;
+        border-radius: 14px !important;
+        align-self: stretch !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions #docreqStatusSelect .docreq-select-button,
+    #mainContent.docreq-page .docreq-toolbar-sort .docreq-select-button {
+        height: 42px !important;
+        min-height: 42px !important;
+        border-radius: 16px !important;
+        padding: 0 11px !important;
+        display: grid !important;
+        grid-template-columns: 28px minmax(0, 1fr) 24px 12px !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions #docreqStatusSelect .docreq-select-leading,
+    #mainContent.docreq-page .docreq-toolbar-sort .docreq-select-leading {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        border-radius: 10px !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions #docreqStatusSelect .docreq-select-count,
+    #mainContent.docreq-page .docreq-toolbar-sort .docreq-select-count {
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        font-size: 12px !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap .search-wrap,
+    #mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap .global-search,
+    #mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap [data-search-wrapper] {
+        width: 100% !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap .search-input,
+    #mainContent.docreq-page .docreq-toolbar-actions .docreq-search-wrap [data-search-input] {
+        height: 42px !important;
+        min-height: 42px !important;
+        line-height: 42px !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.docreq-page #rowCount {
+        width: 100% !important;
+        display: inline-flex !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        padding: 10px 0 0 !important;
+        font-size: 11px !important;
+        order: 5 !important;
+    }
+}
+
+@media (max-width: 767px) {
+    #mainContent.docreq-page .docreq-mobile-footer.docreq-mobile-footer-actions {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        width: 100% !important;
+        margin-top: 8px !important;
+        padding: 0 14px 14px 18px !important;
+        border-top: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .docreq-mobile-direct-actions {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+        width: auto !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-top: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .btn-approve {
+        width: auto !important;
+        min-width: 0 !important;
+        min-height: 34px !important;
+        height: 34px !important;
+        padding: 0 14px !important;
+        border-radius: 9px !important;
+        justify-content: center !important;
+        gap: .35rem !important;
+        background: #15803d !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-size: .78rem !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        box-shadow: none !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .btn-reject {
+        width: auto !important;
+        min-width: 0 !important;
+        min-height: 34px !important;
+        height: 34px !important;
+        padding: 0 14px !important;
+        border-radius: 9px !important;
+        justify-content: center !important;
+        gap: .35rem !important;
+        background: #ffffff !important;
+        color: #b91c1c !important;
+        border: 2px solid #fca5a5 !important;
+        font-size: .78rem !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        box-shadow: none !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .btn-approve:hover {
+        background: #166534 !important;
+        transform: scale(1.02) !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .btn-reject:hover {
+        background: #b91c1c !important;
+        color: #ffffff !important;
+        border-color: #b91c1c !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .docreq-mobile-state-note {
+        width: auto !important;
+        min-height: 34px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 9px !important;
+        padding: 0 14px !important;
+        background: rgba(148, 163, 184, 0.12) !important;
+        color: #64748B !important;
+        font-size: .78rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: .04em !important;
+    }
+
+    [data-theme="dark"] #mainContent.docreq-page .docreq-mobile-footer-actions .btn-reject,
+    .dark #mainContent.docreq-page .docreq-mobile-footer-actions .btn-reject {
+        background: transparent !important;
+        color: #FCA5A5 !important;
+        border-color: rgba(248, 113, 113, 0.55) !important;
+    }
+
+    [data-theme="dark"] #mainContent.docreq-page .docreq-mobile-footer-actions .btn-reject:hover,
+    .dark #mainContent.docreq-page .docreq-mobile-footer-actions .btn-reject:hover {
+        background: #b91c1c !important;
+        color: #ffffff !important;
+        border-color: #b91c1c !important;
+    }
+}
+
+#mainContent.docreq-page .docreq-list-avatar,
+#mainContent.docreq-page .docreq-grid-avatar,
+#mainContent.docreq-page .docreq-mobile-avatar {
+    overflow: hidden !important;
+}
+
+#mainContent.docreq-page .docreq-list-avatar.has-photo,
+#mainContent.docreq-page .docreq-grid-avatar.has-photo,
+#mainContent.docreq-page .docreq-mobile-avatar.has-photo {
+    background: #F3F4F6 !important;
+    padding: 0 !important;
+}
+
+#mainContent.docreq-page .docreq-avatar-img {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: inherit !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .docreq-list-avatar.has-photo,
+[data-theme="dark"] #mainContent.docreq-page .docreq-grid-avatar.has-photo,
+[data-theme="dark"] #mainContent.docreq-page .docreq-mobile-avatar.has-photo,
+.dark #mainContent.docreq-page .docreq-list-avatar.has-photo,
+.dark #mainContent.docreq-page .docreq-grid-avatar.has-photo,
+.dark #mainContent.docreq-page .docreq-mobile-avatar.has-photo {
+    background: #111827 !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern {
+    position: relative !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-card-status {
+    position: absolute !important;
+    top: 18px !important;
+    right: 18px !important;
+    z-index: 8 !important;
+    max-width: 92px !important;
+    min-height: 24px !important;
+    padding: 0 10px !important;
+    font-size: 10.5px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-card-profile,
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-profile {
+    padding-right: 94px !important;
+}
+
+#mainContent.docreq-page .btn-approve {
+    background: #15803D !important;
+    color: #FFFFFF !important;
+    border: 1px solid #15803D !important;
+    box-shadow: none !important;
+}
+
+#mainContent.docreq-page .btn-approve:hover {
+    background: #166534 !important;
+    border-color: #166534 !important;
+    transform: translateY(-1px) !important;
+}
+
+#mainContent.docreq-page .btn-reject {
+    background: #FFFFFF !important;
+    color: #B91C1C !important;
+    border: 1.5px solid #FCA5A5 !important;
+    box-shadow: none !important;
+}
+
+#mainContent.docreq-page .btn-reject:hover {
+    background: #B91C1C !important;
+    color: #FFFFFF !important;
+    border-color: #B91C1C !important;
+    transform: translateY(-1px) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .btn-approve,
+.dark #mainContent.docreq-page .btn-approve {
+    background: rgba(22, 163, 74, 0.18) !important;
+    color: #86EFAC !important;
+    border-color: rgba(74, 222, 128, 0.34) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .btn-approve:hover,
+.dark #mainContent.docreq-page .btn-approve:hover {
+    background: rgba(22, 163, 74, 0.28) !important;
+    color: #DCFCE7 !important;
+    border-color: rgba(134, 239, 172, 0.46) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .btn-reject,
+.dark #mainContent.docreq-page .btn-reject {
+    background: rgba(127, 29, 29, 0.18) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(248, 113, 113, 0.38) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .btn-reject:hover,
+.dark #mainContent.docreq-page .btn-reject:hover {
+    background: rgba(185, 28, 28, 0.34) !important;
+    color: #FEE2E2 !important;
+    border-color: rgba(252, 165, 165, 0.54) !important;
+}
+
+@media (max-width: 767px) {
+    #mainContent.docreq-page #requestListContainer.docreq-list-container {
+        gap: 8px !important;
+        padding: 8px 12px 10px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-card {
+        border-radius: 18px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-card::before {
+        top: 12px !important;
+        bottom: 12px !important;
+        width: 3px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-head {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: start !important;
+        gap: 8px !important;
+        padding: 12px 12px 8px 16px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-profile {
+        grid-template-columns: 38px minmax(0, 1fr) !important;
+        gap: 9px !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-avatar {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 14px !important;
+        font-size: 14px !important;
+    }
+
+    #mainContent.docreq-page .mobile-patient-name {
+        font-size: 13.2px !important;
+        line-height: 1.16 !important;
+        font-weight: 850 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        overflow-wrap: break-word !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-card .mobile-sub-label {
+        max-width: 100% !important;
+        min-height: 22px !important;
+        padding: 0 9px !important;
+        margin-top: 5px !important;
+        font-size: 10px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-head .docreq-card-status {
+        justify-self: end !important;
+        align-self: start !important;
+        max-width: 86px !important;
+        min-height: 23px !important;
+        padding: 0 8px !important;
+        font-size: 9.5px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta {
+        gap: 7px !important;
+        padding: 0 12px 10px 16px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta>div {
+        min-height: auto !important;
+        grid-template-columns: 30px minmax(0, 1fr) !important;
+        gap: 6px 9px !important;
+        padding: 9px 10px !important;
+        border-radius: 14px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta i {
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        min-height: 30px !important;
+        border-radius: 11px !important;
+        font-size: 11px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta span {
+        font-size: 8.5px !important;
+        margin-bottom: 1px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta strong {
+        font-size: 12.3px !important;
+        line-height: 1.22 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-subvalue {
+        font-size: 11px !important;
+        margin-top: 1px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer.docreq-mobile-footer-actions {
+        display: flex !important;
+        justify-content: flex-end !important;
+        margin-top: 6px !important;
+        padding: 0 12px 12px 16px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .docreq-mobile-direct-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .btn-approve,
+    #mainContent.docreq-page .docreq-mobile-footer-actions .btn-reject {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 0 10px !important;
+        border-radius: 10px !important;
+        font-size: 12px !important;
+    }
+}
+
+@media (max-width: 380px) {
+    #mainContent.docreq-page .docreq-mobile-head {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-head .docreq-card-status {
+        justify-self: end !important;
+        max-width: 82px !important;
+    }
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern {
+    position: relative !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-card-status {
+    position: absolute !important;
+    top: 18px !important;
+    right: 18px !important;
+    z-index: 8 !important;
+    max-width: 92px !important;
+    min-height: 24px !important;
+    padding: 0 10px !important;
+    font-size: 10.5px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-card-profile,
+#mainContent.docreq-page .docreq-grid-card-modern .docreq-grid-profile {
+    padding-right: 94px !important;
+}
+
+#mainContent.docreq-page .btn-approve {
+    background: #15803D !important;
+    color: #FFFFFF !important;
+    border: 1px solid #15803D !important;
+    box-shadow: none !important;
+}
+
+#mainContent.docreq-page .btn-approve:hover {
+    background: #166534 !important;
+    border-color: #166534 !important;
+    transform: translateY(-1px) !important;
+}
+
+#mainContent.docreq-page .btn-reject {
+    background: #FFFFFF !important;
+    color: #B91C1C !important;
+    border: 1.5px solid #FCA5A5 !important;
+    box-shadow: none !important;
+}
+
+#mainContent.docreq-page .btn-reject:hover {
+    background: #B91C1C !important;
+    color: #FFFFFF !important;
+    border-color: #B91C1C !important;
+    transform: translateY(-1px) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .btn-approve,
+.dark #mainContent.docreq-page .btn-approve {
+    background: rgba(22, 163, 74, 0.18) !important;
+    color: #86EFAC !important;
+    border-color: rgba(74, 222, 128, 0.34) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .btn-approve:hover,
+.dark #mainContent.docreq-page .btn-approve:hover {
+    background: rgba(22, 163, 74, 0.28) !important;
+    color: #DCFCE7 !important;
+    border-color: rgba(134, 239, 172, 0.46) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .btn-reject,
+.dark #mainContent.docreq-page .btn-reject {
+    background: rgba(127, 29, 29, 0.18) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(248, 113, 113, 0.38) !important;
+}
+
+[data-theme="dark"] #mainContent.docreq-page .btn-reject:hover,
+.dark #mainContent.docreq-page .btn-reject:hover {
+    background: rgba(185, 28, 28, 0.34) !important;
+    color: #FEE2E2 !important;
+    border-color: rgba(252, 165, 165, 0.54) !important;
+}
+
+@media (max-width: 767px) {
+    #mainContent.docreq-page #requestListContainer.docreq-list-container {
+        gap: 8px !important;
+        padding: 8px 12px 10px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-card {
+        border-radius: 18px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-card::before {
+        top: 12px !important;
+        bottom: 12px !important;
+        width: 3px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-head {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: start !important;
+        gap: 8px !important;
+        padding: 12px 12px 8px 16px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-profile {
+        grid-template-columns: 38px minmax(0, 1fr) !important;
+        gap: 9px !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-avatar {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 14px !important;
+        font-size: 14px !important;
+    }
+
+    #mainContent.docreq-page .mobile-patient-name {
+        font-size: 13.2px !important;
+        line-height: 1.16 !important;
+        font-weight: 850 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        overflow-wrap: break-word !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-card .mobile-sub-label {
+        max-width: 100% !important;
+        min-height: 22px !important;
+        padding: 0 9px !important;
+        margin-top: 5px !important;
+        font-size: 10px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-head .docreq-card-status {
+        justify-self: end !important;
+        align-self: start !important;
+        max-width: 86px !important;
+        min-height: 23px !important;
+        padding: 0 8px !important;
+        font-size: 9.5px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta {
+        gap: 7px !important;
+        padding: 0 12px 10px 16px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta>div {
+        min-height: auto !important;
+        grid-template-columns: 30px minmax(0, 1fr) !important;
+        gap: 6px 9px !important;
+        padding: 9px 10px !important;
+        border-radius: 14px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta i {
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        min-height: 30px !important;
+        border-radius: 11px !important;
+        font-size: 11px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta span {
+        font-size: 8.5px !important;
+        margin-bottom: 1px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta strong {
+        font-size: 12.3px !important;
+        line-height: 1.22 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-subvalue {
+        font-size: 11px !important;
+        margin-top: 1px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer.docreq-mobile-footer-actions {
+        display: flex !important;
+        justify-content: flex-end !important;
+        margin-top: 6px !important;
+        padding: 0 12px 12px 16px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .docreq-mobile-direct-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer-actions .btn-approve,
+    #mainContent.docreq-page .docreq-mobile-footer-actions .btn-reject {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 0 10px !important;
+        border-radius: 10px !important;
+        font-size: 12px !important;
+    }
+}
+
+@media (max-width: 380px) {
+    #mainContent.docreq-page .docreq-mobile-head {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-head .docreq-card-status {
+        justify-self: end !important;
+        max-width: 82px !important;
+    }
+}
+
+[data-theme="dark"] .docreq-grid-card.docreq-card-selected,
+.dark .docreq-grid-card.docreq-card-selected,
+[data-theme="dark"] .mobile-req-card.docreq-card-selected,
+.dark .mobile-req-card.docreq-card-selected {
+    background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--card-accent, #c2410c) 18%, transparent), transparent 36%),
+        linear-gradient(145deg, rgba(17, 24, 39, 0.96), rgba(13, 17, 23, 0.92)) !important;
+    border-color: color-mix(in srgb, var(--card-accent, #c2410c) 45%, #30363D) !important;
+}
+
+.dl {
+    font-size: .67rem;
+    font-weight: 700;
+    color: #8B0000;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-bottom: .2rem;
+}
+
+.dv {
+    font-size: .88rem;
+    font-weight: 600;
+    color: #222;
+}
+
+.btn-approve {
+    background: #15803d;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 9px;
+    padding: .5rem 1.2rem;
+    font-weight: 700;
+    font-size: .8rem;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    transition: background .15s, transform .1s;
+}
+
+.btn-approve:hover {
+    background: #166534;
+    transform: scale(1.02);
+}
+
+.btn-reject {
+    background: #fff;
+    color: #b91c1c;
+    border: 2px solid #fca5a5;
+    cursor: pointer;
+    border-radius: 9px;
+    padding: .5rem 1.2rem;
+    font-weight: 700;
+    font-size: .8rem;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    transition: all .15s;
+}
+
+.btn-reject:hover {
+    background: #b91c1c;
+    color: #fff;
+    border-color: #b91c1c;
+}
+
+.btn-view {
+    background: #8B0000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 9px;
+    padding: .45rem 1.1rem;
+    font-weight: 700;
+    font-size: .78rem;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    transition: background .15s;
+    white-space: nowrap;
+}
+
+.btn-view:hover {
+    background: #6b0000;
+}
+
+@media (max-width: 767px) {
+
+    #mainContent.docreq-page #requestGridContainer.docreq-grid {
+        display: none !important;
+    }
+
+    #mainContent.docreq-page #requestListContainer.docreq-list-container {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 10px !important;
+        background: #FFFFFF !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-card {
+        display: block !important;
+        position: relative !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(229, 231, 235, 0.92) !important;
+        background:
+            radial-gradient(circle at 94% 4%, color-mix(in srgb, var(--card-accent, #8B0000) 9%, transparent), transparent 38%),
+            #FFFFFF !important;
+        box-shadow:
+            0 10px 24px rgba(15, 23, 42, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+        cursor: pointer !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-card::before {
+        content: "" !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 14px !important;
+        bottom: 14px !important;
+        width: 4px !important;
+        border-radius: 0 999px 999px 0 !important;
+        background: var(--card-accent, #8B0000) !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-head {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: start !important;
+        gap: 10px !important;
+        padding: 14px 14px 12px 18px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-profile {
+        min-width: 0 !important;
+        display: grid !important;
+        grid-template-columns: 42px minmax(0, 1fr) !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-avatar {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        border-radius: 99px !important;
+        font-size: 15px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-person {
+        min-width: 0 !important;
+    }
+
+    #mainContent.docreq-page .mobile-patient-name {
+        max-width: 100% !important;
+        font-size: 14px !important;
+        line-height: 1.22 !important;
+        font-weight: 800 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+    }
+
+    #mainContent.docreq-page .mobile-sub-label {
+        margin-top: 5px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-head .status-badge {
+        max-width: 92px !important;
+        min-height: 24px !important;
+        padding: 0 8px !important;
+        font-size: 10px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        padding: 0 14px 12px 18px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta>div {
+        min-width: 0 !important;
+        min-height: auto !important;
+        display: grid !important;
+        grid-template-columns: 34px minmax(0, 1fr) !important;
+        grid-auto-rows: auto !important;
+        align-items: start !important;
+        gap: 7px 10px !important;
+        padding: 12px !important;
+        border-radius: 15px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta>div.wide {
+        grid-column: 1 / -1 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta i {
+        grid-column: 1 !important;
+        grid-row: 1 / span 3 !important;
+        align-self: start !important;
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        min-height: 34px !important;
+        border-radius: 12px !important;
+        font-size: 12px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta span {
+        grid-column: 2 !important;
+        margin: 0 !important;
+        font-size: 9px !important;
+        line-height: 1.15 !important;
+        font-weight: 800 !important;
+        letter-spacing: .08em !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-meta strong {
+        grid-column: 2 !important;
+        display: block !important;
+        max-width: 100% !important;
+        color: #111827 !important;
+        font-size: 13px !important;
+        line-height: 1.28 !important;
+        font-weight: 800 !important;
+
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
+
+        line-clamp: unset !important;
+        -webkit-box-orient: initial !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-subvalue {
+        grid-column: 2 !important;
+        display: block !important;
+        margin-top: 1px !important;
+        color: #94A3B8 !important;
+        font-size: 12px !important;
+        line-height: 1.2 !important;
+        font-weight: 800 !important;
+
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-footer {
+        padding: 0 14px 14px 18px !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+        border-top: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-view-btn,
+    #mainContent.docreq-page .docreq-mobile-state-note {
+        min-height: 36px !important;
+        padding: 0 14px !important;
+        border-radius: 999px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-detail {
+        overflow: hidden !important;
+        max-height: 0 !important;
+        opacity: 0 !important;
+        padding: 0 14px 0 18px !important;
+        border-top: 0 solid transparent !important;
+        background: rgba(248, 250, 252, 0.78) !important;
+        transition:
+            max-height .28s cubic-bezier(.22, 1, .36, 1),
+            opacity .2s ease,
+            padding .2s ease,
+            border-color .2s ease !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-detail.open {
+        max-height: 460px !important;
+        opacity: 1 !important;
+        padding: 14px 14px 16px 18px !important;
+        border-top: 1px solid rgba(229, 231, 235, 0.78) !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-detail-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-detail-grid>div {
+        min-width: 0 !important;
+        padding: 10px !important;
+        border-radius: 14px !important;
+        background: #FFFFFF !important;
+        border: 1px solid rgba(229, 231, 235, 0.88) !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        margin-top: 12px !important;
+        padding-top: 12px !important;
+        border-top: 1px solid rgba(229, 231, 235, 0.76) !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-actions .btn-approve,
+    #mainContent.docreq-page .docreq-mobile-actions .btn-reject,
+    #mainContent.docreq-page .docreq-mobile-actions .btn-close-detail {
+        width: 100% !important;
+        min-height: 38px !important;
+        justify-content: center !important;
+        border-radius: 999px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-actions .btn-close-detail {
+        grid-column: 1 / -1 !important;
+    }
+
+    #mainContent.docreq-page .docreq-detail-actions-only,
+    #mainContent.docreq-page .docreq-mobile-actions-only {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+
+    #mainContent.docreq-page .docreq-mobile-actions-only .btn-close-detail {
+        grid-column: 1 / -1 !important;
+    }
+
+    #requestListContainer {
+        padding: 8px 8px 4px !important;
+    }
+
+    #requestGridContainer {
+        display: none !important;
+    }
+
+    .docreq-header-wrap {
+        display: block !important;
+        margin: 0 0 10px !important;
+        padding: 0 !important;
+        gap: 0 !important;
+    }
+
+    .docreq-overview-shell {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    .docreq-overview-copy,
+    .docreq-overview-kicker,
+    .docreq-overview-copy p {
+        display: none !important;
+    }
+
+    .docreq-status-dropdown,
+    .docreq-toolbar-sort,
+    #docreqStatusSelect {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+
+    .docreq-select-button {
+        width: 100% !important;
+        height: 46px !important;
+        min-height: 46px !important;
+        padding: 0 12px !important;
+        border-radius: 18px !important;
+        display: grid !important;
+        grid-template-columns: 34px minmax(0, 1fr) 32px 14px !important;
+        align-items: center !important;
+        gap: 9px !important;
+    }
+
+    .docreq-select-leading {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 13px !important;
+    }
+
+    .docreq-select-count {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        font-size: 12px !important;
+    }
+
+    .docreq-select-menu {
+        width: 100% !important;
+        min-width: 0 !important;
+        left: 0 !important;
+        right: auto !important;
+        z-index: 120 !important;
+    }
+
+    #mainContent.docreq-page #statCards .stat-card-info {
+        gap: 5px !important;
+    }
+
+    #mainContent.docreq-page #statCards .stat-num {
+        font-size: 26px !important;
+    }
+
+    #mainContent.docreq-page #statCards .stat-label {
+        font-size: 8.5px !important;
+        letter-spacing: .06em !important;
+        white-space: normal !important;
+    }
+
+    .docreq-title-hero {
+        padding: 18px 16px;
+        border-radius: 20px;
+    }
+
+    .docreq-title-left {
+        gap: 12px;
+    }
+
+    .docreq-title-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 15px;
+    }
+
+    .docreq-title-heading {
+        font-size: 1.55rem;
+    }
+
+    .docreq-title-orb {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .docreq-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        padding: 10px !important;
+    }
+
+    .docreq-decision-overlay.open .docreq-decision-modal {
+        animation: modalSlideUp .28s cubic-bezier(.22, 1, .36, 1) both !important;
+    }
+
+    .docreq-decision-overlay.closing .docreq-decision-modal {
+        animation: modalSlideDown .22s ease both !important;
+    }
+
+    .docreq-decision-modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 86dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    .docreq-decision-modal .approve-hero,
+    .docreq-decision-modal .reject-hero {
+        padding: 1.08rem 1rem .92rem !important;
+    }
+
+    .docreq-decision-modal .approve-icon-ring,
+    .docreq-decision-modal .reject-icon-ring {
+        width: 48px !important;
+        height: 48px !important;
+        margin-bottom: .58rem !important;
+    }
+
+    .docreq-decision-modal .approve-icon-inner,
+    .docreq-decision-modal .reject-icon-inner {
+        width: 34px !important;
+        height: 34px !important;
+    }
+
+    .docreq-decision-body {
+        padding: .9rem 1rem 1rem !important;
+        overflow-y: auto !important;
+    }
+
+    .docreq-decision-patient-card {
+        padding: .68rem .75rem !important;
+    }
+
+    .docreq-decision-request-card {
+        grid-template-columns: 1fr !important;
+        gap: .52rem !important;
+        margin-top: .62rem !important;
+    }
+
+    .docreq-decision-info {
+        padding: .62rem .68rem !important;
+    }
+
+    .docreq-decision-info-wide {
+        grid-column: auto !important;
+    }
+
+    .docreq-decision-modal .approve-info-row,
+    .docreq-decision-modal .reject-warning-row {
+        padding: .55rem .68rem !important;
+        font-size: .68rem !important;
+    }
+
+    .docreq-field-head {
+        align-items: flex-start !important;
+    }
+
+    .docreq-decision-modal .reject-textarea {
+        min-height: 118px !important;
+        max-height: 150px !important;
+        font-size: .82rem !important;
+    }
+
+    .docreq-decision-modal .approve-footer,
+    .docreq-decision-modal .reject-footer {
+        margin-top: 0 !important;
+        padding: .75rem 1rem calc(.85rem + env(safe-area-inset-bottom)) !important;
+        flex-wrap: nowrap !important;
+        gap: .55rem !important;
+    }
+
+    .docreq-decision-modal .modal-btn-confirm-approve,
+    .docreq-decision-modal .modal-btn-confirm-reject,
+    .docreq-decision-modal .modal-btn-ghost {
+        flex: 1 1 0 !important;
+        min-height: 40px !important;
+        padding: 0 .65rem !important;
+        justify-content: center !important;
+        font-size: .72rem !important;
+        white-space: nowrap !important;
+    }
+
+    .approve-hero,
+    .reject-hero {
+        padding: 1.6rem 1.25rem 1.4rem !important;
+    }
+
+    .approve-footer,
+    .reject-footer {
+        padding: 1rem 1.25rem 1.2rem !important;
+        flex-wrap: wrap !important;
+        gap: .5rem !important;
+    }
+
+}
+
+@media (max-width:380px) {
+
+    .docreq-page .stat-num {
+        font-size: 1.5rem;
+    }
+
+    .docreq-page .stat-label {
+        font-size: .62rem;
+    }
+}
+
+@media (max-width:1023px) and (min-width:768px) {
+    .docreq-page .stat-num {
+        font-size: 2rem;
+    }
+
+    .req-inner {
+        grid-template-columns: 1fr auto !important;
+        row-gap: .5rem;
+    }
+
+    .req-date-col,
+    .req-doc-col {
+        display: none;
+    }
+
+    .req-purpose-col {
+        display: none;
+    }
+
+}
+
+@media (max-width: 1024px) {
+    .docreq-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
