@@ -1,0 +1,133 @@
+.voice-mic-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    width: 18px;
+    height: 18px;
+    font-size: 13px;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+    color: #6b7280;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 4;
+}
+
+.voice-mic-btn:hover {
+    color: #8B0000;
+}
+
+.voice-search-mic.external {
+    display: inline-flex !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    align-items: center;
+    justify-content: center;
+    background: #4b5563;
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(75, 85, 99, 0.12);
+    border: none;
+    margin-left: 0;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    position: relative;
+    z-index: 31;
+    pointer-events: auto;
+}
+
+.voice-search-mic.external:hover {
+    background: #374151;
+}
+
+.voice-search-mic.external i {
+    font-size: 12px;
+    line-height: 1;
+}
+
+.voice-search-mic.external.mic-active {
+    background: #c0392b;
+    transform: scale(1.1);
+    animation: micPulse 1.2s ease-in-out infinite;
+}
+
+.voice-input-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.voice-input-wrap>input,
+.voice-input-wrap>textarea {
+    width: 100%;
+}
+
+.voice-input-wrap .voice-mic-btn {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+}
+
+.patient-voice-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    z-index: 30;
+    pointer-events: auto;
+}
+
+.patient-voice-status {
+    position: absolute;
+    right: 0;
+    top: -1.35rem;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: .74rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: .18rem .48rem;
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 6;
+    background: rgba(255, 255, 255, .92);
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+
+.patient-voice-status.hidden {
+    display: none;
+}
+
+.patient-search-wrap [data-voice-status].is-listening {
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+
+.patient-search-wrap [data-voice-status].is-error {
+    color: #b91c1c;
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.patient-search-wrap [data-voice-status].is-success {
+    color: #166534;
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+[data-theme="dark"] .patient-voice-status {
+    background: rgba(13, 17, 23, .92) !important;
+    border-color: #21262d !important;
+    color: #d1d5db !important;
+}

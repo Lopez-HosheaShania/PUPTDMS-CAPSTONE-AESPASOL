@@ -128,6 +128,10 @@
     animation: errorSlide .15s ease-out;
 }
 
+.field-error.show {
+    display: block;
+}
+
 .status-badge {
     display: inline-flex;
     align-items: center;

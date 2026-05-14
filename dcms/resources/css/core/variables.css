@@ -107,6 +107,15 @@
     --crimson-light: #fef2f2;
     --crimson-mid: #fce8e8;
 
+    --um-primary: #8B0000;
+    --um-primary-dark: #6b0000;
+    --um-primary-soft: #fff1f1;
+    --um-ink: #14213d;
+    --um-muted: #6b7280;
+    --um-border: #ebe7e2;
+    --um-surface: #ffffff;
+    --um-surface-soft: #fbfaf8;
+
     --float-right-final: 22px;
     --fab-final-size: 46px;
     --fab-final-gap: 14px;
