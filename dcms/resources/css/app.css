@@ -36,7 +36,24 @@
 @import './pages/patient/records.css';
 
 /* Admin pages */
-@import './pages/admin/users.css';
+@import './pages/admin/admin-dashboard.css';
+@import './pages/admin/admin-appointments.css';
+@import './pages/admin/admin-patient.css';
+@import './pages/admin/admin-inventory.css';
+@import './pages/admin/admin-dental-records.css';
+@import './pages/admin/admin-document-requests.css';
+@import './pages/admin/admin-document-templates.css';
+@import './pages/admin/admin-reports.css';
+@import './pages/admin/academic-period.css';
+@import './pages/admin/clinic-schedule.css';
+@import './pages/admin/data-backup.css';
+@import './pages/admin/cms-access.css';
+@import './pages/admin/faculty-integration.css';
+@import './pages/admin/role-permissions.css';
+@import './pages/admin/service-types.css';
+@import './pages/admin/system-logs.css';
+@import './pages/admin/system-settings.css';
+@import './pages/admin/user-management.css';
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @plugin "daisyui";

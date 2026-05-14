@@ -1,0 +1,404 @@
+.dental-records-page {
+    margin-left: var(--sidebar-w, 256px);
+    padding: calc(var(--header-h, 70px) + 12px) 1.5rem 2rem;
+    min-height: 100vh;
+    background: #f6f7f9;
+    overflow-x: hidden;
+}
+
+/* ── Buttons ── */
+.btn-primary,
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.btn-primary {
+    padding: .52rem 1.1rem;
+    border: none;
+    background: #8B0000;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #6b0000;
+}
+
+.btn-secondary {
+    padding: .5rem 1rem;
+    background: rgba(255, 255, 255, .15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .25);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, .25);
+}
+
+/* ── Table wrapper ── */
+.tbl-wrap {
+    background: #fff;
+    border: 1px solid #f0eaea;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.tbl th {
+    padding: .7rem 1rem;
+    font-size: .67rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    text-align: left;
+    background: #fafafa;
+    border-bottom: 1px solid #f3f4f6;
+    white-space: nowrap;
+}
+
+.tbl td {
+    padding: .65rem .75rem;
+    font-size: .8rem;
+    color: #374151;
+    border-bottom: 1px solid #f8f5f5;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tbl td.wrap {
+    white-space: normal;
+}
+
+.tbl tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tbl tbody tr:hover td {
+    background: #fffafa;
+}
+
+/* Col widths */
+.tbl th:nth-child(1),
+.tbl td:nth-child(1) {
+    width: 22%;
+}
+
+.tbl th:nth-child(2),
+.tbl td:nth-child(2) {
+    width: 22%;
+}
+
+.tbl th:nth-child(3),
+.tbl td:nth-child(3) {
+    width: 18%;
+}
+
+.tbl th:nth-child(4),
+.tbl td:nth-child(4) {
+    width: 14%;
+}
+
+.tbl th:nth-child(5),
+.tbl td:nth-child(5) {
+    width: 12%;
+}
+
+.tbl th:nth-child(6),
+.tbl td:nth-child(6) {
+    width: 12%;
+    text-align: right;
+}
+
+/* ── Panel ── */
+.content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 1rem;
+    align-items: start;
+}
+
+.panel-card {
+    background: #fff;
+    border: 1px solid #f0eaea;
+    border-radius: 14px;
+    overflow: hidden;
+    position: sticky;
+    top: calc(var(--header-h, 70px) + 12px);
+}
+
+.panel-header {
+    padding: .9rem 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.panel-header-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #8B0000, #6b0000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Insights (side panel bottom card) ── */
+.insights-card {
+    background: #fff;
+    border: 1px solid #f0eaea;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.insight-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .8rem 1.25rem;
+    border-bottom: 1px solid #f8f5f5;
+}
+
+.insight-row:last-child {
+    border-bottom: none;
+}
+
+.insight-lbl {
+    font-size: .67rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #9ca3af;
+    margin-bottom: .2rem;
+}
+
+.insight-val {
+    font-size: .9rem;
+    font-weight: 800;
+    color: #111827;
+}
+
+/* ── Quick Actions ── */
+.quick-action {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .8rem 1rem;
+    border-bottom: 1px solid #f8f5f5;
+    text-decoration: none;
+    transition: background .12s ease;
+}
+
+.quick-action:last-child {
+    border-bottom: none;
+}
+
+.quick-action:hover {
+    background: #fffafa;
+}
+
+.quick-action-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #8B0000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .78rem;
+    flex-shrink: 0;
+    transition: .12s ease;
+}
+
+.quick-action:hover .quick-action-icon {
+    background: #8B0000;
+    color: #fff;
+}
+
+.quick-action-title {
+    font-size: .8rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.quick-action-sub {
+    font-size: .67rem;
+    color: #9ca3af;
+    margin-top: 1px;
+}
+
+.quick-action-arrow {
+    margin-left: auto;
+    color: #d1d5db;
+    font-size: .65rem;
+    transition: .12s ease;
+}
+
+.quick-action:hover .quick-action-arrow {
+    color: #8B0000;
+}
+
+/* ── Dark mode ── */
+[data-theme="dark"] .dental-records-page {
+    background: #0b1117 !important;
+}
+
+[data-theme="dark"] .tbl-wrap,
+[data-theme="dark"] .panel-card,
+[data-theme="dark"] .insights-card {
+    background: #161b22 !important;
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] .tbl th {
+    background: #0d1117 !important;
+    color: #6b7280 !important;
+    border-bottom-color: #21262d !important;
+}
+
+[data-theme="dark"] .tbl td {
+    color: #d1d5db !important;
+    border-bottom-color: #1c2128 !important;
+}
+
+[data-theme="dark"] .tbl tbody tr:hover td {
+    background: #1c2128 !important;
+}
+
+[data-theme="dark"] .panel-header {
+    background: #0d1117 !important;
+    border-bottom-color: #21262d !important;
+}
+
+[data-theme="dark"] .panel-header .font-bold,
+[data-theme="dark"] #panelRecordTitle {
+    color: #f3f4f6 !important;
+}
+
+[data-theme="dark"] #panelRecordTitle.has-ref {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #panelBody {
+    color: #d1d5db !important;
+}
+
+[data-theme="dark"] #panelBody [style*="background:#fef2f2"] {
+    background: rgba(139, 0, 0, .12) !important;
+    border-color: rgba(139, 0, 0, .24) !important;
+}
+
+[data-theme="dark"] #panelBody [style*="color:#111"] {
+    color: #f3f4f6 !important;
+}
+
+[data-theme="dark"] #panelBody [style*="color:#374151"] {
+    color: #d1d5db !important;
+}
+
+[data-theme="dark"] #panelBody [style*="color:#9ca3af"] {
+    color: #9ca3af !important;
+}
+
+[data-theme="dark"] #panelFoot {
+    background: #0d1117 !important;
+    border-top-color: #21262d !important;
+}
+
+[data-theme="dark"] .insight-row {
+    border-bottom-color: #1c2128 !important;
+}
+
+[data-theme="dark"] .insight-lbl {
+    color: #9ca3af !important;
+}
+
+[data-theme="dark"] .insight-val {
+    color: #f3f4f6 !important;
+}
+
+[data-theme="dark"] .quick-action {
+    border-bottom-color: #1c2128 !important;
+}
+
+[data-theme="dark"] .quick-action:hover {
+    background: #1c2128 !important;
+}
+
+[data-theme="dark"] .quick-action-icon {
+    background: rgba(139, 0, 0, .12) !important;
+    color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .quick-action:hover .quick-action-icon {
+    background: #8B0000 !important;
+    color: #fff !important;
+}
+
+[data-theme="dark"] .quick-action-title {
+    color: #f3f4f6 !important;
+}
+
+[data-theme="dark"] .quick-action-sub {
+    color: #9ca3af !important;
+}
+
+[data-theme="dark"] .quick-action:hover .quick-action-arrow {
+    color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: #161b22 !important;
+    color: #e5e7eb !important;
+    border-color: #2b313a !important;
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background: #1c2128 !important;
+}
+
+[data-theme="dark"] .btn-primary {
+    background: #8B0000 !important;
+}
+
+[data-theme="dark"] .btn-primary:hover {
+    background: #6b0000 !important;
+}
+
+@media (max-width: 1024px) {
+    .content-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .panel-card {
+        position: static;
+    }
+}
+
+@media (max-width: 900px) {
+    .dental-records-page {
+        margin-left: 0;
+        padding: calc(var(--header-h, 70px) + 12px) 1rem 2rem;
+    }
+}

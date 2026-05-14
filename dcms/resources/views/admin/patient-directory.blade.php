@@ -28,12 +28,6 @@
         box-shadow: 0 0 0 3px rgba(139, 0, 0, .12);
     }
 
-    .patient-search-wrap .search-icon {
-        color: #8B0000;
-        font-size: 15px;
-        flex-shrink: 0;
-    }
-
     .patient-search-wrap input {
         width: 100%;
         border: none;
@@ -97,24 +91,6 @@
         display: none;
     }
 
-    .patient-search-wrap [data-voice-status].is-listening {
-        color: #1d4ed8;
-        border-color: #bfdbfe;
-        background: #eff6ff;
-    }
-
-    .patient-search-wrap [data-voice-status].is-error {
-        color: #b91c1c;
-        border-color: #fecaca;
-        background: #fef2f2;
-    }
-
-    .patient-search-wrap [data-voice-status].is-success {
-        color: #166534;
-        border-color: #bbf7d0;
-        background: #f0fdf4;
-    }
-
     .patient-search-clear-btn {
         border: none;
         background: transparent;
@@ -142,7 +118,8 @@
 <div class="max-w-7xl mt-4 mx-auto fade-in">
 
     <!-- PAGE HEADER -->
-    <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap;">
+    <div
+        style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap;">
         <div>
             <div style="
                 font-size:11px;
@@ -179,15 +156,11 @@
     <div class="patient-search-row">
         <div class="search-wrap patient-search-wrap">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input
-                type="text"
-                id="patientSearch"
-                placeholder="Search patient name..."
-                oninput="filterPatients()"
-                style="font-family:'Inter', sans-serif;"
-            >
+            <input type="text" id="patientSearch" placeholder="Search patient name..." oninput="filterPatients()"
+                style="font-family:'Inter', sans-serif;">
         </div>
-        <button type="button" id="patientSearchClearBtn" class="patient-search-clear-btn hidden" title="Clear">Clear</button>
+        <button type="button" id="patientSearchClearBtn" class="patient-search-clear-btn hidden"
+            title="Clear">Clear</button>
     </div>
 
     <!-- DIRECTORY CARD -->
@@ -217,12 +190,8 @@
 
                 <tbody id="patientTableBody">
                     @foreach($patients as $patient)
-                    <tr
-                        class="hover patient-row"
-                        style="border-bottom:1px solid #F5F0EB;"
-                        data-name="{{ strtolower($patient->name) }}"
-                        data-email="{{ strtolower($patient->email) }}"
-                    >
+                    <tr class="hover patient-row" style="border-bottom:1px solid #F5F0EB;"
+                        data-name="{{ strtolower($patient->name) }}" data-email="{{ strtolower($patient->email) }}">
                         <td style="font-weight:600;">
                             {{ $patient->id }}
                         </td>
@@ -242,9 +211,7 @@
                         <td class="text-center">
                             <div style="display:flex; justify-content:center; gap:8px;">
 
-                                <button
-                                    onclick="window.location.href='/patient/dashboard'"
-                                    style="
+                                <button onclick="window.location.href='/patient/dashboard'" style="
                                         background:linear-gradient(135deg,#1D4ED8,#3B82F6);
                                         color:#fff;
                                         border:none;
@@ -257,15 +224,12 @@
                                         align-items:center;
                                         gap:6px;
                                         box-shadow:0 3px 10px rgba(29,78,216,.25);
-                                    "
-                                >
+                                    ">
                                     <i class="fa-solid fa-eye"></i>
                                     View Dashboard
                                 </button>
 
-                                <button
-                                    onclick="window.location.href='/patient/record'"
-                                    style="
+                                <button onclick="window.location.href='/patient/record'" style="
                                         background:linear-gradient(135deg,#7B0D0D,#9B1515);
                                         color:#fff;
                                         border:none;
@@ -278,8 +242,7 @@
                                         align-items:center;
                                         gap:6px;
                                         box-shadow:0 3px 10px rgba(123,13,13,.25);
-                                    "
-                                >
+                                    ">
                                     <i class="fa-solid fa-file-medical"></i>
                                     View Record
                                 </button>
@@ -292,16 +255,13 @@
             </table>
 
             <!-- NO RESULTS MESSAGE -->
-            <div
-                id="noPatientResults"
-                style="
+            <div id="noPatientResults" style="
                     display:none;
                     text-align:center;
                     padding:32px 20px;
                     color:#8A7A6F;
                     border-top:1px solid #F5F0EB;
-                "
-            >
+                ">
                 <div style="font-size:16px; font-weight:700; color:#7B0D0D; margin-bottom:6px;">
                     No results for "<span id="searchQueryText"></span>"
                 </div>
@@ -315,58 +275,58 @@
 </div>
 
 <script>
-function filterPatients() {
-    const input = document.getElementById('patientSearch');
-    const query = input.value.trim().toLowerCase();
-    const rows = document.querySelectorAll('.patient-row');
-    const noResults = document.getElementById('noPatientResults');
-    const searchQueryText = document.getElementById('searchQueryText');
+    function filterPatients() {
+        const input = document.getElementById('patientSearch');
+        const query = input.value.trim().toLowerCase();
+        const rows = document.querySelectorAll('.patient-row');
+        const noResults = document.getElementById('noPatientResults');
+        const searchQueryText = document.getElementById('searchQueryText');
 
-    let visibleCount = 0;
+        let visibleCount = 0;
 
-    rows.forEach(row => {
-        const name = row.dataset.name || '';
-        const email = row.dataset.email || '';
-        const match = name.includes(query) || email.includes(query);
+        rows.forEach(row => {
+            const name = row.dataset.name || '';
+            const email = row.dataset.email || '';
+            const match = name.includes(query) || email.includes(query);
 
-        row.style.display = match ? '' : 'none';
+            row.style.display = match ? '' : 'none';
 
-        if (match) {
-            visibleCount++;
+            if (match) {
+                visibleCount++;
+            }
+        });
+
+        if (query !== '' && visibleCount === 0) {
+            noResults.style.display = 'block';
+            searchQueryText.textContent = input.value;
+        } else {
+            noResults.style.display = 'none';
+            searchQueryText.textContent = '';
         }
-    });
 
-    if (query !== '' && visibleCount === 0) {
-        noResults.style.display = 'block';
-        searchQueryText.textContent = input.value;
-    } else {
-        noResults.style.display = 'none';
-        searchQueryText.textContent = '';
+        syncPatientSearchClear();
     }
 
-    syncPatientSearchClear();
-}
+    function syncPatientSearchClear() {
+        const input = document.getElementById('patientSearch');
+        const clearBtn = document.getElementById('patientSearchClearBtn');
+        if (!input || !clearBtn) return;
+        clearBtn.classList.toggle('hidden', input.value.trim().length === 0);
+    }
 
-function syncPatientSearchClear() {
-    const input = document.getElementById('patientSearch');
-    const clearBtn = document.getElementById('patientSearchClearBtn');
-    if (!input || !clearBtn) return;
-    clearBtn.classList.toggle('hidden', input.value.trim().length === 0);
-}
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('patientSearch');
+        const clearBtn = document.getElementById('patientSearchClearBtn');
+        if (!input || !clearBtn) return;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('patientSearch');
-    const clearBtn = document.getElementById('patientSearchClearBtn');
-    if (!input || !clearBtn) return;
+        syncPatientSearchClear();
 
-    syncPatientSearchClear();
-
-    clearBtn.addEventListener('click', () => {
-        input.value = '';
-        const status = input.closest('.patient-search-wrap')?.querySelector('[data-voice-status]');
-        if (status) status.classList.add('hidden');
-        filterPatients();
-        input.focus();
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            const status = input.closest('.patient-search-wrap')?.querySelector('[data-voice-status]');
+            if (status) status.classList.add('hidden');
+            filterPatients();
+            input.focus();
+        });
     });
-});
 </script>
