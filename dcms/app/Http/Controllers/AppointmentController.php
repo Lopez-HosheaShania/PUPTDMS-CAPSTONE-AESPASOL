@@ -304,7 +304,22 @@ class AppointmentController extends Controller
 
             'emergency_person'     => 'required|string|max:50',
             'emergency_number'     => 'required|string|max:15',
-            'emergency_relation'   => 'required|string',
+            'emergency_relation' => [
+                                        'required',
+                                        'string',
+                                        \Illuminate\Validation\Rule::in([
+                                            'Mother',
+                                            'Father',
+                                            'Sibling',
+                                            'Guardian',
+                                            'Spouse',
+                                            'Grandparent',
+                                            'Aunt',
+                                            'Uncle',
+                                            'Cousin',
+                                            'Child',
+                                        ]),
+                                    ],
 
             'patient_signature'    => 'required|mimes:jpg,jpeg,png,pdf|max:5120',
 
