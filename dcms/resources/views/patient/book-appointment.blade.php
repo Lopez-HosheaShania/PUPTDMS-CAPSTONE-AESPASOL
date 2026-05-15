@@ -2911,13 +2911,17 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
                                                     <select id="emergency_relation" name="emergency_relation"
                                                         class="form-input w-full border border-[#e8e2dd] rounded-xl px-3 py-2 text-sm bg-white outline-none appearance-none pr-8"
                                                         required>
-                                                        <option value="" disabled selected>Select relation
-                                                        </option>
+                                                        <option value="" disabled selected>Select relation</option>
                                                         <option value="Mother">Mother</option>
                                                         <option value="Father">Father</option>
+                                                        <option value="Sibling">Sibling</option>
                                                         <option value="Guardian">Guardian</option>
                                                         <option value="Spouse">Spouse</option>
-                                                        <option value="Others">Others</option>
+                                                        <option value="Grandparent">Grandparent</option>
+                                                        <option value="Aunt">Aunt</option>
+                                                        <option value="Uncle">Uncle</option>
+                                                        <option value="Cousin">Cousin</option>
+                                                        <option value="Child">Child</option> 
                                                     </select>
                                                     <div
                                                         class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
@@ -3599,9 +3603,7 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
         const get = n => data.get(n) || "N/A";
         const getAll = n => data.getAll(n);
 
-        const relation = data.get("emergency_relation") || "";
-        const otherRel = (data.get("relation_other") || "").trim();
-        const emergencyRelation = relation === "Others" ? (otherRel || "Others") : (relation || "N/A");
+        const emergencyRelation = data.get("emergency_relation") || "N/A";
 
         const sigFile = data.get("patient_signature");
         let sigHTML = `<span class="text-[#9e9690] italic">Not uploaded</span>`;
@@ -3939,19 +3941,6 @@ $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
     document.querySelectorAll('input[name="had_medical_exam"]').forEach(r => r.addEventListener("change",
         syncMedicalExamBox));
     syncMedicalExamBox();
-    document.getElementById("emergency_relation")
-        ?.addEventListener("change", function () {
-            const other = document.getElementById("relation_other");
-            if (!other) return;
-            if (this.value === "Others") {
-                other.classList.remove("hidden");
-                other.setAttribute("required", "true");
-            } else {
-                other.classList.add("hidden");
-                other.removeAttribute("required");
-                other.value = "";
-            }
-        });
     [{
         name: "good_health",
         boxId: "good_health_box",

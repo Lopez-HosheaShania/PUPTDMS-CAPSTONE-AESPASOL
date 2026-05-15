@@ -29,6 +29,8 @@
 @import './pages/dentist/inventory.css';
 @import './pages/dentist/patient-directory.css';
 @import './pages/dentist/reports.css';
+@import './pages/dentist/patient-profile.css';
+@import './pages/dentist/odontogram.css';
 
 /* Patient pages */
 @import './pages/patient/dashboard.css';
