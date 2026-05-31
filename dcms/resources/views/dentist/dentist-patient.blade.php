@@ -183,7 +183,7 @@ $notifCount = $notifications->count();
                   <button id="btnListView" onclick="switchView('list')" class="btn-view-mode active"
                     title="List View"><i class="fa-solid fa-list text-sm"></i></button>
                   <button id="btnGridView" onclick="switchView('grid')" class="btn-view-mode" title="Grid View"><i
-                      class="fa-solid fa-border-all text-sm"></i></button>
+                      class="fa-solid fa-grip"></i></button>
                 </div>
 
                 <div class="patient-filter-actions">
@@ -1672,7 +1672,7 @@ $notifCount = $notifications->count();
             title = "No matches for your filters";
             sub = "Try removing or adjusting your filter criteria.";
             extraHtml =
-              '<button id="clearFiltersInline" class="mt-3 px-4 py-2 rounded-xl border border-dashed border-gray-300 text-sm text-gray-400  hover:bg-[#8B0000]/5 transition-all duration-200"><i class="fa-solid fa-xmark mr-1.5 text-xs"></i> Reset</button>';
+              '<button id="clearFiltersInline" class="mt-3 px-4 py-2 rounded-xl border border-dashed border-gray-300 text-sm text-gray-400  hover:bg-[#8B0000]/5 transition-all duration-200"><i class="fa-solid fa-xmark mr-1.5 text-xs"></i> Clear filter</button>';
           } else {
             var msg = emptyMessages[activeTab] || emptyMessages.all;
             icon = msg.icon;

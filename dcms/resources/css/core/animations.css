@@ -1,3 +1,50 @@
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin .8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes micPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(192, 57, 43, 0);
+    }
+}
+
 @keyframes pageEnter {
     from {
         opacity: 0;
@@ -174,6 +221,10 @@
     }
 }
 
+.dot-pulse {
+    animation: pulse 2s cubic-bezier(.4, 0, .6, 1) infinite;
+}
+
 @keyframes fadeUp {
     from {
         opacity: 0;
@@ -268,5 +319,98 @@
 
     to {
         width: 0%;
+    }
+}
+
+@keyframes dialogCenteredIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -45%) scale(.94);
+        filter: blur(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes dialogCenteredOut {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        filter: blur(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translate(-50%, -45%) scale(.96);
+        filter: blur(4px);
+    }
+}
+
+@keyframes modalBackdropIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0);
+    }
+
+    to {
+        opacity: 1;
+        backdrop-filter: blur(5px);
+    }
+}
+
+@keyframes modalBackdropOut {
+    from {
+        opacity: 1;
+        backdrop-filter: blur(5px);
+    }
+
+    to {
+        opacity: 0;
+        backdrop-filter: blur(0);
+    }
+}
+
+@keyframes overlayPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(.96);
+        filter: blur(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes overlayPanelOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(14px) scale(.97);
+        filter: blur(4px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .role-modal,
+    .role-modal::backdrop,
+    #vaOverlay,
+    #patientPickerOverlay,
+    #vaOverlay .va-panel,
+    #patientPickerOverlay .va-panel {
+        animation: none !important;
+        transition: none !important;
+        filter: none !important;
     }
 }

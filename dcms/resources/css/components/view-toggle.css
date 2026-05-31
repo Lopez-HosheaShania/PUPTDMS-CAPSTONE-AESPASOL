@@ -1,0 +1,81 @@
+.view-toggle-container {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #f9eaea;
+    box-shadow: 0 2px 10px rgba(139, 0, 0, 0.04);
+    position: relative;
+}
+
+[data-theme="dark"] .view-toggle-container,
+.dark .view-toggle-container {
+    background: rgba(13, 17, 23, 0.70) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+.view-slider {
+    position: absolute !important;
+    top: 4px !important;
+    left: 4px !important;
+    width: 36px !important;
+    height: 36px !important;
+    background: #8B0000 !important;
+    border-radius: 10px !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 1 !important;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, 0.25) !important;
+}
+
+#mainContent.mode-list .view-slider {
+    transform: translateX(0) !important;
+}
+
+#mainContent.mode-grid .view-slider {
+    transform: translateX(40px) !important;
+}
+
+.btn-view-mode {
+    width: 37px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #9CA3AF !important;
+    transition: color 0.3s ease !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 2 !important;
+    box-shadow: none !important;
+}
+
+.btn-view-mode:hover:not(.active) {
+    color: #8B0000 !important;
+    background: transparent !important;
+}
+
+.btn-view-mode.active {
+    color: #FFFFFF !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .btn-view-mode:hover,
+.dark .btn-view-mode:hover {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .btn-view-mode,
+.dark .btn-view-mode {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] .btn-view-mode.active,
+.dark .btn-view-mode.active {
+    color: #FFFFFF !important;
+}

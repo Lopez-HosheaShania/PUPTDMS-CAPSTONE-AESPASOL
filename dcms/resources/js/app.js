@@ -18,19 +18,39 @@ import "flatpickr/dist/flatpickr.min.css";
 
 window.flatpickr = flatpickr;
 
+function normalizeDateOnly(value) {
+    if (!value) return null;
+
+    const date = value instanceof Date ? new Date(value) : new Date(value);
+
+    if (Number.isNaN(date.getTime())) return null;
+
+    date.setHours(0, 0, 0, 0);
+    return date;
+}
+
 function decorateFlatpickrDays(instance) {
     if (!instance?.calendarContainer) return;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const minDate = normalizeDateOnly(instance.config?.minDate);
+    const maxDate = normalizeDateOnly(instance.config?.maxDate);
 
     instance.calendarContainer.querySelectorAll('.flatpickr-day').forEach((dayElem) => {
+        dayElem.classList.remove('flatpickr-has-tooltip');
+        delete dayElem.dataset.tooltip;
+
         if (!dayElem.dateObj) return;
 
-        const dayDate = new Date(dayElem.dateObj);
-        dayDate.setHours(0, 0, 0, 0);
+        const dayDate = normalizeDateOnly(dayElem.dateObj);
+        if (!dayDate) return;
 
-        if (dayDate > today) {
+        if (minDate && dayDate < minDate) {
+            dayElem.classList.add('flatpickr-has-tooltip');
+            dayElem.dataset.tooltip = "You can't select previous date";
+            return;
+        }
+
+        if (maxDate && dayDate > maxDate) {
             dayElem.classList.add('flatpickr-has-tooltip');
             dayElem.dataset.tooltip = "You can't select future date";
         }
@@ -111,16 +131,31 @@ function initGlobalFlatpickr() {
         },
     };
 
-    const dateInputs = document.querySelectorAll('.js-flatpickr-date, .js-flatpickr-date-max-today, .js-flatpickr-date-range-from, .js-flatpickr-date-range-to');
+    const dateInputs = document.querySelectorAll(
+        '.js-flatpickr-date, .js-flatpickr-date-min-today, .js-flatpickr-date-max-today, .js-flatpickr-date-range-from, .js-flatpickr-date-range-to'
+    );
 
     dateInputs.forEach(el => {
         let options = { ...baseOptions };
 
-        const parentDialog = el.closest('dialog');
-        if (parentDialog) {
-            options.appendTo = parentDialog;
-        } else {
-            options.appendTo = document.body;
+        const parentPopup = el.closest('dialog, .ui-modal');
+
+        options.appendTo = document.body;
+
+        if (parentPopup) {
+            options.positionElement = el;
+        }
+
+        if (el.min) {
+            options.minDate = el.min;
+        }
+
+        if (el.max) {
+            options.maxDate = el.max;
+        }
+
+        if (el.classList.contains('js-flatpickr-date-min-today')) {
+            options.minDate = "today";
         }
 
         if (
@@ -147,23 +182,14 @@ document.addEventListener('mousemove', (e) => {
         document.body.appendChild(tooltip);
     }
 
-    if (!day || !day.dateObj) {
+    const message = day?.dataset?.tooltip || '';
+
+    if (!message) {
         tooltip.classList.remove('show');
         return;
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const dayDate = new Date(day.dateObj);
-    dayDate.setHours(0, 0, 0, 0);
-
-    if (dayDate <= today) {
-        tooltip.classList.remove('show');
-        return;
-    }
-
-    tooltip.textContent = "You can't select future date";
+    tooltip.textContent = message;
     tooltip.style.left = `${e.clientX}px`;
     tooltip.style.top = `${e.clientY - 12}px`;
     tooltip.classList.add('show');
@@ -496,21 +522,71 @@ document.addEventListener('DOMContentLoaded', initSearchClearButtons);
 window.clearSearchInput = clearSearchInput;
 window.initSearchClearButtons = initSearchClearButtons;
 
-function showToast(optionsOrType = 'success', messageStr = '', durationNum = 4000) {
-    let type = 'success', message = '', title = '', duration = durationNum;
+function escapeToastHTML(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
 
-    if (typeof optionsOrType === 'object') {
-        type = optionsOrType.type || 'success';
-        message = optionsOrType.message || '';
-        title = optionsOrType.title || (type.charAt(0).toUpperCase() + type.slice(1));
-        duration = optionsOrType.duration || 4000;
-    } else {
-        type = optionsOrType;
-        message = messageStr;
-        title = type.charAt(0).toUpperCase() + type.slice(1);
+function formatToastMessage(message) {
+    return escapeToastHTML(message)
+        .replace(/&lt;strong&gt;(.*?)&lt;\/strong&gt;/g, '<strong>$1</strong>');
+}
+
+function normalizeToastArgs(first = 'success', second = '', third = undefined, fourth = undefined) {
+    const validTypes = ['success', 'error', 'warning', 'info'];
+    const defaultDuration = 7000;
+
+    if (typeof first === 'object' && first !== null) {
+        const type = validTypes.includes(String(first.type || '').toLowerCase())
+            ? String(first.type).toLowerCase()
+            : 'info';
+
+        return {
+            type,
+            title: first.title || type.charAt(0).toUpperCase() + type.slice(1),
+            message: first.message || '',
+            duration: Number(first.duration) || defaultDuration,
+        };
     }
 
+    const firstLower = String(first || '').toLowerCase();
+    const thirdLower = String(third || '').toLowerCase();
+
+    if (validTypes.includes(firstLower)) {
+        return {
+            type: firstLower,
+            title: firstLower.charAt(0).toUpperCase() + firstLower.slice(1),
+            message: second || '',
+            duration: Number(third) || defaultDuration,
+        };
+    }
+
+    if (validTypes.includes(thirdLower)) {
+        return {
+            type: thirdLower,
+            title: first || thirdLower.charAt(0).toUpperCase() + thirdLower.slice(1),
+            message: second || '',
+            duration: Number(fourth) || defaultDuration,
+        };
+    }
+
+    return {
+        type: 'info',
+        title: first || 'Notification',
+        message: second || '',
+        duration: Number(third) || defaultDuration,
+    };
+}
+
+function showToast(first = 'success', second = '', third = undefined, fourth = undefined) {
+    const { type, title, message, duration } = normalizeToastArgs(first, second, third, fourth);
+
     let container = document.getElementById('toastContainer');
+
     if (!container) {
         container = document.createElement('div');
         container.id = 'toastContainer';
@@ -518,36 +594,111 @@ function showToast(optionsOrType = 'success', messageStr = '', durationNum = 400
     }
 
     const toast = document.createElement('div');
-    toast.className = `toast-item toast-${type}`;
+    toast.className = `toast-item toast-${type} ${type}`;
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
 
     const icons = {
         success: 'fa-circle-check',
-        error: 'fa-circle-exclamation',
+        error: 'fa-circle-xmark',
         warning: 'fa-triangle-exclamation',
-        info: 'fa-circle-info'
+        info: 'fa-circle-info',
     };
 
     toast.innerHTML = `
-        <div class="toast-icon-wrap"><i class="fa-solid ${icons[type] || icons.info}"></i></div>
-        <div>
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
+        <div class="toast-icon-wrap">
+            <i class="fa-solid ${icons[type] || icons.info}"></i>
         </div>
-        <button class="toast-close" onclick="dismissToast(this.parentElement)"><i class="fa-solid fa-xmark"></i></button>
-        <div class="toast-progress" style="animation-duration: ${duration}ms;"></div>
+
+        <div class="toast-content">
+            <div class="toast-title">${escapeToastHTML(title)}</div>
+            <div class="toast-message">${formatToastMessage(message)}</div>
+        </div>
+
+        <button type="button" class="toast-close" aria-label="Close notification">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
     `;
 
     container.appendChild(toast);
-    setTimeout(() => dismissToast(toast), duration);
+
+    let remaining = duration;
+    let startedAt = Date.now();
+    let timeoutId = null;
+    let closed = false;
+
+    const closeToast = () => {
+        if (closed) return;
+
+        closed = true;
+        clearTimeout(timeoutId);
+
+        toast.classList.remove('is-paused');
+        toast.classList.add('toast-exit');
+
+        setTimeout(() => {
+            toast.remove();
+        }, 320);
+    };
+
+    const startTimer = () => {
+        clearTimeout(timeoutId);
+        startedAt = Date.now();
+        timeoutId = setTimeout(closeToast, remaining);
+    };
+
+    const pauseToast = () => {
+        if (closed) return;
+
+        clearTimeout(timeoutId);
+        remaining -= Date.now() - startedAt;
+        remaining = Math.max(remaining, 0);
+
+        toast.classList.add('is-paused');
+    };
+
+    const resumeToast = () => {
+        if (closed) return;
+
+        toast.classList.remove('is-paused');
+
+        if (remaining <= 0) {
+            closeToast();
+            return;
+        }
+
+        startTimer();
+    };
+
+    toast.querySelector('.toast-close')?.addEventListener('click', closeToast);
+
+    toast.addEventListener('mouseenter', pauseToast);
+    toast.addEventListener('mouseleave', resumeToast);
+
+    startTimer();
+
+    return toast;
 }
 
 function dismissToast(toast) {
-    if (!toast || toast.classList.contains('toast-exit')) return;
-    toast.classList.add('toast-exit');
-    setTimeout(() => toast.remove(), 350);
+    if (!toast) return;
+
+    const targetToast = toast.closest ? toast.closest('.toast-item') : toast;
+
+    if (!targetToast || targetToast.classList.contains('toast-exit')) return;
+
+    targetToast.classList.remove('is-paused');
+    targetToast.classList.add('toast-exit');
+
+    setTimeout(() => {
+        targetToast.remove();
+    }, 320);
 }
 
 window.showToast = showToast;
+window.dismissToast = dismissToast;
 
 const modalTimers = {};
 
@@ -585,9 +736,7 @@ function closeModal(id) {
 }
 
 function closeModalOnBackdrop(event, id) {
-    if (event.target && event.target.id === id) {
-        closeModal(id);
-    }
+    return false;
 }
 
 document.addEventListener('keydown', function (event) {
@@ -603,7 +752,6 @@ window.openModal = openModal;
 window.closeModal = closeModal;
 window.closeModalOnBackdrop = closeModalOnBackdrop;
 
-/* Temporary compatibility for Inventory */
 window.openInventoryModal = openModal;
 window.closeInventoryModal = closeModal;
 window.closeOnBackdrop = closeModalOnBackdrop;
@@ -981,3 +1129,338 @@ window.setGlobalFilterButtonState = function ({
         reset.classList.toggle('show', has);
     }
 };
+
+function initGlobalViewToggles(root = document) {
+    const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+    const toggles = scope.querySelectorAll('[data-global-view-toggle]');
+
+    toggles.forEach((toggle) => {
+        if (toggle.dataset.globalViewInitialized === 'true') return;
+
+        toggle.dataset.globalViewInitialized = 'true';
+
+        const rootSelector = toggle.dataset.viewRoot || '#mainContent';
+        const listSelector = toggle.dataset.listView;
+        const gridSelector = toggle.dataset.gridView;
+        const storageKey = toggle.dataset.storageKey || `${toggle.id || 'global'}_view_mode`;
+
+        const pageRoot = document.querySelector(rootSelector);
+        const listView = listSelector ? document.querySelector(listSelector) : null;
+        const gridView = gridSelector ? document.querySelector(gridSelector) : null;
+        const buttons = Array.from(toggle.querySelectorAll('[data-view-mode]'));
+
+        if (!buttons.length) return;
+
+        const setMode = (mode, options = {}) => {
+            const nextMode = mode === 'grid' ? 'grid' : 'list';
+            const isGrid = nextMode === 'grid';
+
+            if (listView) listView.hidden = isGrid;
+            if (gridView) gridView.hidden = !isGrid;
+
+            pageRoot?.classList.toggle('mode-grid', isGrid);
+            pageRoot?.classList.toggle('mode-list', !isGrid);
+
+            buttons.forEach((button) => {
+                const active = button.dataset.viewMode === nextMode;
+
+                button.classList.toggle('active', active);
+                button.classList.toggle('is-active', active);
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+
+            toggle.dataset.currentView = nextMode;
+
+            if (options.persist !== false) {
+                localStorage.setItem(storageKey, nextMode);
+            }
+
+            toggle.dispatchEvent(new CustomEvent('global-view-change', {
+                bubbles: true,
+                detail: { mode: nextMode }
+            }));
+        };
+
+        toggle.__setGlobalViewMode = setMode;
+        toggle.__getGlobalViewMode = () => toggle.dataset.currentView || localStorage.getItem(storageKey) || 'list';
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => {
+                setMode(button.dataset.viewMode);
+            });
+        });
+
+        const mobile = window.matchMedia('(max-width: 767px)').matches;
+        const savedMode = localStorage.getItem(storageKey);
+
+        setMode(mobile ? 'grid' : savedMode || 'list', { persist: false });
+    });
+}
+
+function setGlobalViewMode(toggleOrId, mode, options = {}) {
+    const toggle = typeof toggleOrId === 'string'
+        ? document.getElementById(toggleOrId) || document.querySelector(toggleOrId)
+        : toggleOrId;
+
+    if (!toggle) return;
+
+    if (typeof toggle.__setGlobalViewMode !== 'function') {
+        initGlobalViewToggles(document);
+    }
+
+    toggle.__setGlobalViewMode?.(mode, options);
+}
+
+function getGlobalViewMode(toggleOrId) {
+    const toggle = typeof toggleOrId === 'string'
+        ? document.getElementById(toggleOrId) || document.querySelector(toggleOrId)
+        : toggleOrId;
+
+    if (!toggle) return 'list';
+
+    return toggle.__getGlobalViewMode?.() || toggle.dataset.currentView || 'list';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initGlobalViewToggles();
+});
+
+window.initGlobalViewToggles = initGlobalViewToggles;
+window.setGlobalViewMode = setGlobalViewMode;
+window.getGlobalViewMode = getGlobalViewMode;
+
+function initDashboardLogsViewToggle() {
+    const root = document.getElementById('mainContent');
+    const toggle = document.getElementById('dashboardLogsViewToggle');
+    const listView = document.getElementById('dashboardLogsListView');
+    const gridView = document.getElementById('dashboardLogsGridView');
+    const buttons = document.querySelectorAll('[data-dashboard-logs-view]');
+
+    if (!toggle || !listView || !gridView || !buttons.length) return;
+
+    const setMode = (mode) => {
+        const nextMode = mode === 'grid' ? 'grid' : 'list';
+        const isGrid = nextMode === 'grid';
+
+        listView.hidden = isGrid;
+        gridView.hidden = !isGrid;
+
+        root?.classList.toggle('mode-grid', isGrid);
+        root?.classList.toggle('mode-list', !isGrid);
+
+        buttons.forEach((button) => {
+            const active = button.dataset.dashboardLogsView === nextMode;
+
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+
+        localStorage.setItem('admin_dashboard_logs_view', nextMode);
+    };
+
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+            setMode(button.dataset.dashboardLogsView);
+        });
+    });
+
+    const mobile = window.matchMedia('(max-width: 767px)').matches;
+    const savedMode = localStorage.getItem('admin_dashboard_logs_view');
+
+    setMode(mobile ? 'grid' : savedMode || 'list');
+}
+
+const activeVoiceControllers = new Map();
+
+function getSpeechRecognitionConstructor() {
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function setVoiceStatus(statusEl, message = '', state = 'default') {
+    if (!statusEl) return;
+
+    statusEl.textContent = message;
+    statusEl.classList.remove('hidden', 'is-listening', 'is-success', 'is-error', 'is-default');
+
+    if (!message) {
+        statusEl.classList.add('hidden');
+        return;
+    }
+
+    statusEl.classList.add(`is-${state}`);
+}
+
+function resolveVoiceTarget(button) {
+    const targetSelector = button.dataset.voiceTarget;
+
+    if (targetSelector) {
+        return document.querySelector(targetSelector);
+    }
+
+    const field = button.closest('[data-voice-field], .voice-search-row, .st-voice-row');
+
+    return field?.querySelector('input:not([type="hidden"]), textarea') || null;
+}
+
+function resolveVoiceStatus(button) {
+    const statusSelector = button.dataset.voiceStatus;
+
+    if (statusSelector) {
+        return document.querySelector(statusSelector);
+    }
+
+    const field = button.closest('[data-voice-field], .voice-search-row, .st-voice-row');
+
+    return field?.querySelector('[data-voice-status]') || null;
+}
+
+function stopActiveVoiceExcept(currentButton = null) {
+    activeVoiceControllers.forEach((controller, button) => {
+        if (button === currentButton) return;
+
+        try {
+            controller.recognition.stop();
+        } catch (_) { }
+
+        button.classList.remove('mic-active');
+        setVoiceStatus(controller.statusEl, '', 'default');
+        activeVoiceControllers.delete(button);
+    });
+}
+
+function initGlobalVoiceInputs(root = document) {
+    const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+
+    const SpeechRecognition = getSpeechRecognitionConstructor();
+
+    const buttons = scope.querySelectorAll(
+        '.voice-search-mic.external[data-voice-trigger], [data-global-voice-trigger]'
+    );
+
+    buttons.forEach((button) => {
+        if (button.dataset.voiceInitialized === 'true') return;
+
+        button.dataset.voiceInitialized = 'true';
+
+        button.addEventListener('click', () => {
+            const input = resolveVoiceTarget(button);
+            const statusEl = resolveVoiceStatus(button);
+
+            if (!input) {
+                setVoiceStatus(statusEl, 'No input found', 'error');
+                return;
+            }
+
+            if (!SpeechRecognition) {
+                setVoiceStatus(statusEl, 'Voice not supported', 'error');
+                return;
+            }
+
+            if (activeVoiceControllers.has(button)) {
+                const active = activeVoiceControllers.get(button);
+
+                try {
+                    active.recognition.stop();
+                } catch (_) { }
+
+                button.classList.remove('mic-active');
+                setVoiceStatus(statusEl, '', 'default');
+                activeVoiceControllers.delete(button);
+                return;
+            }
+
+            stopActiveVoiceExcept(button);
+
+            const recognition = new SpeechRecognition();
+
+            recognition.lang = input.dataset.voiceLang || button.dataset.voiceLang || 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+
+            let finalTranscript = '';
+
+            recognition.onstart = () => {
+                button.classList.add('mic-active');
+                setVoiceStatus(statusEl, 'Listening...', 'listening');
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0]?.transcript?.trim() || '';
+
+                    if (!transcript) continue;
+
+                    if (event.results[i].isFinal) {
+                        finalTranscript += ` ${transcript}`;
+                    } else {
+                        interimTranscript += ` ${transcript}`;
+                    }
+                }
+
+                const spokenText = (finalTranscript || interimTranscript).trim();
+
+                if (!spokenText) return;
+
+                if (input.tagName.toLowerCase() === 'textarea' && input.value.trim()) {
+                    input.value = `${input.value.trim()} ${spokenText}`.trim();
+                } else {
+                    input.value = spokenText;
+                }
+
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            };
+
+            recognition.onerror = (event) => {
+                button.classList.remove('mic-active');
+
+                const error = event?.error || 'unknown';
+                const message = error === 'not-allowed'
+                    ? 'Microphone blocked'
+                    : 'Voice input failed';
+
+                setVoiceStatus(statusEl, message, 'error');
+                activeVoiceControllers.delete(button);
+
+                setTimeout(() => {
+                    setVoiceStatus(statusEl, '', 'default');
+                }, 1800);
+            };
+
+            recognition.onend = () => {
+                button.classList.remove('mic-active');
+                activeVoiceControllers.delete(button);
+
+                if (input.value.trim()) {
+                    setVoiceStatus(statusEl, 'Captured', 'success');
+
+                    setTimeout(() => {
+                        setVoiceStatus(statusEl, '', 'default');
+                    }, 1200);
+                } else {
+                    setVoiceStatus(statusEl, '', 'default');
+                }
+            };
+
+            activeVoiceControllers.set(button, {
+                recognition,
+                input,
+                statusEl,
+            });
+
+            recognition.start();
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initGlobalVoiceInputs();
+});
+
+window.initGlobalVoiceInputs = initGlobalVoiceInputs;
+
+document.addEventListener('DOMContentLoaded', initDashboardLogsViewToggle);
+window.initDashboardLogsViewToggle = initDashboardLogsViewToggle;

@@ -65,6 +65,7 @@
     @include('partials.dentist.scripts')
 
     @include('partials.voice-logic')
+    @include('components.discard-changes')
 
     <script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
         data-position="bottom-right" data-offset="18,24" defer></script>

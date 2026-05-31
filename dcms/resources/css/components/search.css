@@ -84,7 +84,6 @@
 .search-wrap .search-input,
 .global-search .search-input,
 [data-search-wrapper] [data-search-input] {
-    width: 100% !important;
     height: 42px !important;
     min-height: 42px !important;
     padding: 0 42px 0 40px !important;

@@ -3,1201 +3,2385 @@
 @section('title', 'Document Requests | PUP Taguig Dental Clinic')
 
 @section('content')
-<div class="document-requests-page">
-    <main class="w-full">
-        <div class="max-w-[1280px] mx-auto">
 
-            <div class="page-banner">
-                <div class="page-banner-inner">
-                    <div>
-                        <h1 class="page-title">Document Requests</h1>
+@php
+$docRequestsSource = $requests ?? collect();
+
+if (is_object($docRequestsSource) && method_exists($docRequestsSource, 'getCollection')) {
+    $docRequestsCollection = $docRequestsSource->getCollection();
+} else {
+    $docRequestsCollection = collect($docRequestsSource);
+}
+
+$normalizeStatus = function ($status) {
+    $status = strtolower(str_replace('_', '-', (string) ($status ?: 'pending')));
+
+    if (in_array($status, ['ready-for-pickup', 'ready-for-release'], true)) {
+        return 'ready';
+    }
+
+    return $status;
+};
+
+$formatDocumentType = function ($type) {
+    return ucwords(str_replace(['_', '-'], ' ', (string) ($type ?: 'Document')));
+};
+
+$docRequestsPayload = $docRequestsCollection->map(function ($req) use ($normalizeStatus, $formatDocumentType) {
+    $patient = $req->patient ?? null;
+    $createdAt = $req->created_at ?? now();
+
+    $patientName = data_get($patient, 'name') ?? 'Unknown Patient';
+    $patientIdentifier = data_get($patient, 'student_no')
+        ?? data_get($patient, 'student_number')
+        ?? data_get($patient, 'student_id')
+        ?? data_get($patient, 'faculty_code')
+        ?? data_get($patient, 'employee_no')
+        ?? data_get($patient, 'id')
+        ?? 'No ID set';
+
+    $documentLabel = $formatDocumentType($req->document_type ?? 'Document');
+    $status = $normalizeStatus($req->status ?? 'pending');
+
+    return [
+        'id' => $req->id,
+        'reference_number' => $req->reference_number ?? ('DR-' . str_pad((string) $req->id, 5, '0', STR_PAD_LEFT)),
+        'patient_name' => $patientName,
+        'patient_identifier' => $patientIdentifier,
+        'sub_label' => $patientIdentifier ?: 'No ID set',
+        'document_type' => $documentLabel,
+        'document_type_raw' => $req->document_type ?? $documentLabel,
+        'purpose' => $req->purpose ?: '—',
+        'status' => $status,
+        'request_date' => optional($createdAt)->format('M d, Y') ?? '—',
+        'request_time' => optional($createdAt)->format('h:i A') ?? '',
+        'request_sort_date' => optional($createdAt)->format('Y-m-d H:i:s') ?? '',
+        'filter_date' => optional($createdAt)->format('Y-m-d') ?? '',
+        'copies_needed' => $req->copies_needed ?? 1,
+        'patient_photo_url' => data_get($patient, 'profile_photo_url')
+            ?? data_get($patient, 'profile_picture_url')
+            ?? data_get($patient, 'avatar_url')
+            ?? data_get($patient, 'photo_url')
+            ?? '',
+    ];
+});
+
+$statsSource = $stats ?? [];
+$countByStatus = function ($status) use ($docRequestsCollection, $normalizeStatus) {
+    return $docRequestsCollection->filter(function ($req) use ($status, $normalizeStatus) {
+        return $normalizeStatus($req->status ?? 'pending') === $status;
+    })->count();
+};
+
+$docRequestStats = [
+    'all' => $statsSource['all'] ?? $statsSource['total'] ?? $docRequestsCollection->count(),
+    'pending' => $statsSource['pending'] ?? $countByStatus('pending'),
+    'approved' => $statsSource['approved'] ?? $countByStatus('approved'),
+    'ready' => $statsSource['ready'] ?? $countByStatus('ready'),
+    'released' => $statsSource['released'] ?? $countByStatus('released'),
+    'rejected' => $statsSource['rejected'] ?? $countByStatus('rejected'),
+];
+
+$docRequestTypes = $docRequestsPayload
+    ->pluck('document_type')
+    ->filter()
+    ->unique()
+    ->sort()
+    ->values();
+@endphp
+
+<main id="mainContent" class="admin-page-shell page-enter docreq-page mode-list">
+    <div class="w-full">
+
+        <div class="page-banner docreq-header-wrap">
+            <div class="page-banner-inner">
+                <div>
+                    <h1 class="page-title">Document Requests</h1>
+                </div>
+
+                <div class="page-banner-actions">
+                    <a href="{{ route('admin.document-requests.export') }}" class="ui-btn ui-btn-secondary">
+                        <i class="fa-solid fa-file-export text-xs"></i>
+                        Export CSV
+                    </a>
+                    <a href="{{ route('admin.document-requests.print-queue') }}" class="ui-btn ui-btn-primary">
+                        <i class="fa-solid fa-print text-xs"></i>
+                        Print Queue
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card rounded-2xl border border-gray-200 shadow-sm overflow-hidden bg-white">
+
+            <div class="px-4 md:px-6 py-3.5 border-b border-gray-100 bg-[#FAFAFA]/50">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+
+                    <div class="order-2 md:order-1">
+                        <span id="rowCount"
+                            class="text-[11px] md:text-sm font-bold text-gray-400 uppercase tracking-wider">
+                            {{ $docRequestStats['all'] }} requests
+                        </span>
                     </div>
 
-                    <div class="flex gap-2 flex-wrap">
-                        <a href="{{ route('admin.document-requests.export') }}" class="btn-secondary">
-                            <i class="fa-solid fa-file-export text-xs"></i>
-                            Export CSV
-                        </a>
-                        <a href="{{ route('admin.document-requests.print-queue') }}" class="btn-primary">
-                            <i class="fa-solid fa-print text-xs"></i>
-                            Print Queue
-                        </a>
+                    <div
+                        class="docreq-toolbar-actions flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-end">
+
+                        <div id="docreqStatusSelect"
+                            class="docreq-custom-select docreq-status-dropdown docreq-toolbar-sort">
+                            <button type="button" class="docreq-select-button" data-select-button
+                                aria-haspopup="listbox" aria-expanded="false" aria-controls="docreqStatusMenu"
+                                onclick="toggleDocreqDropdown('docreqStatusSelect')">
+                                <span class="docreq-select-leading status-all">
+                                    <i class="fa-solid fa-file-medical"></i>
+                                </span>
+
+                                <span class="docreq-select-text">
+                                    <span>Sort by</span>
+                                    <strong id="statusDropdownLabel">All Requests</strong>
+                                </span>
+
+                                <span id="statusDropdownCount" class="docreq-select-count">0</span>
+                                <i class="fa-solid fa-chevron-down docreq-select-chevron"></i>
+                            </button>
+
+                            <div id="docreqStatusMenu" class="docreq-select-menu" role="listbox">
+                                <button type="button" class="docreq-select-option active" data-value="all"
+                                    onclick="selectStatusFilter('all')">
+                                    <span class="docreq-option-icon status-all">
+                                        <i class="fa-solid fa-file-medical"></i>
+                                    </span>
+                                    <span class="docreq-option-copy">
+                                        <strong>All Requests</strong>
+                                        <small>Show every document request</small>
+                                    </span>
+                                    <span class="docreq-option-count" id="statAll">0</span>
+                                </button>
+
+                                <button type="button" class="docreq-select-option" data-value="pending"
+                                    onclick="selectStatusFilter('pending')">
+                                    <span class="docreq-option-icon status-pending">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                    </span>
+                                    <span class="docreq-option-copy">
+                                        <strong>Pending</strong>
+                                        <small>Needs review</small>
+                                    </span>
+                                    <span class="docreq-option-count" id="statPending">0</span>
+                                </button>
+
+                                <button type="button" class="docreq-select-option" data-value="approved"
+                                    onclick="selectStatusFilter('approved')">
+                                    <span class="docreq-option-icon status-approved">
+                                        <i class="fa-solid fa-file-circle-check"></i>
+                                    </span>
+                                    <span class="docreq-option-copy">
+                                        <strong>Approved</strong>
+                                        <small>Ready for release</small>
+                                    </span>
+                                    <span class="docreq-option-count" id="statApproved">0</span>
+                                </button>
+
+                                <button type="button" class="docreq-select-option" data-value="ready"
+                                    onclick="selectStatusFilter('ready')">
+                                    <span class="docreq-option-icon status-released">
+                                        <i class="fa-solid fa-box-open"></i>
+                                    </span>
+                                    <span class="docreq-option-copy">
+                                        <strong>Ready</strong>
+                                        <small>Prepared for pickup</small>
+                                    </span>
+                                    <span class="docreq-option-count" id="statReady">0</span>
+                                </button>
+
+                                <button type="button" class="docreq-select-option" data-value="released"
+                                    onclick="selectStatusFilter('released')">
+                                    <span class="docreq-option-icon status-released">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </span>
+                                    <span class="docreq-option-copy">
+                                        <strong>Released</strong>
+                                        <small>Claimed documents</small>
+                                    </span>
+                                    <span class="docreq-option-count" id="statReleased">0</span>
+                                </button>
+
+                                <button type="button" class="docreq-select-option" data-value="rejected"
+                                    onclick="selectStatusFilter('rejected')">
+                                    <span class="docreq-option-icon status-rejected">
+                                        <i class="fa-solid fa-file-circle-xmark"></i>
+                                    </span>
+                                    <span class="docreq-option-copy">
+                                        <strong>Rejected</strong>
+                                        <small>Not approved</small>
+                                    </span>
+                                    <span class="docreq-option-count" id="statRejected">0</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="docreq-search-wrap flex-1 md:flex-none flex items-center gap-2">
+                            <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+
+                                <input id="searchInput" type="text"
+                                    placeholder="Search name, ID, reference, document…"
+                                    data-search-input class="search-input" oninput="onSearch(this)" />
+
+                                <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
+                                    <i class="fa-solid fa-xmark text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="view-toggle-container hidden md:flex" id="docreqViewToggle">
+                            <div class="view-slider"></div>
+
+                            <button id="btnListView" type="button" onclick="setViewMode('list', this)"
+                                class="btn-view-mode active" data-view="list" title="List View">
+                                <i class="fa-solid fa-list text-sm"></i>
+                            </button>
+
+                            <button id="btnGridView" type="button" onclick="setViewMode('grid', this)"
+                                class="btn-view-mode" data-view="grid" title="Grid View">
+                                <i class="fa-solid fa-grip"></i>
+                            </button>
+                        </div>
+
+                        <button id="filterBtn" type="button" onclick="openFilterModal()" class="global-filter-btn">
+                            <i class="fa-solid fa-sliders"></i>
+                            <span>Filter</span>
+                            <span id="filterBadge" class="filter-badge" style="display:none;"></span>
+                        </button>
+
+                        <button id="externalClearFilterBtn" type="button" onclick="resetAdvancedFilters()"
+                            class="global-filter-reset-btn hidden" title="Reset filters">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            @php
-            $_s = $stats ?? [];
-            $_total = $_s['total'] ?? 0;
-            $_pending = $_s['pending'] ?? 0;
-            $_approved = $_s['approved'] ?? 0;
-            $_ready = $_s['ready'] ?? 0;
-            $_released = $_s['released'] ?? 0;
-            $_rejected = $_s['rejected'] ?? 0;
-            $currentQuery = request()->only(['status', 'type', 'sort', 'date_from', 'date_to']);
+            <div id="docreqTableHead"
+                class="hidden md:grid gap-3 text-[10px] font-bold uppercase tracking-wider text-gray-500 py-3.5 px-6 bg-[#FAFAFA] border-b border-gray-200"
+                style="grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 1fr) 145px;">
+                <div class="text-left">Patient</div>
+                <div class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-[10px]"></i>Date
+                    Requested</div>
+                <div class="text-left">Document</div>
+                <div class="text-left">Purpose</div>
+                <div class="text-left">Status</div>
+                <div class="text-right">Actions</div>
+            </div>
 
-            $activeFilterCount = (request('status') ? 1 : 0)
-            + (request('type') ? 1 : 0)
-            + (request('sort') && request('sort') !== 'newest' ? 1 : 0)
-            + (request('date_from') ? 1 : 0)
-            + (request('date_to') ? 1 : 0);
-            @endphp
+            <div id="requestListContainer" class="docreq-list-container"></div>
+            <div id="requestGridContainer" class="docreq-grid"></div>
 
-            <div id="documentRequestsFragment">
-
-                <div class="stat-grid">
-                    <a href="{{ route('admin.document-requests.index', array_filter(array_merge($currentQuery, ['status' => null]))) }}"
-                        class="stat-card total js-ajax-nav {{ !request('status') ? 'stat-active' : '' }}">
-                        <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
-                        <div class="stat-value">{{ $_total }}</div>
-                        <div class="stat-lbl">Total Requests</div>
-                    </a>
-
-                    <a href="{{ route('admin.document-requests.index', array_merge($currentQuery, ['status' => 'pending'])) }}"
-                        class="stat-card pending js-ajax-nav {{ request('status') === 'pending' ? 'stat-active' : '' }}">
-                        <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
-                        <div class="stat-value">{{ $_pending }}</div>
-                        <div class="stat-lbl">Pending Review</div>
-                        @if($_pending > 0)<span class="stat-trend">Needs action</span>@endif
-                    </a>
-
-                    <a href="{{ route('admin.document-requests.index', array_merge($currentQuery, ['status' => 'approved'])) }}"
-                        class="stat-card approved js-ajax-nav {{ request('status') === 'approved' ? 'stat-active' : '' }}">
-                        <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
-                        <div class="stat-value">{{ $_approved }}</div>
-                        <div class="stat-lbl">Approved</div>
-                    </a>
-
-                    <a href="{{ route('admin.document-requests.index', array_merge($currentQuery, ['status' => 'ready'])) }}"
-                        class="stat-card ready js-ajax-nav {{ request('status') === 'ready' ? 'stat-active' : '' }}">
-                        <div class="stat-icon"><i class="fa-solid fa-file-circle-check"></i></div>
-                        <div class="stat-value">{{ $_ready }}</div>
-                        <div class="stat-lbl">Ready for Pickup</div>
-                    </a>
-
-                    <a href="{{ route('admin.document-requests.index', array_merge($currentQuery, ['status' => 'released'])) }}"
-                        class="stat-card released js-ajax-nav {{ request('status') === 'released' ? 'stat-active' : '' }}">
-                        <div class="stat-icon"><i class="fa-solid fa-paper-plane"></i></div>
-                        <div class="stat-value">{{ $_released }}</div>
-                        <div class="stat-lbl">Released</div>
-                    </a>
-
-                    <a href="{{ route('admin.document-requests.index', array_merge($currentQuery, ['status' => 'rejected'])) }}"
-                        class="stat-card rejected js-ajax-nav {{ request('status') === 'rejected' ? 'stat-active' : '' }}">
-                        <div class="stat-icon"><i class="fa-solid fa-ban"></i></div>
-                        <div class="stat-value">{{ $_rejected }}</div>
-                        <div class="stat-lbl">Rejected</div>
-                        @if($_rejected > 0)<span class="stat-trend">Review needed</span>@endif
-                    </a>
-                </div>
-
-                <div class="toolbar">
-                    <div class="document-request-search-row">
-                        <div class="search-wrap">
-                            <i class="fa fa-search search-icon"></i>
-                            <input type="text" id="documentRequestSearch" class="no-voice"
-                                placeholder="Search name/ID..." value="" autocomplete="off">
-                        </div>
-                        <button type="button" id="documentRequestClearBtn" class="search-clear-btn hidden"
-                            title="Clear">Clear</button>
-
-                        <div class="document-request-voice-toggle">
-                            <button type="button" id="documentRequestMicToggleBtn" class="voice-search-mic external"
-                                aria-label="Toggle voice input" aria-pressed="false">
-                                <i class="fa-solid fa-microphone"></i>
-                            </button>
-                            <span id="documentRequestVoiceStatus" class="document-request-voice-status hidden"
-                                aria-live="polite"></span>
-                        </div>
-                    </div>
-
-                    <button type="button" id="filterModalOpenBtn"
-                        class="filter-btn {{ $activeFilterCount > 0 ? 'active' : '' }}">
-                        <i class="fa-solid fa-sliders"></i>
-                        Filter
-                        <span class="filter-dot {{ $activeFilterCount > 0 ? 'visible' : '' }}"></span>
-                    </button>
-
-                    <div class="view-toggle" id="documentRequestViewToggle">
-                        <button type="button" class="view-toggle-btn active" data-view="list" id="listViewBtn"
-                            title="List view" aria-label="List view">
-                            <i class="fa-solid fa-table-list"></i>
-                        </button>
-                        <button type="button" class="view-toggle-btn" data-view="grid" id="gridViewBtn"
-                            title="Grid view" aria-label="Grid view">
-                            <i class="fa-solid fa-grip"></i>
-                        </button>
-                    </div>
-
-                    <form method="GET" action="{{ route('admin.document-requests.index') }}" class="js-ajax-filter-form"
-                        id="documentRequestsFilterForm" style="display: none;">
-                        <input type="hidden" name="status" id="hiddenStatus" value="{{ request('status') }}">
-                        <input type="hidden" name="type" id="hiddenType" value="{{ request('type') }}">
-                        <input type="hidden" name="date_from" id="hiddenDateFrom" value="{{ request('date_from') }}">
-                        <input type="hidden" name="date_to" id="hiddenDateTo" value="{{ request('date_to') }}">
-                        <input type="hidden" name="sort" id="hiddenSort" value="{{ request('sort', 'newest') }}">
-                    </form>
-                </div>
-
-                <div class="filter-modal-backdrop" id="filterModalBackdrop">
-                    <div class="filter-modal" role="dialog" aria-modal="true" aria-label="Filter requests">
-
-                        <div class="filter-modal-header">
-                            <div class="filter-modal-title">
-                                <div class="filter-modal-title-icon">
-                                    <i class="fa-solid fa-sliders"></i>
-                                </div>
-                                Filter Requests
-                            </div>
-                            <button type="button" class="filter-modal-close" id="filterModalCloseBtn" title="Close">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-
-                        <div class="filter-modal-body">
-
-                            <div class="filter-section">
-                                <div class="filter-section-label">Status</div>
-                                <div class="filter-chip-group" id="filterStatusChips">
-                                    <button type="button" class="filter-chip {{ !request('status') ? 'active' : '' }}"
-                                        data-value="">
-                                        All
-                                    </button>
-                                    @foreach([
-                                    'pending' => 'Pending',
-                                    'approved' => 'Approved',
-                                    'ready' => 'Ready for Pickup',
-                                    'released' => 'Released',
-                                    'rejected' => 'Rejected',
-                                    ] as $val => $label)
-                                    <button type="button"
-                                        class="filter-chip {{ request('status') === $val ? 'active' : '' }}"
-                                        data-value="{{ $val }}">
-                                        <span class="chip-dot"></span>
-                                        {{ $label }}
-                                    </button>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <hr class="filter-divider">
-
-                            <div class="filter-section">
-                                <div class="filter-section-label">Document Type</div>
-                                <select class="filter-sel" id="filterTypeSelect">
-                                    <option value="">All Types</option>
-                                    <option value="dental records" {{ request('type')==='dental records' ? 'selected'
-                                        : '' }}>Dental Records</option>
-                                    <option value="medical records" {{ request('type')==='medical records' ? 'selected'
-                                        : '' }}>Medical Records</option>
-                                    <option value="dental clearance" {{ request('type')==='dental clearance'
-                                        ? 'selected' : '' }}>Dental Clearance</option>
-                                    <option value="annual dental clearance" {{
-                                        request('type')==='annual dental clearance' ? 'selected' : '' }}>Annual Dental
-                                        Clearance</option>
-                                </select>
-                            </div>
-
-                            <hr class="filter-divider">
-
-                            <div class="filter-section">
-                                <div class="filter-section-label">Date Range</div>
-                                <div class="filter-date-row">
-                                    <div class="filter-date-wrap">
-                                        <label for="filterDateFrom">From</label>
-                                        <input type="date" id="filterDateFrom" value="{{ request('date_from') }}">
-                                    </div>
-                                    <div class="filter-date-wrap">
-                                        <label for="filterDateTo">To</label>
-                                        <input type="date" id="filterDateTo" value="{{ request('date_to') }}">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <hr class="filter-divider">
-
-                            <div class="filter-section">
-                                <div class="filter-section-label">Sort Order</div>
-                                <div class="filter-chip-group" id="filterSortChips">
-                                    <button type="button"
-                                        class="filter-chip {{ request('sort', 'newest') === 'newest' ? 'active' : '' }}"
-                                        data-value="newest">
-                                        <i class="fa-solid fa-arrow-down-wide-short" style="font-size:.65rem;"></i>
-                                        Newest First
-                                    </button>
-                                    <button type="button"
-                                        class="filter-chip {{ request('sort') === 'oldest' ? 'active' : '' }}"
-                                        data-value="oldest">
-                                        <i class="fa-solid fa-arrow-up-wide-short" style="font-size:.65rem;"></i>
-                                        Oldest First
-                                    </button>
-                                    <button type="button"
-                                        class="filter-chip {{ request('sort') === 'alpha' ? 'active' : '' }}"
-                                        data-value="alpha">
-                                        <i class="fa-solid fa-arrow-down-a-z" style="font-size:.65rem;"></i>
-                                        Alphabetical
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="filter-modal-footer">
-                            <button type="button" class="filter-reset-btn" id="filterResetBtn">
-                                <i class="fa-solid fa-rotate-left text-xs"></i>
-                                Reset all filters
-                            </button>
-                            <button type="button" class="filter-apply-btn" id="filterApplyBtn">
-                                <i class="fa-solid fa-check text-xs"></i>
-                                Apply Filters
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="content-grid"
-                    style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:1rem;align-items:start;">
-
-                    <div class="tbl-wrap">
-                        @if(empty($requests) || $requests->isEmpty())
-                        <div class="empty-state">
-                            <i class="fa-solid fa-inbox"></i>
-                            <p class="font-semibold text-gray-500 mb-1">No requests found</p>
-                            <p class="text-sm">Try adjusting your filters.</p>
-                        </div>
-                        @else
-                        <div class="request-view" id="documentRequestListView">
-                            <div class="table-responsive-fix">
-                                <table class="tbl">
-                                    <thead>
-                                        <tr>
-                                            <th>Ref No.</th>
-                                            <th>Patient</th>
-                                            <th>Document</th>
-                                            <th>Purpose</th>
-                                            <th>Date</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($requests as $req)
-                                        @php
-                                        $sBg = [
-                                        'pending' => '#fef3c7',
-                                        'approved' => '#d1fae5',
-                                        'ready' => '#dbeafe',
-                                        'released' => '#ede9fe',
-                                        'rejected' => '#fef2f2',
-                                        ];
-                                        $sTx = [
-                                        'pending' => '#92400e',
-                                        'approved' => '#065f46',
-                                        'ready' => '#1e40af',
-                                        'released' => '#5b21b6',
-                                        'rejected' => '#8B0000',
-                                        ];
-                                        $patientName = $req->patient->name ?? 'Unknown Patient';
-                                        $patientStudentId = $req->patient->id ?? 'No ID';
-                                        $patientInitial = strtoupper(substr($patientName, 0, 1));
-                                        @endphp
-                                        <tr class="document-request-row"
-                                            data-reference="{{ strtolower($req->reference_number) }}"
-                                            data-patient="{{ strtolower($patientName) }}"
-                                            data-student="{{ strtolower($patientStudentId) }}"
-                                            data-document="{{ strtolower(str_replace('_', ' ', $req->document_type)) }}"
-                                            data-purpose="{{ strtolower($req->purpose ?? '') }}"
-                                            data-status="{{ strtolower($req->status) }}">
-                                            <td>
-                                                <span class="font-mono text-xs font-bold text-[#8B0000]">
-                                                    {{ $req->reference_number }}
-                                                </span>
-                                            </td>
-
-                                            <td>
-                                                <div class="flex items-center gap-2">
-                                                    <div
-                                                        style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#8B0000,#6b0000);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;">
-                                                        {{ $patientInitial }}
-                                                    </div>
-                                                    <div>
-                                                        <div class="font-semibold text-gray-800 cell-patient-name">
-                                                            {{ $patientName }}
-                                                        </div>
-                                                        <div class="text-[10px] text-gray-400 whitespace-nowrap">
-                                                            {{ $patientStudentId }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            <td class="cell-document">
-                                                <a href="{{ route('admin.document-requests.index', array_merge(request()->only(['status', 'sort', 'date_from', 'date_to']), ['type' => $req->document_type])) }}"
-                                                    class="document-badge js-ajax-nav">
-                                                    {{ ucwords(str_replace('_', ' ', $req->document_type)) }}
-                                                </a>
-                                            </td>
-
-                                            <td class="text-xs text-gray-500 cell-purpose">{{ $req->purpose ?: '—' }}
-                                            </td>
-
-                                            <td class="text-xs text-gray-400 whitespace-nowrap"
-                                                style="overflow: visible; text-overflow: unset;">
-                                                {{ $req->created_at->format('M d, Y') }}
-                                            </td>
-
-                                            <td>
-                                                <span
-                                                    style="background:{{ $sBg[$req->status] ?? '#f3f4f6' }};color:{{ $sTx[$req->status] ?? '#6b7280' }};padding:.2rem .65rem;border-radius:999px;font-size:.68rem;font-weight:700;display:inline-block;">
-                                                    {{ ucfirst($req->status) }}
-                                                </span>
-                                            </td>
-
-                                            <td>
-                                                <div class="flex items-center gap-1">
-                                                    <button type="button" class="action-btn view"
-                                                        onclick="openPanel({{ $req->id }})" title="View">
-                                                        <i class="fa-solid fa-eye"></i>
-                                                    </button>
-                                                    @if($req->status === 'pending')
-                                                    <form action="{{ route('admin.document-requests.approve', $req) }}"
-                                                        method="POST" style="display:inline;">
-                                                        @csrf @method('PATCH')
-                                                        <button type="submit" class="action-btn tog-on" title="Approve">
-                                                            <i class="fa-solid fa-check"></i>
-                                                        </button>
-                                                    </form>
-                                                    @endif
-                                                    @if(in_array($req->status, ['approved', 'ready']))
-                                                    <form action="{{ route('admin.document-requests.release', $req) }}"
-                                                        method="POST" style="display:inline;">
-                                                        @csrf @method('PATCH')
-                                                        <button type="submit" class="action-btn"
-                                                            style="background:#dbeafe;color:#1e40af;" title="Release">
-                                                            <i class="fa-solid fa-paper-plane"></i>
-                                                        </button>
-                                                    </form>
-                                                    @endif
-                                                    @if(in_array($req->status, ['pending', 'approved']))
-                                                    <form action="{{ route('admin.document-requests.reject', $req) }}"
-                                                        method="POST" style="display:inline;"
-                                                        onsubmit="return confirm('Reject this request?')">
-                                                        @csrf @method('PATCH')
-                                                        <button type="submit" class="action-btn del" title="Reject">
-                                                            <i class="fa-solid fa-xmark"></i>
-                                                        </button>
-                                                    </form>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="request-view" id="documentRequestGridView" hidden>
-                            <div class="requests-grid">
-                                @foreach($requests as $req)
-                                @php
-                                $sBg = [
-                                'pending' => '#fef3c7',
-                                'approved' => '#d1fae5',
-                                'ready' => '#dbeafe',
-                                'released' => '#ede9fe',
-                                'rejected' => '#fef2f2',
-                                ];
-                                $sTx = [
-                                'pending' => '#92400e',
-                                'approved' => '#065f46',
-                                'ready' => '#1e40af',
-                                'released' => '#5b21b6',
-                                'rejected' => '#8B0000',
-                                ];
-                                $patientName = $req->patient->name ?? 'Unknown Patient';
-                                $patientStudentId = $req->patient->id ?? 'No ID';
-                                $patientInitial = strtoupper(substr($patientName, 0, 1));
-                                @endphp
-
-                                <div class="request-card document-request-row"
-                                    data-reference="{{ strtolower($req->reference_number) }}"
-                                    data-patient="{{ strtolower($patientName) }}"
-                                    data-student="{{ strtolower($patientStudentId) }}"
-                                    data-document="{{ strtolower(str_replace('_', ' ', $req->document_type)) }}"
-                                    data-purpose="{{ strtolower($req->purpose ?? '') }}"
-                                    data-status="{{ strtolower($req->status) }}">
-                                    <div class="request-card-top">
-                                        <div class="request-card-ref">{{ $req->reference_number }}</div>
-                                        <span
-                                            style="background:{{ $sBg[$req->status] ?? '#f3f4f6' }};color:{{ $sTx[$req->status] ?? '#6b7280' }};padding:.2rem .65rem;border-radius:999px;font-size:.68rem;font-weight:700;display:inline-block;white-space:nowrap;">
-                                            {{ ucfirst($req->status) }}
-                                        </span>
-                                    </div>
-
-                                    <div class="request-card-patient">
-                                        <div class="request-card-avatar">{{ $patientInitial }}</div>
-                                        <div class="request-card-patient-info">
-                                            <div class="request-card-name">{{ $patientName }}</div>
-                                            <div class="request-card-id">{{ $patientStudentId }}</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="request-card-meta">
-                                        <div class="request-card-field">
-                                            <div class="request-card-label">Document</div>
-                                            <div class="request-card-value">
-                                                <a href="{{ route('admin.document-requests.index', array_merge(request()->only(['status', 'sort', 'date_from', 'date_to']), ['type' => $req->document_type])) }}"
-                                                    class="document-badge js-ajax-nav">
-                                                    {{ ucwords(str_replace('_', ' ', $req->document_type)) }}
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <div class="request-card-field">
-                                            <div class="request-card-label">Purpose</div>
-                                            <div class="request-card-value request-card-purpose">
-                                                {{ $req->purpose ?: '—' }}
-                                            </div>
-                                        </div>
-
-                                        <div class="request-card-field">
-                                            <div class="request-card-label">Date</div>
-                                            <div class="request-card-value">
-                                                {{ $req->created_at->format('M d, Y') }}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="request-card-footer">
-                                        <button type="button" class="action-btn view"
-                                            onclick="openPanel({{ $req->id }})" title="View">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </button>
-
-                                        <div class="request-card-actions">
-                                            @if($req->status === 'pending')
-                                            <form action="{{ route('admin.document-requests.approve', $req) }}"
-                                                method="POST" style="display:inline;">
-                                                @csrf @method('PATCH')
-                                                <button type="submit" class="action-btn tog-on" title="Approve">
-                                                    <i class="fa-solid fa-check"></i>
-                                                </button>
-                                            </form>
-                                            @endif
-
-                                            @if(in_array($req->status, ['approved', 'ready']))
-                                            <form action="{{ route('admin.document-requests.release', $req) }}"
-                                                method="POST" style="display:inline;">
-                                                @csrf @method('PATCH')
-                                                <button type="submit" class="action-btn"
-                                                    style="background:#dbeafe;color:#1e40af;" title="Release">
-                                                    <i class="fa-solid fa-paper-plane"></i>
-                                                </button>
-                                            </form>
-                                            @endif
-
-                                            @if(in_array($req->status, ['pending', 'approved']))
-                                            <form action="{{ route('admin.document-requests.reject', $req) }}"
-                                                method="POST" style="display:inline;"
-                                                onsubmit="return confirm('Reject this request?')">
-                                                @csrf @method('PATCH')
-                                                <button type="submit" class="action-btn del" title="Reject">
-                                                    <i class="fa-solid fa-xmark"></i>
-                                                </button>
-                                            </form>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        <div id="documentRequestClientEmpty" class="empty-state" style="display:none;">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <p class="font-semibold text-gray-500 mb-1">No matching requests found</p>
-                            <p class="text-sm">Try a different patient name or reference number.</p>
-                        </div>
-
-                        @if(!empty($requests) && $requests->hasPages())
-                        <div class="tbl-pagination">
-                            <span>Showing {{ $requests->firstItem() }}–{{ $requests->lastItem() }} of
-                                {{ $requests->total() }} requests</span>
-                            <div>{{ $requests->withQueryString()->links() }}</div>
-                        </div>
-                        @endif
-                        @endif
-                    </div>
-
-                    <div class="panel-card">
-                        <div class="panel-header">
-                            <div class="panel-header-icon">
-                                <i class="fa-solid fa-file-circle-check text-white" style="font-size:.7rem;"></i>
-                            </div>
-                            <div>
-                                <div class="font-bold text-gray-800 text-sm" id="panelRefNo">Select a request</div>
-                                <div class="text-[11px] text-gray-400">Document Request</div>
-                            </div>
-                        </div>
-
-                        <div style="padding:1.25rem;" id="panelBody">
-                            <div style="text-align:center;padding:2.5rem 0 2rem;color:#d1d5db;">
-                                <div style="width:52px;height:52px;border-radius:14px;background:#fef2f2;display:flex;
-                                    align-items:center;justify-content:center;margin:0 auto .9rem;">
-                                    <i class="fa-solid fa-file-circle-check"
-                                        style="font-size:1.4rem;color:#f9c1c1;"></i>
-                                </div>
-                                <p style="font-size:.78rem;font-weight:600;color:#cbd5e1;margin-bottom:.25rem;">No
-                                    request selected</p>
-                                <p style="font-size:.7rem;color:#e2e8f0;">Click a row to view details</p>
-                            </div>
-                        </div>
-
-                        <div id="panelFoot"
-                            style="padding:.9rem 1.25rem;border-top:1px solid #f3f4f6;background:#fafafa;display:none;gap:.5rem;flex-wrap:wrap;">
-                        </div>
-                    </div>
-
-                </div>
+            <div class="tfoot-bar">
+                <span style="font-size:12px;color:#9A9490;" id="pageInfo"></span>
+                <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;" id="pagControls"></div>
             </div>
 
         </div>
-    </main>
+    </div>
+</main>
+
+<div id="filterModal" class="filter-drawer-wrapper">
+    <div class="filter-drawer-overlay" onclick="document.getElementById('filterCancelBtn')?.click()"></div>
+
+    <div class="filter-drawer-panel docreq-filter-sheet flex flex-col bg-white">
+
+        <div
+            class="filter-drawer-header px-6 py-5 flex items-center justify-between flex-shrink-0 bg-white border-b border-gray-100">
+            <div class="filter-drawer-title flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-xl"></i>
+                <h2 class="text-xl font-extrabold">Filters</h2>
+            </div>
+
+            <button id="filterCancelBtn" type="button" class="text-gray-400 hover:text-gray-700 transition-colors">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="filter-drawer-body px-6 py-5 flex flex-col gap-6 flex-1 overflow-y-auto bg-white">
+
+            <div id="activeFiltersSection" class="hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[13px] font-bold text-gray-800">Active Filters</span>
+                    <button id="clearAllChipsBtn" type="button"
+                        class="text-xs font-bold text-[#8B0000] hover:underline">
+                        Clear All
+                    </button>
+                </div>
+                <div id="activeChipsContainer" class="flex flex-wrap gap-2 pb-4 border-b border-gray-100"></div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Sort By</h3>
+                <div class="filter-chip-row" id="fSortGroup">
+                    <button type="button" class="ftag ftag-active" data-val="newest">Newest First</button>
+                    <button type="button" class="ftag" data-val="oldest">Oldest First</button>
+                    <button type="button" class="ftag" data-val="az">Patient Name A-Z</button>
+                    <button type="button" class="ftag" data-val="za">Patient Name Z-A</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Document Details</h3>
+                <input type="hidden" id="fDocType" value="">
+
+                <div id="docTypeSelect" class="docreq-custom-select docreq-filter-select">
+                    <button type="button" class="docreq-select-button" data-select-button aria-haspopup="listbox"
+                        aria-expanded="false" aria-controls="docTypeSelectMenu"
+                        onclick="toggleDocreqDropdown('docTypeSelect')">
+                        <span class="docreq-select-leading"><i class="fa-regular fa-file-lines"></i></span>
+                        <span class="docreq-select-text">
+                            <span>Document type</span>
+                            <strong id="docTypeSelectLabel">All document types</strong>
+                        </span>
+                        <i class="fa-solid fa-chevron-down docreq-select-chevron"></i>
+                    </button>
+
+                    <div id="docTypeSelectMenu" class="docreq-select-menu docreq-doc-type-menu" role="listbox">
+                        <button type="button" class="docreq-select-option doc-type-option active" data-value=""
+                            onclick="setDocTypeFilter('', 'All document types')">
+                            <span class="docreq-option-icon doc-type-all">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </span>
+
+                            <span class="docreq-option-copy">
+                                <strong>All document types</strong>
+                                <small>No document type filter</small>
+                            </span>
+
+                            <i class="fa-solid fa-check docreq-option-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Filter by Date Range</h3>
+                <div class="filter-chip-row" id="datePresetGroup">
+                    <button type="button" class="quick-date-chip" data-range="7">Last 7 Days</button>
+                    <button type="button" class="quick-date-chip" data-range="30">Last 30 Days</button>
+                    <button type="button" class="quick-date-chip" data-range="90">Last 3 Months</button>
+                    <button type="button" class="quick-date-chip" data-range="180">Last 6 Months</button>
+                    <button type="button" class="quick-date-chip" data-range="365">Last 12 Months</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Custom Date Range</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="filter-date-input-wrap">
+                        <input type="text" id="fDateFrom" class="js-flatpickr-date-range-from" placeholder="Start date"
+                            readonly autocomplete="off" />
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+
+                    <div class="filter-date-input-wrap">
+                        <input type="text" id="fDateTo" class="js-flatpickr-date-range-to" placeholder="End date"
+                            readonly autocomplete="off" />
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="filter-drawer-footer px-6 py-5 bg-white flex flex-col sm:flex-row items-center justify-between flex-shrink-0 border-t border-gray-100 gap-4 sm:gap-0 relative z-20">
+            <button id="filterResetBtn" type="button"
+                class="filter-clear-btn flex items-center gap-2 transition-colors w-full sm:w-auto justify-center sm:justify-start">
+                <i class="fa-regular fa-trash-can text-lg"></i>
+                <span class="text-[13px] font-bold leading-none whitespace-nowrap">Clear Filters</span>
+            </button>
+
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button id="filterCloseBtn" type="button"
+                    class="filter-cancel-btn flex-1 sm:flex-none px-5 py-2.5 text-sm font-bold rounded-lg transition-colors">
+                    Cancel
+                </button>
+
+                <button id="filterApplyBtn" type="button"
+                    class="filter-show-results-btn filter-apply-btn flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-colors shadow-sm">
+                    <i class="fa-solid fa-check"></i>
+                    <span id="showResultsText">Show results</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
 </div>
+
+<div id="approveModal" class="modal-overlay docreq-decision-overlay">
+    <div class="modal-box-inner docreq-decision-modal docreq-approve-modal">
+        <button type="button" class="modal-float-x" id="approveCancelBtn">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="approve-hero">
+            <div class="approve-icon-ring">
+                <div class="approve-icon-inner">
+                    <i class="fa-solid fa-file-circle-check"></i>
+                </div>
+            </div>
+
+            <div class="approve-hero-title">Approve Request</div>
+            <div class="approve-hero-sub">Review the request details before confirming</div>
+        </div>
+
+        <div class="docreq-decision-body">
+            <div class="docreq-decision-patient-card">
+                <div class="docreq-decision-avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <div class="docreq-decision-person-copy">
+                    <div class="docreq-decision-label">Patient</div>
+                    <div id="approvePatientName" class="docreq-decision-patient-name">—</div>
+                </div>
+            </div>
+
+            <div class="docreq-decision-request-card">
+                <div class="docreq-decision-info">
+                    <div class="docreq-decision-info-icon">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                    <div class="docreq-decision-info-copy">
+                        <span>Date & Time</span>
+                        <strong id="approveRequestDate">—</strong>
+                        <small id="approveRequestTime">—</small>
+                    </div>
+                </div>
+
+                <div class="docreq-decision-info">
+                    <div class="docreq-decision-info-icon">
+                        <i class="fa-regular fa-file-lines"></i>
+                    </div>
+                    <div class="docreq-decision-info-copy">
+                        <span>Document</span>
+                        <strong id="approveRequestDocument">—</strong>
+                    </div>
+                </div>
+
+                <div class="docreq-decision-info docreq-decision-info-wide">
+                    <div class="docreq-decision-info-icon">
+                        <i class="fa-solid fa-message"></i>
+                    </div>
+                    <div class="docreq-decision-info-copy">
+                        <span>Purpose</span>
+                        <strong id="approveRequestPurpose">—</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="approve-info-row">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>The document will be queued for printing and signing. This action <strong>cannot be
+                        undone.</strong></span>
+            </div>
+        </div>
+
+        <div class="approve-footer">
+            <button type="button" class="modal-btn-ghost" id="approveCancelBtn2">
+                <i class="fa-solid fa-arrow-left"></i>
+                Cancel
+            </button>
+
+            <button type="button" class="modal-btn-confirm-approve" id="approveConfirmBtn">
+                <span class="btn-confirm-icon">
+                    <i class="fa-solid fa-check"></i>
+                </span>
+                Confirm Approval
+            </button>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="approveRequestId">
+
+<div id="releaseModal" class="modal-overlay docreq-decision-overlay">
+    <div class="modal-box-inner docreq-decision-modal docreq-approve-modal">
+        <button type="button" class="modal-float-x" id="releaseCancelBtn">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="approve-hero">
+            <div class="approve-icon-ring">
+                <div class="approve-icon-inner">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </div>
+            </div>
+
+            <div class="approve-hero-title">Release Document</div>
+            <div class="approve-hero-sub">Confirm that this document has been released to the patient</div>
+        </div>
+
+        <div class="docreq-decision-body">
+            <div class="docreq-decision-patient-card">
+                <div class="docreq-decision-avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <div class="docreq-decision-person-copy">
+                    <div class="docreq-decision-label">Patient</div>
+                    <div id="releasePatientName" class="docreq-decision-patient-name">—</div>
+                </div>
+            </div>
+
+            <div class="docreq-decision-request-card">
+                <div class="docreq-decision-info">
+                    <div class="docreq-decision-info-icon">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                    <div class="docreq-decision-info-copy">
+                        <span>Date & Time</span>
+                        <strong id="releaseRequestDate">—</strong>
+                        <small id="releaseRequestTime">—</small>
+                    </div>
+                </div>
+
+                <div class="docreq-decision-info">
+                    <div class="docreq-decision-info-icon">
+                        <i class="fa-regular fa-file-lines"></i>
+                    </div>
+                    <div class="docreq-decision-info-copy">
+                        <span>Document</span>
+                        <strong id="releaseRequestDocument">—</strong>
+                    </div>
+                </div>
+
+                <div class="docreq-decision-info docreq-decision-info-wide">
+                    <div class="docreq-decision-info-icon">
+                        <i class="fa-solid fa-message"></i>
+                    </div>
+                    <div class="docreq-decision-info-copy">
+                        <span>Purpose</span>
+                        <strong id="releaseRequestPurpose">—</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="approve-info-row">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>This will mark the request as released. Confirm only after the patient has claimed the document.</span>
+            </div>
+        </div>
+
+        <div class="approve-footer">
+            <button type="button" class="modal-btn-ghost" id="releaseCancelBtn2">
+                <i class="fa-solid fa-arrow-left"></i>
+                Cancel
+            </button>
+
+            <button type="button" class="modal-btn-confirm-approve" id="releaseConfirmBtn">
+                <span class="btn-confirm-icon">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </span>
+                Confirm Release
+            </button>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="releaseRequestId">
+
+
+
+<div id="rejectModal" class="modal-overlay docreq-decision-overlay">
+    <div class="modal-box-inner docreq-decision-modal docreq-reject-modal">
+        <button type="button" class="modal-float-x modal-float-x--red" id="rejectCancelBtn">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="reject-hero">
+            <div class="reject-icon-ring">
+                <div class="reject-icon-inner">
+                    <i class="fa-solid fa-file-circle-xmark"></i>
+                </div>
+            </div>
+
+            <div class="reject-hero-title">Reject Request</div>
+            <div class="reject-hero-sub">Review the request details before confirming</div>
+        </div>
+
+        <div class="docreq-decision-body">
+            <div class="docreq-decision-patient-card">
+                <div class="docreq-decision-avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <div class="docreq-decision-person-copy">
+                    <div class="docreq-decision-label">Patient</div>
+                    <div id="rejectPatientName" class="docreq-decision-patient-name">—</div>
+                </div>
+            </div>
+
+            <div class="docreq-decision-request-card">
+                <div class="docreq-decision-info">
+                    <div class="docreq-decision-info-icon">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                    <div class="docreq-decision-info-copy">
+                        <span>Date & Time</span>
+                        <strong id="rejectRequestDate">—</strong>
+                        <small id="rejectRequestTime">—</small>
+                    </div>
+                </div>
+
+                <div class="docreq-decision-info">
+                    <div class="docreq-decision-info-icon">
+                        <i class="fa-regular fa-file-lines"></i>
+                    </div>
+                    <div class="docreq-decision-info-copy">
+                        <span>Document</span>
+                        <strong id="rejectRequestDocument">—</strong>
+                    </div>
+                </div>
+
+                <div class="docreq-decision-info docreq-decision-info-wide">
+                    <div class="docreq-decision-info-icon">
+                        <i class="fa-solid fa-message"></i>
+                    </div>
+                    <div class="docreq-decision-info-copy">
+                        <span>Purpose</span>
+                        <strong id="rejectRequestPurpose">—</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="docreq-reject-field-group">
+                <div class="docreq-field-head">
+                    <label class="reject-field-label" for="rejectNotes">
+                        Reason for rejection
+                        <span>(optional)</span>
+                    </label>
+
+                    <div id="rejectNotesCharCounter" class="char-counter">0 / 150 characters</div>
+                </div>
+
+                <textarea id="rejectNotes" class="reject-textarea" rows="4" maxlength="150" data-char-limit="150"
+                    data-char-counter="#rejectNotesCharCounter" data-char-error="#err-rejectNotes"
+                    placeholder="Provide a reason so the patient understands the decision…"></textarea>
+
+                <div class="field-error" id="err-rejectNotes"></div>
+            </div>
+
+            <div class="reject-warning-row">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>The patient will be notified of this rejection. Make sure you've reviewed the request
+                    carefully.</span>
+            </div>
+        </div>
+
+        <div class="reject-footer">
+            <button type="button" class="modal-btn-ghost modal-btn-ghost--red" id="rejectCancelBtn2">
+                <i class="fa-solid fa-arrow-left"></i>
+                Cancel
+            </button>
+
+            <button type="button" class="modal-btn-confirm-reject" id="rejectConfirmBtn">
+                <span class="btn-confirm-icon">
+                    <i class="fa-solid fa-ban"></i>
+                </span>
+                Confirm Rejection
+            </button>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="rejectRequestId">
+
+<div id="approvedResultModal" class="modal-overlay">
+    <div class="modal-box-inner">
+        <div
+            style="background:linear-gradient(135deg,#15803d,#16a34a);padding:2.5rem 2rem;text-align:center;color:#fff;">
+            <div
+                style="width:58px;height:58px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;">
+                <i class="fa-solid fa-circle-check" style="font-size:1.7rem;"></i>
+            </div>
+            <div style="font-size:1.55rem;margin-bottom:.5rem;">Request Approved!</div>
+            <p style="font-size:.82rem;opacity:.85;line-height:1.6;">The document has been approved and will
+                be<br>prepared
+                for printing. The patient will be notified.</p>
+            <button id="approvedResultClose"
+                style="margin-top:1.4rem;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:9px;padding:.5rem 1.5rem;font-weight:700;cursor:pointer;font-size:.83rem;">
+                Done
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="releasedResultModal" class="modal-overlay">
+    <div class="modal-box-inner">
+        <div
+            style="background:linear-gradient(135deg,#2563eb,#0ea5e9);padding:2.5rem 2rem;text-align:center;color:#fff;">
+            <div
+                style="width:58px;height:58px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;">
+                <i class="fa-solid fa-paper-plane" style="font-size:1.7rem;"></i>
+            </div>
+            <div style="font-size:1.55rem;margin-bottom:.5rem;">Document Released!</div>
+            <p style="font-size:.82rem;opacity:.85;line-height:1.6;">The request has been marked as released.<br>The record will be updated after this closes.</p>
+            <button id="releasedResultClose"
+                style="margin-top:1.4rem;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:9px;padding:.5rem 1.5rem;font-weight:700;cursor:pointer;font-size:.83rem;">
+                Done
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="rejectedResultModal" class="modal-overlay">
+    <div class="modal-box-inner">
+        <div
+            style="background:linear-gradient(135deg,#991b1b,#b91c1c);padding:2.5rem 2rem;text-align:center;color:#fff;">
+            <div
+                style="width:58px;height:58px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;">
+                <i class="fa-solid fa-circle-xmark" style="font-size:1.7rem;"></i>
+            </div>
+            <div style="font-size:1.55rem;margin-bottom:.5rem;">Request Rejected</div>
+            <p style="font-size:.82rem;opacity:.85;line-height:1.6;">The request has been rejected. The patient<br>will
+                be
+                notified of the decision.</p>
+            <button id="rejectedResultClose"
+                style="margin-top:1.4rem;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:9px;padding:.5rem 1.5rem;font-weight:700;cursor:pointer;font-size:.83rem;">
+                Done
+            </button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
 <script>
-    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-    const csrfToken = csrfMeta ? csrfMeta.content : '';
+    const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+    const ADMIN_DOC_REQUESTS = @json($docRequestsPayload->values());
+    const ADMIN_DOC_STATS = @json($docRequestStats);
+    const ADMIN_DOC_TYPES = @json($docRequestTypes->values());
 
-    const statusBackground = { pending: '#fef3c7', approved: '#d1fae5', ready: '#dbeafe', released: '#ede9fe', rejected: '#fef2f2' };
-    const statusText = { pending: '#92400e', approved: '#065f46', ready: '#1e40af', released: '#5b21b6', rejected: '#8B0000' };
+    let allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
+    let activeFilter = @json(request('status', 'all') ?: 'all');
+    let searchQuery = '';
+    const PER_PAGE = 8;
+    let currentPage = 1;
+    let filterStatus = activeFilter;
+    let filterDocType = '';
+    let filterDateFrom = '';
+    let filterDateTo = '';
+    let filterSort = 'newest';
+    let documentTypeOptions = [];
 
-    function updateFilterButtonState() {
-        const btn = document.getElementById('filterModalOpenBtn');
-        const dot = btn ? btn.querySelector('.filter-dot') : null;
+    let currentViewMode = window.innerWidth <= 767 ? 'grid' : 'list';
 
-        const statusVal = document.getElementById('hiddenStatus')?.value || '';
-        const typeVal = document.getElementById('hiddenType')?.value || '';
-        const dateFrom = document.getElementById('hiddenDateFrom')?.value || '';
-        const dateTo = document.getElementById('hiddenDateTo')?.value || '';
-        const sortVal = document.getElementById('hiddenSort')?.value || 'newest';
+    function setViewMode(mode, btn) {
+        const mainContent = document.getElementById('mainContent');
+        currentViewMode = mode;
 
-        const hasFilters = !!statusVal || !!typeVal || !!dateFrom || !!dateTo || (sortVal && sortVal !== 'newest');
-
-        if (btn) btn.classList.toggle('active', hasFilters);
-        if (dot) dot.classList.toggle('visible', hasFilters);
-    }
-
-    function initFilterModal() {
-        const backdrop = document.getElementById('filterModalBackdrop');
-        const openBtn = document.getElementById('filterModalOpenBtn');
-        const closeBtn = document.getElementById('filterModalCloseBtn');
-        const applyBtn = document.getElementById('filterApplyBtn');
-        const resetBtn = document.getElementById('filterResetBtn');
-
-        if (!backdrop || !openBtn) return;
-
-        if (!openBtn.dataset.bound) {
-            openBtn.dataset.bound = '1';
-            openBtn.addEventListener('click', () => {
-                backdrop.classList.add('show');
-                document.body.style.overflow = 'hidden';
-            });
+        if (mainContent) {
+            mainContent.classList.toggle('mode-grid', mode === 'grid');
+            mainContent.classList.toggle('mode-list', mode !== 'grid');
         }
 
-        function closeModal() {
-            backdrop.classList.remove('show');
-            document.body.style.overflow = '';
-        }
-
-        if (closeBtn && !closeBtn.dataset.bound) {
-            closeBtn.dataset.bound = '1';
-            closeBtn.addEventListener('click', closeModal);
-        }
-
-        if (!backdrop.dataset.bound) {
-            backdrop.dataset.bound = '1';
-            backdrop.addEventListener('click', e => {
-                if (e.target === backdrop) closeModal();
-            });
-        }
-
-        if (!document.body.dataset.documentRequestEscapeBound) {
-            document.body.dataset.documentRequestEscapeBound = '1';
-            document.addEventListener('keydown', e => {
-                if (e.key === 'Escape') closeModal();
-            });
-        }
-
-        const chipGroup = document.getElementById('filterStatusChips');
-        if (chipGroup && !chipGroup.dataset.bound) {
-            chipGroup.dataset.bound = '1';
-            chipGroup.addEventListener('click', e => {
-                const chip = e.target.closest('.filter-chip');
-                if (!chip) return;
-                chipGroup.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-            });
-        }
-
-        const sortGroup = document.getElementById('filterSortChips');
-        if (sortGroup && !sortGroup.dataset.bound) {
-            sortGroup.dataset.bound = '1';
-            sortGroup.addEventListener('click', e => {
-                const chip = e.target.closest('.filter-chip');
-                if (!chip) return;
-                sortGroup.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-            });
-        }
-
-        if (applyBtn && !applyBtn.dataset.bound) {
-            applyBtn.dataset.bound = '1';
-            applyBtn.addEventListener('click', () => {
-                const activeChip = chipGroup ? chipGroup.querySelector('.filter-chip.active') : null;
-                const activeSortChip = sortGroup ? sortGroup.querySelector('.filter-chip.active') : null;
-
-                const statusVal = activeChip ? activeChip.dataset.value : '';
-                const sortVal = activeSortChip ? activeSortChip.dataset.value : 'newest';
-                const typeVal = document.getElementById('filterTypeSelect')?.value || '';
-                const dateFrom = document.getElementById('filterDateFrom')?.value || '';
-                const dateTo = document.getElementById('filterDateTo')?.value || '';
-
-                document.getElementById('hiddenStatus').value = statusVal;
-                document.getElementById('hiddenType').value = typeVal;
-                document.getElementById('hiddenDateFrom').value = dateFrom;
-                document.getElementById('hiddenDateTo').value = dateTo;
-                document.getElementById('hiddenSort').value = sortVal;
-
-                updateFilterButtonState();
-                closeModal();
-
-                const form = document.getElementById('documentRequestsFilterForm');
-                const url = new URL(form.action, window.location.origin);
-                url.search = '';
-
-                if (statusVal) url.searchParams.set('status', statusVal);
-                if (typeVal) url.searchParams.set('type', typeVal);
-                if (dateFrom) url.searchParams.set('date_from', dateFrom);
-                if (dateTo) url.searchParams.set('date_to', dateTo);
-                if (sortVal && sortVal !== 'newest') url.searchParams.set('sort', sortVal);
-
-                loadDocumentRequestsFragment(url.toString());
-            });
-        }
-
-        if (resetBtn && !resetBtn.dataset.bound) {
-            resetBtn.dataset.bound = '1';
-            resetBtn.addEventListener('click', () => {
-                if (chipGroup) {
-                    chipGroup.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                    const allChip = chipGroup.querySelector('.filter-chip[data-value=""]');
-                    if (allChip) allChip.classList.add('active');
-                }
-
-                if (sortGroup) {
-                    sortGroup.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                    const defaultSort = sortGroup.querySelector('.filter-chip[data-value="newest"]');
-                    if (defaultSort) defaultSort.classList.add('active');
-                }
-
-                const typeSelect = document.getElementById('filterTypeSelect');
-                if (typeSelect) typeSelect.value = '';
-
-                const dfrom = document.getElementById('filterDateFrom');
-                const dto = document.getElementById('filterDateTo');
-                if (dfrom) dfrom.value = '';
-                if (dto) dto.value = '';
-
-                document.getElementById('hiddenStatus').value = '';
-                document.getElementById('hiddenType').value = '';
-                document.getElementById('hiddenDateFrom').value = '';
-                document.getElementById('hiddenDateTo').value = '';
-                document.getElementById('hiddenSort').value = 'newest';
-
-                updateFilterButtonState();
-            });
-        }
-    }
-
-    function detailRow(label, value) {
-        return `<div style="display:flex;gap:.5rem;margin-bottom:.6rem;font-size:.8rem;">
-            <span style="color:#9ca3af;min-width:100px;flex-shrink:0;">${label}</span>
-            <span style="color:#111;font-weight:600;">${value}</span>
-        </div>`;
-    }
-
-    async function openPanel(id) {
-        const panelRefNo = document.getElementById('panelRefNo');
-        const panelBody = document.getElementById('panelBody');
-        const panelFoot = document.getElementById('panelFoot');
-
-        panelRefNo.textContent = 'Loading...';
-        panelBody.innerHTML = `<div style="text-align:center;padding:2rem 0;color:#d1d5db;">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem;"></i></div>`;
-        panelFoot.style.display = 'none';
-        panelFoot.innerHTML = '';
-
-        try {
-            const response = await fetch(`/admin/document-requests/${id}`, {
-                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
-            });
-            if (!response.ok) throw new Error('Failed to fetch.');
-            const data = await response.json();
-
-            panelRefNo.textContent = data.reference_number;
-            panelBody.innerHTML = `
-                <div style="background:#fef2f2;border-radius:10px;padding:.9rem 1rem;margin-bottom:1rem;display:flex;
-                    align-items:center;gap:.75rem;border:1px solid #fce8e8;">
-                    <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#8B0000,#6b0000);
-                        color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">
-                        ${((data.patient_name || '?')[0] || '?').toUpperCase()}
-                    </div>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:.84rem;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${data.patient_name || '—'}</div>
-                        <div style="font-size:.7rem;color:#9ca3af;">${data.patient_id || ''}</div>
-                    </div>
-                    <span style="background:${statusBackground[data.status] || '#f3f4f6'};color:${statusText[data.status] || '#6b7280'};padding:.2rem .65rem;border-radius:999px;font-size:.68rem;font-weight:700;white-space:nowrap;">
-                        ${data.status ? data.status.charAt(0).toUpperCase() + data.status.slice(1) : '—'}
-                    </span>
-                </div>
-                ${detailRow('Document', formatTitle(data.document_type))}
-                ${detailRow('Purpose', data.purpose || '—')}
-                ${detailRow('Date', data.created_at || '—')}
-                ${detailRow('Copies', data.copies_needed || '1')}
-                <div style="margin-top:1rem;">
-                    <div style="font-size:.67rem;font-weight:700;color:#9ca3af;text-transform:uppercase;
-                        letter-spacing:.08em;margin-bottom:.6rem;">Activity</div>
-                    <div style="padding-left:1rem;border-left:2px solid #f0eaea;">
-                        ${(data.activities || [{ date: '—', description: 'No activity yet.' }]).map(a => `
-                            <div style="position:relative;margin-bottom:.6rem;">
-                                <div style="position:absolute;left:-1.35rem;top:.3rem;width:6px;
-                                    height:6px;border-radius:50%;background:#8B0000;border:1.5px solid #fef2f2;"></div>
-                                <div style="font-size:.67rem;color:#9ca3af;">${a.date}</div>
-                                <div style="font-size:.76rem;color:#374151;">${a.description}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-
-            panelFoot.style.display = 'flex';
-            let actions = '';
-
-            if (data.status === 'pending') {
-                actions += `<form action="/admin/document-requests/${data.id}/approve" method="POST">
-                    <input type="hidden" name="_token" value="${csrfToken}">
-                    <input type="hidden" name="_method" value="PATCH">
-                    <button type="submit" class="btn-primary" style="font-size:.75rem;padding:.4rem .9rem;">
-                        <i class="fa-solid fa-check text-xs"></i> Approve
-                    </button>
-                </form>`;
-            }
-            if (data.status === 'approved' || data.status === 'ready') {
-                actions += `<form action="/admin/document-requests/${data.id}/release" method="POST">
-                    <input type="hidden" name="_token" value="${csrfToken}">
-                    <input type="hidden" name="_method" value="PATCH">
-                    <button type="submit" class="btn-secondary" style="font-size:.75rem;padding:.38rem .9rem;">Release</button>
-                </form>`;
-            }
-            if (data.status === 'pending' || data.status === 'approved') {
-                actions += `<form action="/admin/document-requests/${data.id}/reject" method="POST" onsubmit="return confirm('Reject this request?')">
-                    <input type="hidden" name="_token" value="${csrfToken}">
-                    <input type="hidden" name="_method" value="PATCH">
-                    <button type="submit" class="btn-secondary" style="font-size:.75rem;
-                        padding:.38rem .9rem;color:#dc2626;border-color:#fce8e8;">Reject</button>
-                </form>`;
-            }
-
-            panelFoot.innerHTML = actions;
-        } catch {
-            panelBody.innerHTML = `<p style="color:#dc2626;text-align:center;padding:1.5rem;">Failed to load details.</p>`;
-        }
-    }
-
-    function formatTitle(value) {
-        if (!value) return '—';
-        return value.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    }
-
-    function getPreferredDocumentRequestView() {
-        if (window.innerWidth <= 767) return 'grid';
-        return localStorage.getItem('documentRequestView') || 'list';
-    }
-
-    function applyDocumentRequestView(view, save = true) {
-        const listView = document.getElementById('documentRequestListView');
-        const gridView = document.getElementById('documentRequestGridView');
-        const listBtn = document.getElementById('listViewBtn');
-        const gridBtn = document.getElementById('gridViewBtn');
-
-        if (!listView || !gridView) return;
-
-        const finalView = window.innerWidth <= 767 ? 'grid' : view;
-
-        if (finalView === 'grid') {
-            listView.hidden = true;
-            gridView.hidden = false;
-        } else {
-            listView.hidden = false;
-            gridView.hidden = true;
-        }
-
-        if (listBtn) listBtn.classList.toggle('active', finalView === 'list');
-        if (gridBtn) gridBtn.classList.toggle('active', finalView === 'grid');
-
-        if (save && window.innerWidth > 767) {
-            localStorage.setItem('documentRequestView', finalView);
-        }
-    }
-
-    function initDocumentRequestViewToggle() {
-        const listBtn = document.getElementById('listViewBtn');
-        const gridBtn = document.getElementById('gridViewBtn');
-
-        applyDocumentRequestView(getPreferredDocumentRequestView(), false);
-
-        if (listBtn && !listBtn.dataset.bound) {
-            listBtn.dataset.bound = '1';
-            listBtn.addEventListener('click', () => applyDocumentRequestView('list', true));
-        }
-
-        if (gridBtn && !gridBtn.dataset.bound) {
-            gridBtn.dataset.bound = '1';
-            gridBtn.addEventListener('click', () => applyDocumentRequestView('grid', true));
-        }
-    }
-
-    function updateDocumentRequestSearchClear() {
-        const searchInput = document.getElementById('documentRequestSearch');
-        const clearBtn = document.getElementById('documentRequestClearBtn');
-        if (!searchInput || !clearBtn) return;
-        clearBtn.classList.toggle('hidden', searchInput.value.trim().length === 0);
-    }
-
-    function filterDocumentRequestRows() {
-        const searchInput = document.getElementById('documentRequestSearch');
-        const rows = Array.from(document.querySelectorAll('.document-request-row'));
-        const emptyState = document.getElementById('documentRequestClientEmpty');
-        const pagination = document.querySelector('.tbl-pagination');
-        if (!searchInput) return;
-
-        const q = searchInput.value.trim().toLowerCase();
-        let visibleCount = 0;
-        const seenKeys = new Set();
-
-        rows.forEach(row => {
-            const haystack = [
-                row.dataset.reference,
-                row.dataset.patient,
-                row.dataset.student,
-                row.dataset.document,
-                row.dataset.purpose,
-                row.dataset.status
-            ].join(' ');
-
-            const match = !q || haystack.includes(q);
-            row.style.display = match ? '' : 'none';
-
-            if (match) {
-                const key = row.dataset.reference || Math.random().toString();
-                if (!seenKeys.has(key)) {
-                    seenKeys.add(key);
-                    visibleCount++;
-                }
-            }
+        document.querySelectorAll('.btn-view-mode').forEach(function (b) {
+            b.classList.remove('active');
         });
 
-        if (emptyState) emptyState.style.display = visibleCount === 0 ? 'flex' : 'none';
-        if (pagination) pagination.style.display = q ? 'none' : '';
+        const targetBtn = btn || document.querySelector('.btn-view-mode[data-view="' + mode + '"]');
+        if (targetBtn) targetBtn.classList.add('active');
+
+        if (window.innerWidth > 767) {
+            localStorage.setItem('docreqViewMode', mode);
+        }
+        renderList();
     }
 
-    function initDocumentRequestSearch() {
-        const searchInput = document.getElementById('documentRequestSearch');
-        const clearBtn = document.getElementById('documentRequestClearBtn');
-        if (!searchInput) return;
+    function loadData() {
+        allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
 
-        updateDocumentRequestSearchClear();
-        filterDocumentRequestRows();
+        documentTypeOptions = normalizeDocTypes(
+            Array.isArray(ADMIN_DOC_TYPES) && ADMIN_DOC_TYPES.length
+                ? ADMIN_DOC_TYPES
+                : allRequests.map(r => r.document_type)
+        );
 
-        if (!searchInput.dataset.searchBound) {
-            searchInput.dataset.searchBound = '1';
-            searchInput.addEventListener('input', () => {
-                updateDocumentRequestSearchClear();
-                filterDocumentRequestRows();
-            });
+        if (filterDocType && !documentTypeOptions.includes(filterDocType)) {
+            filterDocType = '';
         }
 
-        if (clearBtn && !clearBtn.dataset.bound) {
-            clearBtn.dataset.bound = '1';
-            clearBtn.addEventListener('click', () => {
-                const micBtn = document.getElementById('documentRequestMicToggleBtn');
-                if (micBtn && micBtn.classList.contains('mic-active')) {
-                    micBtn.click();
+        renderDocTypeOptions(documentTypeOptions);
+        updateStats(ADMIN_DOC_STATS || {});
+        renderList();
+    }
+
+    function showSkeleton() {
+        let html = '';
+        for (let i = 0; i < 4; i++) {
+            html += `
+      <div class="req-row desktop-req-row border-b border-gray-100 hidden md:block">
+        <div class="req-inner" style="display:grid;grid-template-columns:1.5fr 1fr 1.5fr 1.5fr 1fr 100px;align-items:center;gap:12px;">
+          <div style="display:flex;align-items:center;gap:.8rem;">
+            <div class="skeleton" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
+            <div><div class="skeleton" style="height:13px;width:110px;margin-bottom:6px;"></div><div class="skeleton" style="height:10px;width:70px;"></div></div>
+          </div>
+          <div><div class="skeleton" style="height:13px;width:80px;margin-bottom:5px;"></div><div class="skeleton" style="height:10px;width:60px;"></div></div>
+          <div><div class="skeleton" style="height:13px;width:120px;"></div></div>
+          <div><div class="skeleton" style="height:13px;width:140px;"></div></div>
+          <div><div class="skeleton" style="height:20px;width:60px;border-radius:999px;"></div></div>
+          <div class="skeleton" style="height:28px;width:70px;border-radius:8px;"></div>
+        </div>
+      </div>
+      
+      <div class="mobile-req-card md:hidden bg-white border border-gray-200 rounded-xl p-4 mb-3 mx-2">
+        <div class="mobile-card-inner">
+          <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.75rem;">
+            <div class="skeleton" style="width:38px;height:38px;border-radius:10px;flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div class="skeleton" style="height:13px;width:130px;margin-bottom:5px;"></div>
+              <div class="skeleton" style="height:10px;width:80px;"></div>
+            </div>
+            <div class="skeleton" style="height:28px;width:60px;border-radius:9px;"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem;">
+            <div><div class="skeleton" style="height:9px;width:60px;margin-bottom:4px;"></div><div class="skeleton" style="height:12px;width:80px;"></div></div>
+            <div><div class="skeleton" style="height:9px;width:50px;margin-bottom:4px;"></div><div class="skeleton" style="height:12px;width:90px;"></div></div>
+          </div>
+        </div>
+      </div>`;
+        }
+        const listContainer = document.getElementById('requestListContainer');
+        const gridContainer = document.getElementById('requestGridContainer');
+        const tableHead = document.getElementById('docreqTableHead');
+
+        if (tableHead && currentViewMode === 'list') {
+            tableHead.style.display = '';
+        } else if (tableHead) {
+            tableHead.style.display = 'none';
+        }
+
+        if (gridContainer) {
+            gridContainer.style.display = 'none';
+            gridContainer.innerHTML = '';
+        }
+
+        if (listContainer) {
+            listContainer.style.display = 'flex';
+            listContainer.innerHTML = html;
+        }
+
+        const rowCountEl = document.getElementById('rowCount');
+        if (rowCountEl) rowCountEl.textContent = 'Loading...';
+
+        document.getElementById('pageInfo').textContent = '';
+        document.getElementById('pagControls').innerHTML = '';
+    }
+
+    function updateStats(stats) {
+        stats = stats || {};
+        const values = {
+            all: stats.all ?? stats.total ?? 0,
+            pending: stats.pending ?? 0,
+            approved: stats.approved ?? 0,
+            ready: stats.ready ?? 0,
+            released: stats.released ?? 0,
+            rejected: stats.rejected ?? 0
+        };
+
+        const ids = {
+            all: ['statAll', 'miniStatAll'],
+            pending: ['statPending', 'miniStatPending'],
+            approved: ['statApproved', 'miniStatApproved'],
+            ready: ['statReady', 'miniStatReady'],
+            released: ['statReleased', 'miniStatReleased'],
+            rejected: ['statRejected', 'miniStatRejected']
+        };
+
+        Object.keys(ids).forEach((key) => {
+            ids[key].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = values[key] ?? 0;
+            });
+        });
+
+        updateStatusDropdownUI(activeFilter);
+    }
+
+    function getFiltered() {
+        let data = allRequests;
+        if (activeFilter !== 'all') data = data.filter(r => r.status === activeFilter);
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            data = data.filter(r => {
+                const displayName = getPatientDisplayName(r.patient_name).toLowerCase();
+                const rawName = String(r.patient_name || '').toLowerCase();
+                const identifier = String(r.sub_label || r.patient_identifier || '').toLowerCase();
+                const reference = String(r.reference_number || '').toLowerCase();
+                const documentType = String(r.document_type || '').toLowerCase();
+                const purpose = String(r.purpose || '').toLowerCase();
+                const status = String(r.status || '').toLowerCase();
+
+                return displayName.includes(q) ||
+                    rawName.includes(q) ||
+                    identifier.includes(q) ||
+                    reference.includes(q) ||
+                    documentType.includes(q) ||
+                    purpose.includes(q) ||
+                    status.includes(q);
+            });
+        }
+        if (filterDocType) data = data.filter(r => r.document_type === filterDocType);
+        if (filterDateFrom) {
+            data = data.filter(r => String(r.filter_date || '').slice(0, 10) >= filterDateFrom);
+        }
+        if (filterDateTo) {
+            data = data.filter(r => String(r.filter_date || '').slice(0, 10) <= filterDateTo);
+        }
+        data = [...data].sort((a, b) => {
+            const dateA = new Date(a.request_sort_date || a.filter_date || a.request_date || 0);
+            const dateB = new Date(b.request_sort_date || b.filter_date || b.request_date || 0);
+
+            if (filterSort === 'oldest') return dateA - dateB;
+            if (filterSort === 'az') {
+                const displayNameA = getPatientDisplayName(a.patient_name);
+                const displayNameB = getPatientDisplayName(b.patient_name);
+                return displayNameA.localeCompare(displayNameB);
+            }
+            if (filterSort === 'za') {
+                const displayNameA = getPatientDisplayName(a.patient_name);
+                const displayNameB = getPatientDisplayName(b.patient_name);
+                return displayNameB.localeCompare(displayNameA);
+            }
+            return dateB - dateA;
+        });
+        return data;
+    }
+
+    function hasActiveFilters() {
+        return searchQuery !== '' || activeFilter !== 'all' || filterDocType !== '' || filterDateFrom !== '' ||
+            filterDateTo !== '' || filterSort !== 'newest';
+    }
+
+    function countAdvancedFilters() {
+        let n = 0;
+
+        if (filterDocType) n++;
+        if (filterDateFrom || filterDateTo) n++;
+        if (filterSort !== 'newest') n++;
+
+        return n;
+    }
+
+    function updateFilterBtn() {
+        const badge = document.getElementById('filterBadge');
+        const externalClear = document.getElementById('externalClearFilterBtn');
+        const count = countAdvancedFilters();
+
+        if (count > 0) {
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = 'inline-flex';
+            }
+            if (externalClear) externalClear.classList.remove('hidden');
+        } else {
+            if (badge) badge.style.display = 'none';
+            if (externalClear) externalClear.classList.add('hidden');
+        }
+    }
+
+    function buildClearFilterBtn() {
+        const parts = [];
+        if (searchQuery) parts.push(`"${esc(searchQuery)}"`);
+        if (activeFilter !== 'all') parts.push(activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1));
+        if (filterDocType) parts.push(filterDocType);
+        if (filterDateFrom || filterDateTo) parts.push('Date range');
+        if (filterSort !== 'newest') parts.push('Sort');
+        const label = parts.length ? `Clear filter${parts.length > 1 ? 's' : ''} (${parts.join(', ')})` :
+            'Reset';
+        return `<div style="margin-top:1.25rem;"><button class="btn-clear-filter" onclick="resetAllFilters()"><i class="fa-solid fa-filter-circle-xmark"></i>${label}</button></div>`;
+    }
+
+    function resetAllFilters() {
+        const searchInput = document.getElementById('searchInput');
+
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input', {
+                bubbles: true
+            }));
+            searchInput.dispatchEvent(new Event('change', {
+                bubbles: true
+            }));
+        }
+
+        searchQuery = '';
+
+        activeFilter = 'all';
+        filterStatus = 'all';
+        filterDocType = '';
+        filterDateFrom = '';
+        filterDateTo = '';
+        filterSort = 'newest';
+        currentPage = 1;
+
+        updateStatusDropdownUI('all');
+
+        window.syncFilterTagGroup('fSortGroup', 'newest');
+
+        const dateFrom = document.getElementById('fDateFrom');
+        const dateTo = document.getElementById('fDateTo');
+
+        setCustomSelectValue('docTypeSelect', '');
+        if (dateFrom) dateFrom.value = '';
+        if (dateTo) dateTo.value = '';
+
+        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        updateFilterBtn();
+        renderFilterChips();
+        renderList();
+    }
+
+    function resetAdvancedFilters() {
+        filterDocType = '';
+        filterDateFrom = '';
+        filterDateTo = '';
+        filterSort = 'newest';
+        currentPage = 1;
+
+        if (window.syncFilterTagGroup) {
+            window.syncFilterTagGroup('fSortGroup', 'newest');
+            }
+
+        setCustomSelectValue('docTypeSelect', '');
+
+        const dateFrom = document.getElementById('fDateFrom');
+        const dateTo = document.getElementById('fDateTo');
+
+        if (dateFrom) dateFrom.value = '';
+        if (dateTo) dateTo.value = '';
+
+        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        updateFilterBtn();
+        renderFilterChips();
+        renderList();
+    }
+
+    function renderList() {
+        const filtered = getFiltered();
+        const total = filtered.length;
+        const tableHead = document.getElementById('docreqTableHead');
+        const isMobile = window.innerWidth <= 767;
+        const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
+        if (currentPage > lastPage) currentPage = lastPage;
+        const start = (currentPage - 1) * PER_PAGE;
+        const page = filtered.slice(start, start + PER_PAGE);
+
+        const rowCountEl = document.getElementById('rowCount');
+        if (rowCountEl) rowCountEl.textContent = `${total} ${total === 1 ? 'request' : 'requests'}`;
+
+        document.getElementById('pageInfo').textContent =
+            total === 0 ? '' : `Showing ${start + 1}–${Math.min(start + PER_PAGE, total)} of ${total} requests`;
+
+        renderPagination(total, lastPage);
+
+        const listContainer = document.getElementById('requestListContainer');
+        const gridContainer = document.getElementById('requestGridContainer');
+
+        if (listContainer) listContainer.innerHTML = '';
+        if (gridContainer) gridContainer.innerHTML = '';
+
+        if (!page.length) {
+            const emptyHtml = buildEmptyStateHtml();
+
+            if (tableHead) tableHead.style.display = 'none';
+
+            if (currentViewMode === 'grid' && !isMobile) {
+                if (listContainer) {
+                    listContainer.style.display = 'none';
+                    listContainer.innerHTML = '';
                 }
+                if (gridContainer) {
+                    gridContainer.style.display = 'block';
+                    gridContainer.innerHTML = emptyHtml;
+                }
+            } else {
+                if (gridContainer) {
+                    gridContainer.style.display = 'none';
+                    gridContainer.innerHTML = '';
+                }
+                if (listContainer) {
+                    listContainer.style.display = 'flex';
+                    listContainer.innerHTML = emptyHtml;
+                }
+            }
 
-                searchInput.value = '';
-                document.getElementById('documentRequestVoiceStatus')?.classList.add('hidden');
-                updateDocumentRequestSearchClear();
-                filterDocumentRequestRows();
-                searchInput.focus();
-            });
-        }
-    }
-
-    function initDocumentRequestVoice() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const input = document.getElementById('documentRequestSearch');
-        const micBtn = document.getElementById('documentRequestMicToggleBtn');
-        const status = document.getElementById('documentRequestVoiceStatus');
-
-        if (!input || !micBtn || !status) return;
-        if (micBtn.dataset.bound === '1') return;
-        micBtn.dataset.bound = '1';
-
-        console.debug('[voice] initDocumentRequestVoice bound');
-
-        if (!SpeechRecognition) {
-            micBtn.disabled = true;
-            micBtn.setAttribute('aria-disabled', 'true');
             return;
         }
 
-        let listening = false;
-        let recognition = null;
-        let manualStop = false;
+        if (isMobile) {
+            if (tableHead) tableHead.style.display = 'none';
 
-        const setStatus = (text, state) => {
-            status.textContent = text;
-            status.className = 'document-request-voice-status';
-            if (state) status.classList.add(`is-${state}`);
-            status.classList.remove('hidden');
-        };
-
-        const hideStatus = (delay = 0) => {
-            window.setTimeout(() => status.classList.add('hidden'), delay);
-        };
-
-        const setMicState = (isActive) => {
-            micBtn.classList.toggle('mic-active', isActive);
-            micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-            micBtn.innerHTML = isActive
-                ? '<i class="fa-solid fa-stop"></i>'
-                : '<i class="fa-solid fa-microphone"></i>';
-            micBtn.title = isActive ? 'Stop listening' : 'Start voice input';
-        };
-
-        const stopListeningNow = () => {
-            manualStop = true;
-            listening = false;
-            setMicState(false);
-            setStatus('Voice input stopped.', 'success');
-            hideStatus(1200);
-
-            if (recognition) {
-                try {
-                    recognition.abort();
-                } catch (e) {
-                    try { recognition.stop(); } catch (err) { }
-                }
-            }
-        };
-
-        const createRecognition = () => {
-            const r = new SpeechRecognition();
-            r.lang = 'en-US';
-            r.continuous = false;
-            r.interimResults = true;
-            r.maxAlternatives = 1;
-
-            let sawSpeech = false;
-            let timeoutId = null;
-            const LISTEN_TIMEOUT = 6000;
-
-            const clearTimeout_ = () => {
-                if (timeoutId) {
-                    clearTimeout(timeoutId);
-                    timeoutId = null;
-                }
-            };
-
-            r.onstart = () => {
-                console.debug('[voice] recognition started');
-                timeoutId = window.setTimeout(() => {
-                    if (listening && !sawSpeech) {
-                        r.stop();
-                    }
-                }, LISTEN_TIMEOUT);
-            };
-
-            r.onspeechend = () => {
-                clearTimeout_();
-                try { r.stop(); } catch (e) { }
-            };
-
-            r.onresult = (event) => {
-                console.debug('[voice] onresult', event);
-                let transcript = '';
-
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const result = event.results[i];
-                    const chunk = result?.[0]?.transcript?.trim() || '';
-                    if (!chunk) continue;
-
-                    sawSpeech = true;
-
-                    if (result.isFinal) {
-                        transcript = `${transcript} ${chunk}`.trim();
-                    } else if (!transcript) {
-                        transcript = chunk;
-                    }
-                }
-
-                transcript = transcript.trim();
-
-                if (transcript) {
-                    clearTimeout_();
-                    input.value = transcript;
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
-                    input.dispatchEvent(new Event('change', { bubbles: true }));
-                    setStatus('Listening...', 'listening');
-                }
-            };
-
-            r.onerror = () => {
-                console.debug('[voice] onerror');
-                clearTimeout_();
-                listening = false;
-                if (manualStop) {
-                    manualStop = false;
-                    return;
-                }
-                setMicState(false);
-                setStatus("Didn't catch that. Try again.", 'error');
-                hideStatus(2500);
-            };
-
-            r.onend = () => {
-                console.debug('[voice] onend', { sawSpeech, inputValue: input.value });
-                clearTimeout_();
-                if (manualStop) {
-                    manualStop = false;
-                    listening = false;
-                    setMicState(false);
-                    return;
-                }
-
-                const hadSpeech = sawSpeech || !!input.value.trim();
-                listening = false;
-                setMicState(false);
-                if (hadSpeech) {
-                    setStatus('Voice captured.', 'success');
-                    hideStatus(2200);
-                } else {
-                    setStatus("Didn't catch that. Try again.", 'error');
-                    hideStatus(2500);
-                }
-            };
-
-            return r;
-        };
-
-        micBtn.addEventListener('click', () => {
-            if (listening && recognition) {
-                stopListeningNow();
-                return;
+            if (gridContainer) {
+                gridContainer.style.display = 'none';
+                gridContainer.innerHTML = '';
             }
 
-            recognition = createRecognition();
+            if (listContainer) {
+                listContainer.style.display = 'flex';
+                listContainer.innerHTML = page.map(r => buildMobileCard(r)).join('');
+            }
+        } else if (currentViewMode === 'grid') {
+            if (tableHead) tableHead.style.display = 'none';
 
-            try {
-                recognition.start();
-            } catch (error) {
-                setStatus('Unable to start voice input.', 'error');
-                hideStatus(2500);
-                setMicState(false);
-                listening = false;
-                return;
+            if (listContainer) {
+                listContainer.style.display = 'none';
+                listContainer.innerHTML = '';
             }
 
-            listening = true;
-            setMicState(true);
-            setStatus('Listening...', 'listening');
-        });
-    }
+            if (gridContainer) {
+                gridContainer.style.display = 'grid';
+                gridContainer.innerHTML = page.map(r => buildGridCard(r)).join('');
+            }
+        } else {
+            if (tableHead) tableHead.style.display = 'none';
 
-    async function loadDocumentRequestsFragment(url, push = true) {
-        const fragment = document.getElementById('documentRequestsFragment');
-        if (!fragment) return;
+            if (gridContainer) {
+                gridContainer.style.display = 'none';
+                gridContainer.innerHTML = '';
+            }
 
-        fragment.classList.add('is-loading');
-
-        try {
-            const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            if (!response.ok) throw new Error('Failed to load.');
-
-            const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newFragment = doc.querySelector('#documentRequestsFragment');
-
-            if (!newFragment) { window.location.href = url; return; }
-
-            fragment.innerHTML = newFragment.innerHTML;
-            if (push) window.history.pushState({}, '', url);
-
-            bindDocumentRequestAjax();
-            initDocumentRequestSearch();
-            initDocumentRequestVoice();
-            initFilterModal();
-            initDocumentRequestViewToggle();
-            updateFilterButtonState();
-        } catch {
-            window.location.href = url;
-        } finally {
-            fragment.classList.remove('is-loading');
+            if (listContainer) {
+                listContainer.style.display = 'flex';
+                listContainer.innerHTML = page.map(r => buildDesktopRow(r)).join('');
+            }
         }
     }
 
-    function bindDocumentRequestAjax() {
-        document.querySelectorAll('.js-ajax-nav').forEach(link => {
-            if (link.dataset.bound === '1') return;
-            link.dataset.bound = '1';
+    function getPatientDisplayName(name) {
+        const raw = String(name || '').trim();
 
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                loadDocumentRequestsFragment(this.href);
+        // Converts: "Romero, Dianna Rain Margaja" -> "Dianna Rain Margaja Romero"
+        if (raw.includes(',')) {
+            const [lastName, firstPart] = raw.split(',').map(part => part.trim());
+            return `${firstPart} ${lastName}`.replace(/\s+/g, ' ').trim();
+        }
+
+        return raw;
+    }
+
+    function getRequestInitials(name) {
+        const displayName = getPatientDisplayName(name);
+
+        return String(displayName || '?')
+            .trim()
+            .split(/\s+/)
+            .slice(0, 2)
+            .map(part => part.charAt(0))
+            .join('')
+            .toUpperCase() || '?';
+    }
+
+    function getPatientPhotoUrl(r) {
+        return r.patient_photo_url ||
+            r.profile_photo_url ||
+            r.profile_picture_url ||
+            r.avatar_url ||
+            r.photo_url ||
+            '';
+    }
+
+    function buildPatientAvatar(r, className) {
+        const displayName = getPatientDisplayName(r.patient_name);
+        const initials = getRequestInitials(displayName);
+        const photoUrl = getPatientPhotoUrl(r);
+
+        if (!photoUrl) {
+            return `<div class="${className}">${initials}</div>`;
+        }
+
+        return `
+        <div class="${className} has-photo">
+            <img
+                src="${esc(photoUrl)}"
+                alt="${esc(displayName)}"
+                class="docreq-avatar-img"
+                loading="lazy"
+                onerror="this.parentElement.classList.remove('has-photo'); this.parentElement.textContent='${initials}';"
+            >
+        </div>
+    `;
+    }
+
+    function getStatusLabel(status) {
+        const normalized = String(status || 'pending').replace(/_/g, '-').toLowerCase();
+        const labels = {
+            pending: 'Pending',
+            approved: 'Approved',
+            ready: 'Ready',
+            released: 'Released',
+            rejected: 'Rejected'
+        };
+
+        return labels[normalized] || normalized.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function jsStringArg(value) {
+        return JSON.stringify(String(value ?? '')).replace(/"/g, '&quot;');
+    }
+
+
+    function getStatusBadgeClass(status) {
+        const normalized = String(status || 'pending').replace(/_/g, '-').toLowerCase();
+
+        if (normalized === 'ready' || normalized === 'released') return 'badge-released';
+        if (normalized === 'approved') return 'badge-approved';
+        if (normalized === 'rejected') return 'badge-rejected';
+
+        return 'badge-pending';
+    }
+
+    function buildRequestActions(r, layout = 'list') {
+        const displayName = getPatientDisplayName(r.patient_name);
+        const patientArg = jsStringArg(displayName);
+        const statusLabel = getStatusLabel(r.status);
+
+        const approveBtn = `
+            <button type="button" class="btn-approve ${layout === 'list' ? 'docreq-list-action-btn' : ''}" onclick="event.stopPropagation(); openApprove(${r.id}, ${patientArg})">
+                <i class="fa-solid fa-check"></i>
+                <span>Approve</span>
+            </button>
+        `;
+
+        const releaseBtn = `
+            <button type="button" class="btn-release ${layout === 'list' ? 'docreq-list-action-btn' : ''}" onclick="event.stopPropagation(); openRelease(${r.id}, ${patientArg})">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Release</span>
+            </button>
+        `;
+
+        const rejectBtn = `
+            <button type="button" class="btn-reject ${layout === 'list' ? 'docreq-list-action-btn' : ''}" onclick="event.stopPropagation(); openReject(${r.id}, ${patientArg})">
+                <i class="fa-solid fa-xmark"></i>
+                <span>Reject</span>
+            </button>
+        `;
+
+        if (r.status === 'pending') return `${approveBtn}${rejectBtn}`;
+        if (r.status === 'approved') return `${releaseBtn}${rejectBtn}`;
+        if (r.status === 'ready') return `${releaseBtn}`;
+
+        return `<span class="docreq-mobile-state-note">${statusLabel}</span>`;
+    }
+
+    function buildDesktopRow(r) {
+        const accentHex = getDocumentAccent(r.status);
+        const badgeCls = getStatusBadgeClass(r.status);
+        const statusLabel = getStatusLabel(r.status);
+        const displayName = getPatientDisplayName(r.patient_name);
+        const patientArg = jsStringArg(displayName);
+        const avatarHtml = buildPatientAvatar(r, 'docreq-list-avatar');
+        const program = r.sub_label ? esc(r.sub_label) : 'No ID set';
+
+        const rowClick = `selectDocumentCard('d', ${r.id})`;
+        const actionCol = `
+    <div class="docreq-list-direct-actions">
+        ${buildRequestActions(r, 'list')}
+    </div>
+`;
+
+        const detail = '';
+
+        return `
+        <article class="docreq-list-row-modern desktop-req-row" id="row-d-${r.id}" onclick="${rowClick}" style="--card-accent:${accentHex};">
+            <div class="docreq-list-main">
+                <div class="docreq-list-profile">
+                   ${avatarHtml}
+
+                    <div class="docreq-list-person">
+                        <div class="docreq-list-name">${esc(displayName)}</div>
+
+                        <div class="docreq-list-subline">
+                            <span class="status-badge ${badgeCls}">${statusLabel}</span>
+                            <span class="docreq-id-pill docreq-program-pill">${program}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="docreq-list-meta">
+                    <div class="docreq-list-info">
+                        <i class="fa-regular fa-calendar"></i>
+                        <div>
+                            <span>Date & Time Requested</span>
+<strong>${esc(r.request_date)}</strong>
+<small>${esc(r.request_time)}</small>
+                        </div>
+                    </div>
+
+                    <div class="docreq-list-info">
+                        <i class="fa-regular fa-file-lines"></i>
+                        <div>
+                            <span>Document</span>
+                            <strong>${esc(r.document_type)}</strong>
+                        </div>
+                    </div>
+
+                    <div class="docreq-list-info docreq-list-info-purpose">
+                        <i class="fa-solid fa-message"></i>
+                        <div>
+                            <span>Purpose</span>
+                            <strong>${esc(r.purpose)}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="docreq-list-action">
+                    ${actionCol}
+                </div>
+            </div>
+        </article>
+    `;
+    }
+
+    function buildGridCard(r) {
+        const accentHex = getDocumentAccent(r.status);
+        const badgeCls = getStatusBadgeClass(r.status);
+        const statusLabel = getStatusLabel(r.status);
+        const displayName = getPatientDisplayName(r.patient_name);
+        const patientArg = jsStringArg(displayName);
+        const avatarHtml = buildPatientAvatar(r, 'docreq-grid-avatar');
+        const program = r.sub_label ? esc(r.sub_label) : 'No ID set';
+        const actions = `
+        <div class="docreq-grid-actions">
+            ${buildRequestActions(r, 'grid')}
+        </div>
+    `;
+
+        return `
+        <article class="docreq-grid-card docreq-grid-card-modern" id="row-g-${r.id}" onclick="selectDocumentCard('g', ${r.id})" style="--card-accent:${accentHex};">
+            <div class="docreq-grid-head-modern">
+                <div class="docreq-grid-profile">
+                    ${avatarHtml}
+
+                    <div class="docreq-grid-person">
+                        <div class="docreq-grid-name">${esc(displayName)}</div>
+                        <span class="docreq-id-pill docreq-grid-sub">${program}</span>
+
+                        <div class="docreq-grid-status-row">
+                            <span class="status-badge docreq-card-status ${badgeCls}">${statusLabel}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="docreq-grid-meta-modern">
+                <div class="docreq-info-tile docreq-info-tile-date-time">
+                    <div class="docreq-info-icon">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                    <div class="docreq-info-copy">
+                        <div class="docreq-grid-label">Date & Time Requested</div>
+                        <div class="docreq-grid-value">${esc(r.request_date)}</div>
+                        <small class="docreq-grid-subvalue">${esc(r.request_time)}</small>
+                    </div>
+                </div>
+
+                <div class="docreq-info-tile">
+                    <div class="docreq-info-icon">
+                        <i class="fa-regular fa-file-lines"></i>
+                    </div>
+                    <div class="docreq-info-copy">
+                        <div class="docreq-grid-label">Document</div>
+                        <div class="docreq-grid-value">${esc(r.document_type)}</div>
+                    </div>
+                </div>
+
+                <div class="docreq-info-tile docreq-info-tile-purpose">
+                    <div class="docreq-info-icon">
+                        <i class="fa-solid fa-message"></i>
+                    </div>
+                    <div class="docreq-info-copy">
+                        <div class="docreq-grid-label">Purpose</div>
+                        <div class="docreq-grid-value">${esc(r.purpose)}</div>
+                    </div>
+                </div>
+            </div>
+
+            ${actions}
+        </article>
+    `;
+    }
+
+    function buildEmptyStateHtml() {
+        const isSearchMiss = searchQuery !== '';
+        const hasAdvancedFilters =
+            filterDocType !== '' ||
+            filterDateFrom !== '' ||
+            filterDateTo !== '' ||
+            filterSort !== 'newest' ||
+            activeFilter !== 'all';
+
+        const isDataEmpty = allRequests.length === 0;
+
+        let stateClass = 'empty-neutral';
+        let iconHtml = '<i class="fa-regular fa-folder-open"></i>';
+        let title = 'No document requests yet';
+        let subtitle = 'Incoming patient document requests will appear here once submitted.';
+        let buttonLabel = '';
+        let buttonAction = '';
+        const compactClass = 'compact';
+
+        if (isSearchMiss) {
+            stateClass = 'empty-search';
+            iconHtml = '<i class="fa-solid fa-magnifying-glass"></i>';
+            title = `No results for "${esc(searchQuery)}"`;
+            subtitle = 'Try another patient name or clear the search to see all requests.';
+            buttonLabel = 'Clear search';
+            buttonAction = 'clearSearch()';
+        } else if (activeFilter === 'pending') {
+            stateClass = 'empty-pending';
+            iconHtml = '<i class="fa-solid fa-clock-rotate-left"></i>';
+            title = 'No pending requests';
+            subtitle = isDataEmpty && !hasAdvancedFilters ?
+                'There are no document requests waiting for review right now.' :
+                'No pending requests match your current filters.';
+            if (hasAdvancedFilters && !isDataEmpty) {
+                buttonLabel = 'Clear filters';
+                buttonAction = 'resetAllFilters()';
+            }
+        } else if (activeFilter === 'approved') {
+            stateClass = 'empty-approved';
+            iconHtml = '<i class="fa-solid fa-file-circle-check"></i>';
+            title = 'No approved requests';
+            subtitle = isDataEmpty && !hasAdvancedFilters ?
+                'Approved document requests will appear here after review.' :
+                'No approved requests match your current filters.';
+            if (hasAdvancedFilters && !isDataEmpty) {
+                buttonLabel = 'Clear filters';
+                buttonAction = 'resetAllFilters()';
+            }
+        } else if (activeFilter === 'ready') {
+            stateClass = 'empty-approved';
+            iconHtml = '<i class="fa-solid fa-box-open"></i>';
+            title = 'No ready requests';
+            subtitle = isDataEmpty && !hasAdvancedFilters ?
+                'Prepared document requests will appear here when ready for pickup.' :
+                'No ready requests match your current filters.';
+            if (hasAdvancedFilters && !isDataEmpty) {
+                buttonLabel = 'Clear filters';
+                buttonAction = 'resetAllFilters()';
+            }
+        } else if (activeFilter === 'released') {
+            stateClass = 'empty-approved';
+            iconHtml = '<i class="fa-solid fa-paper-plane"></i>';
+            title = 'No released requests';
+            subtitle = isDataEmpty && !hasAdvancedFilters ?
+                'Released document requests will appear here after claiming.' :
+                'No released requests match your current filters.';
+            if (hasAdvancedFilters && !isDataEmpty) {
+                buttonLabel = 'Clear filters';
+                buttonAction = 'resetAllFilters()';
+            }
+        } else if (activeFilter === 'rejected') {
+            stateClass = 'empty-rejected';
+            iconHtml = '<i class="fa-solid fa-file-circle-xmark"></i>';
+            title = 'No rejected requests';
+            subtitle = isDataEmpty && !hasAdvancedFilters ?
+                'Rejected document requests will appear here when applicable.' :
+                'No rejected requests match your current filters.';
+            if (hasAdvancedFilters && !isDataEmpty) {
+                buttonLabel = 'Clear filters';
+                buttonAction = 'resetAllFilters()';
+            }
+        } else if (isDataEmpty && !hasAdvancedFilters) {
+            stateClass = 'empty-neutral';
+            iconHtml = '<i class="fa-regular fa-folder-open"></i>';
+            title = 'No document requests yet';
+            subtitle = 'Incoming patient document requests will appear here once submitted.';
+        } else {
+            stateClass = 'empty-filter';
+            iconHtml = '<i class="fa-solid fa-filter-circle-xmark"></i>';
+            title = 'No matching requests found';
+            subtitle = 'Your current filters did not return any records. Try adjusting or clearing them.';
+            buttonLabel = 'Clear filters';
+            buttonAction = 'resetAllFilters()';
+        }
+
+        return `
+  <div class="empty-state ${stateClass}">
+    <div class="empty-state-icon">${iconHtml}</div>
+    <p class="empty-state-title">${title}</p>
+    <p class="empty-state-sub">${subtitle}</p>
+
+    ${buttonLabel ? `
+              <button
+                type="button"
+                ${buttonAction === 'clearSearch()' ? 'data-clear-search data-search-target="#searchInput"' : `onclick="${buttonAction}"`}
+                class="empty-state-btn"
+              >
+                <i class="fa-solid fa-xmark"></i>
+                ${buttonLabel}
+              </button>
+            ` : ''}
+  </div>
+`;
+    }
+
+    function buildMobileCard(r) {
+        const accentHex = getDocumentAccent(r.status);
+        const badgeCls = getStatusBadgeClass(r.status);
+        const statusLabel = getStatusLabel(r.status);
+        const displayName = getPatientDisplayName(r.patient_name);
+        const patientArg = jsStringArg(displayName);
+        const avatarHtml = buildPatientAvatar(r, 'docreq-mobile-avatar');
+        const program = r.sub_label ? esc(r.sub_label) : 'No ID set';
+
+        const rowClick = `selectDocumentCard('m', ${r.id})`;
+        const mobileActions = buildRequestActions(r, 'mobile');
+
+        return `
+        <article class="docreq-mobile-card" id="row-m-${r.id}" onclick="${rowClick}" style="--card-accent:${accentHex};">
+            <div class="docreq-mobile-head">
+                <div class="docreq-mobile-profile">
+                    ${avatarHtml}
+
+                    <div class="docreq-mobile-person">
+                        <div class="mobile-patient-name">${esc(displayName)}</div>
+                        <span class="docreq-id-pill mobile-sub-label">${program}</span>
+                    </div>
+                </div>
+
+                <span class="status-badge docreq-card-status ${badgeCls}">${statusLabel}</span>
+            </div>
+
+            <div class="docreq-mobile-meta">
+    <div class="wide docreq-mobile-date-time">
+        <i class="fa-regular fa-calendar"></i>
+        <span>Date & Time Requested</span>
+        <strong>${esc(r.request_date)}</strong>
+        <small class="docreq-mobile-subvalue">${esc(r.request_time)}</small>
+    </div>
+
+    <div class="wide">
+        <i class="fa-regular fa-file-lines"></i>
+        <span>Document</span>
+        <strong>${esc(r.document_type)}</strong>
+    </div>
+
+    <div class="wide">
+        <i class="fa-solid fa-message"></i>
+        <span>Purpose</span>
+        <strong>${esc(r.purpose)}</strong>
+    </div>
+</div>
+
+            <div class="docreq-mobile-footer docreq-mobile-footer-actions">
+    ${mobileActions}
+</div>
+        </article>
+    `;
+    }
+
+    function handleDesktopAccordionClick(event, id) {
+        if (event.target.closest('button, a, input, textarea, select, label, .docreq-row-detail')) return;
+
+        const btn = document.querySelector(`#row-d-${id} .docreq-review-btn`);
+        toggleDesktopDetail(btn, id);
+    }
+
+    function toggleDesktopDetail(btn, id) {
+        const panel = document.getElementById(`detail-${id}`);
+        if (!panel) return;
+
+        const opening = !panel.classList.contains('open');
+        panel.classList.toggle('open', opening);
+
+        selectDocumentCard('d', id, opening);
+
+        const realBtn = btn || document.querySelector(`#row-d-${id} .docreq-review-btn`);
+        if (realBtn) {
+            realBtn.innerHTML = opening ?
+                '<i class="fa-solid fa-eye-slash"></i> Hide' :
+                '<i class="fa-solid fa-eye"></i> View';
+        }
+    }
+
+    function closeDesktopDetail(id) {
+        const panel = document.getElementById(`detail-${id}`);
+        if (panel) panel.classList.remove('open');
+
+        selectDocumentCard('d', id, false);
+
+        const btn = document.querySelector(`#row-d-${id} .docreq-review-btn`);
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-eye"></i> View';
+    }
+
+    function handleMobileAccordionClick(event, id) {
+        if (event.target.closest('button, a, input, textarea, select, label, .docreq-mobile-detail')) return;
+
+        const btn = document.getElementById(`mbtn-${id}`);
+        toggleMobileDetail(btn, id);
+    }
+
+    function toggleMobileDetail(btn, id) {
+        const panel = document.getElementById(`mdetail-${id}`);
+        const textEl = document.getElementById(`mtext-${id}`);
+        const iconEl = document.getElementById(`micon-${id}`);
+        if (!panel) return;
+
+        const opening = !panel.classList.contains('open');
+        panel.classList.toggle('open', opening);
+
+        selectDocumentCard('m', id, opening);
+
+        if (textEl) textEl.textContent = opening ? 'Hide' : 'View';
+        if (iconEl) iconEl.className = opening ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+    }
+
+    function closeMobileDetail(id) {
+        const panel = document.getElementById(`mdetail-${id}`);
+        const textEl = document.getElementById(`mtext-${id}`);
+        const iconEl = document.getElementById(`micon-${id}`);
+
+        if (panel) panel.classList.remove('open');
+
+        selectDocumentCard('m', id, false);
+
+        if (textEl) textEl.textContent = 'View';
+        if (iconEl) iconEl.className = 'fa-solid fa-eye';
+    }
+
+    function getCssVar(name, fallback) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+    }
+
+    function getDocumentAccent(status) {
+        const normalized = String(status || 'pending').replace(/_/g, '-').toLowerCase();
+
+        if (normalized === 'approved') return getCssVar('--status-approved-solid', '#16A34A');
+        if (normalized === 'ready' || normalized === 'released') return getCssVar('--status-released-solid', '#8B5CF6');
+        if (normalized === 'rejected') return getCssVar('--status-rejected-solid', '#DC2626');
+
+        return getCssVar('--status-pending-solid', '#D97706');
+    }
+
+    function esc(str) {
+        return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g,
+            '&quot;');
+    }
+
+    function renderPagination(total, lastPage) {
+        const ctrl = document.getElementById('pagControls');
+        if (lastPage <= 1) {
+            ctrl.innerHTML = '';
+            return;
+        }
+        let html = '';
+        html +=
+            `<button class="pag-btn" ${currentPage > 1 ? '' : 'disabled'} onclick="goPage(${currentPage - 1})">‹ Prev</button>`;
+        for (let p = 1; p <= lastPage; p++) html +=
+            `<button class="pag-btn ${p === currentPage ? 'pag-active' : ''}" onclick="goPage(${p})">${p}</button>`;
+        html +=
+            `<button class="pag-btn" ${currentPage < lastPage ? '' : 'disabled'} onclick="goPage(${currentPage + 1})">Next ›</button>`;
+        ctrl.innerHTML = html;
+    }
+
+    function goPage(p) {
+        currentPage = p;
+        renderList();
+        const activeContainer = currentViewMode === 'grid' ?
+            document.getElementById('requestGridContainer') :
+            document.getElementById('requestListContainer');
+
+        if (activeContainer) {
+            activeContainer.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
             });
-        });
+        }
+    }
 
-        document.querySelectorAll('.tbl-pagination a').forEach(link => {
-            if (link.dataset.bound === '1') return;
-            link.dataset.bound = '1';
+    function toggleDocreqDropdown(selectId) {
+        const wrap = document.getElementById(selectId);
+        if (!wrap) return;
 
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                loadDocumentRequestsFragment(this.href);
-            });
+        const isOpen = wrap.classList.contains('open');
+        closeDocreqDropdowns();
+
+        if (!isOpen) {
+            wrap.classList.add('open');
+            wrap.querySelector('[data-select-button]')?.setAttribute('aria-expanded', 'true');
+        }
+    }
+
+    function closeDocreqDropdowns() {
+        document.querySelectorAll('.docreq-custom-select.open').forEach((wrap) => {
+            wrap.classList.remove('open');
+            wrap.querySelector('[data-select-button]')?.setAttribute('aria-expanded', 'false');
         });
     }
 
-    window.addEventListener('popstate', () => loadDocumentRequestsFragment(window.location.href, false));
+    function setCustomSelectValue(selectId, value, label = null) {
+        const wrap = document.getElementById(selectId);
+        if (!wrap) return;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        bindDocumentRequestAjax();
-        initDocumentRequestSearch();
-        initDocumentRequestVoice();
-        initFilterModal();
-        initDocumentRequestViewToggle();
-        updateFilterButtonState();
+        const hiddenInput = selectId === 'docTypeSelect' ? document.getElementById('fDocType') : null;
+        const selected = wrap.querySelector(`.docreq-select-option[data-value="${CSS.escape(value)}"]`);
+        const finalLabel = label || selected?.querySelector('.docreq-option-copy strong')?.textContent ||
+            'All document types';
 
-        window.addEventListener('resize', () => {
-            applyDocumentRequestView(getPreferredDocumentRequestView(), false);
+        if (hiddenInput) hiddenInput.value = value;
+
+        wrap.querySelectorAll('.docreq-select-option').forEach((option) => {
+            option.classList.toggle('active', option.getAttribute('data-value') === value);
         });
+
+        const labelEl = document.getElementById(`${selectId}Label`);
+        if (labelEl) labelEl.textContent = finalLabel;
+    }
+
+    function normalizeDocTypes(types = []) {
+        return [...new Set(
+            types
+                .map(type => String(type || '').trim())
+                .filter(Boolean)
+        )].sort((a, b) => a.localeCompare(b));
+    }
+
+    function getDocTypeIcon(type = '') {
+        const text = String(type).toLowerCase();
+
+        if (text.includes('annual')) return 'fa-file-signature';
+        if (text.includes('clearance')) return 'fa-clipboard-check';
+        if (text.includes('record')) return 'fa-folder-open';
+        if (text.includes('certificate')) return 'fa-certificate';
+        if (text.includes('case')) return 'fa-briefcase-medical';
+        if (text.includes('treatment')) return 'fa-notes-medical';
+        if (text.includes('referral')) return 'fa-envelope-open-text';
+
+        return 'fa-file-lines';
+    }
+
+    function getDocTypeTone(type = '') {
+        const tones = [
+            'doc-type-blue',
+            'doc-type-orange',
+            'doc-type-green',
+            'doc-type-red',
+            'doc-type-purple',
+            'doc-type-cyan',
+            'doc-type-amber'
+        ];
+
+        const text = String(type || 'Document');
+        let hash = 0;
+
+        for (let i = 0; i < text.length; i++) {
+            hash = ((hash << 5) - hash) + text.charCodeAt(i);
+            hash |= 0;
+        }
+
+        return tones[Math.abs(hash) % tones.length];
+    }
+
+    function createDocTypeOption(value, label, isAll = false) {
+        const button = document.createElement('button');
+
+        button.type = 'button';
+        button.className = 'docreq-select-option doc-type-option';
+        button.dataset.value = value;
+        button.setAttribute('role', 'option');
+
+        button.addEventListener('click', () => {
+            setDocTypeFilter(value, label);
+        });
+
+        const iconWrap = document.createElement('span');
+        iconWrap.className = `docreq-option-icon ${isAll ? 'doc-type-all' : getDocTypeTone(label)}`;
+
+        const icon = document.createElement('i');
+        icon.className = `fa-solid ${isAll ? 'fa-layer-group' : getDocTypeIcon(label)}`;
+        iconWrap.appendChild(icon);
+
+        const copy = document.createElement('span');
+        copy.className = 'docreq-option-copy';
+
+        const strong = document.createElement('strong');
+        strong.textContent = label;
+
+        const small = document.createElement('small');
+        small.textContent = isAll ? 'No document type filter' : 'From document requests';
+
+        copy.appendChild(strong);
+        copy.appendChild(small);
+
+        const check = document.createElement('i');
+        check.className = 'fa-solid fa-check docreq-option-check';
+
+        button.appendChild(iconWrap);
+        button.appendChild(copy);
+        button.appendChild(check);
+
+        return button;
+    }
+
+    function renderDocTypeOptions(types = []) {
+        const menu = document.getElementById('docTypeSelectMenu');
+        if (!menu) return;
+
+        const cleanTypes = normalizeDocTypes(types);
+
+        menu.innerHTML = '';
+        menu.appendChild(createDocTypeOption('', 'All document types', true));
+
+        cleanTypes.forEach(type => {
+            menu.appendChild(createDocTypeOption(type, type));
+        });
+
+        setCustomSelectValue(
+            'docTypeSelect',
+            filterDocType,
+            filterDocType || 'All document types'
+        );
+    }
+
+    function setDocTypeFilter(value, label) {
+        filterDocType = value;
+        setCustomSelectValue('docTypeSelect', value, label);
+        closeDocreqDropdowns();
+        renderFilterChips();
+        updateShowResultsButton();
+    }
+
+    function getStatusMeta(status) {
+        const map = {
+            all: {
+                label: 'All Requests',
+                icon: 'fa-file-medical',
+                tone: 'status-all',
+                countId: 'statAll'
+            },
+            pending: {
+                label: 'Pending',
+                icon: 'fa-clock-rotate-left',
+                tone: 'status-pending',
+                countId: 'statPending'
+            },
+            approved: {
+                label: 'Approved',
+                icon: 'fa-file-circle-check',
+                tone: 'status-approved',
+                countId: 'statApproved'
+            },
+            ready: {
+                label: 'Ready',
+                icon: 'fa-box-open',
+                tone: 'status-released',
+                countId: 'statReady'
+            },
+            released: {
+                label: 'Released',
+                icon: 'fa-paper-plane',
+                tone: 'status-released',
+                countId: 'statReleased'
+            },
+            rejected: {
+                label: 'Rejected',
+                icon: 'fa-file-circle-xmark',
+                tone: 'status-rejected',
+                countId: 'statRejected'
+            }
+        };
+
+        return map[status] || map.all;
+    }
+
+    function getStatusCount(status) {
+        const meta = getStatusMeta(status);
+        return document.getElementById(meta.countId)?.textContent || '0';
+    }
+
+    function updateStatusDropdownUI(status) {
+        const meta = getStatusMeta(status);
+        const label = document.getElementById('statusDropdownLabel');
+        const count = document.getElementById('statusDropdownCount');
+        const leading = document.querySelector('#docreqStatusSelect .docreq-select-leading');
+
+        if (label) label.textContent = meta.label;
+        if (count) count.textContent = getStatusCount(status);
+
+        if (leading) {
+            leading.className = `docreq-select-leading ${meta.tone}`;
+            leading.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
+        }
+
+        document.querySelectorAll('#docreqStatusSelect .docreq-select-option').forEach((option) => {
+            option.classList.toggle('active', option.getAttribute('data-value') === status);
+        });
+    }
+
+    function selectStatusFilter(status) {
+        closeDocreqDropdowns();
+        setFilter(status);
+    }
+
+    function setFilter(f) {
+        activeFilter = f;
+        filterStatus = f;
+        currentPage = 1;
+
+        updateStatusDropdownUI(f);
+        updateFilterBtn();
+        renderFilterChips();
+        renderList();
+    }
+
+    function onSearch(input) {
+        searchQuery = input.value.trim();
+        currentPage = 1;
+        renderList();
+    }
+
+    function outside(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.addEventListener('click', e => {
+            if (e.target === el) window.closeModal(id);
+        });
+    }
+
+    function getDecisionRequest(id) {
+        return allRequests.find(r => Number(r.id) === Number(id));
+    }
+
+    function setDecisionText(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = value && String(value).trim() ? value : '—';
+    }
+
+    function fillDecisionModal(prefix, id, fallbackName = '') {
+        const request = getDecisionRequest(id);
+
+        const patientName = request
+            ? getPatientDisplayName(request.patient_name)
+            : getPatientDisplayName(fallbackName);
+
+        setDecisionText(`${prefix}PatientName`, patientName);
+        setDecisionText(`${prefix}RequestDate`, request?.request_date);
+        setDecisionText(`${prefix}RequestTime`, request?.request_time);
+        setDecisionText(`${prefix}RequestDocument`, request?.document_type);
+        setDecisionText(`${prefix}RequestPurpose`, request?.purpose);
+    }
+
+    function openApprove(id, name) {
+        document.getElementById('approveRequestId').value = id;
+        fillDecisionModal('approve', id, name);
+        window.openModal('approveModal');
+    }
+
+    function openReject(id, name) {
+        const notes = document.getElementById('rejectNotes');
+
+        document.getElementById('rejectRequestId').value = id;
+        fillDecisionModal('reject', id, name);
+
+        if (notes) {
+            notes.value = '';
+            if (window.updateCharCounter) {
+                window.updateCharCounter('rejectNotes', 150, 'rejectNotesCharCounter');
+            }
+        }
+
+        window.openModal('rejectModal');
+        setTimeout(() => notes?.focus(), 80);
+    }
+
+
+    function openRelease(id, name) {
+        document.getElementById('releaseRequestId').value = id;
+        fillDecisionModal('release', id, name);
+        window.openModal('releaseModal');
+    }
+
+    function openFilterModal() {
+        window.syncFilterTagGroup('fSortGroup', filterSort);
+        setCustomSelectValue('docTypeSelect', filterDocType);
+        document.getElementById('fDateFrom').value = filterDateFrom;
+        document.getElementById('fDateTo').value = filterDateTo;
+        renderFilterChips();
+        updateShowResultsButton();
+
+        if (window.openFilterDrawer) {
+            window.openFilterDrawer('filterModal');
+            return;
+        }
+
+        if (window.openModal) {
+            window.openModal('filterModal');
+            return;
+        }
+
+        document.getElementById('filterModal')?.classList.add('open');
+    }
+
+    function closeFilterModal() {
+        if (window.closeFilterDrawer) {
+            window.closeFilterDrawer('filterModal');
+            return;
+        }
+
+        if (window.closeModal) {
+            window.closeModal('filterModal');
+            return;
+        }
+
+        const modal = document.getElementById('filterModal');
+        if (modal) modal.classList.remove('open', 'closing');
+        document.body.classList.remove('filter-lock');
+        document.documentElement.classList.remove('filter-lock');
+        document.body.style.overflow = '';
+    }
+
+    function applyFilterModal() {
+        filterStatus = activeFilter;
+        const sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
+        filterSort = sortActive ? sortActive.getAttribute('data-val') : 'newest';
+        filterDocType = document.getElementById('fDocType').value;
+        filterDateFrom = document.getElementById('fDateFrom').value;
+        filterDateTo = document.getElementById('fDateTo').value;
+
+        updateFilterBtn();
+        renderFilterChips();
+        currentPage = 1;
+        closeFilterModal();
+        renderList();
+    }
+
+    function getDraftDocRequestFilters() {
+        const sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
+
+        return {
+            status: activeFilter,
+            docType: document.getElementById('fDocType')?.value || '',
+            dateFrom: document.getElementById('fDateFrom')?.value || '',
+            dateTo: document.getElementById('fDateTo')?.value || '',
+            sort: sortActive ? sortActive.getAttribute('data-val') : 'newest'
+        };
+    }
+
+    function getDraftFilteredDocRequests() {
+        const oldActiveFilter = activeFilter;
+        const oldFilterStatus = filterStatus;
+        const oldFilterDocType = filterDocType;
+        const oldFilterDateFrom = filterDateFrom;
+        const oldFilterDateTo = filterDateTo;
+        const oldFilterSort = filterSort;
+
+        const draft = getDraftDocRequestFilters();
+
+        activeFilter = draft.status;
+        filterStatus = draft.status;
+        filterDocType = draft.docType;
+        filterDateFrom = draft.dateFrom;
+        filterDateTo = draft.dateTo;
+        filterSort = draft.sort;
+
+        const results = getFiltered();
+
+        activeFilter = oldActiveFilter;
+        filterStatus = oldFilterStatus;
+        filterDocType = oldFilterDocType;
+        filterDateFrom = oldFilterDateFrom;
+        filterDateTo = oldFilterDateTo;
+        filterSort = oldFilterSort;
+
+        return results;
+    }
+
+    function updateShowResultsButton() {
+        const count = getDraftFilteredDocRequests().length;
+        window.updateShowResultsText(count);
+    }
+
+    function renderFilterChips() {
+        const container = document.getElementById("activeChipsContainer");
+        const section = document.getElementById("activeFiltersSection");
+        if (!container || !section) return;
+
+        container.innerHTML = "";
+        let hasChips = false;
+
+        function addChip(label, onRemove) {
+            hasChips = true;
+            const chip = document.createElement("div");
+            chip.className = "filter-chip";
+            chip.innerHTML =
+                `<span>${label}</span><span class="filter-chip-remove"><i class="fa-solid fa-xmark"></i></span>`;
+            chip.querySelector(".filter-chip-remove").addEventListener("click", () => {
+                onRemove();
+                renderFilterChips();
+                updateShowResultsButton();
+            });
+            container.appendChild(chip);
+        }
+
+        const docType = document.getElementById('fDocType').value;
+        if (docType) {
+            addChip(`Doc: ${docType}`, () => setCustomSelectValue('docTypeSelect', ''));
+        }
+
+        const activePresetBtn = document.querySelector('#datePresetGroup .quick-date-chip.active');
+        const fDate = document.getElementById('fDateFrom').value;
+        const tDate = document.getElementById('fDateTo').value;
+
+        if (activePresetBtn) {
+            addChip(`Date: ${activePresetBtn.textContent.trim()}`, () => {
+                activePresetBtn.classList.remove('active');
+                document.getElementById('fDateFrom').value = "";
+                document.getElementById('fDateTo').value = "";
+            });
+        } else if (fDate || tDate) {
+            let lbl = (fDate && tDate) ? `${fDate} to ${tDate}` : (fDate ? `From ${fDate}` : `Until ${tDate}`);
+            addChip(`Date: ${lbl}`, () => {
+                document.getElementById('fDateFrom').value = "";
+                document.getElementById('fDateTo').value = "";
+            });
+        }
+
+        const sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
+        if (sortActive && sortActive.getAttribute('data-val') !== 'newest') {
+            addChip(`Sort: ${sortActive.textContent.trim()}`, () => window.syncFilterTagGroup('fSortGroup', 'newest'));
+        }
+
+        if (hasChips) {
+            section.classList.remove("hidden");
+            document.getElementById("clearAllChipsBtn").onclick = () => {
+                        setCustomSelectValue('docTypeSelect', '');
+                document.getElementById('fDateFrom').value = "";
+                document.getElementById('fDateTo').value = "";
+
+                document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                window.syncFilterTagGroup('fSortGroup', 'newest');
+
+                renderFilterChips();
+                updateShowResultsButton();
+            };
+        } else {
+            section.classList.add("hidden");
+        }
+
+        updateShowResultsButton();
+    }
+
+    function resetFilterModal() {
+        filterDocType = '';
+        filterDateFrom = '';
+        filterDateTo = '';
+        filterSort = 'newest';
+
+        window.syncFilterTagGroup('fSortGroup', 'newest');
+
+        setCustomSelectValue('docTypeSelect', '');
+
+        const dateFrom = document.getElementById('fDateFrom');
+        const dateTo = document.getElementById('fDateTo');
+
+        if (dateFrom) dateFrom.value = '';
+        if (dateTo) dateTo.value = '';
+
+        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        renderFilterChips();
+        updateShowResultsButton();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const savedViewMode = localStorage.getItem('docreqViewMode');
+        currentViewMode = window.innerWidth <= 767 ? 'grid' : (savedViewMode || 'list');
+        setViewMode(currentViewMode, document.querySelector('.btn-view-mode[data-view="' + currentViewMode +
+            '"]'));
+
+        if (window.innerWidth <= 767) {
+            document.getElementById('docreqViewToggle')?.classList.add('hidden');
+        }
+
+        window.addEventListener('resize', function () {
+            const toggle = document.getElementById('docreqViewToggle');
+            if (window.innerWidth <= 767) {
+                toggle?.classList.add('hidden');
+                if (currentViewMode !== 'grid') {
+                    setViewMode('grid', document.querySelector('.btn-view-mode[data-view="grid"]'));
+                }
+            } else {
+                toggle?.classList.remove('hidden');
+            }
+            renderList();
+        });
+
+        updateStatusDropdownUI(activeFilter);
+        setCustomSelectValue('docTypeSelect', filterDocType);
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.docreq-custom-select')) closeDocreqDropdowns();
+        });
+
+        window.bindQuickDatePresets({
+            groupId: 'datePresetGroup',
+            fromId: 'fDateFrom',
+            toId: 'fDateTo',
+            onChange: () => {
+                renderFilterChips();
+                updateShowResultsButton();
+            }
+        });
+
+        window.bindFilterTagGroup({
+            groupId: 'fSortGroup',
+            onChange: () => {
+                renderFilterChips();
+                updateShowResultsButton();
+            }
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Escape') return;
+            closeDocreqDropdowns();
+            ['approveModal', 'rejectModal', 'releaseModal', 'approvedResultModal', 'rejectedResultModal', 'releasedResultModal', 'filterModal']
+                .forEach(id => {
+                    const m = document.getElementById(id);
+                    if (!m?.classList.contains('open')) return;
+                    if (id === 'filterModal') closeFilterModal();
+                    else window.closeModal(id);
+                });
+        });
+
+        ['approveModal', 'rejectModal', 'releaseModal', 'approvedResultModal', 'rejectedResultModal', 'releasedResultModal', 'filterModal']
+            .forEach(id => outside(id));
+
+        const filterModal = document.getElementById('filterModal');
+        document.getElementById('filterCloseBtn').addEventListener('click', closeFilterModal);
+        document.getElementById('filterCancelBtn').addEventListener('click', closeFilterModal);
+        document.getElementById('filterApplyBtn').addEventListener('click', applyFilterModal);
+        document.getElementById('filterResetBtn').addEventListener('click', () => {
+            resetAdvancedFilters();
+            resetFilterModal();
+            updateShowResultsButton();
+        });
+
+        const approveModal = document.getElementById('approveModal');
+        const approvedModal = document.getElementById('approvedResultModal');
+        ['approveCancelBtn', 'approveCancelBtn2'].forEach(id =>
+            document.getElementById(id)?.addEventListener('click', () => window.closeModal('approveModal')));
+        document.getElementById('approvedResultClose').addEventListener('click', () => {
+            window.closeModal('approvedResultModal');
+            window.location.reload();
+        });
+        document.getElementById('approveConfirmBtn').addEventListener('click', async () => {
+            const id = document.getElementById('approveRequestId').value;
+            const btn = document.getElementById('approveConfirmBtn');
+            if (!id) return;
+            btn.disabled = true;
+            const res = await fetch(`/admin/document-requests/${id}/approve`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF
+                },
+                body: '{}'
+            });
+            btn.disabled = false;
+            if (res.ok) {
+                window.closeModal('approveModal');
+                window.openModal('approvedResultModal');
+            } else alert('Something went wrong.');
+        });
+
+        const rejectModal = document.getElementById('rejectModal');
+        const rejectedModal = document.getElementById('rejectedResultModal');
+        ['rejectCancelBtn', 'rejectCancelBtn2'].forEach(id =>
+            document.getElementById(id)?.addEventListener('click', () => window.closeModal('rejectModal')));
+        document.getElementById('rejectedResultClose').addEventListener('click', () => {
+            window.closeModal('rejectedResultModal');
+            window.location.reload();
+        });
+        document.getElementById('rejectConfirmBtn').addEventListener('click', async () => {
+            const id = document.getElementById('rejectRequestId').value;
+            const btn = document.getElementById('rejectConfirmBtn');
+            const notes = document.getElementById('rejectNotes').value.trim();
+
+            if (!id) return;
+
+            if (window.validateCharLimit && !window.validateCharLimit('rejectNotes', 150, 'err-rejectNotes')) {
+                document.getElementById('rejectNotes')?.focus();
+                return;
+            }
+
+            btn.disabled = true;
+            const res = await fetch(`/admin/document-requests/${id}/reject`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF
+                },
+                body: JSON.stringify({
+                    reason: notes
+                })
+            });
+            btn.disabled = false;
+            if (res.ok) {
+                window.closeModal('rejectModal');
+                window.openModal('rejectedResultModal');
+            } else alert('Something went wrong.');
+        });
+
+
+        ['releaseCancelBtn', 'releaseCancelBtn2'].forEach(id =>
+            document.getElementById(id)?.addEventListener('click', () => window.closeModal('releaseModal')));
+
+        document.getElementById('releasedResultClose')?.addEventListener('click', () => {
+            window.closeModal('releasedResultModal');
+            window.location.reload();
+        });
+
+        document.getElementById('releaseConfirmBtn')?.addEventListener('click', async () => {
+            const id = document.getElementById('releaseRequestId').value;
+            const btn = document.getElementById('releaseConfirmBtn');
+
+            if (!id) return;
+
+            btn.disabled = true;
+            const res = await fetch(`/admin/document-requests/${id}/release`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF
+                },
+                body: '{}'
+            });
+            btn.disabled = false;
+
+            if (res.ok) {
+                window.closeModal('releaseModal');
+                window.openModal('releasedResultModal');
+            } else {
+                alert('Something went wrong.');
+            }
+        });
+
+        loadData();
     });
+
 </script>
 @endsection

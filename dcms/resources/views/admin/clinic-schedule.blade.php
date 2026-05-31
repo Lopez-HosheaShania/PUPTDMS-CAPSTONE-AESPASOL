@@ -32,8 +32,8 @@ $dayNames = [
 $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !== 'none');
 @endphp
 
-<main id="mainContent" class="px-4 sm:px-6 pt-[82px] pb-8 min-h-screen">
-    <div class="max-w-[1280px] mx-auto">
+<main id="mainContent" class="admin-page-shell clinic-schedule-page page-enter mode-list">
+    <div class="admin-page-container">
 
         @if ($errors->any())
         <script>
@@ -90,7 +90,6 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
         </script>
         @endif
 
-        {{-- ── Title row ── --}}
         <div class="page-banner">
             <div class="page-banner-inner">
 
@@ -99,91 +98,73 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                 </div>
 
                 <div class="flex items-center gap-3 flex-wrap page-actions">
-                    <button onclick="openRuleModal()" class="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#8B0000]
-                             px-4 py-2.5 rounded-xl font-semibold text-sm shadow transition-all">
-                        <i class="fa-solid fa-plus"></i> Add Schedule Rule
+                    <button type="button" onclick="openRuleModal()" class="cs-banner-action-btn">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Schedule Rule</span>
                     </button>
 
-                    <button onclick="openBlockModal()" class="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#8B0000] 
-                            px-4 py-2.5 rounded-xl font-semibold text-sm shadow transition-all">
-                        <i class="fa-solid fa-ban"></i> Block Date
+                    <button type="button" onclick="openBlockModal()"
+                        class="cs-banner-action-btn cs-banner-action-danger">
+                        <i class="fa-solid fa-ban"></i>
+                        <span>Block Date</span>
                     </button>
-
-                    <div class="view-toggle" id="scheduleRulesViewToggle">
-                        <button type="button" class="view-toggle-btn active" id="scheduleRulesListViewBtn"
-                            title="List view">
-                            <i class="fa-solid fa-table-list"></i>
-                        </button>
-                        <button type="button" class="view-toggle-btn" id="scheduleRulesGridViewBtn" title="Grid view">
-                            <i class="fa-solid fa-grip"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- ── Stat cards ── --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div id="statCards" class="stat-grid cs-stat-grid">
             @php
             $statCards = [
             [
             'icon' => 'fa-calendar-days',
-            'color' => 'from-[#8B0000] to-[#6B0000]',
+            'class' => 's-crimson',
             'val' => $openDays,
             'label' => 'Open Days/Week',
             'sub' => 'Active schedule days',
             ],
             [
             'icon' => 'fa-clock',
-            'color' => 'from-blue-500 to-blue-600',
+            'class' => 's-blue',
             'val' => $maxSlots,
             'label' => 'Daily Slot Cap',
             'sub' => 'Max patients/day',
             ],
             [
             'icon' => 'fa-ban',
-            'color' => 'from-green-500 to-green-600',
+            'class' => 's-green',
             'val' => $blockedThisMonth,
-            'label' => 'Blocked
-            Dates',
+            'label' => 'Blocked Dates',
             'sub' => 'This month',
             ],
             [
             'icon' => 'fa-umbrella-beach',
-            'color' => 'from-amber-500
-            to-amber-600',
+            'class' => 's-amber',
             'val' => $holidaysThisMonth,
             'label' => 'Holidays',
             'sub' => 'This month',
             ],
             ];
             @endphp
+
             @foreach ($statCards as $card)
-            <div class="stat-card bg-white rounded-xl p-4 shadow border border-gray-100 overflow-hidden relative">
-                <div
-                    class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-gray-100 to-transparent rounded-full -mr-10 -mt-10">
+            <div class="stat-card {{ $card['class'] }}">
+                <div class="stat-card-info">
+                    <div class="stat-label">{{ $card['label'] }}</div>
+                    <div class="stat-num">{{ $card['val'] }}</div>
+                    <div class="stat-footer">{{ $card['sub'] }}</div>
                 </div>
-                <div class="relative">
-                    <div
-                        class="w-10 h-10 rounded-xl bg-gradient-to-br {{ $card['color'] }} flex items-center justify-center shadow mb-3">
-                        <i class="fa-solid {{ $card['icon'] }} text-white text-sm"></i>
-                    </div>
-                    <p class="text-[10px] uppercase tracking-wide text-gray-500 font-semibold mb-0.5">
-                        {{ $card['label'] }}</p>
-                    <p class="text-3xl font-extrabold text-gray-800">{{ $card['val'] }}</p>
-                    <p class="text-[10px] text-gray-400 mt-0.5">{{ $card['sub'] }}</p>
+
+                <div class="stat-icon-wrapper">
+                    <i class="fa-solid {{ $card['icon'] }}"></i>
                 </div>
             </div>
             @endforeach
         </div>
 
-        {{-- ── Main two-column grid ── --}}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
-            {{-- LEFT: weekly calendar + rules table --}}
             <div class="lg:col-span-2 space-y-6">
 
-                {{-- Weekly view --}}
                 <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
 
                     <div
@@ -226,14 +207,30 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                     </div>
                 </div>
 
-                {{-- Schedule rules table --}}
                 <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                    <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+                    <div class="px-5 py-4 flex items-center justify-between cs-rules-card-header">
                         <div class="weekly-toolbar flex items-center gap-2">
                             <i class="fa-solid fa-list-check text-[#8B0000]"></i>
                             <h2 class="font-bold text-gray-800 text-sm">Schedule Rules</h2>
                         </div>
-                        <span class="text-xs text-gray-400 font-medium">{{ $schedules->count() }} rules</span>
+
+                        <div class="cs-rules-header-actions">
+                            <span class="cs-rules-count">{{ $schedules->count() }} rules</span>
+
+                            <div class="view-toggle-container" id="scheduleRulesViewToggle" aria-label="View options">
+                                <span class="view-slider" aria-hidden="true"></span>
+
+                                <button type="button" class="btn-view-mode active" id="scheduleRulesListViewBtn"
+                                    title="List view" aria-label="List view" aria-pressed="true">
+                                    <i class="fa-solid fa-table-list"></i>
+                                </button>
+
+                                <button type="button" class="btn-view-mode" id="scheduleRulesGridViewBtn"
+                                    title="Grid view" aria-label="Grid view" aria-pressed="false">
+                                    <i class="fa-solid fa-grip"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     @if ($schedules->count())
@@ -293,24 +290,19 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                                             @endif
                                         </td>
                                         <td data-label="Actions">
-                                            <div class="flex items-center gap-1.5">
-                                                <button
-                                                    onclick='openRuleModal("edit",{{ $rule->id }},{{ json_encode($rule) }})'
-                                                    class="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 hover:bg-blue-100 text-xs"
-                                                    title="Edit">
-                                                    <i class="fa-solid fa-pen"></i>
+                                            <div class="cs-action-group">
+                                                <button type="button"
+                                                    onclick='openRuleModal("edit", {{ $rule->id }}, {{ json_encode($rule) }})'
+                                                    class="cs-action-btn cs-action-edit" data-tooltip="Edit"
+                                                    aria-label="Edit schedule rule">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
                                                 </button>
 
-                                                <form action="{{ route('admin.clinic_schedule.destroy', $rule) }}"
-                                                    method="POST" onsubmit="return confirm('Delete this rule?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="w-7 h-7 rounded-lg bg-red-50 border border-red-200 flex items-center justify-center text-red-600 hover:bg-red-100 text-xs"
-                                                        title="Delete">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="cs-action-btn cs-action-delete"
+                                                    data-tooltip="Delete" aria-label="Delete schedule rule"
+                                                    onclick='openScheduleDeleteModal(@json(route("admin.clinic_schedule.destroy", $rule)), @json($rule->days_label))'>
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -382,25 +374,19 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                                     </div>
                                 </div>
 
-                                <div class="schedule-rule-card-actions">
-                                    <button onclick='openRuleModal("edit",{{ $rule->id }},{{ json_encode($rule) }})'
-                                        class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 
-                                                        flex items-center justify-center text-blue-600 hover:bg-blue-100 text-xs"
-                                        title="Edit">
-                                        <i class="fa-solid fa-pen"></i>
+                                <div class="schedule-rule-card-actions cs-action-group">
+                                    <button type="button"
+                                        onclick='openRuleModal("edit", {{ $rule->id }}, {{ json_encode($rule) }})'
+                                        class="cs-action-btn cs-action-edit" data-tooltip="Edit"
+                                        aria-label="Edit schedule rule">
+                                        <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
 
-                                    <form action="{{ route('admin.clinic_schedule.destroy', $rule) }}" method="POST"
-                                        onsubmit="return confirm('Delete this rule?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="w-8 h-8 rounded-lg bg-red-50 border border-red-200 
-                                                            flex items-center justify-center text-red-600 hover:bg-red-100 text-xs"
-                                            title="Delete">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="cs-action-btn cs-action-delete" data-tooltip="Delete"
+                                        aria-label="Delete schedule rule"
+                                        onclick='openScheduleDeleteModal(@json(route("admin.clinic_schedule.destroy", $rule)), @json($rule->days_label))'>
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
                                 </div>
                             </div>
                             @endforeach
@@ -419,10 +405,8 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                 </div>
             </div>
 
-            {{-- RIGHT: Clinic Hours | Blocked Dates | Holidays --}}
             <div class="space-y-6">
 
-                {{-- Clinic Hours --}}
                 <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
                     <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
                         <div class="flex items-center gap-2"><i class="fa-solid fa-clock text-[#8B0000]"></i>
@@ -460,7 +444,6 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                     </div>
                 </div>
 
-                {{-- Blocked Dates --}}
                 <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
                     <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between gap-3 flex-wrap">
                         <div class="flex items-center gap-2">
@@ -527,7 +510,6 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                     </div>
                 </div>
 
-                {{-- Upcoming Holidays --}}
                 <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
                     <div class="px-5 py-4 border-b bg-gray-50">
                         <div class="flex items-center gap-2"><i class="fa-solid fa-umbrella-beach text-[#8B0000]"></i>
@@ -587,8 +569,8 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
     </div>
 </main>
 
-<div id="appointmentDetailModal" class="modal-backdrop" onclick="closeAppointmentDetailModal()">
-    <div class="modal-box" onclick="event.stopPropagation()">
+<div id="appointmentDetailModal" class="ui-modal cs-modal">
+    <div class="ui-modal-card cs-modal-card cs-detail-modal-card" onclick="event.stopPropagation()">
         <div class="modal-hdr">
             <div class="flex items-center justify-between">
                 <div>
@@ -630,13 +612,9 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
     </div>
 </div>
 
-<div id="ruleModalBackdrop" class="modal-backdrop" onclick="closeRuleModal()">
-    <div class="modal-box modal-form" onclick="event.stopPropagation()">
+<div id="ruleModalBackdrop" class="ui-modal cs-modal cs-rule-modal">
+    <div class="ui-modal-card cs-modal-card cs-rule-modal-card" onclick="event.stopPropagation()">
         <div class="modal-hdr modal-form-hdr">
-            <div class="modal-kicker">
-                <i class="fa-solid fa-calendar-plus"></i>
-                Schedule Manager
-            </div>
 
             <div class="modal-title-row">
                 <div class="modal-title-block">
@@ -682,7 +660,6 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                             <div id="ruleDaysError" class="field-error"></div>
                         </div>
 
-                        {{-- ── Additional Notes section with new circular mic button ── --}}
                         <div class="modal-section rule-notes-section m-0 flex-1 flex flex-col">
                             <div class="modal-section-head">
                                 <div class="modal-section-icon">
@@ -696,16 +673,16 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
 
                             <label class="form-label" for="ruleNotes">Notes (optional)</label>
 
-                            {{-- Voice row: textarea wrap + circular mic button --}}
                             <div class="rule-notes-voice-row mb-2">
                                 <div class="rule-notes-textarea-wrap">
                                     <textarea id="ruleNotes" class="form-ctrl resize-none rule-notes-textarea"
                                         maxlength="150"
                                         placeholder="e.g. Reduced operations due to holiday program..."></textarea>
-                                    <button type="button" id="ruleNotesClearBtn"
-                                        class="rule-notes-clear-btn hidden">Clear</button>
+                                    <button type="button" id="ruleNotesClearBtn" class="rule-notes-clear-btn hidden"
+                                        aria-label="Clear notes" title="Clear notes">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
                                 </div>
-                                {{-- Circular mic button injected here by JS --}}
                                 <div class="rule-notes-voice-toggle" id="ruleNotesVoiceToggle"></div>
                             </div>
 
@@ -772,8 +749,9 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                                         <div class="slot-stepper mt-1">
                                             <button type="button" onclick="adjSlots(-1)"
                                                 class="slot-stepper-btn">−</button>
-                                            <input type="number" id="ruleMaxSlots" class="form-ctrl slot-stepper-input"
-                                                value="5" min="1" max="30">
+                                            <input type="text" id="ruleMaxSlots"
+                                                class="form-ctrl slot-stepper-input no-native-spinner" value="5"
+                                                inputmode="numeric" pattern="[0-9]*" autocomplete="off">
                                             <button type="button" onclick="adjSlots(1)"
                                                 class="slot-stepper-btn">+</button>
                                         </div>
@@ -815,13 +793,9 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
     </div>
 </div>
 
-<div id="blockModalBackdrop" class="modal-backdrop" onclick="closeBlockModal()">
-    <div class="modal-box modal-form modal-compact" onclick="event.stopPropagation()">
+<div id="blockModalBackdrop" class="ui-modal cs-modal cs-block-modal">
+    <div class="ui-modal-card cs-modal-card cs-block-modal-card" onclick="event.stopPropagation()">
         <div class="modal-hdr modal-form-hdr">
-            <div class="modal-kicker">
-                <i class="fa-solid fa-ban"></i>
-                Availability Control
-            </div>
 
             <div class="modal-title-row">
                 <div class="modal-title-block">
@@ -836,7 +810,8 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
         </div>
 
         <div class="modal-body modal-form-body">
-            <form action="{{ route('admin.clinic_schedule.block') }}" method="POST">
+            <form action="{{ route('admin.clinic_schedule.block') }}" method="POST"
+                onsubmit="return validateBlockDateBeforeSubmit(event)">
                 @csrf
 
                 <div class="modal-section">
@@ -852,8 +827,13 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
 
                     <div class="mb-4">
                         <label class="form-label" for="blockDate">Date <span class="text-red-400">*</span></label>
-                        <input type="date" id="blockDate" name="date" class="form-ctrl" required
-                            min="{{ date('Y-m-d') }}">
+                        <div class="fp-date-input-wrap">
+                            <input type="text" id="blockDate" name="date"
+                                class="form-ctrl fp-date-input js-flatpickr-date-min-today" required readonly
+                                min="{{ date('Y-m-d') }}" placeholder="Select blocked date">
+
+                            <i class="fa-solid fa-calendar-days fp-date-icon"></i>
+                        </div>
                         <div id="blockDateError" class="field-error"></div>
                     </div>
 
@@ -888,6 +868,61 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
         </div>
     </div>
 </div>
+
+<div id="scheduleDeleteModal" class="ui-modal modal-overlay cs-delete-modal" aria-hidden="true">
+
+    <div class="modal-box-inner cs-delete-modal-card" onclick="event.stopPropagation()" role="dialog" aria-modal="true"
+        aria-labelledby="scheduleDeleteTitle">
+
+        <div class="cs-delete-head">
+            <div class="cs-delete-head-left">
+                <div class="cs-delete-icon">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+
+                <div>
+                    <h3 id="scheduleDeleteTitle">Delete Schedule Rule</h3>
+                    <p>This action requires confirmation</p>
+                </div>
+            </div>
+
+            <button type="button" class="cs-delete-x" onclick="closeScheduleDeleteModal()"
+                aria-label="Close delete modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="cs-delete-body">
+            <div class="cs-delete-alert">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                <div>
+                    <p>
+                        Are you sure you want to delete
+                        <strong id="scheduleDeleteName"></strong>?
+                    </p>
+                    <span>This schedule rule will be permanently removed.</span>
+                </div>
+            </div>
+
+            <div class="cs-delete-actions">
+                <button type="button" class="modal-btn-ghost" onclick="closeScheduleDeleteModal()">
+                    Cancel
+                </button>
+
+                <form id="scheduleDeleteForm" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+
+                    <button type="submit" class="cs-delete-confirm">
+                        <i class="fa-solid fa-trash-can"></i>
+                        Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -895,39 +930,16 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
     const scheduleRules = @json($schedules);
     const weeklyAppointments = @json($weeklyAppointments ?? []);
 
-    // Toast
-    function showToast(title, message, type = 'error') {
-        const c = document.getElementById('toastContainer');
-        if (!c) return;
+    const showClinicScheduleToast = (title, message = '', type = 'info') => {
+        if (typeof window.showToast === 'function') {
+            window.showToast({
+                type,
+                title,
+                message,
+            });
+        }
+    };
 
-        const t = document.createElement('div');
-        t.className = 'toast ' + type;
-
-        const icon = type === 'error' ?
-            '<i class="fa-solid fa-circle-exclamation toast-icon"></i>' :
-            '<i class="fa-solid fa-circle-check toast-icon"></i>';
-
-        t.innerHTML = `
-        <div class="toast-icon-wrap">${icon}</div>
-        <div class="toast-body">
-            <div class="toast-title">${title}</div>
-            <div class="toast-msg">${message}</div>
-        </div>
-        <button class="toast-close" onclick="this.closest('.toast').classList.add('hide')">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    `;
-
-        c.appendChild(t);
-        requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
-        setTimeout(() => {
-            t.classList.remove('show');
-            t.classList.add('hide');
-            setTimeout(() => t.remove(), 400);
-        }, 4500);
-    }
-
-    // Date Label
     const dateEl = document.getElementById('currentDate');
     if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', {
         weekday: 'long',
@@ -982,20 +994,13 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
         document.getElementById('detailSchedule').textContent =
             `${appt.appointment_date} ${appt.display_time || appt.appointment_time || ''}`;
 
-        const modal = document.getElementById('appointmentDetailModal');
-        modal.style.display = 'flex';
-        modal.classList.add('open');
+        window.openModal('appointmentDetailModal');
     }
 
     function closeAppointmentDetailModal() {
-        const backdrop = document.getElementById('appointmentDetailModal');
-        if (backdrop) {
-            backdrop.classList.remove('open');
-            backdrop.style.display = 'none';
-        }
+        window.closeModal('appointmentDetailModal');
     }
 
-    // Weekly Calendar
     const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const DAY_ABBRS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const TIME_ROWS = [
@@ -1125,7 +1130,6 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
     document.getElementById('nextWeek').addEventListener('click', () => { weekOffset++; buildWeekGrid(); });
     document.getElementById('todayBtn').addEventListener('click', () => { weekOffset = 0; buildWeekGrid(); });
 
-    // Schedule Rule Modal
     let selectedBreak = '12:00-13:00';
     let editingId = null;
 
@@ -1200,18 +1204,11 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
 
         if (typeof window.syncRuleNotesClear === 'function') window.syncRuleNotesClear();
 
-        backdrop.style.display = 'flex';
-        backdrop.classList.add('open');
-        document.body.style.overflow = 'hidden';
+        window.openModal('ruleModalBackdrop');
     }
 
     function closeRuleModal() {
-        const backdrop = document.getElementById('ruleModalBackdrop');
-        if (backdrop) {
-            backdrop.classList.remove('open');
-            backdrop.style.display = 'none';
-        }
-        document.body.style.overflow = '';
+        window.closeModal('ruleModalBackdrop');
     }
 
     function toggleDay(el) {
@@ -1297,27 +1294,96 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
         form.submit();
     }
 
-    // Block date modal
+    function getLocalDateString(date = new Date()) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
     function openBlockModal() {
         const backdrop = document.getElementById('blockModalBackdrop');
         const blockDate = document.getElementById('blockDate');
-        if (!backdrop || !blockDate) { console.error('Block modal elements not found.'); return; }
+
+        if (!backdrop || !blockDate) {
+            console.error('Block modal elements not found.');
+            return;
+        }
+
         clearBlockErrors();
-        blockDate.min = new Date().toISOString().split('T')[0];
-        backdrop.style.display = 'flex';
-        backdrop.classList.add('open');
-        document.body.style.overflow = 'hidden';
+
+        const today = getLocalDateString();
+
+        blockDate.removeAttribute('max');
+        blockDate.setAttribute('min', today);
+        blockDate.classList.remove('js-flatpickr-date-max-today');
+        blockDate.classList.add('js-flatpickr-date-min-today');
+
+        if (blockDate._flatpickr) {
+            blockDate._flatpickr.set('maxDate', null);
+            blockDate._flatpickr.set('minDate', today);
+            blockDate._flatpickr.clear();
+        } else {
+            blockDate.value = '';
+        }
+
+        window.openModal('blockModalBackdrop');
+    }
+
+    function validateBlockDateBeforeSubmit(event) {
+        const blockDate = document.getElementById('blockDate');
+        if (!blockDate) return true;
+
+        const today = getLocalDateString();
+        const selectedDate = blockDate.value;
+
+        clearFieldError('blockDateError', 'blockDate');
+
+        if (!selectedDate) {
+            event.preventDefault();
+            setFieldError('blockDateError', 'Please select a date.', 'blockDate');
+            return false;
+        }
+
+        if (selectedDate < today) {
+            event.preventDefault();
+
+            blockDate.value = '';
+            blockDate._flatpickr?.clear();
+
+            setFieldError('blockDateError', 'Previous dates are not allowed.', 'blockDate');
+            return false;
+        }
+
+        return true;
     }
 
     function closeBlockModal() {
-        const backdrop = document.getElementById('blockModalBackdrop');
-        if (backdrop) { backdrop.classList.remove('open'); backdrop.style.display = 'none'; }
-        document.body.style.overflow = '';
+        window.closeModal('blockModalBackdrop');
+    }
+
+    function openScheduleDeleteModal(actionUrl, ruleName = 'this schedule rule') {
+        const form = document.getElementById('scheduleDeleteForm');
+        const name = document.getElementById('scheduleDeleteName');
+
+        if (!form || !name) {
+            console.error('Delete modal elements not found.');
+            return;
+        }
+
+        form.action = actionUrl;
+        name.textContent = ruleName || 'this schedule rule';
+
+        window.openModal('scheduleDeleteModal');
+    }
+
+    function closeScheduleDeleteModal() {
+        window.closeModal('scheduleDeleteModal');
     }
 
     document.addEventListener('DOMContentLoaded', function () {
 
-        // ── Notes textarea: char counter + clear button ──────────────
         const ruleNotes = document.getElementById('ruleNotes');
         const ruleNotesCount = document.getElementById('ruleNotesCount');
         const ruleNotesClearBtn = document.getElementById('ruleNotesClearBtn');
@@ -1356,15 +1422,12 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
         updateRuleNotesCount();
         syncRuleNotesClear();
 
-        // ── Circular mic button for Notes textarea ───────────────────
-        // Matches exactly the style used in service-types.blade.php
         (function initRuleNotesVoice() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const toggleWrapper = document.getElementById('ruleNotesVoiceToggle');
             const input = document.getElementById('ruleNotes');
             if (!SpeechRecognition || !toggleWrapper || !input) return;
 
-            // Build the circular mic button
             const micBtn = document.createElement('button');
             micBtn.type = 'button';
             micBtn.className = 'voice-search-mic external';
@@ -1372,9 +1435,8 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
             micBtn.title = 'Toggle voice input';
             toggleWrapper.appendChild(micBtn);
 
-            // Build the status chip
             const status = document.createElement('span');
-            status.className = 'rule-notes-voice-status hidden';
+            status.className = 'voice-status hidden';
             status.setAttribute('aria-hidden', 'true');
             status.setAttribute('aria-live', 'polite');
             toggleWrapper.appendChild(status);
@@ -1383,7 +1445,7 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
 
             const setStatus = (text, state) => {
                 status.textContent = text || '';
-                status.className = state ? `rule-notes-voice-status is-${state}` : 'rule-notes-voice-status';
+                status.className = state ? `voice-status is-${state}` : 'voice-status';
                 if (!text) status.classList.add('hidden');
                 else status.classList.remove('hidden');
             };
@@ -1489,20 +1551,27 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                 }
             }, { passive: false });
         })();
-        // ── End voice init ──────────────────────────────────────────
 
         buildWeekGrid();
 
         document.getElementById('ruleStatus')?.addEventListener('change', () => clearFieldError('ruleStatusError', 'ruleStatus'));
         document.getElementById('ruleOpenTime')?.addEventListener('change', () => clearFieldError('ruleOpenTimeError', 'ruleOpenTime'));
         document.getElementById('ruleCloseTime')?.addEventListener('change', () => clearFieldError('ruleCloseTimeError', 'ruleCloseTime'));
-        document.getElementById('ruleMaxSlots')?.addEventListener('input', () => clearFieldError('ruleMaxSlotsError', 'ruleMaxSlots'));
+        document.getElementById('ruleMaxSlots')?.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 2);
+
+            if (this.value !== '') {
+                const value = Math.max(1, Math.min(30, parseInt(this.value, 10)));
+                this.value = String(value);
+            }
+
+            clearFieldError('ruleMaxSlotsError', 'ruleMaxSlots');
+        });
 
         document.getElementById('blockDate')?.addEventListener('input', () => clearFieldError('blockDateError', 'blockDate'));
         document.getElementById('blockReason')?.addEventListener('change', () => clearFieldError('blockReasonError', 'blockReason'));
         document.getElementById('blockNote')?.addEventListener('input', () => clearFieldError('blockNoteError', 'blockNote'));
 
-        // ── View toggle (list / grid) ────────────────────────────────
         function getPreferredScheduleRulesView() {
             if (window.innerWidth <= 767) return 'list';
             return localStorage.getItem('scheduleRulesView') || 'list';
@@ -1525,8 +1594,20 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                 listView.removeAttribute('hidden');
             }
 
-            if (listBtn) listBtn.classList.toggle('active', finalView === 'list');
-            if (gridBtn) gridBtn.classList.toggle('active', finalView === 'grid');
+            const root = document.getElementById('mainContent');
+
+            root?.classList.toggle('mode-list', finalView === 'list');
+            root?.classList.toggle('mode-grid', finalView === 'grid');
+
+            if (listBtn) {
+                listBtn.classList.toggle('active', finalView === 'list');
+                listBtn.setAttribute('aria-pressed', finalView === 'list' ? 'true' : 'false');
+            }
+
+            if (gridBtn) {
+                gridBtn.classList.toggle('active', finalView === 'grid');
+                gridBtn.setAttribute('aria-pressed', finalView === 'grid' ? 'true' : 'false');
+            }
 
             if (save && window.innerWidth > 767) localStorage.setItem('scheduleRulesView', finalView);
         }

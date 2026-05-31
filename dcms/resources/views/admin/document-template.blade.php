@@ -3,238 +3,230 @@
 @section('title', 'Document Templates | PUP Taguig Dental Clinic')
 
 @section('content')
-<div class="document-templates-page">
-    <main class="w-full">
-        <div class="max-w-[1280px] mx-auto">
+<main id="mainContent" class="admin-page-shell document-templates-page page-enter">
+    <div class="admin-page-container">
 
-            <div class="page-banner">
-                <div class="page-banner-inner">
-                    <div>
-                        <h1 class="page-title">Document Templates</h1>
-                    </div>
-                    <div class="banner-badge">
-                        <i class="fa-solid fa-lock"></i>
-                        Default templates only
-                    </div>
+        <div class="page-banner">
+            <div class="page-banner-inner">
+                <div>
+                    <h1 class="page-title">Document Templates</h1>
+                </div>
+                <div class="banner-badge">
+                    <i class="fa-solid fa-lock"></i>
+                    Default templates only
                 </div>
             </div>
-
-            @php
-            $stats = $stats ?? [];
-            $totalTemplates = $stats['total'] ?? 0;
-            $activeTemplates = $stats['active'] ?? 0;
-            $archivedTemplates = $stats['archived'] ?? 0;
-            @endphp
-
-            <div class="stat-grid">
-                <div class="stat-card total">
-                    <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
-                    <div class="stat-value">{{ $totalTemplates }}</div>
-                    <div class="stat-lbl">Total Templates</div>
-                </div>
-                <div class="stat-card active">
-                    <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
-                    <div class="stat-value">{{ $activeTemplates }}</div>
-                    <div class="stat-lbl">Active</div>
-                </div>
-                <div class="stat-card archived">
-                    <div class="stat-icon"><i class="fa-solid fa-box-archive"></i></div>
-                    <div class="stat-value">{{ $archivedTemplates }}</div>
-                    <div class="stat-lbl">Archived</div>
-                </div>
-            </div>
-
-            <div class="toolbar">
-                <div class="template-search-row">
-                    <div class="search-wrap">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="templateSearch" class="no-voice" placeholder="Search templates..."
-                            autocomplete="off">
-                    </div>
-
-                    <button type="button" id="templateSearchClear" class="template-search-clear-btn hidden"
-                        title="Clear">
-                        Clear
-                    </button>
-
-                    <div class="template-voice-toggle">
-                        <button type="button" id="templateMicToggleBtn" class="voice-search-mic external"
-                            aria-label="Toggle voice input" aria-pressed="false">
-                            <i class="fa-solid fa-microphone"></i>
-                        </button>
-                        <span id="templateVoiceStatus" class="template-voice-status hidden" aria-live="polite"></span>
-                    </div>
-                </div>
-
-                <div class="tab-bar" style="flex:none;width:auto;margin-bottom:0;">
-                    <button type="button" class="tab-btn active" data-filter="" data-filter-type="category">
-                        <i class="fa-solid fa-border-all tab-icon"></i>
-                        <span class="tab-label">All</span>
-                    </button>
-                    <button type="button" class="tab-btn" data-filter="clearance" data-filter-type="category">
-                        <i class="fa-solid fa-file-circle-check tab-icon"></i>
-                        <span class="tab-label">Clearance</span>
-                    </button>
-                    <button type="button" class="tab-btn" data-filter="record" data-filter-type="category">
-                        <i class="fa-solid fa-folder-open tab-icon"></i>
-                        <span class="tab-label">Record</span>
-                    </button>
-                    <button type="button" class="tab-btn" data-filter="report" data-filter-type="category">
-                        <i class="fa-solid fa-chart-line tab-icon"></i>
-                        <span class="tab-label">Report</span>
-                    </button>
-                    <button type="button" class="tab-btn" data-filter="inventory" data-filter-type="category">
-                        <i class="fa-solid fa-boxes-stacked tab-icon"></i>
-                        <span class="tab-label">Inventory</span>
-                    </button>
-                </div>
-
-                <div class="tab-bar" style="flex:none;width:auto;margin-bottom:0;">
-                    <button type="button" class="tab-btn active" data-filter="" data-filter-type="status">
-                        All
-                    </button>
-                    <button type="button" class="tab-btn" data-filter="active" data-filter-type="status">
-                        <span
-                            style="width:7px;height:7px;border-radius:50%;background:#10b981;flex-shrink:0;display:inline-block;"></span>
-                        Active
-                    </button>
-                    <button type="button" class="tab-btn" data-filter="archived" data-filter-type="status">
-                        <span
-                            style="width:7px;height:7px;border-radius:50%;background:#9ca3af;flex-shrink:0;display:inline-block;"></span>
-                        Archived
-                    </button>
-                </div>
-            </div>
-
-            @if(empty($templates) || $templates->isEmpty())
-            <div class="empty-state">
-                <div
-                    style="width:64px;height:64px;border-radius:16px;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
-                    <i class="fa-solid fa-file-circle-xmark" style="font-size:1.6rem;color:#f9c1c1;"></i>
-                </div>
-                <p class="font-semibold text-gray-500 mb-1">No templates available</p>
-                <p class="text-sm mb-5">No default document templates are currently available.</p>
-            </div>
-            @else
-            <div>
-                <div class="templates-grid" id="templatesGrid">
-                    @foreach($templates as $tpl)
-                    @php
-                    $category = strtolower(trim((string) ($tpl->category ?? '')));
-                    $dt = strtolower($tpl->document_type ?? '');
-
-                    if ($category === '') {
-                    if (str_contains($dt, 'clearance')) $category = 'clearance';
-                    elseif (str_contains($dt, 'record')) $category = 'record';
-                    elseif (str_contains($dt, 'report')) $category = 'report';
-                    elseif (str_contains($dt, 'inventory')) $category = 'inventory';
-                    else $category = 'other';
-                    }
-
-                    if (!in_array($category, ['clearance', 'record', 'report', 'inventory'], true)) {
-                    $category = 'other';
-                    }
-                    @endphp
-
-                    <div class="template-card status-{{ $tpl->status }}" data-id="{{ $tpl->id }}"
-                        data-name="{{ strtolower($tpl->name) }}" data-type="{{ strtolower($tpl->document_type) }}"
-                        data-category="{{ $category }}" data-status="{{ $tpl->status }}"
-                        onclick="openTemplatePreview({{ $tpl->id }})">
-                        <div class="template-card-top">
-                            <div class="template-top-row">
-                                <div class="template-doc-icon">
-                                    @if($category === 'clearance')
-                                    <i class="fa-solid fa-file-circle-check"></i>
-                                    @elseif($category === 'record')
-                                    <i class="fa-solid fa-folder-open"></i>
-                                    @elseif($category === 'report')
-                                    <i class="fa-solid fa-chart-line"></i>
-                                    @elseif($category === 'inventory')
-                                    <i class="fa-solid fa-boxes-stacked"></i>
-                                    @else
-                                    <i class="fa-solid fa-file-lines"></i>
-                                    @endif
-                                </div>
-
-                                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;">
-                                    <span class="status-badge {{ $tpl->status }}">
-                                        {{ ucfirst($tpl->status) }}
-                                    </span>
-
-                                    @if($tpl->is_default)
-                                    <span class="status-badge" style="background:#dbeafe;color:#1d4ed8;">
-                                        Default
-                                    </span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <div>
-                                <div class="template-name">{{ $tpl->name }}</div>
-                                <div class="template-code">{{ $tpl->code ?? 'TPL-' . str_pad($tpl->id, 4, '0',
-                                    STR_PAD_LEFT) }}</div>
-                            </div>
-                        </div>
-
-                        <div class="template-card-body">
-                            <p class="template-description">
-                                {{ $tpl->description ?? $tpl->notes ?? 'Default system template.' }}
-                            </p>
-
-                            <div class="template-meta-row">
-                                <div class="flex items-center gap-2">
-                                    <span class="template-meta-item">
-                                        <i class="fa-solid fa-tag" style="font-size:.6rem;color:#8B0000;"></i>
-                                        {{ ucwords(str_replace('_', ' ', $tpl->document_type)) }}
-                                    </span>
-                                </div>
-
-                                <div class="template-actions" onclick="event.stopPropagation()">
-                                    <button type="button" class="action-btn view" title="Preview"
-                                        onclick="openTemplatePreview({{ $tpl->id }})">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
-
-                                    @if($tpl->status === 'active')
-                                    <form action="{{ route('admin.document-template.archive', $tpl->id) }}"
-                                        method="POST" style="display:inline;"
-                                        onsubmit="return confirm('Archive this template?')">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="action-btn del" title="Archive">
-                                            <i class="fa-solid fa-box-archive"></i>
-                                        </button>
-                                    </form>
-                                    @elseif($tpl->status === 'archived')
-                                    <form action="{{ route('admin.document-template.activate', $tpl->id) }}"
-                                        method="POST" style="display:inline;"
-                                        onsubmit="return confirm('Activate this template?')">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="action-btn copy" title="Activate">
-                                            <i class="fa-solid fa-circle-check"></i>
-                                        </button>
-                                    </form>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-
-                <div id="templateClientEmpty" class="empty-state" style="display:none;">
-                    <i class="fa-solid fa-magnifying-glass"
-                        style="font-size:2rem;color:#e5e7eb;display:block;margin-bottom:1rem;"></i>
-                    <p class="font-semibold text-gray-500 mb-1">No templates match your filter</p>
-                    <p class="text-sm">Try a different category or search term.</p>
-                </div>
-            </div>
-            @endif
-
         </div>
-    </main>
-</div>
+
+        @php
+        $stats = $stats ?? [];
+        $totalTemplates = $stats['total'] ?? 0;
+        $activeTemplates = $stats['active'] ?? 0;
+        $archivedTemplates = $stats['archived'] ?? 0;
+        @endphp
+
+        <div class="stat-grid">
+            <div class="stat-card total">
+                <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="stat-value">{{ $totalTemplates }}</div>
+                <div class="stat-lbl">Total Templates</div>
+            </div>
+            <div class="stat-card active">
+                <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="stat-value">{{ $activeTemplates }}</div>
+                <div class="stat-lbl">Active</div>
+            </div>
+            <div class="stat-card archived">
+                <div class="stat-icon"><i class="fa-solid fa-box-archive"></i></div>
+                <div class="stat-value">{{ $archivedTemplates }}</div>
+                <div class="stat-lbl">Archived</div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="template-search-row">
+                <div class="search-wrap">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="templateSearch" class="no-voice" placeholder="Search templates..."
+                        autocomplete="off">
+                </div>
+
+                <button type="button" id="templateSearchClear" class="template-search-clear-btn hidden" title="Clear">
+                    Clear
+                </button>
+
+                <div class="template-voice-toggle">
+                    <button type="button" id="templateMicToggleBtn" class="voice-search-mic external"
+                        aria-label="Toggle voice input" aria-pressed="false">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <span id="templateVoiceStatus" class="voice-status hidden" aria-live="polite"></span>
+                </div>
+            </div>
+
+            <div class="tab-bar template-filter-tabs">
+                <button type="button" class="tab-btn active" data-filter="" data-filter-type="category">
+                    <i class="fa-solid fa-grip tab-icon"></i>
+                    <span class="tab-label">All</span>
+                </button>
+                <button type="button" class="tab-btn" data-filter="clearance" data-filter-type="category">
+                    <i class="fa-solid fa-file-circle-check tab-icon"></i>
+                    <span class="tab-label">Clearance</span>
+                </button>
+                <button type="button" class="tab-btn" data-filter="record" data-filter-type="category">
+                    <i class="fa-solid fa-folder-open tab-icon"></i>
+                    <span class="tab-label">Record</span>
+                </button>
+                <button type="button" class="tab-btn" data-filter="report" data-filter-type="category">
+                    <i class="fa-solid fa-chart-line tab-icon"></i>
+                    <span class="tab-label">Report</span>
+                </button>
+                <button type="button" class="tab-btn" data-filter="inventory" data-filter-type="category">
+                    <i class="fa-solid fa-boxes-stacked tab-icon"></i>
+                    <span class="tab-label">Inventory</span>
+                </button>
+            </div>
+
+            <div class="tab-bar template-filter-tabs">
+                <button type="button" class="tab-btn active" data-filter="" data-filter-type="status">
+                    All
+                </button>
+                <button type="button" class="tab-btn" data-filter="active" data-filter-type="status">
+                    <span class="template-status-dot is-active"></span>
+                    Active
+                </button>
+                <button type="button" class="tab-btn" data-filter="archived" data-filter-type="status">
+                    <span class="template-status-dot is-archived"></span>
+                    Archived
+                </button>
+            </div>
+        </div>
+
+        @if(empty($templates) || $templates->isEmpty())
+        <div class="empty-state">
+            <div class="template-empty-icon">
+                <i class="fa-solid fa-file-circle-xmark"></i>
+            </div>
+            <p class="font-semibold text-gray-500 mb-1">No templates available</p>
+            <p class="text-sm mb-5">No default document templates are currently available.</p>
+        </div>
+        @else
+        <div>
+            <div class="templates-grid" id="templatesGrid">
+                @foreach($templates as $tpl)
+                @php
+                $category = strtolower(trim((string) ($tpl->category ?? '')));
+                $dt = strtolower($tpl->document_type ?? '');
+
+                if ($category === '') {
+                if (str_contains($dt, 'clearance')) $category = 'clearance';
+                elseif (str_contains($dt, 'record')) $category = 'record';
+                elseif (str_contains($dt, 'report')) $category = 'report';
+                elseif (str_contains($dt, 'inventory')) $category = 'inventory';
+                else $category = 'other';
+                }
+
+                if (!in_array($category, ['clearance', 'record', 'report', 'inventory'], true)) {
+                $category = 'other';
+                }
+                @endphp
+
+                <div class="template-card status-{{ $tpl->status }}" data-id="{{ $tpl->id }}"
+                    data-name="{{ strtolower($tpl->name) }}" data-type="{{ strtolower($tpl->document_type) }}"
+                    data-category="{{ $category }}" data-status="{{ $tpl->status }}"
+                    onclick="openTemplatePreview({{ $tpl->id }})">
+                    <div class="template-card-top">
+                        <div class="template-top-row">
+                            <div class="template-doc-icon">
+                                @if($category === 'clearance')
+                                <i class="fa-solid fa-file-circle-check"></i>
+                                @elseif($category === 'record')
+                                <i class="fa-solid fa-folder-open"></i>
+                                @elseif($category === 'report')
+                                <i class="fa-solid fa-chart-line"></i>
+                                @elseif($category === 'inventory')
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                                @else
+                                <i class="fa-solid fa-file-lines"></i>
+                                @endif
+                            </div>
+
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;">
+                                <span class="status-badge {{ $tpl->status }}">
+                                    {{ ucfirst($tpl->status) }}
+                                </span>
+
+                                @if($tpl->is_default)
+                                <span class="status-badge" style="background:#dbeafe;color:#1d4ed8;">
+                                    Default
+                                </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="template-name">{{ $tpl->name }}</div>
+                            <div class="template-code">{{ $tpl->code ?? 'TPL-' . str_pad($tpl->id, 4, '0',
+                                STR_PAD_LEFT) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="template-card-body">
+                        <p class="template-description">
+                            {{ $tpl->description ?? $tpl->notes ?? 'Default system template.' }}
+                        </p>
+
+                        <div class="template-meta-row">
+                            <div class="flex items-center gap-2">
+                                <span class="template-meta-item">
+                                    <i class="fa-solid fa-tag" style="font-size:.6rem;color:#8B0000;"></i>
+                                    {{ ucwords(str_replace('_', ' ', $tpl->document_type)) }}
+                                </span>
+                            </div>
+
+                            <div class="template-actions" onclick="event.stopPropagation()">
+                                <button type="button" class="action-btn view" title="Preview"
+                                    onclick="openTemplatePreview({{ $tpl->id }})">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+
+                                @if($tpl->status === 'active')
+                                <form action="{{ route('admin.document-template.archive', $tpl->id) }}" method="POST"
+                                    style="display:inline;" onsubmit="return confirm('Archive this template?')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="action-btn del" title="Archive">
+                                        <i class="fa-solid fa-box-archive"></i>
+                                    </button>
+                                </form>
+                                @elseif($tpl->status === 'archived')
+                                <form action="{{ route('admin.document-template.activate', $tpl->id) }}" method="POST"
+                                    style="display:inline;" onsubmit="return confirm('Activate this template?')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="action-btn copy" title="Activate">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+
+            <div id="templateClientEmpty" class="empty-state" style="display:none;">
+                <i class="fa-solid fa-magnifying-glass"
+                    style="font-size:2rem;color:#e5e7eb;display:block;margin-bottom:1rem;"></i>
+                <p class="font-semibold text-gray-500 mb-1">No templates match your filter</p>
+                <p class="text-sm">Try a different category or search term.</p>
+            </div>
+        </div>
+        @endif
+
+    </div>
+</main>
 
 <div class="template-preview-backdrop" id="templatePreviewBackdrop">
     <div class="template-preview-modal" role="dialog" aria-modal="true" aria-labelledby="templatePreviewTitle">
@@ -420,7 +412,7 @@
 
         const setStatus = (text, state) => {
             status.textContent = text;
-            status.className = 'template-voice-status';
+            status.className = 'voice-status';
             if (state) status.classList.add(`is-${state}`);
             status.classList.remove('hidden');
         };

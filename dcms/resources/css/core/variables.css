@@ -54,53 +54,133 @@
 
     --filter-danger-text: #DC2626;
 
+    --status-default-bg: #F3F4F6;
+    --status-default-soft: #F3F4F6;
+    --status-default-text: #6B7280;
+    --status-default-border: #E5E7EB;
+    --status-default-solid: #6B7280;
+
     --status-all-bg: #EFF6FF;
-    --status-all-text: #1E3A8A;
-    --status-all-border: #93C5FD;
-    --status-all-solid: #1E3A8A;
-    --status-all-soft: rgba(30, 58, 138, 0.14);
+    --status-all-soft: #DBEAFE;
+    --status-all-text: #2563EB;
+    --status-all-border: #BFDBFE;
+    --status-all-solid: #2563EB;
 
-    /* Today */
+    /* Appointment / request statuses */
     --status-today-bg: #EFF6FF;
-    --status-today-text: #1D4ED8;
+    --status-today-soft: #DBEAFE;
+    --status-today-text: #2563EB;
     --status-today-border: #BFDBFE;
-    --status-today-solid: #1D4ED8;
-    --status-today-soft: rgba(29, 78, 216, 0.12);
+    --status-today-solid: #2563EB;
 
-    /* Upcoming */
     --status-upcoming-bg: #FFF7ED;
-    --status-upcoming-text: #C2410C;
+    --status-upcoming-soft: #FFEDD5;
+    --status-upcoming-text: #EA580C;
     --status-upcoming-border: #FED7AA;
     --status-upcoming-solid: #EA580C;
-    --status-upcoming-soft: rgba(234, 88, 12, 0.13);
 
-    /* Rescheduled */
-    --status-rescheduled-bg: #FEFCE8;
-    --status-rescheduled-text: #92400E;
+    --status-rescheduled-bg: #FEF9C3;
+    --status-rescheduled-soft: #FEF3C7;
+    --status-rescheduled-text: #A16207;
     --status-rescheduled-border: #FDE68A;
     --status-rescheduled-solid: #CA8A04;
-    --status-rescheduled-soft: rgba(202, 138, 4, 0.14);
 
-    /* Completed */
     --status-completed-bg: #F0FDF4;
+    --status-completed-soft: #DCFCE7;
     --status-completed-text: #15803D;
     --status-completed-border: #BBF7D0;
     --status-completed-solid: #16A34A;
-    --status-completed-soft: rgba(22, 163, 74, 0.13);
 
-    /* Cancelled */
     --status-cancelled-bg: #FEF2F2;
+    --status-cancelled-soft: #FEE2E2;
     --status-cancelled-text: #B91C1C;
     --status-cancelled-border: #FECACA;
     --status-cancelled-solid: #DC2626;
-    --status-cancelled-soft: rgba(220, 38, 38, 0.12);
 
-    /* Default / Past */
-    --status-default-bg: #F8FAFC;
-    --status-default-text: #64748B;
-    --status-default-border: #CBD5E1;
-    --status-default-solid: #64748B;
-    --status-default-soft: rgba(100, 116, 139, 0.12);
+    --status-pending-bg: #FFF7ED;
+    --status-pending-soft: #FEF3C7;
+    --status-pending-text: #D97706;
+    --status-pending-border: #FDE68A;
+    --status-pending-solid: #D97706;
+
+    --status-approved-bg: #F0FDF4;
+    --status-approved-soft: #DCFCE7;
+    --status-approved-text: #15803D;
+    --status-approved-border: #BBF7D0;
+    --status-approved-solid: #16A34A;
+
+    --status-rejected-bg: #FEF2F2;
+    --status-rejected-soft: #FEE2E2;
+    --status-rejected-text: #B91C1C;
+    --status-rejected-border: #FECACA;
+    --status-rejected-solid: #DC2626;
+
+    /* Admin/system statuses */
+    --status-active-bg: #F0FDF4;
+    --status-active-soft: #DCFCE7;
+    --status-active-text: #15803D;
+    --status-active-border: #BBF7D0;
+    --status-active-solid: #16A34A;
+
+    --status-inactive-bg: #F9FAFB;
+    --status-inactive-soft: #F3F4F6;
+    --status-inactive-text: #6B7280;
+    --status-inactive-border: #E5E7EB;
+    --status-inactive-solid: #6B7280;
+
+    --status-archived-bg: #F9FAFB;
+    --status-archived-soft: #F3F4F6;
+    --status-archived-text: #6B7280;
+    --status-archived-border: #E5E7EB;
+    --status-archived-solid: #9CA3AF;
+
+    --status-deleted-bg: #FEF2F2;
+    --status-deleted-soft: #FEE2E2;
+    --status-deleted-text: #991B1B;
+    --status-deleted-border: #FECACA;
+    --status-deleted-solid: #DC2626;
+
+    --status-ongoing-bg: #EFF6FF;
+    --status-ongoing-soft: #DBEAFE;
+    --status-ongoing-text: #1D4ED8;
+    --status-ongoing-border: #BFDBFE;
+    --status-ongoing-solid: #2563EB;
+
+    --status-failed-bg: #FEF2F2;
+    --status-failed-soft: #FEE2E2;
+    --status-failed-text: #B91C1C;
+    --status-failed-border: #FECACA;
+    --status-failed-solid: #DC2626;
+
+    --status-ready-bg: #EFF6FF;
+    --status-ready-soft: #DBEAFE;
+    --status-ready-text: #2563EB;
+    --status-ready-border: #BFDBFE;
+    --status-ready-solid: #2563EB;
+
+    --status-released-bg: #F5F3FF;
+    --status-released-soft: #EDE9FE;
+    --status-released-text: #7C3AED;
+    --status-released-border: #DDD6FE;
+    --status-released-solid: #8B5CF6;
+
+    --status-ended-bg: #F9FAFB;
+    --status-ended-soft: #F3F4F6;
+    --status-ended-text: #6B7280;
+    --status-ended-border: #E5E7EB;
+    --status-ended-solid: #9CA3AF;
+
+    --status-granted-bg: #F0FDF4;
+    --status-granted-soft: #DCFCE7;
+    --status-granted-text: #15803D;
+    --status-granted-border: #BBF7D0;
+    --status-granted-solid: #16A34A;
+
+    --status-denied-bg: #F9FAFB;
+    --status-denied-soft: #F3F4F6;
+    --status-denied-text: #6B7280;
+    --status-denied-border: #E5E7EB;
+    --status-denied-solid: #9CA3AF;
 
     --crimson: #8B0000;
     --crimson-dark: #6b0000;
@@ -156,40 +236,131 @@
 
     --filter-danger-text: #F87171;
 
-    --status-all-bg: rgba(30, 58, 138, 0.22);
-    --status-all-text: #93C5FD;
-    --status-all-border: rgba(147, 197, 253, 0.30);
-    --status-all-soft: rgba(30, 58, 138, 0.24);
-
-    --status-today-bg: rgba(37, 99, 235, 0.16);
-    --status-today-text: #93C5FD;
-    --status-today-border: rgba(147, 197, 253, 0.28);
-    --status-today-soft: rgba(37, 99, 235, 0.22);
-
-    --status-upcoming-bg: rgba(234, 88, 12, 0.16);
-    --status-upcoming-text: #FDBA74;
-    --status-upcoming-border: rgba(251, 146, 60, 0.30);
-    --status-upcoming-soft: rgba(234, 88, 12, 0.22);
-
-    --status-rescheduled-bg: rgba(202, 138, 4, 0.18);
-    --status-rescheduled-text: #FDE68A;
-    --status-rescheduled-border: rgba(253, 230, 138, 0.30);
-    --status-rescheduled-soft: rgba(202, 138, 4, 0.24);
-
-    --status-completed-bg: rgba(22, 163, 74, 0.16);
-    --status-completed-text: #86EFAC;
-    --status-completed-border: rgba(134, 239, 172, 0.28);
-    --status-completed-soft: rgba(22, 163, 74, 0.22);
-
-    --status-cancelled-bg: rgba(220, 38, 38, 0.16);
-    --status-cancelled-text: #FCA5A5;
-    --status-cancelled-border: rgba(252, 165, 165, 0.30);
-    --status-cancelled-soft: rgba(220, 38, 38, 0.22);
-
     --status-default-bg: rgba(100, 116, 139, 0.14);
+    --status-default-soft: rgba(100, 116, 139, 0.20);
     --status-default-text: #CBD5E1;
     --status-default-border: rgba(203, 213, 225, 0.22);
-    --status-default-soft: rgba(100, 116, 139, 0.20);
+    --status-default-solid: #CBD5E1;
+
+    --status-all-bg: rgba(30, 58, 138, 0.22);
+    --status-all-soft: rgba(30, 58, 138, 0.24);
+    --status-all-text: #93C5FD;
+    --status-all-border: rgba(147, 197, 253, 0.30);
+    --status-all-solid: #93C5FD;
+
+    --status-today-bg: rgba(37, 99, 235, 0.16);
+    --status-today-soft: rgba(37, 99, 235, 0.22);
+    --status-today-text: #93C5FD;
+    --status-today-border: rgba(147, 197, 253, 0.28);
+    --status-today-solid: #60A5FA;
+
+    --status-upcoming-bg: rgba(234, 88, 12, 0.16);
+    --status-upcoming-soft: rgba(234, 88, 12, 0.22);
+    --status-upcoming-text: #FDBA74;
+    --status-upcoming-border: rgba(251, 146, 60, 0.30);
+    --status-upcoming-solid: #FB923C;
+
+    --status-rescheduled-bg: rgba(202, 138, 4, 0.18);
+    --status-rescheduled-soft: rgba(202, 138, 4, 0.24);
+    --status-rescheduled-text: #FDE68A;
+    --status-rescheduled-border: rgba(253, 230, 138, 0.30);
+    --status-rescheduled-solid: #FDE047;
+
+    --status-completed-bg: rgba(22, 163, 74, 0.16);
+    --status-completed-soft: rgba(22, 163, 74, 0.22);
+    --status-completed-text: #86EFAC;
+    --status-completed-border: rgba(134, 239, 172, 0.28);
+    --status-completed-solid: #4ADE80;
+
+    --status-cancelled-bg: rgba(220, 38, 38, 0.16);
+    --status-cancelled-soft: rgba(220, 38, 38, 0.22);
+    --status-cancelled-text: #FCA5A5;
+    --status-cancelled-border: rgba(252, 165, 165, 0.30);
+    --status-cancelled-solid: #F87171;
+
+    --status-pending-bg: rgba(245, 158, 11, 0.14);
+    --status-pending-soft: rgba(245, 158, 11, 0.20);
+    --status-pending-text: #FBBF24;
+    --status-pending-border: rgba(251, 191, 36, 0.28);
+    --status-pending-solid: #FBBF24;
+
+    --status-approved-bg: rgba(22, 163, 74, 0.16);
+    --status-approved-soft: rgba(22, 163, 74, 0.22);
+    --status-approved-text: #86EFAC;
+    --status-approved-border: rgba(134, 239, 172, 0.28);
+    --status-approved-solid: #4ADE80;
+
+    --status-rejected-bg: rgba(220, 38, 38, 0.16);
+    --status-rejected-soft: rgba(220, 38, 38, 0.22);
+    --status-rejected-text: #FCA5A5;
+    --status-rejected-border: rgba(252, 165, 165, 0.30);
+    --status-rejected-solid: #F87171;
+
+    --status-active-bg: rgba(22, 163, 74, 0.16);
+    --status-active-soft: rgba(22, 163, 74, 0.22);
+    --status-active-text: #86EFAC;
+    --status-active-border: rgba(134, 239, 172, 0.28);
+    --status-active-solid: #4ADE80;
+
+    --status-inactive-bg: rgba(100, 116, 139, 0.14);
+    --status-inactive-soft: rgba(100, 116, 139, 0.20);
+    --status-inactive-text: #CBD5E1;
+    --status-inactive-border: rgba(203, 213, 225, 0.22);
+    --status-inactive-solid: #CBD5E1;
+
+    --status-archived-bg: rgba(100, 116, 139, 0.14);
+    --status-archived-soft: rgba(100, 116, 139, 0.20);
+    --status-archived-text: #CBD5E1;
+    --status-archived-border: rgba(203, 213, 225, 0.22);
+    --status-archived-solid: #CBD5E1;
+
+    --status-deleted-bg: rgba(220, 38, 38, 0.16);
+    --status-deleted-soft: rgba(220, 38, 38, 0.22);
+    --status-deleted-text: #FCA5A5;
+    --status-deleted-border: rgba(252, 165, 165, 0.30);
+    --status-deleted-solid: #F87171;
+
+    --status-ongoing-bg: rgba(37, 99, 235, 0.16);
+    --status-ongoing-soft: rgba(37, 99, 235, 0.22);
+    --status-ongoing-text: #93C5FD;
+    --status-ongoing-border: rgba(147, 197, 253, 0.28);
+    --status-ongoing-solid: #60A5FA;
+
+    --status-failed-bg: rgba(220, 38, 38, 0.16);
+    --status-failed-soft: rgba(220, 38, 38, 0.22);
+    --status-failed-text: #FCA5A5;
+    --status-failed-border: rgba(252, 165, 165, 0.30);
+    --status-failed-solid: #F87171;
+
+    --status-ready-bg: rgba(37, 99, 235, 0.16);
+    --status-ready-soft: rgba(37, 99, 235, 0.22);
+    --status-ready-text: #93C5FD;
+    --status-ready-border: rgba(147, 197, 253, 0.28);
+    --status-ready-solid: #60A5FA;
+
+    --status-released-bg: rgba(124, 58, 237, 0.16);
+    --status-released-soft: rgba(124, 58, 237, 0.22);
+    --status-released-text: #C4B5FD;
+    --status-released-border: rgba(196, 181, 253, 0.28);
+    --status-released-solid: #A78BFA;
+
+    --status-ended-bg: rgba(100, 116, 139, 0.14);
+    --status-ended-soft: rgba(100, 116, 139, 0.20);
+    --status-ended-text: #CBD5E1;
+    --status-ended-border: rgba(203, 213, 225, 0.22);
+    --status-ended-solid: #CBD5E1;
+
+    --status-granted-bg: rgba(22, 163, 74, 0.16);
+    --status-granted-soft: rgba(22, 163, 74, 0.22);
+    --status-granted-text: #86EFAC;
+    --status-granted-border: rgba(134, 239, 172, 0.28);
+    --status-granted-solid: #4ADE80;
+
+    --status-denied-bg: rgba(100, 116, 139, 0.14);
+    --status-denied-soft: rgba(100, 116, 139, 0.20);
+    --status-denied-text: #CBD5E1;
+    --status-denied-border: rgba(203, 213, 225, 0.22);
+    --status-denied-solid: #CBD5E1;
 }
 
 @media (max-width: 1199px) {

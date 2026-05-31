@@ -8,10 +8,32 @@
     align-items: center;
     justify-content: center;
     padding: 16px;
+    animation: none;
+}
+
+.modal-overlay .modal-box-inner {
+    animation: none !important;
+    transform-origin: center;
+    will-change: opacity, transform, filter;
 }
 
 .modal-overlay.open {
-    display: flex;
+    display: flex !important;
+    animation: modalBackdropIn 180ms ease both;
+}
+
+.modal-overlay.closing {
+    display: flex !important;
+    pointer-events: none !important;
+    animation: modalBackdropOut 160ms ease both;
+}
+
+.modal-overlay.open:not(.closing) .modal-box-inner {
+    animation: overlayPanelIn 220ms cubic-bezier(.22, 1, .36, 1) both !important;
+}
+
+.modal-overlay.closing .modal-box-inner {
+    animation: overlayPanelOut 170ms ease both !important;
 }
 
 .modal-box-inner {
@@ -360,26 +382,25 @@ body.modal-lock {
     color: #ddd;
 }
 
+[data-theme="dark"] .form-input-custom,
+[data-theme="dark"] .form-select-custom {
+    background: #0d1117;
+    border-color: #21262d;
+}
+
 @media (prefers-reduced-motion: reduce) {
+
+    .modal-overlay,
+    .modal-overlay .modal-box-inner {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        filter: none !important;
+    }
 
     .ui-modal,
     .ui-modal-card {
         transition: none !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .form-label-custom {
-        font-size: 9px;
-        letter-spacing: .07em;
-    }
-
-    .form-input-custom,
-    .form-select-custom {
-        height: 42px;
-        padding: 0 12px;
-        font-size: 14px;
-        border-radius: 10px;
     }
 }
 
@@ -431,5 +452,13 @@ body.modal-lock {
         max-width: 100% !important;
         max-height: 88dvh !important;
         border-radius: 24px 24px 0 0 !important;
+    }
+
+    .modal-overlay.open:not(.closing) .modal-box-inner {
+        animation: modalSlideUp 240ms cubic-bezier(.22, 1, .36, 1) both !important;
+    }
+
+    .modal-overlay.closing .modal-box-inner {
+        animation: modalSlideDown 190ms ease both !important;
     }
 }

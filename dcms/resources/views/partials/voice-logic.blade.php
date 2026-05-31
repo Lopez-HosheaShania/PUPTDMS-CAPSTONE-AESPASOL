@@ -1,405 +1,260 @@
 <script>
 (() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    function getJSVoice() {
-        return window.JSVoice;
-    }
-
-    function normalizeVoiceError(error) {
-        if (!error) return 'unknown';
-        if (typeof error === 'string') return error;
-        if (typeof error.error === 'string') return error.error;
-        if (typeof error.code === 'string') return error.code;
-        return 'unknown';
-    }
-
-    function createRecognizer(input, handlers) {
-        const lang = input.dataset.voiceLang || 'en-US';
-        const JSVoice = getJSVoice();
-
-        if (JSVoice && (typeof JSVoice.isApiSupported === 'undefined' || JSVoice.isApiSupported)) {
-            const voice = new JSVoice({
-                lang,
-                continuous: false,
-                interimResults: false,
-                autoRestart: false,
-                commands: {},
-                patternCommands: [],
-                onCommandRecognized: (phrase, raw) => {
-                    const transcript = (raw || phrase || '').trim();
-                    if (transcript) handlers.onResult(transcript);
-                },
-                onCommandNotRecognized: (raw) => {
-                    const transcript = (raw || '').trim();
-                    if (transcript) handlers.onResult(transcript);
-                },
-                onMicrophonePermissionDenied: () => handlers.onError('not-allowed'),
-                onError: (error) => handlers.onError(normalizeVoiceError(error)),
-                onSpeechEnd: () => handlers.onEnd()
-            });
-
-            return {
-                start: () => Promise.resolve(voice.start()),
-                stop: () => {
-                    voice.stop();
-                }
-            };
-        }
-
-        if (!SpeechRecognition) return null;
-
-        const recognition = new SpeechRecognition();
-        recognition.lang = lang;
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
-
-        let processedFinalIndex = -1;
-
-        recognition.onresult = (event) => {
-            let transcript = '';
-            let hasNewFinal = false;
-
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const result = event.results[i];
-                const chunk = result?.[0]?.transcript?.trim() || '';
-                if (!chunk) continue;
-
-                if (result.isFinal) {
-                    if (i > processedFinalIndex) {
-                        transcript += ` ${chunk}`;
-                        processedFinalIndex = i;
-                        hasNewFinal = true;
-                    }
-                } else if (!transcript) {
-                    transcript = chunk;
-                }
-            }
-
-            transcript = transcript.trim();
-
-            if (hasNewFinal && transcript) {
-                handlers.onResult(transcript);
-            }
-        };
-
-        recognition.onerror = (event) => {
-            handlers.onError(event?.error || 'unknown');
-        };
-
-        recognition.onend = () => {
-            handlers.onEnd();
-        };
-
-        return {
-            start: () => {
-                recognition.start();
-                return Promise.resolve();
-            },
-            stop: () => {
-                recognition.stop();
-            }
-        };
-    }
-
-    let activeController = null;
-
-    const selector = [
-        'input:not([type]):not([readonly]):not([type="hidden"])',
-        'input[type="text"]:not([readonly])',
-        'input[type="email"]:not([readonly])',
-        'input[type="tel"]:not([readonly])',
-        'textarea:not([readonly])'
-    ].join(', ');
-
-    function initializeVoiceInputs(root = document) {
-    const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
-    if (!SpeechRecognition && !getJSVoice()) {
-        console.warn('Your browser does not support Voice Recognition.');
+    if (window.__GLOBAL_VOICE_INPUTS_READY__) {
+        document.dispatchEvent(new CustomEvent('voice:refresh', { detail: { root: document } }));
         return;
     }
 
-    const inputs = scope.querySelectorAll(selector);
+    window.__GLOBAL_VOICE_INPUTS_READY__ = true;
 
-    inputs.forEach((input) => {
-        if (input.classList.contains('no-voice')) return;
-        if (input.id === 'relation_other' || input.id === 'emergency_relation') return;
-        if (input.dataset.voiceReady === 'true') return;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let activeController = null;
 
-        const isTextarea = input.tagName.toLowerCase() === 'textarea';
-        const parent = input.parentNode;
-        const isInsideSearchWrap = parent && parent.classList && parent.classList.contains('search-wrap');
-        const isPatientDirectorySearch = input.id === 'patientSearch';
+    function getTargetInput(button) {
+        const targetSelector = button.dataset.voiceTarget;
 
-        let wrapper = input.closest('[data-voice-field]');
-        let micBtn = wrapper?.querySelector('[data-voice-trigger]') || null;
-        let statusLabel = wrapper?.querySelector('[data-voice-status]') || null;
-
-        if (isInsideSearchWrap) {
-            parent.classList.add('voice-search-wrap');
-            if (!input.classList.contains('voice-search-input')) {
-                input.classList.add('voice-search-input');
-            }
-
-            if (!statusLabel) {
-                statusLabel = document.createElement('span');
-                statusLabel.className = 'voice-status hidden';
-                statusLabel.setAttribute('data-voice-status', '');
-                parent.appendChild(statusLabel);
-            }
-
-            if (!micBtn) {
-                micBtn = document.createElement('button');
-                micBtn.type = 'button';
-                micBtn.setAttribute('aria-label', 'Toggle voice input');
-                micBtn.setAttribute('data-voice-trigger', '');
-                micBtn.className = 'voice-mic-btn voice-search-mic';
-                micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-                parent.appendChild(micBtn);
-            }
-
-            if (isPatientDirectorySearch) {
-                parent.style.overflow = 'visible';
-                Object.assign(micBtn.style, {
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: '18px',
-                    height: '18px',
-                    border: 'none',
-                    background: 'transparent',
-                    padding: '0',
-                    margin: '0',
-                    lineHeight: '1',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    zIndex: '4'
-                });
-
-                Object.assign(statusLabel.style, {
-                    position: 'absolute',
-                    right: '0',
-                    top: 'calc(100% + 6px)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    whiteSpace: 'nowrap',
-                    fontSize: '.74rem',
-                    fontWeight: '700',
-                    lineHeight: '1',
-                    padding: '.18rem .48rem',
-                    borderRadius: '999px',
-                    pointerEvents: 'none',
-                    zIndex: '6'
-                });
-            }
-        } else if (!wrapper) {
-            wrapper = document.createElement('div');
-            wrapper.className = 'voice-input-wrap';
-            wrapper.setAttribute('data-voice-field', '');
-
-            if (input.classList.contains('voice-full')) {
-                wrapper.classList.add('is-full');
-            } else if (input.classList.contains('voice-small')) {
-                wrapper.classList.add('is-small');
-            } else {
-                wrapper.classList.add('is-medium');
-            }
-
-            const computedDisplay = window.getComputedStyle(input).display;
-            if (computedDisplay === 'inline' || computedDisplay === 'inline-block') {
-                wrapper.style.display = 'inline-block';
-            } else {
-                wrapper.style.display = 'block';
-                wrapper.style.width = '100%';
-                wrapper.style.maxWidth = '100%';
-            }
-
-            parent.insertBefore(wrapper, input);
-            wrapper.appendChild(input);
-
-            micBtn = document.createElement('button');
-            micBtn.type = 'button';
-            micBtn.setAttribute('aria-label', 'Toggle voice input');
-            micBtn.setAttribute('data-voice-trigger', '');
-            micBtn.className = 'voice-mic-btn';
-            micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-            wrapper.appendChild(micBtn);
-
-            statusLabel = document.createElement('span');
-            statusLabel.className = 'voice-status hidden';
-            statusLabel.setAttribute('data-voice-status', '');
-            wrapper.appendChild(statusLabel);
+        if (targetSelector) {
+            return document.querySelector(targetSelector);
         }
 
-        input.style.width = '100%';
-        input.style.maxWidth = '100%';
-        input.style.boxSizing = 'border-box';
+        const field = button.closest('[data-voice-field], .voice-search-row, .st-voice-row, .voice-input-wrap');
+        return field?.querySelector('input:not([type="hidden"]), textarea') || null;
+    }
 
-        if (input.tagName.toLowerCase() !== 'select') {
-            input.classList.add('has-voice-padding');
+    function getStatusLabel(button) {
+        const statusSelector = button.dataset.voiceStatus;
+
+        if (statusSelector) {
+            return document.querySelector(statusSelector);
         }
 
-        if (isTextarea) {
-            input.classList.add('is-voice-textarea');
-        }
+        const field = button.closest('[data-voice-field], .voice-search-row, .st-voice-row, .voice-input-wrap');
+        return field?.querySelector('[data-voice-status]') || null;
+    }
 
-        input.dataset.voiceReady = 'true';
+    function setVoiceStatus(statusLabel, message = '', state = 'default') {
+        if (!statusLabel) return;
 
-        let hasRecognizedSpeech = false;
+        statusLabel.textContent = message;
+        statusLabel.classList.remove('hidden', 'is-listening', 'is-success', 'is-error', 'is-default');
 
-        const recognizer = createRecognizer(input, {
-            onResult: (transcript) => {
-                hasRecognizedSpeech = true;
-                if (isTextarea && input.value.trim()) {
-                    input.value = `${input.value.trim()} ${transcript}`.trim();
-                } else {
-                    input.value = transcript;
-                }
-
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-
-                showStatus('Voice captured.', 'success');
-                hideStatus(1500);
-            },
-            onError: (errorCode) => {
-                if (errorCode === 'no-speech') {
-                    showStatus("Didn't catch that. Try again.", 'error');
-                } else if (errorCode === 'not-allowed') {
-                    showStatus('Microphone permission denied.', 'error');
-                } else if (errorCode === 'aborted') {
-                    statusLabel.classList.add('hidden');
-                } else {
-                    showStatus('Voice input stopped.', 'error');
-                }
-                hideStatus(2200);
-            },
-            onEnd: () => {
-                resetVisualState();
-
-                if (activeController === controller) {
-                    activeController = null;
-                }
-
-                if (statusLabel.textContent === 'Listening...') {
-                    if (!hasRecognizedSpeech) {
-                        showStatus("Didn't catch that. Try again.", 'error');
-                        hideStatus(1800);
-                    } else {
-                        statusLabel.classList.add('hidden');
-                    }
-                }
-            }
-        });
-
-        if (!recognizer) {
-            micBtn.disabled = true;
-            micBtn.title = 'Voice input is not supported in this browser';
-            input.dataset.voiceReady = 'unsupported';
+        if (!message) {
+            statusLabel.classList.add('hidden');
             return;
         }
 
-        const controller = {
-            input,
-            micBtn,
-            statusLabel,
-            recognizer
-        };
+        statusLabel.classList.add(`is-${state}`);
+    }
 
-        function enforcePatientSearchLayout() {
-            if (!isPatientDirectorySearch || !parent || !statusLabel || !micBtn) return;
+    function setMicPressed(button, value) {
+        button.setAttribute('aria-pressed', value ? 'true' : 'false');
+    }
 
-            parent.style.setProperty('position', 'relative', 'important');
-            parent.style.setProperty('overflow', 'visible', 'important');
+    function resetMic(button) {
+        if (!button) return;
 
-            input.style.setProperty('padding-right', '1.8rem', 'important');
+        button.classList.remove('is-listening', 'mic-active', 'text-[#8B0000]');
+        button.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+        setMicPressed(button, false);
+    }
 
-            micBtn.style.setProperty('position', 'absolute', 'important');
-            micBtn.style.setProperty('right', '12px', 'important');
-            micBtn.style.setProperty('top', '50%', 'important');
-            micBtn.style.setProperty('transform', 'translateY(-50%)', 'important');
-            micBtn.style.setProperty('width', '18px', 'important');
-            micBtn.style.setProperty('height', '18px', 'important');
-            micBtn.style.setProperty('display', 'inline-flex', 'important');
-            micBtn.style.setProperty('align-items', 'center', 'important');
-            micBtn.style.setProperty('justify-content', 'center', 'important');
-            micBtn.style.setProperty('z-index', '4', 'important');
+    function stopActiveController(options = {}) {
+        if (!activeController) return;
 
-            statusLabel.style.setProperty('position', 'absolute', 'important');
-            statusLabel.style.setProperty('right', '0', 'important');
-            statusLabel.style.setProperty('top', 'calc(100% + 6px)', 'important');
-            statusLabel.style.setProperty('display', 'inline-flex', 'important');
-            statusLabel.style.setProperty('align-items', 'center', 'important');
-            statusLabel.style.setProperty('white-space', 'nowrap', 'important');
-            statusLabel.style.setProperty('z-index', '6', 'important');
+        const current = activeController;
+        activeController = null;
+
+        try {
+            current.recognition.stop();
+        } catch (e) {}
+
+        resetMic(current.button);
+
+        if (!options.keepStatus) {
+            setVoiceStatus(current.statusLabel, '');
+        }
+    }
+
+    function normalizeSpaces(value) {
+        return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function joinText(baseText, spokenText) {
+        const base = normalizeSpaces(baseText);
+        const spoken = normalizeSpaces(spokenText);
+
+        if (!base) return spoken;
+        if (!spoken) return base;
+
+        return `${base} ${spoken}`.trim();
+    }
+
+    function applyMaxLength(input, value) {
+        const max = Number(input.getAttribute('maxlength') || input.dataset.wordLimit || 0);
+
+        if (max > 0 && value.length > max) {
+            return value.slice(0, max);
         }
 
-        enforcePatientSearchLayout();
+        return value;
+    }
 
-        function resetVisualState() {
-            micBtn.classList.remove('is-listening', 'text-[#8B0000]');
-            micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-        }
+    function writeTranscript(input, baseValue, spokenText) {
+        const tag = input.tagName.toLowerCase();
+        const shouldAppend = tag === 'textarea' || input.dataset.voiceAppend === 'true';
 
-        function showStatus(message, state = 'default') {
-            enforcePatientSearchLayout();
-            statusLabel.textContent = message;
-            statusLabel.className = 'voice-status';
+        let nextValue = shouldAppend
+            ? joinText(baseValue, spokenText)
+            : normalizeSpaces(spokenText);
 
-            if (state === 'listening') {
-                statusLabel.classList.add('is-listening');
-            } else if (state === 'error') {
-                statusLabel.classList.add('is-error');
-            } else if (state === 'success') {
-                statusLabel.classList.add('is-success');
-            } else {
-                statusLabel.classList.add('is-default');
-            }
-        }
+        nextValue = applyMaxLength(input, nextValue);
+        input.value = nextValue;
 
-        function hideStatus(delay = 0) {
-            setTimeout(() => statusLabel.classList.add('hidden'), delay);
-        }
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
 
-        micBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+    function initializeVoiceInputs(root = document) {
+        const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
 
-            const isSameActive = activeController === controller;
+        const buttons = scope.querySelectorAll(
+            '.voice-search-mic.external[data-voice-trigger], .voice-search-mic.external[data-global-voice-trigger], [data-global-voice-trigger]'
+        );
 
-            if (isSameActive) {
-                recognizer.stop();
-                return;
-            }
+        buttons.forEach((button) => {
+            if (button.dataset.voiceReady === 'true' || button.dataset.voiceInitialized === 'true') return;
 
-            if (activeController) {
+            button.dataset.voiceReady = 'true';
+            button.dataset.voiceInitialized = 'true';
+
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const input = getTargetInput(button);
+                const statusLabel = getStatusLabel(button);
+
+                if (!input) {
+                    setVoiceStatus(statusLabel, 'No input found', 'error');
+                    return;
+                }
+
+                if (!SpeechRecognition) {
+                    setVoiceStatus(statusLabel, 'Voice not supported', 'error');
+                    return;
+                }
+
+                if (activeController && activeController.button === button) {
+                    stopActiveController();
+                    return;
+                }
+
+                stopActiveController();
+
+                const recognition = new SpeechRecognition();
+                recognition.lang = input.dataset.voiceLang || button.dataset.voiceLang || 'en-US';
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.maxAlternatives = 1;
+
+                const baseValue = input.value || '';
+                const finalParts = [];
+                const finalIndexes = new Set();
+
+                recognition.onstart = () => {
+                    button.classList.add('is-listening', 'mic-active', 'text-[#8B0000]');
+                    button.innerHTML = '<i class="fa-solid fa-stop"></i>';
+                    setMicPressed(button, true);
+                    setVoiceStatus(statusLabel, 'Listening...', 'listening');
+                };
+
+                recognition.onresult = (event) => {
+                    const interimParts = [];
+
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0]?.transcript?.trim() || '';
+
+                        if (!transcript) continue;
+
+                        if (event.results[i].isFinal) {
+                            if (!finalIndexes.has(i)) {
+                                finalIndexes.add(i);
+                                finalParts.push(transcript);
+                            }
+                        } else {
+                            interimParts.push(transcript);
+                        }
+                    }
+
+                    const spokenText = normalizeSpaces([...finalParts, ...interimParts].join(' '));
+
+                    if (!spokenText) return;
+
+                    /*
+                     * Important:
+                     * Do not append to the input's current value on every interim result.
+                     * Always rebuild the visible text from the original value captured at mic start.
+                     * This prevents "double" or repeated dictation in modal textareas.
+                     */
+                    writeTranscript(input, baseValue, spokenText);
+                };
+
+                recognition.onerror = (event) => {
+                    resetMic(button);
+
+                    const error = event?.error || 'unknown';
+                    const message = error === 'not-allowed'
+                        ? 'Microphone blocked'
+                        : 'Voice input failed';
+
+                    setVoiceStatus(statusLabel, message, 'error');
+
+                    setTimeout(() => {
+                        setVoiceStatus(statusLabel, '');
+                    }, 1800);
+
+                    activeController = null;
+                };
+
+                recognition.onend = () => {
+                    resetMic(button);
+
+                    if (activeController?.recognition === recognition) {
+                        activeController = null;
+                    }
+
+                    if (input.value.trim()) {
+                        setVoiceStatus(statusLabel, 'Captured', 'success');
+
+                        setTimeout(() => {
+                            setVoiceStatus(statusLabel, '');
+                        }, 1200);
+                    } else {
+                        setVoiceStatus(statusLabel, '');
+                    }
+                };
+
+                activeController = {
+                    recognition,
+                    button,
+                    input,
+                    statusLabel,
+                };
+
                 try {
-                    activeController.recognizer.stop();
-                } catch (err) {}
-            }
-
-            activeController = controller;
-
-            hasRecognizedSpeech = false;
-            Promise.resolve(recognizer.start()).then(() => {
-                micBtn.classList.add('is-listening', 'text-[#8B0000]');
-                micBtn.innerHTML = '<span aria-hidden="true" style="display:block;width:10px;height:10px;border-radius:2px;background:currentColor;"></span>';
-                showStatus('Listening...', 'listening');
-            }).catch(() => {
-                showStatus('Unable to start voice input.', 'error');
-                hideStatus(2500);
-                resetVisualState();
-                activeController = null;
+                    recognition.start();
+                } catch (e) {
+                    resetMic(button);
+                    setVoiceStatus(statusLabel, 'Voice input failed', 'error');
+                    activeController = null;
+                }
             });
         });
-    });
     }
 
     window.initializeVoiceInputs = initializeVoiceInputs;
+    window.initGlobalVoiceInputs = initializeVoiceInputs;
+    window.stopGlobalVoiceInput = stopActiveController;
 
     document.addEventListener('DOMContentLoaded', () => {
         initializeVoiceInputs(document);
@@ -407,6 +262,14 @@
 
     document.addEventListener('voice:refresh', (event) => {
         initializeVoiceInputs(event?.detail?.root || document);
+    });
+
+    document.addEventListener('modal:before-close', () => {
+        stopActiveController();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopActiveController();
     });
 })();
 </script>

@@ -27,26 +27,25 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
 
 <div id="backupModal">
     <div class="backup-modal-inner">
-        <div
-            style="width:52px;height:52px;background:linear-gradient(135deg,#8B0000,#6b0000);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-            <i id="modalIcon" class="fa-solid fa-database" style="color:#fff;font-size:1.2rem;"></i>
+        <div class="admin-modal-icon">
+            <i id="modalIcon" class="fa-solid fa-database"></i>
         </div>
 
-        <div id="modalTitle" style="font-size:.95rem;font-weight:800;color:#1f2937;margin-bottom:.3rem;">
+        <div id="modalTitle" class="admin-modal-message-title">
             Creating Backup...
         </div>
 
-        <div id="modalSubtitle" style="font-size:.76rem;color:#9ca3af;margin-bottom:1.25rem;">
+        <div id="modalSubtitle" class="admin-modal-message-subtitle">
             Please wait while the system archives your data.
         </div>
 
-        <div style="background:#f3f4f6;border-radius:99px;height:7px;overflow:hidden;margin-bottom:.4rem;">
+        <div class="admin-progress-track">
             <div id="modalBar"
-                style="height:100%;border-radius:99px;background:linear-gradient(90deg,#8B0000,#c0392b);width:0%;transition:width .3s ease;">
+                class="admin-progress-bar">
             </div>
         </div>
 
-        <div id="modalPct" style="font-size:.7rem;color:#9ca3af;text-align:right;margin-bottom:1.25rem;">0%</div>
+        <div id="modalPct" class="admin-progress-label">0%</div>
 
         <button class="terms-cancel-btn" id="modalClose" onclick="closeModal()" disabled>
             Close
@@ -54,72 +53,70 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
     </div>
 </div>
 
-<div id="scheduleModal"
-    style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;display:none;align-items:center;justify-content:center;">
-    <div
-        style="background:#fff;border-radius:18px;padding:1.5rem;width:460px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.2);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+<div id="scheduleModal" class="admin-modal-backdrop">
+    <div class="admin-modal-card">
+        <div class="admin-modal-head">
             <div>
-                <div style="font-size:1rem;font-weight:800;color:#1f2937;">
+                <div class="admin-modal-title">
                     Edit Backup Schedule
                 </div>
-                <div style="font-size:.75rem;color:#9ca3af;margin-top:.2rem;">
+                <div class="admin-modal-subtitle">
                     Update recurring backup schedule settings
                 </div>
             </div>
 
             <button type="button" onclick="closeScheduleModal()"
-                style="border:none;background:none;font-size:1rem;color:#9ca3af;cursor:pointer;">
+                class="admin-icon-button">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
         <form id="scheduleForm">
-            <div style="display:grid;gap:1rem;">
+            <div class="admin-modal-grid">
                 <div>
                     <label
-                        style="display:flex;align-items:center;justify-content:space-between;font-size:.8rem;font-weight:700;color:#374151;margin-bottom:.45rem;">
+                        class="admin-modal-field-head">
                         <span>Daily Incremental</span>
                         <input type="checkbox" id="daily_enabled" {{ $backupSchedule['daily_enabled'] ? 'checked' : ''
                             }}>
                     </label>
                     <input type="time" id="daily_time" value="{{ $backupSchedule['daily_time'] }}"
-                        style="width:100%;height:40px;border:1px solid #e5e7eb;border-radius:10px;padding:0 .8rem;">
+                        class="admin-modal-input">
                 </div>
 
                 <div>
                     <label
-                        style="display:flex;align-items:center;justify-content:space-between;font-size:.8rem;font-weight:700;color:#374151;margin-bottom:.45rem;">
+                        class="admin-modal-field-head">
                         <span>Weekly Full Backup</span>
                         <input type="checkbox" id="weekly_enabled" {{ $backupSchedule['weekly_enabled'] ? 'checked' : ''
                             }}>
                     </label>
                     <input type="time" id="weekly_time" value="{{ $backupSchedule['weekly_time'] }}"
-                        style="width:100%;height:40px;border:1px solid #e5e7eb;border-radius:10px;padding:0 .8rem;">
+                        class="admin-modal-input">
                 </div>
 
                 <div>
                     <label
-                        style="display:flex;align-items:center;justify-content:space-between;font-size:.8rem;font-weight:700;color:#374151;margin-bottom:.45rem;">
+                        class="admin-modal-field-head">
                         <span>Monthly Archive</span>
                         <input type="checkbox" id="monthly_enabled" {{ $backupSchedule['monthly_enabled'] ? 'checked'
                             : '' }}>
                     </label>
                     <input type="time" id="monthly_time" value="{{ $backupSchedule['monthly_time'] }}"
-                        style="width:100%;height:40px;border:1px solid #e5e7eb;border-radius:10px;padding:0 .8rem;">
+                        class="admin-modal-input">
                 </div>
             </div>
 
-            <div style="display:flex;justify-content:flex-end;gap:.75rem;margin-top:1.25rem;">
+            <div class="backup-modal-actions">
                 <button type="button" onclick="closeScheduleModal()" class="filter-reset-btn">Cancel</button>
-                <button type="submit" class="backup-run-btn" style="padding:.72rem 1rem;">Save Changes</button>
+                <button type="submit" class="backup-run-btn backup-save-btn">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
 
-<main id="mainContent" class="px-4 sm:px-6 pt-[82px] pb-8 min-h-[calc(100vh-82px)]">
-    <div class="max-w-[1280px] mx-auto">
+<main id="mainContent" class="admin-page-shell">
+    <div class="admin-page-container">
 
         <div class="page-banner">
             <div class="page-banner-inner">
@@ -184,7 +181,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         </div>
 
         <div class="backup-main">
-            <div class="card" id="backupHistoryCard" style="position:relative;">
+            <div class="card backup-history-card" id="backupHistoryCard">
                 <div class="loading-overlay" id="tableLoading">
                     <div class="loading-spinner"></div>
                 </div>
@@ -224,7 +221,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                 </div>
 
                 <div id="backupHistoryListView" class="backup-history-view">
-                    <div style="overflow-x:auto;">
+                    <div class="backup-table-wrap">
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -250,7 +247,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                                             {{ ucfirst($backup->type ?? 'full') }}
                                         </span>
                                     </td>
-                                    <td style="font-weight:700;">
+                                    <td class="backup-strong">
                                         {{ isset($backup->size_formatted) ? $backup->size_formatted :
                                         $formatBytes($backup->size_bytes ?? 0) }}
                                     </td>
@@ -281,9 +278,9 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                                     <td colspan="6">
                                         <div class="empty-state">
                                             <div class="empty-icon"><i class="fa-solid fa-database"></i></div>
-                                            <p style="font-size:.9rem;font-weight:800;color:#6b7280;margin:0 0 .25rem;">
+                                            <p class="backup-empty-title">
                                                 No backups found.</p>
-                                            <p style="font-size:.78rem;color:#b0b7c3;margin:0;">Create your first backup
+                                            <p class="backup-empty-subtitle">Create your first backup
                                                 to start protecting system data</p>
                                         </div>
                                     </td>
@@ -324,7 +321,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
 
                                 <div>
                                     <div class="backup-grid-label">Size</div>
-                                    <div class="backup-grid-value" style="font-weight:700;">
+                                    <div class="backup-grid-value backup-strong">
                                         {{ isset($backup->size_formatted) ? $backup->size_formatted :
                                         $formatBytes($backup->size_bytes ?? 0) }}
                                     </div>
@@ -349,11 +346,11 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                             </div>
                         </div>
                         @empty
-                        <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state backup-grid-empty">
                             <div class="empty-icon"><i class="fa-solid fa-database"></i></div>
-                            <p style="font-size:.9rem;font-weight:800;color:#6b7280;margin:0 0 .25rem;">No backups
+                            <p class="backup-empty-title">No backups
                                 found.</p>
-                            <p style="font-size:.78rem;color:#b0b7c3;margin:0;">Create your first backup to start
+                            <p class="backup-empty-subtitle">Create your first backup to start
                                 protecting system data</p>
                         </div>
                         @endforelse
@@ -411,7 +408,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                         </div>
 
                         <div id="freeSpaceStat"
-                            style="margin-top:.9rem;font-size:.75rem;color:#9aa3b2;font-weight:700;">
+                            class="backup-storage-note">
                             Free Space: {{ $formatBytes($storageFreeBytes) }}
                         </div>
                     </div>
@@ -484,7 +481,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                         </div>
 
                         <button class="schedule-edit-btn" type="button" onclick="openScheduleModal()">
-                            <i class="fa-solid fa-pen-to-square" style="margin-right:.45rem;"></i> Edit Schedule
+                            <i class="fa-solid fa-pen-to-square backup-edit-icon"></i> Edit Schedule
                             Settings
                         </button>
                     </div>
@@ -635,8 +632,8 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                         <td colspan="6">
                             <div class="empty-state">
                                 <div class="empty-icon"><i class="fa-solid fa-database"></i></div>
-                                <p style="font-size:.9rem;font-weight:800;color:#6b7280;margin:0 0 .25rem;">No backups found.</p>
-                                <p style="font-size:.78rem;color:#b0b7c3;margin:0;">Create your first backup to start protecting system data</p>
+                                <p class="backup-empty-title">No backups found.</p>
+                                <p class="backup-empty-subtitle">Create your first backup to start protecting system data</p>
                             </div>
                         </td>
                     </tr>
@@ -645,10 +642,10 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
 
             if (gridBody) {
                 gridBody.innerHTML = `
-                    <div class="empty-state" style="grid-column: 1 / -1;">
+                    <div class="empty-state backup-grid-empty">
                         <div class="empty-icon"><i class="fa-solid fa-database"></i></div>
-                        <p style="font-size:.9rem;font-weight:800;color:#6b7280;margin:0 0 .25rem;">No backups found.</p>
-                        <p style="font-size:.78rem;color:#b0b7c3;margin:0;">Create your first backup to start protecting system data</p>
+                        <p class="backup-empty-title">No backups found.</p>
+                        <p class="backup-empty-subtitle">Create your first backup to start protecting system data</p>
                     </div>
                 `;
             }
@@ -668,7 +665,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                             ${(backup.type || 'full').charAt(0).toUpperCase() + (backup.type || 'full').slice(1)}
                         </span>
                     </td>
-                    <td style="font-weight:700;">
+                    <td class="backup-strong">
                         ${backup.size_formatted || '0 B'}
                     </td>
                     <td>
@@ -720,7 +717,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
 
                         <div>
                             <div class="backup-grid-label">Size</div>
-                            <div class="backup-grid-value" style="font-weight:700;">
+                            <div class="backup-grid-value backup-strong">
                                 ${backup.size_formatted || '0 B'}
                             </div>
                         </div>
