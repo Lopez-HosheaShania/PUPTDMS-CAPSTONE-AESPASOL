@@ -6,7 +6,7 @@
 
 @php $logs = $logs ?? collect([]); @endphp
 
-<main id="mainContent" style="padding-top: var(--header-h); min-height: 100vh;">
+<main id="mainContent" class="admin-page-shell page-enter">
 
     <x-dashboard-loading-status />
 
@@ -54,64 +54,55 @@
         </div>
     </div>
 
-    <div class="content-lift">
+    <div class="relative z-10 -mt-8 px-4 sm:px-6 lg:px-7 pb-8">
 
-        <div class="stat-grid">
-            <div class="stat-card">
-                <div class="stat-card-accent" style="background: linear-gradient(90deg, var(--crimson), #c0392b);">
-                </div>
-                <div class="stat-top">
-                    <div class="stat-icon" style="background:#fef2f2;">
-                        <i class="fa-solid fa-users" style="color:var(--crimson);"></i>
+        <div class="stat-grid admin-dashboard-stat-grid" id="statCards">
+            <div class="stat-card s-all">
+                <div class="stat-card-info">
+                    <div class="stat-label">Total Patients</div>
+                    <div class="stat-value">{{ number_format($totalPatients) }}</div>
+                    <div class="stat-footer">
+                        <i class="fa-solid fa-user-plus"></i>
+                        All registered patients
                     </div>
-                    <span class="stat-badge" style="background:#fef2f2;color:var(--crimson);">All time</span>
                 </div>
-                <div class="stat-label">Total Patients</div>
-                <div class="stat-value">{{ number_format($totalPatients) }}</div>
-                <div class="stat-footer">
-                    <i class="fa-solid fa-user-plus" style="font-size:.65rem;color:var(--crimson);"></i>
-                    All registered patients
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-card-accent" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"></div>
-                <div class="stat-top">
-                    <div class="stat-icon" style="background:#eff6ff;">
-                        <i class="fa-solid fa-calendar-check" style="color:#3b82f6;"></i>
+            <div class="stat-card s-ongoing">
+                <div class="stat-card-info">
+                    <div class="stat-label">Appointments</div>
+                    <div class="stat-value">{{ $appointmentsThisMonth }}</div>
+                    <div class="stat-footer">
+                        <i class="fa-solid fa-clock"></i>
+                        This month
                     </div>
-                    <span class="stat-badge" style="background:#eff6ff;color:#3b82f6;">{{
-                        \Carbon\Carbon::now()->format('F Y') }}</span>
                 </div>
-                <div class="stat-label">Appointments</div>
-                <div class="stat-value">{{ $appointmentsThisMonth }}</div>
-                <div class="stat-footer">
-                    <i class="fa-solid fa-clock" style="font-size:.65rem;color:#3b82f6;"></i>
-                    This month
+                <div class="stat-icon">
+                    <i class="fa-solid fa-calendar-check"></i>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-card-accent" style="background: linear-gradient(90deg, #22c55e, #16a34a);"></div>
-                <div class="stat-top">
-                    <div class="stat-icon" style="background:#f0fdf4;">
-                        <i class="fa-solid fa-file-arrow-up" style="color:#22c55e;"></i>
+            <div class="stat-card s-approved">
+                <div class="stat-card-info">
+                    <div class="stat-label">Documents Issued</div>
+                    <div class="stat-value">{{ $documentsThisMonth }}</div>
+                    <div class="stat-footer">
+                        <i class="fa-solid fa-file-lines"></i>
+                        This month
                     </div>
-                    <span class="stat-badge" style="background:#f0fdf4;color:#16a34a;">{{
-                        \Carbon\Carbon::now()->format('F Y') }}</span>
                 </div>
-                <div class="stat-label">Documents Issued</div>
-                <div class="stat-value">{{ $documentsThisMonth }}</div>
-                <div class="stat-footer">
-                    <i class="fa-solid fa-file-lines" style="font-size:.65rem;color:#22c55e;"></i>
-                    This month
+                <div class="stat-icon">
+                    <i class="fa-solid fa-file-arrow-up"></i>
                 </div>
             </div>
         </div>
 
-        <div class="main-grid">
+        <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px] gap-5 items-start">
 
-            <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="flex flex-col gap-5 min-w-0">
 
                 <div class="card">
                     <div class="card-header">
@@ -120,20 +111,25 @@
                             <span class="card-title">System Logs Overview</span>
                         </div>
 
-                        <div class="card-header-actions">
-                            <div class="view-toggle" id="dashboardLogsViewToggle">
-                                <button type="button" class="view-toggle-btn active" data-view="list"
-                                    id="dashboardLogsListBtn" title="List view" aria-label="List view">
-                                    <i class="fa-solid fa-table-list"></i>
+                        <div class="card-header-right">
+                            <div class="view-toggle-container" id="dashboardLogsViewToggle"
+                                aria-label="System logs view toggle">
+                                <span class="view-slider"></span>
+
+                                <button type="button" class="btn-view-mode active" data-dashboard-logs-view="list"
+                                    aria-label="List view" aria-pressed="true">
+                                    <i class="fa-solid fa-list"></i>
                                 </button>
-                                <button type="button" class="view-toggle-btn" data-view="grid" id="dashboardLogsGridBtn"
-                                    title="Grid view" aria-label="Grid view">
+
+                                <button type="button" class="btn-view-mode" data-dashboard-logs-view="grid"
+                                    aria-label="Grid view" aria-pressed="false">
                                     <i class="fa-solid fa-grip"></i>
                                 </button>
                             </div>
 
-                            <a href="{{ route('admin.system_logs') }}" class="card-link">
-                                View All <i class="fa-solid fa-arrow-right" style="font-size:.65rem;"></i>
+                            <a href="#" class="card-link">
+                                View All
+                                <i class="fa-solid fa-arrow-right"></i>
                             </a>
                         </div>
                     </div>
@@ -163,11 +159,11 @@
 
                     @if (($recentLogs ?? collect())->isEmpty())
                     <div class="empty-state">
-                        <div class="empty-icon"><i class="fa-solid fa-inbox"></i></div>
-                        <p style="font-size:.82rem;font-weight:700;color:#6b7280;margin-bottom:.25rem;">
-                            No logs yet
-                        </p>
-                        <p style="font-size:.72rem;color:#b0b7c3;">System activity will appear here</p>
+                        <div class="empty-state-icon">
+                            <i class="fa-solid fa-inbox"></i>
+                        </div>
+                        <p class="empty-state-title">No logs yet</p>
+                        <p class="empty-state-sub">System activity will appear here</p>
                     </div>
                     @else
                     <div class="logs-view" id="dashboardLogsListView">
@@ -257,7 +253,7 @@
                     @endif
                 </div>
 
-                <div class="bottom-grid">
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-5">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-header-left">
@@ -392,73 +388,87 @@
                 </div>
             </div>
 
-            <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="flex flex-col gap-5 min-w-0">
 
-                <div class="card">
+                <div class="card dashboard-quick-actions-card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <div class="card-header-icon"><i class="fa-solid fa-bolt"></i></div>
-                            <span class="card-title">Quick Actions</span>
+                            <div class="card-header-icon">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div>
+                                <div class="card-title">Quick Actions</div>
+                                <div class="card-subtitle">Frequently used admin shortcuts</div>
+                            </div>
                         </div>
                     </div>
-                    <div style="padding:1rem;">
-                        <button class="qa-btn">
-                            <div class="qa-icon"><i class="fa-solid fa-file-circle-plus"></i></div>
-                            <div class="qa-text">
-                                <span class="qa-title">New Template</span>
-                                <span class="qa-sub">Create document format</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right qa-arrow"></i>
-                        </button>
-                        <button class="qa-btn">
-                            <div class="qa-icon"><i class="fa-solid fa-file-invoice"></i></div>
-                            <div class="qa-text">
-                                <span class="qa-title">Generate Report</span>
-                                <span class="qa-sub">Create report documents</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right qa-arrow"></i>
-                        </button>
-                        <button class="qa-btn">
-                            <div class="qa-icon"><i class="fa-solid fa-chart-column"></i></div>
-                            <div class="qa-text">
-                                <span class="qa-title">View Reports</span>
-                                <span class="qa-sub">All reports & analytics</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right qa-arrow"></i>
-                        </button>
-                        <a href="{{ route('admin.user_management') }}" class="qa-btn">
-                            <div class="qa-icon"><i class="fa-solid fa-user-plus"></i></div>
-                            <div class="qa-text">
-                                <span class="qa-title">Add User</span>
-                                <span class="qa-sub">Register new account</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right qa-arrow"></i>
-                        </a>
+
+                    <div class="card-body">
+                        <div class="qa-list">
+                            <button type="button" class="qa-btn">
+                                <div class="qa-icon"><i class="fa-solid fa-file-circle-plus"></i></div>
+                                <div class="qa-text">
+                                    <span class="qa-title">New Template</span>
+                                    <span class="qa-sub">Create document format</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right qa-arrow"></i>
+                                <i class="fa-solid fa-file-circle-plus qa-bg-icon"></i>
+                            </button>
+
+                            <button type="button" class="qa-btn">
+                                <div class="qa-icon"><i class="fa-solid fa-file-invoice"></i></div>
+                                <div class="qa-text">
+                                    <span class="qa-title">Generate Report</span>
+                                    <span class="qa-sub">Create report documents</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right qa-arrow"></i>
+                                <i class="fa-solid fa-file-invoice qa-bg-icon"></i>
+                            </button>
+
+                            <a href="{{ route('admin.reports') }}" class="qa-btn">
+                                <div class="qa-icon"><i class="fa-solid fa-chart-column"></i></div>
+                                <div class="qa-text">
+                                    <span class="qa-title">View Reports</span>
+                                    <span class="qa-sub">All reports & analytics</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right qa-arrow"></i>
+                                <i class="fa-solid fa-chart-column qa-bg-icon"></i>
+                            </a>
+
+                            <a href="{{ route('admin.user_management') }}" class="qa-btn">
+                                <div class="qa-icon"><i class="fa-solid fa-user-plus"></i></div>
+                                <div class="qa-text">
+                                    <span class="qa-title">Add User</span>
+                                    <span class="qa-sub">Register new account</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right qa-arrow"></i>
+                                <i class="fa-solid fa-user-plus qa-bg-icon"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card dashboard-backup-card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <div class="card-header-icon"><i class="fa-solid fa-database"></i></div>
-                            <span class="card-title">Data Backup</span>
+                            <div class="card-header-icon">
+                                <i class="fa-solid fa-database"></i>
+                            </div>
+                            <div>
+                                <div class="card-title">Data Backup</div>
+                                <div class="card-subtitle">Automated backup status</div>
+                            </div>
                         </div>
 
                         @if ($autoBackupEnabled)
-                        <span style="font-size:.65rem;font-weight:700;background:#f0fdf4;color:#16a34a;
-                                        padding:.25rem .6rem;border-radius:20px;border:1px solid #bbf7d0;">
-                            Active
-                        </span>
+                        <span class="status-pill status-active">Active</span>
                         @else
-                        <span style="font-size:.65rem;font-weight:700;background:#fef3c7;color:#a16207;
-                                        padding:.25rem .6rem;border-radius:20px;border:1px solid #fcd34d;">
-                            Paused
-                        </span>
+                        <span class="status-pill status-pending">Paused</span>
                         @endif
                     </div>
 
-                    <div style="padding:1rem;">
-                        <div class="backup-status">
+                    <div class="dashboard-backup-card-body">
+                        <div class="backup-status" style="margin-bottom:0;">
                             <div class="backup-check">
                                 <i class="fa-solid {{ $lastBackup ? 'fa-check' : 'fa-clock' }}"></i>
                             </div>
@@ -474,7 +484,7 @@
                             </div>
                         </div>
 
-                        <div class="next-backup">
+                        <div class="next-backup" style="margin-bottom:0;">
                             <i class="fa-regular fa-clock next-icon"></i>
                             <div>
                                 <div class="next-label">Next Scheduled</div>
@@ -484,7 +494,8 @@
                             </div>
                         </div>
 
-                        <a href="{{ route('admin.data_backup') }}" class="run-backup-btn" style="text-decoration:none;">
+                        <a href="{{ route('admin.data_backup') }}" class="ui-btn ui-btn-primary"
+                            style="width:100%;text-decoration:none;">
                             <i class="fa-solid fa-database"></i>
                             View Backups ({{ $totalBackups }})
                         </a>
@@ -519,64 +530,6 @@
     });
 </script>
 @endif
-
-<script>
-    function getPreferredDashboardLogsView() {
-        if (window.innerWidth <= 767) return 'grid';
-        return localStorage.getItem('dashboardLogsView') || 'list';
-    }
-
-    function applyDashboardLogsView(view, save = true) {
-        const listView = document.getElementById('dashboardLogsListView');
-        const gridView = document.getElementById('dashboardLogsGridView');
-        const listBtn = document.getElementById('dashboardLogsListBtn');
-        const gridBtn = document.getElementById('dashboardLogsGridBtn');
-
-        if (!listView || !gridView) return;
-
-        const finalView = window.innerWidth <= 767 ? 'grid' : view;
-
-        if (finalView === 'grid') {
-            listView.hidden = true;
-            gridView.hidden = false;
-        } else {
-            listView.hidden = false;
-            gridView.hidden = true;
-        }
-
-        if (listBtn) listBtn.classList.toggle('active', finalView === 'list');
-        if (gridBtn) gridBtn.classList.toggle('active', finalView === 'grid');
-
-        if (save && window.innerWidth > 767) {
-            localStorage.setItem('dashboardLogsView', finalView);
-        }
-    }
-
-    function initDashboardLogsViewToggle() {
-        const listBtn = document.getElementById('dashboardLogsListBtn');
-        const gridBtn = document.getElementById('dashboardLogsGridBtn');
-
-        applyDashboardLogsView(getPreferredDashboardLogsView(), false);
-
-        if (listBtn && !listBtn.dataset.bound) {
-            listBtn.dataset.bound = '1';
-            listBtn.addEventListener('click', () => applyDashboardLogsView('list', true));
-        }
-
-        if (gridBtn && !gridBtn.dataset.bound) {
-            gridBtn.dataset.bound = '1';
-            gridBtn.addEventListener('click', () => applyDashboardLogsView('grid', true));
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        initDashboardLogsViewToggle();
-
-        window.addEventListener('resize', function () {
-            applyDashboardLogsView(getPreferredDashboardLogsView(), false);
-        });
-    });
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

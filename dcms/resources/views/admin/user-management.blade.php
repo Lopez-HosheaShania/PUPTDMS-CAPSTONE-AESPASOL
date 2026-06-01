@@ -10,7 +10,8 @@ $activeCount = $activeCount ?? 0;
 $inactiveCount = $inactiveCount ?? 0;
 @endphp
 
-<main id="mainContent" class="px-3 sm:px-6 pt-[82px] pb-8 min-h-screen">
+<main id="mainContent"
+    class="admin-page-shell user-management-page page-enter mode-list px-3 sm:px-6 pt-[82px] pb-8 min-h-screen">
     <div style="max-width:1280px; margin:0 auto;">
 
         <div class="page-banner">
@@ -44,101 +45,116 @@ $inactiveCount = $inactiveCount ?? 0;
         </script>
         @endif
 
-        <div class="um-stats-grid mb-6">
-            <div class="um-stat-card um-stat-card--users">
-                <div class="um-stat-top">
-                    <div class="um-stat-icon">
+        <div id="statCards" class="stat-grid admin-dashboard-stat-grid user-management-stat-grid mb-6">
+            <div class="stat-card s-all">
+                <div class="stat-card-info">
+                    <span class="stat-label">Total Users</span>
+                    <span class="stat-num" id="countTotalUsers">{{ $totalUsers }}</span>
+                    <span class="stat-footer">
                         <i class="fa-solid fa-users"></i>
-                    </div>
-                    <span class="um-stat-trend">Overview</span>
+                        All registered system accounts
+                    </span>
                 </div>
-                <div class="um-stat-body">
-                    <p class="um-stat-label">Total Users</p>
-                    <p class="um-stat-value" id="countTotalUsers">{{ $totalUsers }}</p>
-                    <p class="um-stat-caption">All registered system accounts</p>
+
+                <div class="stat-icon-wrapper">
+                    <i class="fa-solid fa-users"></i>
                 </div>
             </div>
 
-            <div class="um-stat-card um-stat-card--active">
-                <div class="um-stat-top">
-                    <div class="um-stat-icon">
+            <div class="stat-card s-approved">
+                <div class="stat-card-info">
+                    <span class="stat-label">Active</span>
+                    <span class="stat-num" id="countActiveUsers">{{ $activeCount }}</span>
+                    <span class="stat-footer">
                         <i class="fa-solid fa-circle-check"></i>
-                    </div>
-                    <span class="um-stat-trend">Healthy</span>
+                        Accounts currently enabled
+                    </span>
                 </div>
-                <div class="um-stat-body">
-                    <p class="um-stat-label">Active</p>
-                    <p class="um-stat-value" id="countActiveUsers">{{ $activeCount }}</p>
-                    <p class="um-stat-caption">Accounts currently enabled</p>
+
+                <div class="stat-icon-wrapper">
+                    <i class="fa-solid fa-circle-check"></i>
                 </div>
             </div>
 
-            <div class="um-stat-card um-stat-card--inactive">
-                <div class="um-stat-top">
-                    <div class="um-stat-icon">
+            <div class="stat-card s-rejected">
+                <div class="stat-card-info">
+                    <span class="stat-label">Inactive</span>
+                    <span class="stat-num" id="countInactiveUsers">{{ $inactiveCount }}</span>
+                    <span class="stat-footer">
                         <i class="fa-solid fa-user-slash"></i>
-                    </div>
-                    <span class="um-stat-trend">Attention</span>
+                        Accounts currently disabled
+                    </span>
                 </div>
-                <div class="um-stat-body">
-                    <p class="um-stat-label">Inactive</p>
-                    <p class="um-stat-value" id="countInactiveUsers">{{ $inactiveCount }}</p>
-                    <p class="um-stat-caption">Accounts currently disabled</p>
+
+                <div class="stat-icon-wrapper">
+                    <i class="fa-solid fa-user-slash"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow border border-gray-100 overflow-visible mb-6">
-            <div class="px-4 sm:px-5 py-4 border-b bg-gray-50 flex flex-col gap-3">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-users-gear text-[#8B0000]"></i>
+        <div class="um-users-card card bg-white rounded-xl shadow border border-gray-100 overflow-visible mb-6">
+            <div class="um-users-toolbar px-4 sm:px-5 py-4 border-b bg-gray-50">
+                <div class="um-users-heading">
+                    <div class="card-header-icon">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+
                     <h2 class="font-bold text-gray-800 text-sm">All System Users</h2>
+
                     <span id="countBadgeUsers"
-                        class="text-[10px] font-bold bg-[#8B0000] text-white px-2 py-0.5 rounded-full">{{ $totalUsers
-                        }}</span>
+                        class="text-[10px] font-bold bg-[#8B0000] text-white px-2 py-0.5 rounded-full">
+                        {{ $totalUsers }}
+                    </span>
                 </div>
 
                 <form method="GET" action="{{ route('admin.user_management') }}" id="umFilterForm"
-                    class="flex items-center gap-2.5 flex-wrap">
+                    class="um-users-filter-form">
                     {{-- Search --}}
-                    <div class="um-search-mobile um-search-row">
-                        <div class="search-wrap">
-                            <i class="fa fa-search" style="color:#8B0000;font-size:13px;flex-shrink:0;"></i>
-                            <input id="umSearch" name="search" class="no-voice" placeholder="Search name or email…"
-                                value="{{ $search ?? '' }}" autocomplete="off" oninput="toggleSearchClear(this)"
-                                onkeydown="if(event.key==='Enter'){event.preventDefault();}" />
+                    <div class="um-search-mobile um-search-row voice-search-row" data-voice-field>
+                        <div class="search-wrap global-search" data-search-wrapper>
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+
+                            <input id="umSearch" name="search" class="search-input no-voice"
+                                placeholder="Search name or email…" value="{{ $search ?? '' }}" autocomplete="off"
+                                data-search-input onkeydown="if(event.key==='Enter'){event.preventDefault();}" />
+
+                            <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                            </button>
                         </div>
 
-                        <button type="button" id="searchClearBtn"
-                            class="search-clear-btn {{ $search ?? '' ? '' : 'hidden' }}" onclick="clearSearch()"
-                            title="Clear">Clear</button>
-
-                        <div class="patient-voice-toggle">
-                            <button type="button" id="umMicToggleBtn" class="voice-search-mic external"
-                                aria-label="Toggle voice input" aria-pressed="false">
+                        <div class="voice-input-toggle">
+                            <button type="button" id="umSearchMicBtn" class="voice-search-mic external"
+                                data-voice-trigger data-voice-target="#umSearch"
+                                data-voice-status="#umSearchVoiceStatus" aria-label="Voice input for user search">
                                 <i class="fa-solid fa-microphone"></i>
                             </button>
-                            <span id="umVoiceStatus" class="patient-voice-status hidden" aria-live="polite"></span>
+
+                            <span id="umSearchVoiceStatus" class="voice-status hidden" data-voice-status
+                                aria-live="polite"></span>
                         </div>
                     </div>
 
-                    <div class="um-view-toggle" id="umViewToggle">
-                        <button type="button" class="um-view-toggle-btn active" id="umListViewBtn" title="List view"
-                            aria-label="List view">
+                    <div class="view-toggle-container um-view-toggle" id="umViewToggle" aria-label="View options">
+                        <span class="view-slider" aria-hidden="true"></span>
+
+                        <button type="button" class="btn-view-mode um-view-toggle-btn active" id="umListViewBtn"
+                            title="List view" aria-label="List view" aria-pressed="true">
                             <i class="fa-solid fa-table-list"></i>
                         </button>
-                        <button type="button" class="um-view-toggle-btn" id="umGridViewBtn" title="Grid view"
-                            aria-label="Grid view">
+
+                        <button type="button" class="btn-view-mode um-view-toggle-btn" id="umGridViewBtn"
+                            title="Grid view" aria-label="Grid view" aria-pressed="false">
                             <i class="fa-solid fa-grip"></i>
                         </button>
                     </div>
+                </form>
             </div>
-            </form>
         </div>
 
-        <div class="um-view" id="umListView">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+        <div class="um-view um-list-view" id="umListView">
+            <div class="um-table-scroll overflow-x-auto">
+                <table class="w-full text-sm data-table um-table">
                     <thead class="bg-gray-50 border-b border-gray-100">
                         <tr class="text-[10px] uppercase tracking-wide text-[#8B0000] font-bold">
                             <th class="py-3 px-3 sm:px-5 text-left w-12 hidden sm:table-cell">#</th>
@@ -146,7 +162,7 @@ $inactiveCount = $inactiveCount ?? 0;
                             <th class="py-3 px-4 text-left">Role</th>
                             <th class="py-3 px-4 text-center">Status</th>
                             <th class="py-3 px-4 text-left hidden lg:table-cell">Registered</th>
-                            <th class="py-3 px-5 text-center">Actions</th>
+                            <th class="py-3 px-4 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="umTableBody">
@@ -159,10 +175,10 @@ $inactiveCount = $inactiveCount ?? 0;
                                     }}</span>
                             </td>
 
-                            <td class="py-3.5 px-3 sm:px-4">
+                            <td class="py-3.5 px-2 sm:px-4">
                                 <div class="flex items-center gap-2 sm:gap-3">
                                     <div
-                                        class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8B0000] to-[#b00000] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
+                                        class="w-9 h-9 rounded-full bg-gradient-to-br from-[#8B0000] to-[#b00000] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
                                         {{ strtoupper(substr($user->name, 0, 1)) }}
                                     </div>
                                     <div>
@@ -177,11 +193,9 @@ $inactiveCount = $inactiveCount ?? 0;
                             </td>
 
                             <td class="py-3.5 px-4">
-                                @php $roleSlug = optional($user->role)->slug; @endphp
-                                <span class="badge-role" style="background:
-                {{ $roleSlug === 'patient' ? '#dbeafe' : ($roleSlug === 'dentist' ? '#d1fae5' : '#fee2e2') }};
-                color:
-                {{ $roleSlug === 'patient' ? '#1d4ed8' : ($roleSlug === 'dentist' ? '#065f46' : '#8B0000') }};">
+                                @php $roleSlug = optional($user->role)->slug ?? 'none'; @endphp
+
+                                <span class="badge-role role-{{ $roleSlug }}">
                                     {{ optional($user->role)->name ?? 'No Role' }}
                                 </span>
                             </td>
@@ -194,11 +208,11 @@ $inactiveCount = $inactiveCount ?? 0;
                             </td>
 
                             <td class="py-3.5 px-4 hidden lg:table-cell">
-                                <span class="text-xs text-gray-400">{{ $user->created_at->format('M d, Y') }}</span>
+                                <span class="text-xs text-gray-600">{{ $user->created_at->format('M d, Y') }}</span>
                             </td>
 
-                            <td class="py-3.5 px-2 sm:px-5">
-                                <div class="flex items-center justify-center gap-1">
+                            <td class="py-3.5 px-4">
+                                <div class="um-action-group flex items-center justify-center gap-1">
                                     <button type="button" onclick="openEditModal(
                                                     'users',
                                                     {{ $user->id }},
@@ -231,8 +245,7 @@ $inactiveCount = $inactiveCount ?? 0;
                                                     @js(ucfirst($user->status)),
                                                     'Users',
                                                     @js($user->created_at ? $user->created_at->format('M d, Y h:i A') : 'N/A')
-                                                  )" class="action-btn" style="background:#f3f4f6;color:#374151;"
-                                        title="View details">
+                                                  )" class="action-btn btn-view-details" title="View details">
                                         <i class="fa-solid fa-eye text-[11px]"></i>
                                     </button>
                                 </div>
@@ -307,7 +320,7 @@ $inactiveCount = $inactiveCount ?? 0;
                             <div class="um-grid-field">
                                 <div class="um-grid-label">Role</div>
                                 <div class="um-grid-value">
-                                    <span class="badge-role" style="background:{{ $roleBg }};color:{{ $roleColor }};">
+                                    <span class="badge-role role-{{ $roleSlug ?? 'none' }}">
                                         {{ $roleName }}
                                     </span>
                                 </div>
@@ -319,7 +332,7 @@ $inactiveCount = $inactiveCount ?? 0;
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end gap-1 flex-wrap">
+                        <div class="um-action-group flex items-center justify-end gap-1 flex-wrap">
                             <button type="button" onclick="openEditModal(
                                                 'users',
                                                 {{ $user->id }},
@@ -351,8 +364,7 @@ $inactiveCount = $inactiveCount ?? 0;
                                                 @js(ucfirst($user->status)),
                                                 'Users',
                                                 @js($user->created_at ? $user->created_at->format('M d, Y h:i A') : 'N/A')
-                                            )" class="action-btn" style="background:#f3f4f6;color:#374151;"
-                                title="View details">
+                                            )" class="action-btn btn-view-details" title="View details">
                                 <i class="fa-solid fa-eye text-[11px]"></i>
                             </button>
                         </div>
@@ -377,13 +389,8 @@ $inactiveCount = $inactiveCount ?? 0;
     </div>
 </main>
 
-<!-- Global Toast Container -->
-<div id="toastContainer"
-    style="position:fixed;top:16px;right:16px;z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;width:340px;">
-</div>
-
-<div class="modal-overlay" id="addModal" aria-hidden="true" onclick="closeModalOutside(event,'addModal')">
-    <div class="modal-box um-user-modal">
+<div class="modal-overlay" id="addModal" aria-hidden="true">
+    <div class="modal-box-inner um-user-modal um-user-modal-lg" onclick="event.stopPropagation()">
         <div
             class="um-user-modal-header px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
             <div class="flex items-center gap-3 min-w-0">
@@ -397,8 +404,8 @@ $inactiveCount = $inactiveCount ?? 0;
                 </div>
             </div>
 
-            <button type="button" onclick="closeModal('addModal')"
-                class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:border-red-200 hover:text-[#8B0000] transition-all flex-shrink-0">
+            <button type="button" onclick="closeModal('addModal')" data-close-modal="addModal" class="um-modal-x"
+                aria-label="Close add user modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -437,16 +444,18 @@ $inactiveCount = $inactiveCount ?? 0;
                                 <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
                                     Full Name <span class="text-red-500">*</span>
                                 </label>
-                                <div class="flex items-center gap-2">
+                                <div class="voice-search-row" data-voice-field>
                                     <input type="text" id="addNameInput" name="name" value="{{ old('name') }}"
-                                        class="no-voice field-input flex-1 min-w-0 border border-gray-200 px-3.5 py-3 text-sm bg-white"
+                                        class="field-input flex-1 min-w-0 border border-gray-200 px-3.5 py-3 text-sm bg-white"
                                         placeholder="e.g. Juan dela Cruz" required>
-                                    <div class="patient-voice-toggle">
+                                    <div class="voice-input-toggle">
                                         <button type="button" id="addNameMicBtn" class="voice-search-mic external"
+                                            data-voice-trigger data-voice-target="#addNameInput"
+                                            data-voice-status="#addNameVoiceStatus"
                                             aria-label="Voice input for full name">
                                             <i class="fa-solid fa-microphone"></i>
                                         </button>
-                                        <span id="addNameVoiceStatus" class="patient-voice-status hidden"
+                                        <span id="addNameVoiceStatus" class="voice-status hidden" data-voice-status
                                             aria-live="polite"></span>
                                     </div>
                                 </div>
@@ -456,17 +465,18 @@ $inactiveCount = $inactiveCount ?? 0;
                                 <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
                                     Email Address <span class="text-red-500">*</span>
                                 </label>
-                                <div class="flex items-center gap-2">
+                                <div class="voice-search-row" data-voice-field>
                                     <i class="fa-solid fa-envelope text-gray-400 text-xs flex-shrink-0 pl-1"></i>
                                     <input type="email" id="addEmailInput" name="email" value="{{ old('email') }}"
-                                        class="no-voice field-input flex-1 min-w-0 border border-gray-200 px-3.5 py-3 text-sm bg-white"
+                                        class="field-input flex-1 min-w-0 border border-gray-200 px-3.5 py-3 text-sm bg-white"
                                         placeholder="user@pup.edu.ph" required>
-                                    <div class="patient-voice-toggle">
+                                    <div class="voice-input-toggle">
                                         <button type="button" id="addEmailMicBtn" class="voice-search-mic external"
-                                            aria-label="Voice input for email">
+                                            data-voice-trigger data-voice-target="#addEmailInput"
+                                            data-voice-status="#addEmailVoiceStatus" aria-label="Voice input for email">
                                             <i class="fa-solid fa-microphone"></i>
                                         </button>
-                                        <span id="addEmailVoiceStatus" class="patient-voice-status hidden"
+                                        <span id="addEmailVoiceStatus" class="voice-status hidden" data-voice-status
                                             aria-live="polite"></span>
                                     </div>
                                 </div>
@@ -478,7 +488,7 @@ $inactiveCount = $inactiveCount ?? 0;
                                 </label>
                                 <select name="role_id"
                                     class="field-input w-full border border-gray-200 px-3.5 py-3 text-sm bg-white">
-                                    <option value="">— No Role —</option>
+                                    <option value="">No Role</option>
                                     @foreach ($roles as $role)
                                     <option value="{{ $role->id }}" {{ old('role_id')==$role->id ? 'selected' : '' }}>
                                         {{ $role->name }}
@@ -589,15 +599,15 @@ $inactiveCount = $inactiveCount ?? 0;
                 </div>
             </div>
 
-            <div class="um-user-modal-footer">
-                <button type="button" onclick="closeModal('addModal')"
-                    class="btn-cancel px-5 py-2.5 border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all inline-flex items-center">
+            <div class="modal-ft um-user-modal-footer">
+                <button type="button" onclick="closeModal('addModal')" class="modal-btn-ghost">
                     Cancel
                 </button>
 
-                <button type="submit"
-                    class="btn-save px-6 py-2.5 bg-[#8B0000] hover:bg-[#760000] text-white text-sm font-bold shadow transition-all inline-flex items-center gap-2">
-                    <i class="fa-solid fa-floppy-disk"></i>
+                <button type="submit" class="modal-btn-confirm-reject um-save-user-btn">
+                    <span class="btn-confirm-icon">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                    </span>
                     <span>Save User</span>
                 </button>
             </div>
@@ -605,8 +615,8 @@ $inactiveCount = $inactiveCount ?? 0;
     </div>
 </div>
 
-<div class="modal-overlay" id="editModal" aria-hidden="true" onclick="closeModalOutside(event,'editModal')">
-    <div class="modal-box">
+<div class="modal-overlay" id="editModal" aria-hidden="true">
+    <div class="modal-box-inner um-user-modal um-user-modal-md" onclick="event.stopPropagation()">
         <div
             class="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
             <div class="flex items-center gap-3">
@@ -616,11 +626,11 @@ $inactiveCount = $inactiveCount ?? 0;
                 </div>
                 <div>
                     <h3 class="font-extrabold text-gray-800 text-base">Edit User</h3>
-                    <p class="text-[10px] text-gray-500" id="editModalSubtitle">Updating user details</p>
+                    <p class="text-[12px] text-gray-500" id="editModalSubtitle">Updating user details</p>
                 </div>
             </div>
-            <button type="button" data-close-modal="editModal"
-                class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-[#8B0000] transition-all">
+            <button type="button" onclick="closeModal('editModal')" data-close-modal="editModal" class="um-modal-x"
+                aria-label="Close edit user modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -630,31 +640,81 @@ $inactiveCount = $inactiveCount ?? 0;
             @method('PUT')
 
             <div>
-                <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">Full Name
-                    <span class="text-red-500">*</span></label>
-                <input type="text" name="name" id="editName" placeholder="Full name"
-                    class="field-input w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm" required>
+                <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
+                    Full Name <span class="text-red-500">*</span>
+                </label>
+
+                <div class="voice-search-row" data-voice-field>
+                    <input type="text" name="name" id="editName" placeholder="Full name"
+                        class="field-input flex-1 min-w-0 border border-gray-200 rounded-lg px-3 py-2.5 text-sm"
+                        required>
+
+                    <div class="voice-input-toggle">
+                        <button type="button" id="editNameMicBtn" class="voice-search-mic external" data-voice-trigger
+                            data-voice-target="#editName" data-voice-status="#editNameVoiceStatus"
+                            aria-label="Voice input for edit full name">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+
+                        <span id="editNameVoiceStatus" class="voice-status hidden" data-voice-status
+                            aria-live="polite"></span>
+                    </div>
+                </div>
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">Email
-                    Address <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <i class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                    <input type="email" name="email" id="editEmail" placeholder="user@pup.edu.ph"
-                        class="field-input w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm" required>
+                <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
+                    Email Address <span class="text-red-500">*</span>
+                </label>
+
+                <div class="voice-search-row" data-voice-field>
+                    <div class="relative flex-1 min-w-0">
+                        <i
+                            class="fa-solid fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+
+                        <input type="email" name="email" id="editEmail" placeholder="user@pup.edu.ph"
+                            class="field-input w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm"
+                            required>
+                    </div>
+
+                    <div class="voice-input-toggle">
+                        <button type="button" id="editEmailMicBtn" class="voice-search-mic external" data-voice-trigger
+                            data-voice-target="#editEmail" data-voice-status="#editEmailVoiceStatus"
+                            aria-label="Voice input for edit email">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+
+                        <span id="editEmailVoiceStatus" class="voice-status hidden" data-voice-status
+                            aria-live="polite"></span>
+                    </div>
                 </div>
             </div>
 
             <div>
                 <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">Role</label>
-                <select name="role_id" id="editRole"
-                    class="field-input w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white">
-                    <option value="">— No Role —</option>
-                    @foreach ($roles as $role)
-                    <option value="{{ $role->id }}">{{ $role->name }}</option>
-                    @endforeach
-                </select>
+                <div class="um-custom-select" id="editRoleSelect" data-custom-select>
+                    <input type="hidden" name="role_id" id="editRole" value="">
+
+                    <button type="button" class="um-custom-select-btn" id="editRoleBtn" aria-haspopup="listbox"
+                        aria-expanded="false">
+                        <span id="editRoleText">No Role</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+
+                    <div class="um-custom-select-menu" id="editRoleMenu" role="listbox">
+                        <button type="button" class="um-custom-select-option" data-value="">
+                            <span>No Role</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+
+                        @foreach ($roles as $role)
+                        <button type="button" class="um-custom-select-option" data-value="{{ $role->id }}">
+                            <span>{{ $role->name }}</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        @endforeach
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -675,8 +735,7 @@ $inactiveCount = $inactiveCount ?? 0;
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-2">
-                <button type="button" onclick="closeModal('editModal')"
-                    class="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all">
+                <button type="button" onclick="closeModal('editModal')" class="modal-btn-ghost">
                     Cancel
                 </button>
                 <button type="submit"
@@ -689,8 +748,8 @@ $inactiveCount = $inactiveCount ?? 0;
 </div>
 
 <!-- Reset Password Modal -->
-<div class="modal-overlay" id="resetModal" aria-hidden="true" onclick="closeModalOutside(event,'resetModal')">
-    <div class="modal-box modal-sm">
+<div class="modal-overlay" id="resetModal" aria-hidden="true">
+    <div class="modal-box-inner um-user-modal um-user-modal-sm" onclick="event.stopPropagation()">
         <div
             class="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
             <div class="flex items-center gap-3">
@@ -703,16 +762,14 @@ $inactiveCount = $inactiveCount ?? 0;
                     <p class="text-[10px] text-gray-500" id="resetModalSubtitle">Set a new password</p>
                 </div>
             </div>
-            <button type="button" data-close-modal="resetModal"
-                class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-[#8B0000] transition-all">
+            <button type="button" onclick="closeModal('resetModal')" data-close-modal="resetModal" class="um-modal-x"
+                aria-label="Close reset password modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
         <form method="POST" id="resetForm" class="p-6 space-y-4">
             @csrf
-            @method('PUT')
-
             <div>
                 <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">New
                     Password <span class="text-red-500">*</span></label>
@@ -725,11 +782,23 @@ $inactiveCount = $inactiveCount ?? 0;
                         <i class="fa-regular fa-eye text-xs" id="resetEye"></i>
                     </button>
                 </div>
+
+                <div class="password-strength" id="resetPasswordStrength" data-strength="empty">
+                    <div class="password-strength-track">
+                        <span class="password-strength-fill"></span>
+                    </div>
+
+                    <div class="password-strength-meta">
+                        <span id="resetPasswordStrengthLabel">Enter a password</span>
+                        <span id="resetPasswordStrengthHint">Use 8+ chars, number, uppercase, and symbol.</span>
+                    </div>
+                </div>
             </div>
 
             <div>
                 <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">Confirm
                     Password <span class="text-red-500">*</span></label>
+
                 <div class="relative">
                     <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                     <input type="password" name="password_confirmation" id="resetPasswordConf"
@@ -740,11 +809,15 @@ $inactiveCount = $inactiveCount ?? 0;
                         <i class="fa-regular fa-eye text-xs" id="resetEye2"></i>
                     </button>
                 </div>
+
+                <div class="password-match" id="resetPasswordMatch" data-match="empty">
+                    <span class="password-match-dot"></span>
+                    <span id="resetPasswordMatchText">Confirm your password.</span>
+                </div>
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-2">
-                <button type="button" onclick="closeModal('resetModal')"
-                    class="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all">
+                <button type="button" onclick="closeModal('resetModal')" class="modal-btn-ghost">
                     Cancel
                 </button>
                 <button type="submit"
@@ -756,70 +829,93 @@ $inactiveCount = $inactiveCount ?? 0;
     </div>
 </div>
 
-<div class="modal-overlay" id="viewModal" aria-hidden="true" onclick="closeModalOutside(event,'viewModal')">
-    <div class="modal-box modal-sm">
-        <div
-            class="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center shadow">
-                    <i class="fa-solid fa-eye text-white text-sm"></i>
+<div class="modal-overlay" id="viewModal" aria-hidden="true">
+    <div class="modal-box-inner um-user-modal um-user-modal-md um-view-details-modal" onclick="event.stopPropagation()">
+        <div class="um-view-details-head">
+            <div class="um-view-head-left">
+                <div class="um-view-head-icon">
+                    <i class="fa-solid fa-id-card-clip"></i>
                 </div>
+
                 <div>
-                    <h3 class="font-extrabold text-gray-800 text-base">Account Details</h3>
-                    <p class="text-[10px] text-gray-500">View selected account information</p>
+                    <h3>Account Details</h3>
+                    <p>Review selected account information</p>
                 </div>
             </div>
-            <button type="button" data-close-modal="viewModal"
-                class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-[#8B0000] transition-all">
+
+            <button type="button" onclick="closeModal('viewModal')" data-close-modal="viewModal" class="um-modal-x"
+                aria-label="Close account details modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <div class="p-6 space-y-4 text-sm">
-            <div>
-                <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Name</div>
-                <div id="viewName" class="text-gray-800 font-semibold mt-1"></div>
+        <div class="um-view-details-body">
+            <div class="um-view-profile-card">
+                <div class="um-view-avatar" id="viewInitial">?</div>
+
+                <div class="um-view-profile-copy">
+                    <div id="viewName" class="um-view-name"></div>
+                    <div id="viewEmail" class="um-view-email"></div>
+                </div>
             </div>
 
-            <div>
-                <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Email</div>
-                <div id="viewEmail" class="text-gray-800 mt-1"></div>
-            </div>
+            <div class="um-view-info-grid">
+                <div class="um-view-info-card">
+                    <div class="um-view-info-icon role">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
 
-            <div>
-                <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Role</div>
-                <div id="viewRole" class="text-gray-800 mt-1"></div>
-            </div>
+                    <div>
+                        <span class="um-view-label">Role</span>
+                        <strong id="viewRole" class="um-view-value"></strong>
+                    </div>
+                </div>
 
-            <div>
-                <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Status</div>
-                <div id="viewStatus" class="text-gray-800 mt-1"></div>
-            </div>
+                <div class="um-view-info-card">
+                    <div class="um-view-info-icon status">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
 
-            <div>
-                <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Source</div>
-                <div id="viewSource" class="text-gray-800 mt-1"></div>
-            </div>
+                    <div>
+                        <span class="um-view-label">Status</span>
+                        <strong id="viewStatus" class="um-view-value um-view-status-pill"></strong>
+                    </div>
+                </div>
 
-            <div>
-                <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Created At</div>
-                <div id="viewCreatedAt" class="text-gray-800 mt-1"></div>
-            </div>
+                <div class="um-view-info-card">
+                    <div class="um-view-info-icon source">
+                        <i class="fa-solid fa-database"></i>
+                    </div>
 
-            <div class="flex justify-end pt-2">
-                <button type="button" onclick="closeModal('viewModal')"
-                    class="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all">
-                    Close
-                </button>
+                    <div>
+                        <span class="um-view-label">Source</span>
+                        <strong id="viewSource" class="um-view-value"></strong>
+                    </div>
+                </div>
+
+                <div class="um-view-info-card">
+                    <div class="um-view-info-icon date">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                    </div>
+
+                    <div>
+                        <span class="um-view-label">Created At</span>
+                        <strong id="viewCreatedAt" class="um-view-value"></strong>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <div class="modal-ft um-view-details-foot">
+            <button type="button" onclick="closeModal('viewModal')" class="modal-btn-ghost">
+                Close
+            </button>
         </div>
     </div>
 </div>
 
-<div class="modal-overlay" id="toggleConfirmModal" aria-hidden="true"
-    onclick="closeModalOutside(event,'toggleConfirmModal')">
-    <div class="modal-box modal-sm">
+<div class="modal-overlay" id="toggleConfirmModal" aria-hidden="true">
+    <div class="modal-box-inner um-user-modal um-user-modal-sm" onclick="event.stopPropagation()">
         <div
             class="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
             <div class="flex items-center gap-3">
@@ -830,8 +926,8 @@ $inactiveCount = $inactiveCount ?? 0;
                     <p class="text-[10px] text-gray-500" id="toggleModalSubtitle">Please confirm this change</p>
                 </div>
             </div>
-            <button type="button" data-close-modal="toggleConfirmModal"
-                class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-[#8B0000] transition-all">
+            <button type="button" onclick="closeModal('toggleConfirmModal')" data-close-modal="toggleConfirmModal"
+                class="um-modal-x" aria-label="Close confirm action modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -840,13 +936,11 @@ $inactiveCount = $inactiveCount ?? 0;
             <div id="toggleModalBody" class="rounded-xl p-4 mb-5 flex items-start gap-3 text-sm"></div>
 
             <div class="flex items-center justify-end gap-3">
-                <button type="button" onclick="closeModal('toggleConfirmModal')"
-                    class="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all">
+                <button type="button" onclick="closeModal('toggleConfirmModal')" class="modal-btn-ghost">
                     Cancel
                 </button>
-                <form id="toggleConfirmForm" method="POST" style="display:inline;">
+                <form id="toggleConfirmForm" method="POST">
                     @csrf
-                    @method('PATCH')
                     <button type="submit" id="toggleConfirmBtn"
                         class="px-6 py-2.5 rounded-lg text-white text-sm font-bold shadow transition-all flex items-center gap-2">
                     </button>
@@ -870,11 +964,11 @@ $inactiveCount = $inactiveCount ?? 0;
     }
 
     var umState = {
-        search: '{{ $search ?? '' }}',
-        role: '{{ $roleFilter ?? '' }}',
-        status: '{{ $statusFilter ?? '' }}',
+        search: @js($search ?? ''),
+        role: @js($roleFilter ?? ''),
+        status: @js($statusFilter ?? ''),
         perPage: {{ $perPage ?? 10 }},
-    page: { { request('page', 1) } },
+    page: @json((int) request('page', 1)),
         };
 
     var umSearchTimer = null;
@@ -903,8 +997,18 @@ $inactiveCount = $inactiveCount ?? 0;
             gridView.hidden = true;
         }
 
-        if (listBtn) listBtn.classList.toggle('active', finalView === 'list');
-        if (gridBtn) gridBtn.classList.toggle('active', finalView === 'grid');
+        document.getElementById('mainContent')?.classList.toggle('mode-grid', finalView === 'grid');
+        document.getElementById('mainContent')?.classList.toggle('mode-list', finalView === 'list');
+
+        if (listBtn) {
+            listBtn.classList.toggle('active', finalView === 'list');
+            listBtn.setAttribute('aria-pressed', finalView === 'list' ? 'true' : 'false');
+        }
+
+        if (gridBtn) {
+            gridBtn.classList.toggle('active', finalView === 'grid');
+            gridBtn.setAttribute('aria-pressed', finalView === 'grid' ? 'true' : 'false');
+        }
 
         if (save && window.innerWidth > 767) {
             localStorage.setItem('userManagementView', finalView);
@@ -932,19 +1036,22 @@ $inactiveCount = $inactiveCount ?? 0;
         }
     }
 
+    const UM_MODAL_ANIMATION_MS = 220;
+
+    function forceCloseModal(modal) {
+        if (!modal) return;
+
+        clearTimeout(modal._closeTimer);
+
+        modal.classList.remove('open', 'closing', 'is-open', 'is-closing');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.style.pointerEvents = '';
+    }
+
     window.closeAllModals = function () {
-        document.querySelectorAll('.modal-overlay').forEach(function (modal) {
-            var activeEl = document.activeElement;
-
-            if (activeEl && modal.contains(activeEl)) {
-                activeEl.blur();
-            }
-
-            modal.classList.remove('open');
-            modal.setAttribute('aria-hidden', 'true');
+        document.querySelectorAll('.modal-overlay.open').forEach(function (modal) {
+            window.closeModal(modal.id);
         });
-
-        document.body.classList.remove('modal-open');
     };
 
     window.openModal = function (id, trigger = null) {
@@ -955,51 +1062,74 @@ $inactiveCount = $inactiveCount ?? 0;
 
         document.querySelectorAll('.modal-overlay.open').forEach(function (m) {
             if (m.id !== id) {
-                m.classList.remove('open');
-                m.setAttribute('aria-hidden', 'true');
+                forceCloseModal(m);
             }
         });
 
-        modal.classList.add('open');
+        clearTimeout(modal._closeTimer);
+
+        modal.classList.remove('closing', 'is-closing');
+        modal.classList.add('open', 'is-open');
         modal.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('modal-open');
+        modal.style.pointerEvents = 'auto';
+
+        document.body.classList.add('modal-open', 'modal-lock');
 
         var firstField = modal.querySelector('input, select, textarea, button');
         if (firstField) {
             setTimeout(function () {
                 firstField.focus();
-            }, 30);
+            }, 80);
         }
     };
 
     window.closeModal = function (id) {
         var modal = document.getElementById(id);
-        if (!modal) return;
+        if (!modal || modal.classList.contains('closing')) return;
 
         var activeEl = document.activeElement;
         if (activeEl && modal.contains(activeEl)) {
             activeEl.blur();
         }
 
-        modal.classList.remove('open');
-        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('is-open');
+        modal.classList.add('closing', 'is-closing');
+        modal.style.pointerEvents = 'none';
 
-        if (!document.querySelector('.modal-overlay.open')) {
-            document.body.classList.remove('modal-open');
-        }
+        clearTimeout(modal._closeTimer);
 
-        if (window.lastModalTrigger && typeof window.lastModalTrigger.focus === 'function') {
-            setTimeout(function () {
-                window.lastModalTrigger.focus();
-            }, 30);
-        }
+        modal._closeTimer = setTimeout(function () {
+            modal.classList.remove('open', 'closing', 'is-closing');
+            modal.setAttribute('aria-hidden', 'true');
+            modal.style.pointerEvents = '';
+
+            if (!document.querySelector('.modal-overlay.open')) {
+                document.body.classList.remove('modal-open', 'modal-lock');
+            }
+
+            if (window.lastModalTrigger && typeof window.lastModalTrigger.focus === 'function') {
+                setTimeout(function () {
+                    window.lastModalTrigger.focus();
+                }, 30);
+            }
+        }, UM_MODAL_ANIMATION_MS);
     };
 
     window.closeModalOutside = function (e, id) {
-        if (e.target.id === id) {
+        if (e.target && e.target.id === id) {
             window.closeModal(id);
         }
     };
+
+    document.addEventListener('click', function (e) {
+        var closeBtn = e.target.closest('[data-close-modal]');
+        if (!closeBtn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        window.closeModal(closeBtn.getAttribute('data-close-modal'));
+    });
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
@@ -1020,6 +1150,10 @@ $inactiveCount = $inactiveCount ?? 0;
         var btn = document.getElementById('toggleConfirmBtn');
         var form = document.getElementById('toggleConfirmForm');
 
+        var modal = document.getElementById('toggleConfirmModal');
+
+        modal.classList.remove('is-activate', 'is-deactivate');
+        modal.classList.add(isActive ? 'is-deactivate' : 'is-activate');
         form.dataset.userId = userId;
         form.dataset.currentStatus = currentStatus;
         form.dataset.userName = userName;
@@ -1040,7 +1174,7 @@ $inactiveCount = $inactiveCount ?? 0;
                 '</strong><span class="text-amber-700"> will be <strong>deactivated</strong>. They will no longer be able to log in until reactivated.</span></div>';
             btn.className =
                 'px-6 py-2.5 rounded-lg text-white text-sm font-bold shadow transition-all flex items-center gap-2 bg-amber-500 hover:bg-amber-600';
-            btn.innerHTML = '<i class="fa-solid fa-user-slash"></i> Yes, Deactivate';
+            btn.innerHTML = '<i class="fa-solid fa-user-slash"></i> Deactivate';
         } else {
             icon.className =
                 'w-10 h-10 rounded-xl flex items-center justify-center shadow bg-gradient-to-br from-emerald-500 to-green-600';
@@ -1055,7 +1189,7 @@ $inactiveCount = $inactiveCount ?? 0;
                 '</strong><span class="text-emerald-700"> will be <strong>activated</strong>. They will regain full access to the system.</span></div>';
             btn.className =
                 'px-6 py-2.5 rounded-lg text-white text-sm font-bold shadow transition-all flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700';
-            btn.innerHTML = '<i class="fa-solid fa-user-check"></i> Yes, Activate';
+            btn.innerHTML = '<i class="fa-solid fa-user-check"></i> Activate';
         }
 
         btn.dataset.originalHtml = btn.innerHTML;
@@ -1063,12 +1197,95 @@ $inactiveCount = $inactiveCount ?? 0;
         openModal('toggleConfirmModal');
     }
 
+    function closeEditRoleDropdown() {
+        const wrapper = document.getElementById('editRoleSelect');
+        const button = document.getElementById('editRoleBtn');
+
+        if (!wrapper || !button) return;
+
+        wrapper.classList.remove('is-open');
+        button.setAttribute('aria-expanded', 'false');
+    }
+
+    function setEditRoleValue(value) {
+        const hiddenInput = document.getElementById('editRole');
+        const label = document.getElementById('editRoleText');
+        const menu = document.getElementById('editRoleMenu');
+
+        if (!hiddenInput || !label || !menu) return;
+
+        const normalizedValue = value ? String(value) : '';
+        hiddenInput.value = normalizedValue;
+
+        const options = Array.from(menu.querySelectorAll('.um-custom-select-option'));
+        const selected = options.find(function (option) {
+            return String(option.dataset.value || '') === normalizedValue;
+        }) || options[0];
+
+        options.forEach(function (option) {
+            option.classList.toggle('active', option === selected);
+            option.setAttribute('aria-selected', option === selected ? 'true' : 'false');
+        });
+
+        label.textContent = selected ? selected.querySelector('span').textContent.trim() : '— No Role —';
+    }
+
+    function setEditRoleDisabled(isDisabled) {
+        const wrapper = document.getElementById('editRoleSelect');
+        const button = document.getElementById('editRoleBtn');
+        const hiddenInput = document.getElementById('editRole');
+
+        if (!wrapper || !button || !hiddenInput) return;
+
+        wrapper.classList.toggle('is-disabled', isDisabled);
+        button.disabled = isDisabled;
+        hiddenInput.disabled = isDisabled;
+
+        if (isDisabled) {
+            closeEditRoleDropdown();
+        }
+    }
+
+    (function initEditRoleDropdown() {
+        const wrapper = document.getElementById('editRoleSelect');
+        const button = document.getElementById('editRoleBtn');
+        const menu = document.getElementById('editRoleMenu');
+
+        if (!wrapper || !button || !menu) return;
+
+        button.addEventListener('click', function () {
+            if (button.disabled) return;
+
+            const isOpen = wrapper.classList.toggle('is-open');
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        menu.querySelectorAll('.um-custom-select-option').forEach(function (option) {
+            option.addEventListener('click', function () {
+                setEditRoleValue(option.dataset.value || '');
+                closeEditRoleDropdown();
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!wrapper.contains(event.target)) {
+                closeEditRoleDropdown();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeEditRoleDropdown();
+            }
+        });
+    })();
+
     function openEditModal(source, id, name, email, roleId, status) {
         const form = document.getElementById('editForm');
 
         if (source === 'patients') {
             form.action = `/admin/user-management/patient/${id}`;
-            document.getElementById('editRole').disabled = true;
+            setEditRoleDisabled(true);
             document.getElementById('editStatusActive').disabled = true;
             document.getElementById('editStatusInactive').disabled = true;
         } else {
@@ -1081,7 +1298,7 @@ $inactiveCount = $inactiveCount ?? 0;
                 form.appendChild(methodInput);
             }
             methodInput.value = 'PUT';
-            document.getElementById('editRole').disabled = false;
+            setEditRoleDisabled(false);
             document.getElementById('editStatusActive').disabled = false;
             document.getElementById('editStatusInactive').disabled = false;
         }
@@ -1092,8 +1309,7 @@ $inactiveCount = $inactiveCount ?? 0;
         document.getElementById('editEmail').value = email;
         document.getElementById('editModalSubtitle').textContent = 'Editing: ' + name;
 
-        const roleSelect = document.getElementById('editRole');
-        roleSelect.value = roleId || '';
+        setEditRoleValue(roleId || '');
 
         document.getElementById('editStatusActive').checked = (status === 'active');
         document.getElementById('editStatusInactive').checked = (status === 'inactive');
@@ -1111,38 +1327,177 @@ $inactiveCount = $inactiveCount ?? 0;
         document.getElementById('resetModalSubtitle').textContent = 'Resetting password for: ' + name;
         document.getElementById('resetPassword').value = '';
         document.getElementById('resetPasswordConf').value = '';
+        updateResetPasswordFeedback();
         openModal('resetModal');
     }
 
     function openViewModal(name, email, role, status, source, createdAt) {
-        document.getElementById('viewName').textContent = name;
-        document.getElementById('viewEmail').textContent = email;
-        document.getElementById('viewRole').textContent = role;
-        document.getElementById('viewStatus').textContent = status;
-        document.getElementById('viewSource').textContent = source;
-        document.getElementById('viewCreatedAt').textContent = createdAt;
+        const viewName = document.getElementById('viewName');
+        const viewEmail = document.getElementById('viewEmail');
+        const viewRole = document.getElementById('viewRole');
+        const viewStatus = document.getElementById('viewStatus');
+        const viewSource = document.getElementById('viewSource');
+        const viewCreatedAt = document.getElementById('viewCreatedAt');
+        const viewInitial = document.getElementById('viewInitial');
+
+        if (viewName) viewName.textContent = name || 'Unknown User';
+        if (viewEmail) viewEmail.textContent = email || 'No email available';
+        if (viewRole) viewRole.textContent = role || 'No Role';
+        if (viewSource) viewSource.textContent = source || 'Users';
+        if (viewCreatedAt) viewCreatedAt.textContent = createdAt || 'N/A';
+
+        if (viewInitial) {
+            viewInitial.textContent = String(name || '?').trim().charAt(0).toUpperCase() || '?';
+        }
+
+        if (viewStatus) {
+            const normalizedStatus = String(status || '').toLowerCase();
+
+            viewStatus.textContent = status || 'Unknown';
+            viewStatus.classList.remove('is-active', 'is-inactive');
+
+            if (normalizedStatus === 'active') {
+                viewStatus.classList.add('is-active');
+            } else {
+                viewStatus.classList.add('is-inactive');
+            }
+        }
 
         openModal('viewModal');
     }
 
+    function getPasswordStrength(password) {
+        const value = String(password || '');
+
+        if (!value.length) {
+            return {
+                state: 'empty',
+                width: '0%',
+                label: 'Enter a password',
+                hint: 'Use 8+ chars, number, uppercase, and symbol.',
+            };
+        }
+
+        let score = 0;
+
+        if (value.length >= 8) score++;
+        if (/[a-z]/.test(value) && /[A-Z]/.test(value)) score++;
+        if (/\d/.test(value)) score++;
+        if (/[^A-Za-z0-9]/.test(value)) score++;
+
+        if (score <= 1) {
+            return {
+                state: 'weak',
+                width: '35%',
+                label: 'Weak password',
+                hint: 'Add more characters and numbers.',
+            };
+        }
+
+        if (score <= 3) {
+            return {
+                state: 'medium',
+                width: '68%',
+                label: 'Medium password',
+                hint: 'Add uppercase or symbol to improve.',
+            };
+        }
+
+        return {
+            state: 'strong',
+            width: '100%',
+            label: 'Strong password',
+            hint: 'Good password strength.',
+        };
+    }
+
+    function updateResetPasswordStrength() {
+        const input = document.getElementById('resetPassword');
+        const meter = document.getElementById('resetPasswordStrength');
+        const label = document.getElementById('resetPasswordStrengthLabel');
+        const hint = document.getElementById('resetPasswordStrengthHint');
+
+        if (!input || !meter || !label || !hint) return;
+
+        const result = getPasswordStrength(input.value);
+
+        meter.dataset.strength = result.state;
+        meter.style.setProperty('--strength-width', result.width);
+        label.textContent = result.label;
+        hint.textContent = result.hint;
+    }
+
+    function updateResetPasswordMatch() {
+        const password = document.getElementById('resetPassword');
+        const confirm = document.getElementById('resetPasswordConf');
+        const match = document.getElementById('resetPasswordMatch');
+        const text = document.getElementById('resetPasswordMatchText');
+
+        if (!password || !confirm || !match || !text) return;
+
+        const passwordValue = password.value.trim();
+        const confirmValue = confirm.value.trim();
+
+        confirm.classList.remove('is-password-match', 'is-password-mismatch');
+
+        if (!confirmValue.length) {
+            match.dataset.match = 'empty';
+            text.textContent = 'Confirm your password.';
+            return;
+        }
+
+        if (passwordValue === confirmValue) {
+            match.dataset.match = 'matched';
+            text.textContent = 'Passwords match.';
+            confirm.classList.add('is-password-match');
+            return;
+        }
+
+        match.dataset.match = 'mismatch';
+        text.textContent = 'Passwords do not match.';
+        confirm.classList.add('is-password-mismatch');
+    }
+
+    function updateResetPasswordFeedback() {
+        updateResetPasswordStrength();
+        updateResetPasswordMatch();
+    }
+
+    document.addEventListener('input', function (event) {
+        if (!event.target) return;
+
+        if (event.target.id === 'resetPassword' || event.target.id === 'resetPasswordConf') {
+            updateResetPasswordFeedback();
+        }
+    });
+
     function togglePassVis(inputId, iconId) {
         const inp = document.getElementById(inputId);
         const ico = document.getElementById(iconId);
+
+        if (!inp || !ico) return;
+
         if (inp.type === 'password') {
             inp.type = 'text';
-            ico.className = 'fa-regular fa-eye-slash text-xs';
+            ico.className = ico.className.replace('fa-eye', 'fa-eye-slash');
         } else {
             inp.type = 'password';
-            ico.className = 'fa-regular fa-eye text-xs';
+            ico.className = ico.className.replace('fa-eye-slash', 'fa-eye');
         }
     }
 
+    window.openToggleConfirm = openToggleConfirm;
+    window.openEditModal = openEditModal;
+    window.openResetModal = openResetModal;
+    window.openViewModal = openViewModal;
+    window.togglePassVis = togglePassVis;
+
     document.addEventListener('DOMContentLoaded', () => {
-        applyTheme(localStorage.getItem('theme') || 'light');
+        if (typeof applyTheme === 'function') applyTheme(localStorage.getItem('theme') || 'light');
         document.querySelectorAll('.theme-option').forEach(o =>
             o.addEventListener('click', e => {
                 e.stopPropagation();
-                applyTheme(o.getAttribute('data-theme'));
+                if (typeof applyTheme === 'function') applyTheme(o.getAttribute('data-theme'));
             })
         );
 
@@ -1155,34 +1510,23 @@ $inactiveCount = $inactiveCount ?? 0;
         });
     });
 
-    function toggleSearchClear(input) {
-        document.getElementById('searchClearBtn')?.classList.toggle('hidden', input.value.trim().length === 0);
-    }
-
     function clearSearch() {
         var input = document.getElementById('umSearch');
+
         if (!input) return;
 
-        if (window.umListening && window.umRecognition) {
-            try {
-                window.umRecognition.stop();
-            } catch (e) { }
-            window.umListening = false;
+        if (window.clearSearchInput) {
+            window.clearSearchInput(input);
+        } else {
+            input.value = '';
+            input.dispatchEvent(new Event('input', {
+                bubbles: true
+            }));
+            input.dispatchEvent(new Event('change', {
+                bubbles: true
+            }));
+            input.focus();
         }
-
-        input.value = '';
-        document.getElementById('searchClearBtn')?.classList.add('hidden');
-        document.getElementById('umVoiceStatus')?.classList.add('hidden');
-        var micBtn = document.getElementById('umMicToggleBtn');
-        if (micBtn) {
-            micBtn.classList.remove('mic-active');
-            micBtn.setAttribute('aria-pressed', 'false');
-            micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
-        }
-        umState.search = '';
-        umState.page = 1;
-        umFetch();
-        input.focus();
     }
 
     function umFetch(silent) {
@@ -1221,6 +1565,16 @@ $inactiveCount = $inactiveCount ?? 0;
             });
     }
 
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     function umRenderRows(users) {
         function jsAttr(value) {
             return JSON.stringify(value ?? '').replace(/"/g, '&quot;');
@@ -1233,41 +1587,40 @@ $inactiveCount = $inactiveCount ?? 0;
 
         if (!users || users.length === 0) {
             var searchVal = umState.search || '';
-            var emptyTitle = searchVal ?
-                'No results for &ldquo;' + searchVal + '&rdquo;' :
+            var hasSearch = searchVal.trim() !== '';
+            var escapedSearch = escapeHtml(searchVal);
+            var emptyTitle = hasSearch ?
+                'No results for “' + escapedSearch + '”' :
                 'No users found';
-            var emptySub = searchVal ?
+            var emptySub = hasSearch ?
                 'Try a different name or email.' :
                 'Try adjusting your filters.';
-            var clearBtn = searchVal ?
-                '<button onclick="clearSearch()" style="margin-top:.75rem;display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:99px;border:1.5px dashed #d1d5db;background:none;font-size:.78rem;color:#9ca3af;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor=\'#8B0000\';this.style.color=\'#8B0000\';" onmouseout="this.style.borderColor=\'#d1d5db\';this.style.color=\'#9ca3af\';"><i class=\"fa-solid fa-xmark\" style=\"font-size:.7rem;\"></i> Clear search</button>' :
+            var clearBtn = hasSearch ?
+                '<button type="button" class="empty-state-btn" data-clear-search data-search-target="#umSearch"><i class="fa-solid fa-xmark"></i> Clear search</button>' :
                 '';
 
-            var emptyHtml = `
-                    <div style="padding:3.5rem 1rem;text-align:center;grid-column:1 / -1;">
-                        <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:#f3f4f6;border-radius:18px;margin-bottom:1rem;">
-                            <i class="fa-solid fa-magnifying-glass" style="font-size:1.6rem;color:#d1d5db;"></i>
-                        </div>
-                        <p style="font-size:.9rem;font-weight:700;color:#374151;margin:0 0 .3rem;">${emptyTitle}</p>
-                        <p style="font-size:.78rem;color:#9ca3af;margin:0;">${emptySub}</p>
-                        ${clearBtn}
+            var emptyInner = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fa-solid ${hasSearch ? 'fa-magnifying-glass' : 'fa-users'}"></i>
                     </div>
-                `;
+                    <h3 class="empty-state-title">${emptyTitle}</h3>
+                    <p class="empty-state-sub">${emptySub}</p>
+                    ${clearBtn}
+                </div>
+            `;
 
             tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="padding:3.5rem 1rem;text-align:center;">
-                            <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:#f3f4f6;border-radius:18px;margin-bottom:1rem;">
-                                <i class="fa-solid fa-magnifying-glass" style="font-size:1.6rem;color:#d1d5db;"></i>
-                            </div>
-                            <p style="font-size:.9rem;font-weight:700;color:#374151;margin:0 0 .3rem;">${emptyTitle}</p>
-                            <p style="font-size:.78rem;color:#9ca3af;margin:0;">${emptySub}</p>
-                            ${clearBtn}
-                        </td>
-                    </tr>
-                `;
+                <tr>
+                    <td colspan="6" class="p-0">
+                        ${emptyInner}
+                    </td>
+                </tr>
+            `;
 
-            gridBody.innerHTML = emptyHtml;
+            gridBody.innerHTML = emptyInner;
+            window.initSearchClearButtons?.();
+            window.initGlobalVoiceInputs?.(document.getElementById('addModal') || document);
             return;
         }
 
@@ -1281,17 +1634,6 @@ $inactiveCount = $inactiveCount ?? 0;
             var roleLabel = user.role_name || 'No Role';
             var registeredDay = user.created_at_day || '—';
 
-            var roleBg = '#fee2e2';
-            var roleColor = '#8B0000';
-
-            if (roleSlug === 'patient') {
-                roleBg = '#dbeafe';
-                roleColor = '#1d4ed8';
-            } else if (roleSlug === 'dentist') {
-                roleBg = '#d1fae5';
-                roleColor = '#065f46';
-            }
-
             var statusClass = user.status === 'active' ? 'badge-active' : 'badge-inactive';
             var initial = (user.name || 'U').charAt(0).toUpperCase();
             var statusLabel = (user.status || '').charAt(0).toUpperCase() + (user.status || '').slice(1);
@@ -1304,10 +1646,10 @@ $inactiveCount = $inactiveCount ?? 0;
                         <span class="text-xs text-gray-400 font-medium">${rowNumber}</span>
                     </td>
 
-                    <td class="py-3.5 px-3 sm:px-4">
+                    <td class="py-3.5 px-2 sm:px-4">
                         <div class="flex items-center gap-2 sm:gap-3">
                             <div
-                                class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8B0000] to-[#b00000] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
+                                class="w-9 h-9 rounded-full bg-gradient-to-br from-[#8B0000] to-[#b00000] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
                                 ${initial}
                             </div>
                             <div>
@@ -1322,9 +1664,9 @@ $inactiveCount = $inactiveCount ?? 0;
                     </td>
 
                     <td class="py-3.5 px-4">
-                        <span class="badge-role" style="background:${roleBg};color:${roleColor};">
-                            ${roleLabel}
-                        </span>
+                        <span class="badge-role role-${roleSlug || 'none'}">
+    ${roleLabel}
+</span>
                     </td>
 
                     <td class="py-3.5 px-4 text-center">
@@ -1334,11 +1676,11 @@ $inactiveCount = $inactiveCount ?? 0;
                     </td>
 
                     <td class="py-3.5 px-4 hidden lg:table-cell">
-                        <span class="text-xs text-gray-400">${registeredDay}</span>
+                        <span class="text-xs text-gray-600">${registeredDay}</span>
                     </td>
 
-                    <td class="py-3.5 px-2 sm:px-5">
-                        <div class="flex items-center justify-center gap-1">
+                    <td class="py-3.5 px-4">
+                        <div class="um-action-group flex items-center justify-center gap-1">
                             <button type="button"
                                 onclick="openEditModal(
                                     'users',
@@ -1374,7 +1716,7 @@ $inactiveCount = $inactiveCount ?? 0;
                                     'Users',
                                     ${jsAttr(createdFull)}
                                 )"
-                                class="action-btn" style="background:#f3f4f6;color:#374151;"
+                                class="action-btn btn-view-details"
                                 title="View details">
                                 <i class="fa-solid fa-eye text-[11px]"></i>
                             </button>
@@ -1407,9 +1749,9 @@ $inactiveCount = $inactiveCount ?? 0;
                         <div class="um-grid-field">
                             <div class="um-grid-label">Role</div>
                             <div class="um-grid-value">
-                                <span class="badge-role" style="background:${roleBg};color:${roleColor};">
-                                    ${roleLabel}
-                                </span>
+                                <span class="badge-role role-${roleSlug || 'none'}">
+    ${roleLabel}
+</span>
                             </div>
                         </div>
 
@@ -1455,7 +1797,7 @@ $inactiveCount = $inactiveCount ?? 0;
                                 'Users',
                                 ${jsAttr(createdFull)}
                             )"
-                            class="action-btn" style="background:#f3f4f6;color:#374151;"
+                            class="action-btn btn-view-details"
                             title="View details">
                             <i class="fa-solid fa-eye text-[11px]"></i>
                         </button>
@@ -1552,107 +1894,43 @@ $inactiveCount = $inactiveCount ?? 0;
         html += '</nav>';
         return html;
     }
+    const UM_TOAST_CACHE = new Map();
 
-    function showSuccessToast(message) {
-        const container = document.getElementById('toastContainer');
-        if (!container) return;
-
+    function showUserManagementToast(type, message) {
         const normalizedMessage = String(message || '').trim();
 
-        const existing = Array.from(container.querySelectorAll('[data-toast-type="success"]'))
-            .find(toast => toast.dataset.toastMessage === normalizedMessage);
+        if (!normalizedMessage) return;
 
-        if (existing) return;
+        const normalizedType = type === 'error' ? 'error' : 'success';
+        const cacheKey = `${normalizedType}:${normalizedMessage}`;
+        const now = Date.now();
 
-        const toast = document.createElement('div');
-        toast.dataset.toastType = 'success';
-        toast.dataset.toastMessage = normalizedMessage;
+        if (UM_TOAST_CACHE.has(cacheKey) && now - UM_TOAST_CACHE.get(cacheKey) < 1200) {
+            return;
+        }
 
-        toast.style.cssText =
-            'pointer-events:auto;position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid #d1fae5;box-shadow:0 8px 24px rgba(0,0,0,.12);border-radius:14px;padding:10px 12px;width:320px;animation:slideIn .35s ease forwards;';
+        UM_TOAST_CACHE.set(cacheKey, now);
 
-        toast.innerHTML = `
-        <div class="absolute inset-y-0 left-0 w-1 bg-emerald-500"></div>
+        if (typeof window.showToast === 'function') {
+            window.showToast({
+                type: normalizedType,
+                title: normalizedType === 'error' ? 'Error' : 'Success',
+                message: normalizedMessage,
+                duration: normalizedType === 'error' ? 7000 : 6000,
+            });
 
-        <div class="flex-shrink-0 ml-1">
-            <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
-            </div>
-        </div>
+            return;
+        }
 
-        <div class="flex-1 min-w-0 pr-1">
-            <h3 class="text-[13px] sm:text-sm font-extrabold text-gray-800 leading-tight">Success</h3>
-            <p class="text-[12px] sm:text-[13px] text-gray-500 leading-4 mt-0.5 break-words">${normalizedMessage}</p>
-        </div>
+        alert(normalizedMessage);
+    }
 
-        <button
-            type="button"
-            class="flex-shrink-0 w-7 h-7 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
-            onclick="this.parentElement.remove()"
-        >
-            <i class="fa-solid fa-xmark text-xs"></i>
-        </button>
-    `;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.transition = 'all 0.3s ease';
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(-10px)';
-            setTimeout(() => toast.remove(), 300);
-        }, 3500);
+    function showSuccessToast(message) {
+        showUserManagementToast('success', message);
     }
 
     function showErrorToast(message) {
-        const container = document.getElementById('toastContainer');
-        if (!container) return;
-
-        const normalizedMessage = String(message || '').trim();
-
-        const existing = Array.from(container.querySelectorAll('[data-toast-type="error"]'))
-            .find(toast => toast.dataset.toastMessage === normalizedMessage);
-
-        if (existing) return;
-
-        const toast = document.createElement('div');
-        toast.dataset.toastType = 'error';
-        toast.dataset.toastMessage = normalizedMessage;
-
-        toast.style.cssText =
-            'pointer-events:auto;position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid #fee2e2;box-shadow:0 8px 24px rgba(0,0,0,.12);border-radius:14px;padding:10px 12px;width:320px;animation:slideIn .35s ease forwards;';
-
-        toast.innerHTML = `
-        <div class="absolute inset-y-0 left-0 w-1 bg-red-500"></div>
-
-        <div class="flex-shrink-0 ml-1">
-            <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
-                <i class="fa-solid fa-circle-exclamation text-red-500 text-base"></i>
-            </div>
-        </div>
-
-        <div class="flex-1 min-w-0 pr-1">
-            <h3 class="text-[13px] sm:text-sm font-extrabold text-gray-800 leading-tight">Error</h3>
-            <p class="text-[12px] sm:text-[13px] text-gray-500 leading-4 mt-0.5 break-words">${normalizedMessage}</p>
-        </div>
-
-        <button
-            type="button"
-            class="flex-shrink-0 w-7 h-7 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
-            onclick="this.parentElement.remove()"
-        >
-            <i class="fa-solid fa-xmark text-xs"></i>
-        </button>
-    `;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.transition = 'all 0.3s ease';
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(-10px)';
-            setTimeout(() => toast.remove(), 300);
-        }, 4000);
+        showUserManagementToast('error', message);
     }
 
     function setRoleFilter(el, role) {
@@ -1667,12 +1945,12 @@ $inactiveCount = $inactiveCount ?? 0;
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        applyTheme(localStorage.getItem('theme') || 'light');
+        if (typeof applyTheme === 'function') applyTheme(localStorage.getItem('theme') || 'light');
         initUmViewToggle();
         document.querySelectorAll('.theme-option').forEach(function (o) {
             o.addEventListener('click', function (e) {
                 e.stopPropagation();
-                applyTheme(o.getAttribute('data-theme'));
+                if (typeof applyTheme === 'function') applyTheme(o.getAttribute('data-theme'));
             });
         });
 
@@ -1686,10 +1964,11 @@ $inactiveCount = $inactiveCount ?? 0;
             });
 
     var searchInput = document.getElementById('umSearch');
+
+    window.initSearchClearButtons?.();
+
     if (searchInput) {
-        toggleSearchClear(searchInput);
         searchInput.addEventListener('input', function () {
-            toggleSearchClear(this);
             clearTimeout(umSearchTimer);
             var val = this.value;
             umSearchTimer = setTimeout(function () {
@@ -1730,7 +2009,7 @@ $inactiveCount = $inactiveCount ?? 0;
                     'Accept': 'application/json',
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: '_method=PATCH&_token={{ csrf_token() }}'
+                body: '_token={{ csrf_token() }}'
             })
                 .then(function (res) {
                     return res.json().then(function (data) {
@@ -1778,7 +2057,8 @@ $inactiveCount = $inactiveCount ?? 0;
             params.append('name', document.getElementById('editName').value);
             params.append('email', document.getElementById('editEmail').value);
             params.append('role_id', document.getElementById('editRole').value);
-            params.append('status', form.querySelector('input[name="status"]:checked')?.value ?? '');
+            params.append('status', form.querySelector('input[name="status"]:checked')?.value ??
+                '');
 
             fetch(url, {
                 method: 'POST',
@@ -1877,326 +2157,6 @@ $inactiveCount = $inactiveCount ?? 0;
         });
     }
 
-    // ─── Voice input for Add New User form fields ───────────────────────────
-    (function initAddFormVoice() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) return;
-
-        const inputs = [
-            { inputId: 'addNameInput', micId: 'addNameMicBtn', statusId: 'addNameVoiceStatus' },
-            { inputId: 'addEmailInput', micId: 'addEmailMicBtn', statusId: 'addEmailVoiceStatus' }
-        ];
-
-        inputs.forEach(function (config) {
-            const input = document.getElementById(config.inputId);
-            const micBtn = document.getElementById(config.micId);
-            const status = document.getElementById(config.statusId);
-
-            if (!input || !micBtn || !status) return;
-
-            let listening = false;
-            let recognition = null;
-            let manualStop = false;
-
-            // ── helpers ──────────────────────────────────────────────────────
-            const setStatus = function (text, state) {
-                status.textContent = text;
-                status.className = 'patient-voice-status';
-                if (state) status.classList.add('is-' + state);
-                if (text) {
-                    status.classList.remove('hidden');
-                } else {
-                    status.classList.add('hidden');
-                }
-            };
-
-            const hideStatus = function (delay) {
-                window.setTimeout(function () {
-                    status.classList.add('hidden');
-                }, delay || 0);
-            };
-
-            const setMicState = function (isActive) {
-                micBtn.classList.toggle('mic-active', isActive);
-                micBtn.innerHTML = isActive
-                    ? '<i class="fa-solid fa-stop"></i>'
-                    : '<i class="fa-solid fa-microphone"></i>';
-            };
-
-            const stopListeningNow = function () {
-                manualStop = true;
-                listening = false;
-                setMicState(false);
-                setStatus('Voice captured.', 'success');
-                hideStatus(1200);
-                if (recognition) {
-                    try { recognition.abort(); } catch (e) {
-                        try { recognition.stop(); } catch (err) { }
-                    }
-                }
-            };
-
-            // ── recognition factory ──────────────────────────────────────────
-            const createRecognition = function () {
-                const r = new SpeechRecognition();
-                r.lang = 'en-US';
-                r.continuous = false;
-                r.interimResults = true;
-                r.maxAlternatives = 1;
-
-                let sawSpeech = false;
-                let timeoutId = null;
-                const LISTEN_TIMEOUT = 6000;
-
-                const clearTimeout_ = function () {
-                    if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
-                };
-
-                r.onstart = function () {
-                    timeoutId = window.setTimeout(function () {
-                        if (listening && !sawSpeech) {
-                            try { r.stop(); } catch (e) { }
-                        }
-                    }, LISTEN_TIMEOUT);
-                };
-
-                r.onspeechend = function () {
-                    clearTimeout_();
-                    try { r.stop(); } catch (e) { }
-                };
-
-                r.onresult = function (event) {
-                    let transcript = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        const result = event.results[i];
-                        const chunk = (result && result[0] && result[0].transcript
-                            ? result[0].transcript : '').trim();
-                        if (!chunk) continue;
-                        sawSpeech = true;
-                        if (result.isFinal) {
-                            transcript = (transcript + ' ' + chunk).trim();
-                        } else if (!transcript) {
-                            transcript = chunk;
-                        }
-                    }
-                    transcript = transcript.trim();
-                    if (transcript) {
-                        clearTimeout_();
-                        input.value = transcript;
-                        input.dispatchEvent(new Event('input', { bubbles: true }));
-                        input.dispatchEvent(new Event('change', { bubbles: true }));
-                        setStatus('Listening...', 'listening');
-                    }
-                };
-
-                r.onerror = function () {
-                    clearTimeout_();
-                    listening = false;
-                    if (manualStop) { manualStop = false; return; }
-                    setMicState(false);
-                    setStatus("Didn't catch that. Try again.", 'error');
-                    hideStatus(2500);
-                };
-
-                r.onend = function () {
-                    clearTimeout_();
-                    if (manualStop) {
-                        manualStop = false;
-                        listening = false;
-                        setMicState(false);
-                        return;
-                    }
-                    const hadSpeech = sawSpeech || !!input.value.trim();
-                    listening = false;
-                    setMicState(false);
-                    if (hadSpeech) {
-                        setStatus('Voice captured.', 'success');
-                        hideStatus(2200);
-                    } else {
-                        setStatus("Didn't catch that. Try again.", 'error');
-                        hideStatus(2500);
-                    }
-                };
-
-                return r;
-            };
-
-            // ── click handler ────────────────────────────────────────────────
-            micBtn.addEventListener('click', function () {
-                if (listening && recognition) { stopListeningNow(); return; }
-
-                recognition = createRecognition();
-                try {
-                    recognition.start();
-                } catch (error) {
-                    setStatus('Unable to start voice input.', 'error');
-                    hideStatus(2500);
-                    setMicState(false);
-                    listening = false;
-                    return;
-                }
-                listening = true;
-                setMicState(true);
-                setStatus('Listening...', 'listening');
-            });
-        });
-    })();
-
-    // ─── Voice input for search bar ─────────────────────────────────────────
-    (function () {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const input = document.getElementById('umSearch');
-        const micBtn = document.getElementById('umMicToggleBtn');
-        const status = document.getElementById('umVoiceStatus');
-
-        if (!input || !micBtn || !status || !SpeechRecognition) {
-            if (micBtn) {
-                micBtn.disabled = true;
-                micBtn.setAttribute('aria-disabled', 'true');
-            }
-            return;
-        }
-
-        window.umRecognition = null;
-        window.umListening = false;
-        window.umManualStop = false;
-
-        const setStatus = function (text, state) {
-            status.textContent = text;
-            status.className = 'patient-voice-status';
-            if (state) status.classList.add('is-' + state);
-            status.classList.remove('hidden');
-        };
-
-        const hideStatus = function (delay) {
-            window.setTimeout(function () {
-                status.classList.add('hidden');
-            }, delay || 0);
-        };
-
-        const setMicState = function (isActive) {
-            micBtn.classList.toggle('mic-active', isActive);
-            micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-            micBtn.innerHTML = isActive
-                ? '<i class="fa-solid fa-stop"></i>'
-                : '<i class="fa-solid fa-microphone"></i>';
-        };
-
-        const stopListeningNow = function () {
-            window.umManualStop = true;
-            window.umListening = false;
-            setMicState(false);
-            setStatus('Voice input stopped.', 'success');
-            hideStatus(1200);
-            if (window.umRecognition) {
-                try { window.umRecognition.abort(); } catch (e) {
-                    try { window.umRecognition.stop(); } catch (err) { }
-                }
-            }
-        };
-
-        const createRecognition = function () {
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-            recognition.continuous = false;
-            recognition.interimResults = true;
-            recognition.maxAlternatives = 1;
-
-            let sawSpeech = false;
-            let listenTimeoutId = null;
-            const LISTEN_TIMEOUT = 6000;
-
-            const clearListenTimeout = function () {
-                if (listenTimeoutId) { clearTimeout(listenTimeoutId); listenTimeoutId = null; }
-            };
-
-            recognition.onstart = function () {
-                listenTimeoutId = window.setTimeout(function () {
-                    if (window.umListening && !sawSpeech) {
-                        try { recognition.stop(); } catch (e) { }
-                    }
-                }, LISTEN_TIMEOUT);
-            };
-
-            recognition.onspeechend = function () {
-                clearListenTimeout();
-                try { recognition.stop(); } catch (e) { }
-            };
-
-            recognition.onresult = function (event) {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const result = event.results[i];
-                    const chunk = (result && result[0] && result[0].transcript
-                        ? result[0].transcript : '').trim();
-                    if (!chunk) continue;
-                    sawSpeech = true;
-                    if (result.isFinal) {
-                        transcript = (transcript + ' ' + chunk).trim();
-                    } else if (!transcript) {
-                        transcript = chunk;
-                    }
-                }
-                transcript = transcript.trim();
-                if (transcript) {
-                    clearListenTimeout();
-                    input.value = transcript;
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
-                    input.dispatchEvent(new Event('change', { bubbles: true }));
-                    setStatus('Listening...', 'listening');
-                }
-            };
-
-            recognition.onerror = function () {
-                clearListenTimeout();
-                window.umListening = false;
-                if (window.umManualStop) { window.umManualStop = false; return; }
-                setMicState(false);
-                setStatus("Didn't catch that. Try again.", 'error');
-                hideStatus(2500);
-            };
-
-            recognition.onend = function () {
-                clearListenTimeout();
-                if (window.umManualStop) {
-                    window.umManualStop = false;
-                    window.umListening = false;
-                    setMicState(false);
-                    return;
-                }
-                const hadSpeech = sawSpeech || !!input.value.trim();
-                window.umListening = false;
-                setMicState(false);
-                if (hadSpeech) {
-                    setStatus('Voice captured.', 'success');
-                    hideStatus(2200);
-                } else {
-                    setStatus("Didn't catch that. Try again.", 'error');
-                    hideStatus(2500);
-                }
-            };
-
-            return recognition;
-        };
-
-        micBtn.addEventListener('click', function () {
-            if (window.umListening && window.umRecognition) { stopListeningNow(); return; }
-
-            window.umRecognition = createRecognition();
-            try {
-                window.umRecognition.start();
-            } catch (error) {
-                setStatus('Unable to start voice input.', 'error');
-                hideStatus(2500);
-                setMicState(false);
-                window.umListening = false;
-                return;
-            }
-            window.umListening = true;
-            setMicState(true);
-            setStatus('Listening...', 'listening');
-        });
-    })();
         });
 
     window.addEventListener('resize', function () {

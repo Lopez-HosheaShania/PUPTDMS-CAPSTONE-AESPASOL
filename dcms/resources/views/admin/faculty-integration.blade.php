@@ -3,7 +3,7 @@
 @section('title', 'Faculty Integration | PUP Taguig Dental Clinic')
 
 @section('content')
-<main id="mainContent" class="px-4 sm:px-6 pt-[82px] pb-8 min-h-screen faculty-page">
+<main id="mainContent" class="admin-page-shell faculty-page">
     <div class="faculty-shell">
         <div class="page-banner">
             <div class="page-banner-inner">
@@ -41,7 +41,7 @@
 
                 @if ($errors->any())
                 <div class="status-alert error">
-                    <ul style="margin: 0; padding-left: 1.2rem;">
+                    <ul class="admin-alert-list">
                         @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                         @endforeach
@@ -89,12 +89,12 @@
                                         </button>
 
                                         {{-- External circular mic button (matches Add User style) --}}
-                                        <div class="patient-voice-toggle">
+                                        <div class="voice-input-toggle">
                                             <button type="button" id="facultyMicBtn" class="voice-search-mic external"
                                                 aria-label="Toggle voice input" aria-pressed="false">
                                                 <i class="fa-solid fa-microphone"></i>
                                             </button>
-                                            <span id="facultyVoiceStatus" class="patient-voice-status hidden"
+                                            <span id="facultyVoiceStatus" class="voice-status hidden"
                                                 aria-live="polite"></span>
                                         </div>
                                     </div>
@@ -165,7 +165,7 @@
                                 </div>
                             </div>
 
-                            <div class="faculty-grid-3" style="margin-top: 1rem;">
+                            <div class="faculty-grid-3 admin-mt-4">
                                 <div class="field-group">
                                     <label for="birthday" class="field-label">Birthday</label>
                                     <input type="text" id="birthday" class="access-input" readonly>
@@ -182,7 +182,7 @@
                                 </div>
                             </div>
 
-                            <div class="faculty-grid-3" style="margin-top: 1rem;">
+                            <div class="faculty-grid-3 admin-mt-4">
                                 <div class="field-group">
                                     <label for="house_num" class="field-label">House / Unit No.</label>
                                     <input type="text" id="house_num" class="access-input" readonly>
@@ -299,7 +299,7 @@
                 </div>
 
                 <div class="info-card">
-                    <div class="section-head" style="margin-bottom: .3rem;">
+                    <div class="section-head admin-mb-xs">
                         <div class="section-head-left">
                             <div class="section-icon">
                                 <i class="fa-solid fa-circle-info"></i>
@@ -584,7 +584,7 @@
 
             const setStatus = (text, state) => {
                 status.textContent = text;
-                status.className = 'patient-voice-status' + (state ? ' is-' + state : '');
+                status.className = 'voice-status' + (state ? ' is-' + state : '');
                 text ? status.classList.remove('hidden') : status.classList.add('hidden');
             };
 

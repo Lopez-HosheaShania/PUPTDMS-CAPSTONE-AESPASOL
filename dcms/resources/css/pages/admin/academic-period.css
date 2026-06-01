@@ -1,20 +1,3 @@
-.scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 10px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
-}
-
 .active-banner {
     background: #fff;
     border-radius: 12px;
@@ -85,23 +68,6 @@
     overflow: hidden;
 }
 
-.progress-fill {
-    height: 100%;
-    border-radius: 99px;
-    background: linear-gradient(90deg, #8B0000, #c0392b);
-    transition: width .6s cubic-bezier(.4, 0, .2, 1);
-}
-
-.sem-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 99px;
-}
-
 .s-active {
     background: #fee2e2;
     color: #8B0000;
@@ -120,128 +86,6 @@
 .s-inactive {
     background: #fef9c3;
     color: #92400e;
-}
-
-.act {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all .15s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    line-height: 1;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-
-.act i {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.act:hover {
-    transform: scale(1.06);
-}
-
-.act-edit {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
-.act-edit:hover {
-    background: #dbeafe;
-}
-
-.act-star {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.act-star:hover {
-    background: #a7f3d0;
-}
-
-.act-del {
-    background: #fef2f2;
-    color: #dc2626;
-}
-
-.act-del:hover {
-    background: #fee2e2;
-}
-
-.act-pinned {
-    background: #d1fae5;
-    color: #065f46;
-    opacity: .55;
-    cursor: default;
-}
-
-.tbl-row {
-    transition: background .12s;
-}
-
-.tbl-row:hover {
-    background: #fef9f9;
-}
-
-.tbl-row.is-active {
-    background: #fff7f7;
-}
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at top, rgba(139, 0, 0, .24), rgba(0, 0, 0, .58));
-    backdrop-filter: blur(3px);
-    z-index: 2000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 1.1rem;
-    opacity: 0;
-    transition: opacity .2s;
-}
-
-.modal-overlay.open {
-    display: flex;
-    opacity: 1;
-}
-
-.modal-box {
-    position: relative;
-    z-index: 2001;
-    background: #fff;
-    border-radius: 24px;
-    width: 100%;
-    max-width: 720px;
-    max-height: min(92vh, calc(100dvh - 2.2rem));
-    overflow: hidden;
-    transform: scale(.96) translateY(12px);
-    transition: transform .25s cubic-bezier(.4, 0, .2, 1);
-    box-shadow: 0 28px 70px rgba(0, 0, 0, .3);
-    border: 1px solid rgba(255, 255, 255, .35);
-}
-
-.modal-overlay.open .modal-box {
-    transform: scale(1) translateY(0);
-}
-
-.modal-box>form {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.modal-sm .modal-box {
-    max-width: 420px;
 }
 
 .ap-modal-shell {
@@ -388,17 +232,6 @@
     box-shadow: 0 0 0 3px rgba(139, 0, 0, .12);
 }
 
-.ap-add-modal .modal-box {
-    max-width: 1080px;
-    width: min(1080px, calc(100vw - 2rem));
-    height: min(88vh, calc(100dvh - 2rem));
-    max-height: min(88vh, calc(100dvh - 2rem));
-    overflow: hidden;
-    border-radius: 26px;
-    display: flex;
-    flex-direction: column;
-}
-
 .ap-add-form {
     display: flex;
     flex-direction: column;
@@ -430,7 +263,7 @@
 .ap-add-header-title {
     font-size: 1.35rem;
     font-weight: 900;
-    color: #111827;
+    color: #0c111b;
     line-height: 1.15;
     margin: 0;
 }
@@ -462,7 +295,7 @@
 .ap-add-body {
     flex: 1;
     min-height: 0;
-    padding: 1.2rem 1.5rem 1rem;
+    padding: 0.72rem;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem 1.1rem;
@@ -559,7 +392,6 @@
     margin: 0;
 }
 
-/* ── Description textarea wrap: flex row so mic sits outside ── */
 .ap-textarea-wrap {
     position: relative;
     display: flex;
@@ -579,7 +411,7 @@
     top: 14px;
     left: 15px;
     right: 15px;
-    font-size: 11px;
+    font-size: 14px;
     line-height: 1.35;
     color: #9ca3af;
     pointer-events: none;
@@ -600,58 +432,11 @@
     padding-right: 16px;
 }
 
-/* ── External circular mic button (description) ── */
-.ap-textarea-wrap .voice-mic-btn {
-    position: relative;
-    top: auto;
-    right: auto;
-    transform: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 999px;
-    background: #4b5563;
-    color: #fff;
-    border: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-    box-shadow: 0 4px 12px rgba(75, 85, 99, 0.22);
-    margin-top: 6px;
-}
-
-.ap-textarea-wrap .voice-mic-btn:hover {
-    background: #374151;
-}
-
-.ap-textarea-wrap .voice-mic-btn.is-listening {
-    background: #c0392b;
-    box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.18);
-    border: none;
-    color: #fff !important;
-    animation: micPulse 1.2s ease-in-out infinite;
-}
-
-.ap-textarea-wrap .voice-mic-btn i {
-    font-size: 14px;
-    line-height: 1;
-}
-
-/* voice status badge for textarea mic */
-.ap-textarea-wrap .voice-status {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 6px);
-    z-index: 5;
-}
-
 .ap-textarea {
     min-height: 140px;
     height: 140px;
     max-height: 140px;
-    font-size: 12px;
+    font-size: 14px;
     padding: 14px 15px;
 }
 
@@ -660,7 +445,7 @@
     width: 100%;
     border: 1px solid #e5e7eb;
     background: #fff;
-    color: #111827;
+    color: #0c111b;
     font-size: 14px;
     font-weight: 600;
     transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
@@ -681,10 +466,9 @@
     resize: none;
     border-radius: 16px;
     padding: 16px 18px;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.4;
     box-sizing: border-box;
-    vertical-align: top;
 }
 
 .ap-desc-meta {
@@ -784,14 +568,13 @@
 
 .ap-semester-item input:checked+.ap-semester-card {
     border-color: var(--active-color, #8B0000);
-    background: linear-gradient(180deg, #fff5f5 0%, #ffeaea 100%);
+    background: linear-gradient(180deg, #fffefe 0%, #eafaff 100%);
     color: var(--active-color, #8B0000);
-    box-shadow: 0 10px 24px rgba(139, 0, 0, 0.12);
 }
 
 .ap-semester-card:hover {
-    border-color: #8B0000;
-    color: #8B0000;
+    border-color: var(--active-color, #8B0000);
+    color: var(--active-color, #8B0000);
 }
 
 .ap-date-grid-redesign {
@@ -834,7 +617,7 @@
 .ap-active-title {
     font-size: 14px;
     font-weight: 800;
-    color: #111827;
+    color: #0c111b;
     margin: 0 0 2px;
 }
 
@@ -862,7 +645,7 @@
 
 .ap-switch-slider {
     width: 48px;
-    height: 28px;
+    height: 29px;
     border-radius: 999px;
     background: #d1d5db;
     position: relative;
@@ -988,7 +771,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: .75rem;
-    padding: 1rem 1.5rem 1.15rem;
+    padding-top: 1.15rem;
     border-top: 1px solid #eef2f7;
     background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(10px);
@@ -1039,10 +822,6 @@
 }
 
 @media (max-width: 991px) {
-    .ap-add-modal .modal-box {
-        max-width: 880px;
-    }
-
     .ap-add-body {
         gap: 1rem;
     }
@@ -1060,42 +839,6 @@
         inset: 0;
         background: rgba(15, 23, 42, 0.42);
         backdrop-filter: blur(5px);
-    }
-
-    .ap-add-modal .modal-box {
-        width: 100%;
-        max-width: 100%;
-        height: min(92dvh, 92vh);
-        max-height: min(92dvh, 92vh);
-        margin: 0;
-        border-radius: 22px 22px 0 0;
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
-        box-shadow: 0 -18px 42px rgba(15, 23, 42, 0.18);
-        transform: translateY(100%);
-        transition: transform .28s cubic-bezier(.22, 1, .36, 1);
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .ap-add-modal.open .modal-box {
-        transform: translateY(0);
-    }
-
-    .ap-add-modal .modal-box::before {
-        content: '';
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 44px;
-        height: 5px;
-        border-radius: 999px;
-        background: #cbd5e1;
-        z-index: 40;
     }
 
     .ap-add-form {
@@ -1423,162 +1166,6 @@
     filter: brightness(1.05);
 }
 
-.ap-delete-shell {
-    max-width: 460px;
-}
-
-.ap-delete-body {
-    padding: 1.4rem;
-    text-align: center;
-    display: grid;
-    gap: .5rem;
-}
-
-.ap-delete-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: .55rem;
-    margin-top: .65rem;
-}
-
-.field-input {
-    transition: border-color .15s, box-shadow .15s;
-}
-
-.field-input:focus {
-    outline: none;
-    border-color: #8B0000 !important;
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, .1);
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1
-    }
-
-    50% {
-        opacity: .35
-    }
-}
-
-.dot-pulse {
-    animation: pulse 2s cubic-bezier(.4, 0, .6, 1) infinite;
-}
-
-/* ── Voice mic pulse animation ── */
-@keyframes micPulse {
-
-    0%,
-    100% {
-        box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4);
-    }
-
-    50% {
-        box-shadow: 0 0 0 8px rgba(192, 57, 43, 0);
-    }
-}
-
-/* ── External circular mic button (search bar) ── */
-.ap-voice-toggle {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.ap-voice-mic-ext {
-    display: inline-flex;
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
-    align-items: center;
-    justify-content: center;
-    background: #4b5563;
-    color: #ffffff;
-    box-shadow: 0 6px 18px rgba(75, 85, 99, 0.12);
-    border: none;
-    flex-shrink: 0;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-}
-
-.ap-voice-mic-ext:hover {
-    background: #374151;
-}
-
-.ap-voice-mic-ext i {
-    font-size: 12px;
-    line-height: 1;
-}
-
-.ap-voice-mic-ext.mic-active {
-    background: #c0392b;
-    transform: scale(1.1);
-    animation: micPulse 1.2s ease-in-out infinite;
-}
-
-.ap-voice-status {
-    position: absolute;
-    right: 0;
-    top: -1.55rem;
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-    font-size: .74rem;
-    font-weight: 700;
-    line-height: 1;
-    padding: .18rem .48rem;
-    border-radius: 999px;
-    pointer-events: none;
-    z-index: 6;
-    background: rgba(255, 255, 255, .92);
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
-}
-
-.ap-voice-status.hidden {
-    display: none;
-}
-
-.ap-voice-status.is-listening {
-    color: #1d4ed8;
-    border-color: #bfdbfe;
-    background: #eff6ff;
-}
-
-.ap-voice-status.is-error {
-    color: #b91c1c;
-    border-color: #fecaca;
-    background: #fef2f2;
-}
-
-.ap-voice-status.is-success {
-    color: #166534;
-    border-color: #bbf7d0;
-    background: #f0fdf4;
-}
-
-/* Dark mode for the mic buttons */
-[data-theme="dark"] .ap-voice-mic-ext,
-[data-theme="dark"] .ap-textarea-wrap .voice-mic-btn {
-    background: rgba(255, 255, 255, 0.10) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: #d1d5db !important;
-}
-
-[data-theme="dark"] .ap-voice-mic-ext:hover,
-[data-theme="dark"] .ap-textarea-wrap .voice-mic-btn:hover {
-    background: rgba(255, 255, 255, 0.16) !important;
-}
-
-[data-theme="dark"] .ap-voice-mic-ext.mic-active,
-[data-theme="dark"] .ap-textarea-wrap .voice-mic-btn.is-listening {
-    background: #c0392b !important;
-    color: #fff !important;
-}
-
 .ap-field-block {
     display: grid;
     gap: 8px;
@@ -1618,40 +1205,6 @@
     color: #a1a1aa;
 }
 
-.filter-select {
-    height: 38px;
-    border: 1.5px solid #E0DDD8;
-    border-radius: 12px;
-    background: #FAFAF9;
-    padding: 0 12px;
-    font-size: 12px;
-    color: #4b5563;
-    outline: none;
-    cursor: pointer;
-    transition: border-color .2s, box-shadow .2s;
-}
-
-.filter-select:focus {
-    border-color: #8B0000;
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, .1);
-}
-
-.filter-btn {
-    height: 38px;
-    padding: 0 16px;
-    border-radius: 10px;
-    background: #8B0000;
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-}
-
-.filter-btn:hover {
-    background: #760000;
-}
-
 .reset-btn {
     height: 38px;
     padding: 0 16px;
@@ -1672,27 +1225,27 @@
     background: #f9fafb;
 }
 
-[data-theme="dark"] .border-gray-100 {
+[data-theme="dark"] .academic-period-page .border-gray-100 {
     border-color: #21262d !important;
 }
 
-[data-theme="dark"] .border-gray-200 {
+[data-theme="dark"] .academic-period-page .border-gray-200 {
     border-color: #21262d !important;
 }
 
-[data-theme="dark"] .text-gray-800 {
+[data-theme="dark"] .academic-period-page .text-gray-800 {
     color: #e5e7eb !important;
 }
 
-[data-theme="dark"] .text-gray-600 {
+[data-theme="dark"] .academic-period-page .text-gray-600 {
     color: #9ca3af !important;
 }
 
-[data-theme="dark"] .text-gray-500 {
+[data-theme="dark"] .academic-period-page .text-gray-500 {
     color: #9ca3af !important;
 }
 
-[data-theme="dark"] .text-\[\#333333\] {
+[data-theme="dark"] .academic-period-page .text-\[\#333333\] {
     color: #E5E7EB !important;
 }
 
@@ -1703,11 +1256,6 @@
 
 [data-theme="dark"] .flyout-link {
     color: #d1d5db;
-}
-
-[data-theme="dark"] .modal-box {
-    background: #161b22;
-    border-color: #2b313a;
 }
 
 [data-theme="dark"] .ap-modal-header {
@@ -1741,27 +1289,11 @@
     color: #d1d5db;
 }
 
-[data-theme="dark"] .modal-box input,
-[data-theme="dark"] .modal-box select,
-[data-theme="dark"] .modal-box textarea {
-    background: #0d1117 !important;
-    border-color: #21262d !important;
-    color: #e5e7eb !important;
-}
-
-[data-theme="dark"] .tbl-row:hover {
-    background: #0d1117;
-}
-
-[data-theme="dark"] .tbl-row.is-active {
-    background: rgba(139, 0, 0, .07);
-}
-
-[data-theme="dark"] thead tr {
+[data-theme="dark"] .academic-period-page thead tr {
     background: #0d1117 !important;
 }
 
-[data-theme="dark"] tr {
+[data-theme="dark"] .academic-period-page tr {
     border-color: #21262d !important;
 }
 
@@ -1773,36 +1305,9 @@
     background: #21262d;
 }
 
-[data-theme="dark"] .modal-box .bg-gray-50 {
-    background: #0d1117 !important;
-}
-
 [data-theme="dark"] .cal-card {
     background: #161b22 !important;
     border-color: #21262d !important;
-}
-
-.field-error {
-    font-size: 11px;
-    color: #dc2626;
-    margin-top: 4px;
-    display: none;
-    align-items: center;
-    gap: 4px;
-    font-weight: 600;
-}
-
-.field-error.show {
-    display: flex;
-}
-
-.field-invalid {
-    border-color: #dc2626 !important;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, .1) !important;
-}
-
-.field-valid {
-    border-color: #16a34a !important;
 }
 
 .ap-toolbar {
@@ -1900,7 +1405,7 @@
 .academic-card-year-text {
     font-size: 14px;
     font-weight: 800;
-    color: #111827;
+    color: #0c111b;
     line-height: 1.2;
 }
 
@@ -1961,12 +1466,6 @@
 }
 
 @media (max-width: 767px) {
-    #mainContent {
-        padding-left: 0.9rem !important;
-        padding-right: 0.9rem !important;
-        padding-top: 74px !important;
-    }
-
     .active-banner-inner {
         padding: 1rem;
     }
@@ -1987,8 +1486,6 @@
         gap: 8px;
     }
 
-    .filter-select,
-    .filter-btn,
     .reset-btn {
         width: 100% !important;
     }
@@ -1998,8 +1495,6 @@
         justify-content: center;
     }
 
-    .filter-select,
-    .filter-btn,
     .reset-btn {
         justify-content: center;
     }
@@ -2036,31 +1531,6 @@
 
     .ap-actions {
         gap: 6px;
-    }
-
-    .act {
-        width: 28px;
-        height: 28px;
-    }
-
-    .sem-pill {
-        font-size: 10px !important;
-    }
-
-    .modal-overlay:not(.ap-add-modal) {
-        align-items: flex-end;
-        padding: 0;
-        padding-top: calc(var(--header-h, 68px) + 10px);
-    }
-
-    .modal-overlay:not(.ap-add-modal) .modal-box {
-        width: 100%;
-        max-width: 100%;
-        max-height: calc(100dvh - var(--header-h, 68px) - 10px);
-        border-radius: 20px 20px 0 0;
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
     }
 
     .ap-modal-header {
@@ -2129,11 +1599,12 @@
     }
 }
 
-[data-theme="dark"] #mainContent {
+[data-theme="dark"] #mainContent.academic-period-page,
+.dark #mainContent.academic-period-page {
     background: #020c16 !important;
 }
 
-[data-theme="dark"] .bg-white.rounded-xl.shadow.border.border-gray-100,
+[data-theme="dark"] .academic-period-page .bg-white.rounded-xl.shadow.border.border-gray-100,
 [data-theme="dark"] .cal-card,
 [data-theme="dark"] .active-banner,
 [data-theme="dark"] .academic-card {
@@ -2142,32 +1613,18 @@
     box-shadow: 0 14px 34px rgba(0, 0, 0, .32) !important;
 }
 
-[data-theme="dark"] .bg-gray-50,
+[data-theme="dark"] .academic-period-page .bg-gray-50,
 [data-theme="dark"] .ap-toolbar,
 [data-theme="dark"] .border-t.bg-gray-50 {
     background: rgba(13, 17, 23, .90) !important;
     border-color: rgba(255, 255, 255, .08) !important;
 }
 
-[data-theme="dark"] .filter-select,
 [data-theme="dark"] .reset-btn,
 [data-theme="dark"] .academic-view-toggle {
     background: rgba(255, 255, 255, .06) !important;
     border-color: rgba(255, 255, 255, .12) !important;
     color: #d1d5db !important;
-}
-
-[data-theme="dark"] .tbl-row,
-[data-theme="dark"] .ap-table tbody tr {
-    background: rgba(255, 255, 255, .02) !important;
-}
-
-[data-theme="dark"] .tbl-row.is-active {
-    background: rgba(252, 165, 165, .08) !important;
-}
-
-[data-theme="dark"] .tbl-row:hover {
-    background: rgba(255, 255, 255, .05) !important;
 }
 
 [data-theme="dark"] .ap-table td,
@@ -2178,45 +1635,22 @@
     color: #d1d5db !important;
 }
 
-[data-theme="dark"] h2.text-gray-800,
+[data-theme="dark"] .academic-period-page h2.text-gray-800,
 [data-theme="dark"] .ap-toolbar-left h2,
 [data-theme="dark"] .cal-card h2 {
     color: #FCA5A5 !important;
 }
 
 [data-theme="dark"] #liveClock {
-    color: #FCA5A5 !important;
+    color: #fef6f6 !important;
 }
 
-[data-theme="dark"] .act,
-[data-theme="dark"] .sem-pill,
 [data-theme="dark"] #calYear {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
 
-[data-theme="dark"] .act-edit {
-    background: rgba(37, 99, 235, .13) !important;
-    border: 1px solid rgba(96, 165, 250, .20) !important;
-}
-
-[data-theme="dark"] .act-star,
-[data-theme="dark"] .act-pinned {
-    background: rgba(16, 185, 129, .13) !important;
-    border: 1px solid rgba(52, 211, 153, .20) !important;
-}
-
-[data-theme="dark"] .act-del {
-    background: rgba(239, 68, 68, .12) !important;
-    border: 1px solid rgba(248, 113, 113, .20) !important;
-}
-
-[data-theme="dark"] .group {
-    background: rgba(255, 255, 255, .04) !important;
-    border-color: rgba(255, 255, 255, .10) !important;
-}
-
-[data-theme="dark"] .group>div:first-child {
+[data-theme="dark"] .academic-period-page .group>div:first-child {
     background: rgba(255, 255, 255, .07) !important;
     border-color: rgba(255, 255, 255, .12) !important;
 }
@@ -2242,22 +1676,6 @@
 
 [data-theme="dark"] .ap-table tbody tr.tbl-row:hover {
     background: rgba(255, 255, 255, .04) !important;
-}
-
-[data-theme="dark"] .sem-pill {
-    background: rgba(255, 255, 255, .06) !important;
-    border: 1px solid rgba(255, 255, 255, .12) !important;
-    color: #d1d5db !important;
-    backdrop-filter: blur(12px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .10),
-        0 4px 12px rgba(0, 0, 0, .22) !important;
-    text-shadow: none !important;
-}
-
-[data-theme="dark"] .sem-pill::before {
-    display: none !important;
 }
 
 [data-theme="dark"] .academic-item[data-semester="Summer"] .sem-pill {
@@ -2287,15 +1705,6 @@
         0 2px 6px rgba(239, 68, 68, .12) !important;
 }
 
-[data-theme="dark"] .academic-item .sem-pill i {
-    color: currentColor !important;
-}
-
-[data-theme="dark"] .sem-pill i {
-    color: currentColor !important;
-    opacity: .8;
-}
-
 [data-theme="dark"] #openAddPeriodQuickBtn .font-bold,
 [data-theme="dark"] #openEditPeriodQuickBtn .font-bold {
     color: #FCA5A5 !important;
@@ -2313,7 +1722,6 @@
     color: #FCA5A5 !important;
 }
 
-[data-theme="dark"] .ap-add-modal .modal-box,
 [data-theme="dark"] .ap-add-header,
 [data-theme="dark"] .ap-add-body,
 [data-theme="dark"] .ap-add-footer,
@@ -2351,18 +1759,3437 @@
     background: rgba(255, 255, 255, .05) !important;
 }
 
-input[type="date"] {
-    color: #111827;
-}
-
-input[type="date"]::-webkit-datetime-edit {
-    color: #111827;
-}
-
-input[type="date"]:invalid::-webkit-datetime-edit {
-    color: #9ca3af;
-}
-
 [data-theme="dark"] .ap-add-header-title {
     color: #FCA5A5 !important;
+}
+
+#mainContent.academic-period-page {
+    overflow-x: hidden;
+    background: var(--admin-page-bg, #f6f7f9);
+}
+
+.academic-period-page .admin-page-container {
+    max-width: 100%;
+}
+
+.academic-period-page .ap-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    overflow: visible !important;
+}
+
+.academic-period-page .ap-toolbar-left,
+.academic-period-page .ap-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.academic-period-page .ap-toolbar-right {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.academic-period-page .ap-search-row {
+    width: min(360px, 100%);
+    flex: 1 1 320px;
+}
+
+.academic-period-page .ap-search-row .search-wrap.global-search {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+.academic-period-page #academicViewToggle.view-toggle-container {
+    flex: 0 0 auto;
+}
+
+.academic-period-page #academicListView[hidden],
+.academic-period-page #academicGridView[hidden] {
+    display: none !important;
+}
+
+.academic-period-page .academic-grid-view {
+    display: none;
+    padding: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .85rem;
+}
+
+.academic-period-page.mode-grid .academic-grid-view {
+    display: grid;
+}
+
+.academic-period-page.mode-list #academicListView {
+    display: block;
+}
+
+.academic-period-page.mode-grid #academicListView {
+    display: none;
+}
+
+.academic-period-page.mode-list #academicGridView {
+    display: none;
+}
+
+.academic-period-page .academic-card {
+    position: relative;
+    min-height: 225px;
+    border-radius: 18px;
+    border: 1px solid #E5E7EB;
+    background: #ffffff;
+    padding: 1rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.academic-period-page .academic-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 0, 0, .20);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .08);
+}
+
+.academic-period-page .academic-card-meta {
+    flex: 1 1 auto;
+}
+
+.academic-period-page .academic-card-actions {
+    margin-top: auto;
+}
+
+.academic-period-page .quick-actions-list {
+    display: grid;
+    gap: .7rem;
+    padding: .75rem;
+}
+
+.academic-period-page .quick-action-card {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .9rem .95rem;
+    border-radius: 18px;
+    border: 1px solid rgba(139, 0, 0, .10);
+    background:
+        radial-gradient(circle at 100% 100%, rgba(139, 0, 0, .08), transparent 40%),
+        linear-gradient(135deg, #ffffff 0%, #fff7f7 100%);
+    box-shadow:
+        0 2px 10px rgba(15, 23, 42, .035),
+        inset 0 1px 0 rgba(255, 255, 255, .72);
+    overflow: hidden;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.academic-period-page .quick-action-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 0, 0, .30);
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, .18), transparent 40%),
+        linear-gradient(135deg, #8B0000 0%, #6b0000 58%, #3b0202 100%);
+    box-shadow: 0 14px 28px rgba(139, 0, 0, .18);
+}
+
+.academic-period-page .quick-action-icon {
+    position: relative;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .64);
+    color: var(--crimson, #8B0000);
+    border: 1px solid rgba(139, 0, 0, .12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .78), 0 8px 18px rgba(139, 0, 0, .08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.academic-period-page .quick-action-icon i,
+.academic-period-page .quick-action-arrow,
+.academic-period-page .quick-action-bg-icon {
+    color: currentColor !important;
+}
+
+.academic-period-page .quick-action-card:hover .quick-action-icon {
+    transform: scale(1.03);
+    background: rgba(255, 255, 255, .16);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, .22);
+}
+
+.academic-period-page .quick-action-copy {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    flex: 1;
+    display: grid;
+    gap: .15rem;
+}
+
+.academic-period-page .quick-action-title {
+    display: block;
+    color: #0c111b;
+    font-size: .88rem;
+    font-weight: 900;
+    line-height: 1.15;
+    transition: color .18s ease;
+}
+
+.academic-period-page .quick-action-sub {
+    display: block;
+    color: #9CA3AF;
+    font-size: .70rem;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color .18s ease;
+}
+
+.academic-period-page .quick-action-arrow {
+    position: relative;
+    z-index: 1;
+    margin-left: auto;
+    color: #c9cdd3 !important;
+    font-size: .72rem;
+    transition: transform .18s ease, color .18s ease;
+}
+
+.academic-period-page .quick-action-card:hover .quick-action-title,
+.academic-period-page .quick-action-card:hover .quick-action-sub,
+.academic-period-page .quick-action-card:hover .quick-action-arrow {
+    color: #ffffff !important;
+}
+
+.academic-period-page .quick-action-card:hover .quick-action-arrow {
+    transform: translateX(3px);
+}
+
+.academic-period-page .quick-action-bg-icon {
+    position: absolute;
+    right: .75rem;
+    bottom: -1.25rem;
+    z-index: 0;
+    font-size: 4.6rem;
+    color: rgba(139, 0, 0, .075) !important;
+    transform: rotate(-10deg);
+    pointer-events: none;
+    transition: color .18s ease, transform .18s ease;
+}
+
+.academic-period-page .quick-action-card:hover .quick-action-bg-icon {
+    color: rgba(255, 255, 255, .13) !important;
+    transform: rotate(-8deg) scale(1.04);
+}
+
+.academic-period-page .ap-actions,
+.academic-period-page .academic-card-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    overflow: visible;
+}
+
+.academic-period-page .academic-card-actions form,
+.academic-period-page .ap-actions form {
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.academic-period-page .ap-action-btn {
+    --ap-action-bg: #F3F4F6;
+    --ap-action-color: #4B5563;
+    --ap-action-hover-bg: #E5E7EB;
+    --ap-action-hover-color: #0c111b;
+
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--ap-action-bg) !important;
+    color: var(--ap-action-color) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: transform .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease !important;
+}
+
+.academic-period-page .ap-action-btn i {
+    color: currentColor !important;
+    font-size: 13px !important;
+}
+
+.academic-period-page .ap-action-btn:hover,
+.academic-period-page .ap-action-btn:focus-visible {
+    background: var(--ap-action-hover-bg) !important;
+    color: var(--ap-action-hover-color) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 10px 18px color-mix(in srgb, var(--ap-action-hover-color) 18%, transparent) !important;
+    outline: none !important;
+}
+
+.academic-period-page .ap-action-edit {
+    --ap-action-bg: #EFF6FF;
+    --ap-action-color: #2563EB;
+    --ap-action-hover-bg: #DBEAFE;
+    --ap-action-hover-color: #1D4ED8;
+}
+
+.academic-period-page .ap-action-active {
+    --ap-action-bg: #DCFCE7;
+    --ap-action-color: #16A34A;
+    --ap-action-hover-bg: #BBF7D0;
+    --ap-action-hover-color: #15803D;
+}
+
+.academic-period-page .ap-action-delete {
+    --ap-action-bg: #FEE2E2;
+    --ap-action-color: #DC2626;
+    --ap-action-hover-bg: #FECACA;
+    --ap-action-hover-color: #B91C1C;
+}
+
+.academic-period-page .ap-action-pinned {
+    --ap-action-bg: #FFF7ED;
+    --ap-action-color: #F97316;
+    pointer-events: none;
+}
+
+.academic-period-page .status-badge,
+.academic-period-page .sem-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    min-height: 26px !important;
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid transparent !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+}
+
+.academic-period-page .s-active {
+    background: var(--status-completed-bg, #DCFCE7) !important;
+    color: var(--status-completed-text, #166534) !important;
+    border-color: var(--status-completed-border, #BBF7D0) !important;
+}
+
+.academic-period-page .s-upcoming {
+    background: var(--status-info-bg, #EFF6FF) !important;
+    color: var(--status-info-text, #1D4ED8) !important;
+    border-color: var(--status-info-border, #BFDBFE) !important;
+}
+
+.academic-period-page .s-ended {
+    background: var(--status-default-bg, #F1F5F9) !important;
+    color: var(--status-default-text, #475569) !important;
+    border-color: var(--status-default-border, #CBD5E1) !important;
+}
+
+.academic-period-page .s-inactive {
+    background: var(--status-pending-bg, #FFF7ED) !important;
+    color: var(--status-pending-text, #C2410C) !important;
+    border-color: var(--status-pending-border, #FED7AA) !important;
+}
+
+#filterModal.academic-filter-modal .filter-drawer-panel {
+    max-width: 520px !important;
+}
+
+#filterModal.academic-filter-modal .filter-chip-remove {
+    border: 0 !important;
+    background: transparent !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page,
+.dark #mainContent.academic-period-page {
+    background: #000D1A !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] .academic-period-page .bg-white.rounded-xl,
+[data-theme="dark"] .academic-period-page .active-banner,
+[data-theme="dark"] .academic-period-page .cal-card,
+[data-theme="dark"] .academic-period-page .academic-card,
+.dark .academic-period-page .bg-white.rounded-xl,
+.dark .academic-period-page .active-banner,
+.dark .academic-period-page .cal-card,
+.dark .academic-period-page .academic-card {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, .14), transparent 38%),
+        linear-gradient(145deg, rgba(13, 17, 23, .94), rgba(22, 27, 34, .88)) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] .academic-period-page .bg-gray-50,
+[data-theme="dark"] .academic-period-page .ap-toolbar,
+[data-theme="dark"] .academic-period-page .border-t.bg-gray-50,
+.dark .academic-period-page .bg-gray-50,
+.dark .academic-period-page .ap-toolbar,
+.dark .academic-period-page .border-t.bg-gray-50 {
+    background: rgba(13, 17, 23, .82) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] .academic-period-page .text-gray-900,
+[data-theme="dark"] .academic-period-page .text-gray-800,
+[data-theme="dark"] .academic-period-page .text-gray-700,
+[data-theme="dark"] .academic-period-page .text-gray-600,
+[data-theme="dark"] .academic-period-page .academic-card-year-text,
+[data-theme="dark"] .academic-period-page .academic-card-value,
+[data-theme="dark"] .academic-period-page #liveDate,
+.dark .academic-period-page .text-gray-900,
+.dark .academic-period-page .text-gray-800,
+.dark .academic-period-page .text-gray-700,
+.dark .academic-period-page .text-gray-600,
+.dark .academic-period-page .academic-card-year-text,
+.dark .academic-period-page .academic-card-value,
+.dark .academic-period-page #liveDate {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] .academic-period-page .text-gray-500,
+[data-theme="dark"] .academic-period-page .text-gray-400,
+[data-theme="dark"] .academic-period-page .academic-card-label,
+[data-theme="dark"] .academic-period-page #liveDay,
+.dark .academic-period-page .text-gray-500,
+.dark .academic-period-page .text-gray-400,
+.dark .academic-period-page .academic-card-label,
+.dark .academic-period-page #liveDay {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .academic-period-page h2.text-gray-800,
+[data-theme="dark"] .academic-period-page .ap-toolbar-left h2,
+[data-theme="dark"] .academic-period-page .cal-card h2,
+.dark .academic-period-page h2.text-gray-800,
+.dark .academic-period-page .ap-toolbar-left h2,
+.dark .academic-period-page .cal-card h2,
+.dark .academic-period-page #liveClock {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .academic-period-page .ap-table thead tr,
+.dark .academic-period-page .ap-table thead tr {
+    background: rgba(13, 17, 23, .92) !important;
+}
+
+[data-theme="dark"] .academic-period-page .ap-table tbody tr.tbl-row,
+.dark .academic-period-page .ap-table tbody tr.tbl-row {
+    background: rgba(255, 255, 255, .025) !important;
+    border-color: rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .academic-period-page .ap-table tbody tr.tbl-row:hover,
+.dark .academic-period-page .ap-table tbody tr.tbl-row:hover {
+    background: rgba(252, 165, 165, .07) !important;
+}
+
+[data-theme="dark"] .academic-period-page .ap-table td,
+.dark .academic-period-page .ap-table td {
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .academic-period-page .quick-action-card,
+.dark .academic-period-page .quick-action-card {
+    border-color: rgba(255, 255, 255, .08) !important;
+    background:
+        radial-gradient(circle at 100% 100%, rgba(252, 165, 165, .10), transparent 42%),
+        linear-gradient(145deg, rgba(17, 24, 39, .95), rgba(13, 17, 23, .94)) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, .20), inset 0 1px 0 rgba(255, 255, 255, .055) !important;
+}
+
+[data-theme="dark"] .academic-period-page .quick-action-card:hover,
+.dark .academic-period-page .quick-action-card:hover {
+    border-color: rgba(252, 165, 165, .26) !important;
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, .14), transparent 40%),
+        linear-gradient(135deg, #8B0000 0%, #5f0202 58%, #2a0101 100%) !important;
+}
+
+[data-theme="dark"] .academic-period-page .quick-action-icon,
+.dark .academic-period-page .quick-action-icon {
+    color: #FCA5A5 !important;
+    background: rgba(255, 255, 255, .075) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] .academic-period-page .quick-action-title,
+.dark .academic-period-page .quick-action-title {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] .academic-period-page .quick-action-sub,
+.dark .academic-period-page .quick-action-sub {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .academic-period-page .ap-action-btn,
+.dark .academic-period-page .ap-action-btn {
+    background: rgba(255, 255, 255, .075) !important;
+    border: 1px solid rgba(255, 255, 255, .10) !important;
+    color: #CBD5E1 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 8px 18px rgba(0, 0, 0, .18) !important;
+}
+
+[data-theme="dark"] .academic-period-page .ap-action-edit,
+.dark .academic-period-page .ap-action-edit {
+    color: #93C5FD !important;
+}
+
+[data-theme="dark"] .academic-period-page .ap-action-active,
+.dark .academic-period-page .ap-action-active {
+    color: #86EFAC !important;
+}
+
+[data-theme="dark"] .academic-period-page .ap-action-delete,
+.dark .academic-period-page .ap-action-delete {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .academic-period-page .ap-action-pinned,
+.dark .academic-period-page .ap-action-pinned {
+    color: #FDBA74 !important;
+}
+
+[data-theme="dark"] .academic-period-page .s-active,
+.dark .academic-period-page .s-active {
+    background: rgba(34, 197, 94, .12) !important;
+    color: #86EFAC !important;
+    border-color: rgba(134, 239, 172, .22) !important;
+}
+
+[data-theme="dark"] .academic-period-page .s-upcoming,
+.dark .academic-period-page .s-upcoming {
+    background: rgba(59, 130, 246, .12) !important;
+    color: #93C5FD !important;
+    border-color: rgba(147, 197, 253, .22) !important;
+}
+
+[data-theme="dark"] .academic-period-page .s-ended,
+.dark .academic-period-page .s-ended {
+    background: rgba(148, 163, 184, .12) !important;
+    color: #CBD5E1 !important;
+    border-color: rgba(203, 213, 225, .18) !important;
+}
+
+[data-theme="dark"] .academic-period-page .s-inactive,
+.dark .academic-period-page .s-inactive {
+    background: rgba(245, 158, 11, .12) !important;
+    color: #FCD34D !important;
+    border-color: rgba(252, 211, 77, .20) !important;
+}
+
+[data-theme="dark"] .academic-period-page .sem-pill,
+.dark .academic-period-page .sem-pill {
+    background: rgba(252, 165, 165, .10) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, .20) !important;
+}
+
+[data-theme="dark"] #filterModal.academic-filter-modal .filter-drawer-panel,
+.dark #filterModal.academic-filter-modal .filter-drawer-panel,
+[data-theme="dark"] #filterModal.academic-filter-modal .filter-drawer-header,
+[data-theme="dark"] #filterModal.academic-filter-modal .filter-drawer-body,
+[data-theme="dark"] #filterModal.academic-filter-modal .filter-drawer-footer,
+.dark #filterModal.academic-filter-modal .filter-drawer-header,
+.dark #filterModal.academic-filter-modal .filter-drawer-body,
+.dark #filterModal.academic-filter-modal .filter-drawer-footer {
+    background: var(--filter-panel-bg, #0c111b) !important;
+    color: var(--filter-panel-text, #E5E7EB) !important;
+    border-color: var(--filter-panel-border, rgba(255, 255, 255, .10)) !important;
+}
+
+@media (max-width: 1280px) {
+    .academic-period-page .academic-grid-view {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1023px) {
+    .academic-period-page .ap-toolbar {
+        align-items: stretch;
+    }
+
+    .academic-period-page .ap-toolbar-left,
+    .academic-period-page .ap-toolbar-right,
+    .academic-period-page .ap-search-row {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .academic-period-page #academicViewToggle {
+        display: none !important;
+    }
+
+    .academic-period-page #academicListView {
+        display: none !important;
+    }
+
+    .academic-period-page #academicGridView {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .academic-period-page .ap-toolbar-right {
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .academic-period-page .global-filter-btn,
+    .academic-period-page .global-filter-reset-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+#mainContent.academic-period-page .bg-white.rounded-xl.shadow.border.border-gray-100,
+#mainContent.academic-period-page .active-banner,
+#mainContent.academic-period-page .cal-card {
+    border-color: #F0EAEA !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .045) !important;
+}
+
+#mainContent.academic-period-page .ap-toolbar,
+#mainContent.academic-period-page .bg-gray-50,
+#mainContent.academic-period-page .border-t.bg-gray-50 {
+    background: #FAFAFA !important;
+    border-color: #F1ECE7 !important;
+}
+
+#mainContent.academic-period-page .ap-table,
+#mainContent.academic-period-page .ap-table thead,
+#mainContent.academic-period-page .ap-table thead tr,
+#mainContent.academic-period-page .ap-table thead th,
+#mainContent.academic-period-page .ap-table tbody td,
+#mainContent.academic-period-page .ap-table tbody tr {
+    border-color: #F1ECE7 !important;
+}
+
+#mainContent.academic-period-page .ap-table thead th {
+    background: #FAFAFA !important;
+    border-bottom: 1px solid #F1ECE7 !important;
+}
+
+#mainContent.academic-period-page .ap-table-wrap {
+    border-top: 0 !important;
+}
+
+#mainContent.academic-period-page .ap-table {
+    border: 0 !important;
+}
+
+#mainContent.academic-period-page .progress-track {
+    position: relative !important;
+    width: 100% !important;
+    height: 8px !important;
+    border-radius: 999px !important;
+    background: #F1F5F9 !important;
+    border: 1px solid #E5E7EB !important;
+    overflow: hidden !important;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, .06) !important;
+}
+
+#mainContent.academic-period-page .progress-fill {
+    display: block !important;
+    height: 100% !important;
+    min-width: 4px;
+    border-radius: inherit !important;
+    background: linear-gradient(90deg, #8B0000, #C1121F) !important;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, .22) inset,
+        0 0 18px rgba(139, 0, 0, .22) !important;
+    transition: width .35s ease !important;
+}
+
+#mainContent.academic-period-page .ap-add-period-btn {
+    min-height: 48px !important;
+    padding: 0 1.1rem !important;
+    border: 1px solid rgba(255, 255, 255, .18) !important;
+    border-radius: 14px !important;
+    background: #FFFFFF !important;
+    color: var(--crimson, #8B0000) !important;
+    font-weight: 800 !important;
+    font-size: .92rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .6rem !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .12) !important;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease !important;
+}
+
+#mainContent.academic-period-page .ap-add-period-btn:hover,
+#mainContent.academic-period-page .ap-add-period-btn:focus-visible {
+    transform: translateY(-1px) !important;
+    background: #FFF8F8 !important;
+    color: #6B0000 !important;
+    box-shadow: 0 14px 26px rgba(0, 0, 0, .16) !important;
+    outline: none !important;
+}
+
+#mainContent.academic-period-page .ap-add-period-btn i {
+    color: currentColor !important;
+}
+
+#filterModal.academic-filter-modal .filter-drawer-footer {
+    background: var(--filter-panel-bg, #FFFFFF) !important;
+    border-top: 1px solid var(--filter-panel-border, #F1ECE7) !important;
+}
+
+#filterModal.academic-filter-modal .filter-clear-btn {
+    min-height: 42px !important;
+    padding: 0 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--filter-danger-text, #D97706) !important;
+    font-weight: 900 !important;
+    border-radius: 12px !important;
+}
+
+#filterModal.academic-filter-modal .filter-clear-btn:hover {
+    color: var(--filter-primary-bg-hover, #660000) !important;
+    background: transparent !important;
+}
+
+#filterModal.academic-filter-modal .filter-cancel-btn {
+    min-height: 42px !important;
+    border-radius: 10px !important;
+}
+
+#filterModal.academic-filter-modal .filter-show-results-btn {
+    min-height: 42px !important;
+    border-radius: 10px !important;
+    min-width: 170px !important;
+}
+
+#filterModal.academic-filter-modal .filter-show-results-btn i,
+#filterModal.academic-filter-modal .filter-clear-btn i {
+    color: currentColor !important;
+}
+
+#mainContent.academic-period-page .ap-actions,
+#mainContent.academic-period-page .academic-card-actions,
+#mainContent.academic-period-page .ap-table td:last-child {
+    overflow: visible !important;
+}
+
+#mainContent.academic-period-page .ap-action-btn {
+    --action-bg: #F3F4F6;
+    --action-color: #4B5563;
+    --action-hover-bg: var(--action-bg);
+    --action-hover-color: var(--action-color);
+    --action-tooltip-bg: var(--action-color);
+
+    position: relative !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--action-bg) !important;
+    color: var(--action-color) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        background .18s ease,
+        color .18s ease,
+        filter .18s ease !important;
+    isolation: isolate !important;
+}
+
+#mainContent.academic-period-page .ap-action-btn:hover,
+#mainContent.academic-period-page .ap-action-btn:focus-visible {
+    background: var(--action-hover-bg) !important;
+    color: var(--action-hover-color) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--action-hover-color) 18%, transparent) !important;
+    outline: none !important;
+}
+
+#mainContent.academic-period-page .ap-action-btn i {
+    color: currentColor !important;
+}
+
+#mainContent.academic-period-page .ap-action-edit {
+    --action-bg: #EFF6FF;
+    --action-color: #2563EB;
+    --action-hover-bg: #DBEAFE;
+    --action-hover-color: #1D4ED8;
+    --action-tooltip-bg: #2563EB;
+}
+
+#mainContent.academic-period-page .ap-action-active {
+    --action-bg: #D1FAE5;
+    --action-color: #047857;
+    --action-hover-bg: #A7F3D0;
+    --action-hover-color: #065F46;
+    --action-tooltip-bg: #047857;
+}
+
+#mainContent.academic-period-page .ap-action-delete {
+    --action-bg: #FEE2E2;
+    --action-color: #DC2626;
+    --action-hover-bg: #FECACA;
+    --action-hover-color: #B91C1C;
+    --action-tooltip-bg: #DC2626;
+}
+
+#mainContent.academic-period-page .ap-action-pinned {
+    --action-bg: #FEF3C7;
+    --action-color: #B45309;
+    --action-hover-bg: #FDE68A;
+    --action-hover-color: #92400E;
+    --action-tooltip-bg: #B45309;
+    cursor: default !important;
+    pointer-events: auto !important;
+}
+
+#mainContent.academic-period-page .ap-action-btn[title]::after {
+    content: attr(title);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 9px);
+    transform: translateX(-50%) translateY(4px);
+    padding: .42rem .58rem;
+    border-radius: 9px;
+    background: var(--action-tooltip-bg);
+    color: #FFFFFF;
+    font-size: .68rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--action-tooltip-bg) 24%, transparent);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 60;
+    transition: opacity .16s ease, visibility .16s ease, transform .16s ease;
+}
+
+#mainContent.academic-period-page .ap-action-btn[title]::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    transform: translateX(-50%) translateY(4px);
+    border: 5px solid transparent;
+    border-top-color: var(--action-tooltip-bg);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 61;
+    transition: opacity .16s ease, visibility .16s ease, transform .16s ease;
+}
+
+#mainContent.academic-period-page .ap-action-btn[title]:hover::after,
+#mainContent.academic-period-page .ap-action-btn[title]:hover::before,
+#mainContent.academic-period-page .ap-action-btn[title]:focus-visible::after,
+#mainContent.academic-period-page .ap-action-btn[title]:focus-visible::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+#mainContent.academic-period-page #externalClearFilterBtn.hidden {
+    display: none !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .progress-track,
+.dark #mainContent.academic-period-page .progress-track {
+    background: rgba(255, 255, 255, .055) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .30) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .progress-fill,
+.dark #mainContent.academic-period-page .progress-fill {
+    background: linear-gradient(90deg, #8B0000, #F87171) !important;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, .10) inset,
+        0 0 20px rgba(248, 113, 113, .22) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-add-period-btn,
+.dark #mainContent.academic-period-page .ap-add-period-btn {
+    background: #FFFFFF !important;
+    color: #8B0000 !important;
+    border-color: rgba(255, 255, 255, .24) !important;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, .24) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-add-period-btn:hover,
+.dark #mainContent.academic-period-page .ap-add-period-btn:hover {
+    background: #FFF5F5 !important;
+    color: #660000 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-action-edit,
+.dark #mainContent.academic-period-page .ap-action-edit {
+    --action-bg: rgba(37, 99, 235, .16);
+    --action-color: #60A5FA;
+    --action-hover-bg: rgba(37, 99, 235, .24);
+    --action-hover-color: #93C5FD;
+    --action-tooltip-bg: #2563EB;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-action-active,
+.dark #mainContent.academic-period-page .ap-action-active {
+    --action-bg: rgba(16, 185, 129, .17);
+    --action-color: #34D399;
+    --action-hover-bg: rgba(16, 185, 129, .26);
+    --action-hover-color: #6EE7B7;
+    --action-tooltip-bg: #047857;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-action-delete,
+.dark #mainContent.academic-period-page .ap-action-delete {
+    --action-bg: rgba(220, 38, 38, .17);
+    --action-color: #FCA5A5;
+    --action-hover-bg: rgba(220, 38, 38, .26);
+    --action-hover-color: #FECACA;
+    --action-tooltip-bg: #DC2626;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-action-pinned,
+.dark #mainContent.academic-period-page .ap-action-pinned {
+    --action-bg: rgba(245, 158, 11, .17);
+    --action-color: #FBBF24;
+    --action-hover-bg: rgba(245, 158, 11, .26);
+    --action-hover-color: #FCD34D;
+    --action-tooltip-bg: #B45309;
+}
+
+@media (max-width: 640px) {
+    #filterModal.academic-filter-modal .filter-show-results-btn {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+}
+
+#mainContent.academic-period-page .ap-content-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(390px, 420px) !important;
+    gap: 1.5rem !important;
+}
+
+#mainContent.academic-period-page .ap-periods-column {
+    min-width: 0 !important;
+}
+
+@media (max-width: 1023px) {
+    #mainContent.academic-period-page .ap-content-layout {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    #mainContent.academic-period-page .grid.grid-cols-1.lg\:grid-cols-3 {
+        grid-template-columns: minmax(0, 1fr) minmax(390px, 420px) !important;
+    }
+
+    #mainContent.academic-period-page .lg\:col-span-2 {
+        grid-column: auto !important;
+        min-width: 0 !important;
+    }
+}
+
+#mainContent.academic-period-page .ap-toolbar {
+    display: grid !important;
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    overflow: visible !important;
+}
+
+#mainContent.academic-period-page .ap-toolbar-left {
+    min-width: max-content !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.academic-period-page .ap-toolbar-right {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: .85rem !important;
+    min-width: 0 !important;
+}
+
+#mainContent.academic-period-page .ap-search-row {
+    flex: 0 1 420px !important;
+    width: 420px !important;
+    max-width: 420px !important;
+    min-width: 280px !important;
+}
+
+#mainContent.academic-period-page .ap-search-row .search-wrap.global-search {
+    width: 100% !important;
+}
+
+@media (max-width: 900px) {
+    #mainContent.academic-period-page .ap-toolbar {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.academic-period-page .ap-toolbar-right {
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+    }
+
+    #mainContent.academic-period-page .ap-search-row {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex-basis: 100% !important;
+    }
+}
+
+#mainContent.academic-period-page .bg-white.rounded-xl.shadow.border.border-gray-100,
+#mainContent.academic-period-page .active-banner,
+#mainContent.academic-period-page .cal-card {
+    border-color: rgb(113 5 5) !important;
+    box-shadow: 0 8px 24px rgba(16, 17, 20, 0.094) !important;
+}
+
+#mainContent.academic-period-page .ap-toolbar,
+#mainContent.academic-period-page .bg-gray-50,
+#mainContent.academic-period-page .border-t.bg-gray-50 {
+    background: #FAFAFA !important;
+    border-color: #F1ECE7 !important;
+}
+
+#mainContent.academic-period-page .ap-table-wrap {
+    border-top: 0 !important;
+    background: #FFFFFF !important;
+}
+
+#mainContent.academic-period-page .ap-table {
+    width: 100% !important;
+    min-width: 920px !important;
+    table-layout: fixed !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+#mainContent.academic-period-page .ap-table thead th {
+    height: 48px !important;
+    background: #FAFAFA !important;
+    border-bottom: 1px solid #F1ECE7 !important;
+    color: #8B0000 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: .08em !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.academic-period-page .ap-table tbody td {
+    height: 58px !important;
+    border-color: #F1ECE7 !important;
+    color: #374151 !important;
+}
+
+#mainContent.academic-period-page .ap-table tbody tr.tbl-row:hover td {
+    background: rgba(139, 0, 0, .035) !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(1),
+#mainContent.academic-period-page .ap-table td:nth-child(1) {
+    width: 6% !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(2),
+#mainContent.academic-period-page .ap-table td:nth-child(2) {
+    width: 22% !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(3),
+#mainContent.academic-period-page .ap-table td:nth-child(3) {
+    width: 20% !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(4),
+#mainContent.academic-period-page .ap-table td:nth-child(4),
+#mainContent.academic-period-page .ap-table th:nth-child(5),
+#mainContent.academic-period-page .ap-table td:nth-child(5) {
+    width: 15% !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(6),
+#mainContent.academic-period-page .ap-table td:nth-child(6) {
+    width: 12% !important;
+    text-align: center !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(7),
+#mainContent.academic-period-page .ap-table td:nth-child(7) {
+    width: 10% !important;
+    text-align: center !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .bg-white.rounded-xl,
+.dark #mainContent.academic-period-page .bg-white.rounded-xl {
+    background: #161B22 !important;
+    border-color: #21262D !important;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .32) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-toolbar,
+.dark #mainContent.academic-period-page .ap-toolbar {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table-wrap,
+.dark #mainContent.academic-period-page .ap-table-wrap {
+    background: #161B22 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table thead,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table thead tr,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table thead th,
+.dark #mainContent.academic-period-page .ap-table thead,
+.dark #mainContent.academic-period-page .ap-table thead tr,
+.dark #mainContent.academic-period-page .ap-table thead th {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody tr,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody td,
+.dark #mainContent.academic-period-page .ap-table tbody tr,
+.dark #mainContent.academic-period-page .ap-table tbody td {
+    background: transparent !important;
+    border-color: #21262D !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody tr.tbl-row:hover td,
+.dark #mainContent.academic-period-page .ap-table tbody tr.tbl-row:hover td {
+    background: rgba(252, 165, 165, .06) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table .font-bold,
+.dark #mainContent.academic-period-page .ap-table .font-bold {
+    color: #F3F4F6 !important;
+}
+
+#mainContent.academic-period-page .status-badge.s-upcoming::before {
+    background: #2563EB !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .14) !important;
+}
+
+#mainContent.academic-period-page .status-badge.s-upcoming {
+    color: #1D4ED8 !important;
+    border-color: #BFDBFE !important;
+    background: #EFF6FF !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .status-badge.s-upcoming::before,
+.dark #mainContent.academic-period-page .status-badge.s-upcoming::before {
+    background: #60A5FA !important;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .16) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .status-badge.s-upcoming,
+.dark #mainContent.academic-period-page .status-badge.s-upcoming {
+    color: #93C5FD !important;
+    border-color: rgba(147, 197, 253, .28) !important;
+    background: rgba(59, 130, 246, .14) !important;
+}
+
+#addModal,
+#editModal,
+#deleteModal {
+    z-index: 99999 !important;
+}
+
+#addModal .ap-academic-modal,
+#editModal .ap-academic-modal {
+    width: min(94vw, 980px) !important;
+    max-width: 980px !important;
+    max-height: calc(100dvh - 32px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: 24px !important;
+}
+
+#deleteModal .ap-academic-modal-sm {
+    width: min(94vw, 460px) !important;
+    max-width: 460px !important;
+}
+
+#addModal .ap-add-form,
+#editModal .ap-add-form {
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+#addModal .ap-add-body,
+#editModal .ap-add-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background: #F8FAFC !important;
+}
+
+#addModal .ap-add-header,
+#editModal .ap-add-header,
+#addModal .ap-add-footer,
+#editModal .ap-add-footer {
+    flex-shrink: 0 !important;
+}
+
+[data-theme="dark"] #addModal .ap-academic-modal,
+[data-theme="dark"] #editModal .ap-academic-modal,
+[data-theme="dark"] #deleteModal .ap-academic-modal,
+.dark #addModal .ap-academic-modal,
+.dark #editModal .ap-academic-modal,
+.dark #deleteModal .ap-academic-modal {
+    background: #0D1117 !important;
+    border: 1px solid #21262D !important;
+    color: #E5E7EB !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-body,
+[data-theme="dark"] #editModal .ap-add-body,
+.dark #addModal .ap-add-body,
+.dark #editModal .ap-add-body {
+    background: #0c111b !important;
+}
+
+#addModal .js-flatpickr-date,
+#editModal .js-flatpickr-date {
+    cursor: pointer !important;
+    caret-color: transparent !important;
+}
+
+#addModal .js-flatpickr-date::placeholder,
+#editModal .js-flatpickr-date::placeholder {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] #addModal .js-flatpickr-date,
+[data-theme="dark"] #editModal .js-flatpickr-date,
+.dark #addModal .js-flatpickr-date,
+.dark #editModal .js-flatpickr-date {
+    background: #0D1117 !important;
+    border-color: #30363D !important;
+    color: #E5E7EB !important;
+}
+
+@media (max-width: 768px) {
+
+    #addModal .ap-academic-modal,
+    #editModal .ap-academic-modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #addModal,
+    #editModal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+}
+
+#addModal.ui-modal:not(.open):not(.closing),
+#editModal.ui-modal:not(.open):not(.closing),
+#deleteModal.ui-modal:not(.open):not(.closing) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+#addModal.ui-modal.open,
+#editModal.ui-modal.open,
+#deleteModal.ui-modal.open,
+#addModal.ui-modal.closing,
+#editModal.ui-modal.closing,
+#deleteModal.ui-modal.closing {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+#addModal.ui-modal.open,
+#editModal.ui-modal.open,
+#deleteModal.ui-modal.open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+#addModal .modal-box,
+#editModal .modal-box,
+#deleteModal .modal-box {
+    pointer-events: auto !important;
+}
+
+#filterModal.filter-drawer-wrapper:not(.open):not(.closing) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+#filterModal.filter-drawer-wrapper.open,
+#filterModal.filter-drawer-wrapper.closing {
+    visibility: visible !important;
+}
+
+#filterModal.filter-drawer-wrapper.open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+#mainContent.academic-period-page .ap-search-row .search-wrap.global-search {
+    position: relative !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+#mainContent.academic-period-page .ap-search-row .search-input,
+#mainContent.academic-period-page .ap-search-row [data-search-input] {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-right: 44px !important;
+}
+
+#mainContent.academic-period-page .ap-search-row .search-clear,
+#mainContent.academic-period-page .ap-search-row [data-search-clear] {
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 5 !important;
+}
+
+#mainContent.academic-period-page .ap-empty-state-cell {
+    padding: 0 !important;
+    height: 360px !important;
+    border-bottom: 0 !important;
+}
+
+#mainContent.academic-period-page .ap-empty-state-cell .empty-state {
+    min-height: 360px !important;
+    padding: 64px 20px 72px !important;
+}
+
+#mainContent.academic-period-page .academic-grid-view .empty-state {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-empty-state-cell,
+.dark #mainContent.academic-period-page .ap-empty-state-cell {
+    background: transparent !important;
+}
+
+#mainContent.academic-period-page .ap-table-wrap {
+    overflow-x: hidden !important;
+}
+
+#mainContent.academic-period-page .ap-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+}
+
+#mainContent.academic-period-page .ap-table th,
+#mainContent.academic-period-page .ap-table td {
+    padding-left: .75rem !important;
+    padding-right: .75rem !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(1),
+#mainContent.academic-period-page .ap-table td:nth-child(1) {
+    width: 4% !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(2),
+#mainContent.academic-period-page .ap-table td:nth-child(2) {
+    width: 15% !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(3),
+#mainContent.academic-period-page .ap-table td:nth-child(3) {
+    width: 23% !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(4),
+#mainContent.academic-period-page .ap-table td:nth-child(4),
+#mainContent.academic-period-page .ap-table th:nth-child(5),
+#mainContent.academic-period-page .ap-table td:nth-child(5) {
+    width: 14% !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(6),
+#mainContent.academic-period-page .ap-table td:nth-child(6) {
+    width: 14% !important;
+    text-align: center !important;
+}
+
+#mainContent.academic-period-page .ap-table th:nth-child(7),
+#mainContent.academic-period-page .ap-table td:nth-child(7) {
+    width: 16% !important;
+    text-align: center !important;
+}
+
+#mainContent.academic-period-page .ap-table td.col-year .font-bold {
+    font-size: .88rem !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.academic-period-page .ap-actions {
+    justify-content: center !important;
+    gap: .45rem !important;
+    flex-wrap: nowrap !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-periods-column>.bg-white,
+.dark #mainContent.academic-period-page .ap-periods-column>.bg-white,
+[data-theme="dark"] #mainContent.academic-period-page .bg-white.rounded-xl,
+.dark #mainContent.academic-period-page .bg-white.rounded-xl {
+    background: #161B22 !important;
+    border-color: #21262D !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, .34),
+        inset 0 1px 0 rgba(255, 255, 255, .055) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-toolbar,
+.dark #mainContent.academic-period-page .ap-toolbar {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #academicListView,
+.dark #mainContent.academic-period-page #academicListView,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table-wrap,
+.dark #mainContent.academic-period-page .ap-table-wrap {
+    background: #161B22 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table,
+.dark #mainContent.academic-period-page .ap-table {
+    background: transparent !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table thead,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table thead tr,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table thead th,
+.dark #mainContent.academic-period-page .ap-table thead,
+.dark #mainContent.academic-period-page .ap-table thead tr,
+.dark #mainContent.academic-period-page .ap-table thead th {
+    background: #0D1117 !important;
+    color: #FCA5A5 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody tr,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody td,
+.dark #mainContent.academic-period-page .ap-table tbody tr,
+.dark #mainContent.academic-period-page .ap-table tbody td {
+    background: transparent !important;
+    color: #CBD5E1 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody tr.tbl-row:hover td,
+.dark #mainContent.academic-period-page .ap-table tbody tr.tbl-row:hover td {
+    background: rgba(252, 165, 165, .06) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody tr.tbl-row.is-active td,
+.dark #mainContent.academic-period-page .ap-table tbody tr.tbl-row.is-active td {
+    background: rgba(252, 165, 165, .045) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .border-t.bg-gray-50,
+.dark #mainContent.academic-period-page .border-t.bg-gray-50 {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #academicGridView,
+.dark #mainContent.academic-period-page #academicGridView {
+    background: #161B22 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-card,
+.dark #mainContent.academic-period-page .academic-card {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .045), transparent 42%),
+        #161B22 !important;
+    border-color: #2B313A !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .045),
+        0 14px 30px rgba(0, 0, 0, .24) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-card:hover,
+.dark #mainContent.academic-period-page .academic-card:hover {
+    border-color: rgba(252, 165, 165, .24) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .07),
+        0 0 18px rgba(252, 165, 165, .07),
+        0 16px 30px rgba(0, 0, 0, .26) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-card-year-text,
+[data-theme="dark"] #mainContent.academic-period-page .academic-card-value,
+.dark #mainContent.academic-period-page .academic-card-year-text,
+.dark #mainContent.academic-period-page .academic-card-value {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-card-label,
+.dark #mainContent.academic-period-page .academic-card-label {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card,
+.dark #mainContent.academic-period-page .quick-action-card {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(252, 165, 165, .10), transparent 44%),
+        linear-gradient(145deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .035)) !important;
+    border: 1px solid rgba(255, 255, 255, .12) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 14px 28px rgba(0, 0, 0, .24) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card:hover,
+.dark #mainContent.academic-period-page .quick-action-card:hover {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, .13), transparent 42%),
+        linear-gradient(135deg, rgba(139, 0, 0, .88), rgba(80, 0, 0, .72)) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 18px 34px rgba(139, 0, 0, .22) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-icon,
+.dark #mainContent.academic-period-page .quick-action-icon {
+    background: rgba(255, 255, 255, .08) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-title,
+.dark #mainContent.academic-period-page .quick-action-title {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #addModal.modal-overlay,
+[data-theme="dark"] #editModal.modal-overlay,
+[data-theme="dark"] #deleteModal.modal-overlay,
+.dark #addModal.modal-overlay,
+.dark #editModal.modal-overlay,
+.dark #deleteModal.modal-overlay {
+    background:
+        radial-gradient(circle at 15% 12%, rgba(139, 0, 0, .24), transparent 32%),
+        rgba(2, 6, 23, .74) !important;
+    backdrop-filter: blur(8px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
+}
+
+[data-theme="dark"] #addModal .ap-academic-modal,
+[data-theme="dark"] #editModal .ap-academic-modal,
+.dark #addModal .ap-academic-modal,
+.dark #editModal .ap-academic-modal {
+    background: #0D1117 !important;
+    border: 1px solid #21262D !important;
+    color: #E5E7EB !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-header,
+[data-theme="dark"] #editModal .ap-add-header,
+[data-theme="dark"] #addModal .ap-add-footer,
+[data-theme="dark"] #editModal .ap-add-footer,
+.dark #addModal .ap-add-header,
+.dark #editModal .ap-add-header,
+.dark #addModal .ap-add-footer,
+.dark #editModal .ap-add-footer {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-body,
+[data-theme="dark"] #editModal .ap-add-body,
+.dark #addModal .ap-add-body,
+.dark #editModal .ap-add-body {
+    background: #0c111b !important;
+}
+
+[data-theme="dark"] #addModal .ap-panel,
+[data-theme="dark"] #editModal .ap-panel,
+[data-theme="dark"] #addModal .ap-panel-soft,
+[data-theme="dark"] #editModal .ap-panel-soft,
+.dark #addModal .ap-panel,
+.dark #editModal .ap-panel,
+.dark #addModal .ap-panel-soft,
+.dark #editModal .ap-panel-soft {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .055), transparent 45%),
+        #161B22 !important;
+    border-color: #21262D !important;
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, .26),
+        inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-header-title,
+[data-theme="dark"] #editModal .ap-add-header-title,
+.dark #addModal .ap-add-header-title,
+.dark #editModal .ap-add-header-title {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-header-subtitle,
+[data-theme="dark"] #editModal .ap-add-header-subtitle,
+[data-theme="dark"] #addModal .ap-label-text,
+[data-theme="dark"] #editModal .ap-label-text,
+[data-theme="dark"] #addModal .ap-label-hint,
+[data-theme="dark"] #editModal .ap-label-hint,
+.dark #addModal .ap-add-header-subtitle,
+.dark #editModal .ap-add-header-subtitle,
+.dark #addModal .ap-label-text,
+.dark #editModal .ap-label-text,
+.dark #addModal .ap-label-hint,
+.dark #editModal .ap-label-hint {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] #addModal .ap-input,
+[data-theme="dark"] #editModal .ap-input,
+[data-theme="dark"] #addModal .ap-textarea,
+[data-theme="dark"] #editModal .ap-textarea,
+.dark #addModal .ap-input,
+.dark #editModal .ap-input,
+.dark #addModal .ap-textarea,
+.dark #editModal .ap-textarea {
+    background: #0D1117 !important;
+    border-color: #30363D !important;
+    color: #E5E7EB !important;
+}
+
+#mainContent.academic-period-page .ap-banner-add-btn:hover,
+#mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn:hover {
+    transform: translateY(-1px) !important;
+    background: #FFF8F8 !important;
+    color: #6B0000 !important;
+    box-shadow: 0 14px 26px rgba(0, 0, 0, .16) !important;
+}
+
+#mainContent.academic-period-page .ap-banner-add-btn i,
+#mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn i {
+    color: currentColor !important;
+}
+
+#mainContent.academic-period-page .ap-banner-add-btn,
+#mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn {
+    min-height: 42px !important;
+    padding: 0 1rem !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255, 255, 255, .18) !important;
+    background: rgba(255, 255, 255, .96) !important;
+    color: var(--crimson, #8B0000) !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .5rem !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .12) !important;
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        box-shadow .18s ease !important;
+}
+
+#mainContent.academic-period-page .ap-banner-add-btn i,
+#mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn i {
+    color: currentColor !important;
+    font-size: .82rem !important;
+    line-height: 1 !important;
+}
+
+#mainContent.academic-period-page .ap-banner-add-btn:hover,
+#mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn:hover {
+    background: #fff8f8 !important;
+    color: #6B0000 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, .16) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-banner-add-btn,
+[data-theme="dark"] #mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn,
+.dark #mainContent.academic-period-page .ap-banner-add-btn,
+.dark #mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn {
+    background: rgba(255, 255, 255, .08) !important;
+    border-color: rgba(255, 255, 255, .14) !important;
+    color: #fff5f5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 10px 22px rgba(0, 0, 0, .22) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-banner-add-btn:hover,
+[data-theme="dark"] #mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn:hover,
+.dark #mainContent.academic-period-page .ap-banner-add-btn:hover,
+.dark #mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn:hover {
+    background: rgba(255, 255, 255, .14) !important;
+    border-color: rgba(255, 255, 255, .22) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .12),
+        0 14px 28px rgba(0, 0, 0, .28) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-banner-add-btn:hover,
+[data-theme="dark"] #mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn:hover,
+.dark #mainContent.academic-period-page .ap-banner-add-btn:hover,
+.dark #mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn:hover {
+    background: #FFF5F5 !important;
+    color: #660000 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page,
+.dark #mainContent.academic-period-page {
+    background: #000D1A !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-periods-column>.bg-white,
+[data-theme="dark"] #mainContent.academic-period-page .bg-white.rounded-xl,
+[data-theme="dark"] #mainContent.academic-period-page .active-banner,
+[data-theme="dark"] #mainContent.academic-period-page .cal-card,
+.dark #mainContent.academic-period-page .ap-periods-column>.bg-white,
+.dark #mainContent.academic-period-page .bg-white.rounded-xl,
+.dark #mainContent.academic-period-page .active-banner,
+.dark #mainContent.academic-period-page .cal-card {
+    background:
+        radial-gradient(circle at top left, rgba(247, 227, 227, 0.101), transparent 40%),
+        linear-gradient(180deg, #0D1117 0%, #0D1117 100%) !important;
+    border-color: rgb(113 5 5) !important;
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, .30),
+        inset 0 1px 0 rgba(255, 255, 255, .055) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .bg-gray-50,
+[data-theme="dark"] #mainContent.academic-period-page .ap-toolbar,
+[data-theme="dark"] #mainContent.academic-period-page .border-b.bg-gray-50,
+[data-theme="dark"] #mainContent.academic-period-page .border-t.bg-gray-50,
+.dark #mainContent.academic-period-page .bg-gray-50,
+.dark #mainContent.academic-period-page .ap-toolbar,
+.dark #mainContent.academic-period-page .border-b.bg-gray-50,
+.dark #mainContent.academic-period-page .border-t.bg-gray-50 {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .bg-gray-50 h2,
+[data-theme="dark"] #mainContent.academic-period-page .ap-toolbar-left h2,
+[data-theme="dark"] #mainContent.academic-period-page .cal-card h2,
+.dark #mainContent.academic-period-page .bg-gray-50 h2,
+.dark #mainContent.academic-period-page .ap-toolbar-left h2,
+.dark #mainContent.academic-period-page .cal-card h2 {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .bg-gray-50>i,
+[data-theme="dark"] #mainContent.academic-period-page .ap-toolbar-left>i,
+.dark #mainContent.academic-period-page .bg-gray-50>i,
+.dark #mainContent.academic-period-page .ap-toolbar-left>i {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-actions-list,
+.dark #mainContent.academic-period-page .quick-actions-list {
+    background: transparent !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card,
+.dark #mainContent.academic-period-page .quick-action-card {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(252, 165, 165, .10), transparent 44%),
+        linear-gradient(145deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .035)) !important;
+    border: 1px solid rgba(255, 255, 255, .12) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 14px 28px rgba(0, 0, 0, .24) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card:hover,
+.dark #mainContent.academic-period-page .quick-action-card:hover {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, .13), transparent 42%),
+        linear-gradient(135deg, rgba(139, 0, 0, .88), rgba(80, 0, 0, .72)) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 18px 34px rgba(139, 0, 0, .22) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-icon,
+.dark #mainContent.academic-period-page .quick-action-icon {
+    background: rgba(255, 255, 255, .08) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-title,
+.dark #mainContent.academic-period-page .quick-action-title {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-arrow,
+.dark #mainContent.academic-period-page .quick-action-arrow {
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #liveAmPm,
+[data-theme="dark"] #mainContent.academic-period-page #liveDay,
+[data-theme="dark"] #mainContent.academic-period-page .text-gray-400,
+.dark #mainContent.academic-period-page #liveAmPm,
+.dark #mainContent.academic-period-page #liveDay,
+.dark #mainContent.academic-period-page .text-gray-400 {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #liveDate,
+.dark #mainContent.academic-period-page #liveDate {
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #academicListView,
+[data-theme="dark"] #mainContent.academic-period-page #academicGridView,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table-wrap,
+.dark #mainContent.academic-period-page #academicListView,
+.dark #mainContent.academic-period-page #academicGridView,
+.dark #mainContent.academic-period-page .ap-table-wrap {
+    background: #161B22 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table thead,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table thead tr,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table thead th,
+.dark #mainContent.academic-period-page .ap-table thead,
+.dark #mainContent.academic-period-page .ap-table thead tr,
+.dark #mainContent.academic-period-page .ap-table thead th {
+    background: #0D1117 !important;
+    color: #FCA5A5 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody tr,
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody td,
+.dark #mainContent.academic-period-page .ap-table tbody tr,
+.dark #mainContent.academic-period-page .ap-table tbody td {
+    background: transparent !important;
+    color: #CBD5E1 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody tr.tbl-row:hover td,
+.dark #mainContent.academic-period-page .ap-table tbody tr.tbl-row:hover td {
+    background: rgba(252, 165, 165, .06) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table tbody tr.tbl-row.is-active td,
+.dark #mainContent.academic-period-page .ap-table tbody tr.tbl-row.is-active td {
+    background: rgba(252, 165, 165, .045) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table .font-bold,
+.dark #mainContent.academic-period-page .ap-table .font-bold {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-card,
+.dark #mainContent.academic-period-page .academic-card {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .055), transparent 45%),
+        #161B22 !important;
+    border-color: #21262D !important;
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, .26),
+        inset 0 1px 0 rgba(255, 255, 255, .045) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-card:hover,
+.dark #mainContent.academic-period-page .academic-card:hover {
+    border-color: rgba(252, 165, 165, .24) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .075),
+        0 14px 30px rgba(0, 0, 0, .30) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-card-year-text,
+[data-theme="dark"] #mainContent.academic-period-page .academic-card-value,
+.dark #mainContent.academic-period-page .academic-card-year-text,
+.dark #mainContent.academic-period-page .academic-card-value {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-card-label,
+.dark #mainContent.academic-period-page .academic-card-label {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] #addModal .ap-academic-modal,
+[data-theme="dark"] #editModal .ap-academic-modal,
+[data-theme="dark"] #deleteModal .ap-delete-shell,
+.dark #addModal .ap-academic-modal,
+.dark #editModal .ap-academic-modal,
+.dark #deleteModal .ap-delete-shell {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+    color: #E5E7EB !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-body,
+[data-theme="dark"] #editModal .ap-add-body,
+.dark #addModal .ap-add-body,
+.dark #editModal .ap-add-body {
+    background: #0c111b !important;
+}
+
+[data-theme="dark"] #addModal .ap-panel,
+[data-theme="dark"] #editModal .ap-panel,
+[data-theme="dark"] #addModal .ap-panel-soft,
+[data-theme="dark"] #editModal .ap-panel-soft,
+.dark #addModal .ap-panel,
+.dark #editModal .ap-panel,
+.dark #addModal .ap-panel-soft,
+.dark #editModal .ap-panel-soft {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .055), transparent 45%),
+        #161B22 !important;
+    border-color: #21262D !important;
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, .26),
+        inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+}
+
+#addModal .ap-semester-card,
+#editModal .ap-semester-card {
+    position: relative !important;
+}
+
+#addModal .ap-semester-check,
+#editModal .ap-semester-check {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: scale(.82) !important;
+    transition: opacity .16s ease, visibility .16s ease, transform .16s ease !important;
+    background: #8B0000 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, .20) !important;
+    z-index: 3 !important;
+}
+
+#editModal .ap-semester-check {
+    background: #2563EB !important;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, .22) !important;
+}
+
+#addModal .ap-semester-check i,
+#editModal .ap-semester-check i {
+    color: currentColor !important;
+    font-size: 9px !important;
+    line-height: 1 !important;
+}
+
+#addModal .ap-semester-item input:checked+.ap-semester-card .ap-semester-check,
+#editModal .ap-semester-item input:checked+.ap-semester-card .ap-semester-check {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: scale(1) !important;
+}
+
+[data-theme="dark"] #addModal .ap-semester-check,
+.dark #addModal .ap-semester-check {
+    background: #B91C1C !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(252, 165, 165, .30) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .24) !important;
+}
+
+[data-theme="dark"] #editModal .ap-semester-check,
+.dark #editModal .ap-semester-check {
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(147, 197, 253, .34) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .24) !important;
+}
+
+#mainContent.academic-period-page .sem-pill .sem-pill-icon {
+    color: currentColor !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+
+#mainContent.academic-period-page .ap-table td.col-year .ap-year-text {
+    display: inline-block !important;
+    font-size: .78rem !important;
+    line-height: 1.15 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.01em !important;
+    color: #1F2937 !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.academic-period-page .ap-table td.col-year .font-bold {
+    font-size: .78rem !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-table td.col-year .ap-year-text,
+.dark #mainContent.academic-period-page .ap-table td.col-year .ap-year-text {
+    color: #F3F4F6 !important;
+}
+
+#mainContent.academic-period-page .academic-card-year-text {
+    font-size: .82rem !important;
+    line-height: 1.15 !important;
+}
+
+#mainContent.academic-period-page .academic-quick-actions-panel,
+#mainContent.academic-period-page .academic-quick-actions-panel.table-card {
+    overflow: hidden !important;
+    border-radius: 18px !important;
+    border: 1px solid #f0eaea !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .045) !important;
+}
+
+#mainContent.academic-period-page .academic-quick-actions-header {
+    padding: 1rem 1.1rem !important;
+    border-bottom: 1px solid #f1ece7 !important;
+    background: #fafafa !important;
+}
+
+#mainContent.academic-period-page .academic-quick-actions-head-icon {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+    background: #fef2f2 !important;
+    border: 1px solid rgba(139, 0, 0, .14) !important;
+    color: #8B0000 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#mainContent.academic-period-page .academic-quick-actions-head-icon i {
+    color: currentColor !important;
+}
+
+#mainContent.academic-period-page .quick-actions-list {
+    display: grid !important;
+    background: transparent !important;
+}
+
+#mainContent.academic-period-page .quick-action-card {
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+    min-height: 76px !important;
+    width: 100% !important;
+    padding: 1rem 1.05rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    border-radius: 20px !important;
+    text-decoration: none !important;
+    text-align: left !important;
+    cursor: pointer !important;
+
+    background:
+        radial-gradient(circle at 100% 100%, rgba(139, 0, 0, .08), transparent 42%),
+        linear-gradient(135deg, #ffffff 0%, #fff8f8 100%) !important;
+    border: 1px solid rgba(139, 0, 0, .12) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .78),
+        0 8px 20px rgba(15, 23, 42, .045) !important;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease,
+        background .18s ease !important;
+}
+
+#mainContent.academic-period-page .quick-action-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: rgba(139, 0, 0, .30) !important;
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, .17), transparent 42%),
+        linear-gradient(135deg, #8B0000 0%, #650000 58%, #320101 100%) !important;
+    box-shadow: 0 16px 30px rgba(139, 0, 0, .20) !important;
+}
+
+#mainContent.academic-period-page .quick-action-icon {
+    position: relative !important;
+    z-index: 2 !important;
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    border-radius: 17px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: #f8fafc !important;
+    border: 1px solid #e5e7eb !important;
+    color: #8B0000 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .78),
+        0 8px 18px rgba(15, 23, 42, .06) !important;
+
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease,
+        color .18s ease !important;
+}
+
+#mainContent.academic-period-page .quick-action-icon i {
+    color: currentColor !important;
+    font-size: 1rem !important;
+    line-height: 1 !important;
+}
+
+#mainContent.academic-period-page .quick-action-card:hover .quick-action-icon {
+    transform: scale(1.03) !important;
+    background: rgba(255, 255, 255, .16) !important;
+    border-color: rgba(255, 255, 255, .24) !important;
+    color: #ffffff !important;
+}
+
+#mainContent.academic-period-page .quick-action-copy {
+    position: relative !important;
+    z-index: 2 !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+    display: grid !important;
+    gap: .18rem !important;
+}
+
+#mainContent.academic-period-page .quick-action-title {
+    color: #111827 !important;
+    font-size: .95rem !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    letter-spacing: -.015em !important;
+}
+
+#mainContent.academic-period-page .quick-action-sub {
+    color: #6b7280 !important;
+    font-size: .75rem !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+}
+
+#mainContent.academic-period-page .quick-action-arrow {
+    position: relative !important;
+    z-index: 2 !important;
+    margin-left: auto !important;
+    color: #9ca3af !important;
+    font-size: .86rem !important;
+    transition: transform .18s ease, color .18s ease !important;
+}
+
+#mainContent.academic-period-page .quick-action-card:hover .quick-action-title,
+#mainContent.academic-period-page .quick-action-card:hover .quick-action-sub,
+#mainContent.academic-period-page .quick-action-card:hover .quick-action-arrow {
+    color: #ffffff !important;
+}
+
+#mainContent.academic-period-page .quick-action-card:hover .quick-action-arrow {
+    transform: translateX(3px) !important;
+}
+
+#mainContent.academic-period-page .quick-action-bg-icon {
+    position: absolute !important;
+    right: .95rem !important;
+    bottom: -1.8rem !important;
+    z-index: 1 !important;
+    font-size: 5.1rem !important;
+    color: rgba(139, 0, 0, .075) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: rotate(-10deg) !important;
+    pointer-events: none !important;
+    transition: color .18s ease, transform .18s ease !important;
+}
+
+#mainContent.academic-period-page .quick-action-card:hover .quick-action-bg-icon {
+    color: rgba(255, 255, 255, .14) !important;
+    transform: rotate(-8deg) scale(1.04) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-quick-actions-panel,
+[data-theme="dark"] #mainContent.academic-period-page .academic-quick-actions-panel.table-card,
+.dark #mainContent.academic-period-page .academic-quick-actions-panel,
+.dark #mainContent.academic-period-page .academic-quick-actions-panel.table-card {
+    background: #0D1117 !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, .34),
+        inset 0 1px 0 rgba(255, 255, 255, .055) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-quick-actions-header,
+.dark #mainContent.academic-period-page .academic-quick-actions-header {
+    background: #0D1117 !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-quick-actions-head-icon,
+.dark #mainContent.academic-period-page .academic-quick-actions-head-icon {
+    background: rgba(252, 165, 165, .08) !important;
+    border-color: rgba(252, 165, 165, .16) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .06),
+        0 10px 18px rgba(0, 0, 0, .18) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-quick-actions-header h2,
+.dark #mainContent.academic-period-page .academic-quick-actions-header h2 {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .academic-quick-actions-header p,
+.dark #mainContent.academic-period-page .academic-quick-actions-header p {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card,
+.dark #mainContent.academic-period-page .quick-action-card {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(252, 165, 165, .08), transparent 42%),
+        linear-gradient(145deg, rgba(17, 24, 39, .96), rgba(13, 17, 23, .94)) !important;
+    border: 1px solid rgba(255, 255, 255, .10) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .055),
+        0 12px 24px rgba(0, 0, 0, .24) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card:hover,
+.dark #mainContent.academic-period-page .quick-action-card:hover {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, .14), transparent 40%),
+        linear-gradient(135deg, #8B0000 0%, #5f0202 58%, #2a0101 100%) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 18px 34px rgba(0, 0, 0, .34) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-icon,
+.dark #mainContent.academic-period-page .quick-action-icon {
+    background: rgba(255, 255, 255, .075) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .065),
+        0 10px 18px rgba(0, 0, 0, .20) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card:hover .quick-action-icon,
+.dark #mainContent.academic-period-page .quick-action-card:hover .quick-action-icon {
+    background: rgba(255, 255, 255, .16) !important;
+    border-color: rgba(255, 255, 255, .24) !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-title,
+.dark #mainContent.academic-period-page .quick-action-title {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-sub,
+.dark #mainContent.academic-period-page .quick-action-sub {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-arrow,
+.dark #mainContent.academic-period-page .quick-action-arrow {
+    color: #6B7280 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-bg-icon,
+.dark #mainContent.academic-period-page .quick-action-bg-icon {
+    color: rgba(252, 165, 165, .07) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card:hover .quick-action-title,
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card:hover .quick-action-sub,
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card:hover .quick-action-arrow,
+.dark #mainContent.academic-period-page .quick-action-card:hover .quick-action-title,
+.dark #mainContent.academic-period-page .quick-action-card:hover .quick-action-sub,
+.dark #mainContent.academic-period-page .quick-action-card:hover .quick-action-arrow {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .quick-action-card:hover .quick-action-bg-icon,
+.dark #mainContent.academic-period-page .quick-action-card:hover .quick-action-bg-icon {
+    color: rgba(255, 255, 255, .13) !important;
+}
+
+#addModal .ap-add-header,
+#editModal .ap-add-header {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+    padding: 1.25rem 5.75rem 1rem 1.5rem !important;
+    min-height: 86px !important;
+}
+
+#addModal .ap-add-header-left,
+#editModal .ap-add-header-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: .95rem !important;
+    margin-bottom: .95rem !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+}
+
+#addModal .ap-add-close,
+#editModal .ap-add-close {
+    position: absolute !important;
+    top: 1.25rem !important;
+    right: 1.5rem !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 14px !important;
+    border: 1px solid #E5E7EB !important;
+    background: #FFFFFF !important;
+    color: #9CA3AF !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    transform: none !important;
+    z-index: 30 !important;
+    flex: 0 0 auto !important;
+    transition: all .18s ease !important;
+}
+
+#addModal .ap-add-close:hover,
+#editModal .ap-add-close:hover {
+    background: #FEF2F2 !important;
+    border-color: #FECACA !important;
+    color: #8B0000 !important;
+    transform: translateY(-1px) !important;
+}
+
+#addModal .ap-add-close i,
+#editModal .ap-add-close i {
+    color: currentColor !important;
+    line-height: 1 !important;
+}
+
+#addModal .ap-semester-card:hover,
+#editModal .ap-semester-card:hover {
+    border-color: var(--active-color, #8B0000) !important;
+    color: var(--active-color, #8B0000) !important;
+    background:
+        radial-gradient(circle at 100% 100%, rgba(139, 0, 0, .08), transparent 42%),
+        linear-gradient(180deg, #FFFFFF 0%, #FFF7F7 100%) !important;
+    box-shadow:
+        0 10px 22px rgba(139, 0, 0, .10),
+        inset 0 1px 0 rgba(255, 255, 255, .75) !important;
+    transform: translateY(-1px) !important;
+}
+
+#editModal .ap-semester-card:hover {
+    border-color: #2563EB !important;
+    color: #2563EB !important;
+    background:
+        radial-gradient(circle at 100% 100%, rgba(37, 99, 235, .08), transparent 42%),
+        linear-gradient(180deg, #FFFFFF 0%, #EFF6FF 100%) !important;
+    box-shadow:
+        0 10px 22px rgba(37, 99, 235, .10),
+        inset 0 1px 0 rgba(255, 255, 255, .75) !important;
+}
+
+#addModal .ap-word-counter,
+#editModal .ap-word-counter {
+    background: #F8FAFC !important;
+    border: 1px solid #E5E7EB !important;
+    color: #64748B !important;
+}
+
+#addModal .ap-active-card,
+#editModal .ap-active-card {
+    background: linear-gradient(90deg, #FFF7F7 0%, #FFFFFF 100%) !important;
+    border: 1px solid #F3D4D4 !important;
+}
+
+#addModal .ap-active-badge,
+#editModal .ap-active-badge {
+    background: #FFFFFF !important;
+    color: #8B0000 !important;
+    border: 1px solid rgba(139, 0, 0, .10) !important;
+}
+
+#addModal .ap-switch-slider,
+#editModal .ap-switch-slider {
+    background: #D1D5DB !important;
+    border: 1px solid #CBD5E1 !important;
+}
+
+#addModal .ap-switch input:checked+.ap-switch-slider {
+    background: #8B0000 !important;
+    border-color: #8B0000 !important;
+}
+
+#editModal .ap-switch input:checked+.ap-switch-slider {
+    background: #2563EB !important;
+    border-color: #2563EB !important;
+}
+
+#addModal .ap-add-btn-cancel,
+#editModal .ap-add-btn-cancel {
+    min-height: 44px !important;
+    height: 46px !important;
+    padding: 0 1.35rem !important;
+    border-radius: 12px !important;
+    border: 1px solid #E5E7EB !important;
+    background: #FFFFFF !important;
+    color: #4B5563 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .5rem !important;
+    font-size: .875rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        transform .18s ease,
+        box-shadow .18s ease !important;
+}
+
+#addModal .ap-add-btn-cancel:hover,
+#editModal .ap-add-btn-cancel:hover,
+#addModal .ap-add-btn-cancel:focus-visible,
+#editModal .ap-add-btn-cancel:focus-visible {
+    background: #FEF2F2 !important;
+    border-color: #FECACA !important;
+    color: #8B0000 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 10px 22px rgba(139, 0, 0, .10) !important;
+    outline: none !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-close,
+[data-theme="dark"] #editModal .ap-add-close,
+.dark #addModal .ap-add-close,
+.dark #editModal .ap-add-close {
+    background: rgba(255, 255, 255, .06) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    color: #CBD5E1 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-close:hover,
+[data-theme="dark"] #editModal .ap-add-close:hover,
+.dark #addModal .ap-add-close:hover,
+.dark #editModal .ap-add-close:hover {
+    background: rgba(252, 165, 165, .13) !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #addModal .ap-semester-card:hover,
+.dark #addModal .ap-semester-card:hover {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(139, 0, 0, .24), transparent 44%),
+        linear-gradient(145deg, rgba(139, 0, 0, .18), rgba(13, 17, 23, .92)) !important;
+    border-color: rgba(252, 165, 165, .42) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        0 14px 26px rgba(0, 0, 0, .26),
+        0 0 0 4px rgba(252, 165, 165, .055),
+        inset 0 1px 0 rgba(255, 255, 255, .075) !important;
+}
+
+[data-theme="dark"] #editModal .ap-semester-card:hover,
+.dark #editModal .ap-semester-card:hover {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(37, 99, 235, .24), transparent 44%),
+        linear-gradient(145deg, rgba(37, 99, 235, .18), rgba(13, 17, 23, .92)) !important;
+    border-color: rgba(147, 197, 253, .42) !important;
+    color: #93C5FD !important;
+    box-shadow:
+        0 14px 26px rgba(0, 0, 0, .26),
+        0 0 0 4px rgba(147, 197, 253, .055),
+        inset 0 1px 0 rgba(255, 255, 255, .075) !important;
+}
+
+[data-theme="dark"] #addModal .ap-semester-item input:checked+.ap-semester-card,
+.dark #addModal .ap-semester-item input:checked+.ap-semester-card {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(139, 0, 0, .30), transparent 44%),
+        linear-gradient(145deg, rgba(139, 0, 0, .22), rgba(13, 17, 23, .92)) !important;
+    border-color: rgba(252, 165, 165, .46) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        0 14px 28px rgba(0, 0, 0, .28),
+        inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] #editModal .ap-semester-item input:checked+.ap-semester-card,
+.dark #editModal .ap-semester-item input:checked+.ap-semester-card {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(37, 99, 235, .30), transparent 44%),
+        linear-gradient(145deg, rgba(37, 99, 235, .22), rgba(13, 17, 23, .92)) !important;
+    border-color: rgba(147, 197, 253, .46) !important;
+    color: #93C5FD !important;
+    box-shadow:
+        0 14px 28px rgba(0, 0, 0, .28),
+        inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] #addModal .ap-word-counter,
+[data-theme="dark"] #editModal .ap-word-counter,
+.dark #addModal .ap-word-counter,
+.dark #editModal .ap-word-counter {
+    background: rgba(255, 255, 255, .065) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #CBD5E1 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .055) !important;
+}
+
+[data-theme="dark"] #addModal .ap-desc-help,
+[data-theme="dark"] #editModal .ap-desc-help,
+.dark #addModal .ap-desc-help,
+.dark #editModal .ap-desc-help {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] #addModal .ap-active-card,
+[data-theme="dark"] #editModal .ap-active-card,
+.dark #addModal .ap-active-card,
+.dark #editModal .ap-active-card {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .065), transparent 44%),
+        linear-gradient(145deg, rgba(22, 27, 34, .98), rgba(13, 17, 23, .92)) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .055),
+        0 12px 26px rgba(0, 0, 0, .22) !important;
+}
+
+[data-theme="dark"] #addModal .ap-active-badge,
+[data-theme="dark"] #editModal .ap-active-badge,
+.dark #addModal .ap-active-badge,
+.dark #editModal .ap-active-badge {
+    background: rgba(255, 255, 255, .075) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .06),
+        0 10px 18px rgba(0, 0, 0, .18) !important;
+}
+
+[data-theme="dark"] #editModal .ap-active-badge,
+.dark #editModal .ap-active-badge {
+    color: #93C5FD !important;
+}
+
+[data-theme="dark"] #addModal .ap-active-title,
+[data-theme="dark"] #editModal .ap-active-title,
+.dark #addModal .ap-active-title,
+.dark #editModal .ap-active-title {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #addModal .ap-active-desc,
+[data-theme="dark"] #editModal .ap-active-desc,
+.dark #addModal .ap-active-desc,
+.dark #editModal .ap-active-desc {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] #addModal .ap-switch-slider,
+[data-theme="dark"] #editModal .ap-switch-slider,
+.dark #addModal .ap-switch-slider,
+.dark #editModal .ap-switch-slider {
+    background: rgba(255, 255, 255, .16) !important;
+    border-color: rgba(255, 255, 255, .14) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35) !important;
+}
+
+[data-theme="dark"] #addModal .ap-switch-slider::after,
+[data-theme="dark"] #editModal .ap-switch-slider::after,
+.dark #addModal .ap-switch-slider::after,
+.dark #editModal .ap-switch-slider::after {
+    background: #F8FAFC !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35) !important;
+}
+
+[data-theme="dark"] #addModal .ap-switch input:checked+.ap-switch-slider,
+.dark #addModal .ap-switch input:checked+.ap-switch-slider {
+    background: #8B0000 !important;
+    border-color: rgba(252, 165, 165, .34) !important;
+    box-shadow: 0 0 18px rgba(139, 0, 0, .24) !important;
+}
+
+[data-theme="dark"] #editModal .ap-switch input:checked+.ap-switch-slider,
+.dark #editModal .ap-switch input:checked+.ap-switch-slider {
+    background: #2563EB !important;
+    border-color: rgba(147, 197, 253, .34) !important;
+    box-shadow: 0 0 18px rgba(37, 99, 235, .24) !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-btn-cancel,
+[data-theme="dark"] #editModal .ap-add-btn-cancel,
+.dark #addModal .ap-add-btn-cancel,
+.dark #editModal .ap-add-btn-cancel {
+    background: rgba(255, 255, 255, .06) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    color: #CBD5E1 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] #addModal .ap-add-btn-cancel:hover,
+[data-theme="dark"] #editModal .ap-add-btn-cancel:hover,
+[data-theme="dark"] #addModal .ap-add-btn-cancel:focus-visible,
+[data-theme="dark"] #editModal .ap-add-btn-cancel:focus-visible,
+.dark #addModal .ap-add-btn-cancel:hover,
+.dark #editModal .ap-add-btn-cancel:hover,
+.dark #addModal .ap-add-btn-cancel:focus-visible,
+.dark #editModal .ap-add-btn-cancel:focus-visible {
+    background: rgba(252, 165, 165, .13) !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+    color: #FCA5A5 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .24) !important;
+}
+
+@media (max-width: 767px) {
+
+    #addModal .ap-add-header,
+    #editModal .ap-add-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding: 1.15rem 4.75rem .95rem 1rem !important;
+        min-height: 74px !important;
+        border-radius: 22px 22px 0 0 !important;
+    }
+
+    #addModal .ap-add-header-left,
+    #editModal .ap-add-header-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: .75rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #addModal .ap-add-header-icon,
+    #editModal .ap-add-header-icon {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        border-radius: 14px !important;
+        flex: 0 0 44px !important;
+    }
+
+    #addModal .ap-add-header-left>div:last-child,
+    #editModal .ap-add-header-left>div:last-child {
+        width: auto !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    #addModal .ap-add-close,
+    #editModal .ap-add-close {
+        top: 1.15rem !important;
+        right: 1rem !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+    }
+}
+
+#mainContent.academic-period-page .ap-pup-calendar-link {
+    background: #FFFFFF !important;
+    border-color: #E5E7EB !important;
+    color: #6B7280 !important;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, .035) !important;
+}
+
+#mainContent.academic-period-page .ap-pup-calendar-link i {
+    color: currentColor !important;
+}
+
+#mainContent.academic-period-page .ap-pup-calendar-link:hover {
+    background: #FEF2F2 !important;
+    border-color: #8B0000 !important;
+    color: #8B0000 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 10px 20px rgba(139, 0, 0, .10) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-pup-calendar-link,
+.dark #mainContent.academic-period-page .ap-pup-calendar-link {
+    background: rgba(255, 255, 255, .055) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #CBD5E1 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .055),
+        0 10px 20px rgba(0, 0, 0, .20) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-pup-calendar-link:hover,
+.dark #mainContent.academic-period-page .ap-pup-calendar-link:hover {
+    background: rgba(252, 165, 165, .13) !important;
+    border-color: rgba(252, 165, 165, .28) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .075),
+        0 12px 24px rgba(0, 0, 0, .26) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .active-banner .progress-fill,
+.dark #mainContent.academic-period-page .active-banner .progress-fill {
+    background: linear-gradient(90deg, #8B0000, #F87171) !important;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, .10) inset,
+        0 0 20px rgba(248, 113, 113, .22) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .active-banner .text-\[\#8B0000\],
+[data-theme="dark"] #mainContent.academic-period-page .active-banner .text-red-600,
+[data-theme="dark"] #mainContent.academic-period-page .active-banner .text-red-700,
+.dark #mainContent.academic-period-page .active-banner .text-\[\#8B0000\],
+.dark #mainContent.academic-period-page .active-banner .text-red-600,
+.dark #mainContent.academic-period-page .active-banner .text-red-700 {
+    color: #FCA5A5 !important;
+    text-shadow: 0 0 12px rgba(252, 165, 165, .20) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .active-banner .progress-track,
+.dark #mainContent.academic-period-page .active-banner .progress-track {
+    background: rgba(255, 255, 255, .055) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .cal-card h2,
+.dark #mainContent.academic-period-page .cal-card h2 {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .cal-card h2 i,
+.dark #mainContent.academic-period-page .cal-card h2 i {
+    color: #FCA5A5 !important;
+    text-shadow: 0 0 14px rgba(252, 165, 165, .22) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .cal-card .border-b span,
+.dark #mainContent.academic-period-page .cal-card .border-b span {
+    background: rgba(252, 165, 165, .12) !important;
+    border: 1px solid rgba(252, 165, 165, .22) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .06),
+        0 8px 18px rgba(0, 0, 0, .18) !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap.active-banner {
+    border-left: 0 !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+    background: #FFFFFF !important;
+    border: 1px solid #F0EAEA !important;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, .055) !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 330px) !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: .85rem !important;
+    min-width: 0 !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div {
+    min-height: 104px !important;
+    padding: 1rem !important;
+    border-radius: 18px !important;
+    background:
+        radial-gradient(circle at top right, rgba(139, 0, 0, .055), transparent 44%),
+        linear-gradient(145deg, #FFFFFF 0%, #FFF8F8 100%) !important;
+    border: 1px solid rgba(139, 0, 0, .10) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .85),
+        0 8px 20px rgba(15, 23, 42, .045) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: .45rem !important;
+    min-width: 0 !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div > .flex {
+    margin-bottom: 0 !important;
+    gap: .55rem !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div i {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    border-radius: 11px !important;
+    background: #FEF2F2 !important;
+    border: 1px solid rgba(139, 0, 0, .12) !important;
+    color: #8B0000 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: .82rem !important;
+    line-height: 1 !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div p:first-of-type {
+    color: #8B0000 !important;
+    font-size: .64rem !important;
+    font-weight: 900 !important;
+    letter-spacing: .09em !important;
+    line-height: 1.1 !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap #bannerSem,
+#mainContent.academic-period-page #activeBannerWrap #bannerYear,
+#mainContent.academic-period-page #activeBannerWrap #bannerEnd {
+    color: #111827 !important;
+    font-size: 1rem !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    letter-spacing: -.015em !important;
+    word-break: break-word !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > div:last-child {
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 1rem !important;
+    border-radius: 18px !important;
+    background:
+        radial-gradient(circle at top right, rgba(139, 0, 0, .07), transparent 44%),
+        linear-gradient(145deg, #FFFFFF 0%, #FFF8F8 100%) !important;
+    border: 1px solid rgba(139, 0, 0, .10) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .85),
+        0 8px 20px rgba(15, 23, 42, .045) !important;
+    justify-content: space-between !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap #bannerPct {
+    color: #8B0000 !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .progress-track {
+    height: 8px !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > div:last-child > button {
+    width: 100% !important;
+    min-height: 46px !important;
+    border-radius: 14px !important;
+    font-size: .88rem !important;
+    font-weight: 900 !important;
+    box-shadow: 0 12px 24px rgba(139, 0, 0, .18) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #activeBannerWrap.active-banner,
+.dark #mainContent.academic-period-page #activeBannerWrap.active-banner {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, .34),
+        inset 0 1px 0 rgba(255, 255, 255, .055) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div,
+[data-theme="dark"] #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > div:last-child,
+.dark #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div,
+.dark #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > div:last-child {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .065), transparent 44%),
+        linear-gradient(145deg, rgba(22, 27, 34, .98), rgba(13, 17, 23, .94)) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .055),
+        0 12px 26px rgba(0, 0, 0, .24) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div i,
+.dark #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div i {
+    background: rgba(252, 165, 165, .10) !important;
+    border-color: rgba(252, 165, 165, .20) !important;
+    color: #FCA5A5 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div p:first-of-type,
+.dark #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div p:first-of-type {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #activeBannerWrap #bannerSem,
+[data-theme="dark"] #mainContent.academic-period-page #activeBannerWrap #bannerYear,
+[data-theme="dark"] #mainContent.academic-period-page #activeBannerWrap #bannerEnd,
+.dark #mainContent.academic-period-page #activeBannerWrap #bannerSem,
+.dark #mainContent.academic-period-page #activeBannerWrap #bannerYear,
+.dark #mainContent.academic-period-page #activeBannerWrap #bannerEnd {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page #activeBannerWrap #bannerPct,
+.dark #mainContent.academic-period-page #activeBannerWrap #bannerPct {
+    color: #FCA5A5 !important;
+    text-shadow: 0 0 12px rgba(252, 165, 165, .18) !important;
+}
+
+@media (max-width: 1180px) {
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > div:last-child {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 767px) {
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner {
+        padding: .85rem !important;
+        gap: .75rem !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 {
+        grid-template-columns: 1fr !important;
+        gap: .75rem !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div {
+        min-height: 86px !important;
+        padding: .85rem !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap #bannerSem,
+    #mainContent.academic-period-page #activeBannerWrap #bannerYear,
+    #mainContent.academic-period-page #activeBannerWrap #bannerEnd {
+        font-size: .92rem !important;
+    }
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner {
+    padding: 1.15rem 1.25rem !important;
+    gap: 1rem !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 {
+    gap: 1rem !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div {
+    min-height: 118px !important;
+    padding: 1.1rem 1.25rem !important;
+    justify-content: center !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div > .flex {
+    display: flex !important;
+    align-items: center !important;
+    gap: .7rem !important;
+    min-height: 28px !important;
+    margin-bottom: .35rem !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div i {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 10px !important;
+    font-size: .78rem !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap #bannerSem,
+#mainContent.academic-period-page #activeBannerWrap #bannerYear,
+#mainContent.academic-period-page #activeBannerWrap #bannerEnd {
+    padding-left: calc(28px + .7rem) !important;
+    margin: 0 !important;
+    font-size: 1rem !important;
+    line-height: 1.15 !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div p:first-of-type {
+    margin: 0 !important;
+    font-size: .66rem !important;
+    line-height: 1.1 !important;
+    letter-spacing: .08em !important;
+}
+
+#mainContent.academic-period-page #activeBannerWrap .active-banner-inner > div:last-child {
+    min-height: 118px !important;
+    padding: 1.1rem 1.25rem !important;
+}
+
+@media (max-width: 767px) {
+    #mainContent.academic-period-page #activeBannerWrap #bannerSem,
+    #mainContent.academic-period-page #activeBannerWrap #bannerYear,
+    #mainContent.academic-period-page #activeBannerWrap #bannerEnd {
+        padding-left: calc(28px + .65rem) !important;
+    }
+}
+
+#mainContent.academic-period-page .ap-calendar-title-icon {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 10px !important;
+    background: #FEF2F2 !important;
+    border: 1px solid rgba(139, 0, 0, .12) !important;
+    color: #8B0000 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: .78rem !important;
+    line-height: 1 !important;
+}
+
+[data-theme="dark"] #mainContent.academic-period-page .ap-calendar-title-icon,
+.dark #mainContent.academic-period-page .ap-calendar-title-icon {
+    background: rgba(252, 165, 165, .10) !important;
+    border-color: rgba(252, 165, 165, .20) !important;
+    color: #FCA5A5 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+#deleteModal.ui-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 24px !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
+    transform: none !important;
+}
+
+#deleteModal.ui-modal.open,
+#deleteModal.ui-modal.closing {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+#deleteModal .ap-delete-shell {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    width: min(92vw, 560px) !important;
+    max-width: 680px !important;
+    max-height: calc(100dvh - 2rem) !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    background: #ffffff !important;
+    border: 1px solid #eef2f7 !important;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, .28) !important;
+}
+
+#deleteModal .ap-delete-head {
+    padding: 1rem 1.15rem !important;
+    border-bottom: 1px solid #eef2f7 !important;
+    background:
+        radial-gradient(circle at top right, rgba(239, 68, 68, .10), transparent 38%),
+        #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: .85rem !important;
+}
+
+#deleteModal .ap-delete-head-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: .8rem !important;
+    min-width: 0 !important;
+}
+
+#deleteModal .ap-delete-head-icon {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border-radius: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #fee2e2 !important;
+    color: #dc2626 !important;
+    border: 1px solid #fecaca !important;
+    box-shadow: 0 10px 22px rgba(220, 38, 38, .14) !important;
+}
+
+#deleteModal .ap-delete-head-icon i,
+#deleteModal .ap-delete-x i,
+#deleteModal .ap-delete-confirm-btn i {
+    color: currentColor !important;
+}
+
+#deleteModal .ap-delete-title {
+    margin: 0 !important;
+    color: #1f2937 !important;
+    font-size: 1rem !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+}
+
+#deleteModal .ap-delete-subtitle {
+    margin: .2rem 0 0 !important;
+    color: #8b95a7 !important;
+    font-size: .76rem !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+}
+
+#deleteModal .ap-delete-x {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #94a3b8 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all .18s ease !important;
+}
+
+#deleteModal .ap-delete-x:hover {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+    transform: translateY(-1px) !important;
+}
+
+#deleteModal .ap-delete-content {
+    padding: 1.15rem !important;
+    background: #ffffff !important;
+}
+
+#deleteModal .ap-delete-warning {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: .75rem !important;
+    padding: .9rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 16px !important;
+    background: #fef2f2 !important;
+    border: 1px solid #fca5a5 !important;
+    color: #991b1b !important;
+}
+
+#deleteModal .ap-delete-warning > i {
+    margin-top: .12rem !important;
+    color: #dc2626 !important;
+    font-size: .95rem !important;
+}
+
+#deleteModal .ap-delete-warning p {
+    margin: 0 !important;
+    color: #7f1d1d !important;
+    font-size: .88rem !important;
+    line-height: 1.4 !important;
+    font-weight: 900 !important;
+}
+
+#deleteModal .ap-delete-warning span {
+    display: block !important;
+    margin-top: .3rem !important;
+    color: #b91c1c !important;
+    font-size: .76rem !important;
+    font-weight: 600 !important;
+}
+
+#deleteModal #deletePeriodLabel {
+    display: inline-flex !important;
+    padding: .14rem .42rem !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, .82) !important;
+    color: #111827 !important;
+    font-weight: 950 !important;
+}
+
+#deleteModal .ap-delete-footer {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: .7rem !important;
+}
+
+#deleteModal .modal-btn-ghost,
+#deleteModal .ap-delete-confirm-btn {
+    min-height: 44px !important;
+    padding: 0 1.15rem !important;
+    border-radius: 12px !important;
+    font-size: .86rem !important;
+    font-weight: 900 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .55rem !important;
+}
+
+#deleteModal .modal-btn-ghost {
+    border: 1px solid #e5e7eb !important;
+    background: #ffffff !important;
+    color: #4b5563 !important;
+}
+
+#deleteModal .modal-btn-ghost:hover {
+    background: #f9fafb !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-1px) !important;
+}
+
+#deleteModal .ap-delete-confirm-btn {
+    border: 0 !important;
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    box-shadow: 0 12px 24px rgba(220, 38, 38, .26) !important;
+    transition: all .18s ease !important;
+}
+
+#deleteModal .ap-delete-confirm-btn:hover {
+    transform: translateY(-1px) !important;
+    background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+    box-shadow: 0 16px 30px rgba(220, 38, 38, .34) !important;
+}
+
+/* Dark mode */
+[data-theme="dark"] #deleteModal .ap-delete-shell,
+.dark #deleteModal .ap-delete-shell {
+    background: #0d1117 !important;
+    border-color: #21262d !important;
+    color: #e5e7eb !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-head,
+.dark #deleteModal .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .10), transparent 38%),
+        #0d1117 !important;
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-content,
+.dark #deleteModal .ap-delete-content {
+    background: #111827 !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-title,
+.dark #deleteModal .ap-delete-title {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-subtitle,
+.dark #deleteModal .ap-delete-subtitle {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-head-icon,
+.dark #deleteModal .ap-delete-head-icon {
+    background: rgba(220, 38, 38, .17) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(252, 165, 165, .22) !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-x,
+.dark #deleteModal .ap-delete-x,
+[data-theme="dark"] #deleteModal .modal-btn-ghost,
+.dark #deleteModal .modal-btn-ghost {
+    background: rgba(255, 255, 255, .06) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-x:hover,
+.dark #deleteModal .ap-delete-x:hover,
+[data-theme="dark"] #deleteModal .modal-btn-ghost:hover,
+.dark #deleteModal .modal-btn-ghost:hover {
+    background: rgba(252, 165, 165, .13) !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+    color: #fca5a5 !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-warning,
+.dark #deleteModal .ap-delete-warning {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .12), transparent 45%),
+        rgba(220, 38, 38, .12) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-warning p,
+.dark #deleteModal .ap-delete-warning p {
+    color: #fecaca !important;
+}
+
+[data-theme="dark"] #deleteModal .ap-delete-warning span,
+[data-theme="dark"] #deleteModal .ap-delete-warning > i,
+.dark #deleteModal .ap-delete-warning span,
+.dark #deleteModal .ap-delete-warning > i {
+    color: #fca5a5 !important;
+}
+
+[data-theme="dark"] #deleteModal #deletePeriodLabel,
+.dark #deleteModal #deletePeriodLabel {
+    background: rgba(255, 255, 255, .08) !important;
+    color: #ffffff !important;
+}
+
+@media (max-width: 767px) {
+    #deleteModal.ui-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    #deleteModal .ap-delete-shell {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #deleteModal .ap-delete-footer {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    #deleteModal .modal-btn-ghost,
+    #deleteModal .ap-delete-confirm-btn {
+        width: 100% !important;
+    }
 }

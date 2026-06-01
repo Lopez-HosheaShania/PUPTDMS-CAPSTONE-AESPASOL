@@ -3,7 +3,7 @@
 @section('title', 'Assign CMS Access | PUP Taguig Dental Clinic')
 
 @section('content')
-<main id="mainContent" class="px-4 sm:px-6 pt-[82px] pb-8 min-h-screen">
+<main id="mainContent" class="admin-page-shell">
     <div class="cms-shell">
         <div class="page-banner">
             <div class="page-banner-inner">
@@ -72,12 +72,12 @@
                                         </button>
 
                                         {{-- External circular mic button (matches Add User style) --}}
-                                        <div class="patient-voice-toggle">
+                                        <div class="voice-input-toggle">
                                             <button type="button" id="cmsSearchMicBtn" class="voice-search-mic external"
                                                 aria-label="Toggle voice input" aria-pressed="false">
                                                 <i class="fa-solid fa-microphone"></i>
                                             </button>
-                                            <span id="cmsSearchVoiceStatus" class="patient-voice-status hidden"
+                                            <span id="cmsSearchVoiceStatus" class="voice-status hidden"
                                                 aria-live="polite"></span>
                                         </div>
                                     </div>
@@ -243,7 +243,7 @@
                 </div>
 
                 <div class="info-card">
-                    <div class="section-head" style="margin-bottom: .3rem;">
+                    <div class="section-head admin-mb-xs">
                         <div class="section-head-left">
                             <div class="section-icon">
                                 <i class="fa-solid fa-circle-info"></i>
@@ -505,7 +505,7 @@
 
             const setStatus = (text, state) => {
                 status.textContent = text;
-                status.className = 'patient-voice-status' + (state ? ' is-' + state : '');
+                status.className = 'voice-status' + (state ? ' is-' + state : '');
                 text ? status.classList.remove('hidden') : status.classList.add('hidden');
             };
 

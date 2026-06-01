@@ -5,8 +5,8 @@
 @section('content')
 <div id="toastContainer" role="region" aria-live="polite"></div>
 
-<main id="mainContent" class="px-4 sm:px-6 pt-[82px] pb-8 min-h-[calc(100vh-82px)]">
-  <div class="max-w-[1280px] mx-auto">
+<main id="mainContent" class="admin-page-shell">
+  <div class="admin-page-container">
 
     <div class="page-banner">
       <div class="page-banner-inner">

@@ -1,404 +1,1484 @@
-.dental-records-page {
-    margin-left: var(--sidebar-w, 256px);
-    padding: calc(var(--header-h, 70px) + 12px) 1.5rem 2rem;
-    min-height: 100vh;
-    background: #f6f7f9;
+.admin-dental-records-page {
     overflow-x: hidden;
+    background: #f6f7f9;
 }
 
-/* ── Buttons ── */
-.btn-primary,
-.btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    border-radius: 8px;
-    font-size: .82rem;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    transition: .15s ease;
-}
-
-.btn-primary {
-    padding: .52rem 1.1rem;
-    border: none;
-    background: #8B0000;
-    color: #fff;
-}
-
-.btn-primary:hover {
-    background: #6b0000;
-}
-
-.btn-secondary {
-    padding: .5rem 1rem;
-    background: rgba(255, 255, 255, .15);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, .25);
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, .25);
-}
-
-/* ── Table wrapper ── */
-.tbl-wrap {
-    background: #fff;
-    border: 1px solid #f0eaea;
-    border-radius: 14px;
-    overflow: hidden;
-}
-
-.tbl {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.tbl th {
-    padding: .7rem 1rem;
-    font-size: .67rem;
-    font-weight: 700;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    text-align: left;
-    background: #fafafa;
-    border-bottom: 1px solid #f3f4f6;
-    white-space: nowrap;
-}
-
-.tbl td {
-    padding: .65rem .75rem;
-    font-size: .8rem;
-    color: #374151;
-    border-bottom: 1px solid #f8f5f5;
-    vertical-align: middle;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.tbl td.wrap {
+.admin-dental-records-page .tbl td.wrap {
     white-space: normal;
 }
 
-.tbl tbody tr:last-child td {
+.admin-dental-records-page .tbl tbody tr:last-child td {
     border-bottom: none;
 }
 
-.tbl tbody tr:hover td {
-    background: #fffafa;
-}
-
-/* Col widths */
-.tbl th:nth-child(1),
-.tbl td:nth-child(1) {
+.admin-dental-records-page .tbl th:nth-child(1),
+.admin-dental-records-page .tbl td:nth-child(1) {
     width: 22%;
 }
 
-.tbl th:nth-child(2),
-.tbl td:nth-child(2) {
+.admin-dental-records-page .tbl th:nth-child(2),
+.admin-dental-records-page .tbl td:nth-child(2) {
     width: 22%;
 }
 
-.tbl th:nth-child(3),
-.tbl td:nth-child(3) {
+.admin-dental-records-page .tbl th:nth-child(3),
+.admin-dental-records-page .tbl td:nth-child(3) {
     width: 18%;
 }
 
-.tbl th:nth-child(4),
-.tbl td:nth-child(4) {
+.admin-dental-records-page .tbl th:nth-child(4),
+.admin-dental-records-page .tbl td:nth-child(4) {
     width: 14%;
 }
 
-.tbl th:nth-child(5),
-.tbl td:nth-child(5) {
+.admin-dental-records-page .tbl th:nth-child(5),
+.admin-dental-records-page .tbl td:nth-child(5) {
     width: 12%;
 }
 
-.tbl th:nth-child(6),
-.tbl td:nth-child(6) {
+.admin-dental-records-page .tbl th:nth-child(6),
+.admin-dental-records-page .tbl td:nth-child(6) {
     width: 12%;
     text-align: right;
 }
 
-/* ── Panel ── */
-.content-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 1rem;
-    align-items: start;
+/* ─────────────────────────────────────────────
+   Stat cards: display only, not filter buttons
+───────────────────────────────────────────── */
+.admin-dental-records-page #statCards.dental-records-stat-grid {
+    margin-bottom: 1.25rem;
 }
 
-.panel-card {
-    background: #fff;
-    border: 1px solid #f0eaea;
-    border-radius: 14px;
-    overflow: hidden;
-    position: sticky;
-    top: calc(var(--header-h, 70px) + 12px);
+.admin-dental-records-page #statCards.dental-records-stat-grid .stat-card {
+    cursor: default !important;
+    pointer-events: none;
+    user-select: text;
 }
 
-.panel-header {
-    padding: .9rem 1.25rem;
-    border-bottom: 1px solid #f3f4f6;
-    background: #fafafa;
+.admin-dental-records-page #statCards.dental-records-stat-grid .stat-card:hover {
+    transform: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .06) !important;
+}
+
+#mainContent #statCards.dental-records-stat-grid .stat-card.s-all {
+    --stat-accent: var(--crimson, #8B0000);
+    --stat-soft: rgba(139, 0, 0, .10);
+    --stat-bg: rgba(139, 0, 0, .055);
+    --stat-text: var(--crimson, #8B0000);
+    --stat-border: rgba(139, 0, 0, .18);
+}
+
+#mainContent #statCards.dental-records-stat-grid .stat-card.s-today {
+    --stat-accent: var(--status-info-solid, #2563EB);
+    --stat-soft: var(--status-info-soft, #DBEAFE);
+    --stat-bg: var(--status-info-bg, #EFF6FF);
+    --stat-text: var(--status-info-text, #1D4ED8);
+    --stat-border: var(--status-info-border, #BFDBFE);
+}
+
+#mainContent #statCards.dental-records-stat-grid .stat-card.s-pending {
+    --stat-accent: var(--status-pending-solid, #F97316);
+    --stat-soft: var(--status-pending-soft, #FFF7ED);
+    --stat-bg: var(--status-pending-bg, #FFF7ED);
+    --stat-text: var(--status-pending-text, #C2410C);
+    --stat-border: var(--status-pending-border, #FED7AA);
+}
+
+#mainContent #statCards.dental-records-stat-grid .stat-card {
+    background:
+        radial-gradient(circle at 100% 100%, var(--stat-soft) 0%, transparent 34%),
+        linear-gradient(135deg, var(--stat-bg) 0%, var(--um-surface, #ffffff) 72%) !important;
+    border-color: var(--stat-border) !important;
+}
+
+#mainContent #statCards.dental-records-stat-grid .stat-card::before {
+    background: linear-gradient(90deg,
+            var(--stat-accent),
+            color-mix(in srgb, var(--stat-accent) 62%, #ffffff)) !important;
+}
+
+#mainContent #statCards.dental-records-stat-grid .stat-value,
+#mainContent #statCards.dental-records-stat-grid .stat-num,
+#mainContent #statCards.dental-records-stat-grid .stat-count {
+    color: var(--stat-accent) !important;
+}
+
+#mainContent #statCards.dental-records-stat-grid .stat-icon,
+#mainContent #statCards.dental-records-stat-grid .stat-icon-wrapper {
+    background: var(--stat-soft) !important;
+    color: var(--stat-accent) !important;
+    border-color: var(--stat-border) !important;
+}
+
+#mainContent #statCards.dental-records-stat-grid .stat-icon i,
+#mainContent #statCards.dental-records-stat-grid .stat-icon-wrapper i,
+#mainContent #statCards.dental-records-stat-grid .stat-footer i {
+    color: currentColor !important;
+}
+
+#mainContent #statCards.dental-records-stat-grid .stat-footer {
+    color: color-mix(in srgb, var(--stat-accent) 50%, #6b7280) !important;
+}
+
+/* ─────────────────────────────────────────────
+   Toolbar, patient-style dropdown, search cleanup
+───────────────────────────────────────────── */
+.admin-dental-records-page .patient-table-toolbar {
+    background: rgba(255, 255, 255, .86);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    overflow: visible;
+}
+
+.admin-dental-records-page .record-toolbar-layout {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 14px !important;
+}
+
+.admin-dental-records-page .record-sort-dropdown {
+    position: relative;
+    z-index: 30;
+}
+
+.admin-dental-records-page .record-sort-trigger {
+    padding: .45rem .75rem;
+    border: 1px solid rgba(139, 0, 0, .14);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .78);
+    box-shadow:
+        0 8px 24px rgba(139, 0, 0, .06),
+        inset 0 1px 0 rgba(255, 255, 255, .78);
     display: flex;
     align-items: center;
-    gap: .6rem;
+    gap: .55rem;
+    color: var(--crimson, #8B0000);
+    cursor: pointer;
+    transition: border-color .18s ease, box-shadow .18s ease;
 }
 
-.panel-header-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-    background: linear-gradient(135deg, #8B0000, #6b0000);
-    display: flex;
+.admin-dental-records-page .record-sort-trigger:hover,
+.admin-dental-records-page .record-sort-dropdown.is-open .record-sort-trigger {
+    border-color: rgba(139, 0, 0, .26);
+    box-shadow:
+        0 10px 24px rgba(139, 0, 0, .09),
+        inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+
+.admin-dental-records-page .record-sort-icon {
+    padding: .55rem;
+    border-radius: 14px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    border: 1px solid #BFDBFE;
+    color: #2563EB;
+    line-height: 1;
 }
 
-/* ── Insights (side panel bottom card) ── */
-.insights-card {
-    background: #fff;
-    border: 1px solid #f0eaea;
-    border-radius: 14px;
-    overflow: hidden;
-    margin-top: 1rem;
-}
-
-.insight-row {
+.admin-dental-records-page .record-sort-copy {
+    min-width: 0;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: .75rem;
-    padding: .8rem 1.25rem;
-    border-bottom: 1px solid #f8f5f5;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.05;
 }
 
-.insight-row:last-child {
-    border-bottom: none;
+.admin-dental-records-page .record-sort-label {
+    font-size: 8px !important;
+    line-height: 1 !important;
+    letter-spacing: .1em !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    color: #9CA3AF !important;
+    white-space: nowrap !important;
 }
 
-.insight-lbl {
-    font-size: .67rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    color: #9ca3af;
-    margin-bottom: .2rem;
-}
-
-.insight-val {
-    font-size: .9rem;
-    font-weight: 800;
+.admin-dental-records-page .record-sort-value {
+    margin-top: .15rem;
+    font-size: .8rem !important;
+    font-weight: 900;
     color: #111827;
+    white-space: nowrap;
 }
 
-/* ── Quick Actions ── */
-.quick-action {
-    display: flex;
-    align-items: center;
-    gap: .85rem;
-    padding: .8rem 1rem;
-    border-bottom: 1px solid #f8f5f5;
-    text-decoration: none;
-    transition: background .12s ease;
-}
-
-.quick-action:last-child {
-    border-bottom: none;
-}
-
-.quick-action:hover {
-    background: #fffafa;
-}
-
-.quick-action-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: #fef2f2;
-    color: #8B0000;
-    display: flex;
+.admin-dental-records-page .record-sort-count {
+    padding: .38rem .62rem;
+    border-radius: 999px;
+    background: #FFE4E6;
+    border: 1px solid #FDA4AF;
+    color: #E11D48;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: .78rem;
-    flex-shrink: 0;
-    transition: .12s ease;
+    font-weight: 900;
+    line-height: 1;
 }
 
-.quick-action:hover .quick-action-icon {
-    background: #8B0000;
-    color: #fff;
+.admin-dental-records-page .record-sort-chevron {
+    color: #94A3B8 !important;
+    font-size: .78rem;
+    transition: transform .18s ease;
 }
 
-.quick-action-title {
-    font-size: .8rem;
-    font-weight: 700;
+.admin-dental-records-page .record-sort-dropdown.is-open .record-sort-chevron {
+    transform: rotate(180deg);
+}
+
+.admin-dental-records-page .record-sort-menu {
+    position: absolute;
+    top: calc(100% + .7rem);
+    left: 0;
+    padding: .75rem;
+    border-radius: 22px;
+    border: 1px solid rgba(229, 231, 235, .95);
+    background: rgba(255, 255, 255, .96);
+    box-shadow:
+        0 22px 50px rgba(15, 23, 42, .14),
+        inset 0 1px 0 rgba(255, 255, 255, .85);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: .55rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px) scale(.98);
+    transform-origin: top left;
+    pointer-events: none;
+    transition: opacity .18s ease, visibility .18s ease, transform .18s ease;
+}
+
+.admin-dental-records-page .record-sort-dropdown.is-open .record-sort-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.admin-dental-records-page .record-sort-option {
+    --option-color: #8B0000;
+    --option-bg: #FEF2F2;
+    --option-border: #FECACA;
+
+    padding: .8rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    background: #F8FAFC;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    color: #64748B;
+    font-size: .85rem;
+    font-weight: 950;
+    text-align: center;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.admin-dental-records-page .record-sort-option:hover,
+.admin-dental-records-page .record-sort-option.is-active {
+    color: var(--option-color);
+    background: var(--option-bg);
+    border-color: var(--option-border);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--option-color) 12%, transparent);
+    transform: translateY(-1px);
+}
+
+.admin-dental-records-page .record-option-icon {
+    padding: .55rem;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--option-bg);
+    border: 1px solid var(--option-border);
+    color: var(--option-color);
+    line-height: 1;
+}
+
+.admin-dental-records-page .record-sort-option[data-filter="all"] {
+    --option-color: #2563EB;
+    --option-bg: #EFF6FF;
+    --option-border: #BFDBFE;
+}
+
+.admin-dental-records-page .record-sort-option[data-filter="today"] {
+    --option-color: #2563EB;
+    --option-bg: #EFF6FF;
+    --option-border: #BFDBFE;
+}
+
+.admin-dental-records-page .record-sort-option[data-filter="pending"] {
+    --option-color: #F97316;
+    --option-bg: #FFF7ED;
+    --option-border: #FED7AA;
+}
+
+.admin-dental-records-page .record-sort-option[data-filter="ongoing"] {
+    --option-color: #7C3AED;
+    --option-bg: #F5F3FF;
+    --option-border: #DDD6FE;
+}
+
+.admin-dental-records-page .record-sort-option[data-filter="completed"] {
+    --option-color: #16A34A;
+    --option-bg: #F0FDF4;
+    --option-border: #BBF7D0;
+}
+
+.admin-dental-records-page .record-sort-option[data-filter="cancelled"] {
+    --option-color: #DC2626;
+    --option-bg: #FEF2F2;
+    --option-border: #FECACA;
+}
+
+.admin-dental-records-page .record-sort-icon {
+    --dr-trigger-text: var(--status-all-text, #1D4ED8);
+    --dr-trigger-border: var(--status-all-border, #BFDBFE);
+    --dr-trigger-solid: var(--status-all-solid, #2563EB);
+
+    background:
+        radial-gradient(circle at 30% 18%,
+            color-mix(in srgb, var(--dr-trigger-solid) 22%, rgba(255, 255, 255, 0.92)),
+            transparent 48%),
+        linear-gradient(145deg,
+            color-mix(in srgb, var(--dr-trigger-solid) 14%, #FFFFFF),
+            color-mix(in srgb, var(--dr-trigger-solid) 6%, #FFFFFF)) !important;
+    border: 1px solid var(--dr-trigger-border) !important;
+    color: var(--dr-trigger-text) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        0 8px 16px color-mix(in srgb, var(--dr-trigger-solid) 14%, transparent) !important;
+}
+
+.admin-dental-records-page #recordStatusField[data-status-filter="all"] .record-sort-icon {
+    --dr-trigger-text: var(--status-all-text, #1D4ED8);
+    --dr-trigger-border: var(--status-all-border, #BFDBFE);
+    --dr-trigger-solid: var(--status-all-solid, #2563EB);
+}
+
+.admin-dental-records-page #recordStatusField[data-status-filter="today"] .record-sort-icon {
+    --dr-trigger-text: var(--status-today-text, #1D4ED8);
+    --dr-trigger-border: var(--status-today-border, #BFDBFE);
+    --dr-trigger-solid: var(--status-today-solid, #2563EB);
+}
+
+.admin-dental-records-page #recordStatusField[data-status-filter="pending"] .record-sort-icon {
+    --dr-trigger-text: var(--status-pending-text, #C2410C);
+    --dr-trigger-border: var(--status-pending-border, #FED7AA);
+    --dr-trigger-solid: var(--status-pending-solid, #F97316);
+}
+
+.admin-dental-records-page #recordStatusField[data-status-filter="ongoing"] .record-sort-icon {
+    --dr-trigger-text: var(--status-ongoing-text, #6D28D9);
+    --dr-trigger-border: var(--status-ongoing-border, #DDD6FE);
+    --dr-trigger-solid: var(--status-ongoing-solid, #7C3AED);
+}
+
+.admin-dental-records-page #recordStatusField[data-status-filter="completed"] .record-sort-icon {
+    --dr-trigger-text: var(--status-completed-text, #15803D);
+    --dr-trigger-border: var(--status-completed-border, #BBF7D0);
+    --dr-trigger-solid: var(--status-completed-solid, #16A34A);
+}
+
+.admin-dental-records-page #recordStatusField[data-status-filter="cancelled"] .record-sort-icon {
+    --dr-trigger-text: var(--status-cancelled-text, #B91C1C);
+    --dr-trigger-border: var(--status-cancelled-border, #FECACA);
+    --dr-trigger-solid: var(--status-cancelled-solid, #DC2626);
+}
+
+.admin-dental-records-page .record-search-row,
+.admin-dental-records-page .search-wrap.global-search {
+    width: 100%;
+    min-width: 0;
+}
+
+.admin-dental-records-page #recordResetFilterBtn {
+    display: none !important;
+}
+
+.admin-dental-records-page .record-view-switch {
+    padding: .35rem;
+    border-radius: 14px;
+    border: 1px solid rgba(139, 0, 0, .10);
+    background: rgba(255, 255, 255, .76);
+    box-shadow:
+        0 8px 24px rgba(139, 0, 0, .06),
+        inset 0 1px 0 rgba(255, 255, 255, .8);
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+.admin-dental-records-page .record-view-btn {
+    padding: .65rem .75rem;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #94A3B8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+.admin-dental-records-page .record-view-btn.is-active {
+    background: linear-gradient(135deg, #8B0000, #6b0000);
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(139, 0, 0, .24);
+}
+
+.admin-dental-records-page .record-view-btn i {
+    color: currentColor !important;
+}
+
+/* ─────────────────────────────────────────────
+   Table and panel polish
+───────────────────────────────────────────── */
+.admin-dental-records-page .table-card {
+    background: #ffffff;
+    border-color: #e8e4de !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04) !important;
+}
+
+.admin-dental-records-page .dental-record-row {
+    cursor: pointer;
+}
+
+.admin-dental-records-page .dental-record-row:hover {
+    background: rgba(139, 0, 0, .04) !important;
+}
+
+.admin-dental-records-page #dentalRecordClientEmpty {
+    display: none;
+}
+
+.admin-dental-records-page #dentalRecordClientEmpty.show {
+    display: block;
+}
+
+.admin-dental-records-page #panelFoot .ui-btn {
+    justify-content: center;
+}
+
+/* ─────────────────────────────────────────────
+   Quick actions: admin dashboard style
+───────────────────────────────────────────── */
+.admin-dental-records-page .quick-actions-list {
+    display: grid;
+    gap: .7rem;
+    padding: .75rem;
+}
+
+.admin-dental-records-page .quick-action-card {
+    position: relative;
+    isolation: isolate;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .9rem .95rem;
+    border-radius: 18px;
+    border: 1px solid rgba(139, 0, 0, .10);
+    background:
+        radial-gradient(circle at 100% 100%, rgba(139, 0, 0, .08), transparent 40%),
+        linear-gradient(135deg, #ffffff 0%, #fff7f7 100%);
+    box-shadow:
+        0 2px 10px rgba(15, 23, 42, .035),
+        inset 0 1px 0 rgba(255, 255, 255, .72);
+    overflow: hidden;
+    text-decoration: none;
+    transition:
+        transform .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease,
+        background .18s ease;
+}
+
+.admin-dental-records-page .quick-action-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 0, 0, .30);
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, .18), transparent 40%),
+        linear-gradient(135deg, #8B0000 0%, #6b0000 58%, #3b0202 100%);
+    box-shadow: 0 14px 28px rgba(139, 0, 0, .18);
+}
+
+.admin-dental-records-page .quick-action-icon {
+    position: relative;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .64);
+    color: var(--crimson, #8B0000);
+    border: 1px solid rgba(139, 0, 0, .12);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .78),
+        0 8px 18px rgba(139, 0, 0, .08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.admin-dental-records-page .quick-action-icon i,
+.admin-dental-records-page .quick-action-arrow,
+.admin-dental-records-page .quick-action-bg-icon {
+    color: currentColor !important;
+}
+
+.admin-dental-records-page .quick-action-card:hover .quick-action-icon {
+    transform: scale(1.03);
+    background: rgba(255, 255, 255, .16);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, .22);
+}
+
+.admin-dental-records-page .quick-action-copy {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    flex: 1;
+    display: grid;
+    gap: .15rem;
+}
+
+.admin-dental-records-page .quick-action-title {
+    display: block;
     color: #111827;
+    font-size: .88rem;
+    font-weight: 900;
+    line-height: 1.15;
+    transition: color .18s ease;
 }
 
-.quick-action-sub {
-    font-size: .67rem;
-    color: #9ca3af;
-    margin-top: 1px;
+.admin-dental-records-page .quick-action-sub {
+    display: block;
+    color: #9CA3AF;
+    font-size: .70rem;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color .18s ease;
 }
 
-.quick-action-arrow {
+.admin-dental-records-page .quick-action-arrow {
+    position: relative;
+    z-index: 1;
     margin-left: auto;
-    color: #d1d5db;
-    font-size: .65rem;
-    transition: .12s ease;
+    color: #c9cdd3 !important;
+    font-size: .72rem;
+    transition: transform .18s ease, color .18s ease;
 }
 
-.quick-action:hover .quick-action-arrow {
-    color: #8B0000;
+.admin-dental-records-page .quick-action-card:hover .quick-action-title,
+.admin-dental-records-page .quick-action-card:hover .quick-action-sub,
+.admin-dental-records-page .quick-action-card:hover .quick-action-arrow {
+    color: #ffffff !important;
 }
 
-/* ── Dark mode ── */
-[data-theme="dark"] .dental-records-page {
-    background: #0b1117 !important;
+.admin-dental-records-page .quick-action-card:hover .quick-action-arrow {
+    transform: translateX(3px);
 }
 
-[data-theme="dark"] .tbl-wrap,
-[data-theme="dark"] .panel-card,
-[data-theme="dark"] .insights-card {
+.admin-dental-records-page .quick-action-bg-icon {
+    position: absolute;
+    right: .75rem;
+    bottom: -1.25rem;
+    z-index: 0;
+    font-size: 4.6rem;
+    color: rgba(139, 0, 0, .075) !important;
+    transform: rotate(-10deg);
+    pointer-events: none;
+    transition: color .18s ease, transform .18s ease;
+}
+
+.admin-dental-records-page .quick-action-card:hover .quick-action-bg-icon {
+    color: rgba(255, 255, 255, .13) !important;
+    transform: rotate(-8deg) scale(1.04);
+}
+
+.admin-dental-records-page .dental-record-list-view[hidden],
+.admin-dental-records-page .dental-record-grid-view[hidden] {
+    display: none !important;
+}
+
+.admin-dental-records-page .dental-record-grid-view {
+    padding: 1rem;
+}
+
+.admin-dental-records-page .dental-record-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: .85rem;
+}
+
+.admin-dental-records-page .dental-record-grid-card {
+    cursor: pointer;
+    border: 1px solid #E5E7EB;
+    border-radius: 18px;
+    background: #ffffff;
+    padding: 1rem;
+    display: grid;
+    gap: .9rem;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.admin-dental-records-page .dental-record-grid-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 0, 0, .20);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
+}
+
+.admin-dental-records-page .dental-record-grid-top {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    min-width: 0;
+}
+
+.admin-dental-records-page .dental-record-grid-avatar {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: .9rem;
+    background: linear-gradient(135deg, #8B0000, #6b0000);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .78rem;
+    font-weight: 950;
+    flex-shrink: 0;
+}
+
+.admin-dental-records-page .dental-record-grid-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.admin-dental-records-page .dental-record-grid-name {
+    color: #111827;
+    font-size: .9rem;
+    font-weight: 950;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-dental-records-page .dental-record-grid-sub {
+    margin-top: .2rem;
+    color: #9CA3AF;
+    font-size: .7rem;
+    font-weight: 800;
+}
+
+.admin-dental-records-page .dental-record-grid-meta {
+    display: grid;
+    gap: .65rem;
+}
+
+.admin-dental-records-page .dental-record-grid-meta-item {
+    padding: .7rem .75rem;
+    border-radius: 14px;
+    background: #F9FAFB;
+    border: 1px solid #F1F5F9;
+    display: grid;
+    gap: .2rem;
+}
+
+.admin-dental-records-page .dental-record-grid-label {
+    color: #9CA3AF;
+    font-size: .62rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.admin-dental-records-page .dental-record-grid-value {
+    color: #374151;
+    font-size: .8rem;
+    font-weight: 850;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    min-width: 0;
+    word-break: break-word;
+}
+
+/* ─────────────────────────────────────────────
+   Dark mode
+───────────────────────────────────────────── */
+[data-theme="dark"] .admin-dental-records-page .dental-record-grid-card,
+.dark .admin-dental-records-page .dental-record-grid-card {
     background: #161b22 !important;
     border-color: #21262d !important;
 }
 
-[data-theme="dark"] .tbl th {
-    background: #0d1117 !important;
-    color: #6b7280 !important;
-    border-bottom-color: #21262d !important;
+[data-theme="dark"] .admin-dental-records-page .dental-record-grid-card:hover,
+.dark .admin-dental-records-page .dental-record-grid-card:hover {
+    border-color: rgba(252, 165, 165, .24) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 12px 24px rgba(0, 0, 0, .22) !important;
 }
 
-[data-theme="dark"] .tbl td {
-    color: #d1d5db !important;
-    border-bottom-color: #1c2128 !important;
-}
-
-[data-theme="dark"] .tbl tbody tr:hover td {
-    background: #1c2128 !important;
-}
-
-[data-theme="dark"] .panel-header {
-    background: #0d1117 !important;
-    border-bottom-color: #21262d !important;
-}
-
-[data-theme="dark"] .panel-header .font-bold,
-[data-theme="dark"] #panelRecordTitle {
-    color: #f3f4f6 !important;
-}
-
-[data-theme="dark"] #panelRecordTitle.has-ref {
+[data-theme="dark"] .admin-dental-records-page .dental-record-grid-name,
+.dark .admin-dental-records-page .dental-record-grid-name {
     color: #FCA5A5 !important;
 }
 
-[data-theme="dark"] #panelBody {
-    color: #d1d5db !important;
+[data-theme="dark"] .admin-dental-records-page .dental-record-grid-sub,
+[data-theme="dark"] .admin-dental-records-page .dental-record-grid-label,
+.dark .admin-dental-records-page .dental-record-grid-sub,
+.dark .admin-dental-records-page .dental-record-grid-label {
+    color: #9CA3AF !important;
 }
 
-[data-theme="dark"] #panelBody [style*="background:#fef2f2"] {
-    background: rgba(139, 0, 0, .12) !important;
-    border-color: rgba(139, 0, 0, .24) !important;
+[data-theme="dark"] .admin-dental-records-page .dental-record-grid-meta-item,
+.dark .admin-dental-records-page .dental-record-grid-meta-item {
+    background: rgba(255, 255, 255, .045) !important;
+    border-color: rgba(255, 255, 255, .075) !important;
 }
 
-[data-theme="dark"] #panelBody [style*="color:#111"] {
+[data-theme="dark"] .admin-dental-records-page .dental-record-grid-value,
+.dark .admin-dental-records-page .dental-record-grid-value {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page,
+.dark .admin-dental-records-page {
+    background: #0b1117 !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .page-banner,
+.dark .admin-dental-records-page .page-banner {
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .34) !important;
+}
+
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-card,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-card {
+    background:
+        radial-gradient(circle at 100% 100%, var(--stat-bg) 0%, transparent 38%),
+        linear-gradient(145deg, rgba(17, 24, 39, .96), rgba(13, 17, 23, .94)) !important;
+    border-color: var(--stat-border) !important;
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, .34),
+        inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-card:hover,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-card:hover {
+    transform: none !important;
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, .34),
+        inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-card.s-all,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-card.s-all {
+    --stat-accent: #FCA5A5;
+    --stat-soft: rgba(139, 0, 0, .24);
+    --stat-bg: rgba(139, 0, 0, .16);
+    --stat-text: #FCA5A5;
+    --stat-border: rgba(252, 165, 165, .28);
+}
+
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-card.s-today,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-card.s-today {
+    --stat-accent: #93C5FD;
+    --stat-soft: rgba(37, 99, 235, .22);
+    --stat-bg: rgba(37, 99, 235, .15);
+    --stat-text: #93C5FD;
+    --stat-border: rgba(147, 197, 253, .26);
+}
+
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-card.s-pending,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-card.s-pending {
+    --stat-accent: #FDBA74;
+    --stat-soft: rgba(249, 115, 22, .22);
+    --stat-bg: rgba(249, 115, 22, .14);
+    --stat-text: #FDBA74;
+    --stat-border: rgba(253, 186, 116, .26);
+}
+
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-value,
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-num,
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-count,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-value,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-num,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-count {
+    color: var(--stat-accent) !important;
+}
+
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-icon,
+[data-theme="dark"] #mainContent #statCards.dental-records-stat-grid .stat-icon-wrapper,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-icon,
+.dark #mainContent #statCards.dental-records-stat-grid .stat-icon-wrapper {
+    background: var(--stat-bg) !important;
+    color: var(--stat-accent) !important;
+    border-color: var(--stat-border) !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .patient-table-toolbar,
+.dark .admin-dental-records-page .patient-table-toolbar {
+    background: rgba(13, 17, 23, .82) !important;
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .table-card,
+.dark .admin-dental-records-page .table-card {
+    background: #161b22 !important;
+    border-color: #21262d !important;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .26) !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .border-gray-100,
+[data-theme="dark"] .admin-dental-records-page .border-gray-200,
+.dark .admin-dental-records-page .border-gray-100,
+.dark .admin-dental-records-page .border-gray-200 {
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .divide-gray-100> :not([hidden])~ :not([hidden]),
+.dark .admin-dental-records-page .divide-gray-100> :not([hidden])~ :not([hidden]) {
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page thead tr,
+.dark .admin-dental-records-page thead tr {
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .dental-record-row:hover,
+.dark .admin-dental-records-page .dental-record-row:hover {
+    background: rgba(252, 165, 165, .08) !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .text-gray-900,
+[data-theme="dark"] .admin-dental-records-page .text-gray-800,
+[data-theme="dark"] .admin-dental-records-page .text-gray-700,
+[data-theme="dark"] .admin-dental-records-page .text-gray-600,
+.dark .admin-dental-records-page .text-gray-900,
+.dark .admin-dental-records-page .text-gray-800,
+.dark .admin-dental-records-page .text-gray-700,
+.dark .admin-dental-records-page .text-gray-600 {
     color: #f3f4f6 !important;
 }
 
-[data-theme="dark"] #panelBody [style*="color:#374151"] {
+[data-theme="dark"] .admin-dental-records-page .text-gray-500,
+[data-theme="dark"] .admin-dental-records-page .text-gray-400,
+.dark .admin-dental-records-page .text-gray-500,
+.dark .admin-dental-records-page .text-gray-400 {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .text-gray-300,
+.dark .admin-dental-records-page .text-gray-300 {
+    color: #6B7280 !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .bg-gray-50,
+.dark .admin-dental-records-page .bg-gray-50 {
+    background: #0d1117 !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .bg-white,
+.dark .admin-dental-records-page .bg-white {
+    background: #0d1117 !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .bg-red-50,
+[data-theme="dark"] .admin-dental-records-page .bg-red-50\/70,
+.dark .admin-dental-records-page .bg-red-50,
+.dark .admin-dental-records-page .bg-red-50\/70 {
+    background: rgba(139, 0, 0, .14) !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .border-red-100,
+.dark .admin-dental-records-page .border-red-100 {
+    border-color: rgba(252, 165, 165, .18) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page #panelRecordTitle,
+.dark .admin-dental-records-page #panelRecordTitle {
+    color: #f3f4f6 !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page #panelBody,
+.dark .admin-dental-records-page #panelBody {
     color: #d1d5db !important;
 }
 
-[data-theme="dark"] #panelBody [style*="color:#9ca3af"] {
-    color: #9ca3af !important;
+[data-theme="dark"] .admin-dental-records-page #panelBody .rounded-2xl,
+.dark .admin-dental-records-page #panelBody .rounded-2xl {
+    border-color: #21262d !important;
 }
 
-[data-theme="dark"] #panelFoot {
+[data-theme="dark"] .admin-dental-records-page #panelFoot,
+.dark .admin-dental-records-page #panelFoot {
     background: #0d1117 !important;
     border-top-color: #21262d !important;
 }
 
-[data-theme="dark"] .insight-row {
-    border-bottom-color: #1c2128 !important;
+[data-theme="dark"] .admin-dental-records-page .global-filter-select-field,
+.dark .admin-dental-records-page .global-filter-select-field {
+    background: rgba(255, 255, 255, .055) !important;
+    border-color: rgba(255, 255, 255, .09) !important;
+    color: #FCA5A5;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .05),
+        0 10px 24px rgba(0, 0, 0, .18);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
-[data-theme="dark"] .insight-lbl {
-    color: #9ca3af !important;
+[data-theme="dark"] .admin-dental-records-page .global-filter-select,
+.dark .admin-dental-records-page .global-filter-select {
+    color: #FEE2E2 !important;
 }
 
-[data-theme="dark"] .insight-val {
+[data-theme="dark"] .admin-dental-records-page .global-filter-select option,
+.dark .admin-dental-records-page .global-filter-select option {
+    color: #f3f4f6;
+    background: #111827;
+}
+
+[data-theme="dark"] .admin-dental-records-page .search-input,
+.dark .admin-dental-records-page .search-input {
     color: #f3f4f6 !important;
 }
 
-[data-theme="dark"] .quick-action {
-    border-bottom-color: #1c2128 !important;
+[data-theme="dark"] .admin-dental-records-page .search-input::placeholder,
+.dark .admin-dental-records-page .search-input::placeholder {
+    color: #6B7280 !important;
 }
 
-[data-theme="dark"] .quick-action:hover {
-    background: #1c2128 !important;
+[data-theme="dark"] .admin-dental-records-page .search-icon,
+[data-theme="dark"] .admin-dental-records-page .search-clear,
+.dark .admin-dental-records-page .search-icon,
+.dark .admin-dental-records-page .search-clear {
+    color: #9CA3AF !important;
 }
 
-[data-theme="dark"] .quick-action-icon {
-    background: rgba(139, 0, 0, .12) !important;
-    color: #fca5a5 !important;
+[data-theme="dark"] .admin-dental-records-page .quick-action-card,
+.dark .admin-dental-records-page .quick-action-card {
+    border-color: rgba(255, 255, 255, .08);
+    background:
+        radial-gradient(circle at 100% 100%, rgba(252, 165, 165, .10), transparent 42%),
+        linear-gradient(145deg, rgba(17, 24, 39, .95), rgba(13, 17, 23, .94));
+    box-shadow:
+        0 12px 24px rgba(0, 0, 0, .20),
+        inset 0 1px 0 rgba(255, 255, 255, .055);
 }
 
-[data-theme="dark"] .quick-action:hover .quick-action-icon {
-    background: #8B0000 !important;
-    color: #fff !important;
+[data-theme="dark"] .admin-dental-records-page .quick-action-card:hover,
+.dark .admin-dental-records-page .quick-action-card:hover {
+    border-color: rgba(252, 165, 165, .26);
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, .14), transparent 40%),
+        linear-gradient(135deg, #8B0000 0%, #5f0202 58%, #2a0101 100%);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, .34);
 }
 
-[data-theme="dark"] .quick-action-title {
-    color: #f3f4f6 !important;
+[data-theme="dark"] .admin-dental-records-page .quick-action-icon,
+.dark .admin-dental-records-page .quick-action-icon {
+    color: #FCA5A5;
+    background: rgba(255, 255, 255, .075);
+    border-color: rgba(255, 255, 255, .10);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .06),
+        0 10px 18px rgba(0, 0, 0, .18);
 }
 
-[data-theme="dark"] .quick-action-sub {
-    color: #9ca3af !important;
+[data-theme="dark"] .admin-dental-records-page .quick-action-title,
+.dark .admin-dental-records-page .quick-action-title {
+    color: #f3f4f6;
 }
 
-[data-theme="dark"] .quick-action:hover .quick-action-arrow {
-    color: #fca5a5 !important;
+[data-theme="dark"] .admin-dental-records-page .quick-action-sub,
+.dark .admin-dental-records-page .quick-action-sub {
+    color: #9CA3AF;
 }
 
-[data-theme="dark"] .btn-secondary {
-    background: #161b22 !important;
-    color: #e5e7eb !important;
-    border-color: #2b313a !important;
+[data-theme="dark"] .admin-dental-records-page .quick-action-arrow,
+.dark .admin-dental-records-page .quick-action-arrow {
+    color: #6B7280 !important;
 }
 
-[data-theme="dark"] .btn-secondary:hover {
-    background: #1c2128 !important;
+[data-theme="dark"] .admin-dental-records-page .quick-action-bg-icon,
+.dark .admin-dental-records-page .quick-action-bg-icon {
+    color: rgba(252, 165, 165, .07) !important;
 }
 
-[data-theme="dark"] .btn-primary {
-    background: #8B0000 !important;
+[data-theme="dark"] .admin-dental-records-page .record-sort-trigger,
+.dark .admin-dental-records-page .record-sort-trigger,
+[data-theme="dark"] .admin-dental-records-page .record-view-switch,
+.dark .admin-dental-records-page .record-view-switch {
+    background: rgba(13, 17, 23, 0.82) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .05),
+        0 14px 28px rgba(0, 0, 0, .22) !important;
 }
 
-[data-theme="dark"] .btn-primary:hover {
-    background: #6b0000 !important;
+[data-theme="dark"] .admin-dental-records-page .record-sort-value,
+.dark .admin-dental-records-page .record-sort-value {
+    color: #F3F4F6 !important;
 }
 
+[data-theme="dark"] .admin-dental-records-page .record-sort-label,
+.dark .admin-dental-records-page .record-sort-label {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .record-sort-count,
+.dark .admin-dental-records-page .record-sort-count {
+    background: rgba(139, 0, 0, .22) !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .record-sort-menu,
+.dark .admin-dental-records-page .record-sort-menu {
+    background: rgba(13, 17, 23, .96) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, .42),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .record-sort-option,
+.dark .admin-dental-records-page .record-sort-option {
+    background: rgba(255, 255, 255, .045) !important;
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .admin-dental-records-page .record-sort-option:hover,
+[data-theme="dark"] .admin-dental-records-page .record-sort-option.is-active,
+.dark .admin-dental-records-page .record-sort-option:hover,
+.dark .admin-dental-records-page .record-sort-option.is-active {
+    color: var(--option-color) !important;
+    background: color-mix(in srgb, var(--option-color) 13%, transparent) !important;
+    border-color: color-mix(in srgb, var(--option-color) 28%, transparent) !important;
+}
+
+[data-theme="dark"] #mainContent.admin-dental-records-page .record-sort-icon,
+.dark #mainContent.admin-dental-records-page .record-sort-icon,
+[data-theme="dark"] .admin-dental-records-page .record-sort-icon,
+.dark .admin-dental-records-page .record-sort-icon {
+    background:
+        radial-gradient(circle at 30% 18%,
+            color-mix(in srgb, var(--dr-trigger-solid) 42%, rgba(255, 255, 255, .16)) 0%,
+            color-mix(in srgb, var(--dr-trigger-solid) 24%, transparent) 34%,
+            transparent 68%),
+        linear-gradient(145deg,
+            color-mix(in srgb, var(--dr-trigger-solid) 22%, rgba(13, 17, 23, .92)),
+            rgba(13, 17, 23, .88)) !important;
+    color: var(--dr-trigger-text) !important;
+    border: 1px solid var(--dr-trigger-border) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 8px 16px color-mix(in srgb, var(--dr-trigger-solid) 16%, transparent) !important;
+}
+
+[data-theme="dark"] #mainContent.admin-dental-records-page .record-option-icon,
+.dark #mainContent.admin-dental-records-page .record-option-icon,
+[data-theme="dark"] .admin-dental-records-page .record-option-icon,
+.dark .admin-dental-records-page .record-option-icon {
+    background: rgba(255, 255, 255, .045) !important;
+    border-color: rgba(255, 255, 255, .075) !important;
+}
+
+[data-theme="dark"] #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="all"] .record-sort-icon,
+[data-theme="dark"] #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="today"] .record-sort-icon,
+.dark #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="all"] .record-sort-icon,
+.dark #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="today"] .record-sort-icon,
+[data-theme="dark"] .admin-dental-records-page #recordStatusField[data-status-filter="all"] .record-sort-icon,
+[data-theme="dark"] .admin-dental-records-page #recordStatusField[data-status-filter="today"] .record-sort-icon,
+.dark .admin-dental-records-page #recordStatusField[data-status-filter="all"] .record-sort-icon,
+.dark .admin-dental-records-page #recordStatusField[data-status-filter="today"] .record-sort-icon {
+    --dr-trigger-text: #93C5FD;
+    --dr-trigger-border: rgba(147, 197, 253, .24);
+    --dr-trigger-solid: #60A5FA;
+}
+
+[data-theme="dark"] #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="pending"] .record-sort-icon,
+.dark #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="pending"] .record-sort-icon,
+[data-theme="dark"] .admin-dental-records-page #recordStatusField[data-status-filter="pending"] .record-sort-icon,
+.dark .admin-dental-records-page #recordStatusField[data-status-filter="pending"] .record-sort-icon {
+    --dr-trigger-text: #FDBA74;
+    --dr-trigger-border: rgba(253, 186, 116, .24);
+    --dr-trigger-solid: #FB923C;
+}
+
+[data-theme="dark"] #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="ongoing"] .record-sort-icon,
+.dark #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="ongoing"] .record-sort-icon,
+[data-theme="dark"] .admin-dental-records-page #recordStatusField[data-status-filter="ongoing"] .record-sort-icon,
+.dark .admin-dental-records-page #recordStatusField[data-status-filter="ongoing"] .record-sort-icon {
+    --dr-trigger-text: #C4B5FD;
+    --dr-trigger-border: rgba(196, 181, 253, .24);
+    --dr-trigger-solid: #A78BFA;
+}
+
+[data-theme="dark"] #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="completed"] .record-sort-icon,
+.dark #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="completed"] .record-sort-icon,
+[data-theme="dark"] .admin-dental-records-page #recordStatusField[data-status-filter="completed"] .record-sort-icon,
+.dark .admin-dental-records-page #recordStatusField[data-status-filter="completed"] .record-sort-icon {
+    --dr-trigger-text: #86EFAC;
+    --dr-trigger-border: rgba(134, 239, 172, .24);
+    --dr-trigger-solid: #4ADE80;
+}
+
+[data-theme="dark"] #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="cancelled"] .record-sort-icon,
+.dark #mainContent.admin-dental-records-page #recordStatusField[data-status-filter="cancelled"] .record-sort-icon,
+[data-theme="dark"] .admin-dental-records-page #recordStatusField[data-status-filter="cancelled"] .record-sort-icon,
+.dark .admin-dental-records-page #recordStatusField[data-status-filter="cancelled"] .record-sort-icon {
+    --dr-trigger-text: #FCA5A5;
+    --dr-trigger-border: rgba(252, 165, 165, .24);
+    --dr-trigger-solid: #F87171;
+}
+
+[data-theme="dark"] .admin-dental-records-page .record-view-btn,
+.dark .admin-dental-records-page .record-view-btn {
+    color: #8B949E;
+}
+
+[data-theme="dark"] .admin-dental-records-page .record-view-btn.is-active,
+.dark .admin-dental-records-page .record-view-btn.is-active {
+    background: linear-gradient(135deg, #8B0000, #5f0202) !important;
+    color: #ffffff !important;
+}
+
+/* ─────────────────────────────────────────────
+   Responsive
+───────────────────────────────────────────── */
 @media (max-width: 1024px) {
-    .content-grid {
+    .admin-dental-records-page .content-grid {
         grid-template-columns: 1fr !important;
     }
+}
 
-    .panel-card {
-        position: static;
+@media (max-width: 767px) {
+    .admin-dental-records-page .record-toolbar-layout {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .admin-dental-records-page .record-sort-dropdown,
+    .admin-dental-records-page .record-search-row,
+    .admin-dental-records-page .search-wrap.global-search,
+    .admin-dental-records-page .record-view-switch {
+        width: 100% !important;
+    }
+
+    .admin-dental-records-page .record-sort-menu {
+        width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-dental-records-page .record-view-switch {
+        justify-content: center;
+    }
+
+    .admin-dental-records-page .record-view-btn {
+        flex: 1;
+    }
+
+    .admin-dental-records-page .quick-action-card {
+        min-height: 70px;
+        padding: .82rem;
+    }
+
+    .admin-dental-records-page .quick-action-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 14px;
+    }
+
+    .admin-dental-records-page .quick-action-bg-icon {
+        font-size: 4rem;
+        bottom: -1.1rem;
+    }
+}
+
+#mainContent.admin-page-shell.docreq-page .docreq-list-main {
+    grid-template-columns:
+        minmax(250px, .9fr) minmax(0, 1.65fr) minmax(128px, max-content) !important;
+    align-items: center !important;
+    gap: 12px !important;
+    overflow: hidden !important;
+}
+
+#mainContent.admin-page-shell.docreq-page .docreq-list-profile,
+#mainContent.admin-page-shell.docreq-page .docreq-list-meta,
+#mainContent.admin-page-shell.docreq-page .docreq-list-action,
+#mainContent.admin-page-shell.docreq-page .docreq-list-info,
+#mainContent.admin-page-shell.docreq-page .docreq-list-info>div {
+    min-width: 0 !important;
+}
+
+#mainContent.admin-page-shell.docreq-page .docreq-list-meta {
+    grid-template-columns:
+        minmax(160px, .9fr) minmax(180px, .95fr) minmax(0, 1.2fr) !important;
+    gap: 10px !important;
+    overflow: hidden !important;
+}
+
+#mainContent.admin-page-shell.docreq-page .docreq-list-info {
+    overflow: hidden !important;
+}
+
+#mainContent.admin-page-shell.docreq-page .docreq-list-info strong {
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+}
+
+#mainContent.admin-page-shell.docreq-page .docreq-list-info span {
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+#mainContent.admin-page-shell.docreq-page .docreq-list-action {
+    grid-column: 3 !important;
+    justify-self: end !important;
+    align-self: center !important;
+    min-width: 128px !important;
+    z-index: 5 !important;
+}
+
+#mainContent.admin-page-shell.docreq-page .docreq-list-direct-actions {
+    width: 128px !important;
+    min-width: 128px !important;
+    align-items: stretch !important;
+}
+
+#mainContent.admin-page-shell.docreq-page .docreq-list-action-btn {
+    width: 128px !important;
+    min-width: 128px !important;
+    max-width: 128px !important;
+    justify-content: center !important;
+}
+
+@media (max-width: 1280px) {
+    #mainContent.admin-page-shell.docreq-page .docreq-list-main {
+        grid-template-columns: minmax(0, 1fr) minmax(128px, max-content) !important;
+    }
+
+    #mainContent.admin-page-shell.docreq-page .docreq-list-profile {
+        grid-column: 1 / -1 !important;
+    }
+
+    #mainContent.admin-page-shell.docreq-page .docreq-list-meta {
+        grid-column: 1 !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #mainContent.admin-page-shell.docreq-page .docreq-list-info-purpose {
+        grid-column: 1 / -1 !important;
+    }
+
+    #mainContent.admin-page-shell.docreq-page .docreq-list-action {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        align-self: center !important;
     }
 }
 
 @media (max-width: 900px) {
-    .dental-records-page {
-        margin-left: 0;
-        padding: calc(var(--header-h, 70px) + 12px) 1rem 2rem;
+    #mainContent.admin-page-shell.docreq-page .docreq-list-main {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.admin-page-shell.docreq-page .docreq-list-profile,
+    #mainContent.admin-page-shell.docreq-page .docreq-list-meta,
+    #mainContent.admin-page-shell.docreq-page .docreq-list-action {
+        grid-column: auto !important;
+        grid-row: auto !important;
+    }
+
+    #mainContent.admin-page-shell.docreq-page .docreq-list-meta {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.admin-page-shell.docreq-page .docreq-list-action {
+        justify-self: stretch !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-page-shell.docreq-page .docreq-list-direct-actions {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex-direction: row !important;
+    }
+
+    #mainContent.admin-page-shell.docreq-page .docreq-list-action-btn {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        flex: 1 !important;
+    }
+}
+
+.admin-dental-records-page .record-toolbar-layout {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 14px !important;
+}
+
+.admin-dental-records-page .record-toolbar-actions {
+    justify-self: end !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    width: auto !important;
+}
+
+.admin-dental-records-page .record-search-wrap {
+    flex: 0 1 360px !important;
+    width: 360px !important;
+    min-width: 250px !important;
+    max-width: 100% !important;
+}
+
+.admin-dental-records-page .record-search-row {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    min-width: 260px !important;
+    max-width: 390px !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.admin-dental-records-page .record-search-row .search-wrap.global-search {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+.admin-dental-records-page .record-search-row .voice-input-toggle {
+    flex: 0 0 auto !important;
+}
+
+.admin-dental-records-page .record-search-row .search-input {
+    width: 100% !important;
+    height: 42px !important;
+    padding: 0 44px 0 42px !important;
+    border-radius: 999px !important;
+}
+
+.admin-dental-records-page .record-search-row .search-icon {
+    position: absolute !important;
+    left: 16px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 2 !important;
+    pointer-events: none !important;
+}
+
+.admin-dental-records-page .record-search-row .search-clear,
+.admin-dental-records-page .record-search-row [data-search-clear] {
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 26px !important;
+    height: 26px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 4 !important;
+}
+
+.admin-dental-records-page .record-view-toggle.view-toggle-container {
+    flex: 0 0 auto !important;
+}
+
+.admin-dental-records-page .record-view-toggle .btn-view-mode i {
+    color: currentColor !important;
+}
+
+.admin-dental-records-page .dental-record-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.admin-dental-records-page #dentalRecordClientEmpty.empty-state-host {
+    display: none !important;
+}
+
+.admin-dental-records-page #dentalRecordClientEmpty.empty-state-host.show,
+.admin-dental-records-page #dentalRecordClientEmpty.empty-state-host.is-visible {
+    display: block !important;
+}
+
+[data-theme="dark"] #mainContent.admin-dental-records-page .record-insight-row,
+.dark #mainContent.admin-dental-records-page .record-insight-row {
+    background: transparent !important;
+}
+
+@media (max-width: 1280px) {
+    .admin-dental-records-page .dental-record-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .admin-dental-records-page .record-toolbar-layout {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    .admin-dental-records-page .record-sort-dropdown,
+    .admin-dental-records-page .record-toolbar-actions,
+    .admin-dental-records-page .record-search-row {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+    }
+
+    .admin-dental-records-page .record-toolbar-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .admin-dental-records-page .record-view-toggle.view-toggle-container {
+        width: 100% !important;
+    }
+
+    .admin-dental-records-page .record-view-toggle .btn-view-mode {
+        flex: 1 1 50% !important;
+        width: auto !important;
+    }
+
+    .admin-dental-records-page .record-view-toggle .view-slider {
+        width: calc(50% - 4px) !important;
+    }
+
+    #mainContent.mode-grid.admin-dental-records-page .record-view-toggle .view-slider {
+        transform: translateX(calc(100% + 4px)) !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid {
+        grid-template-columns: 1fr !important;
     }
 }

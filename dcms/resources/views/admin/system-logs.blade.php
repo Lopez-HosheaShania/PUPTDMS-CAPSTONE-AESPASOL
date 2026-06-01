@@ -9,8 +9,8 @@ $logs = $logs ?? collect([]);
 $perPage = $perPage ?? 20;
 @endphp
 
-<main id="mainContent" class="px-4 sm:px-6 pt-[82px] pb-8 min-h-screen">
-    <div class="max-w-[1280px] mx-auto">
+<main id="mainContent" class="admin-page-shell">
+    <div class="admin-page-container">
 
         <!-- Page Banner -->
         <div class="page-banner rounded-2xl mb-6">
@@ -40,53 +40,46 @@ $perPage = $perPage ?? 20;
 
         {{-- STAT CARDS --}}
         <div class="stat-grid">
-            <div class="stat-card">
-                <div class="stat-card-accent" style="background:linear-gradient(90deg,var(--crimson),#c0392b);"></div>
+            <div class="stat-card s-crimson">                <div class="stat-card-accent"></div>
                 <div class="stat-top">
-                    <div class="stat-icon" style="background:#fef2f2;">
-                        <i class="fa-solid fa-clipboard-list" style="color:var(--crimson);"></i>
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-clipboard-list"></i>
                     </div>
-                    <span class="stat-badge" style="background:#fef2f2;color:var(--crimson);">Total</span>
+                    <span class="stat-badge">Total</span>
                 </div>
                 <div class="stat-label">Total Logs</div>
                 <div class="stat-value" id="statTotal">{{ $totalCount }}</div>
-                <div class="stat-footer"><i class="fa-solid fa-list" style="font-size:.65rem;color:var(--crimson);"></i>
+                <div class="stat-footer"><i class="fa-solid fa-list admin-icon-sm"></i>
                     All recorded activity</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-card-accent" style="background:linear-gradient(90deg,#af2626,#fca5a5);"></div>
+            <div class="stat-card s-red">                <div class="stat-card-accent"></div>
                 <div class="stat-top">
-                    <div class="stat-icon" style="background:#fef2f2;"><i class="fa-solid fa-user-tie"
-                            style="color:#af2626;"></i></div>
-                    <span class="stat-badge" style="background:#fef2f2;color:#af2626;">Admin</span>
+                    <div class="stat-icon"><i class="fa-solid fa-user-tie"></i></div>
+                    <span class="stat-badge">Admin</span>
                 </div>
                 <div class="stat-label">Admin Actions</div>
-                <div class="stat-value" id="statAdmin" style="color:#af2626;">{{ $adminCount }}</div>
-                <div class="stat-footer"><i class="fa-solid fa-shield" style="font-size:.65rem;color:#af2626;"></i>
+                <div class="stat-value" id="statAdmin">{{ $adminCount }}</div>
+                <div class="stat-footer"><i class="fa-solid fa-shield admin-icon-sm"></i>
                     Administrator activity</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-card-accent" style="background:linear-gradient(90deg,#3b82f6,#93c5fd);"></div>
+            <div class="stat-card s-blue">                <div class="stat-card-accent"></div>
                 <div class="stat-top">
-                    <div class="stat-icon" style="background:#eff6ff;"><i class="fa-solid fa-user-doctor"
-                            style="color:#3b82f6;"></i></div>
-                    <span class="stat-badge" style="background:#eff6ff;color:#3b82f6;">Dentist</span>
+                    <div class="stat-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                    <span class="stat-badge">Dentist</span>
                 </div>
                 <div class="stat-label">Dentist Actions</div>
-                <div class="stat-value" id="statDentist" style="color:#3b82f6;">{{ $dentistCount }}</div>
-                <div class="stat-footer"><i class="fa-solid fa-stethoscope" style="font-size:.65rem;color:#3b82f6;"></i>
+                <div class="stat-value" id="statDentist">{{ $dentistCount }}</div>
+                <div class="stat-footer"><i class="fa-solid fa-stethoscope admin-icon-sm"></i>
                     Dentist activity</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-card-accent" style="background:linear-gradient(90deg,#10b981,#6ee7b7);"></div>
+            <div class="stat-card s-green">                <div class="stat-card-accent"></div>
                 <div class="stat-top">
-                    <div class="stat-icon" style="background:#ecfdf5;"><i class="fa-solid fa-user"
-                            style="color:#10b981;"></i></div>
-                    <span class="stat-badge" style="background:#ecfdf5;color:#059669;">Patient</span>
+                    <div class="stat-icon"><i class="fa-solid fa-user"></i></div>
+                    <span class="stat-badge">Patient</span>
                 </div>
                 <div class="stat-label">Patient Actions</div>
-                <div class="stat-value" id="statPatient" style="color:#10b981;">{{ $patientCount }}</div>
-                <div class="stat-footer"><i class="fa-solid fa-heart-pulse" style="font-size:.65rem;color:#10b981;"></i>
+                <div class="stat-value" id="statPatient">{{ $patientCount }}</div>
+                <div class="stat-footer"><i class="fa-solid fa-heart-pulse admin-icon-sm"></i>
                     Patient activity</div>
             </div>
         </div>
@@ -106,7 +99,7 @@ $perPage = $perPage ?? 20;
 
                 <div class="card-header-right">
                     <div class="flex items-center gap-2">
-                        <div class="search-wrap" style="width:200px;">
+                        <div class="search-wrap sl-search-wrap">
                             <i class="fa fa-search"></i>
                             <input id="slSearch" name="search" placeholder="Search logs…" value="{{ $search ?? '' }}"
                                 onkeydown="if(event.key==='Enter'){event.preventDefault();slState.search=this.value;slState.page=1;slFetch();}">
@@ -155,7 +148,7 @@ $perPage = $perPage ?? 20;
             </div>
 
             {{-- Top pagebar --}}
-            <div class="sl-pagebar" style="border-top:none; border-bottom:1px solid #f3f4f6;">
+            <div class="sl-pagebar sl-pagebar-top">
                 <div class="flex items-center gap-3 flex-wrap">
                     <span class="sl-pagebar-info">
                         @if (method_exists($logs, 'total'))
@@ -182,16 +175,16 @@ $perPage = $perPage ?? 20;
 
             {{-- List View --}}
             <div class="sl-view" id="slListView">
-                <div style="overflow-x:auto;">
+                <div class="sl-table-wrap">
                     <table class="data-table" id="slTable">
                         <thead>
                             <tr>
-                                <th style="width:100px;">ID</th>
-                                <th style="width:150px;">Timestamp</th>
-                                <th style="width:150px;">Role</th>
-                                <th style="width:180px;">User</th>
-                                <th style="width:150px;">Action</th>
-                                <th style="width:200px;">Module</th>
+                                <th class="sl-col-id">ID</th>
+                                <th class="sl-col-timestamp">Timestamp</th>
+                                <th class="sl-col-role">Role</th>
+                                <th class="sl-col-user">User</th>
+                                <th class="sl-col-action">Action</th>
+                                <th class="sl-col-module">Module</th>
                                 <th>Description</th>
                             </tr>
                         </thead>
@@ -347,7 +340,7 @@ $perPage = $perPage ?? 20;
                 </div>
             </div>
 
-            <div id="emptyState" style="display:none;"></div>
+            <div id="emptyState" class="admin-hidden"></div>
 
             {{-- Bottom pagebar --}}
             <div class="sl-pagebar">
@@ -534,7 +527,7 @@ $perPage = $perPage ?? 20;
         notifBanner.style.cssText =
             'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:.6rem;background:#fff;border:1.5px solid #a7f3d0;border-radius:12px;padding:.65rem 1.1rem;box-shadow:0 8px 24px rgba(0,0,0,.12);font-size:.78rem;font-weight:600;color:#059669;white-space:nowrap;max-width:90vw;';
         notifBanner.innerHTML =
-            '<i class="fa-solid fa-circle-check" style="color:#10b981;"></i> New log entries detected. <span style="color:#8B0000;text-decoration:underline;margin-left:.25rem;cursor:pointer;" onclick="slState.page=1;slFetch();this.closest(\'div\').remove();">Refresh to see</span><button onclick="this.parentElement.remove()" style="margin-left:.5rem;background:none;border:none;cursor:pointer;color:#757575;font-size:.7rem;padding:0;"><i class="fa-solid fa-xmark"></i></button>';
+            '<i class="fa-solid fa-circle-check"></i> New log entries detected. <span class="sl-toast-refresh" onclick="slState.page=1;slFetch();this.closest(\'div\').remove();">Refresh to see</span><button onclick="this.parentElement.remove()" class="sl-toast-close"><i class="fa-solid fa-xmark"></i></button>';
         document.body.appendChild(notifBanner);
     }
 
@@ -883,17 +876,14 @@ $perPage = $perPage ?? 20;
     }
 
     function slSkeletonRows(count) {
-        var pulse =
-            'style="background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%);background-size:200% 100%;animation:sl-shimmer 1.2s infinite;border-radius:6px;display:inline-block;"';
         var row = '<tr>' +
-            '<td><span class="sl-id" ' + pulse +
-            ' style="width:36px;height:14px;background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%);background-size:200% 100%;animation:sl-shimmer 1.2s infinite;border-radius:6px;display:inline-block;">&nbsp;&nbsp;&nbsp;&nbsp;</span></td>' +
-            '<td><span ' + pulse + ' style="width:80px;height:14px;">&nbsp;</span></td>' +
-            '<td><span ' + pulse + ' style="width:60px;height:22px;">&nbsp;</span></td>' +
-            '<td><span ' + pulse + ' style="width:70px;height:14px;">&nbsp;</span></td>' +
-            '<td><span ' + pulse + ' style="width:55px;height:22px;">&nbsp;</span></td>' +
-            '<td><span ' + pulse + ' style="width:80px;height:14px;">&nbsp;</span></td>' +
-            '<td><span ' + pulse + ' style="width:140px;height:14px;">&nbsp;</span></td>' +
+            '<td><span class="sl-id sl-skeleton sl-skeleton-check">&nbsp;&nbsp;&nbsp;&nbsp;</span></td>' +
+            '<td><span class="sl-skeleton sl-skeleton-id">&nbsp;</span></td>' +
+            '<td><span class="sl-skeleton sl-skeleton-role">&nbsp;</span></td>' +
+            '<td><span class="sl-skeleton sl-skeleton-user">&nbsp;</span></td>' +
+            '<td><span class="sl-skeleton sl-skeleton-action">&nbsp;</span></td>' +
+            '<td><span class="sl-skeleton sl-skeleton-id">&nbsp;</span></td>' +
+            '<td><span class="sl-skeleton sl-skeleton-desc">&nbsp;</span></td>' +
             '</tr>';
         var html = '';
         for (var i = 0; i < Math.min(count, 5); i++) html += row;
@@ -1028,22 +1018,18 @@ $perPage = $perPage ?? 20;
         var end = Math.min(last, start + winSize - 1);
         if (end - start + 1 < winSize) start = Math.max(1, end - winSize + 1);
 
-        var btn =
-            'style="height:32px;min-width:32px;padding:0 10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;color:#333333;font-size:.75rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;" onmouseover="this.style.borderColor=\'#8B0000\';this.style.color=\'#8B0000\';this.style.background=\'#fef2f2\';" onmouseout="this.style.borderColor=\'#e5e7eb\';this.style.color=\'#333333\';this.style.background=\'#fff\';"';
-        var btnActive =
-            'style="height:32px;min-width:32px;padding:0 10px;border-radius:8px;border:1.5px solid #8B0000;background:linear-gradient(135deg,#8B0000,#6b0000);color:#fff;font-size:.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(139,0,0,.25);"';
-        var btnDis =
-            'style="height:32px;min-width:32px;padding:0 10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#d1d5db;font-size:.75rem;font-weight:600;cursor:not-allowed;display:inline-flex;align-items:center;justify-content:center;"';
-        var dots =
-            '<span style="height:32px;min-width:32px;display:inline-flex;align-items:center;justify-content:center;color:#757575;font-size:.75rem;font-weight:600;">…</span>';
+        var btn = 'class="sl-page-btn"';
+        var btnActive = 'class="sl-page-current"';
+        var btnDis = 'class="sl-page-disabled"';
+        var dots = '<span class="sl-page-ellipsis">&hellip;</span>';
 
-        var html = '<nav style="display:flex;align-items:center;gap:.35rem;flex-wrap:nowrap;">';
+        var html = '<nav class="sl-pagination">';
         if (current <= 1) {
             html += '<button disabled ' + btnDis +
-                '><i class="fa-solid fa-chevron-left" style="font-size:.65rem;"></i></button>';
+                '><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>';
         } else {
             html += '<button onclick="slGoPage(' + (current - 1) + ')" ' + btn +
-                '><i class="fa-solid fa-chevron-left" style="font-size:.65rem;"></i></button>';
+                '><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>';
         }
         if (start > 1) {
             html += '<button onclick="slGoPage(1)" ' + btn + '>1</button>';
@@ -1059,10 +1045,10 @@ $perPage = $perPage ?? 20;
         }
         if (current >= last) {
             html += '<button disabled ' + btnDis +
-                '><i class="fa-solid fa-chevron-right" style="font-size:.65rem;"></i></button>';
+                '><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>';
         } else {
             html += '<button onclick="slGoPage(' + (current + 1) + ')" ' + btn +
-                '><i class="fa-solid fa-chevron-right" style="font-size:.65rem;"></i></button>';
+                '><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>';
         }
         html += '</nav>';
         return html;
@@ -1096,7 +1082,7 @@ $perPage = $perPage ?? 20;
             title = 'No results for \u201c' + query + '\u201d';
             sub = 'Try a different name, action, or user.';
             extra =
-                '<button onclick="clearSearch()" style="margin-top:.75rem;padding:.5rem 1.1rem;border-radius:10px;border:1.5px dashed #d1d5db;background:none;font-size:.8rem;color:#757575;cursor:pointer;" onmouseover="this.style.borderColor=\'#8B0000\';this.style.color=\'#8B0000\';" onmouseout="this.style.borderColor=\'#d1d5db\';this.style.color=\'#757575\';"><i class="fa-solid fa-xmark" style="margin-right:.4rem;font-size:.7rem;"></i>Clear search</button>';
+                '<button onclick="clearSearch()" class="sl-empty-action"><i class="fa-solid fa-xmark"></i>Clear search</button>';
         } else if (slState.role !== 'all') {
             var labels = {
                 admin: 'Admin',
@@ -1108,13 +1094,13 @@ $perPage = $perPage ?? 20;
             title = 'No ' + (labels[slState.role] || slState.role) + ' logs found';
             sub = 'There are no logs matching this filter yet.';
             extra =
-                '<button onclick="slSetTab(document.querySelector(\'.tab-btn\'),\'all\')" style="margin-top:.75rem;padding:.5rem 1.1rem;border-radius:10px;border:1.5px dashed #d1d5db;background:none;font-size:.8rem;color:#757575;cursor:pointer;" onmouseover="this.style.borderColor=\'#8B0000\';this.style.color=\'#8B0000\';" onmouseout="this.style.borderColor=\'#d1d5db\';this.style.color=\'#757575\';"><i class="fa-solid fa-xmark" style="margin-right:.4rem;font-size:.7rem;"></i>Show all logs</button>';
+                '<button onclick="slSetTab(document.querySelector(\'.tab-btn\'),\'all\')" class="sl-empty-action"><i class="fa-solid fa-xmark"></i>Show all logs</button>';
         } else if (hasActiveSlFilters()) {
             icon = 'fa-filter-circle-xmark';
             title = 'No logs match the selected filters';
             sub = 'Try adjusting or clearing the filters.';
             extra =
-                '<button onclick="clearOnlySlFilters()" style="margin-top:.75rem;padding:.5rem 1.1rem;border-radius:10px;border:1.5px dashed #d1d5db;background:none;font-size:.8rem;color:#757575;cursor:pointer;" onmouseover="this.style.borderColor=\'#8B0000\';this.style.color=\'#8B0000\';" onmouseout="this.style.borderColor=\'#d1d5db\';this.style.color=\'#757575\';"><i class="fa-solid fa-filter-circle-xmark" style="margin-right:.4rem;font-size:.7rem;"></i>Clear filters</button>';
+                '<button onclick="clearOnlySlFilters()" class="sl-empty-action"><i class="fa-solid fa-filter-circle-xmark"></i>Clear filters</button>';
         } else {
             icon = 'fa-clipboard-list';
             title = 'No system logs yet';
@@ -1122,10 +1108,10 @@ $perPage = $perPage ?? 20;
         }
 
         emptyState.innerHTML =
-            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3.5rem 1rem;text-align:center;gap:.5rem;"><div style="width:60px;height:60px;border-radius:16px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;margin-bottom:.75rem;"><i class="fa-solid ' +
+            '<div class="sl-empty-state"><div class="sl-empty-icon"><i class="fa-solid ' +
             icon +
-            '" style="font-size:1.6rem;color:#d1d5db;"></i></div><p style="font-size:.9rem;font-weight:700;color:#6b7280;margin:0;">' +
-            title + '</p><p style="font-size:.78rem;color:#b0b7c3;margin:0;max-width:280px;">' + sub + '</p>' + extra +
+            '"></i></div><p class="sl-empty-title">' +
+            title + '</p><p class="sl-empty-subtitle">' + sub + '</p>' + extra +
             '</div>';
 
         window.addEventListener('resize', function () {

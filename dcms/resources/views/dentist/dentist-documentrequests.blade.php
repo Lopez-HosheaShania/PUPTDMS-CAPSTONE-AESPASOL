@@ -140,7 +140,7 @@ $notifCount = $notifications->count();
 
                             <button id="btnGridView" type="button" onclick="setViewMode('grid', this)"
                                 class="btn-view-mode" data-view="grid" title="Grid View">
-                                <i class="fa-solid fa-border-all text-sm"></i>
+                                <i class="fa-solid fa-grip"></i>
                             </button>
                         </div>
 

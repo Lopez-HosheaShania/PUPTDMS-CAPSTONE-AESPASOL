@@ -116,7 +116,7 @@ $notifCount = $notifications->count();
 
                                 <button type="button" class="btn-view-mode" data-view="grid"
                                     onclick="setViewMode('grid', this)" title="Grid View">
-                                    <i class="fa-solid fa-border-all"></i>
+                                    <i class="fa-solid fa-grip"></i>
                                 </button>
                             </div>
 
@@ -144,7 +144,7 @@ $notifCount = $notifications->count();
             </div>
 
             <div id="tableWrapper" class="overflow-x-auto">
-                <table class="inv-table">
+                <table class="d-inv-table">
                     <thead>
                         <tr>
                             <th>Date</th>

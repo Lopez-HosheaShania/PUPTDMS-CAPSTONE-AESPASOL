@@ -1,127 +1,8 @@
-@keyframes fadeSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(16px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes cardIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes micPulse {
-
-    0%,
-    100% {
-        box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.4);
-    }
-
-    50% {
-        box-shadow: 0 0 0 8px rgba(192, 57, 43, 0);
-    }
-}
-
-.filter-btn {
-    height: 38px;
-    padding: 0 14px;
-    border-radius: 12px;
-    border: 1.5px solid #E0DDD8;
-    background: #FAFAF9;
-    color: #6b7280;
-    font-size: 12px;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all .2s;
-    position: relative;
-}
-
-.filter-btn:hover,
-.filter-btn.active {
-    border-color: #8B0000;
-    color: #8B0000;
-    background: #fef2f2;
-}
-
-.filter-dot {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
+.patient-card:hover .card-arrow-btn {
     background: #8B0000;
-    border: 2px solid #fff;
-    display: none;
-}
-
-.filter-dot.visible {
-    display: block;
-}
-
-.tab-strip {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: .8rem;
-    margin: 1rem 0 1.1rem;
-}
-
-.tab-btn {
-    position: relative;
-    background: #fff;
-    border: 1.5px solid #E5E7EB;
-    border-radius: 16px;
-    padding: 14px 12px 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    cursor: pointer;
-    transition: box-shadow .2s ease, transform .2s ease, border-color .2s;
-    overflow: hidden;
-}
-
-.tab-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
-    border-color: transparent;
-}
-
-.tab-btn::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    border-radius: 0 0 16px 16px;
-    opacity: 0;
-    transition: opacity .2s;
-}
-
-.tab-btn.tab-active {
-    border-color: transparent;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, .10);
-    transform: translateY(-2px);
-}
-
-.tab-btn.tab-active::after {
-    opacity: 1;
+    border-color: #8B0000;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, .3);
 }
 
 .tab-top-row {
@@ -364,146 +245,6 @@
     margin-top: .15rem;
 }
 
-.pill-today {
-    background: #EFF6FF;
-    color: #1D4ED8;
-    border: 1px solid #BFDBFE;
-}
-
-.pill-upcoming {
-    background: #FFF7ED;
-    color: #C2410C;
-    border: 1px solid #FED7AA;
-}
-
-.pill-rescheduled {
-    background: #FEFCE8;
-    color: #92400E;
-    border: 1px solid #FDE68A;
-}
-
-.pill-cancelled {
-    background: #FEE2E2;
-    color: #DC2626;
-    border: 1px solid #FECACA;
-}
-
-.pill-completed {
-    background: #F0FDF4;
-    color: #15803D;
-    border: 1px solid #BBF7D0;
-}
-
-.pill-default {
-    background: #F9FAFB;
-    color: #374151;
-    border: 1px solid #E5E7EB;
-}
-
-.pagebar {
-    padding: .85rem 1.2rem;
-    border-top: 1px solid #f3f4f6;
-    background: #fafafa;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: .75rem;
-    flex-wrap: wrap;
-}
-
-.pagebar-info {
-    font-size: .73rem;
-    color: #757575;
-    font-weight: 500;
-}
-
-.pagebar-info strong {
-    color: #333333;
-}
-
-.filter-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, .4);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-    padding: 1rem;
-}
-
-.filter-modal-backdrop.show {
-    display: flex;
-}
-
-.filter-modal {
-    background: #fff;
-    width: 100%;
-    max-width: 760px;
-    border-radius: 18px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, .18);
-    overflow: hidden;
-    border: 1px solid #ececec;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.filter-modal-body {
-    overflow-y: auto;
-    padding: 1.25rem;
-}
-
-.radio-red {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border: 2px solid #8B0000;
-    border-radius: 9999px;
-    display: inline-grid;
-    place-content: center;
-    background: #fff;
-    flex-shrink: 0;
-}
-
-.radio-red::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 9999px;
-    transform: scale(0);
-    transition: transform 120ms ease-in-out;
-    background: #8B0000;
-}
-
-.radio-red:checked::before {
-    transform: scale(1);
-}
-
-/* DARK MODE - GLASS TAB STAT CARDS */
-[data-theme="dark"] .tab-btn {
-    background:
-        radial-gradient(circle at bottom right, rgba(255, 255, 255, .07), transparent 42%),
-        linear-gradient(135deg, rgba(22, 27, 34, .68), rgba(17, 24, 39, .50)) !important;
-    border: 1px solid rgba(255, 255, 255, .10);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .10),
-        0 0 0 1px rgba(255, 255, 255, .025),
-        0 8px 18px rgba(0, 0, 0, .16);
-}
-
-[data-theme="dark"] .tab-btn:hover,
-[data-theme="dark"] .tab-btn.tab-active {
-    border-color: rgba(252, 165, 165, .24);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .13),
-        0 0 18px rgba(252, 165, 165, .08),
-        0 12px 24px rgba(0, 0, 0, .20);
-}
-
 [data-theme="dark"] .tab-count {
     color: #f3f4f6 !important;
 }
@@ -522,16 +263,12 @@
     color: #FCA5A5 !important;
 }
 
-[data-theme="dark"] .patient-card,
-[data-theme="dark"] .filter-modal {
+[data-theme="dark"] .patient-card {
     background: #161b22 !important;
     border-color: #21262d !important;
 }
 
-[data-theme="dark"] .pagebar {
-    background: #0d1117 !important;
-    border-color: #21262d !important;
-}
+
 
 [data-theme="dark"] .detail-value {
     color: #f3f4f6 !important;
@@ -539,20 +276,8 @@
 
 [data-theme="dark"] .detail-sub,
 [data-theme="dark"] .detail-label,
-[data-theme="dark"] .pagebar-info,
 [data-theme="dark"] .patient-id {
     color: #9ca3af !important;
-}
-
-[data-theme="dark"] .filter-btn {
-    background: #0d1117;
-    border-color: #21262d;
-}
-
-[data-theme="dark"] .filter-modal-body input[type="date"] {
-    background: #0d1117;
-    color: #f3f4f6;
-    border-color: #21262d;
 }
 
 [data-theme="dark"] .detail-icon {
@@ -690,10 +415,6 @@
 
 @media (max-width: 1279px) {
 
-    .tab-strip {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
     .patient-card-body {
         flex-wrap: wrap;
         align-items: flex-start;
@@ -709,15 +430,6 @@
 }
 
 @media (max-width: 767px) {
-
-    .filter-btn {
-        width: 100%;
-        height: 42px;
-    }
-
-    .tab-strip {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 
     .patient-list-wrap {
         padding: .75rem;
@@ -746,12 +458,5 @@
 
     #patientViewToggle {
         display: none !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .tab-strip {
-        grid-template-columns: 1fr 1fr;
-        gap: .55rem;
     }
 }

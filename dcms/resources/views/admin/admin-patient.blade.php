@@ -4,908 +4,1800 @@
 
 @section('content')
 @php
-use Carbon\Carbon;
-
-$appointments = $appointments ?? collect([]);
-$allAppointments = $appointments instanceof \Illuminate\Pagination\AbstractPaginator
-? collect($appointments->items())
-: collect($appointments);
-
-$today = Carbon::today()->toDateString();
-
-$todayCount = $todayCount ?? 0;
-$upcomingCount = $upcomingCount ?? 0;
-$rescheduledCount = $rescheduledCount ?? 0;
-$cancelledCount = $cancelledCount ?? 0;
-$completedCount = $completedCount ?? 0;
-$allCount = $allCount ?? $allAppointments->count();
+$notifications = collect($notifications ?? []);
+$notifCount = $notifications->count();
 @endphp
 
-<main id="mainContent" class="px-4 sm:px-6 pt-[82px] pb-8 min-h-screen">
-    <div class="max-w-[1280px] mx-auto">
+<main id="mainContent" class="admin-page-shell admin-patient-page dentist-page-shell page-enter mode-list">
+  <div class="w-full">
 
-        <div class="page-banner">
-            <div class="page-banner-inner">
-                <div>
-                    <h1 class="page-title">Patient List</h1>
-                </div>
-                <div class="flex items-center gap-3 flex-shrink-0">
-                    <span class="page-badge">
-                        <span class="page-badge-dot"></span>
-                        {{ $allCount }} {{ \Illuminate\Support\Str::plural('record', $allCount) }}
-                    </span>
-                </div>
-            </div>
+    @php
+    use Carbon\Carbon;
+    $today = Carbon::today()->toDateString();
+    $appts =
+    $appointments instanceof \Illuminate\Pagination\AbstractPaginator
+    ? collect($appointments->items())
+    : collect($appointments);
+    $todayCount = $todayCount ?? 0;
+    $upcomingCount = $upcomingCount ?? 0;
+    $rescheduledCount = $rescheduledCount ?? 0;
+    $cancelledCount = $cancelledCount ?? 0;
+    $completedCount = $completedCount ?? 0;
+    $allCount = $allCount ?? 0;
+    @endphp
+
+    <div class="page-banner mt-2 mb-6">
+      <div class="page-banner-inner">
+        <div>
+          <h1 class="page-title">Patient List</h1>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <div class="card-header-left">
-                    <div class="card-header-icon">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                    <span class="card-title">Patient Directory</span>
-                    <span id="entryBadge" class="entry-badge">
-                        {{ $allCount }} {{ \Illuminate\Support\Str::plural('entry', $allCount) }}
-                    </span>
-                </div>
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <span class="page-badge">
+            <span class="page-badge-dot"></span>
+            {{ $allCount }} {{ \Illuminate\Support\Str::plural('record', $allCount) }}
+          </span>
+        </div>
+      </div>
+    </div>
 
-                <div class="card-header-right">
-                    <div class="search-wrap">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input id="searchInput" class="no-voice" type="text" placeholder="Search patients...">
-                    </div>
+    <div class="w-full">
+      <div class="relative">
 
-                    <button type="button" id="searchClearBtn" class="search-clear-btn hidden"
-                        title="Clear">Clear</button>
+        <div class="table-card patient-table-card rounded-2xl border border-gray-200 shadow-sm overflow-visible">
 
-                    <div class="patient-voice-toggle">
-                        <button type="button" id="micToggleBtn" class="voice-search-mic external"
-                            aria-label="Toggle voice input" aria-pressed="false">
-                            <i class="fa-solid fa-microphone"></i>
-                        </button>
-                        <span id="patientVoiceStatus" class="patient-voice-status hidden" aria-live="polite"></span>
-                    </div>
+          <div class="patient-table-toolbar px-4 md:px-6 py-3.5 border-b border-gray-100">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
 
-                    <script>
-                        document.addEventListener('DOMContentLoaded', () => {
-                            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                            const input = document.getElementById('searchInput');
-                            const micBtn = document.getElementById('micToggleBtn');
-                            const status = document.getElementById('patientVoiceStatus');
+              <div class="order-2 md:order-1">
+                <span id="rowCount" class="text-[11px] md:text-sm font-bold text-gray-400 uppercase tracking-wider">
+                  0 patients
+                </span>
+              </div>
 
-                            if (!input || !micBtn || !status) return;
+              <div
+                class="patient-toolbar-actions flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-end">
 
-                            if (!SpeechRecognition) {
-                                micBtn.disabled = true;
-                                micBtn.setAttribute('aria-disabled', 'true');
-                                return;
-                            }
+                <div class="patient-sort-row">
 
-                            let listening = false;
-                            let manualStop = false;
+                  <div class="patient-stats-dropdown" id="patientStatsDropdown">
+                    <button type="button" class="patient-stats-trigger" id="patientStatsToggle" aria-expanded="false">
+                      <span class="patient-stats-trigger-left">
+                        <span class="patient-stats-trigger-icon">
+                          <i class="fa-solid fa-calendar-day"></i>
+                        </span>
 
-                            const setStatus = (text, state) => {
-                                status.textContent = text;
-                                status.className = 'patient-voice-status';
-                                if (state) status.classList.add(`is-${state}`);
-                                status.classList.remove('hidden');
-                            };
+                        <span class="patient-stats-trigger-text">
+                          <span class="patient-stats-trigger-label">Sort by</span>
+                          <strong id="patientStatsSelectedLabel">Today</strong>
+                        </span>
+                      </span>
 
-                            const hideStatus = (delay = 0) => {
-                                window.setTimeout(() => status.classList.add('hidden'), delay);
-                            };
-
-                            const setMicState = (isActive) => {
-                                micBtn.classList.toggle('mic-active', isActive);
-                                micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-                                micBtn.innerHTML = isActive
-                                    ? '<i class="fa-solid fa-stop"></i>'
-                                    : '<i class="fa-solid fa-microphone"></i>';
-                            };
-
-                            const stopListeningNow = () => {
-                                manualStop = true;
-                                listening = false;
-                                setMicState(false);
-                                setStatus('Voice input stopped.', 'success');
-                                hideStatus(1200);
-
-                                if (recognition) {
-                                    try {
-                                        recognition.abort();
-                                    } catch (e) {
-                                        try { recognition.stop(); } catch (err) { }
-                                    }
-                                }
-                            };
-
-                            // Create a fresh recognition instance each time to avoid state bugs
-                            const createRecognition = () => {
-                                const r = new SpeechRecognition();
-                                r.lang = 'en-US';
-                                r.continuous = false;
-                                r.interimResults = true;
-                                r.maxAlternatives = 1;
-
-                                let sawSpeech = false;
-                                let timeoutId = null;
-                                const LISTEN_TIMEOUT = 6000; // 6 seconds
-
-                                const clearTimeout_ = () => {
-                                    if (timeoutId) {
-                                        clearTimeout(timeoutId);
-                                        timeoutId = null;
-                                    }
-                                };
-
-                                r.onstart = () => {
-                                    timeoutId = window.setTimeout(() => {
-                                        if (listening && !sawSpeech) {
-                                            r.stop();
-                                        }
-                                    }, LISTEN_TIMEOUT);
-                                };
-
-                                r.onspeechend = () => {
-                                    clearTimeout_(timeoutId);
-                                    try { r.stop(); } catch (e) { }
-                                };
-
-                                r.onresult = (event) => {
-                                    let transcript = '';
-
-                                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                                        const result = event.results[i];
-                                        const chunk = result?.[0]?.transcript?.trim() || '';
-                                        if (!chunk) continue;
-
-                                        sawSpeech = true;
-
-                                        if (result.isFinal) {
-                                            transcript = `${transcript} ${chunk}`.trim();
-                                        } else if (!transcript) {
-                                            transcript = chunk;
-                                        }
-                                    }
-
-                                    transcript = transcript.trim();
-
-                                    if (transcript) {
-                                        clearTimeout_(timeoutId);
-                                        input.value = transcript;
-                                        input.dispatchEvent(new Event('input', { bubbles: true }));
-                                        input.dispatchEvent(new Event('change', { bubbles: true }));
-
-                                        setStatus('Listening...', 'listening');
-                                    }
-                                };
-
-                                r.onerror = () => {
-                                    clearTimeout_();
-                                    listening = false;
-                                    if (manualStop) {
-                                        manualStop = false;
-                                        return;
-                                    }
-                                    setMicState(false);
-                                    setStatus("Didn't catch that. Try again.", 'error');
-                                    hideStatus(2500);
-                                };
-
-                                r.onend = () => {
-                                    clearTimeout_();
-                                    if (manualStop) {
-                                        manualStop = false;
-                                        listening = false;
-                                        setMicState(false);
-                                        return;
-                                    }
-
-                                    const hadSpeech = sawSpeech || !!input.value.trim();
-                                    listening = false;
-                                    setMicState(false);
-                                    if (hadSpeech) {
-                                        setStatus('Voice captured.', 'success');
-                                        hideStatus(2200);
-                                    } else {
-                                        setStatus("Didn't catch that. Try again.", 'error');
-                                        hideStatus(2500);
-                                    }
-                                };
-
-                                return r;
-                            };
-
-                            let recognition = null;
-
-                            micBtn.addEventListener('click', () => {
-                                if (listening && recognition) {
-                                    stopListeningNow();
-                                    return;
-                                }
-
-                                // create fresh instance and start
-                                recognition = createRecognition();
-
-                                try {
-                                    recognition.start();
-                                } catch (error) {
-                                    setStatus('Unable to start voice input.', 'error');
-                                    hideStatus(2500);
-                                    setMicState(false);
-                                    listening = false;
-                                    return;
-                                }
-
-                                listening = true;
-                                setMicState(true);
-                                setStatus('Listening...', 'listening');
-                            });
-                        });
-                    </script>
-
-                    <button type="button" id="openFilterBtn" class="filter-btn">
-                        <i class="fa-solid fa-sliders"></i>
-                        <span>Filter</span>
-                        <span id="filterDot" class="filter-dot"></span>
+                      <span class="patient-stats-trigger-right">
+                        <span class="patient-stats-count-badge" id="patientStatsSelectedCount">{{ $todayCount ?? 0
+                          }}</span>
+                        <i class="fa-solid fa-chevron-down patient-stats-chevron"></i>
+                      </span>
                     </button>
 
-                    <div class="view-toggle" id="patientViewToggle">
-                        <button type="button" class="view-toggle-btn active" data-view="list" id="patientListViewBtn"
-                            title="List view" aria-label="List view">
-                            <i class="fa-solid fa-table-list"></i>
+                    <div class="patient-stats-panel" id="patientStatsPanel">
+                      <div id="tabsGrid" class="patient-stats-grid">
+                        <button type="button" class="patient-stat-option filter-btn tab-active s-today"
+                          data-filter="today">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-clock"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Today</span>
+                          <span class="patient-stat-option-count" id="statUpcoming">{{ $todayCount ?? 0 }}</span>
                         </button>
-                        <button type="button" class="view-toggle-btn" data-view="grid" id="patientGridViewBtn"
-                            title="Grid view" aria-label="Grid view">
-                            <i class="fa-solid fa-grip"></i>
+
+                        <button type="button" class="patient-stat-option filter-btn s-upcoming" data-filter="upcoming">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-calendar-check"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Upcoming</span>
+                          <span class="patient-stat-option-count" id="statScheduled">{{ $upcomingCount ?? 0 }}</span>
                         </button>
+
+                        <button type="button" class="patient-stat-option filter-btn s-rescheduled"
+                          data-filter="rescheduled">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Rescheduled</span>
+                          <span class="patient-stat-option-count" id="statRescheduled">{{ $rescheduledCount ?? 0
+                            }}</span>
+                        </button>
+
+                        <button type="button" class="patient-stat-option filter-btn s-completed"
+                          data-filter="completed">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-check-double"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Completed</span>
+                          <span class="patient-stat-option-count" id="statCompleted">{{ $completedCount ?? 0 }}</span>
+                        </button>
+
+                        <button type="button" class="patient-stat-option filter-btn s-cancelled"
+                          data-filter="cancelled">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                          </span>
+                          <span class="patient-stat-option-label">Cancelled</span>
+                          <span class="patient-stat-option-count" id="statCancelled">{{ $cancelledCount ?? 0 }}</span>
+                        </button>
+
+                        <button type="button" class="patient-stat-option filter-btn s-all" data-filter="all">
+                          <span class="patient-stat-option-icon">
+                            <i class="fa-solid fa-users"></i>
+                          </span>
+                          <span class="patient-stat-option-label">All Patients</span>
+                          <span class="patient-stat-option-count" id="statAll">{{ $allCount ?? 0 }}</span>
+                        </button>
+                      </div>
                     </div>
+                  </div>
                 </div>
+
+                <div class="patient-search-row relative flex-1 md:flex-none flex items-center gap-2">
+                  <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+
+                    <input id="searchInput" type="text" placeholder="Search patient name…" data-search-input
+                      class="search-input" />
+
+                    <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
+                      <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="view-toggle-container hidden md:flex mr-2">
+                  <div class="view-slider"></div>
+
+                  <button id="btnListView" onclick="switchView('list')" class="btn-view-mode active"
+                    title="List View"><i class="fa-solid fa-list text-sm"></i></button>
+                  <button id="btnGridView" onclick="switchView('grid')" class="btn-view-mode" title="Grid View"><i
+                      class="fa-solid fa-grip"></i></button>
+                </div>
+
+                <div class="patient-filter-actions">
+                  <button id="filterBtn" type="button" onclick="openFilterModal()" class="global-filter-btn">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Filter</span>
+                    <span id="filterBadge" class="filter-badge" style="display:none;"></span>
+                  </button>
+
+                  <button id="externalClearFilterBtn" type="button" onclick="resetAllFilters()"
+                    class="global-filter-reset-btn hidden" title="Reset filters">
+                    <i class="fa-solid fa-rotate-left"></i>
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <div class="tab-strip px-4 pt-4">
-                <button class="tab-btn tab-today tab-active" data-filter="today" type="button">
-                    <div class="tab-top-row">
-                        <div class="tab-icon-wrap"><i class="fa-solid fa-calendar-days"></i></div>
-                        <span class="tab-count">{{ $todayCount }}</span>
-                    </div>
-                    <span class="tab-label">Scheduled Today</span>
-                </button>
+          <div class="table-scroll-wrapper">
+            <div class="table-scroll-inner">
 
-                <button class="tab-btn tab-upcoming" data-filter="upcoming" type="button">
-                    <div class="tab-top-row">
-                        <div class="tab-icon-wrap"><i class="fa-solid fa-hourglass-half"></i></div>
-                        <span class="tab-count">{{ $upcomingCount }}</span>
-                    </div>
-                    <span class="tab-label">Upcoming</span>
-                </button>
+              <div class="card-col-header">
+                <span></span>
+                <span>Patient</span>
+                <span></span>
+                <span>Date &amp; Time</span>
+                <span></span>
+                <span>Service &amp; Status</span>
+                <span></span>
+              </div>
 
-                <button class="tab-btn tab-rescheduled" data-filter="rescheduled" type="button">
-                    <div class="tab-top-row">
-                        <div class="tab-icon-wrap"><i class="fa-solid fa-rotate"></i></div>
-                        <span class="tab-count">{{ $rescheduledCount }}</span>
-                    </div>
-                    <span class="tab-label">Rescheduled</span>
-                </button>
+              <div id="patientSkeleton" class="hidden px-3 md:px-6 pb-6 pt-4">
 
-                <button class="tab-btn tab-cancelled" data-filter="cancelled" type="button">
-                    <div class="tab-top-row">
-                        <div class="tab-icon-wrap"><i class="fa-solid fa-xmark"></i></div>
-                        <span class="tab-count">{{ $cancelledCount }}</span>
-                    </div>
-                    <span class="tab-label">Cancelled</span>
-                </button>
+                <div class="skeleton-list-layout space-y-3">
+                  @for ($i = 0; $i < 3; $i++) <div class="skeleton-shell p-4">
+                    <div class="flex items-center gap-5">
+                      <div class="skeleton-circle w-14 h-14 flex-shrink-0"></div>
 
-                <button class="tab-btn tab-completed" data-filter="completed" type="button">
-                    <div class="tab-top-row">
-                        <div class="tab-icon-wrap"><i class="fa-solid fa-circle-check"></i></div>
-                        <span class="tab-count">{{ $completedCount }}</span>
-                    </div>
-                    <span class="tab-label">Completed</span>
-                </button>
+                      <div class="w-44 flex-shrink-0 space-y-2">
+                        <div class="skeleton-line h-4 w-36"></div>
+                        <div class="skeleton-pill h-5 w-20"></div>
+                      </div>
 
-                <button class="tab-btn tab-all" data-filter="all" type="button">
-                    <div class="tab-top-row">
-                        <div class="tab-icon-wrap"><i class="fa-solid fa-clipboard-list"></i></div>
-                        <span class="tab-count">{{ $allCount }}</span>
-                    </div>
-                    <span class="tab-label">All Patients</span>
-                </button>
-            </div>
+                      <div class="skeleton-block h-10 w-px hidden lg:block"></div>
 
-            <div id="patientListWrap" class="patient-list-wrap">
-                @if($allAppointments->count())
-                <div class="patient-view" id="patientListView">
-                    @foreach($allAppointments as $appt)
-                    @php
-                    $status = strtolower($appt->status ?? '');
-                    $isCancelled = $status === 'cancelled';
-                    $isCompleted = $status === 'completed';
-                    $isRescheduled = $status === 'rescheduled';
-                    $isToday = $appt->appointment_date === $today && !$isCancelled && !$isCompleted;
-                    $isUpcoming = $appt->appointment_date > $today && in_array($status, ['upcoming', 'rescheduled',
-                    'pending', 'confirmed'], true);
-
-                    $tabClass = $isCancelled ? 'cancelled' : ($isCompleted ? 'completed' : ($isRescheduled ?
-                    'rescheduled' : ($isToday ? 'today' : ($isUpcoming ? 'upcoming' : 'all'))));
-
-                    $patientName = $appt->patient->name ?? 'Unknown Patient';
-                    $dateLabel = Carbon::parse($appt->appointment_date)->format('d M Y');
-                    $timeLabel = Carbon::parse($appt->appointment_time)->format('g:i A');
-                    $serviceLabel = ($appt->service_type === 'Others') ? ($appt->other_services ?: 'Others') :
-                    $appt->service_type;
-
-                    $accentClass = $isCancelled ? 'accent-cancelled' : ($isCompleted ? 'accent-completed' :
-                    ($isRescheduled ? 'accent-rescheduled' : ($isToday ? 'accent-today' : ($isUpcoming ?
-                    'accent-upcoming' : 'accent-default'))));
-                    $iconBg = $isCancelled ? 'background:#FEE2E2;color:#DC2626;' : ($isCompleted ?
-                    'background:#F0FDF4;color:#16A34A;' : ($isRescheduled ? 'background:#FEFCE8;color:#A16207;' :
-                    ($isToday ? 'background:#EFF6FF;color:#2563EB;' : ($isUpcoming ? 'background:#FFF7ED;color:#EA580C;'
-                    : 'background:#F3F4F6;color:#6B7280;'))));
-                    $pillClass = $isCancelled ? 'pill-cancelled' : ($isCompleted ? 'pill-completed' : ($isRescheduled ?
-                    'pill-rescheduled' : ($isToday ? 'pill-today' : ($isUpcoming ? 'pill-upcoming' : 'pill-default'))));
-                    $pillText = $isCancelled ? 'Cancelled' : ($isCompleted ? 'Completed' : ($isRescheduled ?
-                    'Rescheduled' : ($isToday ? 'Appointment Today' : ($isUpcoming ? ($status === 'upcoming' ?
-                    'Upcoming' : 'Upcoming · '.ucfirst($status)) : ucfirst($status ?: 'Pending')))));
-                    @endphp
-
-                    <a href="{{ route('admin.admin.patient.profile', ['patient' => $appt->patient_id]) }}"
-                        class="patient-card patient-item" data-tab="{{ $tabClass }}"
-                        data-name="{{ strtolower($patientName) }}" data-service="{{ strtolower($serviceLabel) }}"
-                        data-course="{{ strtolower($appt->patient->course ?? '') }}"
-                        data-year="{{ strtolower($appt->patient->year_level ?? '') }}"
-                        data-section="{{ strtolower($appt->patient->section ?? '') }}"
-                        data-department="{{ strtolower($appt->patient->department ?? '') }}"
-                        data-date="{{ $appt->appointment_date }}" data-record-key="appt-{{ $appt->id }}"
-                        data-view-type="list">
-
-                        <div class="accent-bar {{ $accentClass }}"></div>
-
-                        <div class="patient-card-body">
-                            <img src="{{ $appt->patient->profile_image ? asset('storage/'.$appt->patient->profile_image) : 'https://ui-avatars.com/api/?name='.urlencode($patientName).'&background=660000&color=FFFFFF&rounded=true&size=128' }}"
-                                alt="{{ $patientName }}" class="patient-avatar">
-
-                            <div class="patient-main">
-                                <div class="patient-name">{{ $patientName }}</div>
-                                <span class="patient-id">ID #{{ $appt->patient_id }}</span>
-                            </div>
-
-                            <div class="divider-y"></div>
-
-                            <div class="detail-box" style="width: 210px; flex-shrink:0;">
-                                <div class="detail-icon" style="background:#EFF6FF;color:#2563EB;">
-                                    <i class="fa-regular fa-calendar"></i>
-                                </div>
-                                <div>
-                                    <div class="detail-label">Date & Time</div>
-                                    <div class="detail-value">{{ $dateLabel }}</div>
-                                    <div class="detail-sub">{{ $timeLabel }}</div>
-                                </div>
-                            </div>
-
-                            <div class="divider-y"></div>
-
-                            <div class="detail-box" style="flex:1; min-width:220px;">
-                                <div class="detail-icon" style="{{ $iconBg }}">
-                                    <i class="fa-solid fa-tooth"></i>
-                                </div>
-                                <div>
-                                    <div class="detail-label">Service</div>
-                                    <div class="detail-value">{{ $serviceLabel }}</div>
-                                    <span class="status-pill {{ $pillClass }}">
-                                        <span class="pill-dot"></span>{{ $pillText }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="card-arrow-btn">
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </div>
+                      <div class="flex items-center gap-3 w-44 flex-shrink-0">
+                        <div class="skeleton-block w-10 h-10"></div>
+                        <div class="space-y-2">
+                          <div class="skeleton-line h-3 w-20"></div>
+                          <div class="skeleton-line h-4 w-28"></div>
+                          <div class="skeleton-line h-3 w-16"></div>
                         </div>
-                    </a>
-                    @endforeach
-                </div>
+                      </div>
 
-                <div class="patient-view" id="patientGridView" hidden>
-                    <div class="patient-grid">
-                        @foreach($allAppointments as $appt)
-                        @php
-                        $status = strtolower($appt->status ?? '');
-                        $isCancelled = $status === 'cancelled';
-                        $isCompleted = $status === 'completed';
-                        $isRescheduled = $status === 'rescheduled';
-                        $isToday = $appt->appointment_date === $today && !$isCancelled && !$isCompleted;
-                        $isUpcoming = $appt->appointment_date > $today && in_array($status, ['upcoming', 'rescheduled',
-                        'pending', 'confirmed'], true);
+                      <div class="skeleton-block h-10 w-px hidden lg:block"></div>
 
-                        $tabClass = $isCancelled ? 'cancelled' : ($isCompleted ? 'completed' : ($isRescheduled ?
-                        'rescheduled' : ($isToday ? 'today' : ($isUpcoming ? 'upcoming' : 'all'))));
+                      <div class="flex items-center gap-3 flex-1">
+                        <div class="skeleton-block w-10 h-10"></div>
+                        <div class="space-y-2 flex-1">
+                          <div class="skeleton-line h-3 w-16"></div>
+                          <div class="skeleton-line h-4 w-32"></div>
+                          <div class="skeleton-pill h-6 w-36"></div>
+                        </div>
+                      </div>
 
-                        $patientName = $appt->patient->name ?? 'Unknown Patient';
-                        $dateLabel = Carbon::parse($appt->appointment_date)->format('d M Y');
-                        $timeLabel = Carbon::parse($appt->appointment_time)->format('g:i A');
-                        $serviceLabel = ($appt->service_type === 'Others') ? ($appt->other_services ?: 'Others') :
-                        $appt->service_type;
-
-                        $accentClass = $isCancelled ? 'accent-cancelled' : ($isCompleted ? 'accent-completed' :
-                        ($isRescheduled ? 'accent-rescheduled' : ($isToday ? 'accent-today' : ($isUpcoming ?
-                        'accent-upcoming' : 'accent-default'))));
-                        $pillClass = $isCancelled ? 'pill-cancelled' : ($isCompleted ? 'pill-completed' :
-                        ($isRescheduled ? 'pill-rescheduled' : ($isToday ? 'pill-today' : ($isUpcoming ? 'pill-upcoming'
-                        : 'pill-default'))));
-                        $pillText = $isCancelled ? 'Cancelled' : ($isCompleted ? 'Completed' : ($isRescheduled ?
-                        'Rescheduled' : ($isToday ? 'Appointment Today' : ($isUpcoming ? ($status === 'upcoming' ?
-                        'Upcoming' : 'Upcoming · '.ucfirst($status)) : ucfirst($status ?: 'Pending')))));
-                        @endphp
-
-                        <a href="{{ route('admin.admin.patient.profile', ['patient' => $appt->patient_id]) }}"
-                            class="patient-grid-card patient-item" data-tab="{{ $tabClass }}"
-                            data-name="{{ strtolower($patientName) }}" data-service="{{ strtolower($serviceLabel) }}"
-                            data-course="{{ strtolower($appt->patient->course ?? '') }}"
-                            data-year="{{ strtolower($appt->patient->year_level ?? '') }}"
-                            data-section="{{ strtolower($appt->patient->section ?? '') }}"
-                            data-department="{{ strtolower($appt->patient->department ?? '') }}"
-                            data-date="{{ $appt->appointment_date }}" data-record-key="appt-{{ $appt->id }}"
-                            data-view-type="grid">
-
-                            <div class="accent-bar {{ $accentClass }}"></div>
-
-                            <div class="patient-grid-card-body">
-                                <div class="patient-grid-top">
-                                    <img src="{{ $appt->patient->profile_image ? asset('storage/'.$appt->patient->profile_image) : 'https://ui-avatars.com/api/?name='.urlencode($patientName).'&background=660000&color=FFFFFF&rounded=true&size=128' }}"
-                                        alt="{{ $patientName }}" class="patient-avatar">
-
-                                    <div class="patient-grid-main">
-                                        <div class="patient-grid-name">{{ $patientName }}</div>
-                                        <span class="patient-grid-id">ID #{{ $appt->patient_id }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="patient-grid-meta">
-                                    <div>
-                                        <div class="detail-label">Date & Time</div>
-                                        <div class="detail-value">{{ $dateLabel }}</div>
-                                        <div class="detail-sub">{{ $timeLabel }}</div>
-                                    </div>
-
-                                    <div>
-                                        <div class="detail-label">Service</div>
-                                        <div class="detail-value">{{ $serviceLabel }}</div>
-                                        <span class="status-pill {{ $pillClass }}">
-                                            <span class="pill-dot"></span>{{ $pillText }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="patient-grid-actions">
-                                    <div class="card-arrow-btn">
-                                        <i class="fa-solid fa-arrow-right"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        @endforeach
+                      <div class="skeleton-circle w-9 h-9 flex-shrink-0"></div>
                     </div>
                 </div>
-                @else
-                <div id="serverEmptyState" class="empty-state visible">
-                    <div class="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-users text-3xl text-gray-300"></i>
-                    </div>
-                    <p class="text-gray-500 font-semibold text-base">No appointments found</p>
-                    <p class="text-gray-400 text-sm mt-1">There are no patient records to display yet.</p>
-                </div>
-                @endif
+                @endfor
+              </div>
 
-                <div id="clientEmptyState" class="empty-state">
-                    <div class="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-filter-circle-xmark text-3xl text-gray-300"></i>
+              <div class="skeleton-grid-layout">
+                @for ($i = 0; $i < 6; $i++) <div class="skeleton-shell patient-grid-skeleton-card">
+                  <div class="flex items-start gap-3">
+                    <div class="skeleton-circle w-[54px] h-[54px] flex-shrink-0"></div>
+
+                    <div class="flex-1 min-w-0 space-y-2">
+                      <div class="skeleton-line h-4 w-4/5"></div>
+                      <div class="skeleton-line h-4 w-3/5"></div>
+                      <div class="flex gap-2 pt-1">
+                        <div class="skeleton-pill h-5 w-24"></div>
+                        <div class="skeleton-pill h-5 w-20"></div>
+                      </div>
                     </div>
-                    <p class="text-gray-500 font-semibold text-base">No matching records found</p>
-                    <p class="text-gray-400 text-sm mt-1">Try changing the search, tab, or filter options.</p>
-                </div>
+
+                    <div class="skeleton-circle w-9 h-9 flex-shrink-0"></div>
+                  </div>
+
+                  <div class="space-y-2 mt-4">
+                    <div class="skeleton-block h-14 w-full"></div>
+                    <div class="skeleton-block h-14 w-full"></div>
+                  </div>
+
+                  <div class="flex items-center justify-between gap-2 mt-4">
+                    <div class="skeleton-pill h-7 w-28"></div>
+                    <div class="skeleton-pill h-7 w-20"></div>
+                  </div>
+              </div>
+              @endfor
             </div>
 
-            <div class="pagebar">
-                <span class="pagebar-info">
-                    Showing <strong id="visibleCount">{{ $allCount }}</strong> of <strong id="totalCount">{{ $allCount
-                        }}</strong> entries
-                </span>
+          </div>
+
+          <div id="patientContainer" class="space-y-3 px-3 md:px-6 pb-6 pt-4">
+
+            @forelse($appointments as $appt)
+            @php
+            $status = strtolower($appt->status ?? '');
+            $isCancelled = $status === 'cancelled';
+            $isCompleted = $status === 'completed';
+            $isRescheduled = $status === 'rescheduled';
+            $isToday =
+            $appt->appointment_date === $today && !$isCancelled && !$isCompleted;
+            $isUpcoming =
+            $appt->appointment_date > $today &&
+            in_array(
+            $status,
+            ['upcoming', 'rescheduled', 'pending', 'confirmed'],
+            true,
+            );
+
+            $tabClass = $isCancelled
+            ? 'cancelled'
+            : ($isCompleted
+            ? 'completed'
+            : ($isRescheduled
+            ? 'rescheduled'
+            : ($isToday
+            ? 'today'
+            : ($isUpcoming
+            ? 'upcoming'
+            : 'all'))));
+
+            $patientName = $appt->patient->name ?? 'Unknown Patient';
+            $dateLabel = Carbon::parse($appt->appointment_date)->format('d M Y');
+            $timeLabel = Carbon::parse($appt->appointment_time)->format('g:i A');
+            $serviceLabel =
+            $appt->service_type === 'Others'
+            ? ($appt->other_services ?:
+            'Others')
+            : $appt->service_type;
+
+            $accentClass = $isCancelled
+            ? 'accent-cancelled'
+            : ($isCompleted
+            ? 'accent-completed'
+            : ($isRescheduled
+            ? 'accent-rescheduled'
+            : ($isToday
+            ? 'accent-today'
+            : ($isUpcoming
+            ? 'accent-upcoming'
+            : 'accent-default'))));
+            $iconBg = $isCancelled
+            ? 'bg-red-100'
+            : ($isCompleted
+            ? 'bg-green-100'
+            : ($isRescheduled
+            ? 'bg-yellow-100'
+            : ($isToday
+            ? 'bg-blue-50'
+            : ($isUpcoming
+            ? 'bg-orange-100'
+            : 'bg-gray-100'))));
+            $iconColor = $isCancelled
+            ? 'text-red-600'
+            : ($isCompleted
+            ? 'text-green-600'
+            : ($isRescheduled
+            ? 'text-yellow-600'
+            : ($isToday
+            ? 'text-blue-600'
+            : ($isUpcoming
+            ? 'text-orange-600'
+            : 'text-gray-500'))));
+            $pillClass = $isCancelled
+            ? 'pill-cancelled'
+            : ($isCompleted
+            ? 'pill-completed'
+            : ($isRescheduled
+            ? 'pill-rescheduled'
+            : ($isToday
+            ? 'pill-today'
+            : ($isUpcoming
+            ? 'pill-upcoming'
+            : 'pill-default'))));
+            $pillText = $isCancelled
+            ? 'Cancelled'
+            : ($isCompleted
+            ? 'Completed'
+            : ($isRescheduled
+            ? 'Rescheduled'
+            : ($isToday
+            ? 'Appointment Today'
+            : ($isUpcoming
+            ? ($status === 'upcoming'
+            ? 'Upcoming'
+            : 'Upcoming ·
+            ' . ucfirst($status))
+            : ucfirst($status ?: 'Pending')))));
+
+            $appointmentDate = Carbon::parse($appt->appointment_date)->startOfDay();
+            $todayDate = Carbon::today();
+            $daysDiff = (int) $todayDate->diffInDays($appointmentDate, false);
+
+            $showDateUrgency = !$isCancelled && !$isCompleted && $daysDiff >= 0;
+
+            $urgencyLabel = $showDateUrgency
+            ? ($daysDiff === 0
+            ? 'Today'
+            : ($daysDiff === 1
+            ? 'Tomorrow'
+            : 'In ' . $daysDiff . ' days'))
+            : '';
+
+            $urgencyClass = $showDateUrgency
+            ? ($daysDiff === 0
+            ? 'urgency-today'
+            : ($daysDiff === 1
+            ? 'urgency-tomorrow'
+            : 'urgency-upcoming'))
+            : '';
+            @endphp
+
+            <a href="{{ route('admin.admin.patient.profile', ['patient' => $appt->patient_id]) }}"
+              class="patient-card patient-item all {{ $tabClass }} block">
+
+              <div class="accent-bar {{ $accentClass }}"></div>
+
+              <div class="card-body-desktop items-center gap-5 px-8 py-4 pl-10">
+                <div class="relative flex-shrink-0">
+                  <img
+                    src="{{ $appt->patient->profile_image ? asset('storage/' . $appt->patient->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($patientName) . '&background=660000&color=FFFFFF&rounded=true&size=128' }}"
+                    class="patient-avatar w-14 h-14 rounded-full object-cover shadow-sm" alt="{{ $patientName }}" />
+                </div>
+                <div class="w-44 flex-shrink-0">
+                  <p class="font-semibold text-[#1a1a1a] text-sm leading-tight">
+                    {{ $patientName }}</p>
+                  <span
+                    class="inline-flex px-2.5 py-0.5 rounded-md bg-gray-200 text-gray-600 text-[10px] font-bold tracking-wide w-max">
+                    {{ $appt->patient->course ?: 'No Program' }}
+                  </span>
+                  <span class="patient-info hidden">
+                    {{ $appt->patient->course ?? '' }}|
+                    {{ $appt->patient->year_level ?? '' }}|
+                    {{ $appt->patient->section ?? '' }}|
+                    {{ $appt->appointment_date }}|
+                    {{ $appt->patient->department ?? '' }}|
+                    {{ optional($appt->created_at)->toDateTimeString() }}
+                  </span>
+                </div>
+                <div class="w-px h-10 bg-gray-200 flex-shrink-0"></div>
+                <div class="patient-meta-block patient-date-block flex items-start gap-3 w-44 flex-shrink-0">
+                  <div class="icon-box {{ $iconBg }} flex-shrink-0">
+                    <i class="fa-regular fa-calendar {{ $iconColor }} text-base"></i>
+                  </div>
+                  <div>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide mb-1 font-semibold">
+                      Date &amp; Time
+                    </p>
+                    <p class="font-semibold text-[#1a1a1a] text-sm">
+                      {{ $dateLabel }}</p>
+                    <p class="text-gray-500 text-xs mt-0.5">{{ $timeLabel }}</p>
+                    @if ($showDateUrgency)
+                    <span class="urgency-chip {{ $urgencyClass }}">
+                      {{ $urgencyLabel }}
+                    </span>
+                    @endif
+                  </div>
+                </div>
+                <div class="w-px h-10 bg-gray-200 flex-shrink-0"></div>
+                <div class="patient-meta-block patient-service-block flex items-start gap-3 flex-1 min-w-0">
+                  <div class="icon-box {{ $iconBg }} flex-shrink-0">
+                    <i class="fa-solid fa-tooth {{ $iconColor }} text-base"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide mb-1 font-semibold">
+                      Service</p>
+                    <p class="font-semibold text-[#1a1a1a] text-sm">
+                      {{ $serviceLabel }}</p>
+                    <span class="status-pill {{ $pillClass }}">
+                      <span class="pill-dot"></span>{{ $pillText }}
+                    </span>
+                  </div>
+                </div>
+                <div class="patient-actions">
+                  <span class="patient-action-chip">
+                    <i class="fa-regular fa-user"></i>
+                    View
+                  </span>
+                  <span class="patient-action-chip patient-action-primary">
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </span>
+                </div>
+              </div>
+
+              <div class="card-body-mobile redesigned-grid-card w-full h-full relative">
+
+                <div class="grid-card-top mobile-profile-header">
+                  <div class="mobile-avatar-row">
+                    <div class="grid-avatar-wrap">
+                      <img
+                        src="{{ $appt->patient->profile_image ? asset('storage/' . $appt->patient->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($patientName) . '&background=660000&color=FFFFFF&rounded=true&size=128' }}"
+                        class="patient-avatar grid-patient-avatar object-cover shadow-sm" alt="{{ $patientName }}" />
+                    </div>
+
+                    <div class="card-arrow-btn grid-arrow-btn">
+                      <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                  </div>
+
+                  <div class="grid-patient-main">
+                    <h3 class="patient-grid-name">
+                      {{ $patientName }}
+                    </h3>
+
+                    <div class="grid-badge-row">
+                      <span class="status-pill {{ $pillClass }} grid-status-pill">
+                        <span class="pill-dot"></span>{{ $pillText }}
+                      </span>
+
+                      <span class="grid-program-pill">
+                        {{ $appt->patient->course ?: 'No Program' }}
+                      </span>
+                    </div>
+
+                    <span class="patient-info hidden">
+                      {{ $appt->patient->course ?? '' }}|{{ $appt->patient->year_level ?? '' }}|{{
+                      $appt->patient->section ?? '' }}|{{ $appt->appointment_date }}|{{ $appt->patient->department
+                      ?? ''
+                      }}|{{ optional($appt->created_at)->toDateTimeString() }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="grid-info-stack">
+                  <div class="grid-info-item">
+                    <div class="grid-info-icon {{ $iconBg }}">
+                      <i class="fa-regular fa-calendar {{ $iconColor }}"></i>
+                    </div>
+                    <div class="grid-info-text">
+                      <span class="grid-info-label">Date &amp; Time</span>
+                      <strong>{{ $dateLabel }} · {{ $timeLabel }}</strong>
+                    </div>
+                  </div>
+
+                  <div class="grid-info-item">
+                    <div class="grid-info-icon {{ $iconBg }}">
+                      <i class="fa-solid fa-tooth {{ $iconColor }}"></i>
+                    </div>
+                    <div class="grid-info-text">
+                      <span class="grid-info-label">Service</span>
+                      <strong>{{ $serviceLabel }}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid-card-footer">
+                  <span class="grid-action-pill">
+                    <i class="fa-regular fa-user"></i>
+                    View Profile
+                  </span>
+
+                  @if ($showDateUrgency)
+                  <span class="grid-urgency-pill {{ $urgencyClass }}">
+                    {{ $urgencyLabel }}
+                  </span>
+                  @endif
+                </div>
+              </div>
+            </a>
+            @empty
+            <div class="empty-state col-span-full w-full">
+              <div class="empty-state-icon">
+                <i class="fa-solid fa-tooth"></i>
+              </div>
+
+              <p class="empty-state-title">No appointments found</p>
+              <p class="empty-state-sub">There are no appointments in the system yet.</p>
             </div>
+            @endforelse
+          </div>
         </div>
+
+        <div id="pagination"
+          class="flex items-center justify-center gap-2 md:gap-4 py-5 text-sm text-gray-600 border-t border-gray-100 flex-wrap">
+          <button id="prevPage" class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-gray-300 cursor-not-allowed"
+            disabled>
+            <span>‹</span> Previous
+          </button>
+          <div id="pageNumbers" class="flex items-center gap-1 md:gap-2 flex-wrap justify-center">
+          </div>
+          <button id="nextPage"
+            class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[#8B0000] hover:bg-[#8B0000]/5 transition">
+            Next <span>›</span>
+          </button>
+        </div>
+
+      </div>
     </div>
+  </div>
+  </div>
 </main>
 
-<div id="filterModalBackdrop" class="filter-modal-backdrop">
-    <div class="filter-modal">
-        <div class="px-5 py-4 flex items-center justify-between border-b border-gray-200">
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-sliders text-[#8B0000]"></i>
-                <h2 class="text-lg font-semibold text-[#8B0000]">Filter Patients</h2>
-            </div>
-            <button type="button" id="closeFilterModal"
-                class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
+<div id="filterModal" class="filter-drawer-wrapper">
+  <div class="filter-drawer-overlay" onclick="document.getElementById('closeFilterModalBtn').click()"></div>
 
-        <div class="filter-modal-body space-y-5">
-            <div class="space-y-3">
-                <p class="text-sm text-gray-500">Sort</p>
-                <div class="space-y-2">
-                    <label class="flex items-center gap-3 text-sm text-gray-700">
-                        <input type="radio" name="sort" value="az" class="radio-red"> A-Z
-                    </label>
-                    <label class="flex items-center gap-3 text-sm text-gray-700">
-                        <input type="radio" name="sort" value="za" class="radio-red"> Z-A
-                    </label>
-                </div>
-            </div>
+  <div class="filter-drawer-panel flex flex-col bg-white">
 
-            <div class="h-px bg-gray-200"></div>
+    <div class="px-6 py-5 flex items-center justify-between flex-shrink-0 bg-white border-b border-gray-100">
+      <div class="filter-drawer-title flex items-center gap-2">
+        <i class="fa-solid fa-sliders text-xl"></i>
+        <h2 class="text-xl font-extrabold">Filters</h2>
+      </div>
 
-            <div class="space-y-3">
-                <p class="text-sm text-gray-500">Date Range</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="text-sm text-gray-700">From</label>
-                        <input type="date" id="fromDate"
-                            class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm text-gray-700">To</label>
-                        <input type="date" id="toDate"
-                            class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm">
-                    </div>
-                </div>
-            </div>
-
-            <div class="h-px bg-gray-200"></div>
-
-            <div class="space-y-3">
-                <p class="text-sm text-gray-500">Course</p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-3 text-sm text-gray-700">
-                    @foreach(['BSIT','BSECE','BSBA - HRM','BSED - ENG','BSOA','BSPSYCH','DIT','BSME','BSBA - MM','BSED -
-                    MATH','DOMT'] as $course)
-                    <label class="flex items-center gap-2">
-                        <input type="radio" name="course" value="{{ strtolower($course) }}" class="radio-red"> {{
-                        $course }}
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="h-px bg-gray-200"></div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-3">
-                    <p class="text-sm text-gray-500">Year</p>
-                    <div class="grid grid-cols-2 gap-y-3 text-sm text-gray-700">
-                        @foreach(['1st Year','2nd Year','3rd Year','4th Year'] as $year)
-                        <label class="flex items-center gap-3">
-                            <input type="radio" name="year" value="{{ strtolower($year) }}" class="radio-red"> {{ $year
-                            }}
-                        </label>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    <p class="text-sm text-gray-500">Section</p>
-                    <div class="space-y-3 text-sm text-gray-700">
-                        <label class="flex items-center gap-3">
-                            <input type="radio" name="section" value="1" class="radio-red"> 1
-                        </label>
-                        <label class="flex items-center gap-3">
-                            <input type="radio" name="section" value="2" class="radio-red"> 2
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="h-px bg-gray-200"></div>
-
-            <div class="space-y-3">
-                <p class="text-sm text-gray-500">Department</p>
-                <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm text-gray-700">
-                    @foreach(['Administrative','Faculty','Dependent'] as $department)
-                    <label class="flex items-center gap-3">
-                        <input type="radio" name="department" value="{{ strtolower($department) }}" class="radio-red">
-                        {{ $department }}
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <div class="px-5 py-4 flex items-center justify-between border-t border-gray-200 bg-white">
-            <button type="button" id="clearFiltersBtn"
-                class="text-[#8B0000] text-sm font-medium hover:underline">Clear</button>
-            <button type="button" id="applyFiltersBtn"
-                class="bg-[#8B0000] text-white px-8 py-2 rounded-md text-sm font-medium shadow hover:bg-[#760000] transition">
-                Apply
-            </button>
-        </div>
+      <button id="closeFilterModalBtn" type="button" class="text-gray-400 hover:text-gray-700 transition-colors">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
     </div>
+
+    <div class="px-6 py-5 flex flex-col gap-6 flex-1 overflow-y-auto bg-white">
+
+      <div id="activeFiltersSection" class="hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[13px] font-bold text-gray-800">Active Filters</span>
+          <button id="clearAllChipsBtn" type="button" class="text-xs font-bold text-[#8B0000] hover:underline">
+            Clear All
+          </button>
+        </div>
+        <div id="activeChipsContainer" class="flex flex-wrap gap-2 pb-4 border-b border-gray-100"></div>
+      </div>
+
+      <div>
+        <h3 class="filter-section-title">Sort By</h3>
+        <div class="filter-chip-row" id="fSortGroup">
+          <button type="button" class="ftag ftag-active" data-val="newest">Newest First</button>
+          <button type="button" class="ftag" data-val="oldest">Oldest First</button>
+          <button type="button" class="ftag" data-val="az">Patient Name A-Z</button>
+          <button type="button" class="ftag" data-val="za">Patient Name Z-A</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="filter-section-title">Filter by Date Range</h3>
+        <div class="filter-chip-row" id="datePresetGroup">
+          <button type="button" class="quick-date-chip" data-range="7">Last 7 Days</button>
+          <button type="button" class="quick-date-chip" data-range="30">Last 30 Days</button>
+          <button type="button" class="quick-date-chip" data-range="90">Last 3 Months</button>
+          <button type="button" class="quick-date-chip" data-range="180">Last 6 Months</button>
+          <button type="button" class="quick-date-chip" data-range="365">Last 12 Months</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="filter-section-title">Custom Date Range</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="filter-date-input-wrap">
+            <input id="fromDate" type="text" class="js-flatpickr-date-range-from" placeholder="Start date" readonly
+              autocomplete="off" />
+            <i class="fa-regular fa-calendar"></i>
+          </div>
+
+          <div class="filter-date-input-wrap">
+            <input id="toDate" type="text" class="js-flatpickr-date-range-to" placeholder="End date" readonly
+              autocomplete="off" />
+            <i class="fa-regular fa-calendar"></i>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="filter-section-title">Course</h3>
+        <div class="filter-chip-grid">
+          @foreach (['BSIT', 'BSECE', 'BSBA - HRM', 'BSED - ENG', 'BSOA', 'BSPSYCH', 'DIT', 'BSME', 'BSBA - MM', 'BSED -
+          MATH', 'DOMT'] as $course)
+          <label class="choice-chip">
+            <input type="radio" name="course" value="{{ $course }}" class="filter-input radio-red chip-radio" />
+            <span>{{ $course }}</span>
+          </label>
+          @endforeach
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="filter-section-title">Year Level</h3>
+          <div class="filter-chip-row">
+            <label class="choice-chip">
+              <input type="radio" name="year" value="1st Year" class="filter-input radio-red chip-radio" />
+              <span>1st Year</span>
+            </label>
+
+            <label class="choice-chip">
+              <input type="radio" name="year" value="2nd Year" class="filter-input radio-red chip-radio" />
+              <span>2nd Year</span>
+            </label>
+
+            <label class="choice-chip">
+              <input type="radio" name="year" value="3rd Year" class="filter-input radio-red chip-radio" />
+              <span>3rd Year</span>
+            </label>
+
+            <label class="choice-chip">
+              <input type="radio" name="year" value="4th Year" class="filter-input radio-red chip-radio" />
+              <span>4th Year</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="filter-section-title">Section</h3>
+          <div class="filter-chip-row">
+            <label class="choice-chip">
+              <input type="radio" name="section" value="1" class="filter-input radio-red chip-radio" />
+              <span>1</span>
+            </label>
+
+            <label class="choice-chip">
+              <input type="radio" name="section" value="2" class="filter-input radio-red chip-radio" />
+              <span>2</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="pb-6">
+        <h3 class="filter-section-title">Department</h3>
+        <div class="filter-chip-row">
+          <label class="choice-chip">
+            <input type="radio" name="department" value="Administrative" class="filter-input radio-red chip-radio" />
+            <span>Administrative</span>
+          </label>
+
+          <label class="choice-chip">
+            <input type="radio" name="department" value="Faculty" class="filter-input radio-red chip-radio" />
+            <span>Faculty</span>
+          </label>
+
+          <label class="choice-chip">
+            <input type="radio" name="department" value="Dependent" class="filter-input radio-red chip-radio" />
+            <span>Dependent</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="px-6 py-5 bg-white flex flex-col sm:flex-row items-center justify-between flex-shrink-0 border-t border-gray-100 gap-4 sm:gap-0 relative z-20">
+
+      <button id="clearFiltersModal" type="button"
+        class="filter-clear-btn flex items-center gap-2 transition-colors w-full sm:w-auto justify-center sm:justify-start">
+        <i class="fa-regular fa-trash-can text-lg"></i>
+        <span class="text-[13px] font-bold leading-none whitespace-nowrap">Clear Filters</span>
+      </button>
+
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <button id="cancelFilterBtn" type="button"
+          class="filter-cancel-btn flex-1 sm:flex-none px-5 py-2.5 text-sm font-bold rounded-lg transition-colors">
+          Cancel
+        </button>
+
+        <button id="applyFilters" type="button"
+          class="filter-show-results-btn filter-apply-btn flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-colors shadow-sm">
+          <i class="fa-solid fa-check"></i>
+          <span id="showResultsText">Show 0 results</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const allCards = Array.from(document.querySelectorAll('.patient-item'));
-        const listCards = allCards.filter(card => card.dataset.viewType === 'list');
-        const gridCards = allCards.filter(card => card.dataset.viewType === 'grid');
+  function switchView(mode) {
+    const mainContent = document.getElementById('mainContent');
+    const btnList = document.getElementById('btnListView');
+    const btnGrid = document.getElementById('btnGridView');
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
-        const searchInput = document.getElementById('searchInput');
-        const searchClearBtn = document.getElementById('searchClearBtn');
-        const tabButtons = Array.from(document.querySelectorAll('.tab-btn[data-filter]'));
-        const visibleCount = document.getElementById('visibleCount');
-        const totalCount = document.getElementById('totalCount');
-        const clientEmptyState = document.getElementById('clientEmptyState');
-        const serverEmptyState = document.getElementById('serverEmptyState');
+    if (!mainContent) return;
 
-        const filterModalBackdrop = document.getElementById('filterModalBackdrop');
-        const openFilterBtn = document.getElementById('openFilterBtn');
-        const closeFilterModal = document.getElementById('closeFilterModal');
-        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
-        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-        const filterDot = document.getElementById('filterDot');
+    if (isMobile) {
+      mode = 'grid';
+    }
 
-        const patientListView = document.getElementById('patientListView');
-        const patientGridView = document.getElementById('patientGridView');
-        const patientListViewBtn = document.getElementById('patientListViewBtn');
-        const patientGridViewBtn = document.getElementById('patientGridViewBtn');
+    if (mode === 'grid') {
+      mainContent.classList.remove('mode-list');
+      mainContent.classList.add('mode-grid');
 
-        let activeTab = 'today';
-        let currentView = getPreferredPatientView();
+      if (btnList) btnList.classList.remove('active');
+      if (btnGrid) btnGrid.classList.add('active');
 
-        let filters = {
-            search: '',
-            sort: '',
-            fromDate: '',
-            toDate: '',
-            course: '',
-            year: '',
-            section: '',
-            department: ''
-        };
+      if (!isMobile) {
+        localStorage.setItem('patientViewMode', 'grid');
+      }
+    } else {
+      mainContent.classList.remove('mode-grid');
+      mainContent.classList.add('mode-list');
 
-        function getPreferredPatientView() {
-            if (window.innerWidth <= 767) return 'grid';
-            return localStorage.getItem('patientView') || 'list';
-        }
+      if (btnGrid) btnGrid.classList.remove('active');
+      if (btnList) btnList.classList.add('active');
 
-        function applyPatientView(view, save = true) {
-            if (!patientListView || !patientGridView) return;
+      localStorage.setItem('patientViewMode', 'list');
+    }
+  }
 
-            const finalView = window.innerWidth <= 767 ? 'grid' : view;
-            currentView = finalView;
+  function syncResponsivePatientView() {
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
-            if (finalView === 'grid') {
-                patientListView.setAttribute('hidden', 'hidden');
-                patientGridView.removeAttribute('hidden');
-            } else {
-                patientGridView.setAttribute('hidden', 'hidden');
-                patientListView.removeAttribute('hidden');
-            }
+    if (isMobile) {
+      switchView('grid');
+      return;
+    }
 
-            if (patientListViewBtn) patientListViewBtn.classList.toggle('active', finalView === 'list');
-            if (patientGridViewBtn) patientGridViewBtn.classList.toggle('active', finalView === 'grid');
+    const savedMode = localStorage.getItem('patientViewMode') || 'list';
+    switchView(savedMode);
+  }
 
-            if (save && window.innerWidth > 767) {
-                localStorage.setItem('patientView', finalView);
-            }
-        }
+  document.addEventListener('DOMContentLoaded', syncResponsivePatientView);
+  window.addEventListener('resize', syncResponsivePatientView);
 
-        function updateSearchClear() {
-            if (!searchClearBtn || !searchInput) return;
-            searchClearBtn.classList.toggle('hidden', searchInput.value.trim().length === 0);
-        }
+  function getPatientDropdownMeta(status) {
+    const map = {
+      today: {
+        label: 'Today',
+        icon: 'fa-clock',
+        tone: 's-today',
+        countId: 'statUpcoming'
+      },
+      upcoming: {
+        label: 'Upcoming',
+        icon: 'fa-calendar-check',
+        tone: 's-upcoming',
+        countId: 'statScheduled'
+      },
+      rescheduled: {
+        label: 'Rescheduled',
+        icon: 'fa-calendar-plus',
+        tone: 's-rescheduled',
+        countId: 'statRescheduled'
+      },
+      completed: {
+        label: 'Completed',
+        icon: 'fa-check-double',
+        tone: 's-completed',
+        countId: 'statCompleted'
+      },
+      cancelled: {
+        label: 'Cancelled',
+        icon: 'fa-calendar-xmark',
+        tone: 's-cancelled',
+        countId: 'statCancelled'
+      },
+      all: {
+        label: 'All Patients',
+        icon: 'fa-users',
+        tone: 's-all',
+        countId: 'statAll'
+      }
+    };
 
-        function hasActiveFilters() {
-            return !!filters.sort || !!filters.fromDate || !!filters.toDate || !!filters.course ||
-                !!filters.year || !!filters.section || !!filters.department;
-        }
+    return map[status] || map.today;
+  }
 
-        function updateFilterDot() {
-            if (!filterDot || !openFilterBtn) return;
-            filterDot.classList.toggle('visible', hasActiveFilters());
-            openFilterBtn.classList.toggle('active', hasActiveFilters());
-        }
+  function getPatientDropdownCount(status) {
+    const meta = getPatientDropdownMeta(status);
+    return document.getElementById(meta.countId)?.textContent?.trim() || '0';
+  }
 
-        function cardMatchesFilters(card) {
-            if (activeTab !== 'all' && card.dataset.tab !== activeTab) return false;
+  function updatePatientStatsDropdownLabel() {
+    const activeBtn =
+      document.querySelector('#tabsGrid .filter-btn.tab-active') ||
+      document.querySelector('#tabsGrid .filter-btn[data-filter="today"]');
 
-            if (filters.search) {
-                const q = filters.search.toLowerCase();
-                const matchesSearch =
-                    (card.dataset.name || '').includes(q) ||
-                    (card.dataset.service || '').includes(q) ||
-                    (card.textContent || '').toLowerCase().includes(q);
+    const labelEl = document.getElementById('patientStatsSelectedLabel');
+    const countEl = document.getElementById('patientStatsSelectedCount');
+    const leadingIcon = document.querySelector('#patientStatsToggle .patient-stats-trigger-icon');
 
-                if (!matchesSearch) return false;
-            }
+    if (!activeBtn || !labelEl || !countEl) return;
 
-            if (filters.course && (card.dataset.course || '') !== filters.course) return false;
-            if (filters.year && (card.dataset.year || '') !== filters.year) return false;
-            if (filters.section && (card.dataset.section || '') !== filters.section) return false;
-            if (filters.department && (card.dataset.department || '') !== filters.department) return false;
-            if (filters.fromDate && (card.dataset.date || '') < filters.fromDate) return false;
-            if (filters.toDate && (card.dataset.date || '') > filters.toDate) return false;
+    const status = activeBtn.getAttribute('data-filter') || 'today';
+    const meta = getPatientDropdownMeta(status);
 
-            return true;
-        }
+    labelEl.textContent = meta.label;
+    countEl.textContent = getPatientDropdownCount(status);
 
-        function applySorting(cards) {
-            if (filters.sort === 'az') {
-                cards.sort((a, b) => (a.dataset.name || '').localeCompare(b.dataset.name || ''));
-            } else if (filters.sort === 'za') {
-                cards.sort((a, b) => (b.dataset.name || '').localeCompare(a.dataset.name || ''));
-            }
-            return cards;
-        }
+    if (leadingIcon) {
+      leadingIcon.className = `patient-stats-trigger-icon ${meta.tone}`;
+      leadingIcon.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
+    }
 
-        function applyCardFilters() {
-            const listWrap = patientListView;
-            const gridWrap = patientGridView ? patientGridView.querySelector('.patient-grid') : null;
-
-            allCards.forEach(card => {
-                card.style.display = 'none';
-            });
-
-            let filteredListCards = listCards.filter(cardMatchesFilters);
-            let filteredGridCards = gridCards.filter(cardMatchesFilters);
-
-            filteredListCards = applySorting(filteredListCards);
-            filteredGridCards = applySorting(filteredGridCards);
-
-            if (listWrap) {
-                filteredListCards.forEach(card => {
-                    card.style.display = '';
-                    listWrap.appendChild(card);
-                });
-            }
-
-            if (gridWrap) {
-                filteredGridCards.forEach(card => {
-                    card.style.display = '';
-                    gridWrap.appendChild(card);
-                });
-            }
-
-            const visible = filteredListCards.length;
-
-            if (visibleCount) visibleCount.textContent = visible;
-            if (totalCount) totalCount.textContent = listCards.length;
-
-            if (serverEmptyState) {
-                serverEmptyState.classList.remove('visible');
-            }
-
-            if (clientEmptyState) {
-                clientEmptyState.classList.toggle('visible', visible === 0 && listCards.length > 0);
-            }
-
-            updateFilterDot();
-        }
-
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', function () {
-                tabButtons.forEach(b => b.classList.remove('tab-active'));
-                this.classList.add('tab-active');
-                activeTab = this.dataset.filter;
-                applyCardFilters();
-            });
-        });
-
-        if (patientListViewBtn) {
-            patientListViewBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                applyPatientView('list', true);
-            });
-        }
-
-        if (patientGridViewBtn) {
-            patientGridViewBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                applyPatientView('grid', true);
-            });
-        }
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function () {
-                filters.search = this.value.trim();
-                updateSearchClear();
-                applyCardFilters();
-            });
-        }
-
-        if (searchClearBtn) {
-            searchClearBtn.addEventListener('click', function () {
-                const micBtn = document.getElementById('micToggleBtn');
-                if (micBtn && micBtn.classList.contains('mic-active')) {
-                    micBtn.click();
-                }
-
-                searchInput.value = '';
-                filters.search = '';
-                updateSearchClear();
-                applyCardFilters();
-                document.getElementById('patientVoiceStatus')?.classList.add('hidden');
-                searchInput.focus();
-            });
-        }
-
-        if (openFilterBtn) {
-            openFilterBtn.addEventListener('click', function () {
-                filterModalBackdrop.classList.add('show');
-            });
-        }
-
-        if (closeFilterModal) {
-            closeFilterModal.addEventListener('click', function () {
-                filterModalBackdrop.classList.remove('show');
-            });
-        }
-
-        if (filterModalBackdrop) {
-            filterModalBackdrop.addEventListener('click', function (e) {
-                if (e.target === filterModalBackdrop) {
-                    filterModalBackdrop.classList.remove('show');
-                }
-            });
-        }
-
-        if (applyFiltersBtn) {
-            applyFiltersBtn.addEventListener('click', function () {
-                filters.sort = document.querySelector('input[name="sort"]:checked')?.value || '';
-                filters.fromDate = document.getElementById('fromDate')?.value || '';
-                filters.toDate = document.getElementById('toDate')?.value || '';
-                filters.course = document.querySelector('input[name="course"]:checked')?.value || '';
-                filters.year = document.querySelector('input[name="year"]:checked')?.value || '';
-                filters.section = document.querySelector('input[name="section"]:checked')?.value || '';
-                filters.department = document.querySelector('input[name="department"]:checked')?.value || '';
-
-                filterModalBackdrop.classList.remove('show');
-                applyCardFilters();
-            });
-        }
-
-        if (clearFiltersBtn) {
-            clearFiltersBtn.addEventListener('click', function () {
-                document.querySelectorAll('#filterModalBackdrop input[type="radio"]').forEach(input => {
-                    input.checked = false;
-                });
-
-                const fromDate = document.getElementById('fromDate');
-                const toDate = document.getElementById('toDate');
-
-                if (fromDate) fromDate.value = '';
-                if (toDate) toDate.value = '';
-
-                filters.sort = '';
-                filters.fromDate = '';
-                filters.toDate = '';
-                filters.course = '';
-                filters.year = '';
-                filters.section = '';
-                filters.department = '';
-
-                applyCardFilters();
-            });
-        }
-
-        window.addEventListener('resize', function () {
-            applyPatientView(getPreferredPatientView(), false);
-        });
-
-        applyPatientView(currentView, false);
-        updateSearchClear();
-        applyCardFilters();
+    document.querySelectorAll('#tabsGrid .filter-btn').forEach(function (btn) {
+      btn.classList.toggle('tab-active', btn.getAttribute('data-filter') === status);
     });
+  }
+
+  window.updatePatientStatsDropdownLabel = updatePatientStatsDropdownLabel;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const dropdown = document.getElementById('patientStatsDropdown');
+    const toggle = document.getElementById('patientStatsToggle');
+    const panel = document.getElementById('patientStatsPanel');
+
+    if (!dropdown || !toggle || !panel) return;
+
+    function closePatientStatsDropdown() {
+      dropdown.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    panel.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+
+    document.querySelectorAll('#tabsGrid .filter-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#tabsGrid .filter-btn').forEach(function (b) {
+          b.classList.remove('tab-active');
+        });
+
+        btn.classList.add('tab-active');
+        updatePatientStatsDropdownLabel();
+        closePatientStatsDropdown();
+      });
+    });
+
+    document.addEventListener('click', closePatientStatsDropdown);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closePatientStatsDropdown();
+    });
+
+    updatePatientStatsDropdownLabel();
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    let patientFilterModal = null;
+    let patientSearchInput = null;
+    let patientFilterBtn = null;
+    let patientFilterBadge = null;
+    let patientExternalResetBtn = null;
+
+    function openFilterModal() {
+      if (!patientFilterModal) return;
+
+      window.clearTimeout(window.patientFilterCloseTimer);
+
+      patientFilterModal.classList.remove('closing');
+      patientFilterModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeFilterModal() {
+      if (!patientFilterModal) return;
+
+      patientFilterModal.classList.remove('open');
+      patientFilterModal.classList.add('closing');
+      document.body.style.overflow = '';
+
+      window.clearTimeout(window.patientFilterCloseTimer);
+      window.patientFilterCloseTimer = window.setTimeout(function () {
+        if (!patientFilterModal) return;
+        patientFilterModal.classList.remove('closing');
+      }, 280);
+    }
+
+    function onSearch(input) {
+      if (!input) return;
+      input.dispatchEvent(new Event('input'));
+    }
+
+    function resetAllFilters() {
+      clearFormState();
+
+      selectedDepartment = null;
+      selectedProgram = null;
+      selectedYearLevel = null;
+      selectedSection = null;
+      activeFromDate = "";
+      activeToDate = "";
+      dateSort = 'desc';
+      nameSort = null;
+      searchKeyword = "";
+
+      if (patientSearchInput) {
+        patientSearchInput.value = "";
+        patientSearchInput.dispatchEvent(new Event("input", {
+          bubbles: true
+        }));
+      }
+
+      activeTab = "today";
+      document.querySelectorAll('.filter-btn').forEach(function (b) {
+        b.classList.remove('tab-active');
+      });
+      var todayBtn = document.querySelector('.filter-btn[data-filter="today"]');
+      if (todayBtn) {
+        todayBtn.classList.add('tab-active');
+      }
+
+      renderFilterChips();
+      syncMutualExclusion();
+      applyFilters();
+      updateFilterButtonState();
+    }
+
+    try {
+      var patientContainer = document.getElementById("patientContainer");
+      if (!patientContainer) return;
+
+      var patientSkeleton = document.getElementById("patientSkeleton");
+
+      function showPatientSkeleton() {
+        if (!patientSkeleton || !patientContainer) return;
+        patientSkeleton.classList.remove("hidden");
+        patientContainer.classList.add("hidden");
+      }
+
+      function hidePatientSkeleton() {
+        if (!patientSkeleton || !patientContainer) return;
+        patientSkeleton.classList.add("hidden");
+        patientContainer.classList.remove("hidden");
+      }
+
+      var allPatients = Array.from(patientContainer.querySelectorAll(".patient-item"));
+      var filterModal = document.getElementById("filterModal");
+      var filterBtn = document.getElementById("filterBtn");
+      var filterBadge = document.getElementById("filterBadge");
+      var clearFiltersModalBtn = document.getElementById("clearFiltersModal");
+      var applyFiltersBtn = document.getElementById("applyFilters");
+      var searchInput = document.getElementById("searchInput");
+      var externalClearFilterBtn = document.getElementById("externalClearFilterBtn");
+      var colHeader = document.querySelector(".card-col-header");
+
+      patientFilterModal = filterModal;
+      patientSearchInput = searchInput;
+      patientFilterBtn = filterBtn;
+      patientFilterBadge = filterBadge;
+      patientExternalResetBtn = externalClearFilterBtn;
+
+      var activeTab = "today";
+      var searchKeyword = "";
+      var selectedProgram = null,
+        selectedYearLevel = null,
+        selectedSection = null,
+        selectedDepartment = null;
+      var nameSort = null,
+        dateSort = 'desc';
+
+      var activeFromDate = "",
+        activeToDate = "",
+        activeDatePreset = "";
+
+      var deptRadios = Array.from(document.querySelectorAll('input[name="department"]'));
+      var courseRadios = Array.from(document.querySelectorAll('input[name="course"]'));
+      var yearRadios = Array.from(document.querySelectorAll('input[name="year"]'));
+      var sectionRadios = Array.from(document.querySelectorAll('input[name="section"]'));
+      var otherRadios = courseRadios.concat(yearRadios, sectionRadios);
+
+      if (filterBtn) {
+        filterBtn.onclick = function (e) {
+          e.preventDefault();
+          renderFilterChips();
+          syncMutualExclusion();
+          updateShowResultsButton();
+          openFilterModal();
+        };
+      }
+
+      var closeFilterModalBtn = document.getElementById("closeFilterModalBtn");
+      if (closeFilterModalBtn) {
+        closeFilterModalBtn.onclick = function () {
+          if (filterModal) closeFilterModal();
+          updateFilterButtonState();
+        };
+      }
+
+      var cancelFilterBtn = document.getElementById("cancelFilterBtn");
+      if (cancelFilterBtn) {
+        cancelFilterBtn.onclick = function () {
+          if (filterModal) closeFilterModal();
+          updateFilterButtonState();
+        };
+      }
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && filterModal && filterModal.classList.contains("open")) {
+          closeFilterModal();
+          updateFilterButtonState();
+        }
+      });
+
+      function clearFormState() {
+        if (filterModal) {
+          filterModal.querySelectorAll("input[type='radio']").forEach(function (i) {
+            i.checked = false;
+            i.disabled = false;
+
+            var lbl = i.closest("label");
+            if (lbl) {
+              lbl.classList.remove("opacity-50", "cursor-not-allowed");
+            }
+          });
+        }
+
+        var f = document.getElementById("fromDate");
+        var t = document.getElementById("toDate");
+
+        if (f) f.value = "";
+        if (t) t.value = "";
+
+        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(function (b) {
+          b.classList.remove('active');
+        });
+
+        selectedDepartment = null;
+        selectedProgram = null;
+        selectedYearLevel = null;
+        selectedSection = null;
+        activeFromDate = "";
+        activeToDate = "";
+        activeDatePreset = "";
+
+        window.syncFilterTagGroup("fSortGroup", "newest");
+
+        syncMutualExclusion();
+        updateFilterButtonState();
+
+        dateSort = 'desc';
+        nameSort = null;
+
+        updateShowResultsButton();
+      }
+
+      function getDraftFilterState() {
+        var deptEl = filterModal ? filterModal.querySelector('input[name="department"]:checked') : null;
+        var crsEl = filterModal ? filterModal.querySelector('input[name="course"]:checked') : null;
+        var yrEl = filterModal ? filterModal.querySelector('input[name="year"]:checked') : null;
+        var secEl = filterModal ? filterModal.querySelector('input[name="section"]:checked') : null;
+
+        var fromDateEl = document.getElementById("fromDate");
+        var toDateEl = document.getElementById("toDate");
+
+        return {
+          department: deptEl ? deptEl.value : null,
+          program: crsEl ? crsEl.value : null,
+          year: yrEl ? yrEl.value : null,
+          section: secEl ? secEl.value : null,
+          fromDate: fromDateEl ? fromDateEl.value : "",
+          toDate: toDateEl ? toDateEl.value : ""
+        };
+      }
+
+      function hasDraftFilterChips() {
+        var draft = getDraftFilterState();
+
+        var sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
+        var sortVal = sortActive ? sortActive.getAttribute('data-val') : 'newest';
+
+        return !!(
+          draft.department ||
+          draft.program ||
+          draft.year ||
+          draft.section ||
+          draft.fromDate ||
+          draft.toDate ||
+          activeDatePreset ||
+          sortVal !== 'newest'
+        );
+      }
+
+      function countDraftResults() {
+        var draft = getDraftFilterState();
+        var data = allPatients.slice();
+
+        if (searchKeyword) {
+          data = data.filter(function (p) {
+            return matchesSearch(p, searchKeyword);
+          });
+        } else {
+          /*
+            IMPORTANT:
+            Filter count should preview ALL matching patients,
+            not only the current tab like today/upcoming/completed.
+            Kaya hindi natin ginagamit activeTab dito.
+          */
+
+          if (draft.program) {
+            data = data.filter(function (p) {
+              return ilike(getInfo(p).program, draft.program);
+            });
+          }
+
+          if (draft.year || draft.section) {
+            data = data.filter(function (p) {
+              var i = getInfo(p);
+
+              if (draft.year && !ilike(i.year, draft.year)) return false;
+              if (draft.section && String(i.section).trim() !== String(draft.section)
+                .trim()) return false;
+
+              return true;
+            });
+          }
+
+          if (draft.department) {
+            data = data.filter(function (p) {
+              return ilike(getInfo(p).department, draft.department);
+            });
+          }
+
+          if (draft.fromDate || draft.toDate) {
+            data = data.filter(function (p) {
+              var d = new Date(getInfo(p).dateStr);
+              if (isNaN(d.getTime())) return false;
+              if (draft.fromDate && d < new Date(draft.fromDate)) return false;
+              if (draft.toDate && d > new Date(draft.toDate)) return false;
+              return true;
+            });
+          }
+        }
+
+        return data.length;
+      }
+
+      function updateShowResultsButton() {
+        if (!hasDraftFilterChips()) {
+          window.updateShowResultsText(0);
+          return;
+        }
+
+        var count = countDraftResults();
+        window.updateShowResultsText(count);
+      }
+
+      function renderFilterChips() {
+        var container = document.getElementById("activeChipsContainer");
+        var section = document.getElementById("activeFiltersSection");
+        if (!container || !section) return;
+
+        container.innerHTML = "";
+        var hasChips = false;
+
+        function addChip(label, callback) {
+          hasChips = true;
+          var chip = document.createElement("div");
+          chip.className = "filter-chip";
+          chip.innerHTML = "<span>" + label +
+            "</span><span class='filter-chip-remove'><i class='fa-solid fa-xmark'></i></span>";
+          chip.querySelector(".filter-chip-remove").onclick = function () {
+            callback();
+            renderFilterChips();
+            syncMutualExclusion();
+            updateShowResultsButton();
+          };
+          container.appendChild(chip);
+        }
+
+        var sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
+        if (sortActive && sortActive.getAttribute('data-val') !== 'newest') {
+          addChip("Sort: " + sortActive.textContent.trim().replace(/\n/g, ' '), function () {
+            document.querySelectorAll('#fSortGroup .ftag').forEach(function (b) {
+              b.classList.remove('ftag-active');
+            });
+            var defSort = document.querySelector('#fSortGroup .ftag[data-val="newest"]');
+            if (defSort) defSort.classList.add('ftag-active');
+          });
+        }
+
+        var fDate = document.getElementById("fromDate");
+        var tDate = document.getElementById("toDate");
+        var activePresetBtn = document.querySelector('#datePresetGroup .quick-date-chip.active');
+
+        if (activePresetBtn) {
+          addChip(activePresetBtn.textContent.trim(), function () {
+            activePresetBtn.classList.remove("active");
+            if (fDate) fDate.value = "";
+            if (tDate) tDate.value = "";
+            activeDatePreset = "";
+          });
+        } else if (fDate && tDate && (fDate.value || tDate.value)) {
+          var lbl = fDate.value && tDate.value ? (fDate.value + " to " + tDate.value) : (fDate.value ?
+            "From " + fDate.value : "Until " + tDate.value);
+
+          addChip(lbl, function () {
+            fDate.value = "";
+            tDate.value = "";
+            activeDatePreset = "";
+          });
+        }
+
+        var course = document.querySelector('input[name="course"]:checked');
+        if (course) addChip(course.value, function () {
+          course.checked = false;
+        });
+
+        var year = document.querySelector('input[name="year"]:checked');
+        if (year) addChip(year.value, function () {
+          year.checked = false;
+        });
+
+        var sectionElem = document.querySelector('input[name="section"]:checked');
+        if (sectionElem) addChip("Section " + sectionElem.value, function () {
+          sectionElem.checked = false;
+        });
+
+        var dept = document.querySelector('input[name="department"]:checked');
+        if (dept) addChip(dept.value, function () {
+          dept.checked = false;
+        });
+
+        if (hasChips) {
+          section.classList.remove("hidden");
+          var clearAllBtn = document.getElementById("clearAllChipsBtn");
+          if (clearAllBtn) {
+            clearAllBtn.onclick = function () {
+              clearFormState();
+              renderFilterChips();
+
+              selectedDepartment = null;
+              selectedProgram = null;
+              selectedYearLevel = null;
+              selectedSection = null;
+              activeFromDate = "";
+              activeToDate = "";
+              dateSort = 'desc';
+              nameSort = null;
+
+              applyFilters();
+            };
+          }
+        } else {
+          section.classList.add("hidden");
+        }
+
+        updateShowResultsButton();
+      }
+
+      if (filterModal) {
+        var radioInputs = filterModal.querySelectorAll('input[type="radio"]');
+
+        radioInputs.forEach(function (input) {
+          input.addEventListener("change", function () {
+            renderFilterChips();
+            syncMutualExclusion();
+            updateShowResultsButton();
+          });
+        });
+      }
+
+      window.bindQuickDatePresets({
+        groupId: "datePresetGroup",
+        fromId: "fromDate",
+        toId: "toDate",
+        onChange: function () {
+          var activePresetBtn = document.querySelector(
+            "#datePresetGroup .quick-date-chip.active");
+          activeDatePreset = activePresetBtn ? activePresetBtn.getAttribute(
+            "data-range") : "";
+
+          renderFilterChips();
+          updateShowResultsButton();
+        }
+      });
+
+      function anyChecked(list) {
+        return list.some(function (i) {
+          return i.checked;
+        });
+      }
+
+      function setDisabled(list, d) {
+        list.forEach(function (i) {
+          i.disabled = d;
+          var label = i.closest("label");
+          if (label) {
+            label.classList.toggle("opacity-50", d);
+            label.classList.toggle("cursor-not-allowed", d);
+          }
+        });
+      }
+
+      function clearChecked(list) {
+        list.forEach(function (i) {
+          i.checked = false;
+        });
+      }
+
+      function ilike(val, t) {
+        return (val || "").toLowerCase().includes((t || "").toLowerCase());
+      }
+
+      function syncMutualExclusion() {
+        if (anyChecked(deptRadios)) {
+          clearChecked(otherRadios);
+          setDisabled(otherRadios, true);
+          setDisabled(deptRadios, false);
+          return;
+        }
+        if (anyChecked(otherRadios)) {
+          clearChecked(deptRadios);
+          setDisabled(deptRadios, true);
+          setDisabled(otherRadios, false);
+          return;
+        }
+        setDisabled(deptRadios, false);
+        setDisabled(otherRadios, false);
+      }
+      deptRadios.concat(otherRadios).forEach(function (r) {
+        r.addEventListener("change", syncMutualExclusion);
+      });
+
+      function getInfo(p) {
+        var infoEl = p.querySelector(".patient-info");
+        var parts = ((infoEl ? infoEl.textContent.trim() : "") || "").split("|").map(function (s) {
+          return s.trim();
+        });
+        return {
+          program: parts[0] || "",
+          year: parts[1] || "",
+          section: parts[2] || "",
+          dateStr: parts[3] || "",
+          department: parts[4] || p.getAttribute("data-department") || "",
+          createdAt: parts[5] || ""
+        };
+      }
+
+      function getName(p) {
+        var el = p.querySelector(".font-semibold");
+        return (el ? el.textContent : "").trim();
+      }
+
+      function getService(p) {
+        var el = p.querySelector(".truncate");
+        return (el ? el.textContent : "").trim();
+      }
+
+      function getIdText(p) {
+        var el = p.querySelector(".text-gray-500.text-\\[11px\\]");
+        return el ? el.textContent.trim() : "";
+      }
+
+      function matchesSearch(p, kw) {
+        if (!kw) return true;
+        var info = getInfo(p);
+        var haystack = [getName(p), getService(p), getIdText(p), info.program, info.department, info
+          .dateStr
+        ].join(" ").toLowerCase();
+        return haystack.includes(kw);
+      }
+
+      function updateFilterButtonState() {
+        var count = 0;
+
+        if (document.querySelector('input[name="course"]:checked')) count++;
+        if (document.querySelector('input[name="year"]:checked')) count++;
+        if (document.querySelector('input[name="section"]:checked')) count++;
+        if (document.querySelector('input[name="department"]:checked')) count++;
+
+        if (activeFromDate || activeToDate || activeDatePreset) count++;
+
+        var sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
+        if (sortActive && sortActive.getAttribute('data-val') !== 'newest') count++;
+
+        var has = count > 0;
+
+        if (filterBtn) {
+          filterBtn.classList.toggle("has-filters", has);
+        }
+
+        if (filterBadge) {
+          if (has) {
+            filterBadge.classList.remove("hidden");
+            filterBadge.style.display = "inline-flex";
+            filterBadge.textContent = count;
+          } else {
+            filterBadge.classList.add("hidden");
+            filterBadge.style.display = "none";
+            filterBadge.textContent = "";
+          }
+        }
+
+        if (externalClearFilterBtn) {
+          if (has) {
+            externalClearFilterBtn.classList.remove('hidden');
+          } else {
+            externalClearFilterBtn.classList.add('hidden');
+          }
+        }
+      }
+
+      if (externalClearFilterBtn) {
+        externalClearFilterBtn.onclick = function () {
+          resetAllFilters();
+        };
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener("input", function () {
+          searchKeyword = searchInput.value.trim().toLowerCase();
+          applyFilters();
+        });
+      }
+
+      window.bindFilterTagGroup({
+        groupId: "fSortGroup",
+        onChange: function () {
+          renderFilterChips();
+          updateShowResultsButton();
+        }
+      });
+
+      var tabButtons = document.querySelectorAll('.filter-btn');
+      tabButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          activeTab = btn.getAttribute("data-filter");
+          applyFilters();
+        });
+      });
+
+      if (applyFiltersBtn) {
+        applyFiltersBtn.onclick = function () {
+          var draft = getDraftFilterState();
+
+          selectedDepartment = draft.department;
+          selectedProgram = draft.program;
+          selectedYearLevel = draft.year;
+          selectedSection = draft.section;
+          activeFromDate = draft.fromDate;
+          activeToDate = draft.toDate;
+
+          var activePresetBtn = document.querySelector(
+            '#datePresetGroup .quick-date-chip.active');
+          activeDatePreset = activePresetBtn ? activePresetBtn.getAttribute("data-range") : "";
+
+          var sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
+          var sortVal = sortActive ? sortActive.getAttribute('data-val') : 'newest';
+
+          if (sortVal === 'az') {
+            nameSort = 'az';
+            dateSort = null;
+          } else if (sortVal === 'za') {
+            nameSort = 'za';
+            dateSort = null;
+          } else if (sortVal === 'newest') {
+            dateSort = 'desc';
+            nameSort = null;
+          } else if (sortVal === 'oldest') {
+            dateSort = 'asc';
+            nameSort = null;
+          }
+
+          if (filterModal) closeFilterModal();
+
+          syncMutualExclusion();
+          applyFilters();
+          updateFilterButtonState();
+        };
+      }
+
+      if (clearFiltersModalBtn) {
+        clearFiltersModalBtn.onclick = function () {
+          clearFormState();
+          renderFilterChips();
+
+          selectedDepartment = null;
+          selectedProgram = null;
+          selectedYearLevel = null;
+          selectedSection = null;
+          activeFromDate = "";
+          activeToDate = "";
+          dateSort = 'desc';
+          nameSort = null;
+
+          applyFilters();
+        };
+      }
+
+      var pagination = document.getElementById("pagination");
+      var pageNumbers = document.getElementById("pageNumbers");
+      var prevPageBtn = document.getElementById("prevPage");
+      var nextPageBtn = document.getElementById("nextPage");
+      var PER_PAGE = 5;
+      var currentPage = 1,
+        currentItems = [];
+
+      function renderPagination(items) {
+        currentItems = items;
+        var total = Math.ceil(items.length / PER_PAGE);
+        if (pageNumbers) pageNumbers.innerHTML = "";
+        if (total <= 1) {
+          if (pagination) pagination.classList.add("hidden");
+          return;
+        }
+        if (pagination) pagination.classList.remove("hidden");
+
+        for (var i = 1; i <= total; i++) {
+          (function (pageNum) {
+            var btn = document.createElement("button");
+            btn.textContent = pageNum;
+            btn.className = pageNum === currentPage ?
+              "px-3 py-1.5 rounded-lg bg-[#8B0000]/10 text-[#8B0000] font-semibold text-sm" :
+              "px-3 py-1.5 rounded-lg hover:bg-gray-100 text-gray-600 text-sm";
+            btn.onclick = function () {
+              currentPage = pageNum;
+              updatePage();
+            };
+            if (pageNumbers) pageNumbers.appendChild(btn);
+          })(i);
+        }
+
+        if (prevPageBtn) {
+          prevPageBtn.disabled = currentPage === 1;
+          prevPageBtn.classList.toggle("cursor-not-allowed", currentPage === 1);
+          prevPageBtn.classList.toggle("text-gray-300", currentPage === 1);
+          prevPageBtn.classList.toggle("text-[#8B0000]", currentPage !== 1);
+        }
+        if (nextPageBtn) {
+          nextPageBtn.disabled = currentPage === total;
+          nextPageBtn.classList.toggle("cursor-not-allowed", currentPage === total);
+          nextPageBtn.classList.toggle("text-gray-300", currentPage === total);
+          nextPageBtn.classList.toggle("text-[#8B0000]", currentPage !== total);
+        }
+      }
+
+      function updatePage() {
+        var s = (currentPage - 1) * PER_PAGE,
+          e = s + PER_PAGE;
+        patientContainer.innerHTML = "";
+
+        if (currentItems.length === 0) {
+          var isSearching = searchKeyword.trim().length > 0;
+          var hasFilters = !!selectedProgram || !!selectedYearLevel || !!selectedSection || !!
+            selectedDepartment || !!activeFromDate || !!activeToDate;
+
+          var emptyMessages = {
+            today: {
+              icon: "fa-calendar-days",
+              title: "No appointments today",
+              sub: "No patient visits today. Enjoy a calm and easy clinic day!"
+            },
+            upcoming: {
+              icon: "fa-hourglass-half",
+              title: "No upcoming appointments",
+              sub: "New bookings will show up here once confirmed."
+            },
+            rescheduled: {
+              icon: "fa-rotate",
+              title: "No rescheduled appointments",
+              sub: "Any rescheduled visits will appear here."
+            },
+            cancelled: {
+              icon: "fa-xmark-circle",
+              title: "No cancelled appointments",
+              sub: "That's great! Nothing has been cancelled."
+            },
+            completed: {
+              icon: "fa-circle-check",
+              title: "No completed appointments yet",
+              sub: "Completed visits will be recorded here."
+            },
+            all: {
+              icon: "fa-clipboard-list",
+              title: "No appointments found",
+              sub: "There are no appointments in the system yet."
+            }
+          };
+
+          var icon, title, sub, extraHtml = "";
+          if (isSearching) {
+            icon = "fa-magnifying-glass";
+            title = 'No results for "' + searchKeyword + '"';
+            sub = "Try a different name, ID, or service type.";
+            extraHtml =
+              '<button type="button" id="clearSearchInlineBtn" class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-dashed border-gray-300 text-sm font-bold text-gray-400  hover:bg-[#8B0000]/5 transition-all duration-200"><i class="fa-solid fa-xmark text-xs"></i> Clear search</button>';
+          } else if (hasFilters) {
+            icon = "fa-sliders";
+            title = "No matches for your filters";
+            sub = "Try removing or adjusting your filter criteria.";
+            extraHtml =
+              '<button id="clearFiltersInline" class="mt-3 px-4 py-2 rounded-xl border border-dashed border-gray-300 text-sm text-gray-400  hover:bg-[#8B0000]/5 transition-all duration-200"><i class="fa-solid fa-xmark mr-1.5 text-xs"></i> Clear filter</button>';
+          } else {
+            var msg = emptyMessages[activeTab] || emptyMessages.all;
+            icon = msg.icon;
+            title = msg.title;
+            sub = msg.sub;
+          }
+
+          patientContainer.innerHTML = `
+  <div class="empty-state col-span-full w-full">
+    <div class="empty-state-icon">
+      <i class="fa-solid ${icon}"></i>
+    </div>
+
+    <p class="empty-state-title">${title}</p>
+    <p class="empty-state-sub">${sub}</p>
+
+    ${extraHtml}
+  </div>
+`;
+
+          var inlineClear = document.getElementById("clearFiltersInline");
+          if (inlineClear) {
+            inlineClear.onclick = function () {
+              if (externalClearFilterBtn) externalClearFilterBtn.click();
+            };
+          }
+
+          var inlineSearchClear = document.getElementById("clearSearchInlineBtn");
+          if (inlineSearchClear) {
+            inlineSearchClear.onclick = function () {
+              if (!searchInput) return;
+
+              searchInput.value = "";
+              searchInput.dispatchEvent(new Event("input", {
+                bubbles: true
+              }));
+              searchInput.focus();
+            };
+          }
+
+          if (pagination) pagination.classList.add("hidden");
+          return;
+        }
+
+        if (colHeader) colHeader.style.display = "grid";
+        currentItems.slice(s, e).forEach(function (p) {
+          patientContainer.appendChild(p);
+        });
+        renderPagination(currentItems);
+      }
+
+      if (prevPageBtn) {
+        prevPageBtn.onclick = function () {
+          if (currentPage > 1) {
+            currentPage--;
+            updatePage();
+          }
+        };
+      }
+      if (nextPageBtn) {
+        nextPageBtn.onclick = function () {
+          if (currentPage < Math.ceil(currentItems.length / PER_PAGE)) {
+            currentPage++;
+            updatePage();
+          }
+        };
+      }
+
+      function applyFilters() {
+        showPatientSkeleton();
+
+        window.clearTimeout(window.patientDirectoryFilterTimer);
+        window.patientDirectoryFilterTimer = window.setTimeout(function () {
+
+          var data = allPatients.slice();
+
+          if (searchKeyword) {
+            data = data.filter(function (p) {
+              return matchesSearch(p, searchKeyword);
+            });
+          } else {
+            if (activeTab !== "all") data = data.filter(function (p) {
+              return p.classList.contains(activeTab);
+            });
+
+            if (selectedProgram) data = data.filter(function (p) {
+              return ilike(getInfo(p).program, selectedProgram);
+            });
+            if (selectedYearLevel || selectedSection) data = data.filter(function (p) {
+              var i = getInfo(p);
+              if (selectedYearLevel && !ilike(i.year, selectedYearLevel))
+                return false;
+              if (selectedSection && String(i.section).trim() !== String(
+                selectedSection)
+                .trim()) return false;
+              return true;
+            });
+            if (selectedDepartment) data = data.filter(function (p) {
+              return ilike(getInfo(p).department, selectedDepartment);
+            });
+            if (activeFromDate || activeToDate) data = data.filter(function (p) {
+              var d = new Date(getInfo(p).dateStr);
+              if (isNaN(d.getTime())) return false;
+              if (activeFromDate && d < new Date(activeFromDate)) return false;
+              if (activeToDate && d > new Date(activeToDate)) return false;
+              return true;
+            });
+          }
+
+          if (nameSort === "az") data.sort(function (a, b) {
+            return getName(a).localeCompare(getName(b));
+          });
+          if (nameSort === "za") data.sort(function (a, b) {
+            return getName(b).localeCompare(getName(a));
+          });
+          if (dateSort === "asc") data.sort(function (a, b) {
+            return new Date(getInfo(a).createdAt || getInfo(a).dateStr) - new Date(
+              getInfo(b).createdAt || getInfo(b).dateStr);
+          });
+
+          if (dateSort === "desc") data.sort(function (a, b) {
+            return new Date(getInfo(b).createdAt || getInfo(b).dateStr) - new Date(
+              getInfo(a).createdAt || getInfo(a).dateStr);
+          });
+
+          var rowCountEl = document.getElementById("rowCount");
+          if (rowCountEl) {
+            rowCountEl.textContent = data.length + " " + (data.length === 1 ? "patient" :
+              "patients");
+          }
+
+          currentPage = 1;
+          renderPagination(data);
+          updatePage();
+          updateFilterButtonState();
+          hidePatientSkeleton();
+        }, 600);
+      }
+
+      syncMutualExclusion();
+      document.querySelectorAll('.filter-btn').forEach(function (b) {
+        b.classList.remove('tab-active');
+      });
+      var todayBtn = document.querySelector('.filter-btn[data-filter="today"]');
+      if (todayBtn) todayBtn.classList.add('tab-active');
+      applyFilters();
+
+    } catch (err) {
+      console.error("Initialization Error:", err);
+    }
+  });
 </script>
 @endsection

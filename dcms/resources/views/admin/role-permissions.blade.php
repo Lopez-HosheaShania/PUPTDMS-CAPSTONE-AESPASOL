@@ -8,29 +8,21 @@ $logs = $logs ?? collect([]);
 $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $logs->total() : $logs->count();
 @endphp
 
-<main id="mainContent" class="px-4 sm:px-6 pt-[82px] pb-8 min-h-screen">
-    <div class="role-permission-shell" style="max-width: 1300px; margin: 0 auto;">
+<main id="mainContent" class="admin-page-shell role-permissions-page page-enter">
+    <div class="role-permission-shell">
 
         <div class="page-banner">
             <div class="page-banner-inner">
-                <h1 class="page-banner-title">Roles & Permissions</h1>
+                <div>
+                    <h1 class="page-title page-banner-title">Roles & Permissions</h1>
+                    <p class="page-subtitle">Manage role access and permission groups across the system.</p>
+                </div>
 
                 <div class="page-banner-actions">
-                    <button type="button" class="btn-new-role" onclick="openNewRoleModal()"
-                        style="background:white; color:#8B0000;">
-                        <i class="fa-solid fa-plus"></i> New Role
+                    <button type="button" class="btn-new-role" onclick="openNewRoleModal()">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>New Role</span>
                     </button>
-
-                    <div class="view-toggle" id="rolePermissionViewToggle" onclick="event.stopPropagation()">
-                        <button type="button" class="view-toggle-btn active" id="roleListViewBtn" title="List view"
-                            aria-label="List view">
-                            <i class="fa-solid fa-table-list"></i>
-                        </button>
-                        <button type="button" class="view-toggle-btn" id="roleGridViewBtn" title="Grid view"
-                            aria-label="Grid view">
-                            <i class="fa-solid fa-grip"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -164,18 +156,36 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
             </div>
 
             <div>
-                <div class="card" style="display:flex; flex-direction:column; min-height:600px;">
+                <div class="card role-permission-card">
                     <div class="card-header">
-                        <div class="perm-search-row">
-                            <div class="st-input-wrap">
-                                <i class="fa-solid fa-magnifying-glass st-input-icon"></i>
-                                <input type="text" id="permSearch" placeholder="Search permissions..." class="st-input"
-                                    oninput="filterPerms(this.value)">
+                        <div class="perm-search-row voice-search-row relative flex-1 md:flex-none flex items-center gap-2"
+                            data-voice-field>
+                            <div class="search-wrap global-search flex-1" data-search-wrapper>
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+
+                                <input type="text" id="permSearch" placeholder="Search permissions..."
+                                    class="search-input" data-search-input oninput="filterPerms(this.value)">
+
+                                <button type="button" id="permSearchClearBtn" class="search-clear" data-search-clear
+                                    title="Clear" aria-label="Clear search">
+                                    <i class="fa-solid fa-xmark text-xs"></i>
+                                </button>
                             </div>
-                            <button type="button" id="permSearchClearBtn" class="perm-search-clear-btn hidden"
-                                title="Clear">Clear</button>
+
+                            <div class="voice-input-toggle">
+                                <button type="button" id="permSearchMicBtn" class="voice-search-mic external"
+                                    data-voice-trigger data-voice-target="#permSearch"
+                                    data-voice-status="#permSearchVoiceStatus"
+                                    aria-label="Voice input for permission search">
+                                    <i class="fa-solid fa-microphone"></i>
+                                </button>
+
+                                <span id="permSearchVoiceStatus" class="voice-status hidden" data-voice-status
+                                    aria-live="polite"></span>
+                            </div>
                         </div>
-                        <div style="display:flex; gap:8px;">
+
+                        <div class="card-header-actions">
                             <button type="button" class="btn-view-as" id="globalViewAsBtn" onclick="openViewAs()">
                                 <i class="fa-solid fa-eye"></i> View As
                                 <span class="va-count-badge" id="globalVaBadge">0</span>
@@ -188,7 +198,7 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                         </div>
                     </div>
 
-                    <div style="padding: 1.25rem 1.25rem 0; flex:1;">
+                    <div class="role-permission-card-body">
                         <div class="protected-banner" id="protectedBanner" style="display:none;">
                             <i class="fa-solid fa-shield-halved" style="font-size:24px; color:#d97706;"></i>
                             <div>
@@ -228,8 +238,7 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                             @csrf
                             <input type="hidden" name="role_id" value="{{ $role->id }}">
 
-                            <div style="display:flex; flex-direction:column; gap:10px; padding-bottom: 80px;"
-                                class="groups-container">
+                            <div class="groups-container">
                                 @forelse($groupedPermissions as $module => $permissions)
                                 @php
                                 [$ico, $icol] = $micons[$module] ?? ['fa-shield-halved', '#4b5563'];
@@ -246,28 +255,29 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
 
                                 <div class="group-card perm-group" data-group="{{ strtolower($module) }}">
                                     <div class="perm-group-header" onclick="togglePermGroup(this)">
-                                        <div class="perm-group-icon"
-                                            style="background:{{ $icol }}15; color:{{ $icol }};">
+                                        <div class="perm-group-icon" style="--module-color: {{ $icol }};">
                                             <i class="fa-solid {{ $ico }}"></i>
                                         </div>
-                                        <div style="flex:1;">
-                                            <div style="font-weight:800; font-size:13px; color:#1f2937;">
-                                                {{ $module }}</div>
-                                            <div style="font-size:11px; color:#6b7280; font-weight: 600;"
-                                                class="group-count">{{ $roleGranted }} of
-                                                {{ $mTotal }} enabled</div>
+
+                                        <div class="perm-group-info">
+                                            <div class="perm-group-title">{{ $module }}</div>
+                                            <div class="group-count">
+                                                {{ $roleGranted }} of {{ $mTotal }} enabled
+                                            </div>
                                         </div>
-                                        <div style="display:flex; align-items:center; gap:14px;">
+
+                                        <div class="perm-group-actions">
                                             <div class="dot-row" id="dots-{{ $role->id }}-{{ $mSlug }}">
-                                                @for ($d = 0; $d < $mTotal; $d++) <div class="dot"
-                                                    style="{{ $d < $roleGranted ? 'background:' . $icol . ';' : '' }}">
+                                                @for ($d = 0; $d < $mTotal; $d++) <div
+                                                    class="dot {{ $d < $roleGranted ? 'is-granted' : '' }}"
+                                                    style="--dot-color: {{ $icol }};">
                                             </div>
                                             @endfor
                                         </div>
+
                                         <div class="all-toggle-wrap"
                                             onclick="event.stopPropagation(); toggleGroupPerms(this,'{{ $role->id }}','{{ $mSlug }}',{{ $allOn ? 'true' : 'false' }})">
-                                            <span
-                                                style="font-size:10px; color:#4b5563; font-weight:700; text-transform:uppercase;">All</span>
+                                            <span>All</span>
                                             <label class="toggle-switch {{ $isSuperRole ? 'disabled' : '' }}"
                                                 onclick="event.preventDefault();">
                                                 <input type="checkbox" class="group-master" data-role="{{ $role->id }}"
@@ -276,6 +286,7 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                                                 <span class="toggle-track"></span>
                                             </label>
                                         </div>
+
                                         <i class="fa-solid fa-chevron-up chevron"></i>
                                     </div>
                                 </div>
@@ -283,23 +294,22 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                                 <div class="perm-group-body">
                                     @foreach ($permissions as $permission)
                                     @php $isGranted = $role->permissions->contains('id',$permission->id); @endphp
+
                                     <div class="perm-row"
                                         data-perm-search="{{ strtolower($permission->name . ' ' . $permission->slug) }}">
-                                        <div style="flex:1;">
-                                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
-                                                <span
-                                                    style="font-weight:700; font-size:12px; color:{{ $isGranted ? '#1f2937' : '#6b7280' }};"
-                                                    class="perm-label">{{ $permission->name }}</span>
+                                        <div class="perm-main">
+                                            <div class="perm-title-row">
+                                                <span class="perm-label">{{ $permission->name }}</span>
                                             </div>
-                                            <div style="font-size:11px; color:#9ca3af;">
-                                                {{ $permission->slug }}</div>
+                                            <div class="perm-slug">{{ $permission->slug }}</div>
                                         </div>
-                                        <div style="display:flex; align-items:center; gap:10px;">
+
+                                        <div class="perm-row-actions">
                                             <span
-                                                class="perm-status {{ $isGranted ? 'status-granted' : 'status-denied' }}"
-                                                style="{{ $isGranted ? 'background:' . $icol . '18; color:' . $icol . ';' : '' }}">
+                                                class="perm-status {{ $isGranted ? 'status-granted' : 'status-denied' }}">
                                                 {{ $isGranted ? 'Granted' : 'Denied' }}
                                             </span>
+
                                             <label class="toggle-switch {{ $isSuperRole ? 'disabled' : '' }}">
                                                 <input type="checkbox" name="permissions[{{ $role->id }}][]"
                                                     value="{{ $permission->id }}" class="perm-toggle"
@@ -348,6 +358,19 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
 
                     </form>
                     @endforeach
+
+                    <div id="permSearchEmptyState" class="empty-state perm-search-empty-state" hidden>
+                        <div class="empty-state-icon">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <h3 class="empty-state-title">No permissions found</h3>
+                        <p class="empty-state-sub" id="permSearchEmptyText">Try a different permission name or
+                            slug.</p>
+                        <button type="button" class="empty-state-btn" id="permSearchEmptyClearBtn">
+                            <i class="fa-solid fa-xmark"></i>
+                            Clear search
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -356,23 +379,28 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
     </div>
 </main>
 
-<dialog id="newRoleModal" class="modern-modal">
-    <div class="modal-icon primary"><i class="fa-solid fa-user-shield"></i></div>
+<dialog id="newRoleModal" class="modern-modal global-dialog role-modal role-modal-create">
+    <div class="modal-icon primary modal-icon-hoverable">
+        <i class="fa-solid fa-user-shield"></i>
+    </div>
+
     <h2 class="modal-title">Create New Role</h2>
     <div class="modal-body">Define a new role and assign permissions to it right away.</div>
 
     <form id="createRoleForm" action="{{ route('admin.role_permissions.store_role') }}" method="POST">
         @csrf
-        <div class="modal-form-group">
-            <label class="modal-label">Role Name</label>
+
+        <div class="modal-form-group st-form-group">
+            <label class="modal-label field-label">Role Name</label>
             <div class="st-input-wrap">
                 <i class="fa-solid fa-tag st-input-icon"></i>
                 <input type="text" id="newRoleName" name="name" class="st-input" placeholder="e.g. Dental Intern"
                     autocomplete="off">
             </div>
         </div>
-        <div class="modal-form-group">
-            <label class="modal-label">Role Slug</label>
+
+        <div class="modal-form-group st-form-group">
+            <label class="modal-label field-label">Role Slug</label>
             <div class="st-input-wrap">
                 <i class="fa-solid fa-link st-input-icon"></i>
                 <input type="text" id="newRoleSlug" name="slug" class="st-input" placeholder="e.g. dental-intern"
@@ -380,50 +408,84 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
             </div>
         </div>
 
-        <div id="newRoleError"
-            style="display:none; color:#dc2626; font-size:12px; font-weight:600; margin-bottom:16px; background:#fef2f2; padding:8px; border-radius:8px;">
-        </div>
+        <div id="newRoleError" class="modal-inline-error" style="display:none;"></div>
 
         <div class="modal-actions">
-            <button type="button" class="modal-btn-cancel" onclick="closeNewRoleModal()">Cancel</button>
-            <button type="submit" class="modal-btn-confirm primary" id="btnSubmitNewRole">Create Role</button>
+            <button type="button" class="modal-btn-cancel modal-btn-ghost" onclick="closeNewRoleModal()">
+                Cancel
+            </button>
+
+            <button type="submit" class="modal-btn-confirm modal-btn-confirm-approve primary" id="btnSubmitNewRole">
+                <i class="fa-solid fa-plus"></i>
+                Create Role
+            </button>
         </div>
     </form>
 </dialog>
 
-<dialog id="deleteRoleModal" class="modern-modal">
-    <div class="modal-icon danger"><i class="fa-solid fa-trash-can"></i></div>
-    <h2 class="modal-title">Delete Role</h2>
-    <div class="modal-body">
-        Are you sure you want to permanently delete <span class="modal-highlight" id="deleteRoleName"></span>?
-        <span style="display:block; color:#ef4444; font-weight:600; margin-top:8px;">This action cannot be
-            undone.</span>
+<dialog id="deleteRoleModal" class="modern-modal global-dialog role-modal role-modal-delete">
+    <div class="modal-icon danger modal-icon-hoverable">
+        <i class="fa-solid fa-trash-can"></i>
     </div>
+
+    <h2 class="modal-title">Delete Role</h2>
+
+    <div class="modal-body">
+        Are you sure you want to permanently delete
+        <span class="modal-highlight" id="deleteRoleName"></span>?
+
+        <span class="modal-danger-note">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <span>This action cannot be undone.</span>
+        </span>
+    </div>
+
     <div class="modal-actions">
-        <button type="button" class="modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+        <button type="button" class="modal-btn-cancel modal-btn-ghost" onclick="closeDeleteModal()">
+            Cancel
+        </button>
+
         <form id="deleteRoleForm" method="POST" style="margin:0;">
-            @csrf @method('DELETE')
-            <button type="submit" class="modal-btn-confirm danger">Yes, delete it</button>
+            @csrf
+            @method('DELETE')
+
+            <button type="submit" class="modal-btn-confirm modal-btn-confirm-reject danger">
+                <i class="fa-solid fa-trash-can"></i>
+                Delete
+            </button>
         </form>
     </div>
 </dialog>
 
-<dialog id="resetConfirmModal" class="modern-modal">
-    <div class="modal-icon warning"><i class="fa-solid fa-rotate-left"></i></div>
+<dialog id="resetConfirmModal" class="modern-modal global-dialog role-modal role-modal-reset">
+    <div class="modal-icon warning modal-icon-hoverable">
+        <i class="fa-solid fa-rotate-left"></i>
+    </div>
+
     <h2 class="modal-title">Reset to Defaults?</h2>
-    <div class="modal-body">
-        This restores original permissions for <strong style="color:#111827;">Super Admin</strong>, <strong
-            style="color:#111827;">Dentist</strong>, and <strong style="color:#111827;">Patient</strong>.
-        <div
-            style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px; margin-top:12px; color:#b45309; font-size:.8rem; font-weight:600; text-align:left;">
-            <i class="fa-solid fa-triangle-exclamation" style="margin-right:4px;"></i> Custom changes will be lost.
-            This cannot be undone.
+
+    <div class="modal-body reset-defaults-body">
+        <p class="reset-defaults-copy">
+            This restores original permissions for
+            <strong>Super Admin</strong>, <strong>Dentist</strong>, and <strong>Patient</strong>.
+        </p>
+
+        <div class="modal-warning-note">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Custom changes will be lost. This cannot be undone.</span>
         </div>
     </div>
-    <div class="modal-actions">
-        <button type="button" class="modal-btn-cancel" onclick="closeResetConfirm()">Cancel</button>
-        <button type="button" id="resetConfirmBtn" class="modal-btn-confirm warning"
-            onclick="confirmResetDefaults()">Yes, Reset</button>
+
+    <div class="modal-actions role-reset-modal-actions">
+        <button type="button" class="modal-btn-cancel modal-btn-ghost" onclick="closeResetConfirm()">
+            Cancel
+        </button>
+
+        <button type="button" id="resetConfirmBtn" class="modal-btn-confirm modal-btn-confirm-warning warning"
+            onclick="confirmResetDefaults()">
+            <i class="fa-solid fa-rotate-left"></i>
+            Yes, Reset
+        </button>
     </div>
 </dialog>
 
@@ -477,10 +539,15 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                     class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="va-body">
-            <div class="st-input-wrap" style="margin-bottom: 16px;">
-                <i class="fa-solid fa-magnifying-glass st-input-icon"></i>
+            <div class="search-wrap global-search patient-picker-search" data-search-wrapper
+                style="margin-bottom: 16px;">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
                 <input type="text" id="patientPickerSearch" placeholder="Search patient name or email..."
-                    class="st-input" oninput="filterPatientPicker(this.value)">
+                    class="search-input no-voice" data-search-input oninput="filterPatientPicker(this.value)">
+                <button type="button" id="patientPickerSearchClearBtn" class="search-clear" data-search-clear
+                    aria-label="Clear patient search">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
             <div id="patientPickerList"></div>
         </div>
@@ -497,7 +564,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
 
 @section('scripts')
 <script>
-    // PERM MODULE META
     const PERM_MODULES = [{
         module: 'Dashboard',
         color: '#8B0000'
@@ -545,12 +611,93 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         return found ? found.color : '#4b5563';
     }
 
-    // GLOBAL STATE
     let initialStates = {};
     let savedGrants = {};
     let activeRoleId = null;
-    let isScrolledDown = window.scrollY > 40;
     let isModalActive = false;
+
+    function openRoleDialog(dialog) {
+        if (!dialog) return;
+
+        dialog.classList.remove('is-closing');
+
+        if (!dialog.open) {
+            dialog.showModal();
+        }
+
+        dialog.style.top = '50%';
+        dialog.style.left = '50%';
+        dialog.style.removeProperty('transform');
+
+        requestAnimationFrame(() => {
+            dialog.classList.add('is-open');
+        });
+    }
+
+    function closeRoleDialog(dialogId, afterClose = null) {
+        const dialog = document.getElementById(dialogId);
+        if (!dialog) return;
+
+        dialog.classList.remove('is-open');
+        dialog.classList.add('is-closing');
+
+        setTimeout(() => {
+            dialog.classList.remove('is-closing');
+
+            if (dialog.open) {
+                dialog.close();
+            }
+
+            if (typeof afterClose === 'function') {
+                afterClose();
+            }
+        }, 220);
+    }
+
+    function openRoleOverlay(overlay) {
+        if (!overlay) return;
+
+        overlay.classList.remove('is-closing');
+
+        if (overlay.parentElement !== document.body) {
+            document.body.appendChild(overlay);
+        }
+
+        overlay.classList.add('open');
+
+        requestAnimationFrame(() => {
+            overlay.classList.add('is-open');
+        });
+
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeRoleOverlay(overlayId, afterClose = null) {
+        const overlay = document.getElementById(overlayId);
+        if (!overlay || overlay.classList.contains('is-closing')) return;
+
+        overlay.classList.remove('is-open');
+        overlay.classList.add('is-closing');
+
+        requestAnimationFrame(() => {
+            overlay.classList.remove('open');
+        });
+
+        setTimeout(() => {
+            overlay.classList.remove('is-closing');
+            document.body.style.overflow = '';
+
+            if (typeof afterClose === 'function') {
+                afterClose();
+            }
+        }, 220);
+    }
+
+    function syncScrollStateForSaveBar() {
+        updateFABVisibility();
+    }
+
+    const ROLE_TOAST_DURATION = 7000;
 
     const flashedViewAs = @json(session('saved_view_as') ?? null);
     if (flashedViewAs && flashedViewAs.role_id) {
@@ -561,13 +708,26 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         }));
     }
 
-    // Scroll Listener
-    document.addEventListener('scroll', () => {
-        isScrolledDown = window.scrollY > 40;
-        updateFABVisibility();
-    });
+    function mountFloatingSaveBars() {
+        document.querySelectorAll('.floating-save-bar').forEach(bar => {
+            if (!bar.id) return;
+
+            [...document.body.children].forEach(child => {
+                if (child !== bar && child.id === bar.id && child.classList.contains(
+                    'floating-save-bar')) {
+                    child.remove();
+                }
+            });
+
+            bar.classList.add('role-permissions-floating-save-bar');
+            if (bar.parentElement !== document.body) {
+                document.body.appendChild(bar);
+            }
+        });
+    }
 
     function initRoleForms() {
+        mountFloatingSaveBars();
         initialStates = {};
         savedGrants = {};
 
@@ -592,7 +752,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                 }
             });
 
-            // Ensure floating bar is hidden initially
             const bar = document.getElementById('footer-bar-' + roleId);
             if (bar) bar.classList.remove('show');
 
@@ -610,57 +769,20 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         updateViewAsBtn();
     }
 
-    function getPreferredRolePermissionView() {
-        if (window.innerWidth <= 767) return 'grid';
-        return localStorage.getItem('rolePermissionView') || 'list';
-    }
-
-    function applyRolePermissionView(view, save = true) {
+    function keepRoleListLayout() {
         const container = document.getElementById('roleListContainer');
-        const listBtn = document.getElementById('roleListViewBtn');
-        const gridBtn = document.getElementById('roleGridViewBtn');
-
-        if (!container) return;
-
-        const finalView = window.innerWidth <= 767 ? 'grid' : view;
-
-        container.classList.remove('role-list-view', 'role-grid-view');
-        container.classList.add(finalView === 'grid' ? 'role-grid-view' : 'role-list-view');
-
-        if (listBtn) listBtn.classList.toggle('active', finalView === 'list');
-        if (gridBtn) gridBtn.classList.toggle('active', finalView === 'grid');
-
-        if (save && window.innerWidth > 767) {
-            localStorage.setItem('rolePermissionView', finalView);
+        const mainContent = document.getElementById('mainContent');
+        if (container) {
+            container.classList.remove('role-grid-view');
+            container.classList.add('role-list-view');
         }
-    }
-
-    function initRolePermissionViewToggle() {
-        const listBtn = document.getElementById('roleListViewBtn');
-        const gridBtn = document.getElementById('roleGridViewBtn');
-
-        applyRolePermissionView(getPreferredRolePermissionView(), false);
-
-        if (listBtn && !listBtn.dataset.bound) {
-            listBtn.dataset.bound = '1';
-            listBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                applyRolePermissionView('list', true);
-            });
-        }
-
-        if (gridBtn && !gridBtn.dataset.bound) {
-            gridBtn.dataset.bound = '1';
-            gridBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                applyRolePermissionView('grid', true);
-            });
+        if (mainContent) {
+            mainContent.classList.remove('mode-grid', 'mode-list');
         }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        mountFloatingSaveBars();
         const firstCard = document.querySelector('.role-card');
         const protectedBanner = document.getElementById('protectedBanner');
         const permSearch = document.getElementById('permSearch');
@@ -668,202 +790,49 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
 
         function syncPermSearchClear() {
             if (!permSearch || !permSearchClearBtn) return;
-            permSearchClearBtn.classList.toggle('hidden', (permSearch.value || '').trim().length === 0);
+            permSearchClearBtn.classList.toggle('show', (permSearch.value || '').trim().length > 0);
+        }
+
+        function clearPermissionSearch() {
+            if (!permSearch) return;
+            permSearch.value = '';
+            filterPerms('');
+            syncPermSearchClear();
+
+            const status = permSearch.closest('.perm-search-row')?.querySelector('[data-voice-status]');
+            if (status) status.classList.add('hidden');
+
+            permSearch.focus();
         }
 
         if (permSearchClearBtn && !permSearchClearBtn.dataset.bound) {
             permSearchClearBtn.dataset.bound = '1';
-            permSearchClearBtn.addEventListener('click', () => {
-                if (!permSearch) return;
-                permSearch.value = '';
-                filterPerms('');
-                syncPermSearchClear();
-
-                const status = permSearch.closest('.st-input-wrap')?.querySelector('[data-voice-status]');
-                if (status) status.classList.add('hidden');
-
-                permSearch.focus();
-            });
+            permSearchClearBtn.addEventListener('click', clearPermissionSearch);
         }
+
+        document.getElementById('permSearchEmptyClearBtn')?.addEventListener('click', clearPermissionSearch);
 
         if (permSearch && !permSearch.dataset.clearSyncBound) {
             permSearch.dataset.clearSyncBound = '1';
             permSearch.addEventListener('input', syncPermSearchClear);
         }
 
+        window.initGlobalVoiceInputs?.(document);
+        document.dispatchEvent(new CustomEvent('voice:refresh', {
+            detail: { root: document }
+        }));
+
         syncPermSearchClear();
 
-        // Inject compact external mic button and voice controller for permissions search
-        (function initPermSearchVoice() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
-
-            const searchRow = document.querySelector('.perm-search-row');
-            const inputWrap = searchRow?.querySelector('.st-input-wrap');
-            const permSearchInput = document.getElementById('permSearch');
-            if (!searchRow || !inputWrap || !permSearchInput) return;
-
-            inputWrap.querySelectorAll('.voice-mic-btn, [data-voice-trigger]').forEach(el => el.remove());
-
-            // create a patient-style wrapper (button + status) and append it to the row
-            let wrapper = searchRow.querySelector('.patient-voice-toggle');
-            if (!wrapper) {
-                wrapper = document.createElement('div');
-                wrapper.className = 'patient-voice-toggle';
-                wrapper.style.position = 'relative';
-                wrapper.style.display = 'inline-flex';
-                wrapper.style.alignItems = 'center';
-                wrapper.style.flexShrink = '0';
-                searchRow.appendChild(wrapper);
-            }
-
-            // create external mic button inside wrapper if missing
-            let micBtn = wrapper.querySelector('#permMicToggleBtn');
-            if (!micBtn) {
-                micBtn = document.createElement('button');
-                micBtn.type = 'button';
-                micBtn.id = 'permMicToggleBtn';
-                micBtn.className = 'voice-search-mic external';
-                micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
-                micBtn.title = 'Toggle voice input';
-                wrapper.appendChild(micBtn);
-            }
-
-            // create status span inside wrapper if missing (use patient-voice-status for consistent styling)
-            let status = wrapper.querySelector('.patient-voice-status');
-            if (!status) {
-                status = document.createElement('span');
-                status.className = 'patient-voice-status hidden';
-                status.setAttribute('aria-hidden', 'true');
-                status.setAttribute('id', 'permPatientVoiceStatus');
-                status.setAttribute('aria-live', 'polite');
-                wrapper.appendChild(status);
-            }
-
-            // ensure input has padding for mic (keeps space for external button)
-            permSearchInput.classList.add('has-voice-padding');
-
-            let recognition = null;
-            let listening = false;
-            let manualStop = false;
-
-            const setStatus = (text, state) => {
-                status.textContent = text || '';
-                status.className = state ? `patient-voice-status is-${state}` : 'patient-voice-status';
-                if (!text) status.classList.add('hidden'); else status.classList.remove('hidden');
-            };
-
-            const setMicState = (active) => {
-                micBtn.classList.toggle('mic-active', !!active);
-                micBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
-                micBtn.innerHTML = active ? '<i class="fa-solid fa-stop"></i>' : '<i class="fa-solid fa-microphone"></i>';
-            };
-
-            const stopNow = () => {
-                manualStop = true;
-                listening = false;
-                setMicState(false);
-                setStatus('Voice captured.', 'success');
-                setTimeout(() => setStatus('', null), 1200);
-                if (recognition) {
-                    try { recognition.abort(); } catch (e) { try { recognition.stop(); } catch (e) { } }
-                }
-            };
-
-            const createRecognition = () => {
-                const r = new SpeechRecognition();
-                r.lang = 'en-US';
-                r.continuous = false;
-                r.interimResults = true;
-                r.maxAlternatives = 1;
-
-                let sawSpeech = false;
-                let timeoutId = null;
-                const LISTEN_TIMEOUT = 6000;
-
-                const clearTimeout_ = () => { if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; } };
-
-                r.onstart = () => {
-                    timeoutId = setTimeout(() => { if (listening && !sawSpeech) { try { r.stop(); } catch (e) { } } }, LISTEN_TIMEOUT);
-                };
-
-                r.onspeechend = () => { clearTimeout_(); try { r.stop(); } catch (e) { } };
-
-                r.onresult = (event) => {
-                    let transcript = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        const result = event.results[i];
-                        const chunk = (result && result[0] && result[0].transcript ? result[0].transcript : '').trim();
-                        if (!chunk) continue;
-                        sawSpeech = true;
-                        if (result.isFinal) {
-                            transcript = (transcript + ' ' + chunk).trim();
-                        } else if (!transcript) {
-                            transcript = chunk;
-                        }
-                    }
-                    transcript = transcript.trim();
-                    if (transcript) {
-                        clearTimeout_();
-                        permSearchInput.value = transcript;
-                        permSearchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        permSearchInput.dispatchEvent(new Event('change', { bubbles: true }));
-                        setStatus('Listening...', 'listening');
-                    }
-                };
-
-                r.onerror = () => {
-                    clearTimeout_();
-                    listening = false;
-                    if (manualStop) { manualStop = false; return; }
-                    setMicState(false);
-                    setStatus("Didn't catch that. Try again.", 'error');
-                    setTimeout(() => setStatus('', null), 2500);
-                };
-
-                r.onend = () => {
-                    clearTimeout_();
-                    if (manualStop) { manualStop = false; listening = false; setMicState(false); return; }
-                    const hadSpeech = sawSpeech || !!permSearchInput.value.trim();
-                    listening = false;
-                    setMicState(false);
-                    if (hadSpeech) {
-                        setStatus('Voice captured.', 'success');
-                        setTimeout(() => setStatus('', null), 2200);
-                    } else {
-                        setStatus("Didn't catch that. Try again.", 'error');
-                        setTimeout(() => setStatus('', null), 2500);
-                    }
-                };
-
-                return r;
-            };
-
-            micBtn.addEventListener('click', () => {
-                if (listening && recognition) { stopNow(); return; }
-                recognition = createRecognition();
-                try { recognition.start(); } catch (e) { setStatus('Unable to start voice input.', 'error'); setTimeout(() => setStatus('', null), 2500); setMicState(false); listening = false; return; }
-                listening = true;
-                setMicState(true);
-                setStatus('Listening...', 'listening');
-            });
-
-            // support pointerdown immediate stop (some browsers)
-            micBtn.addEventListener('pointerdown', (ev) => {
-                if (listening && recognition) { ev.preventDefault(); ev.stopPropagation(); manualStop = true; try { recognition.stop(); } catch (e) { } }
-            }, { passive: false });
-
-        })();
         if (firstCard && protectedBanner && firstCard.dataset.isSuper === '1') {
             protectedBanner.style.display = 'flex';
         }
 
         initRoleForms();
-        initRolePermissionViewToggle();
+        keepRoleListLayout();
+        syncScrollStateForSaveBar();
 
-        window.addEventListener('resize', () => {
-            applyRolePermissionView(getPreferredRolePermissionView(), false);
-        });
+
 
         @if (session('success'))
             if (typeof showToast === 'function') {
@@ -877,14 +846,12 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
             }
         @endif
 
-        // Slug auto-fill for new role
         document.getElementById('newRoleName')?.addEventListener('input', function () {
             document.getElementById('newRoleSlug').value = this.value.toLowerCase().trim()
                 .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
         });
     });
 
-    // ROLE CARD SELECT
     function selectRole(card) {
         document.querySelectorAll('.role-card').forEach(c => {
             c.classList.remove('active');
@@ -916,14 +883,16 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         const permSearch = document.getElementById('permSearch');
         if (permSearch) permSearch.value = '';
         const permSearchClearBtn = document.getElementById('permSearchClearBtn');
-        if (permSearchClearBtn) permSearchClearBtn.classList.add('hidden');
+        if (permSearchClearBtn) {
+            permSearchClearBtn.classList.remove('show');
+            permSearchClearBtn.classList.remove('hidden');
+        }
         filterPerms('');
 
         activeRoleId = roleId;
         updateFABVisibility();
     }
 
-    // UPDATE VIEW AS BUTTONS (TOP TOOLBAR)
     function updateViewAsBtn() {
         let totalSavedRoles = 0;
         Object.values(savedGrants).forEach(grants => {
@@ -943,19 +912,14 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         updateFABVisibility();
     }
 
-    // ══════════════════════════════════════════
-    // FLOATING ACTION BAR (FAB) VISIBILITY LOGIC
-    // ══════════════════════════════════════════
     function updateFABVisibility() {
-        // Hide all first
         document.querySelectorAll('.floating-save-bar').forEach(b => b.classList.remove('show'));
 
         if (!activeRoleId) return;
         const bar = document.getElementById('footer-bar-' + activeRoleId);
         if (!bar) return;
 
-        // Ensure it is hidden if a modal is active or user is at the top of the page
-        if (isModalActive || !isScrolledDown) {
+        if (isModalActive) {
             return;
         }
 
@@ -996,17 +960,8 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                 const badge = btnViewAs.querySelector('.va-count-badge');
                 if (badge) badge.textContent = totalSavedRoles;
             }
-        } else if (totalSavedRoles > 0) {
-            bar.classList.add('show');
-            title.textContent = 'Ready to preview';
-            sub.style.display = 'none';
-            btnDiscard.style.display = 'none';
-            btnSave.style.display = 'none';
-            if (btnViewAs) {
-                btnViewAs.style.display = 'inline-flex';
-                const badge = btnViewAs.querySelector('.va-count-badge');
-                if (badge) badge.textContent = totalSavedRoles;
-            }
+        } else {
+            bar.classList.remove('show');
         }
     }
 
@@ -1022,7 +977,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
             }
         });
 
-        // Update group masters, dots, accent card
         const modules = [...new Set(Array.from(form.querySelectorAll('.perm-toggle')).map(t => t.dataset.module).filter(
             Boolean))];
         modules.forEach(module => {
@@ -1045,19 +999,18 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         if (input.checked) {
             badge.textContent = 'Granted';
             badge.className = 'perm-status status-granted';
-            badge.style.background = color + '18';
-            badge.style.color = color;
-            label.style.color = '#1f2937';
+            badge.style.removeProperty('background');
+            badge.style.removeProperty('color');
+            label?.classList.remove('is-denied');
         } else {
             badge.textContent = 'Denied';
             badge.className = 'perm-status status-denied';
-            badge.style.background = '';
-            badge.style.color = '';
-            label.style.color = '#6b7280';
+            badge.style.removeProperty('background');
+            badge.style.removeProperty('color');
+            label?.classList.add('is-denied');
         }
     }
 
-    // PERMISSION GROUP COLLAPSE
     let allExpanded = true;
 
     function togglePermGroup(header) {
@@ -1078,7 +1031,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         btn.textContent = allExpanded ? 'Collapse All' : 'Expand All';
     }
 
-    // PER-PERMISSION TOGGLE
     function onPermChange(input) {
         updatePermVisuals(input);
         const roleId = input.dataset.role;
@@ -1091,7 +1043,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         updateFABVisibility();
     }
 
-    // ALL TOGGLE
     function toggleGroupPerms(wrapper, roleId, mSlug, currentlyAllOn) {
         const newState = !currentlyAllOn;
         wrapper.setAttribute('onclick',
@@ -1131,7 +1082,9 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         const toggles = [...form.querySelectorAll(`.perm-toggle[data-module="${mSlug}"]`)];
         const dots = cont.querySelectorAll('.dot');
         toggles.forEach((t, i) => {
-            if (dots[i]) dots[i].style.background = t.checked ? color : '#e5e7eb';
+            if (!dots[i]) return;
+            dots[i].style.setProperty('--dot-color', color || '#8B0000');
+            dots[i].classList.toggle('is-granted', !!t.checked);
         });
     }
 
@@ -1169,7 +1122,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         }
     }
 
-    // AJAX SAVE
     function ajaxSaveRole(roleId) {
         const form = document.getElementById('form-role-' + roleId);
         const btn = document.getElementById('save-btn-' + roleId);
@@ -1199,12 +1151,10 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                 return data;
             })
             .then(data => {
-                // Update initial states so it's no longer dirty
                 form.querySelectorAll('.perm-toggle').forEach(input => {
                     initialStates[roleId][input.value] = input.checked;
                 });
 
-                // Update savedGrants for View As
                 savedGrants[roleId] = [];
                 form.querySelectorAll('.perm-toggle:checked').forEach(input => {
                     savedGrants[roleId].push({
@@ -1232,27 +1182,44 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
     }
 
     function filterPerms(q) {
-        q = q.toLowerCase().trim();
+        q = (q || '').toLowerCase().trim();
         const form = [...document.querySelectorAll('.role-form')].find(f => f.style.display === 'block');
         if (!form) return;
 
         const permSearchClearBtn = document.getElementById('permSearchClearBtn');
-        if (permSearchClearBtn) permSearchClearBtn.classList.toggle('hidden', q.length === 0);
+        if (permSearchClearBtn) permSearchClearBtn.classList.toggle('show', q.length > 0);
+
+        let visibleGroups = 0;
 
         form.querySelectorAll('.perm-row').forEach(row => {
             row.style.display = (!q || (row.dataset.permSearch || '').includes(q)) ? '' : 'none';
         });
+
         form.querySelectorAll('.perm-group').forEach(group => {
             const visible = [...group.querySelectorAll('.perm-row')].some(r => r.style.display !== 'none');
             group.style.display = visible ? '' : 'none';
+            if (visible) visibleGroups++;
             if (q && visible) {
                 const b = group.querySelector('.perm-group-body');
                 if (b) b.classList.remove('collapsed');
             }
         });
+
+        const empty = document.getElementById('permSearchEmptyState');
+        const emptyText = document.getElementById('permSearchEmptyText');
+
+        if (empty) {
+            const hasNoMatches = q.length > 0 && visibleGroups === 0;
+            empty.hidden = !hasNoMatches;
+            empty.classList.toggle('show', hasNoMatches);
+            if (emptyText) {
+                emptyText.textContent = hasNoMatches ?
+                    `No permission matched “${q}”. Try another keyword.` :
+                    'Try a different permission name or slug.';
+            }
+        }
     }
 
-    // MODALS: New Role (Seamless AJAX Add)
     function openNewRoleModal() {
         isModalActive = true;
         updateFABVisibility();
@@ -1262,16 +1229,18 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         document.getElementById('newRoleError').style.display = 'none';
 
         const modal = document.getElementById('newRoleModal');
-        modal.showModal();
-        modal.style.top = '50%';
-        modal.style.left = '50%';
-        modal.style.transform = 'translate(-50%, -50%)';
+        openRoleDialog(modal);
+
+        document.dispatchEvent(new CustomEvent('voice:refresh', {
+            detail: { root: modal }
+        }));
     }
 
     function closeNewRoleModal() {
-        isModalActive = false;
-        updateFABVisibility();
-        document.getElementById('newRoleModal').close();
+        closeRoleDialog('newRoleModal', () => {
+            isModalActive = false;
+            updateFABVisibility();
+        });
     }
 
     document.getElementById('createRoleForm').addEventListener('submit', function (e) {
@@ -1320,7 +1289,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                     showToast('Success', 'Role created successfully.', 'success');
                 }
 
-                // Seamless UI fetch replacement
                 fetch(window.location.href)
                     .then(r => r.text())
                     .then(html => {
@@ -1328,10 +1296,18 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                         const newGrid = doc.querySelector('.main-grid');
 
                         if (newGrid) {
-                            document.querySelector('.main-grid').innerHTML = newGrid.innerHTML;
+                            const currentGrid = document.querySelector('.main-grid');
+
+                            if (currentGrid) {
+                                currentGrid.innerHTML = newGrid.innerHTML;
+
+                                document.dispatchEvent(new CustomEvent('voice:refresh', {
+                                    detail: { root: currentGrid }
+                                }));
+                            }
                             initRoleForms();
-                            initRolePermissionViewToggle();
-                            applyRolePermissionView(getPreferredRolePermissionView(), false);
+                            keepRoleListLayout();
+                            syncScrollStateForSaveBar();
 
                             const newRoleCard = document.querySelector(
                                 `.role-card[data-slug="${slug}"]`) || document.querySelector(
@@ -1350,7 +1326,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
             });
     });
 
-    // MODALS: Delete Role (Seamless AJAX Delete)
     const PROTECTED_ROLE_SLUGS = ['admin', 'patient', 'dentist', 'super_admin', 'super-admin', 'superadmin'];
 
     function openDeleteModal(roleId, roleName) {
@@ -1369,16 +1344,14 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         document.getElementById('deleteRoleName').textContent = roleName;
         document.getElementById('deleteRoleForm').action = `/admin/role-permissions/${roleId}/destroy`;
         const deleteModal = document.getElementById('deleteRoleModal');
-        deleteModal.showModal();
-        deleteModal.style.top = '50%';
-        deleteModal.style.left = '50%';
-        deleteModal.style.transform = 'translate(-50%, -50%)';
+        openRoleDialog(deleteModal);
     }
 
     function closeDeleteModal() {
-        isModalActive = false;
-        updateFABVisibility();
-        document.getElementById('deleteRoleModal').close();
+        closeRoleDialog('deleteRoleModal', () => {
+            isModalActive = false;
+            updateFABVisibility();
+        });
     }
 
     document.getElementById('deleteRoleForm').addEventListener('submit', function (e) {
@@ -1386,7 +1359,7 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         const form = this;
         const btn = form.querySelector('.modal-btn-confirm');
         btn.disabled = true;
-        btn.innerHTML = 'Deleting...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
 
         fetch(form.action, {
             method: 'POST',
@@ -1408,7 +1381,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                     showToast('Success', 'Role deleted successfully.', 'success');
                 }
 
-                // Seamless UI fetch replacement
                 fetch(window.location.href)
                     .then(r => r.text())
                     .then(html => {
@@ -1418,13 +1390,13 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                         if (newGrid) {
                             document.querySelector('.main-grid').innerHTML = newGrid.innerHTML;
                             initRoleForms();
-                            initRolePermissionViewToggle();
-                            applyRolePermissionView(getPreferredRolePermissionView(), false);
+                            keepRoleListLayout();
+                            syncScrollStateForSaveBar();
                             const firstRole = document.querySelector('.role-card');
                             if (firstRole) selectRole(firstRole);
                         }
                         btn.disabled = false;
-                        btn.innerHTML = 'Yes, delete it';
+                        btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
                     });
             })
             .catch(err => {
@@ -1433,25 +1405,23 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                     showToast('Error', err.message, 'error');
                 }
                 btn.disabled = false;
-                btn.innerHTML = 'Yes, delete it';
+                btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
             });
     });
 
-    // MODALS: Reset (Seamless AJAX Reset)
     function ajaxResetDefaults() {
         isModalActive = true;
         updateFABVisibility();
+
         const resetModal = document.getElementById('resetConfirmModal');
-        resetModal.showModal();
-        resetModal.style.top = '50%';
-        resetModal.style.left = '50%';
-        resetModal.style.transform = 'translate(-50%, -50%)';
+        openRoleDialog(resetModal);
     }
 
     function closeResetConfirm() {
-        isModalActive = false;
-        updateFABVisibility();
-        document.getElementById('resetConfirmModal').close();
+        closeRoleDialog('resetConfirmModal', () => {
+            isModalActive = false;
+            updateFABVisibility();
+        });
     }
 
     function confirmResetDefaults() {
@@ -1480,7 +1450,6 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                     showToast('Success', 'Permissions reset to defaults.', 'success');
                 }
 
-                // Seamless UI fetch replacement
                 fetch(window.location.href)
                     .then(res => res.text())
                     .then(html => {
@@ -1490,12 +1459,16 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
 
                         if (newGrid && currentGrid) {
                             currentGrid.innerHTML = newGrid.innerHTML;
+
+                            document.dispatchEvent(new CustomEvent('voice:refresh', {
+                                detail: { root: currentGrid }
+                            }));
                             const firstRole = document.querySelector('.role-card');
                             if (firstRole) selectRole(firstRole);
 
                             initRoleForms();
-                            initRolePermissionViewToggle();
-                            applyRolePermissionView(getPreferredRolePermissionView(), false);
+                            keepRoleListLayout();
+                            syncScrollStateForSaveBar();
                         }
                         confirmBtn.disabled = false;
                         confirmBtn.innerHTML = 'Yes, Reset';
@@ -1511,12 +1484,14 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
             });
     }
 
-    // MODALS: View As
     function openViewAs() {
         isModalActive = true;
         updateFABVisibility();
 
         const overlay = document.getElementById('vaOverlay');
+        if (overlay && overlay.parentElement !== document.body) {
+            document.body.appendChild(overlay);
+        }
         const list = document.getElementById('vaRoleList');
         if (!overlay || !list) return;
         list.innerHTML = '';
@@ -1575,18 +1550,16 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
 
         document.getElementById('vaTotalPerms').textContent = totalPerms;
         document.getElementById('vaTotalRoles').textContent = totalRoles;
-        overlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
+        openRoleOverlay(overlay);
     }
 
     function closeViewAs() {
-        isModalActive = false;
-        updateFABVisibility();
-        document.getElementById('vaOverlay').classList.remove('open');
-        document.body.style.overflow = '';
+        closeRoleOverlay('vaOverlay', () => {
+            isModalActive = false;
+            updateFABVisibility();
+        });
     }
 
-    // MODALS: Patient Picker & Impersonation
     let patientAccountsCache = [];
 
     function escapeHtml(v) {
@@ -1595,10 +1568,10 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
     }
 
     function closePatientPicker() {
-        isModalActive = false;
-        updateFABVisibility();
-        document.getElementById('patientPickerOverlay').classList.remove('open');
-        document.body.style.overflow = '';
+        closeRoleOverlay('patientPickerOverlay', () => {
+            isModalActive = false;
+            updateFABVisibility();
+        });
     }
 
     function redirectToRole(roleId, roleName, roleSlug, color) {
@@ -1628,8 +1601,13 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                 patientAccountsCache = Array.isArray(d) ? d : [];
                 renderPatientPicker(patientAccountsCache);
                 document.getElementById('patientPickerSearch').value = '';
-                document.getElementById('patientPickerOverlay').classList.add('open');
-                document.body.style.overflow = 'hidden';
+                document.getElementById('patientPickerSearchClearBtn')?.classList.remove('show');
+                const patientOverlay = document.getElementById('patientPickerOverlay');
+
+                if (patientOverlay && patientOverlay.parentElement !== document.body) {
+                    document.body.appendChild(patientOverlay);
+                }
+                openRoleOverlay(patientOverlay);
             })
             .catch(err => {
                 if (typeof showToast === 'function') {
@@ -1642,8 +1620,14 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         const list = document.getElementById('patientPickerList');
         if (!list) return;
         if (!patients.length) {
-            list.innerHTML =
-                '<div style="text-align:center;padding:32px 20px;color:#6b7280;font-size:14px;">No patients found.</div>';
+            list.innerHTML = `
+                <div class="empty-state patient-picker-empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h3 class="empty-state-title">No patients found</h3>
+                    <p class="empty-state-sub">Try a different patient name or email.</p>
+                </div>`;
             return;
         }
         list.innerHTML = patients.map(p => {
@@ -1661,14 +1645,30 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
     }
 
     function filterPatientPicker(q) {
-        q = q.toLowerCase().trim();
+        q = (q || '').toLowerCase().trim();
+        const clearBtn = document.getElementById('patientPickerSearchClearBtn');
+        if (clearBtn) clearBtn.classList.toggle('show', q.length > 0);
+
         if (!q) {
             renderPatientPicker(patientAccountsCache);
             return;
         }
+
         const filtered = patientAccountsCache.filter(p => ((p.name || '') + (p.email || '')).toLowerCase().includes(q));
         renderPatientPicker(filtered);
     }
+
+    document.addEventListener('click', function (event) {
+        const btn = event.target.closest('#patientPickerSearchClearBtn');
+        if (!btn) return;
+
+        const input = document.getElementById('patientPickerSearch');
+        if (!input) return;
+
+        input.value = '';
+        filterPatientPicker('');
+        input.focus();
+    });
 
     function startPatientImpersonation(roleName, roleSlug, color, patientId, patientName) {
         closePatientPicker();
