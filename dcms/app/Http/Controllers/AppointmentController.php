@@ -28,6 +28,7 @@ use App\Helpers\PhilippineHolidays;
 use App\Helpers\AuditLogger;
 use App\Notifications\AppointmentBookedNotification;
 use App\Notifications\AppointmentRescheduledNotification;
+use App\Services\SignatureAiVerifier;
 
 
 class AppointmentController extends Controller
@@ -295,7 +296,8 @@ class AppointmentController extends Controller
     /* =======================
        STORE APPOINTMENT
     ======================= */
-    public function store(Request $request)
+    public function store(Request $request, SignatureAiVerifier $signatureVerifier)
+
     {
         $request->validate([
             'appointment_date'     => 'required|date|after:today',
@@ -321,7 +323,12 @@ class AppointmentController extends Controller
                                         ]),
                                     ],
 
-            'patient_signature'    => 'required|mimes:jpg,jpeg,png,pdf|max:5120',
+            'patient_signature' => [
+                'required',
+                'file',
+                'mimes:jpg,jpeg,png',
+                'max:25600', // 25 MB
+            ],
 
             'diseases'   => 'array',
             'diseases.*' => 'string|exists:diseases,code',
@@ -329,7 +336,7 @@ class AppointmentController extends Controller
 
 
         if (!ServiceType::where('name', $request->service_type)
-             ->where('is_active_for_booking', true)
+            ->where('is_active_for_booking', true)
             ->exists()) {
             return redirect()->back()
                 ->withInput()
@@ -441,7 +448,34 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $signaturePath = $request->file('patient_signature')->store('signatures', 'public');
+        /*
+|--------------------------------------------------------------------------
+| AI Signature Validation
+|--------------------------------------------------------------------------
+| Check muna kung mukhang signature talaga yung uploaded image.
+| Kapag hindi pasado, huwag i-save yung appointment.
+*/
+        $signatureFile = $request->file('patient_signature');
+
+        $aiResult = $signatureVerifier->verify($signatureFile);
+        \Log::info('Validate Signature Endpoint Result', $aiResult);
+
+        $message = 'Invalid signature. Please upload a clear handwritten signature or initials image.';
+
+        if (!empty($aiResult['detected_type']) || !empty($aiResult['reason'])) {
+            $message .= ' Detected: ' . ($aiResult['detected_type'] ?? 'unknown') .
+                '. Reason: ' . ($aiResult['reason'] ?? 'No reason returned.');
+        }
+
+        return response()->json([
+            'valid' => false,
+            'message' => $message,
+            'detected_type' => $aiResult['detected_type'] ?? 'unknown',
+            'confidence' => $aiResult['confidence'] ?? 0,
+            'reason' => $aiResult['reason'] ?? '',
+        ], 422);
+
+        $signaturePath = $signatureFile->store('signatures', 'public');
         $appointment = null;
 
         DB::transaction(function () use ($request, $signaturePath, $mysqlTime, $patientId, &$appointment) {
@@ -798,6 +832,44 @@ class AppointmentController extends Controller
         ]);
     }
 
+    /* =======================
+   VALIDATE SIGNATURE AJAX
+======================= */
+    public function validateSignature(Request $request, SignatureAiVerifier $signatureVerifier)
+    {
+        $request->validate([
+            'patient_signature' => [
+                'required',
+                'file',
+                'mimes:jpg,jpeg,png',
+                'max:25600', // 25 MB
+            ],
+        ]);
+
+        $signatureFile = $request->file('patient_signature');
+
+        $aiResult = $signatureVerifier->verify($signatureFile);
+
+        \Log::info('Validate Signature Endpoint Result', $aiResult);
+
+        if (! $aiResult['accepted']) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Invalid signature. Please upload a clear handwritten signature or initials image.',
+                'detected_type' => $aiResult['detected_type'] ?? 'unknown',
+                'confidence' => $aiResult['confidence'] ?? 0,
+                'reason' => $aiResult['reason'] ?? '',
+            ], 422);
+        }
+
+        return response()->json([
+            'valid' => true,
+            'message' => 'Valid signature image.',
+            'detected_type' => $aiResult['detected_type'] ?? 'signature',
+            'confidence' => $aiResult['confidence'] ?? 0,
+            'reason' => $aiResult['reason'] ?? '',
+        ]);
+    }
     /* =======================
        HELPERS
     ======================= */

@@ -44,4 +44,52 @@ class SystemSetting extends Model
             ->get()
             ->keyBy('key');
     }
+
+    public static function isEnabled(string $key, bool $default = true): bool
+    {
+        $value = static::getSetting($key, $default ? '1' : '0');
+
+        return in_array(strtolower(trim((string) $value)), ['1', 'true', 'yes', 'on'], true);
+    }
+
+    public static function notificationChannels(): array
+    {
+        $value = static::getSetting('notif_channels', 'Email,SMS,In-App');
+
+        if (is_array($value)) {
+            return $value;
+        }
+
+        return array_values(array_filter(array_map('trim', explode(',', (string) $value))));
+    }
+
+    public static function notificationChannelEnabled(string $channel, bool $default = true): bool
+    {
+        $channels = static::notificationChannels();
+
+        if (empty($channels)) {
+            return $default;
+        }
+
+        foreach ($channels as $savedChannel) {
+            if (strtolower($savedChannel) === strtolower($channel)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function notificationVia(string $settingKey): array
+    {
+        if (! static::isEnabled($settingKey)) {
+            return [];
+        }
+
+        if (! static::notificationChannelEnabled('In-App')) {
+            return [];
+        }
+
+        return ['database', 'broadcast'];
+    }
 }

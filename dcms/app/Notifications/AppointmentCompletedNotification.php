@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
+use App\Models\SystemSetting;
 
 class AppointmentCompletedNotification extends Notification
 {
@@ -13,12 +14,11 @@ class AppointmentCompletedNotification extends Notification
 
     public function __construct(
         private readonly Appointment $appointment
-    ) {
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {
-        return ['database', 'broadcast'];
+        return SystemSetting::notificationVia('notif_appointment_completed');
     }
 
     public function toArray(object $notifiable): array

@@ -761,6 +761,9 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->middleware('permission:book_appointments')
         ->name('book.appointment.store');
 
+    Route::post('/book-appointment/validate-signature', [AppointmentController::class, 'validateSignature'])
+    ->name('book.appointment.validate-signature');
+
     Route::get('/appointments', [AppointmentController::class, 'index'])
         ->middleware('permission:view_own_appointments')
         ->name('book.appointment.index');

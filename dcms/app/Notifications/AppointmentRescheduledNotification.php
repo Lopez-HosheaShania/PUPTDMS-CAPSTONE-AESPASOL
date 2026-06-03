@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
+use App\Models\SystemSetting;
 
 class AppointmentRescheduledNotification extends Notification
 {
@@ -14,12 +15,11 @@ class AppointmentRescheduledNotification extends Notification
     public function __construct(
         private readonly Appointment $appointment,
         private readonly string $rescheduledBy = 'Dentist'
-    ) {
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {
-        return ['database', 'broadcast'];
+        return SystemSetting::notificationVia('notif_rescheduled');
     }
 
     public function toArray(object $notifiable): array

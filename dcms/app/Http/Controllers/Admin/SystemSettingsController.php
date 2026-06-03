@@ -17,6 +17,10 @@ class SystemSettingsController extends Controller
         'notif_new_appointment',
         'notif_cancellation',
         'notif_document_request',
+        'notif_appointment_completed',
+        'notif_rescheduled',
+        'notif_document_approved',
+        'notif_document_rejected',
         'notif_reminder_24h',
         'notif_confirmation',
         'notif_followup',
@@ -47,6 +51,10 @@ class SystemSettingsController extends Controller
             'notif_new_appointment',
             'notif_cancellation',
             'notif_document_request',
+            'notif_appointment_completed',
+            'notif_rescheduled',
+            'notif_document_approved',
+            'notif_document_rejected',
             'notif_reminder_24h',
             'notif_confirmation',
             'notif_followup',
@@ -93,6 +101,7 @@ class SystemSettingsController extends Controller
         foreach (self::ALLOWED_GROUPS as $group => $keys) {
             foreach ($keys as $key) {
                 $value = $this->resolveValue($request, $validated, $key);
+
                 SystemSetting::setSetting($key, $value, $group);
             }
         }
@@ -116,6 +125,7 @@ class SystemSettingsController extends Controller
 
         if ($key === 'notif_channels') {
             $channels = $validated['notif_channels'] ?? [];
+
             return empty($channels) ? '' : implode(',', $channels);
         }
 
@@ -147,6 +157,10 @@ class SystemSettingsController extends Controller
             'notif_new_appointment' => ['nullable', 'boolean'],
             'notif_cancellation' => ['nullable', 'boolean'],
             'notif_document_request' => ['nullable', 'boolean'],
+            'notif_appointment_completed' => ['nullable', 'boolean'],
+            'notif_rescheduled' => ['nullable', 'boolean'],
+            'notif_document_approved' => ['nullable', 'boolean'],
+            'notif_document_rejected' => ['nullable', 'boolean'],
             'notif_reminder_24h' => ['nullable', 'boolean'],
             'notif_confirmation' => ['nullable', 'boolean'],
             'notif_followup' => ['nullable', 'boolean'],
