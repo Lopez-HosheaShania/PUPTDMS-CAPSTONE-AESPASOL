@@ -48,4 +48,13 @@ return [
         'api_key' => env('CHATBOT_API_KEY'),
     ],
 
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'signature_model' => env('OPENAI_SIGNATURE_MODEL', 'gpt-5.5'),
+    ],
+
+    'signature_ai' => [
+        'threshold' => env('SIGNATURE_AI_THRESHOLD', 0.80),
+    ],
+
 ];

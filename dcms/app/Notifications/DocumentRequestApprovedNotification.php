@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\SystemSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
@@ -16,7 +17,7 @@ class DocumentRequestApprovedNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database', 'broadcast']; // IMPORTANT
+        return SystemSetting::notificationVia('notif_document_approved');
     }
 
     public function toArray(object $notifiable): array
@@ -28,11 +29,18 @@ class DocumentRequestApprovedNotification extends Notification
             'icon' => 'fa-file-circle-check',
             'document_request_id' => $this->documentRequest->id,
             'status' => $this->documentRequest->status,
+            'event' => 'document.request.approved',
         ];
     }
 
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
-        return new BroadcastMessage($this->toArray($notifiable));
+        return new BroadcastMessage(array_merge(
+            $this->toArray($notifiable),
+            [
+                'created_at_label' => 'Just now',
+                'state' => 'unread',
+            ]
+        ));
     }
 }
