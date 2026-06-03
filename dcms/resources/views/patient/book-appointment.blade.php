@@ -2774,7 +2774,7 @@
             [
                 'name' => 'birth_control',
                 'q' => 'Are you taking birth
-                                                        control pills?',
+                                                                            control pills?',
             ],
         ] as $i => $q)
                                                     <div
@@ -2905,33 +2905,34 @@
                                                     </p>
                                                 </div>
 
-                                            <div>
-                                                <label class="block text-xs font-semibold text-[#333] mb-1.5">
-                                                    Relation to Patient <span class="required-star">*</span>
-                                                </label>
-                                                <div class="relative w-full">
-                                                    <select id="emergency_relation" name="emergency_relation"
-                                                        class="form-input w-full border border-[#e8e2dd] rounded-xl px-3 py-2 text-sm bg-white outline-none appearance-none pr-8"
-                                                        required>
-                                                        <option value="" disabled selected>Select relation</option>
-                                                        <option value="Mother">Mother</option>
-                                                        <option value="Father">Father</option>
-                                                        <option value="Sibling">Sibling</option>
-                                                        <option value="Guardian">Guardian</option>
-                                                        <option value="Spouse">Spouse</option>
-                                                        <option value="Grandparent">Grandparent</option>
-                                                        <option value="Aunt">Aunt</option>
-                                                        <option value="Uncle">Uncle</option>
-                                                        <option value="Cousin">Cousin</option>
-                                                        <option value="Child">Child</option> 
-                                                    </select>
-                                                    <div
-                                                        class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
-                                                        <i
-                                                            class="fa-solid fa-chevron-down text-[10px] text-[#5c5550]"></i>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-[#333] mb-1.5">
+                                                        Relation to Patient <span class="required-star">*</span>
+                                                    </label>
+                                                    <div class="relative w-full">
+                                                        <select id="emergency_relation" name="emergency_relation"
+                                                            class="form-input w-full border border-[#e8e2dd] rounded-xl px-3 py-2 text-sm bg-white outline-none appearance-none pr-8"
+                                                            required>
+                                                            <option value="" disabled selected>Select relation
+                                                            </option>
+                                                            <option value="Mother">Mother</option>
+                                                            <option value="Father">Father</option>
+                                                            <option value="Sibling">Sibling</option>
+                                                            <option value="Guardian">Guardian</option>
+                                                            <option value="Spouse">Spouse</option>
+                                                            <option value="Grandparent">Grandparent</option>
+                                                            <option value="Aunt">Aunt</option>
+                                                            <option value="Uncle">Uncle</option>
+                                                            <option value="Cousin">Cousin</option>
+                                                            <option value="Child">Child</option>
+                                                        </select>
+                                                        <div
+                                                            class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
+                                                            <i
+                                                                class="fa-solid fa-chevron-down text-[10px] text-[#5c5550]"></i>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
                                                 <div class="md:col-span-2">
                                                     <label class="block text-xs font-semibold text-[#333] mb-1.5">
@@ -2958,10 +2959,15 @@
 
                                                         </label>
 
-                                                        <p id="signature_filename"
-                                                            class="text-xs text-[#5c5550] mt-2 hidden truncate"></p>
-                                                        <p id="signature_error"
-                                                            class="text-xs text-red-600 mt-2 font-semibold hidden"></p>
+                                                        <div id="signature_result_box"
+                                                            class="mt-3 hidden text-left w-full max-w-full">
+                                                            <p id="signature_filename"
+                                                                class="text-xs text-[#5c5550] font-semibold truncate"></p>
+
+                                                            <div id="signature_error"
+                                                                class="mt-1 hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 leading-5 font-semibold">
+                                                            </div>
+                                                        </div>
                                                         @error('patient_signature')
                                                             <p class="text-xs text-red-600 mt-3 font-semibold">
                                                                 <i class="fa-solid fa-circle-exclamation mr-1"></i>
@@ -3635,7 +3641,7 @@
             const get = n => data.get(n) || "N/A";
             const getAll = n => data.getAll(n);
 
-        const emergencyRelation = data.get("emergency_relation") || "N/A";
+            const emergencyRelation = data.get("emergency_relation") || "N/A";
 
             const sigFile = data.get("patient_signature");
             let sigHTML = `<span class="text-[#9e9690] italic">Not uploaded</span>`;
@@ -3702,122 +3708,122 @@
             const patientGender = @json($patient->gender ?? 'N/A');
             const dentalHistoryBody = `
     ${subSection("Basic Info", `
-                                        ${row("Last Dental Visit", get("last_dental_visit"))}
-                                        ${row("Previous Dentist", get("previous_dentist"))}
-                                    `)}
+                                                            ${row("Last Dental Visit", get("last_dental_visit"))}
+                                                            ${row("Previous Dentist", get("previous_dentist"))}
+                                                        `)}
 
     ${subSection("Dental Symptoms", `
-                                        ${row("Bleeding Gums", get("bleeding_gums"))}
-                                        ${row("Sensitive (Hot/Cold)", get("sensitive_temp"))}
-                                        ${row("Sensitive (Sweets/Sour)", get("sensitive_taste"))}
-                                        ${row("Tooth Pain", get("tooth_pain"))}
-                                        ${row("Sores/Lumps", get("sores"))}
-                                        ${row("Jaw Injuries", get("injuries"))}
-                                    `)}
+                                                            ${row("Bleeding Gums", get("bleeding_gums"))}
+                                                            ${row("Sensitive (Hot/Cold)", get("sensitive_temp"))}
+                                                            ${row("Sensitive (Sweets/Sour)", get("sensitive_taste"))}
+                                                            ${row("Tooth Pain", get("tooth_pain"))}
+                                                            ${row("Sores/Lumps", get("sores"))}
+                                                            ${row("Jaw Injuries", get("injuries"))}
+                                                        `)}
 
     ${subSection("Jaw & Bite Symptoms", `
-                                        ${row("Clicking", get("clicking"))}
-                                        ${row("Joint Pain", get("joint_pain"))}
-                                        ${row("Difficulty Moving", get("difficulty_moving"))}
-                                        ${row("Difficulty Chewing", get("difficulty_chewing"))}
-                                        ${row("Frequent Headaches", get("jaw_headaches"))}
-                                        ${row("Grinding/Clenching", get("clench_grind"))}
-                                        ${row("Lips/Cheek Biting", get("biting"))}
-                                        ${row("Teeth Loosening", get("teeth_loosening"))}
-                                        ${row("Food Caught Between Teeth", get("food_teeth"))}
-                                        ${row("Medicine Reaction", get("med_reaction"))}
-                                    `)}
+                                                            ${row("Clicking", get("clicking"))}
+                                                            ${row("Joint Pain", get("joint_pain"))}
+                                                            ${row("Difficulty Moving", get("difficulty_moving"))}
+                                                            ${row("Difficulty Chewing", get("difficulty_chewing"))}
+                                                            ${row("Frequent Headaches", get("jaw_headaches"))}
+                                                            ${row("Grinding/Clenching", get("clench_grind"))}
+                                                            ${row("Lips/Cheek Biting", get("biting"))}
+                                                            ${row("Teeth Loosening", get("teeth_loosening"))}
+                                                            ${row("Food Caught Between Teeth", get("food_teeth"))}
+                                                            ${row("Medicine Reaction", get("med_reaction"))}
+                                                        `)}
 
     ${subSection("Dental Procedures", `
-                                        ${row("Periodontal Treatment", get("periodontal"))}
-                                        ${row("Difficult Extraction", get("difficult_extraction"))}
-                                        ${get("difficult_extraction") === "YES" ? row("Extraction Date", get("extraction_date")) : ""}
+                                                            ${row("Periodontal Treatment", get("periodontal"))}
+                                                            ${row("Difficult Extraction", get("difficult_extraction"))}
+                                                            ${get("difficult_extraction") === "YES" ? row("Extraction Date", get("extraction_date")) : ""}
 
-                                        ${row("Prolonged Bleeding", get("prolonged_bleeding"))}
-                                        ${row("Dentures", get("dentures"))}
-                                        ${get("dentures") === "YES" ? row("Dentures Placement Date", get("dentures_date")) : ""}
+                                                            ${row("Prolonged Bleeding", get("prolonged_bleeding"))}
+                                                            ${row("Dentures", get("dentures"))}
+                                                            ${get("dentures") === "YES" ? row("Dentures Placement Date", get("dentures_date")) : ""}
 
-                                        ${row("Orthodontic Treatment", get("ortho_treatment"))}
-                                        ${get("ortho_treatment") === "YES" ? row("Orthodontic Completion Date", get("ortho_date")) : ""}
-                                    `)}
+                                                            ${row("Orthodontic Treatment", get("ortho_treatment"))}
+                                                            ${get("ortho_treatment") === "YES" ? row("Orthodontic Completion Date", get("ortho_date")) : ""}
+                                                        `)}
 
     ${fullWidthSection("Additional Concerns", `
-                                        ${get("additional_concerns") !== "N/A" && String(get("additional_concerns")).trim() !== ""
-                                ? get("additional_concerns")
-                                : '<span class="text-[#9e9690] italic">No additional concerns provided.</span>'}
-                                    `)}
+                                                            ${get("additional_concerns") !== "N/A" && String(get("additional_concerns")).trim() !== ""
+                                                    ? get("additional_concerns")
+                                                    : '<span class="text-[#9e9690] italic">No additional concerns provided.</span>'}
+                                                        `)}
 `;
 
             const medicalHistoryBody = `
     ${subSection("General Health", `
-                                    ${row("Good Health", get("good_health"))}
-                                    ${get("good_health") === "NO" ? row("Health Details", get("good_health_details")) : ""}
+                                                        ${row("Good Health", get("good_health"))}
+                                                        ${get("good_health") === "NO" ? row("Health Details", get("good_health_details")) : ""}
 
-                                    ${row("Had Medical Exam", get("had_medical_exam"))}
-                                    ${get("had_medical_exam") === "YES" ? row("Medical Exam Date", get("medical_exam_date")) : ""}
+                                                        ${row("Had Medical Exam", get("had_medical_exam"))}
+                                                        ${get("had_medical_exam") === "YES" ? row("Medical Exam Date", get("medical_exam_date")) : ""}
 
-                                    ${row("Under Treatment", get("under_treatment"))}
-                                    ${get("under_treatment") === "YES" ? row("Treatment Details", get("treatment_details")) : ""}
+                                                        ${row("Under Treatment", get("under_treatment"))}
+                                                        ${get("under_treatment") === "YES" ? row("Treatment Details", get("treatment_details")) : ""}
 
-                                    ${row("Hospitalized", get("hospitalized"))}
-                                    ${get("hospitalized") === "YES" ? row("Hospital Details", get("hospital_details")) : ""}
-                                `)}
+                                                        ${row("Hospitalized", get("hospitalized"))}
+                                                        ${get("hospitalized") === "YES" ? row("Hospital Details", get("hospital_details")) : ""}
+                                                    `)}
 
     ${subSection("Allergies", `
-                                    ${row("Allergy (Medicine)", get("allergy_medicine"))}
-                                    ${row("Allergy (Food)", get("allergy_food"))}
-                                    ${optionalRow("Allergy (Others)", get("allergy_others"))}
-                                `)}
+                                                        ${row("Allergy (Medicine)", get("allergy_medicine"))}
+                                                        ${row("Allergy (Food)", get("allergy_food"))}
+                                                        ${optionalRow("Allergy (Others)", get("allergy_others"))}
+                                                    `)}
 
     ${subSection("Medications", `
-                                    ${row("Medication", get("medication"))}
-                                    ${get("medication") === "YES" ? row("Medication Details", get("medication_details")) : ""}
-                                `)}
+                                                        ${row("Medication", get("medication"))}
+                                                        ${get("medication") === "YES" ? row("Medication Details", get("medication_details")) : ""}
+                                                    `)}
 
     ${isFemalePatient ? subSection("For Women Only", `
-                                    ${row("Pregnant", get("pregnant"))}
-                                    ${row("Nursing", get("nursing"))}
-                                    ${row("Birth Control Pills", get("birth_control"))}
-                                `) : ""}
+                                                        ${row("Pregnant", get("pregnant"))}
+                                                        ${row("Nursing", get("nursing"))}
+                                                        ${row("Birth Control Pills", get("birth_control"))}
+                                                    `) : ""}
 
     ${fullWidthSection("Medical Conditions", `
-                                    <b class="text-[#5c5550] dark:text-[#e5e5e5] font-semibold">Selected Conditions:</b> ${diseaseText}
-                                `)}
+                                                        <b class="text-[#5c5550] dark:text-[#e5e5e5] font-semibold">Selected Conditions:</b> ${diseaseText}
+                                                    `)}
 
     ${subSection("Tobacco Use", `
-                                    ${row("Tobacco Use", get("tobacco_use"))}
-                                    ${get("tobacco_use") === "YES" ? row("Amount Per Day", get("tobacco_per_day")) : ""}
-                                    ${get("tobacco_use") === "YES" ? row("Amount Per Week", get("tobacco_per_week")) : ""}
-                                `)}
+                                                        ${row("Tobacco Use", get("tobacco_use"))}
+                                                        ${get("tobacco_use") === "YES" ? row("Amount Per Day", get("tobacco_per_day")) : ""}
+                                                        ${get("tobacco_use") === "YES" ? row("Amount Per Week", get("tobacco_per_week")) : ""}
+                                                    `)}
 
     ${subSection("Do You Suffer From", `
-                                    ${row("Headaches", get("headaches"))}
-                                    ${row("Earaches", get("earaches"))}
-                                    ${row("Neck Aches", get("neck_aches"))}
-                                `)}
+                                                        ${row("Headaches", get("headaches"))}
+                                                        ${row("Earaches", get("earaches"))}
+                                                        ${row("Neck Aches", get("neck_aches"))}
+                                                    `)}
 `;
 
             document.getElementById("summaryBox").innerHTML = `
     ${summaryCard("Patient Information", "fa-user", `
-                                    <div class="grid grid-cols-1 gap-y-1">
-                                        ${row("Name", patientName)}
-                                        ${row("Gender", patientGender)}
-                                    </div>
-                                `)}
+                                                        <div class="grid grid-cols-1 gap-y-1">
+                                                            ${row("Name", patientName)}
+                                                            ${row("Gender", patientGender)}
+                                                        </div>
+                                                    `)}
 
     <div class="grid grid-cols-2 gap-4 sm-grid-1col">
         ${summaryCard("Appointment Details", "fa-calendar-check", `
-                                        <div class="grid grid-cols-1 gap-y-1">
-                                            ${row("Date", get("appointment_date"))}
-                                            ${row("Time", get("appointment_time"))}
-                                        </div>
-                                    `)}
+                                                            <div class="grid grid-cols-1 gap-y-1">
+                                                                ${row("Date", get("appointment_date"))}
+                                                                ${row("Time", get("appointment_time"))}
+                                                            </div>
+                                                        `)}
 
         ${summaryCard("Service", "fa-tooth", `
-                                        <div class="grid grid-cols-1 gap-y-1">
-                                            ${row("Type", get("service_type"))}
-                                        </div>
-                                    `)}
+                                                            <div class="grid grid-cols-1 gap-y-1">
+                                                                ${row("Type", get("service_type"))}
+                                                            </div>
+                                                        `)}
     </div>
 
     ${summaryCard("Dental History", "fa-teeth", dentalHistoryBody)}
@@ -3826,12 +3832,12 @@
 
     <div class="grid grid-cols-2 gap-4 sm-grid-1col">
         ${summaryCard("Emergency Contact", "fa-phone", `
-                                        <div class="grid grid-cols-1 gap-y-1">
-                                            ${row("Name", get("emergency_person"))}
-                                            ${row("Number", get("emergency_number"))}
-                                            ${row("Relation", emergencyRelation)}
-                                        </div>
-                                    `)}
+                                                            <div class="grid grid-cols-1 gap-y-1">
+                                                                ${row("Name", get("emergency_person"))}
+                                                                ${row("Number", get("emergency_number"))}
+                                                                ${row("Relation", emergencyRelation)}
+                                                            </div>
+                                                        `)}
 
         ${summaryCard("Signature", "fa-signature", sigHTML)}
     </div>
@@ -4032,24 +4038,113 @@
                     "hidden");
             else document.getElementById("tobacco_details")?.classList.add("hidden");
         }));
+        const sigInput = document.getElementById("patient_signature");
+        const sigName = document.getElementById("signature_filename");
         const sigError = document.getElementById("signature_error");
+        const sigResultBox = document.getElementById("signature_result_box");
+
+        const SIGNATURE_ACCEPTED_MESSAGE = "Signature verified and accepted";
+        const SIGNATURE_DECLINED_MESSAGE = "Signature could not be processed. Please try again.";
 
         let signatureAiValid = false;
         let signatureAiChecking = false;
 
-        function showSignatureError(message) {
-            signatureAiValid = false;
-            signatureAiChecking = false;
+        function escapeHtml(value) {
+            return String(value || "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
 
-            if (sigError) {
-                sigError.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i>${message}`;
-                sigError.classList.remove("hidden");
-            }
+        function clearSignatureDisplay() {
+            sigResultBox?.classList.add("hidden");
 
             if (sigName) {
                 sigName.textContent = "";
-                sigName.classList.add("hidden");
                 sigName.classList.remove("text-emerald-700", "text-red-600", "text-[#5c5550]");
+            }
+
+            if (sigError) {
+                sigError.innerHTML = "";
+                sigError.classList.add("hidden");
+            }
+        }
+
+        function showSignatureStatus(fileName = "", message = "", type = "neutral") {
+            sigResultBox?.classList.remove("hidden");
+
+            if (sigName) {
+                sigName.textContent = fileName;
+                sigName.classList.remove("text-emerald-700", "text-red-600", "text-[#5c5550]");
+
+                if (type === "success") {
+                    sigName.classList.add("text-emerald-700");
+                } else if (type === "error") {
+                    sigName.classList.add("text-red-600");
+                } else {
+                    sigName.classList.add("text-[#5c5550]");
+                }
+            }
+
+            if (sigError) {
+                let icon = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>`;
+
+                if (type === "success") {
+                    icon = `<i class="fa-solid fa-circle-check mr-1"></i>`;
+                    sigError.className =
+                        "mt-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700 leading-5 font-semibold";
+                } else if (type === "error") {
+                    icon = `<i class="fa-solid fa-circle-exclamation mr-1"></i>`;
+                    sigError.className =
+                        "mt-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 leading-5 font-semibold";
+                } else {
+                    sigError.className =
+                        "mt-1 rounded-xl border border-[#e8e2dd] bg-white px-3 py-2 text-xs text-[#5c5550] leading-5 font-semibold";
+                }
+
+                sigError.innerHTML = `${icon}${escapeHtml(message)}`;
+                sigError.classList.remove("hidden");
+            }
+        }
+
+        function showSignatureError(fileName = "", result = {}) {
+            signatureAiValid = false;
+            signatureAiChecking = false;
+
+            const aiReason = result.reason || "The uploaded image did not pass signature validation.";
+            const detectedType = result.detected_type || "unknown";
+            const confidence = result.confidence !== undefined && result.confidence !== null ?
+                Number(result.confidence).toFixed(2) :
+                "N/A";
+
+            sigResultBox?.classList.remove("hidden");
+
+            if (sigName) {
+                sigName.textContent = fileName;
+                sigName.classList.remove("text-emerald-700", "text-[#5c5550]");
+                sigName.classList.add("text-red-600");
+            }
+
+            if (sigError) {
+                sigError.className =
+                    "mt-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 leading-5 font-semibold";
+
+                sigError.innerHTML = `
+            <div class="flex items-start gap-2">
+                <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                <div>
+                    <p>${escapeHtml(SIGNATURE_DECLINED_MESSAGE)}</p>
+                    <p class="mt-1 font-medium">Reason: ${escapeHtml(aiReason)}</p>
+                    <p class="mt-1 text-[0.7rem] opacity-80">
+                        Detected: ${escapeHtml(detectedType)} · Confidence: ${escapeHtml(confidence)}
+                    </p>
+                </div>
+            </div>
+        `;
+
+                sigError.classList.remove("hidden");
             }
 
             if (sigInput) {
@@ -4059,28 +4154,10 @@
 
         function clearSignatureError() {
             if (sigError) {
-                sigError.textContent = "";
+                sigError.innerHTML = "";
                 sigError.classList.add("hidden");
             }
         }
-
-        function showSignatureStatus(message, type = "neutral") {
-            if (!sigName) return;
-
-            sigName.textContent = message;
-            sigName.classList.remove("hidden", "text-emerald-700", "text-red-600", "text-[#5c5550]");
-
-            if (type === "success") {
-                sigName.classList.add("text-emerald-700");
-            } else if (type === "error") {
-                sigName.classList.add("text-red-600");
-            } else {
-                sigName.classList.add("text-[#5c5550]");
-            }
-        }
-        const sigInput = document.getElementById("patient_signature");
-        const sigName = document.getElementById("signature_filename");
-
         async function validateSignatureWithAi(file) {
             const formData = new FormData();
             formData.append("patient_signature", file);
@@ -4098,10 +4175,10 @@
 
             const data = await response.json().catch(() => ({}));
 
-            if (!response.ok) {
-                throw new Error(
-                    data.message || "Invalid signature."
-                );
+            if (!response.ok || data.valid === false || data.accepted === false) {
+                const error = new Error(data.message || "Signature could not be processed. Please try again.");
+                error.data = data;
+                throw error;
             }
 
             return data;
@@ -4114,8 +4191,7 @@
             clearSignatureError();
 
             if (!file) {
-                showSignatureStatus("", "neutral");
-                sigName?.classList.add("hidden");
+                clearSignatureDisplay();
                 return;
             }
 
@@ -4123,12 +4199,20 @@
             const maxSize = 25 * 1024 * 1024;
 
             if (!allowedTypes.includes(file.type)) {
-                showSignatureError("Signature must be a JPG or PNG file.");
+                showSignatureError(file?.name || "", {
+    reason: "Signature must be a JPG or PNG file.",
+    detected_type: "invalid_file_type",
+    confidence: 0,
+});
                 return;
             }
 
             if (file.size > maxSize) {
-                showSignatureError("Signature file must not exceed 25 MB.");
+               showSignatureError(file.name, {
+    reason: "Signature file must not exceed 25 MB.",
+    detected_type: "file_too_large",
+    confidence: 0,
+});
                 return;
             }
 
@@ -4143,13 +4227,21 @@
 
                 if (width < 120 || height < 60) {
                     URL.revokeObjectURL(objectUrl);
-                    showSignatureError("Signature image is too small. Please upload a clearer signature.");
+                   showSignatureError(file.name, {
+    reason: "Signature image is too small. Please upload a clearer signature.",
+    detected_type: "image_too_small",
+    confidence: 0,
+});
                     return;
                 }
 
                 if (width > 5000 || height > 5000) {
                     URL.revokeObjectURL(objectUrl);
-                    showSignatureError("Signature image is too large. Please upload a smaller image.");
+showSignatureError(file.name, {
+    reason: "Signature image is too large. Please upload a smaller image.",
+    detected_type: "image_too_large",
+    confidence: 0,
+});
                     return;
                 }
 
@@ -4157,7 +4249,7 @@
 
                 try {
                     signatureAiChecking = true;
-                    showSignatureStatus("Checking signature image...", "neutral");
+                    showSignatureStatus(file.name, "Checking signature image...", "neutral");
 
                     const result = await validateSignatureWithAi(file);
 
@@ -4165,23 +4257,29 @@
                     signatureAiChecking = false;
                     clearSignatureError();
 
-                    showSignatureStatus(`${file.name} — Valid signature`, "success");
+                    showSignatureStatus(file.name, SIGNATURE_ACCEPTED_MESSAGE, "success");
                     markFormDirty();
+
                 } catch (error) {
                     signatureAiValid = false;
                     signatureAiChecking = false;
 
-                    showSignatureError(
-                        error.message && error.message !== "Server Error" ?
-                        error.message :
-                        "Invalid signature."
-                    );
+                    showSignatureError(file.name, error.data || {
+                        message: SIGNATURE_DECLINED_MESSAGE,
+                        reason: error.message || "Unable to validate the uploaded image.",
+                        detected_type: "unknown",
+                        confidence: 0,
+                    });
                 }
             };
 
             img.onerror = function() {
                 URL.revokeObjectURL(objectUrl);
-                showSignatureError("Invalid signature image file.");
+                showSignatureError(file?.name || "", {
+    reason: "Invalid signature image file.",
+    detected_type: "invalid_image",
+    confidence: 0,
+});
             };
 
             img.src = objectUrl;
