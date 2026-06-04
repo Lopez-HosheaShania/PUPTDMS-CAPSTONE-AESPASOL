@@ -5085,7 +5085,6 @@
     box-shadow: 0 16px 30px rgba(220, 38, 38, .34) !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] #deleteModal .ap-delete-shell,
 .dark #deleteModal .ap-delete-shell {
     background: #0d1117 !important;

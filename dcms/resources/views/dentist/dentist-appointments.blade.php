@@ -57,11 +57,29 @@ fn($a) => \Carbon\Carbon::parse($a->appointment_date)->format('F'),
 $pastGrouped = $pastAppointments->groupBy(fn($a) => \Carbon\Carbon::parse($a->appointment_date)->format('F'));
 $upcomingTotal = $upcomingAppointments->count();
 $pastTotal = $pastAppointments->count();
+$allAppointments = $upcomingAppointments->merge($pastAppointments);
+
+$statusCounts = [
+'all' => $allAppointments->count(),
+'upcoming' => $allAppointments->filter(fn($a) => strtolower($a->status ?? 'upcoming') === 'upcoming')->count(),
+'rescheduled' => $allAppointments->filter(fn($a) => strtolower($a->status ?? '') === 'rescheduled')->count(),
+'completed' => $allAppointments->filter(fn($a) => strtolower($a->status ?? '') === 'completed')->count(),
+'cancelled' => $allAppointments->filter(fn($a) => in_array(strtolower($a->status ?? ''), ['cancelled', 'canceled']))->count(),
+];
+
+$statusOptions = [
+'all' => ['label' => 'All statuses', 'icon' => 'fa-layer-group', 'tone' => 'all'],
+'upcoming' => ['label' => 'Upcoming', 'icon' => 'fa-calendar-check', 'tone' => 'upcoming'],
+'rescheduled' => ['label' => 'Rescheduled', 'icon' => 'fa-rotate-right', 'tone' => 'rescheduled'],
+'completed' => ['label' => 'Completed', 'icon' => 'fa-circle-check', 'tone' => 'completed'],
+'cancelled' => ['label' => 'Cancelled', 'icon' => 'fa-circle-xmark', 'tone' => 'cancelled'],
+];
+
 $notifications = collect($notifications ?? []);
 $notifCount = $notifications->count();
 @endphp
 
-<main id="mainContent" class="dentist-page-shell page-enter">
+<main id="mainContent" class="dentist-page-shell dentist-appointments-page page-enter mode-list">
   <div class="w-full">
 
     <div class="appointment-header-wrap mb-8">
@@ -163,32 +181,66 @@ $notifCount = $notifications->count();
         <div class="appointment-filter-wrap">
           <div class="search-wrap global-search" data-search-wrapper>
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input id="apptSearchInput" type="text" placeholder="Search patient" class="search-input" data-search-input>
+
+            <input id="apptSearchInput" type="text" placeholder="Search patient" class="search-input"
+              data-search-input autocomplete="off">
 
             <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
           </div>
 
-          <div class="appointment-filter-field">
-            <i class="fa-solid fa-tooth"></i>
-            <select id="apptServiceFilter">
-              <option value="all">All services</option>
-              @foreach ($defaultServiceTypes ?? collect() as $service)
-              <option value="{{ strtolower($service->name) }}">{{ $service->name }}</option>
-              @endforeach
-            </select>
+          <div class="voice-input-toggle">
+            <button type="button" class="voice-search-mic external" data-voice-trigger
+              data-voice-target="#apptSearchInput" data-voice-status="#apptVoiceStatus"
+              aria-label="Voice search appointments">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+
+            <span id="apptVoiceStatus" class="voice-status hidden" data-voice-status aria-live="polite"></span>
           </div>
 
-          <div class="appointment-filter-field">
-            <i class="fa-solid fa-filter"></i>
-            <select id="apptStatusFilter">
-              <option value="all">All status</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="rescheduled">Rescheduled</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+          <input type="hidden" id="apptStatusFilter" value="all">
+
+          <div class="appointment-status-dropdown" id="apptStatusDropdown">
+            <button type="button" class="appointment-status-trigger" id="apptStatusToggle" aria-expanded="false">
+              <span class="appointment-status-trigger-left">
+                <span class="appointment-status-trigger-icon tone-all" id="apptStatusIcon">
+                  <i class="fa-solid fa-layer-group"></i>
+                </span>
+
+                <span class="appointment-status-trigger-text">
+                  <span class="appointment-status-trigger-label">Status</span>
+                  <strong id="apptStatusSelectedLabel">All statuses</strong>
+                </span>
+              </span>
+
+              <span class="appointment-status-trigger-right">
+                <span class="appointment-status-count-badge" id="apptStatusSelectedCount">
+                  {{ $statusCounts['all'] ?? 0 }}
+                </span>
+                <i class="fa-solid fa-chevron-down appointment-status-chevron"></i>
+              </span>
+            </button>
+
+            <div class="appointment-status-panel" id="apptStatusPanel">
+              <div class="appointment-status-grid">
+                @foreach ($statusOptions as $value => $meta)
+                <button type="button"
+                  class="appointment-status-option {{ $value === 'all' ? 'is-active' : '' }} tone-{{ $meta['tone'] }}"
+                  data-status-value="{{ $value }}" data-status-label="{{ $meta['label'] }}"
+                  data-status-icon="{{ $meta['icon'] }}" data-status-tone="{{ $meta['tone'] }}"
+                  data-status-count="{{ $statusCounts[$value] ?? 0 }}">
+                  <span class="appointment-status-option-icon">
+                    <i class="fa-solid {{ $meta['icon'] }}"></i>
+                  </span>
+
+                  <span class="appointment-status-option-label">{{ $meta['label'] }}</span>
+                  <span class="appointment-status-option-count">{{ $statusCounts[$value] ?? 0 }}</span>
+                </button>
+                @endforeach
+              </div>
+            </div>
           </div>
         </div>
 
@@ -395,7 +447,7 @@ $notifCount = $notifications->count();
 
                   <button type="button" class="action-btn action-btn-start" data-tooltip="Start procedure"
                     onclick="openStartProcedureModal(this)" data-id="{{ $appt->id }}" data-name="{{ $patientName }}"
-                    data-datetime="{{ $modalDatetime }}" {{ $isToday ? '' : 'disabled' }}>
+                    data-datetime="{{ $modalDatetime }}" data-start-url="{{ route('dentist.odontogram', $appt->patient_id) }}?from=appointments&appointment_id={{ $appt->id }}&start_procedure=1" {{ $isToday ? '' : 'disabled' }}>
                     <i class="fa-solid fa-play"></i>
                   </button>
 
@@ -541,8 +593,9 @@ $notifCount = $notifications->count();
 
             <div class="grid grid-cols-2 gap-3">
               <button type="button" class="action-btn action-btn-start" onclick="openStartProcedureModal(this)"
-                data-id="{{ $appt->id }}" data-name="{{ $patientName }}" data-datetime="{{ $modalDatetime }}" {{
-                $isToday ? '' : 'disabled' }}>
+                data-id="{{ $appt->id }}" data-name="{{ $patientName }}" data-datetime="{{ $modalDatetime }}"
+                data-start-url="{{ route('dentist.odontogram', $appt->patient_id) }}?from=appointments&appointment_id={{ $appt->id }}&start_procedure=1"
+                {{ $isToday ? '' : 'disabled' }}>
                 <i class="fa-solid fa-play text-[10px]"></i> Start
               </button>
 
@@ -597,6 +650,20 @@ $notifCount = $notifications->count();
           <i class="fa-solid fa-xmark"></i>
           Clear search
         </button>
+      </div>
+
+      <div id="appointmentStatusEmptyUpcoming" class="empty-state empty-state-controlled">
+        <div class="empty-state-icon appointment-empty-icon">
+          <i id="appointmentStatusEmptyUpcomingIcon" class="fa-regular fa-calendar-xmark"></i>
+        </div>
+
+        <p id="appointmentStatusEmptyUpcomingTitle" class="empty-state-title">
+          No upcoming appointments
+        </p>
+
+        <p id="appointmentStatusEmptyUpcomingSub" class="empty-state-sub">
+          New appointments will appear here once scheduled.
+        </p>
       </div>
     </section>
 
@@ -883,6 +950,20 @@ $notifCount = $notifications->count();
           Clear search
         </button>
       </div>
+
+      <div id="appointmentStatusEmptyPast" class="empty-state empty-state-controlled">
+        <div class="empty-state-icon appointment-empty-icon">
+          <i id="appointmentStatusEmptyPastIcon" class="fa-regular fa-calendar-xmark"></i>
+        </div>
+
+        <p id="appointmentStatusEmptyPastTitle" class="empty-state-title">
+          No past appointments
+        </p>
+
+        <p id="appointmentStatusEmptyPastSub" class="empty-state-sub">
+          Completed appointments will appear here.
+        </p>
+      </div>
     </section>
 
     <div class="pb-16"></div>
@@ -894,27 +975,60 @@ $notifCount = $notifications->count();
 </div>
 
 <div id="startProcedureModal"
-  class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center backdrop-blur-sm hidden z-[9999] p-0 sm:p-4">
-  <div class="bg-white w-full sm:w-[560px] rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl">
-    <div class="bg-green-700 px-6 sm:px-8 py-5 text-center">
-      <h2 class="text-lg sm:text-xl font-bold text-white">Confirm Procedure Start</h2>
+  class="start-procedure-overlay fixed inset-0 hidden z-[9999] items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="start-procedure-shell modal-box">
+    <div class="start-procedure-header">
+      <div class="start-procedure-header-left">
+        <div class="start-procedure-icon">
+          <i class="fa-solid fa-tooth"></i>
+        </div>
+
+        <div class="min-w-0">
+          <h2>Start Procedure</h2>
+          <p>Open the odontogram to begin this appointment.</p>
+        </div>
+      </div>
+
+      <button type="button" class="start-procedure-close" onclick="closeStartProcedureModal()"
+        aria-label="Close start procedure modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
-    <div class="px-6 sm:px-10 py-6 sm:py-7 bg-gray-50">
-      <p class="text-sm sm:text-base font-bold text-gray-900 mb-1 text-center">You are about to begin this
-        appointment's procedure.</p>
-      <p class="text-xs sm:text-sm text-gray-500 mb-5 text-center">This will mark the appointment as in progress.
-      </p>
-      <div class="bg-white border border-gray-200 rounded-2xl px-6 sm:px-8 py-4 sm:py-5 text-center mb-4 shadow-sm">
-        <p class="text-sm text-gray-800">Patient: <span class="font-bold" id="startPatientName">—</span></p>
-        <p class="text-sm text-gray-600 mt-1" id="startAppointmentDate">—</p>
+
+    <div class="start-procedure-body">
+      <div class="start-procedure-alert">
+        <div class="start-procedure-alert-icon">
+          <i class="fa-solid fa-play"></i>
+        </div>
+
+        <div>
+          <p class="start-procedure-alert-title">Ready to start this appointment?</p>
+          <p class="start-procedure-alert-sub">You will be redirected to the odontogram page for the selected patient.</p>
+        </div>
       </div>
-      <div class="flex justify-end gap-3">
-        <button onclick="closeStartProcedureModal()"
-          class="px-5 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-semibold hover:bg-gray-100 transition text-sm">Cancel</button>
-        <button onclick="confirmStartProcedure()"
-          class="px-5 py-2 rounded-lg bg-green-700 text-white font-semibold hover:bg-green-800 transition text-sm">Start
-          Procedure</button>
+
+      <div class="start-procedure-card">
+        <div class="start-procedure-card-row">
+          <span>Patient</span>
+          <strong id="startPatientName">—</strong>
+        </div>
+
+        <div class="start-procedure-card-row">
+          <span>Schedule</span>
+          <strong id="startAppointmentDate">—</strong>
+        </div>
       </div>
+    </div>
+
+    <div class="start-procedure-footer">
+      <button type="button" onclick="closeStartProcedureModal()" class="start-procedure-btn start-procedure-btn-cancel">
+        Cancel
+      </button>
+
+      <button type="button" onclick="confirmStartProcedure()" class="start-procedure-btn start-procedure-btn-primary">
+        <i class="fa-solid fa-tooth"></i>
+        Start Procedure
+      </button>
     </div>
   </div>
 </div>
@@ -1052,59 +1166,88 @@ $notifCount = $notifications->count();
   });
 
   var selectedApptId = null;
+  var selectedStartUrl = null;
 
   function openStartProcedureModal(btn) {
-    selectedApptId = btn.dataset.id;
+    if (!btn || btn.disabled) return;
+
+    selectedApptId = btn.dataset.id || null;
+    selectedStartUrl = btn.dataset.startUrl || null;
+
     document.getElementById('startPatientName').textContent = btn.dataset.name || '—';
     document.getElementById('startAppointmentDate').textContent = btn.dataset.datetime || '—';
-    document.getElementById('startProcedureModal').classList.remove('hidden');
+
+    const modal = document.getElementById('startProcedureModal');
+    modal?.classList.remove('hidden');
+    modal?.classList.add('flex');
   }
 
   function closeStartProcedureModal() {
-    document.getElementById('startProcedureModal').classList.add('hidden');
+    const modal = document.getElementById('startProcedureModal');
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+
     selectedApptId = null;
+    selectedStartUrl = null;
   }
 
   function confirmStartProcedure() {
-    window.location.href = `/dentist/appointments/${selectedApptId}/start`;
+    if (!selectedStartUrl) return;
+
+    window.location.href = selectedStartUrl;
   }
 
   const apptSearchInput = document.getElementById('apptSearchInput');
-  const apptServiceFilter = document.getElementById('apptServiceFilter');
   const apptStatusFilter = document.getElementById('apptStatusFilter');
+
+  const apptStatusMeta = {
+    all: { label: 'All statuses', icon: 'fa-layer-group', tone: 'all' },
+    upcoming: { label: 'Upcoming', icon: 'fa-calendar-check', tone: 'upcoming' },
+    rescheduled: { label: 'Rescheduled', icon: 'fa-rotate-right', tone: 'rescheduled' },
+    completed: { label: 'Completed', icon: 'fa-circle-check', tone: 'completed' },
+    cancelled: { label: 'Cancelled', icon: 'fa-circle-xmark', tone: 'cancelled' }
+  };
+
+  function setAppointmentStatusFilter(value = 'all') {
+    const nextValue = apptStatusMeta[value] ? value : 'all';
+    const meta = apptStatusMeta[nextValue];
+
+    if (apptStatusFilter) {
+      apptStatusFilter.value = nextValue;
+      apptStatusFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    const label = document.getElementById('apptStatusSelectedLabel');
+    const count = document.getElementById('apptStatusSelectedCount');
+    const icon = document.getElementById('apptStatusIcon');
+    const activeOption = document.querySelector(`.appointment-status-option[data-status-value="${nextValue}"]`);
+
+    if (label) label.textContent = meta.label;
+    if (count) count.textContent = activeOption?.dataset.statusCount || '0';
+
+    if (icon) {
+      icon.className = `appointment-status-trigger-icon tone-${meta.tone}`;
+      icon.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
+    }
+
+    document.querySelectorAll('.appointment-status-option').forEach(option => {
+      option.classList.toggle('is-active', option.dataset.statusValue === nextValue);
+    });
+  }
 
   function clearAppointmentSearch() {
     if (apptSearchInput) {
       apptSearchInput.value = '';
-      apptSearchInput.dispatchEvent(new Event('input', {
-        bubbles: true
-      }));
-      apptSearchInput.dispatchEvent(new Event('change', {
-        bubbles: true
-      }));
-    }
-
-    if (apptServiceFilter) {
-      apptServiceFilter.value = 'all';
-      apptServiceFilter.dispatchEvent(new Event('change', {
-        bubbles: true
-      }));
-    }
-
-    if (apptStatusFilter) {
-      apptStatusFilter.value = 'all';
-      apptStatusFilter.dispatchEvent(new Event('change', {
-        bubbles: true
-      }));
+      apptSearchInput.dispatchEvent(new Event('input', { bubbles: true }));
+      apptSearchInput.dispatchEvent(new Event('change', { bubbles: true }));
+      apptSearchInput.focus();
     }
 
     applyAppointmentFilters();
-    apptSearchInput?.focus();
   }
 
   function applyAppointmentFilters() {
     const searchValue = (apptSearchInput?.value || '').toLowerCase().trim();
-    const serviceValue = apptServiceFilter?.value || 'all';
     const statusValue = apptStatusFilter?.value || 'all';
 
     document.querySelectorAll('.appt-card, .mobile-appt-card').forEach((card) => {
@@ -1118,10 +1261,12 @@ $notifCount = $notifications->count();
         patientId.includes(searchValue) ||
         service.includes(searchValue);
 
-      const matchesService = serviceValue === 'all' || service === serviceValue;
-      const matchesStatus = statusValue === 'all' || status === statusValue;
+      const matchesStatus =
+        statusValue === 'all' ||
+        status === statusValue ||
+        (statusValue === 'cancelled' && status === 'canceled');
 
-      card.classList.toggle('hidden', !(matchesSearch && matchesService && matchesStatus));
+      card.classList.toggle('hidden', !(matchesSearch && matchesStatus));
     });
 
     document.querySelectorAll('.appt-month-group').forEach((group) => {
@@ -1136,10 +1281,10 @@ $notifCount = $notifications->count();
 
   function updateFilteredEmptyState() {
     const searchValue = (apptSearchInput?.value || '').trim();
-    const hasActiveFilters =
-      searchValue !== '' ||
-      (apptServiceFilter?.value || 'all') !== 'all' ||
-      (apptStatusFilter?.value || 'all') !== 'all';
+    const statusValue = apptStatusFilter?.value || 'all';
+
+    const hasSearch = searchValue.length > 0;
+    const hasStatusFilter = statusValue !== 'all';
 
     const upcomingVisible = Array.from(
       document.querySelectorAll('#upcomingSection .appt-card, #upcomingSection .mobile-appt-card')
@@ -1149,27 +1294,113 @@ $notifCount = $notifications->count();
       document.querySelectorAll('#pastSection .appt-card, #pastSection .mobile-appt-card')
     ).some((card) => !card.classList.contains('hidden'));
 
-    const titleText = searchValue ?
-      `No results for "${searchValue}"` :
-      'No results found';
+    const searchTitle = hasSearch ? `No results for "${searchValue}"` : 'No results found';
 
-    const upcomingTitle = document.getElementById('appointmentFilterEmptyUpcomingTitle');
-    const pastTitle = document.getElementById('appointmentFilterEmptyPastTitle');
+    const upcomingSearchEmpty = document.getElementById('appointmentFilterEmptyUpcoming');
+    const pastSearchEmpty = document.getElementById('appointmentFilterEmptyPast');
+    const upcomingStatusEmpty = document.getElementById('appointmentStatusEmptyUpcoming');
+    const pastStatusEmpty = document.getElementById('appointmentStatusEmptyPast');
 
-    if (upcomingTitle) upcomingTitle.textContent = titleText;
-    if (pastTitle) pastTitle.textContent = titleText;
+    const upcomingSearchTitle = document.getElementById('appointmentFilterEmptyUpcomingTitle');
+    const pastSearchTitle = document.getElementById('appointmentFilterEmptyPastTitle');
 
-    document
-      .getElementById('appointmentFilterEmptyUpcoming')
-      ?.classList.toggle('show', hasActiveFilters && !upcomingVisible);
+    if (upcomingSearchTitle) upcomingSearchTitle.textContent = searchTitle;
+    if (pastSearchTitle) pastSearchTitle.textContent = searchTitle;
 
-    document
-      .getElementById('appointmentFilterEmptyPast')
-      ?.classList.toggle('show', hasActiveFilters && !pastVisible);
+    const statusEmptyCopy = {
+      upcoming: {
+        icon: 'fa-regular fa-calendar-xmark',
+        title: 'No upcoming appointments',
+        sub: 'New appointments will appear here once scheduled.'
+      },
+      rescheduled: {
+        icon: 'fa-solid fa-rotate-right',
+        title: 'No rescheduled appointments',
+        sub: 'Rescheduled appointments will appear here once available.'
+      },
+      completed: {
+        icon: 'fa-solid fa-circle-check',
+        title: 'No completed appointments',
+        sub: 'Completed appointments will appear here.'
+      },
+      cancelled: {
+        icon: 'fa-regular fa-calendar-xmark',
+        title: 'No cancelled appointments',
+        sub: 'Cancelled appointments will appear here.'
+      },
+      all: {
+        icon: 'fa-regular fa-calendar-xmark',
+        title: 'No appointments found',
+        sub: 'Appointments will appear here once available.'
+      }
+    };
+
+    const meta = statusEmptyCopy[statusValue] || statusEmptyCopy.all;
+
+    function setStatusEmptyContent(prefix) {
+      const icon = document.getElementById(`appointmentStatusEmpty${prefix}Icon`);
+      const title = document.getElementById(`appointmentStatusEmpty${prefix}Title`);
+      const sub = document.getElementById(`appointmentStatusEmpty${prefix}Sub`);
+
+      if (icon) icon.className = meta.icon;
+      if (title) title.textContent = meta.title;
+      if (sub) sub.textContent = meta.sub;
+    }
+
+    setStatusEmptyContent('Upcoming');
+    setStatusEmptyContent('Past');
+
+    const showUpcomingSearchEmpty = hasSearch && !upcomingVisible;
+    const showPastSearchEmpty = hasSearch && !pastVisible;
+    const showUpcomingStatusEmpty = !hasSearch && hasStatusFilter && !upcomingVisible;
+    const showPastStatusEmpty = !hasSearch && hasStatusFilter && !pastVisible;
+
+    upcomingSearchEmpty?.classList.toggle('show', showUpcomingSearchEmpty);
+    upcomingSearchEmpty?.classList.toggle('is-visible', showUpcomingSearchEmpty);
+
+    pastSearchEmpty?.classList.toggle('show', showPastSearchEmpty);
+    pastSearchEmpty?.classList.toggle('is-visible', showPastSearchEmpty);
+
+    upcomingStatusEmpty?.classList.toggle('show', showUpcomingStatusEmpty);
+    upcomingStatusEmpty?.classList.toggle('is-visible', showUpcomingStatusEmpty);
+
+    pastStatusEmpty?.classList.toggle('show', showPastStatusEmpty);
+    pastStatusEmpty?.classList.toggle('is-visible', showPastStatusEmpty);
   }
 
   apptSearchInput?.addEventListener('input', applyAppointmentFilters);
-  apptServiceFilter?.addEventListener('change', applyAppointmentFilters);
   apptStatusFilter?.addEventListener('change', applyAppointmentFilters);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    window.initGlobalVoiceInputs?.();
+
+    const dropdown = document.getElementById('apptStatusDropdown');
+    const toggle = document.getElementById('apptStatusToggle');
+    const panel = document.getElementById('apptStatusPanel');
+
+    function closeAppointmentStatusDropdown() {
+      dropdown?.classList.remove('open');
+      toggle?.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle?.addEventListener('click', function (event) {
+      event.stopPropagation();
+      const isOpen = dropdown?.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    panel?.addEventListener('click', function (event) {
+      event.stopPropagation();
+
+      const option = event.target.closest('.appointment-status-option');
+      if (!option) return;
+
+      setAppointmentStatusFilter(option.dataset.statusValue || 'all');
+      closeAppointmentStatusDropdown();
+      applyAppointmentFilters();
+    });
+
+    document.addEventListener('click', closeAppointmentStatusDropdown);
+  });
 </script>
 @endsection

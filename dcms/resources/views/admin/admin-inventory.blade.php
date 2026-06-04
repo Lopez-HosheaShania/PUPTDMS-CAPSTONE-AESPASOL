@@ -645,7 +645,7 @@
         <div class="inv-delete-head">
             <div class="inv-delete-head-left">
                 <div class="inv-delete-icon">
-                    <i class="fa-solid fa-trash-can"></i>
+                    <i class="fa-solid fa-trash"></i>
                 </div>
 
                 <div>
@@ -679,7 +679,7 @@
                 </button>
 
                 <button type="button" id="confirmDeleteBtn" class="inv-delete-confirm">
-                    <i class="fa-solid fa-trash-can"></i>
+                    <i class="fa-solid fa-trash"></i>
                     Delete
                 </button>
             </div>

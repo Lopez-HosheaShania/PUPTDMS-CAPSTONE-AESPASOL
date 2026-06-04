@@ -1615,7 +1615,6 @@
     box-shadow: 0 -12px 28px rgba(15, 23, 42, .06) !important;
 }
 
-/* 2. Table/history card dark mode */
 [data-theme="dark"] .backup-page .backup-history-card,
 .dark .backup-page .backup-history-card {
     background: #161B22 !important;
@@ -1676,7 +1675,6 @@
     color: #9CA3AF !important;
 }
 
-/* 3. Side containers + Auto-Backup Schedule dark mode */
 [data-theme="dark"] .backup-page .side-stack .card,
 .dark .backup-page .side-stack .card {
     background: #161B22 !important;
@@ -1806,7 +1804,6 @@
     line-height: 1 !important;
 }
 
-/* 5. Stronger color-coded action buttons */
 #mainContent.backup-page .table-actions {
     display: inline-flex !important;
     align-items: center !important;
@@ -1874,7 +1871,6 @@
     outline: none !important;
 }
 
-/* Dark mode for filter drawer, modal, and action buttons */
 [data-theme="dark"] .backup-filter-drawer .filter-drawer-header,
 .dark .backup-filter-drawer .filter-drawer-header,
 [data-theme="dark"] .backup-filter-drawer .filter-drawer-body,
@@ -1950,14 +1946,6 @@
     color: #FCA5A5 !important;
 }
 
-[data-theme="dark"] #mainContent.backup-page .table-actions .action-btn.dl,
-.dark #mainContent.backup-page .table-actions .action-btn.dl {
-    --action-bg: rgba(37, 99, 235, .16);
-    --action-color: #60A5FA;
-    --action-hover-bg: rgba(37, 99, 235, .24);
-    --action-hover-color: #93C5FD;
-}
-
 [data-theme="dark"] #mainContent.backup-page .table-actions .action-btn.restore,
 .dark #mainContent.backup-page .table-actions .action-btn.restore {
     --action-bg: rgba(245, 158, 11, .17);
@@ -1986,4 +1974,1865 @@
         max-height: calc(100dvh - 74px) !important;
         border-radius: 24px 24px 0 0 !important;
     }
+}
+
+.backup-filter-modal.filter-drawer-wrapper {
+    z-index: 99990 !important;
+}
+
+.backup-filter-modal .filter-drawer-panel {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+}
+
+.backup-filter-modal .filter-drawer-title i,
+.backup-filter-modal .filter-drawer-title h2 {
+    color: var(--crimson, #8B0000) !important;
+}
+
+[data-theme="dark"] .backup-filter-modal .filter-drawer-panel,
+.dark .backup-filter-modal .filter-drawer-panel,
+[data-theme="dark"] .backup-filter-modal .filter-drawer-panel>div,
+.dark .backup-filter-modal .filter-drawer-panel>div {
+    background: #111827 !important;
+    border-color: #30363D !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] .backup-filter-modal .filter-drawer-title i,
+[data-theme="dark"] .backup-filter-modal .filter-drawer-title h2,
+.dark .backup-filter-modal .filter-drawer-title i,
+.dark .backup-filter-modal .filter-drawer-title h2 {
+    color: #FCA5A5 !important;
+}
+
+.backup-page .card-icon,
+.backup-page .stat-icon-wrapper,
+.backup-page .empty-state-icon,
+.backup-action-icon {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    border-radius: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--crimson-light, #FEF2F2) !important;
+    border: 1px solid rgba(139, 0, 0, .14) !important;
+    color: var(--crimson, #8B0000) !important;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, .08) !important;
+}
+
+.backup-page .card-icon i,
+.backup-page .stat-icon-wrapper i,
+.backup-page .empty-state-icon i,
+.backup-action-icon i {
+    color: currentColor !important;
+}
+
+#backupModal {
+    z-index: 99999 !important;
+}
+
+#backupModal .backup-progress-close {
+    position: relative !important;
+    z-index: 4 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+#backupModal .backup-progress-close:disabled {
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    opacity: .55 !important;
+}
+
+#scheduleModal.backup-schedule-modal.open {
+    display: flex !important;
+    animation: modalBackdropIn .22s ease both !important;
+}
+
+#scheduleModal.backup-schedule-modal.is-closing {
+    animation: modalBackdropOut .22s ease both !important;
+}
+
+#scheduleModal .backup-schedule-modal-card.modal-enter {
+    animation: modalEnter .28s ease-out both !important;
+}
+
+#scheduleModal .backup-schedule-modal-card.modal-exit {
+    animation: modalExit .22s ease-in both !important;
+}
+
+.backup-action-modal {
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
+    background:
+        radial-gradient(circle at 15% 12%, rgba(139, 0, 0, .18), transparent 32%),
+        rgba(15, 23, 42, .58) !important;
+    backdrop-filter: blur(8px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
+}
+
+.backup-action-modal.open {
+    display: flex !important;
+    animation: modalBackdropIn .22s ease both !important;
+}
+
+.backup-action-modal-card {
+    width: min(94vw, 520px) !important;
+    max-width: 520px !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    background: #FFFFFF !important;
+    border: 1px solid #EEF2F7 !important;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, .28) !important;
+    animation: modalEnter .28s ease-out both !important;
+}
+
+.backup-action-head-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: .85rem !important;
+    min-width: 0 !important;
+}
+
+.backup-action-body {
+    padding: 1.25rem 1.45rem !important;
+    background: #FFFFFF !important;
+}
+
+.backup-action-message {
+    margin: 0 !important;
+    color: #4B5563 !important;
+    font-size: .88rem !important;
+    font-weight: 700 !important;
+    line-height: 1.55 !important;
+}
+
+.backup-action-footer {
+    padding: 1rem 1.45rem 1.25rem !important;
+    border-top: 1px solid #EEF2F7 !important;
+    background: #FFFFFF !important;
+}
+
+.backup-action-icon.is-download {
+    background: #EFF6FF !important;
+    border-color: #BFDBFE !important;
+    color: #2563EB !important;
+}
+
+.backup-action-icon.is-restore {
+    background: #FEF3C7 !important;
+    border-color: #FDE68A !important;
+    color: #B45309 !important;
+}
+
+.backup-action-icon.is-delete {
+    background: #FEE2E2 !important;
+    border-color: #FCA5A5 !important;
+    color: #B91C1C !important;
+}
+
+.backup-action-confirm {
+    min-height: 44px !important;
+    padding: 0 1.35rem !important;
+    border-radius: 12px !important;
+    border: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .55rem !important;
+    color: #FFFFFF !important;
+    font-size: .875rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease !important;
+}
+
+.backup-action-confirm:hover {
+    transform: translateY(-1px) !important;
+    filter: brightness(1.04) !important;
+}
+
+.backup-action-confirm.is-download {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, .24) !important;
+}
+
+.backup-action-confirm.is-restore {
+    background: linear-gradient(135deg, #D97706, #B45309) !important;
+    box-shadow: 0 10px 22px rgba(180, 83, 9, .24) !important;
+}
+
+.backup-action-confirm.is-delete {
+    background: linear-gradient(135deg, #DC2626, #991B1B) !important;
+    box-shadow: 0 10px 22px rgba(220, 38, 38, .24) !important;
+}
+
+#mainContent.backup-page .table-actions .action-btn.dl {
+    --action-bg: #EFF6FF;
+    --action-color: #2563EB;
+    --action-hover-bg: #DBEAFE;
+    --action-hover-color: #1D4ED8;
+    --action-tooltip-bg: #2563EB;
+}
+
+#mainContent.backup-page .table-actions .action-btn.restore {
+    --action-bg: #FEF3C7;
+    --action-color: #B45309;
+    --action-hover-bg: #FDE68A;
+    --action-hover-color: #92400E;
+    --action-tooltip-bg: #B45309;
+}
+
+#mainContent.backup-page .table-actions .action-btn.del {
+    --action-bg: #FEE2E2;
+    --action-color: #B91C1C;
+    --action-hover-bg: #FECACA;
+    --action-hover-color: #991B1B;
+    --action-tooltip-bg: #B91C1C;
+}
+
+[data-theme="dark"] .backup-page .card-icon,
+[data-theme="dark"] .backup-page .stat-icon-wrapper,
+[data-theme="dark"] .backup-page .empty-state-icon,
+.dark .backup-page .card-icon,
+.dark .backup-page .stat-icon-wrapper,
+.dark .backup-page .empty-state-icon {
+    background: rgba(139, 0, 0, .26) !important;
+    border-color: rgba(252, 165, 165, .18) !important;
+    color: #FCA5A5 !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .backup-action-modal-card,
+.dark .backup-action-modal-card {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+    color: #E5E7EB !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] .backup-action-body,
+[data-theme="dark"] .backup-action-footer,
+.dark .backup-action-body,
+.dark .backup-action-footer {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] .backup-action-message,
+.dark .backup-action-message {
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .backup-action-icon.is-download,
+.dark .backup-action-icon.is-download {
+    background: rgba(37, 99, 235, .16) !important;
+    border-color: rgba(147, 197, 253, .28) !important;
+    color: #60A5FA !important;
+}
+
+[data-theme="dark"] .backup-action-icon.is-restore,
+.dark .backup-action-icon.is-restore {
+    background: rgba(245, 158, 11, .17) !important;
+    border-color: rgba(253, 230, 138, .28) !important;
+    color: #FBBF24 !important;
+}
+
+[data-theme="dark"] .backup-action-icon.is-delete,
+.dark .backup-action-icon.is-delete {
+    background: rgba(220, 38, 38, .16) !important;
+    border-color: rgba(252, 165, 165, .28) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent.backup-page .table-actions .action-btn.restore,
+.dark #mainContent.backup-page .table-actions .action-btn.restore {
+    --action-bg: rgba(245, 158, 11, .17);
+    --action-color: #FBBF24;
+    --action-hover-bg: rgba(245, 158, 11, .26);
+    --action-hover-color: #FCD34D;
+}
+
+[data-theme="dark"] #mainContent.backup-page .table-actions .action-btn.del,
+.dark #mainContent.backup-page .table-actions .action-btn.del {
+    --action-bg: rgba(220, 38, 38, .16);
+    --action-color: #FCA5A5;
+    --action-hover-bg: rgba(220, 38, 38, .24);
+    --action-hover-color: #FECACA;
+}
+
+#mainContent.backup-page .table-actions .action-btn::after,
+#mainContent.backup-page .table-actions .action-btn::before,
+.backup-page .table-actions .action-btn::after,
+.backup-page .table-actions .action-btn::before {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    text-transform: none !important;
+}
+
+#mainContent.backup-page .table-actions .action-btn[data-tooltip]::after,
+.backup-page .table-actions .action-btn[data-tooltip]::after {
+    content: attr(data-tooltip) !important;
+    position: absolute !important;
+    left: 50% !important;
+    bottom: calc(100% + 9px) !important;
+    transform: translateX(-50%) translateY(4px) !important;
+
+    width: max-content !important;
+    min-width: max-content !important;
+    max-width: 180px !important;
+
+    padding: .42rem .58rem !important;
+    border-radius: 9px !important;
+    background: var(--action-tooltip-bg, #2563EB) !important;
+    color: #FFFFFF !important;
+
+    font-size: .68rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--action-tooltip-bg, #2563EB) 24%, transparent) !important;
+    z-index: 80 !important;
+}
+
+#mainContent.backup-page .table-actions .action-btn[data-tooltip]::before,
+.backup-page .table-actions .action-btn[data-tooltip]::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 50% !important;
+    bottom: calc(100% + 4px) !important;
+    transform: translateX(-50%) translateY(4px) !important;
+
+    border: 5px solid transparent !important;
+    border-top-color: var(--action-tooltip-bg, #2563EB) !important;
+    z-index: 81 !important;
+}
+
+#mainContent.backup-page .table-actions .action-btn[data-tooltip]:hover::after,
+#mainContent.backup-page .table-actions .action-btn[data-tooltip]:hover::before,
+#mainContent.backup-page .table-actions .action-btn[data-tooltip]:focus-visible::after,
+#mainContent.backup-page .table-actions .action-btn[data-tooltip]:focus-visible::before,
+.backup-page .table-actions .action-btn[data-tooltip]:hover::after,
+.backup-page .table-actions .action-btn[data-tooltip]:hover::before,
+.backup-page .table-actions .action-btn[data-tooltip]:focus-visible::after,
+.backup-page .table-actions .action-btn[data-tooltip]:focus-visible::before {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-50%) translateY(0) !important;
+}
+
+#backupActionModal.backup-action-modal:not(.open):not(.closing) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+#backupActionModal.backup-action-modal.open,
+#backupActionModal.backup-action-modal.closing {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+#backupActionModal.backup-action-modal.open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    animation: modalBackdropIn .22s ease both !important;
+}
+
+#backupActionModal.backup-action-modal.closing {
+    animation: modalBackdropOut .22s ease both !important;
+}
+
+#backupActionModal.backup-action-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    background:
+        radial-gradient(circle at 15% 12%, rgba(139, 0, 0, .18), transparent 32%),
+        rgba(15, 23, 42, .56) !important;
+    backdrop-filter: blur(8px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
+}
+
+#backupActionModal .backup-action-shell {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    width: min(92vw, 560px) !important;
+    max-width: 560px !important;
+    max-height: calc(100dvh - 2rem) !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    background: #ffffff !important;
+    border: 1px solid #eef2f7 !important;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, .28) !important;
+    animation: modalEnter .28s ease-out both !important;
+}
+
+#backupActionModal.closing .backup-action-shell {
+    animation: modalExit .22s ease-in both !important;
+}
+
+#backupActionModal .ap-delete-head {
+    padding: 1rem 1.15rem !important;
+    border-bottom: 1px solid #eef2f7 !important;
+    background:
+        radial-gradient(circle at top right, rgba(239, 68, 68, .10), transparent 38%),
+        #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: .85rem !important;
+}
+
+#backupActionModal .ap-delete-head-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: .8rem !important;
+    min-width: 0 !important;
+}
+
+#backupActionModal .ap-delete-head-icon {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border-radius: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid transparent !important;
+}
+
+#backupActionModal .backup-action-icon.is-download {
+    background: #EFF6FF !important;
+    color: #2563EB !important;
+    border-color: #BFDBFE !important;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, .14) !important;
+}
+
+#backupActionModal .backup-action-icon.is-restore {
+    background: #FEF3C7 !important;
+    color: #B45309 !important;
+    border-color: #FDE68A !important;
+    box-shadow: 0 10px 22px rgba(180, 83, 9, .14) !important;
+}
+
+#backupActionModal .backup-action-icon.is-delete {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border-color: #FECACA !important;
+    box-shadow: 0 10px 22px rgba(220, 38, 38, .14) !important;
+}
+
+#backupActionModal .ap-delete-head-icon i,
+#backupActionModal .ap-delete-x i,
+#backupActionModal .backup-action-confirm i {
+    color: currentColor !important;
+}
+
+#backupActionModal .ap-delete-title {
+    margin: 0 !important;
+    color: #1f2937 !important;
+    font-size: 1rem !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+}
+
+#backupActionModal .ap-delete-subtitle {
+    margin: .2rem 0 0 !important;
+    color: #8b95a7 !important;
+    font-size: .76rem !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+}
+
+#backupActionModal .ap-delete-x {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #94a3b8 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all .18s ease !important;
+}
+
+#backupActionModal .ap-delete-x:hover {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+    transform: translateY(-1px) !important;
+}
+
+#backupActionModal .ap-delete-content {
+    padding: 1.15rem !important;
+    background: #ffffff !important;
+}
+
+#backupActionModal .ap-delete-warning {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: .75rem !important;
+    padding: .9rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 16px !important;
+    border: 1px solid transparent !important;
+}
+
+#backupActionModal .ap-delete-warning>i {
+    margin-top: .12rem !important;
+    font-size: .95rem !important;
+    color: currentColor !important;
+}
+
+#backupActionModal .ap-delete-warning.is-download {
+    background: #EFF6FF !important;
+    border-color: #BFDBFE !important;
+    color: #1D4ED8 !important;
+}
+
+#backupActionModal .ap-delete-warning.is-restore {
+    background: #FFFBEB !important;
+    border-color: #FDE68A !important;
+    color: #92400E !important;
+}
+
+#backupActionModal .ap-delete-warning.is-delete {
+    background: #FEF2F2 !important;
+    border-color: #FCA5A5 !important;
+    color: #991B1B !important;
+}
+
+#backupActionModal .ap-delete-warning p {
+    margin: 0 !important;
+    color: inherit !important;
+    font-size: .88rem !important;
+    line-height: 1.4 !important;
+    font-weight: 900 !important;
+}
+
+#backupActionModal .ap-delete-warning span {
+    display: block !important;
+    margin-top: .3rem !important;
+    color: currentColor !important;
+    opacity: .82 !important;
+    font-size: .76rem !important;
+    font-weight: 650 !important;
+}
+
+#backupActionModal .ap-delete-footer {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: .7rem !important;
+}
+
+#backupActionModal .modal-btn-ghost,
+#backupActionModal .backup-action-confirm {
+    min-height: 44px !important;
+    padding: 0 1.15rem !important;
+    border-radius: 12px !important;
+    font-size: .86rem !important;
+    font-weight: 900 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .55rem !important;
+}
+
+#backupActionModal .modal-btn-ghost {
+    border: 1px solid #e5e7eb !important;
+    background: #ffffff !important;
+    color: #4b5563 !important;
+}
+
+#backupActionModal .modal-btn-ghost:hover {
+    background: #f9fafb !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-1px) !important;
+}
+
+#backupActionModal .backup-action-confirm {
+    border: 0 !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    transition: all .18s ease !important;
+}
+
+#backupActionModal .backup-action-confirm.is-download {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, .24) !important;
+}
+
+#backupActionModal .backup-action-confirm.is-restore {
+    background: linear-gradient(135deg, #D97706, #B45309) !important;
+    box-shadow: 0 12px 24px rgba(180, 83, 9, .24) !important;
+}
+
+#backupActionModal .backup-action-confirm.is-delete {
+    background: linear-gradient(135deg, #DC2626, #EF4444) !important;
+    box-shadow: 0 12px 24px rgba(220, 38, 38, .26) !important;
+}
+
+#backupActionModal .backup-action-confirm:hover {
+    transform: translateY(-1px) !important;
+    filter: brightness(1.04) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-shell,
+.dark #backupActionModal .backup-action-shell {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+    color: #E5E7EB !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-head,
+.dark #backupActionModal .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .10), transparent 38%),
+        #0D1117 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-content,
+.dark #backupActionModal .ap-delete-content {
+    background: #111827 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-title,
+.dark #backupActionModal .ap-delete-title {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-subtitle,
+.dark #backupActionModal .ap-delete-subtitle {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-x,
+[data-theme="dark"] #backupActionModal .modal-btn-ghost,
+.dark #backupActionModal .ap-delete-x,
+.dark #backupActionModal .modal-btn-ghost {
+    background: rgba(255, 255, 255, .06) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-x:hover,
+[data-theme="dark"] #backupActionModal .modal-btn-ghost:hover,
+.dark #backupActionModal .ap-delete-x:hover,
+.dark #backupActionModal .modal-btn-ghost:hover {
+    background: rgba(252, 165, 165, .13) !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+    color: #FCA5A5 !important;
+}
+
+@media (max-width: 767px) {
+    #backupActionModal.backup-action-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    #backupActionModal .backup-action-shell {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #backupActionModal .ap-delete-footer {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    #backupActionModal .modal-btn-ghost,
+    #backupActionModal .backup-action-confirm {
+        width: 100% !important;
+    }
+}
+
+#backupActionModal.ui-modal:not(.open):not(.closing),
+#backupActionModal.backup-action-modal:not(.open):not(.closing) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+#backupActionModal.ui-modal,
+#backupActionModal.backup-action-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 24px !important;
+
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    z-index: 99999 !important;
+    transform: none !important;
+
+    background:
+        radial-gradient(circle at 15% 12%, rgba(139, 0, 0, .18), transparent 32%),
+        rgba(15, 23, 42, .56) !important;
+    backdrop-filter: blur(8px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
+}
+
+#backupActionModal.ui-modal.open,
+#backupActionModal.ui-modal.closing,
+#backupActionModal.backup-action-modal.open,
+#backupActionModal.backup-action-modal.closing {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+#backupActionModal.ui-modal.open,
+#backupActionModal.backup-action-modal.open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    animation: modalBackdropIn .18s ease-out both !important;
+}
+
+#backupActionModal.ui-modal.closing,
+#backupActionModal.backup-action-modal.closing {
+    pointer-events: none !important;
+    animation: modalBackdropOut .18s ease-in both !important;
+}
+
+#backupActionModal .modal-box.modal-box-inner.ap-delete-shell.backup-action-shell,
+#backupActionModal .ap-delete-shell,
+#backupActionModal .backup-action-shell {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: min(92vw, 560px) !important;
+    max-width: 680px !important;
+    max-height: calc(100dvh - 2rem) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    background: #ffffff !important;
+    border-color: #21262d !important;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, .28) !important;
+    animation: modalEnter .22s ease-out both !important;
+    will-change: transform, opacity !important;
+}
+
+#backupActionModal.closing .ap-delete-shell,
+#backupActionModal.closing .backup-action-shell {
+    animation: modalExit .18s ease-in both !important;
+}
+
+#backupActionModal .ap-delete-head {
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    padding: 1rem 1.15rem !important;
+    margin: 0 !important;
+
+    border-radius: 22px 22px 0 0 !important;
+    border-bottom: 1px solid #eef2f7 !important;
+
+    background:
+        radial-gradient(circle at top right, rgba(239, 68, 68, .10), transparent 38%),
+        #ffffff !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: .85rem !important;
+}
+
+#backupActionModal .ap-delete-head-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: .8rem !important;
+    min-width: 0 !important;
+}
+
+#backupActionModal .ap-delete-head-icon {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border-radius: 14px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: #fee2e2 !important;
+    color: #dc2626 !important;
+    border: 1px solid #fecaca !important;
+    box-shadow: 0 10px 22px rgba(220, 38, 38, .14) !important;
+}
+
+#backupActionModal .ap-delete-head-icon i,
+#backupActionModal .ap-delete-x i,
+#backupActionModal .ap-delete-confirm-btn i {
+    color: currentColor !important;
+}
+
+#backupActionModal .ap-delete-title {
+    margin: 0 !important;
+    color: #1f2937 !important;
+    font-size: 1rem !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+}
+
+#backupActionModal .ap-delete-subtitle {
+    margin: .2rem 0 0 !important;
+    color: #8b95a7 !important;
+    font-size: .76rem !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+}
+
+#backupActionModal .ap-delete-x {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #94a3b8 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    cursor: pointer !important;
+    transition: all .18s ease !important;
+}
+
+#backupActionModal .ap-delete-x:hover {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+    transform: translateY(-1px) !important;
+}
+
+#backupActionModal .ap-delete-content {
+    padding: 1.15rem !important;
+    background: #ffffff !important;
+}
+
+#backupActionModal .ap-delete-warning {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: .75rem !important;
+
+    padding: .9rem !important;
+    margin-bottom: 1rem !important;
+
+    border-radius: 16px !important;
+    background: #fef2f2 !important;
+    border: 1px solid #fca5a5 !important;
+    color: #991b1b !important;
+}
+
+#backupActionModal .ap-delete-warning>i {
+    margin-top: .12rem !important;
+    color: #dc2626 !important;
+    font-size: .95rem !important;
+}
+
+#backupActionModal .ap-delete-warning p {
+    margin: 0 !important;
+    color: #7f1d1d !important;
+    font-size: .88rem !important;
+    line-height: 1.4 !important;
+    font-weight: 900 !important;
+}
+
+#backupActionModal .ap-delete-warning span {
+    display: block !important;
+    margin-top: .3rem !important;
+    color: #b91c1c !important;
+    font-size: .76rem !important;
+    font-weight: 600 !important;
+}
+
+#backupActionModal .ap-delete-footer {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: .7rem !important;
+}
+
+#backupActionModal .modal-btn-ghost,
+#backupActionModal .ap-delete-confirm-btn {
+    min-height: 44px !important;
+    padding: 0 1.15rem !important;
+    border-radius: 12px !important;
+
+    font-size: .86rem !important;
+    font-weight: 900 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .55rem !important;
+}
+
+#backupActionModal .modal-btn-ghost {
+    border: 1px solid #e5e7eb !important;
+    background: #ffffff !important;
+    color: #4b5563 !important;
+}
+
+#backupActionModal .modal-btn-ghost:hover {
+    background: #f9fafb !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-1px) !important;
+}
+
+#backupActionModal .ap-delete-confirm-btn {
+    border: 0 !important;
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    box-shadow: 0 12px 24px rgba(220, 38, 38, .26) !important;
+    transition: all .18s ease !important;
+}
+
+#backupActionModal .ap-delete-confirm-btn:hover {
+    transform: translateY(-1px) !important;
+    background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+    box-shadow: 0 16px 30px rgba(220, 38, 38, .34) !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-shell,
+[data-theme="dark"] #backupActionModal .backup-action-shell,
+.dark #backupActionModal .ap-delete-shell,
+.dark #backupActionModal .backup-action-shell {
+    background: #0d1117 !important;
+    border-color: #21262d !important;
+    color: #e5e7eb !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-head,
+.dark #backupActionModal .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .10), transparent 38%),
+        #0d1117 !important;
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-content,
+.dark #backupActionModal .ap-delete-content {
+    background: #111827 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-title,
+.dark #backupActionModal .ap-delete-title {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-subtitle,
+.dark #backupActionModal .ap-delete-subtitle {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-head-icon,
+.dark #backupActionModal .ap-delete-head-icon {
+    background: rgba(220, 38, 38, .17) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(252, 165, 165, .22) !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-x,
+[data-theme="dark"] #backupActionModal .modal-btn-ghost,
+.dark #backupActionModal .ap-delete-x,
+.dark #backupActionModal .modal-btn-ghost {
+    background: rgba(255, 255, 255, .06) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-x:hover,
+[data-theme="dark"] #backupActionModal .modal-btn-ghost:hover,
+.dark #backupActionModal .ap-delete-x:hover,
+.dark #backupActionModal .modal-btn-ghost:hover {
+    background: rgba(252, 165, 165, .13) !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+    color: #fca5a5 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-warning,
+.dark #backupActionModal .ap-delete-warning {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .12), transparent 45%),
+        rgba(220, 38, 38, .12) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-warning p,
+.dark #backupActionModal .ap-delete-warning p {
+    color: #fecaca !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-warning span,
+[data-theme="dark"] #backupActionModal .ap-delete-warning>i,
+.dark #backupActionModal .ap-delete-warning span,
+.dark #backupActionModal .ap-delete-warning>i {
+    color: #fca5a5 !important;
+}
+
+@media (max-width: 767px) {
+
+    #backupActionModal.ui-modal,
+    #backupActionModal.backup-action-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    #backupActionModal .ap-delete-shell,
+    #backupActionModal .backup-action-shell {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #backupActionModal .ap-delete-head {
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #backupActionModal .ap-delete-footer {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    #backupActionModal .modal-btn-ghost,
+    #backupActionModal .ap-delete-confirm-btn {
+        width: 100% !important;
+    }
+}
+
+#backupActionModal:has(.backup-action-confirm.is-download) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(59, 130, 246, .12), transparent 38%),
+        #ffffff !important;
+}
+
+#backupActionModal .backup-action-icon.is-download {
+    background: #EFF6FF !important;
+    color: #2563EB !important;
+    border-color: #BFDBFE !important;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, .14) !important;
+}
+
+#backupActionModal .backup-action-warning.is-download {
+    background: #EFF6FF !important;
+    border-color: #BFDBFE !important;
+    color: #1D4ED8 !important;
+}
+
+#backupActionModal .backup-action-warning.is-download>i,
+#backupActionModal .backup-action-warning.is-download p,
+#backupActionModal .backup-action-warning.is-download span {
+    color: #1D4ED8 !important;
+}
+
+#backupActionModal .backup-action-confirm.is-download {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
+    color: #ffffff !important;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, .24) !important;
+}
+
+#backupActionModal .backup-action-confirm.is-download:hover {
+    background: linear-gradient(135deg, #1D4ED8, #1E40AF) !important;
+    box-shadow: 0 16px 30px rgba(37, 99, 235, .32) !important;
+}
+
+#backupActionModal:has(.backup-action-confirm.is-restore) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(245, 158, 11, .14), transparent 38%),
+        #ffffff !important;
+}
+
+#backupActionModal .backup-action-icon.is-restore {
+    background: #FEF3C7 !important;
+    color: #B45309 !important;
+    border-color: #FDE68A !important;
+    box-shadow: 0 10px 22px rgba(180, 83, 9, .14) !important;
+}
+
+#backupActionModal .backup-action-warning.is-restore {
+    background: #FFFBEB !important;
+    border-color: #FDE68A !important;
+    color: #92400E !important;
+}
+
+#backupActionModal .backup-action-warning.is-restore>i,
+#backupActionModal .backup-action-warning.is-restore p,
+#backupActionModal .backup-action-warning.is-restore span {
+    color: #92400E !important;
+}
+
+#backupActionModal .backup-action-confirm.is-restore {
+    background: linear-gradient(135deg, #D97706, #B45309) !important;
+    color: #ffffff !important;
+    box-shadow: 0 12px 24px rgba(180, 83, 9, .24) !important;
+}
+
+#backupActionModal .backup-action-confirm.is-restore:hover {
+    background: linear-gradient(135deg, #B45309, #92400E) !important;
+    box-shadow: 0 16px 30px rgba(180, 83, 9, .32) !important;
+}
+
+#backupActionModal:has(.backup-action-confirm.is-delete) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(239, 68, 68, .12), transparent 38%),
+        #ffffff !important;
+}
+
+#backupActionModal .backup-action-icon.is-delete {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border-color: #FECACA !important;
+    box-shadow: 0 10px 22px rgba(220, 38, 38, .14) !important;
+}
+
+#backupActionModal .backup-action-warning.is-delete {
+    background: #FEF2F2 !important;
+    border-color: #FCA5A5 !important;
+    color: #991B1B !important;
+}
+
+#backupActionModal .backup-action-warning.is-delete>i,
+#backupActionModal .backup-action-warning.is-delete p,
+#backupActionModal .backup-action-warning.is-delete span {
+    color: #991B1B !important;
+}
+
+#backupActionModal .backup-action-confirm.is-delete {
+    background: linear-gradient(135deg, #DC2626, #EF4444) !important;
+    color: #ffffff !important;
+    box-shadow: 0 12px 24px rgba(220, 38, 38, .26) !important;
+}
+
+#backupActionModal .backup-action-confirm.is-delete:hover {
+    background: linear-gradient(135deg, #B91C1C, #DC2626) !important;
+    box-shadow: 0 16px 30px rgba(220, 38, 38, .34) !important;
+}
+
+[data-theme="dark"] #backupActionModal:has(.backup-action-confirm.is-download) .ap-delete-head,
+.dark #backupActionModal:has(.backup-action-confirm.is-download) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(96, 165, 250, .13), transparent 38%),
+        #0D1117 !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-icon.is-download,
+.dark #backupActionModal .backup-action-icon.is-download {
+    background: rgba(37, 99, 235, .16) !important;
+    color: #60A5FA !important;
+    border-color: rgba(147, 197, 253, .28) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-download,
+.dark #backupActionModal .backup-action-warning.is-download {
+    background:
+        radial-gradient(circle at top left, rgba(96, 165, 250, .13), transparent 45%),
+        rgba(37, 99, 235, .12) !important;
+    border-color: rgba(147, 197, 253, .28) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-download>i,
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-download p,
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-download span,
+.dark #backupActionModal .backup-action-warning.is-download>i,
+.dark #backupActionModal .backup-action-warning.is-download p,
+.dark #backupActionModal .backup-action-warning.is-download span {
+    color: #93C5FD !important;
+}
+
+[data-theme="dark"] #backupActionModal:has(.backup-action-confirm.is-restore) .ap-delete-head,
+.dark #backupActionModal:has(.backup-action-confirm.is-restore) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(251, 191, 36, .13), transparent 38%),
+        #0D1117 !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-icon.is-restore,
+.dark #backupActionModal .backup-action-icon.is-restore {
+    background: rgba(245, 158, 11, .17) !important;
+    color: #FBBF24 !important;
+    border-color: rgba(253, 230, 138, .28) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-restore,
+.dark #backupActionModal .backup-action-warning.is-restore {
+    background:
+        radial-gradient(circle at top left, rgba(251, 191, 36, .13), transparent 45%),
+        rgba(245, 158, 11, .12) !important;
+    border-color: rgba(253, 230, 138, .28) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-restore>i,
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-restore p,
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-restore span,
+.dark #backupActionModal .backup-action-warning.is-restore>i,
+.dark #backupActionModal .backup-action-warning.is-restore p,
+.dark #backupActionModal .backup-action-warning.is-restore span {
+    color: #FCD34D !important;
+}
+
+[data-theme="dark"] #backupActionModal:has(.backup-action-confirm.is-delete) .ap-delete-head,
+.dark #backupActionModal:has(.backup-action-confirm.is-delete) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .12), transparent 38%),
+        #0D1117 !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-icon.is-delete,
+.dark #backupActionModal .backup-action-icon.is-delete {
+    background: rgba(220, 38, 38, .17) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, .28) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-delete,
+.dark #backupActionModal .backup-action-warning.is-delete {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .12), transparent 45%),
+        rgba(220, 38, 38, .12) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-delete>i,
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-delete p,
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-delete span,
+.dark #backupActionModal .backup-action-warning.is-delete>i,
+.dark #backupActionModal .backup-action-warning.is-delete p,
+.dark #backupActionModal .backup-action-warning.is-delete span {
+    color: #FCA5A5 !important;
+}
+
+.backup-id,
+.backup-grid-id,
+.backup-page .backup-id,
+.backup-page .backup-grid-id,
+#mainContent.backup-page .backup-id,
+#mainContent.backup-page .backup-grid-id {
+    color: #8B0000 !important;
+    font-weight: 900 !important;
+}
+
+[data-theme="dark"] .backup-id,
+[data-theme="dark"] .backup-grid-id,
+[data-theme="dark"] .backup-page .backup-id,
+[data-theme="dark"] .backup-page .backup-grid-id,
+[data-theme="dark"] #mainContent.backup-page .backup-id,
+[data-theme="dark"] #mainContent.backup-page .backup-grid-id,
+.dark .backup-id,
+.dark .backup-grid-id,
+.dark .backup-page .backup-id,
+.dark .backup-page .backup-grid-id,
+.dark #mainContent.backup-page .backup-id,
+.dark #mainContent.backup-page .backup-grid-id {
+    color: #FCA5A5 !important;
+    text-shadow: none !important;
+}
+
+#backupActionModal.ui-modal:not(.open):not(.closing),
+#backupActionModal.backup-action-modal:not(.open):not(.closing) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+#backupActionModal.ui-modal,
+#backupActionModal.backup-action-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    transform: none !important;
+    background:
+        radial-gradient(circle at 15% 12%, rgba(139, 0, 0, .18), transparent 32%),
+        rgba(15, 23, 42, .56) !important;
+    backdrop-filter: blur(8px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
+}
+
+#backupActionModal.ui-modal.open,
+#backupActionModal.ui-modal.closing,
+#backupActionModal.backup-action-modal.open,
+#backupActionModal.backup-action-modal.closing {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+#backupActionModal.ui-modal.open,
+#backupActionModal.backup-action-modal.open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    animation: modalBackdropIn .18s ease-out both !important;
+}
+
+#backupActionModal.ui-modal.closing,
+#backupActionModal.backup-action-modal.closing {
+    pointer-events: none !important;
+    animation: modalBackdropOut .18s ease-in both !important;
+}
+
+#backupActionModal .modal-box.modal-box-inner.ap-delete-shell.backup-action-shell,
+#backupActionModal .ap-delete-shell,
+#backupActionModal .backup-action-shell {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: min(92vw, 560px) !important;
+    max-width: 680px !important;
+    max-height: calc(100dvh - 2rem) !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    background: #ffffff !important;
+    border: 1px solid #eef2f7 !important;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, .28) !important;
+    animation: modalEnter .22s ease-out both !important;
+}
+
+#backupActionModal.closing .ap-delete-shell,
+#backupActionModal.closing .backup-action-shell {
+    animation: modalExit .18s ease-in both !important;
+}
+
+#backupActionModal .ap-delete-head {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 1rem 1.15rem !important;
+    margin: 0 !important;
+    border-radius: 22px 22px 0 0 !important;
+    border-bottom: 1px solid #eef2f7 !important;
+    background:
+        radial-gradient(circle at top right, rgba(239, 68, 68, .10), transparent 38%),
+        #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: .85rem !important;
+}
+
+#backupActionModal .ap-delete-head-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: .8rem !important;
+    min-width: 0 !important;
+}
+
+#backupActionModal .ap-delete-head-icon {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border-radius: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid transparent !important;
+    box-shadow: 0 10px 22px rgba(220, 38, 38, .14) !important;
+}
+
+#backupActionModal .ap-delete-head-icon i,
+#backupActionModal .ap-delete-x i,
+#backupActionModal .ap-delete-confirm-btn i,
+#backupActionModal .backup-action-confirm i {
+    color: currentColor !important;
+}
+
+#backupActionModal .ap-delete-title {
+    margin: 0 !important;
+    color: #1f2937 !important;
+    font-size: 1rem !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+}
+
+#backupActionModal .ap-delete-subtitle {
+    margin: .2rem 0 0 !important;
+    color: #8b95a7 !important;
+    font-size: .76rem !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+}
+
+#backupActionModal .ap-delete-x {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #94a3b8 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all .18s ease !important;
+}
+
+#backupActionModal .ap-delete-x:hover {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+    transform: translateY(-1px) !important;
+}
+
+#backupActionModal .ap-delete-content {
+    padding: 1.15rem !important;
+    background: #ffffff !important;
+}
+
+#backupActionModal .ap-delete-warning {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: .75rem !important;
+    padding: .9rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 16px !important;
+    border: 1px solid transparent !important;
+}
+
+#backupActionModal .ap-delete-warning > i {
+    margin-top: .12rem !important;
+    font-size: .95rem !important;
+    color: currentColor !important;
+}
+
+#backupActionModal .ap-delete-warning p {
+    margin: 0 !important;
+    color: inherit !important;
+    font-size: .88rem !important;
+    line-height: 1.4 !important;
+    font-weight: 900 !important;
+}
+
+#backupActionModal .ap-delete-warning span {
+    display: block !important;
+    margin-top: .3rem !important;
+    color: currentColor !important;
+    opacity: .82 !important;
+    font-size: .76rem !important;
+    font-weight: 650 !important;
+}
+
+#backupActionModal .ap-delete-footer {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: .7rem !important;
+}
+
+#backupActionModal .modal-btn-ghost,
+#backupActionModal .ap-delete-confirm-btn,
+#backupActionModal .backup-action-confirm {
+    min-height: 44px !important;
+    padding: 0 1.15rem !important;
+    border-radius: 12px !important;
+    font-size: .86rem !important;
+    font-weight: 900 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .55rem !important;
+}
+
+#backupActionModal .modal-btn-ghost {
+    border: 1px solid #e5e7eb !important;
+    background: #ffffff !important;
+    color: #4b5563 !important;
+}
+
+#backupActionModal .modal-btn-ghost:hover {
+    background: #f9fafb !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-1px) !important;
+}
+
+#backupActionModal .ap-delete-confirm-btn,
+#backupActionModal .backup-action-confirm {
+    border: 0 !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    transition: all .18s ease !important;
+}
+
+#backupActionModal .ap-delete-confirm-btn:hover,
+#backupActionModal .backup-action-confirm:hover {
+    transform: translateY(-1px) !important;
+    filter: brightness(1.04) !important;
+}
+
+#backupActionModal:has(.backup-action-confirm.is-download) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(59, 130, 246, .12), transparent 38%),
+        #ffffff !important;
+}
+
+#backupActionModal .backup-action-icon.is-download {
+    background: #EFF6FF !important;
+    color: #2563EB !important;
+    border-color: #BFDBFE !important;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, .14) !important;
+}
+
+#backupActionModal .backup-action-warning.is-download {
+    background: #EFF6FF !important;
+    border-color: #BFDBFE !important;
+    color: #1D4ED8 !important;
+}
+
+#backupActionModal .backup-action-confirm.is-download {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, .24) !important;
+}
+
+#backupActionModal:has(.backup-action-confirm.is-restore) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(245, 158, 11, .14), transparent 38%),
+        #ffffff !important;
+}
+
+#backupActionModal .backup-action-icon.is-restore {
+    background: #FEF3C7 !important;
+    color: #B45309 !important;
+    border-color: #FDE68A !important;
+    box-shadow: 0 10px 22px rgba(180, 83, 9, .14) !important;
+}
+
+#backupActionModal .backup-action-warning.is-restore {
+    background: #FFFBEB !important;
+    border-color: #FDE68A !important;
+    color: #92400E !important;
+}
+
+#backupActionModal .backup-action-confirm.is-restore {
+    background: linear-gradient(135deg, #D97706, #B45309) !important;
+    box-shadow: 0 12px 24px rgba(180, 83, 9, .24) !important;
+}
+
+#backupActionModal:has(.backup-action-confirm.is-delete) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(239, 68, 68, .12), transparent 38%),
+        #ffffff !important;
+}
+
+#backupActionModal .backup-action-icon.is-delete {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border-color: #FECACA !important;
+    box-shadow: 0 10px 22px rgba(220, 38, 38, .14) !important;
+}
+
+#backupActionModal .backup-action-warning.is-delete {
+    background: #FEF2F2 !important;
+    border-color: #FCA5A5 !important;
+    color: #991B1B !important;
+}
+
+#backupActionModal .backup-action-confirm.is-delete {
+    background: linear-gradient(135deg, #DC2626, #EF4444) !important;
+    box-shadow: 0 12px 24px rgba(220, 38, 38, .26) !important;
+}
+
+[data-theme="dark"] #backupActionModal .modal-box.modal-box-inner.ap-delete-shell.backup-action-shell,
+[data-theme="dark"] #backupActionModal .ap-delete-shell,
+[data-theme="dark"] #backupActionModal .backup-action-shell,
+.dark #backupActionModal .modal-box.modal-box-inner.ap-delete-shell.backup-action-shell,
+.dark #backupActionModal .ap-delete-shell,
+.dark #backupActionModal .backup-action-shell {
+    background: #0d1117 !important;
+    border-color: #21262d !important;
+    color: #e5e7eb !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-content,
+.dark #backupActionModal .ap-delete-content {
+    background: #111827 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-title,
+.dark #backupActionModal .ap-delete-title {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-subtitle,
+.dark #backupActionModal .ap-delete-subtitle {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-x,
+[data-theme="dark"] #backupActionModal .modal-btn-ghost,
+.dark #backupActionModal .ap-delete-x,
+.dark #backupActionModal .modal-btn-ghost {
+    background: rgba(255, 255, 255, .06) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] #backupActionModal .ap-delete-x:hover,
+[data-theme="dark"] #backupActionModal .modal-btn-ghost:hover,
+.dark #backupActionModal .ap-delete-x:hover,
+.dark #backupActionModal .modal-btn-ghost:hover {
+    background: rgba(252, 165, 165, .13) !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+    color: #fca5a5 !important;
+}
+
+[data-theme="dark"] #backupActionModal:has(.backup-action-confirm.is-download) .ap-delete-head,
+.dark #backupActionModal:has(.backup-action-confirm.is-download) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(96, 165, 250, .13), transparent 38%),
+        #0d1117 !important;
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-icon.is-download,
+.dark #backupActionModal .backup-action-icon.is-download {
+    background: rgba(37, 99, 235, .16) !important;
+    color: #60A5FA !important;
+    border-color: rgba(147, 197, 253, .28) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-download,
+.dark #backupActionModal .backup-action-warning.is-download {
+    background:
+        radial-gradient(circle at top left, rgba(96, 165, 250, .13), transparent 45%),
+        rgba(37, 99, 235, .12) !important;
+    border-color: rgba(147, 197, 253, .28) !important;
+    color: #93C5FD !important;
+}
+
+[data-theme="dark"] #backupActionModal:has(.backup-action-confirm.is-restore) .ap-delete-head,
+.dark #backupActionModal:has(.backup-action-confirm.is-restore) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(251, 191, 36, .13), transparent 38%),
+        #0d1117 !important;
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-icon.is-restore,
+.dark #backupActionModal .backup-action-icon.is-restore {
+    background: rgba(245, 158, 11, .17) !important;
+    color: #FBBF24 !important;
+    border-color: rgba(253, 230, 138, .28) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-restore,
+.dark #backupActionModal .backup-action-warning.is-restore {
+    background:
+        radial-gradient(circle at top left, rgba(251, 191, 36, .13), transparent 45%),
+        rgba(245, 158, 11, .12) !important;
+    border-color: rgba(253, 230, 138, .28) !important;
+    color: #FCD34D !important;
+}
+
+[data-theme="dark"] #backupActionModal:has(.backup-action-confirm.is-delete) .ap-delete-head,
+.dark #backupActionModal:has(.backup-action-confirm.is-delete) .ap-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .12), transparent 38%),
+        #0d1117 !important;
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-icon.is-delete,
+.dark #backupActionModal .backup-action-icon.is-delete {
+    background: rgba(220, 38, 38, .17) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, .28) !important;
+}
+
+[data-theme="dark"] #backupActionModal .backup-action-warning.is-delete,
+.dark #backupActionModal .backup-action-warning.is-delete {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .12), transparent 45%),
+        rgba(220, 38, 38, .12) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+    color: #FCA5A5 !important;
+}
+
+@media (max-width: 767px) {
+    #backupActionModal.ui-modal,
+    #backupActionModal.backup-action-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    #backupActionModal .modal-box.modal-box-inner.ap-delete-shell.backup-action-shell,
+    #backupActionModal .ap-delete-shell,
+    #backupActionModal .backup-action-shell {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #backupActionModal .ap-delete-head {
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #backupActionModal .ap-delete-footer {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    #backupActionModal .modal-btn-ghost,
+    #backupActionModal .ap-delete-confirm-btn,
+    #backupActionModal .backup-action-confirm {
+        width: 100% !important;
+    }
+}
+
+#mainContent.backup-page .table-actions .action-btn,
+.backup-page .table-actions .action-btn,
+.backup-grid-footer .action-btn {
+    --action-bg: #F3F4F6;
+    --action-color: #4B5563;
+    --action-hover-bg: var(--action-bg);
+    --action-hover-color: var(--action-color);
+    --action-tooltip-bg: var(--action-color);
+
+    position: relative !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--action-bg) !important;
+    color: var(--action-color) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, filter .18s ease !important;
+    isolation: isolate !important;
+}
+
+#mainContent.backup-page .table-actions .action-btn i,
+.backup-page .table-actions .action-btn i,
+.backup-grid-footer .action-btn i {
+    color: currentColor !important;
+    font-size: .72rem !important;
+    line-height: 1 !important;
+}
+
+[data-theme="dark"] #mainContent.backup-page .table-actions .action-btn,
+[data-theme="dark"] .backup-page .table-actions .action-btn,
+[data-theme="dark"] .backup-grid-footer .action-btn,
+.dark #mainContent.backup-page .table-actions .action-btn,
+.dark .backup-page .table-actions .action-btn,
+.dark .backup-grid-footer .action-btn {
+    border: 0 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 8px 18px rgba(0, 0, 0, .18) !important;
+}
+
+[data-theme="dark"] #mainContent.backup-page .table-actions .action-btn.dl,
+[data-theme="dark"] .backup-page .table-actions .action-btn.dl,
+[data-theme="dark"] .backup-grid-footer .action-btn.dl,
+.dark #mainContent.backup-page .table-actions .action-btn.dl,
+.dark .backup-page .table-actions .action-btn.dl,
+.dark .backup-grid-footer .action-btn.dl {
+    --action-bg: rgba(37, 99, 235, .16);
+    --action-color: #60A5FA;
+    --action-hover-bg: rgba(37, 99, 235, .24);
+    --action-hover-color: #93C5FD;
+    --action-tooltip-bg: #2563EB;
+}
+
+[data-theme="dark"] #mainContent.backup-page .table-actions .action-btn.restore,
+[data-theme="dark"] .backup-page .table-actions .action-btn.restore,
+[data-theme="dark"] .backup-grid-footer .action-btn.restore,
+.dark #mainContent.backup-page .table-actions .action-btn.restore,
+.dark .backup-page .table-actions .action-btn.restore,
+.dark .backup-grid-footer .action-btn.restore {
+    --action-bg: rgba(245, 158, 11, .17);
+    --action-color: #FBBF24;
+    --action-hover-bg: rgba(245, 158, 11, .26);
+    --action-hover-color: #FCD34D;
+    --action-tooltip-bg: #B45309;
+}
+
+[data-theme="dark"] #mainContent.backup-page .table-actions .action-btn.del,
+[data-theme="dark"] .backup-page .table-actions .action-btn.del,
+[data-theme="dark"] .backup-grid-footer .action-btn.del,
+.dark #mainContent.backup-page .table-actions .action-btn.del,
+.dark .backup-page .table-actions .action-btn.del,
+.dark .backup-grid-footer .action-btn.del {
+    --action-bg: rgba(220, 38, 38, .17);
+    --action-color: #FCA5A5;
+    --action-hover-bg: rgba(220, 38, 38, .26);
+    --action-hover-color: #FECACA;
+    --action-tooltip-bg: #DC2626;
+}
+
+#backupActionModal .modal-box.modal-box-inner.ap-delete-shell.backup-action-shell,
+#backupActionModal .ap-delete-shell,
+#backupActionModal .backup-action-shell {
+    width: min(94vw, 640px) !important;
+    max-width: 640px !important;
+}
+
+#backupActionModal .ap-delete-head {
+    padding: 1.15rem 1.35rem !important;
+}
+
+#backupActionModal .ap-delete-content {
+    padding: 1.35rem !important;
+}
+
+#backupActionModal .ap-delete-warning {
+    padding: 1rem 1.05rem !important;
+    margin-bottom: 1.15rem !important;
+}
+
+#backupActionModal .ap-delete-footer {
+    gap: .8rem !important;
 }

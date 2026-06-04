@@ -471,11 +471,6 @@
     }
 }
 
-/* =========================================================
-       DARK MODE
-       Consolidated overrides for appointment cards and controls.
-       Some !important rules are kept only to beat Tailwind utility classes.
-    ========================================================= */
 [data-theme="dark"] .bg-white {
     background-color: #0d1117 !important;
     border-color: #21262d !important;
@@ -709,7 +704,6 @@
     min-width: 0 !important;
 }
 
-/* Compact status dropdown */
 .admin-appointments-page .appointment-status-dropdown {
     position: relative !important;
     flex: 0 0 190px !important;
@@ -908,7 +902,6 @@
     box-shadow: 0 4px 10px rgba(15, 23, 42, .06) !important;
 }
 
-/* Status tones */
 .admin-appointments-page .tone-all {
     --appt-status-color: #2563EB;
     --appt-status-bg: #EFF6FF;
@@ -939,7 +932,6 @@
     --appt-status-border: #FECACA;
 }
 
-/* Smaller upcoming / past toggle */
 .admin-appointments-page .tab-toggle-wrap {
     padding: 4px !important;
     gap: 4px !important;
@@ -959,7 +951,6 @@
     font-size: 10px !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] .admin-appointments-page .appointment-status-trigger,
 .dark .admin-appointments-page .appointment-status-trigger {
     background: rgba(13, 17, 23, .82) !important;
@@ -1171,7 +1162,6 @@
     line-height: 1 !important;
 }
 
-/* Status tone variables */
 .admin-appointments-page .appointment-status-option.tone-all,
 .admin-appointments-page .appointment-status-trigger-icon.tone-all {
     --appt-option-bg: #EFF6FF;
@@ -1212,14 +1202,12 @@
     --appt-option-soft: rgba(220, 38, 38, .16);
 }
 
-/* Trigger icon should follow selected status color */
 .admin-appointments-page .appointment-status-trigger-icon {
     background: var(--appt-option-bg, #EFF6FF) !important;
     border-color: var(--appt-option-border, #BFDBFE) !important;
     color: var(--appt-option-text, #2563EB) !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] .admin-appointments-page .appointment-status-panel,
 .dark .admin-appointments-page .appointment-status-panel {
     background:
@@ -1233,7 +1221,6 @@
     -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
 }
 
-/* Keep mobile clean */
 @media (max-width: 767px) {
     .admin-appointments-page .appointment-status-panel {
         width: 100% !important;
@@ -1335,7 +1322,6 @@
     color: var(--appt-option-text) !important;
 }
 
-/* Selected trigger icon dark mode */
 [data-theme="dark"] .admin-appointments-page .appointment-status-trigger-icon,
 .dark .admin-appointments-page .appointment-status-trigger-icon {
     background: color-mix(in srgb, var(--appt-option-text, #60A5FA) 18%, rgba(13, 17, 23, .88)) !important;
