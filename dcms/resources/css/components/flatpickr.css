@@ -520,3 +520,130 @@ span.flatpickr-weekday {
     color: #333333;
     cursor: pointer;
 }
+
+.flatpickr-calendar.hasTime.noCalendar {
+    width: 210px !important;
+    min-width: 210px !important;
+    max-width: 210px !important;
+    padding: 8px !important;
+    border-radius: 16px !important;
+    overflow: visible !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time {
+    height: 42px !important;
+    max-height: 42px !important;
+    min-height: 42px !important;
+    border: 0 !important;
+    border-radius: 13px !important;
+    background: #FFF5F5 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    box-shadow: inset 0 0 0 1px rgba(139, 0, 0, .12) !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time .numInputWrapper {
+    width: 48px !important;
+    height: 34px !important;
+    min-width: 48px !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input.flatpickr-hour,
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input.flatpickr-minute {
+    height: 34px !important;
+    line-height: 34px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    color: #8B0000 !important;
+    font-size: .88rem !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-time-separator {
+    width: 10px !important;
+    height: 34px !important;
+    line-height: 34px !important;
+    color: #8B0000 !important;
+    font-size: .88rem !important;
+    font-weight: 900 !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-am-pm {
+    width: 46px !important;
+    height: 34px !important;
+    line-height: 34px !important;
+    border-radius: 10px !important;
+    color: #8B0000 !important;
+    font-size: .82rem !important;
+    font-weight: 900 !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:hover,
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-am-pm:hover,
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:focus,
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-am-pm:focus {
+    background: rgba(139, 0, 0, .08) !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .numInputWrapper span {
+    width: 16px !important;
+    opacity: .65 !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .numInputWrapper span.arrowUp::after {
+    border-bottom-color: #8B0000 !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .numInputWrapper span.arrowDown::after {
+    border-top-color: #8B0000 !important;
+}
+
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar,
+.dark .flatpickr-calendar.hasTime.noCalendar {
+    background: rgba(13, 17, 23, .98) !important;
+    border: 1px solid rgba(255, 255, 255, .12) !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .52) !important;
+}
+
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .flatpickr-time,
+.dark .flatpickr-calendar.hasTime.noCalendar .flatpickr-time {
+    background: rgba(255, 255, 255, .055) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input.flatpickr-hour,
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input.flatpickr-minute,
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-time-separator,
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-am-pm,
+.dark .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input.flatpickr-hour,
+.dark .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input.flatpickr-minute,
+.dark .flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-time-separator,
+.dark .flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-am-pm {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:hover,
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-am-pm:hover,
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:focus,
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-am-pm:focus,
+.dark .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:hover,
+.dark .flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-am-pm:hover,
+.dark .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:focus,
+.dark .flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-am-pm:focus {
+    background: rgba(252, 165, 165, .10) !important;
+}
+
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .numInputWrapper span.arrowUp::after,
+.dark .flatpickr-calendar.hasTime.noCalendar .numInputWrapper span.arrowUp::after {
+    border-bottom-color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .flatpickr-calendar.hasTime.noCalendar .numInputWrapper span.arrowDown::after,
+.dark .flatpickr-calendar.hasTime.noCalendar .numInputWrapper span.arrowDown::after {
+    border-top-color: #FCA5A5 !important;
+}
