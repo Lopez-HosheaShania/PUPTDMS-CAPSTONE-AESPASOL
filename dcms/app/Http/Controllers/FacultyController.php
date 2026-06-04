@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Faculty;
 use App\Models\Role;
 use App\Models\User;
-use App\Services\FactyApiService;
+use App\Services\FacultyApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +15,7 @@ class FacultyController extends Controller
 {
     protected $facultyService;
 
-    public function __construct(\App\Services\FacultyApiService $facultyService)
+    public function __construct(FacultyApiService $facultyService)
     {
         $this->facultyService = $facultyService;
     }

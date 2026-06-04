@@ -223,10 +223,6 @@
     margin-top: .15rem;
 }
 
-.section-block+.section-block {
-    margin-top: 1rem;
-}
-
 .card {
     background: #fff;
     border-radius: 16px;

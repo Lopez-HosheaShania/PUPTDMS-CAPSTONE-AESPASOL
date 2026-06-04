@@ -168,6 +168,43 @@ function initGlobalFlatpickr() {
 
         flatpickr(el, options);
     });
+
+    const timeInputs = document.querySelectorAll('.js-flatpickr-time');
+
+    timeInputs.forEach(el => {
+        if (el._flatpickr) return;
+
+        const parentPopup = el.closest('dialog, .ui-modal');
+
+        const options = {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            altInput: true,
+            altFormat: "h:i K",
+            time_24hr: false,
+            minuteIncrement: 5,
+            allowInput: false,
+            clickOpens: true,
+            disableMobile: true,
+            position: "auto center",
+            appendTo: document.body,
+
+            onOpen: (_dates, _str, instance) => {
+                openFlatpickrSheet(instance);
+            },
+
+            onClose: (_dates, _str, instance) => {
+                closeFlatpickrSheet(instance);
+            },
+        };
+
+        if (parentPopup) {
+            options.positionElement = el;
+        }
+
+        flatpickr(el, options);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", initGlobalFlatpickr);
@@ -582,19 +619,71 @@ function normalizeToastArgs(first = 'success', second = '', third = undefined, f
     };
 }
 
-function showToast(first = 'success', second = '', third = undefined, fourth = undefined) {
-    const { type, title, message, duration } = normalizeToastArgs(first, second, third, fourth);
+const TOAST_MAX_VISIBLE = 3;
+const activeToastRegistry = new Map();
 
+function getToastKey(type, title, message) {
+    return `${type}|${String(message || '').trim()}`;
+}
+
+function pruneToastStack(container) {
+    if (!container) return;
+
+    const visibleToasts = Array.from(
+        container.querySelectorAll('.toast-item:not(.toast-exit)')
+    );
+
+    while (visibleToasts.length > TOAST_MAX_VISIBLE) {
+        const oldestToast = visibleToasts.shift();
+
+        if (oldestToast?.__closeToast) {
+            oldestToast.__closeToast();
+        } else {
+            oldestToast?.remove();
+        }
+    }
+}
+
+function ensureToastContainer() {
     let container = document.getElementById('toastContainer');
 
     if (!container) {
         container = document.createElement('div');
         container.id = 'toastContainer';
+    }
+
+    if (container.parentElement !== document.body) {
         document.body.appendChild(container);
+    }
+
+    return container;
+}
+
+function showToast(first = 'success', second = '', third = undefined, fourth = undefined) {
+    const { type, title, message, duration } = normalizeToastArgs(first, second, third, fourth);
+
+    const container = ensureToastContainer();
+
+    const toastKey = getToastKey(type, title, message);
+    const existingToast = activeToastRegistry.get(toastKey);
+
+    if (
+        existingToast &&
+        document.body.contains(existingToast) &&
+        !existingToast.classList.contains('toast-exit')
+    ) {
+        existingToast.__restartToast?.(duration);
+
+        existingToast.classList.remove('toast-bumped');
+        void existingToast.offsetWidth;
+        existingToast.classList.add('toast-bumped');
+
+        return existingToast;
     }
 
     const toast = document.createElement('div');
     toast.className = `toast-item toast-${type} ${type}`;
+    toast.dataset.toastKey = toastKey;
     toast.setAttribute('role', 'status');
     toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
 
@@ -619,15 +708,26 @@ function showToast(first = 'success', second = '', third = undefined, fourth = u
             <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+        <div class="toast-progress"></div>
     `;
 
     container.appendChild(toast);
+    activeToastRegistry.set(toastKey, toast);
+
+    const progress = toast.querySelector('.toast-progress');
 
     let remaining = duration;
     let startedAt = Date.now();
     let timeoutId = null;
     let closed = false;
+
+    const resetProgress = (nextDuration = duration) => {
+        if (!progress) return;
+
+        progress.style.animation = 'none';
+        void progress.offsetWidth;
+        progress.style.animation = `toastProgress ${nextDuration}ms linear forwards`;
+    };
 
     const closeToast = () => {
         if (closed) return;
@@ -635,7 +735,11 @@ function showToast(first = 'success', second = '', third = undefined, fourth = u
         closed = true;
         clearTimeout(timeoutId);
 
-        toast.classList.remove('is-paused');
+        if (activeToastRegistry.get(toastKey) === toast) {
+            activeToastRegistry.delete(toastKey);
+        }
+
+        toast.classList.remove('is-paused', 'toast-bumped');
         toast.classList.add('toast-exit');
 
         setTimeout(() => {
@@ -649,6 +753,20 @@ function showToast(first = 'success', second = '', third = undefined, fourth = u
         timeoutId = setTimeout(closeToast, remaining);
     };
 
+    const restartToast = (nextDuration = duration) => {
+        if (closed) return;
+
+        clearTimeout(timeoutId);
+
+        remaining = Number(nextDuration) || duration;
+        startedAt = Date.now();
+
+        toast.classList.remove('is-paused');
+        resetProgress(remaining);
+
+        timeoutId = setTimeout(closeToast, remaining);
+    };
+
     const pauseToast = () => {
         if (closed) return;
 
@@ -657,12 +775,20 @@ function showToast(first = 'success', second = '', third = undefined, fourth = u
         remaining = Math.max(remaining, 0);
 
         toast.classList.add('is-paused');
+
+        if (progress) {
+            progress.style.animationPlayState = 'paused';
+        }
     };
 
     const resumeToast = () => {
         if (closed) return;
 
         toast.classList.remove('is-paused');
+
+        if (progress) {
+            progress.style.animationPlayState = 'running';
+        }
 
         if (remaining <= 0) {
             closeToast();
@@ -672,12 +798,17 @@ function showToast(first = 'success', second = '', third = undefined, fourth = u
         startTimer();
     };
 
+    toast.__closeToast = closeToast;
+    toast.__restartToast = restartToast;
+
     toast.querySelector('.toast-close')?.addEventListener('click', closeToast);
 
     toast.addEventListener('mouseenter', pauseToast);
     toast.addEventListener('mouseleave', resumeToast);
 
+    resetProgress(duration);
     startTimer();
+    pruneToastStack(container);
 
     return toast;
 }

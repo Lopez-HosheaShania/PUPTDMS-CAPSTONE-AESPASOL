@@ -3,7 +3,7 @@
 @section('title', 'Faculty Integration | PUP Taguig Dental Clinic')
 
 @section('content')
-<main id="mainContent" class="admin-page-shell faculty-page">
+<main id="mainContent" class="admin-page-shell faculty-page page-enter">
     <div class="faculty-shell">
         <div class="page-banner">
             <div class="page-banner-inner">
@@ -27,29 +27,7 @@
                     <span class="entry-badge">Faculty Setup</span>
                 </div>
 
-                @if (session('success'))
-                <div class="status-alert success">
-                    {{ session('success') }}
-                </div>
-                @endif
-
-                @if (session('error'))
-                <div class="status-alert error">
-                    {{ session('error') }}
-                </div>
-                @endif
-
-                @if ($errors->any())
-                <div class="status-alert error">
-                    <ul class="admin-alert-list">
-                        @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
-
-                <form id="facultyIntegrationForm" method="POST" action="{{ route('admin.faculty.store') }}">
+                <form id="facultyIntegrationForm" method="POST" action="{{ route('admin.faculty.store') }}" novalidate>
                     @csrf
 
                     <div class="card-body">
@@ -71,11 +49,20 @@
                                         Select Faculty<span class="required-mark">*</span>
                                     </label>
 
-                                    <div class="faculty-search-row">
-                                        <div class="search-input-wrap">
-                                            <input type="text" id="faculty_search" class="access-input"
+                                    <div class="faculty-search-row voice-search-row">
+                                        <div class="search-input-wrap" data-search-wrapper>
+                                            <i class="fa-solid fa-magnifying-glass faculty-search-leading-icon"></i>
+
+                                            <input type="text" id="faculty_search"
+                                                class="access-input faculty-search-input"
                                                 placeholder="Search faculty by name, email, or faculty code"
-                                                autocomplete="off">
+                                                autocomplete="off" data-search-input>
+
+                                            <button type="button" id="facultySearchClearBtn"
+                                                class="faculty-search-clear-btn" data-search-clear
+                                                aria-label="Clear search">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
 
                                             <button type="button" id="toggleFacultyDropdown" class="dropdown-toggle-btn"
                                                 aria-label="Show faculty list">
@@ -83,17 +70,14 @@
                                             </button>
                                         </div>
 
-                                        <button type="button" id="facultySearchClearBtn"
-                                            class="faculty-search-clear-btn hidden" onclick="clearFacultySearch()">
-                                            Clear
-                                        </button>
-
-                                        {{-- External circular mic button (matches Add User style) --}}
                                         <div class="voice-input-toggle">
                                             <button type="button" id="facultyMicBtn" class="voice-search-mic external"
-                                                aria-label="Toggle voice input" aria-pressed="false">
+                                                data-voice-trigger data-voice-target="#faculty_search"
+                                                data-voice-status="#facultyVoiceStatus" aria-label="Toggle voice input"
+                                                aria-pressed="false">
                                                 <i class="fa-solid fa-microphone"></i>
                                             </button>
+
                                             <span id="facultyVoiceStatus" class="voice-status hidden"
                                                 aria-live="polite"></span>
                                         </div>
@@ -232,7 +216,7 @@
                                     <label for="cms_role" class="field-label">
                                         CMS Role<span class="required-mark">*</span>
                                     </label>
-                                    <select name="cms_role" id="cms_role" class="access-select" required>
+                                    <select name="cms_role" id="cms_role" class="access-select">
                                         <option value="" disabled selected hidden>Select CMS Role</option>
                                         <option value="patient">Patient</option>
                                         <option value="admin">Admin</option>
@@ -244,7 +228,7 @@
                                     <label for="account_status" class="field-label">
                                         Account Status<span class="required-mark">*</span>
                                     </label>
-                                    <select name="account_status" id="account_status" class="access-select" required>
+                                    <select name="account_status" id="account_status" class="access-select">
                                         <option value="" disabled selected hidden>Select Status</option>
                                         <option value="Active">Active</option>
                                         <option value="Inactive">Inactive</option>
@@ -255,9 +239,9 @@
                     </div>
 
                     <div class="access-card-footer">
-                        <button type="button" class="btn-cancel" id="cancelFacultyBtn">
+                        <button type="button" class="btn-reset" id="resetFacultyBtn">
                             <i class="fa-solid fa-arrow-left"></i>
-                            Cancel
+                            Reset
                         </button>
 
                         <button type="submit" class="btn-save">
@@ -269,7 +253,7 @@
             </div>
 
             <div class="sidebar-stack">
-                <div class="info-card preview-card">
+                <div class="info-card">
                     <div class="preview-inner">
                         <div class="preview-avatar">
                             <i class="fa-solid fa-user-graduate"></i>
@@ -298,14 +282,14 @@
                     </div>
                 </div>
 
-                <div class="info-card">
-                    <div class="section-head admin-mb-xs">
+                <div class="info-card quick-notes-card">
+                    <div class="section-head quick-notes-head admin-mb-xs">
                         <div class="section-head-left">
                             <div class="section-icon">
                                 <i class="fa-solid fa-circle-info"></i>
                             </div>
                             <div>
-                                <h3 class="section-title">Quick Notes</h3>
+                                <h3 class="section-title quick-notes-title">Quick Notes</h3>
                                 <div class="section-note">Small guidance for cleaner admin workflow.</div>
                             </div>
                         </div>
@@ -338,7 +322,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        // ─── Element refs ───────────────────────────────────────────────────────────
         const searchInput = document.getElementById('faculty_search');
         const toggleButton = document.getElementById('toggleFacultyDropdown');
         const clearSearchButton = document.getElementById('facultySearchClearBtn');
@@ -369,36 +352,53 @@
         const previewCode = document.getElementById('preview_code');
         const previewDepartment = document.getElementById('preview_department');
         const previewType = document.getElementById('preview_type');
-        const cancelFacultyBtn = document.getElementById('cancelFacultyBtn');
+        const resetFacultyBtn = document.getElementById('resetFacultyBtn');
 
         let faculties = [];
         let dropdownOpen = false;
         let isDropdownMode = false;
+        let facultyLoadError = '';
+        let facultiesLoading = true;
 
-        // ─── Helpers ────────────────────────────────────────────────────────────────
         function toggleFacultySearchClear(input) {
             if (!clearSearchButton) return;
-            (input.value || '').trim().length > 0
-                ? clearSearchButton.classList.remove('hidden')
-                : clearSearchButton.classList.add('hidden');
+
+            clearSearchButton.classList.toggle('show', (input.value || '').trim().length > 0);
         }
 
         window.clearFacultySearch = function () {
             if (!searchInput) return;
-            searchInput.value = '';
+
+            if (window.clearSearchInput) {
+                window.clearSearchInput(searchInput);
+            } else {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input', {
+                    bubbles: true
+                }));
+                searchInput.dispatchEvent(new Event('change', {
+                    bubbles: true
+                }));
+                searchInput.focus();
+            }
+
             clearFields();
             hideResults();
             toggleFacultySearchClear(searchInput);
-            searchInput.focus();
         };
 
         function showResults() {
-            resultsBox.style.display = 'block';
+            if (!resultsBox.innerHTML.trim()) {
+                hideResults();
+                return;
+            }
+
+            resultsBox.classList.add('is-open');
             dropdownOpen = true;
         }
 
         function hideResults() {
-            resultsBox.style.display = 'none';
+            resultsBox.classList.remove('is-open');
             resultsBox.innerHTML = '';
             dropdownOpen = false;
             isDropdownMode = false;
@@ -427,6 +427,10 @@
             clearFields();
             document.getElementById('cms_role').value = '';
             document.getElementById('account_status').value = '';
+            syncFacultyCustomSelects(document);
+            setFacultyFieldError(searchInput, '');
+            setFacultyFieldError(document.getElementById('cms_role'), '');
+            setFacultyFieldError(document.getElementById('account_status'), '');
             hideResults();
             toggleFacultySearchClear(searchInput);
         }
@@ -436,6 +440,7 @@
             const addr = profile.address ?? {};
 
             facultyJson.value = JSON.stringify(faculty);
+            setFacultyFieldError(searchInput, '');
             searchInput.value = `${faculty.first_name ?? ''} ${faculty.last_name ?? ''}`.trim();
 
             facultyId.value = faculty.faculty_id ?? '';
@@ -457,7 +462,8 @@
             country.value = addr.country ?? '';
             zipcode.value = addr.zipcode ?? '';
 
-            previewName.textContent = `${faculty.first_name ?? ''} ${faculty.last_name ?? ''}`.trim() || 'Selected faculty';
+            previewName.textContent = `${faculty.first_name ?? ''} ${faculty.last_name ?? ''}`.trim() ||
+                'Selected faculty';
             previewEmail.textContent = faculty.email ?? 'No email available';
             previewCode.textContent = faculty.faculty_code ?? '—';
             previewDepartment.textContent = faculty.department ?? '—';
@@ -485,8 +491,9 @@
                 item.type = 'button';
                 item.className = 'search-item';
 
-                const fullName = `${faculty.first_name ?? ''} ${faculty.middle_name ?? ''} ${faculty.last_name ?? ''}`
-                    .replace(/\s+/g, ' ').trim();
+                const fullName =
+                    `${faculty.first_name ?? ''} ${faculty.middle_name ?? ''} ${faculty.last_name ?? ''}`
+                        .replace(/\s+/g, ' ').trim();
 
                 item.innerHTML = `
                         <div class="search-name">${fullName || 'Unnamed Faculty'}</div>
@@ -509,7 +516,8 @@
             if (!q) return [];
 
             return faculties.filter(f => {
-                const name = `${f.first_name ?? ''} ${f.middle_name ?? ''} ${f.last_name ?? ''}`.toLowerCase();
+                const name = `${f.first_name ?? ''} ${f.middle_name ?? ''} ${f.last_name ?? ''}`
+                    .toLowerCase();
                 return name.includes(q) ||
                     (f.email ?? '').toLowerCase().includes(q) ||
                     (f.faculty_code ?? '').toLowerCase().includes(q) ||
@@ -517,37 +525,357 @@
             });
         }
 
-        // ─── Load faculty list ──────────────────────────────────────────────────────
+        function closeFacultyCustomDropdowns(except = null) {
+            document.querySelectorAll('.faculty-custom-select.is-open').forEach(wrapper => {
+                if (wrapper === except) return;
+
+                wrapper.classList.remove('is-open');
+                wrapper.querySelector('.faculty-custom-select-btn')?.setAttribute('aria-expanded',
+                    'false');
+            });
+        }
+
+        function syncFacultyCustomSelects(root = document) {
+            const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+            const wrappers = [];
+
+            if (scope.matches && scope.matches('.faculty-custom-select')) {
+                wrappers.push(scope);
+            }
+
+            scope.querySelectorAll?.('.faculty-custom-select').forEach(wrapper => {
+                if (!wrappers.includes(wrapper)) wrappers.push(wrapper);
+            });
+
+            wrappers.forEach(wrapper => {
+                const select = wrapper.querySelector('select');
+                const valueText = wrapper.querySelector('[data-faculty-custom-select-value]');
+                const button = wrapper.querySelector('.faculty-custom-select-btn');
+
+                if (!select || !valueText || !button) return;
+
+                const selectedOption = select.options[select.selectedIndex];
+                const selectedValue = select.value || '';
+
+                valueText.textContent = selectedOption?.textContent?.trim() || 'Select option';
+
+                wrapper.classList.toggle('is-disabled', select.disabled);
+                button.disabled = select.disabled;
+
+                wrapper.classList.remove(
+                    'role-admin',
+                    'role-dentist',
+                    'role-patient',
+                    'status-active',
+                    'status-inactive',
+                    'has-value'
+                );
+
+                if (selectedValue) {
+                    wrapper.classList.add('has-value');
+
+                    if (select.id === 'cms_role') {
+                        wrapper.classList.add(`role-${selectedValue.toLowerCase()}`);
+                    }
+
+                    if (select.id === 'account_status') {
+                        wrapper.classList.add(`status-${selectedValue.toLowerCase()}`);
+                    }
+                }
+
+                wrapper.querySelectorAll('.faculty-custom-select-option').forEach(option => {
+                    const isActive = Number(option.dataset.index) === select.selectedIndex;
+
+                    option.classList.toggle('is-active', isActive);
+                    option.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                });
+            });
+        }
+
+        function initFacultyCustomDropdowns(root = document) {
+            const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+
+            scope.querySelectorAll('#facultyIntegrationForm select.access-select').forEach(select => {
+                if (select.dataset.customDropdownReady === 'true') return;
+
+                select.dataset.customDropdownReady = 'true';
+                select.classList.add('faculty-native-select');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'faculty-custom-select';
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'faculty-custom-select-btn';
+                button.setAttribute('aria-haspopup', 'listbox');
+                button.setAttribute('aria-expanded', 'false');
+
+                const valueSpan = document.createElement('span');
+                valueSpan.setAttribute('data-faculty-custom-select-value', '');
+
+                const chevron = document.createElement('i');
+                chevron.className = 'fa-solid fa-chevron-down';
+                chevron.setAttribute('aria-hidden', 'true');
+
+                button.appendChild(valueSpan);
+                button.appendChild(chevron);
+
+                const menu = document.createElement('div');
+                menu.className = 'faculty-custom-select-menu';
+                menu.setAttribute('role', 'listbox');
+
+                Array.from(select.options).forEach(option => {
+                    if (option.hidden) return;
+
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'faculty-custom-select-option';
+                    item.dataset.value = option.value;
+                    item.dataset.index = String(option.index);
+                    item.setAttribute('role', 'option');
+
+                    if (select.id === 'cms_role' && option.value) {
+                        item.classList.add(`role-${option.value.toLowerCase()}`);
+                    }
+
+                    if (select.id === 'account_status' && option.value) {
+                        item.classList.add(`status-${option.value.toLowerCase()}`);
+                    }
+
+                    const labelSpan = document.createElement('span');
+                    labelSpan.textContent = option.textContent.trim();
+
+                    const checkIcon = document.createElement('i');
+                    checkIcon.className = 'fa-solid fa-check faculty-custom-select-check';
+                    checkIcon.setAttribute('aria-hidden', 'true');
+
+                    item.appendChild(labelSpan);
+                    item.appendChild(checkIcon);
+
+                    item.addEventListener('click', event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        if (select.disabled) return;
+
+                        select.selectedIndex = option.index;
+
+                        select.dispatchEvent(new Event('input', {
+                            bubbles: true
+                        }));
+                        select.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
+
+                        wrapper.classList.remove('is-open');
+                        button.setAttribute('aria-expanded', 'false');
+
+                        syncFacultyCustomSelects(wrapper);
+                    });
+
+                    menu.appendChild(item);
+                });
+
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+                wrapper.appendChild(button);
+                wrapper.appendChild(menu);
+
+                button.addEventListener('click', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (select.disabled) return;
+
+                    const willOpen = !wrapper.classList.contains('is-open');
+
+                    closeFacultyCustomDropdowns(wrapper);
+
+                    wrapper.classList.toggle('is-open', willOpen);
+                    button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+                });
+
+                select.addEventListener('change', () => syncFacultyCustomSelects(wrapper));
+
+                syncFacultyCustomSelects(wrapper);
+            });
+        }
+
+        document.addEventListener('click', event => {
+            if (event.target.closest('.faculty-custom-select')) return;
+            closeFacultyCustomDropdowns();
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key !== 'Escape') return;
+            closeFacultyCustomDropdowns();
+        });
+
+        initFacultyCustomDropdowns(document);
+
+        const facultyForm = document.getElementById('facultyIntegrationForm');
+        const cmsRole = document.getElementById('cms_role');
+        const accountStatus = document.getElementById('account_status');
+
+        function getFacultyFieldErrorHost(field) {
+            if (!field) return null;
+
+            if (field.classList.contains('access-select')) {
+                return field.closest('.faculty-custom-select') || field.closest('.field-group');
+            }
+
+            return field.closest('.field-group') || field.parentElement;
+        }
+
+        function setFacultyFieldError(field, message = '') {
+            if (!field) return;
+
+            const host = getFacultyFieldErrorHost(field);
+            const fieldGroup = field.closest('.field-group');
+            const customSelect = field.closest('.faculty-custom-select');
+
+            field.classList.toggle('is-invalid', Boolean(message));
+            host?.classList.toggle('is-invalid', Boolean(message));
+            customSelect?.classList.toggle('is-invalid', Boolean(message));
+
+            let errorEl = fieldGroup?.querySelector(`[data-error-for="${field.id}"]`);
+
+            if (!errorEl && fieldGroup) {
+                errorEl = document.createElement('div');
+                errorEl.className = 'st-field-error faculty-field-error';
+                errorEl.dataset.errorFor = field.id;
+                fieldGroup.appendChild(errorEl);
+            }
+
+            if (errorEl) {
+                errorEl.innerHTML = message ?
+                    `<i class="fa-solid fa-circle-exclamation"></i><span>${message}</span>` :
+                    '';
+                errorEl.classList.toggle('hidden', !message);
+            }
+        }
+
+        function validateFacultyIntegrationForm({
+            showToastMessage = false
+        } = {}) {
+            let valid = true;
+
+            if (!facultyJson.value.trim()) {
+                setFacultyFieldError(searchInput, 'Please select a faculty record from the dropdown list.');
+                valid = false;
+            } else {
+                setFacultyFieldError(searchInput, '');
+            }
+
+            if (!cmsRole.value) {
+                setFacultyFieldError(cmsRole, 'Please select a CMS role.');
+                valid = false;
+            } else {
+                setFacultyFieldError(cmsRole, '');
+            }
+
+            if (!accountStatus.value) {
+                setFacultyFieldError(accountStatus, 'Please select an account status.');
+                valid = false;
+            } else {
+                setFacultyFieldError(accountStatus, '');
+            }
+
+            if (!valid && showToastMessage) {
+                window.showToast?.({
+                    type: 'error',
+                    title: 'Complete required fields',
+                    message: 'Select a faculty record, CMS role, and account status before saving.',
+                    duration: 6000,
+                });
+
+                const firstError = facultyForm.querySelector('.is-invalid');
+                firstError?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+
+            return valid;
+        }
+
+        facultyForm?.addEventListener('submit', function (event) {
+            if (!validateFacultyIntegrationForm({
+                showToastMessage: true
+            })) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+
+        cmsRole?.addEventListener('change', () => {
+            setFacultyFieldError(cmsRole, cmsRole.value ? '' : 'Please select a CMS role.');
+            syncFacultyCustomSelects(document);
+        });
+
+        accountStatus?.addEventListener('change', () => {
+            setFacultyFieldError(accountStatus, accountStatus.value ? '' :
+                'Please select an account status.');
+            syncFacultyCustomSelects(document);
+        });
+
         fetch('/faculties', {
-            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 return res.json();
             })
-            .then(data => { faculties = Array.isArray(data) ? data : []; })
-            .catch(err => { console.error('Failed to load faculties:', err); faculties = []; });
+            .then(data => {
+                faculties = Array.isArray(data) ? data : [];
+                facultyLoadError = '';
+            })
+            .catch(err => {
+                console.error('Failed to load faculties:', err);
+                faculties = [];
+                facultyLoadError = 'Unable to load faculty records. Please check the FLSS API connection.';
+            })
+            .finally(() => {
+                facultiesLoading = false;
+            });
 
-        // ─── Search input ───────────────────────────────────────────────────────────
         searchInput.addEventListener('input', function () {
             const query = this.value.trim();
             toggleFacultySearchClear(this);
             clearFields();
             isDropdownMode = false;
 
-            if (!query) { hideResults(); return; }
+            if (!query) {
+                hideResults();
+                return;
+            }
 
             const filtered = filterFaculties(query);
             filtered.length ? renderResults(filtered) : renderNoResults('No results found.');
         });
 
-        // ─── Dropdown toggle ────────────────────────────────────────────────────────
         toggleButton.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
-            if (dropdownOpen && isDropdownMode) { hideResults(); return; }
+            if (dropdownOpen && isDropdownMode) {
+                hideResults();
+                return;
+            }
             isDropdownMode = true;
+            if (facultiesLoading) {
+                renderNoResults('Loading faculty records...');
+                return;
+            }
+
+            if (facultyLoadError) {
+                renderNoResults(facultyLoadError);
+                return;
+            }
+
             faculties.length ? renderResults(faculties) : renderNoResults('No faculty records available.');
         });
 
@@ -562,129 +890,26 @@
             if (!inside) hideResults();
         });
 
-        if (cancelFacultyBtn) cancelFacultyBtn.addEventListener('click', resetFacultyForm);
+        if (resetFacultyBtn) resetFacultyBtn.addEventListener('click', resetFacultyForm);
 
         toggleFacultySearchClear(searchInput);
         resetPreview();
 
-        // ─── Voice input for faculty search (external circular button) ──────────────
-        (function () {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const micBtn = document.getElementById('facultyMicBtn');
-            const status = document.getElementById('facultyVoiceStatus');
+        if (window.initSearchClearButtons) {
+            window.initSearchClearButtons();
+        }
 
-            if (!micBtn || !status || !SpeechRecognition) {
-                if (micBtn) micBtn.disabled = true;
-                return;
-            }
-
-            let recognition = null;
-            let listening = false;
-            let manualStop = false;
-
-            const setStatus = (text, state) => {
-                status.textContent = text;
-                status.className = 'voice-status' + (state ? ' is-' + state : '');
-                text ? status.classList.remove('hidden') : status.classList.add('hidden');
-            };
-
-            const hideStatus = (delay) => setTimeout(() => status.classList.add('hidden'), delay || 0);
-
-            const setMicState = (isActive) => {
-                micBtn.classList.toggle('mic-active', isActive);
-                micBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-                micBtn.innerHTML = isActive
-                    ? '<i class="fa-solid fa-stop"></i>'
-                    : '<i class="fa-solid fa-microphone"></i>';
-            };
-
-            const stopNow = () => {
-                manualStop = true;
-                listening = false;
-                setMicState(false);
-                setStatus('Voice captured.', 'success');
-                hideStatus(1200);
-                if (recognition) { try { recognition.abort(); } catch (e) { } }
-            };
-
-            const createRecognition = () => {
-                const r = new SpeechRecognition();
-                r.lang = 'en-US';
-                r.continuous = false;
-                r.interimResults = true;
-                r.maxAlternatives = 1;
-
-                let sawSpeech = false;
-                let timeoutId = null;
-
-                r.onstart = () => {
-                    timeoutId = setTimeout(() => {
-                        if (listening && !sawSpeech) { try { r.stop(); } catch (e) { } }
-                    }, 6000);
-                };
-
-                r.onspeechend = () => { clearTimeout(timeoutId); try { r.stop(); } catch (e) { } };
-
-                r.onresult = (event) => {
-                    let transcript = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        const res = event.results[i];
-                        const chunk = (res && res[0] ? res[0].transcript : '').trim();
-                        if (!chunk) continue;
-                        sawSpeech = true;
-                        if (res.isFinal) transcript = (transcript + ' ' + chunk).trim();
-                        else if (!transcript) transcript = chunk;
-                    }
-                    if (transcript) {
-                        clearTimeout(timeoutId);
-                        searchInput.value = transcript;
-                        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        setStatus('Listening...', 'listening');
-                    }
-                };
-
-                r.onerror = () => {
-                    clearTimeout(timeoutId);
-                    listening = false;
-                    if (manualStop) { manualStop = false; return; }
-                    setMicState(false);
-                    setStatus("Didn't catch that. Try again.", 'error');
-                    hideStatus(2500);
-                };
-
-                r.onend = () => {
-                    clearTimeout(timeoutId);
-                    if (manualStop) { manualStop = false; listening = false; setMicState(false); return; }
-                    const hadSpeech = sawSpeech || !!searchInput.value.trim();
-                    listening = false;
-                    setMicState(false);
-                    hadSpeech
-                        ? (setStatus('Voice captured.', 'success'), hideStatus(2200))
-                        : (setStatus("Didn't catch that. Try again.", 'error'), hideStatus(2500));
-                };
-
-                return r;
-            };
-
-            micBtn.addEventListener('click', () => {
-                if (listening && recognition) { stopNow(); return; }
-
-                recognition = createRecognition();
-                try {
-                    recognition.start();
-                } catch (e) {
-                    setStatus('Unable to start voice input.', 'error');
-                    hideStatus(2500);
-                    setMicState(false);
-                    listening = false;
-                    return;
-                }
-                listening = true;
-                setMicState(true);
-                setStatus('Listening...', 'listening');
+        if (clearSearchButton) {
+            clearSearchButton.addEventListener('click', function () {
+                clearFields();
+                hideResults();
+                toggleFacultySearchClear(searchInput);
             });
-        })();
+        }
 
+        if (window.initGlobalVoiceInputs) {
+            window.initGlobalVoiceInputs(document);
+        }
     });
 </script>
 @endsection

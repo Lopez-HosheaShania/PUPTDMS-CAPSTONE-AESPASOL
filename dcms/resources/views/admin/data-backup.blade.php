@@ -23,8 +23,6 @@ return $bytes . ' B';
 $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : true;
 @endphp
 
-<div id="toastContainer" role="region" aria-live="polite"></div>
-
 <div id="backupModal">
     <div class="backup-modal-inner">
         <div class="admin-modal-icon">
@@ -40,8 +38,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         </div>
 
         <div class="admin-progress-track">
-            <div id="modalBar"
-                class="admin-progress-bar">
+            <div id="modalBar" class="admin-progress-bar">
             </div>
         </div>
 
@@ -53,8 +50,8 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
     </div>
 </div>
 
-<div id="scheduleModal" class="admin-modal-backdrop">
-    <div class="admin-modal-card">
+<div id="scheduleModal" class="admin-modal-backdrop backup-schedule-modal">
+    <div class="admin-modal-card backup-schedule-modal-card">
         <div class="admin-modal-head">
             <div>
                 <div class="admin-modal-title">
@@ -65,57 +62,93 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                 </div>
             </div>
 
-            <button type="button" onclick="closeScheduleModal()"
-                class="admin-icon-button">
+            <button type="button" onclick="closeScheduleModal()" class="um-modal-x backup-modal-x"
+                aria-label="Close modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
         <form id="scheduleForm">
-            <div class="admin-modal-grid">
-                <div>
-                    <label
-                        class="admin-modal-field-head">
-                        <span>Daily Incremental</span>
-                        <input type="checkbox" id="daily_enabled" {{ $backupSchedule['daily_enabled'] ? 'checked' : ''
-                            }}>
+            <div class="admin-modal-grid backup-schedule-grid">
+                <div class="backup-schedule-field">
+                    <label class="backup-check-card" for="daily_enabled">
+                        <span class="backup-check-copy">
+                            <span class="backup-check-title">Daily Incremental</span>
+                            <span class="backup-check-sub">Small database changes every day</span>
+                        </span>
+
+                        <span class="backup-check-toggle">
+                            <input type="checkbox" id="daily_enabled" {{ $backupSchedule['daily_enabled'] ? 'checked'
+                                : '' }}>
+                            <span class="backup-check-slider"></span>
+                        </span>
                     </label>
-                    <input type="time" id="daily_time" value="{{ $backupSchedule['daily_time'] }}"
-                        class="admin-modal-input">
+
+                    <div class="backup-time-wrap">
+                        <input type="text" id="daily_time" value="{{ $backupSchedule['daily_time'] }}"
+                            class="admin-modal-input js-flatpickr-time backup-time-input" placeholder="Select time">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
                 </div>
 
-                <div>
-                    <label
-                        class="admin-modal-field-head">
-                        <span>Weekly Full Backup</span>
-                        <input type="checkbox" id="weekly_enabled" {{ $backupSchedule['weekly_enabled'] ? 'checked' : ''
-                            }}>
+                <div class="backup-schedule-field">
+                    <label class="backup-check-card" for="weekly_enabled">
+                        <span class="backup-check-copy">
+                            <span class="backup-check-title">Weekly Full Backup</span>
+                            <span class="backup-check-sub">Complete copy every Sunday</span>
+                        </span>
+
+                        <span class="backup-check-toggle">
+                            <input type="checkbox" id="weekly_enabled" {{ $backupSchedule['weekly_enabled'] ? 'checked'
+                                : '' }}>
+                            <span class="backup-check-slider"></span>
+                        </span>
                     </label>
-                    <input type="time" id="weekly_time" value="{{ $backupSchedule['weekly_time'] }}"
-                        class="admin-modal-input">
+
+                    <div class="backup-time-wrap">
+                        <input type="text" id="weekly_time" value="{{ $backupSchedule['weekly_time'] }}"
+                            class="admin-modal-input js-flatpickr-time backup-time-input" placeholder="Select time">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
                 </div>
 
-                <div>
-                    <label
-                        class="admin-modal-field-head">
-                        <span>Monthly Archive</span>
-                        <input type="checkbox" id="monthly_enabled" {{ $backupSchedule['monthly_enabled'] ? 'checked'
-                            : '' }}>
+                <div class="backup-schedule-field">
+                    <label class="backup-check-card" for="monthly_enabled">
+                        <span class="backup-check-copy">
+                            <span class="backup-check-title">Monthly Archive</span>
+                            <span class="backup-check-sub">Long-term monthly archive copy</span>
+                        </span>
+
+                        <span class="backup-check-toggle">
+                            <input type="checkbox" id="monthly_enabled" {{ $backupSchedule['monthly_enabled']
+                                ? 'checked' : '' }}>
+                            <span class="backup-check-slider"></span>
+                        </span>
                     </label>
-                    <input type="time" id="monthly_time" value="{{ $backupSchedule['monthly_time'] }}"
-                        class="admin-modal-input">
+
+                    <div class="backup-time-wrap">
+                        <input type="text" id="monthly_time" value="{{ $backupSchedule['monthly_time'] }}"
+                            class="admin-modal-input js-flatpickr-time backup-time-input" placeholder="Select time">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
                 </div>
             </div>
 
             <div class="backup-modal-actions">
-                <button type="button" onclick="closeScheduleModal()" class="filter-reset-btn">Cancel</button>
-                <button type="submit" class="backup-run-btn backup-save-btn">Save Changes</button>
+                <button type="button" onclick="closeScheduleModal()" class="modal-btn-ghost backup-modal-cancel">
+                    Cancel
+                </button>
+
+                <button type="submit" class="backup-run-btn backup-save-btn">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Changes
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<main id="mainContent" class="admin-page-shell">
+<main id="mainContent" class="admin-page-shell backup-page page-enter mode-list">
     <div class="admin-page-container">
 
         <div class="page-banner">
@@ -125,59 +158,143 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                 </div>
 
                 <div class="flex items-center gap-3 flex-wrap">
-                    <button id="backupNowBtn" onclick="startBackup()"
-                        class="flex items-center gap-2 bg-white hover:bg-gray-100 text-[#8B0000] px-5 py-2.5 rounded-lg font-semibold text-sm shadow transition-all">
+                    <button id="backupNowBtn" type="button" onclick="startBackup()" class="backup-banner-action">
                         <i class="fa-solid fa-database"></i>
-                        Backup Now
+                        <span>Backup Now</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="filterOverlay" class="filter-overlay-ui backup-filter-overlay"
+            onclick="closeFilterDrawer('filterPanel', 'filterOverlay')">
+        </div>
+
+        <aside id="filterPanel" class="filter-drawer-ui backup-filter-drawer" aria-label="Backup filters">
+            <div class="filter-drawer-header px-6 py-5 border-b">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="filter-drawer-title flex items-center gap-3">
+                        <i class="fa-solid fa-filter"></i>
+                        <div>
+                            <h2 class="text-xl font-black leading-none">Filters</h2>
+                            <p class="text-xs font-bold text-gray-500 mt-1">Refine backup history results</p>
+                        </div>
+                    </div>
+
+                    <button type="button" class="admin-icon-button"
+                        onclick="closeFilterDrawer('filterPanel', 'filterOverlay')" aria-label="Close filters">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-drawer-body px-6 py-5 space-y-6">
+                <div id="activeFiltersSection">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="filter-section-title !mb-0">Active Filters</span>
+
+                        <button type="button" id="clearAllChipsBtn" class="text-xs font-black"
+                            onclick="resetAjaxFilters()">
+                            Clear all
+                        </button>
+                    </div>
+
+                    <div id="activeChipsContainer"></div>
+                </div>
+
+                <div class="filter-soft-divider"></div>
+
+                <section>
+                    <div class="filter-section-title">Backup Type</div>
+
+                    <div id="backupTypeGroup" class="filter-chip-row">
+                        <button type="button" class="ftag" data-val="">All Types</button>
+                        <button type="button" class="ftag" data-val="full">Full</button>
+                        <button type="button" class="ftag" data-val="incremental">Incremental</button>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="filter-section-title">Backup Status</div>
+
+                    <div id="backupStatusGroup" class="filter-chip-row">
+                        <button type="button" class="ftag" data-val="">All Status</button>
+                        <button type="button" class="ftag" data-val="completed">Completed</button>
+                        <button type="button" class="ftag" data-val="failed">Failed</button>
+                        <button type="button" class="ftag" data-val="in_progress">In Progress</button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="filter-drawer-footer px-6 py-4 border-t">
+                <div class="flex items-center justify-between gap-3">
+                    <button type="button" id="filterResetBtn" class="filter-clear-btn" onclick="resetAjaxFilters()">
+                        Reset Filters
                     </button>
 
-                    <div class="view-toggle" id="backupHistoryViewToggle">
-                        <button type="button" class="view-toggle-btn active" id="backupListViewBtn" title="List view"
-                            aria-label="List view">
-                            <i class="fa-solid fa-table-list"></i>
+                    <div class="flex items-center gap-3">
+                        <button type="button" class="filter-cancel-btn px-5 py-3 rounded-xl font-black text-sm"
+                            onclick="closeFilterDrawer('filterPanel', 'filterOverlay')">
+                            Cancel
                         </button>
-                        <button type="button" class="view-toggle-btn" id="backupGridViewBtn" title="Grid view"
-                            aria-label="Grid view">
-                            <i class="fa-solid fa-grip"></i>
+
+                        <button type="button" id="backupApplyFiltersBtn"
+                            class="filter-apply-btn filter-show-results-btn px-5 py-3 rounded-xl font-black text-sm">
+                            <span id="backupShowResultsText">Show results</span>
                         </button>
                     </div>
                 </div>
             </div>
-        </div>
+        </aside>
 
-        <div class="backup-stats" id="backupStats">
-            <span class="stats-indicator" id="statsIndicator"></span>
+        <div class="backup-stats admin-dashboard-stat-grid" id="backupStats">
+            <div class="backup-stat stat-card s-all">
+                <span class="stat-icon-wrapper">
+                    <i class="fa-solid fa-database"></i>
+                </span>
 
-            <button id="stat-all" type="button"
-                class="backup-stat clickable {{ !request()->filled('type') && !request()->filled('status') && !request()->filled('scope') && request('stat') !== 'last' && request('stat') !== 'auto' ? 'active' : '' }}"
-                onclick="applyFilters({ scope: '', stat: '' }, this)">
-                <div class="backup-stat-value red" id="totalBackupsStat">{{ $totalBackups }}</div>
-                <div class="backup-stat-label">Total Backups</div>
-            </button>
+                <span class="stat-card-info">
+                    <span class="backup-stat-value stat-num" id="totalBackupsStat">{{ $totalBackups }}</span>
+                    <span class="backup-stat-label stat-label">Total Backups</span>
+                </span>
+            </div>
 
-            <button id="stat-month" type="button"
-                class="backup-stat clickable {{ request('scope') === 'month' ? 'active' : '' }}"
-                onclick="applyFilters({ scope: 'month', stat: '' }, this)">
-                <div class="backup-stat-value green" id="thisMonthBackupsStat">{{ $thisMonthBackups ?? 0 }}</div>
-                <div class="backup-stat-label">This Month</div>
-            </button>
+            <div class="backup-stat stat-card s-month">
+                <span class="stat-icon-wrapper">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </span>
 
-            <button id="stat-last" type="button"
-                class="backup-stat clickable {{ request('stat') === 'last' ? 'active' : '' }}"
-                onclick="setActiveStat(this); scrollToTable()">
-                <div class="backup-stat-value green" id="lastBackupStat">
-                    {{ isset($lastBackup) && $lastBackup ? $lastBackup->created_at->format('M d') : '—' }}
-                </div>
-                <div class="backup-stat-label">Last Backup</div>
-            </button>
+                <span class="stat-card-info">
+                    <span class="backup-stat-value stat-num" id="thisMonthBackupsStat">{{ $thisMonthBackups ?? 0
+                        }}</span>
+                    <span class="backup-stat-label stat-label">This Month</span>
+                </span>
+            </div>
 
-            <button id="stat-auto" type="button"
-                class="backup-stat clickable {{ request('stat') === 'auto' ? 'active' : '' }}"
-                onclick="setActiveStat(this); openScheduleModal(true)">
-                <div class="backup-stat-value green" id="autoScheduleStatValue">{{ $autoBackupEnabled ? 'Active' :
-                    'Paused' }}</div>
-                <div class="backup-stat-label">Auto-Schedule</div>
-            </button>
+            <div class="backup-stat stat-card s-last">
+                <span class="stat-icon-wrapper">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </span>
+
+                <span class="stat-card-info">
+                    <span class="backup-stat-value stat-num" id="lastBackupStat">
+                        {{ isset($lastBackup) && $lastBackup ? $lastBackup->created_at->format('M d') : '—' }}
+                    </span>
+                    <span class="backup-stat-label stat-label">Last Backup</span>
+                </span>
+            </div>
+
+            <div class="backup-stat stat-card s-auto">
+                <span class="stat-icon-wrapper">
+                    <i class="fa-solid fa-rotate"></i>
+                </span>
+
+                <span class="stat-card-info">
+                    <span class="backup-stat-value stat-num" id="autoScheduleStatValue">
+                        {{ $autoBackupEnabled ? 'Active' : 'Paused' }}
+                    </span>
+                    <span class="backup-stat-label stat-label">Auto-Schedule</span>
+                </span>
+            </div>
         </div>
 
         <div class="backup-main">
@@ -195,29 +312,36 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                         </div>
                     </div>
 
-                    <form method="GET" action="{{ route('admin.data_backup') }}" class="toolbar" id="backupFilterForm">
-                        <select name="type" id="typeFilter">
-                            <option value="">All Types</option>
-                            <option value="full" {{ request('type')==='full' ? 'selected' : '' }}>Full</option>
-                            <option value="incremental" {{ request('type')==='incremental' ? 'selected' : '' }}>
-                                Incremental</option>
-                        </select>
+                    <div class="backup-history-actions">
+                        <button type="button" id="filterBtn" class="global-filter-btn"
+                            onclick="openFilterDrawer('filterPanel', 'filterOverlay')" aria-pressed="false">
+                            <i class="fa-solid fa-filter"></i>
+                            <span>Filters</span>
+                            <span id="filterBadge" class="filter-badge"></span>
+                        </button>
 
-                        <select name="status" id="statusFilter">
-                            <option value="">All Status</option>
-                            <option value="completed" {{ request('status')==='completed' ? 'selected' : '' }}>Completed
-                            </option>
-                            <option value="failed" {{ request('status')==='failed' ? 'selected' : '' }}>Failed</option>
-                            <option value="in_progress" {{ request('status')==='in_progress' ? 'selected' : '' }}>In
-                                Progress</option>
-                        </select>
+                        <button type="button" id="externalClearFilterBtn" class="global-filter-reset-btn hidden"
+                            onclick="resetAjaxFilters()" aria-label="Reset filters">
+                            <i class="fa-solid fa-arrow-rotate-left"></i>
+                        </button>
 
-                        <a href="{{ route('admin.data_backup') }}" class="filter-reset-btn" id="resetFiltersBtn"
-                            style="{{ request()->filled('type') || request()->filled('status') || request()->filled('scope') ? '' : 'display:none;' }}"
-                            onclick="event.preventDefault(); resetAjaxFilters();">
-                            Reset
-                        </a>
-                    </form>
+                        <div class="view-toggle-container backup-view-toggle" id="backupHistoryViewToggle"
+                            data-global-view-toggle data-view-root="#mainContent"
+                            data-list-view="#backupHistoryListView" data-grid-view="#backupHistoryGridView"
+                            data-storage-key="backupHistoryView">
+                            <span class="view-slider"></span>
+
+                            <button type="button" class="btn-view-mode active" id="backupListViewBtn"
+                                data-view-mode="list" title="List view" aria-label="List view">
+                                <i class="fa-solid fa-table-list"></i>
+                            </button>
+
+                            <button type="button" class="btn-view-mode" id="backupGridViewBtn" data-view-mode="grid"
+                                title="Grid view" aria-label="Grid view">
+                                <i class="fa-solid fa-grip"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="backupHistoryListView" class="backup-history-view">
@@ -276,12 +400,13 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                                 @empty
                                 <tr>
                                     <td colspan="6">
-                                        <div class="empty-state">
-                                            <div class="empty-icon"><i class="fa-solid fa-database"></i></div>
-                                            <p class="backup-empty-title">
-                                                No backups found.</p>
-                                            <p class="backup-empty-subtitle">Create your first backup
-                                                to start protecting system data</p>
+                                        <div class="empty-state backup-empty-state">
+                                            <div class="empty-state-icon">
+                                                <i class="fa-solid fa-database"></i>
+                                            </div>
+                                            <h3 class="empty-state-title">No backups found</h3>
+                                            <p class="empty-state-sub">Create your first backup to start protecting
+                                                system data.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -346,12 +471,12 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                             </div>
                         </div>
                         @empty
-                        <div class="empty-state backup-grid-empty">
-                            <div class="empty-icon"><i class="fa-solid fa-database"></i></div>
-                            <p class="backup-empty-title">No backups
-                                found.</p>
-                            <p class="backup-empty-subtitle">Create your first backup to start
-                                protecting system data</p>
+                        <div class="empty-state backup-empty-state backup-grid-empty">
+                            <div class="empty-state-icon">
+                                <i class="fa-solid fa-database"></i>
+                            </div>
+                            <h3 class="empty-state-title">No backups found</h3>
+                            <p class="empty-state-sub">Create your first backup to start protecting system data.</p>
                         </div>
                         @endforelse
                     </div>
@@ -407,8 +532,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                             </div>
                         </div>
 
-                        <div id="freeSpaceStat"
-                            class="backup-storage-note">
+                        <div id="freeSpaceStat" class="backup-storage-note">
                             Free Space: {{ $formatBytes($storageFreeBytes) }}
                         </div>
                     </div>
@@ -590,20 +714,144 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         window.history.replaceState({}, '', url);
     }
 
-    function updateResetButtonVisibility() {
-        const resetBtn = document.getElementById('resetFiltersBtn');
-        if (!resetBtn) return;
+    function getActiveBackupFilterCount() {
+        return ['type', 'status', 'scope', 'stat'].filter(key => {
+            return String(currentFilters[key] || '').trim() !== '';
+        }).length;
+    }
 
-        const hasFilters = !!currentFilters.type || !!currentFilters.status || !!currentFilters.scope;
-        resetBtn.style.display = hasFilters ? '' : 'none';
+    function updateBackupActiveChips() {
+        const section = document.getElementById('activeFiltersSection');
+        const container = document.getElementById('activeChipsContainer');
+
+        if (!section || !container) return;
+
+        const chips = [];
+
+        const labels = {
+            type: {
+                full: 'Type: Full',
+                incremental: 'Type: Incremental',
+            },
+            status: {
+                completed: 'Status: Completed',
+                failed: 'Status: Failed',
+                in_progress: 'Status: In Progress',
+            },
+            scope: {
+                month: 'This Month',
+            },
+            stat: {
+                last: 'Last Backup',
+                auto: 'Auto-Schedule',
+            },
+        };
+
+        Object.keys(labels).forEach(key => {
+            const value = currentFilters[key];
+
+            if (!value || !labels[key][value]) return;
+
+            chips.push(`
+            <span class="filter-chip">
+                <span>${labels[key][value]}</span>
+                <button type="button" class="filter-chip-remove" onclick="clearBackupFilter('${key}')" aria-label="Remove ${labels[key][value]}">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </span>
+        `);
+        });
+
+        container.innerHTML = chips.join('');
+        section.style.display = chips.length ? '' : 'none';
+    }
+
+    function getActiveBackupFilterCount() {
+        return ['type', 'status', 'scope', 'stat'].filter(key => {
+            return String(currentFilters[key] || '').trim() !== '';
+        }).length;
+    }
+
+    function updateBackupActiveChips() {
+        const section = document.getElementById('activeFiltersSection');
+        const container = document.getElementById('activeChipsContainer');
+
+        if (!section || !container) return;
+
+        const labels = {
+            type: {
+                full: 'Type: Full',
+                incremental: 'Type: Incremental',
+            },
+            status: {
+                completed: 'Status: Completed',
+                failed: 'Status: Failed',
+                in_progress: 'Status: In Progress',
+            },
+            scope: {
+                month: 'This Month',
+            },
+            stat: {
+                last: 'Last Backup',
+                auto: 'Auto-Schedule',
+            },
+        };
+
+        const chips = [];
+
+        Object.keys(labels).forEach(key => {
+            const value = currentFilters[key];
+
+            if (!value || !labels[key][value]) return;
+
+            chips.push(`
+            <span class="filter-chip">
+                <span>${labels[key][value]}</span>
+                <button type="button" class="filter-chip-remove"
+                    onclick="clearBackupFilter('${key}')"
+                    aria-label="Remove ${labels[key][value]}">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </span>
+        `);
+        });
+
+        container.innerHTML = chips.join('');
+        section.style.display = chips.length ? '' : 'none';
+    }
+
+    function updateResetButtonVisibility() {
+        const count = getActiveBackupFilterCount();
+
+        window.setGlobalFilterButtonState?.({
+            buttonId: 'filterBtn',
+            badgeId: 'filterBadge',
+            resetId: 'externalClearFilterBtn',
+            count,
+        });
+
+        updateBackupActiveChips();
     }
 
     function syncFilterInputs() {
-        const typeFilter = document.getElementById('typeFilter');
-        const statusFilter = document.getElementById('statusFilter');
+        window.syncFilterTagGroup?.('backupTypeGroup', currentFilters.type || '');
+        window.syncFilterTagGroup?.('backupStatusGroup', currentFilters.status || '');
 
-        if (typeFilter) typeFilter.value = currentFilters.type || '';
-        if (statusFilter) statusFilter.value = currentFilters.status || '';
+        updateResetButtonVisibility();
+    }
+
+    function clearBackupFilter(key) {
+        if (!Object.prototype.hasOwnProperty.call(currentFilters, key)) return;
+
+        currentFilters[key] = '';
+
+        syncFilterInputs();
+        fetchBackupTable();
+    }
+
+    function getBackupFilterGroupValue(groupId) {
+        const active = document.querySelector(`#${groupId} .ftag.ftag-active`);
+        return active?.getAttribute('data-val') || '';
     }
 
     function setStatActiveByFilters() {
@@ -626,28 +874,32 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         if (!tbody && !gridBody) return;
 
         if (!rows || rows.length === 0) {
+            const emptyInner = `
+        <div class="empty-state backup-empty-state">
+            <div class="empty-state-icon">
+                <i class="fa-solid fa-database"></i>
+            </div>
+            <h3 class="empty-state-title">No backups found</h3>
+            <p class="empty-state-sub">Create your first backup to start protecting system data.</p>
+        </div>
+    `;
+
             if (tbody) {
                 tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6">
-                            <div class="empty-state">
-                                <div class="empty-icon"><i class="fa-solid fa-database"></i></div>
-                                <p class="backup-empty-title">No backups found.</p>
-                                <p class="backup-empty-subtitle">Create your first backup to start protecting system data</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td colspan="6" class="p-0">
+                    ${emptyInner}
+                </td>
+            </tr>
+        `;
             }
 
             if (gridBody) {
                 gridBody.innerHTML = `
-                    <div class="empty-state backup-grid-empty">
-                        <div class="empty-icon"><i class="fa-solid fa-database"></i></div>
-                        <p class="backup-empty-title">No backups found.</p>
-                        <p class="backup-empty-subtitle">Create your first backup to start protecting system data</p>
-                    </div>
-                `;
+            <div class="backup-grid-empty">
+                ${emptyInner}
+            </div>
+        `;
             }
 
             return;
@@ -748,6 +1000,8 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         if (summary) {
             summary.textContent = `Showing ${meta.from ?? 0}–${meta.to ?? 0} of ${meta.total ?? 0} backups`;
         }
+
+        window.updateShowResultsText?.(Number(meta.total ?? 0), 'backupShowResultsText');
 
         if (pagination) {
             pagination.innerHTML = '';
@@ -871,6 +1125,20 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         fetchBackupTable();
     }
 
+    function clearBackupFilter(key) {
+        if (!Object.prototype.hasOwnProperty.call(currentFilters, key)) return;
+
+        currentFilters[key] = '';
+
+        syncFilterInputs();
+        fetchBackupTable();
+    }
+
+    function getBackupFilterGroupValue(groupId) {
+        const active = document.querySelector(`#${groupId} .ftag.ftag-active`);
+        return active?.getAttribute('data-val') || '';
+    }
+
     async function startBackup() {
         const modal = document.getElementById('backupModal');
         const bar = document.getElementById('modalBar');
@@ -951,15 +1219,31 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         document.getElementById('backupModal').classList.remove('open');
     }
 
+    function setBackupTimePickerValue(inputId, value) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        if (input._flatpickr) {
+            input._flatpickr.setDate(value, false, 'H:i');
+        } else {
+            input.value = value;
+        }
+    }
+
     function openScheduleModal(updateUrl = false) {
         document.getElementById('daily_enabled').checked = !!backupSchedule.daily_enabled;
-        document.getElementById('daily_time').value = backupSchedule.daily_time;
         document.getElementById('weekly_enabled').checked = !!backupSchedule.weekly_enabled;
-        document.getElementById('weekly_time').value = backupSchedule.weekly_time;
         document.getElementById('monthly_enabled').checked = !!backupSchedule.monthly_enabled;
-        document.getElementById('monthly_time').value = backupSchedule.monthly_time;
+
+        setBackupTimePickerValue('daily_time', backupSchedule.daily_time);
+        setBackupTimePickerValue('weekly_time', backupSchedule.weekly_time);
+        setBackupTimePickerValue('monthly_time', backupSchedule.monthly_time);
 
         document.getElementById('scheduleModal').style.display = 'flex';
+
+        if (window.initGlobalFlatpickr) {
+            window.initGlobalFlatpickr();
+        }
 
         if (updateUrl) {
             const url = new URL(window.location.href);
@@ -1115,40 +1399,31 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         }
     }
 
-    function closeToast(button) {
-        const toast = button.closest('.toast');
-        if (!toast) return;
-
-        toast.classList.remove('show');
-        toast.classList.add('hide');
-
-        setTimeout(() => {
-            toast.remove();
-        }, 400);
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
-        const typeFilter = document.getElementById('typeFilter');
-        const statusFilter = document.getElementById('statusFilter');
+
         const scheduleForm = document.getElementById('scheduleForm');
+        window.bindFilterTagGroup?.({
+            groupId: 'backupTypeGroup',
+            onChange: () => { },
+        });
 
-        if (typeFilter) {
-            typeFilter.addEventListener('change', function () {
-                applyFilters({
-                    type: this.value,
-                    stat: ''
-                });
-            });
-        }
+        window.bindFilterTagGroup?.({
+            groupId: 'backupStatusGroup',
+            onChange: () => { },
+        });
 
-        if (statusFilter) {
-            statusFilter.addEventListener('change', function () {
-                applyFilters({
-                    status: this.value,
-                    stat: ''
-                });
+        document.getElementById('backupApplyFiltersBtn')?.addEventListener('click', function () {
+            applyFilters({
+                type: getBackupFilterGroupValue('backupTypeGroup'),
+                status: getBackupFilterGroupValue('backupStatusGroup'),
+                stat: '',
             });
-        }
+
+            closeFilterDrawer('filterPanel', 'filterOverlay');
+        });
+
+        window.initGlobalViewToggles?.(document);
+        syncFilterInputs(); F
 
         if (scheduleForm) {
             scheduleForm.addEventListener('submit', async function (e) {
@@ -1196,95 +1471,8 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
             });
         }
 
-        function getPreferredBackupHistoryView() {
-            if (window.innerWidth <= 767) return 'grid';
-            return localStorage.getItem('backupHistoryView') || 'list';
-        }
-
-        function applyBackupHistoryView(view, save = true) {
-            const listView = document.getElementById('backupHistoryListView');
-            const gridView = document.getElementById('backupHistoryGridView');
-            const listBtn = document.getElementById('backupListViewBtn');
-            const gridBtn = document.getElementById('backupGridViewBtn');
-
-            if (!listView || !gridView) return;
-
-            const finalView = window.innerWidth <= 767 ? 'grid' : view;
-
-            if (finalView === 'grid') {
-                listView.hidden = true;
-                gridView.hidden = false;
-            } else {
-                listView.hidden = false;
-                gridView.hidden = true;
-            }
-
-            if (listBtn) listBtn.classList.toggle('active', finalView === 'list');
-            if (gridBtn) gridBtn.classList.toggle('active', finalView === 'grid');
-
-            if (save && window.innerWidth > 767) {
-                localStorage.setItem('backupHistoryView', finalView);
-            }
-        }
-
-        const backupListViewBtn = document.getElementById('backupListViewBtn');
-        const backupGridViewBtn = document.getElementById('backupGridViewBtn');
-
-        if (backupListViewBtn) {
-            backupListViewBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                applyBackupHistoryView('list', true);
-            });
-        }
-
-        if (backupGridViewBtn) {
-            backupGridViewBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                applyBackupHistoryView('grid', true);
-            });
-        }
-
-        applyBackupHistoryView(getPreferredBackupHistoryView(), false);
-
-        window.addEventListener('resize', function () {
-            applyBackupHistoryView(getPreferredBackupHistoryView(), false);
-        });
-
-        moveStatsIndicator();
         updateScheduleUI();
         updateResetButtonVisibility();
     });
-
-    window.addEventListener('resize', moveStatsIndicator);
-
-    function showToast(title, message, type = 'error') {
-        const c = document.getElementById('toastContainer');
-        const t = document.createElement('div');
-        t.className = 'toast ' + type;
-        t.innerHTML = `
-            <div class="toast-icon-wrap">
-                <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} toast-icon"></i>
-            </div>
-            <div class="toast-body">
-                <div class="toast-title">${title}</div>
-                <div class="toast-msg">${message}</div>
-            </div>
-            <button class="toast-close" onclick="closeToast(this)">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        `;
-        c.appendChild(t);
-        requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
-        setTimeout(() => {
-            if (!t.isConnected) return;
-            t.classList.remove('show');
-            t.classList.add('hide');
-            setTimeout(() => {
-                if (t.isConnected) t.remove();
-            }, 400);
-        }, 4500);
-    }
 </script>
 @endsection
