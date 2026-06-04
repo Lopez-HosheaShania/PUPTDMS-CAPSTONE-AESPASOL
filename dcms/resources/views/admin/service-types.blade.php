@@ -195,14 +195,14 @@
                                                                 {{ $service->is_active_for_booking ? 'true' : 'false' }},
                                                                 {{ $service->is_default ? 'true' : 'false' }}
                                                             )">
-                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                    <i class="fa-solid fa-pen"></i>
                                                 </button>
 
                                                 @if (!$service->is_default)
                                                 <button type="button" class="action-btn btn-delete-service"
                                                     title="Delete service"
                                                     onclick="openDeleteModal('{{ route('admin.service-types.destroy', $service->id) }}', '{{ addslashes($service->name) }}')">
-                                                    <i class="fa-solid fa-trash-can"></i>
+                                                    <i class="fa-solid fa-trash"></i>
                                                 </button>
                                                 @endif
                                             </div>
@@ -280,14 +280,14 @@
                                                             {{ $service->is_active_for_booking ? 'true' : 'false' }},
                                                             {{ $service->is_default ? 'true' : 'false' }}
                                                         )">
-                                            <i class="fa-solid fa-pen-to-square"></i>
+                                            <i class="fa-solid fa-pen"></i>
                                         </button>
 
                                         @if (!$service->is_default)
                                         <button type="button" class="action-btn btn-delete-service"
                                             title="Delete service"
                                             onclick="openDeleteModal('{{ route('admin.service-types.destroy', $service->id) }}', '{{ addslashes($service->name) }}')">
-                                            <i class="fa-solid fa-trash-can"></i>
+                                            <i class="fa-solid fa-trash"></i>
                                         </button>
                                         @endif
                                     </div>
@@ -321,7 +321,7 @@
             <div class="st-delete-head">
                 <div class="flex items-center gap-3">
                     <div class="st-delete-head-icon">
-                        <i class="fa-solid fa-trash-can"></i>
+                        <i class="fa-solid fa-trash"></i>
                     </div>
 
                     <div>
@@ -358,7 +358,7 @@
                         @method('DELETE')
 
                         <button type="submit" class="st-delete-confirm-btn">
-                            <i class="fa-solid fa-trash-can"></i>
+                            <i class="fa-solid fa-trash"></i>
                             Delete
                         </button>
                     </form>
@@ -377,7 +377,7 @@
                 <div class="st-modal-header">
                     <div class="st-modal-header-left">
                         <div class="st-modal-header-icon">
-                            <i class="fa-solid fa-pen-to-square"></i>
+                            <i class="fa-solid fa-pen"></i>
                         </div>
 
                         <div>

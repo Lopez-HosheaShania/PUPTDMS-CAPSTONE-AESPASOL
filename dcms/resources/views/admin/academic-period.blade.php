@@ -1074,7 +1074,7 @@ $activePeriodPayload = $activePeriod
         <div class="ap-delete-head">
             <div class="ap-delete-head-left">
                 <div class="ap-delete-head-icon">
-                    <i class="fa-solid fa-trash-can"></i>
+                    <i class="fa-solid fa-trash"></i>
                 </div>
 
                 <div>
@@ -1112,7 +1112,7 @@ $activePeriodPayload = $activePeriod
                     </button>
 
                     <button type="submit" class="ap-delete-confirm-btn">
-                        <i class="fa-solid fa-trash-can"></i>
+                        <i class="fa-solid fa-trash"></i>
                         Delete
                     </button>
                 </div>

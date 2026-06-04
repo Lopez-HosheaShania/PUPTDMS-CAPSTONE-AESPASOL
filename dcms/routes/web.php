@@ -762,7 +762,7 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->name('book.appointment.store');
 
     Route::post('/book-appointment/validate-signature', [AppointmentController::class, 'validateSignature'])
-    ->name('book.appointment.validate-signature');
+        ->name('book.appointment.validate-signature');
 
     Route::get('/appointments', [AppointmentController::class, 'index'])
         ->middleware('permission:view_own_appointments')
@@ -950,6 +950,10 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
         ->middleware('permission:manage_appointments')
         ->name('dentist.dentist.appointments.cancel');
 
+    Route::get('/appointments/{id}/start', [DentistAppointmentController::class, 'start'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.appointments.start');
+
     // Patients
     Route::get('/patients', [DentistPatientController::class, 'index'])
         ->middleware('permission:manage_patient_profiles')
@@ -998,6 +1002,7 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
     // Generate (AJAX POST)
     Route::post('/document-requests/generate', [DocumentRequestController::class, 'generate'])
         ->name('dentist.dentist.documentrequests.generate');
+
 
     // Odontogram
     Route::get('/odontogram/{patient}', function (\App\Models\Patient $patient) {

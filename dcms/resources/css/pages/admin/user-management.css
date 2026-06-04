@@ -3988,7 +3988,6 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
     background: #F9FAFB !important;
 }
 
-/* Dark mode compact custom dropdown */
 [data-theme="dark"] #editModal .um-custom-select-btn,
 .dark #editModal .um-custom-select-btn {
     background: #0D1117 !important;

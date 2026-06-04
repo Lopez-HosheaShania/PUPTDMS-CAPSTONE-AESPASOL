@@ -1,4 +1,3 @@
-/* ===== REPORT SECTION LABELS ===== */
 .section-label {
     display: flex;
     align-items: center;
@@ -119,7 +118,6 @@ hr.section-divider {
     color: var(--status-cancelled-text, #B91C1C);
 }
 
-/* Appointment progress bars */
 .progress-bar {
     width: 100%;
     height: 7px;
@@ -137,7 +135,6 @@ hr.section-divider {
     transition: width .25s ease;
 }
 
-/* ===== SHARED REPORT CARD DARK MODE ===== */
 [data-theme="dark"] .section-label,
 .dark .section-label {
     color: var(--text-muted, #8B949E) !important;
@@ -212,7 +209,6 @@ hr.section-divider {
     border-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
 }
 
-/* ===== SHARED REPORT CARD RESPONSIVE ===== */
 @media (max-width: 900px) {
 
     .metric-grid,
@@ -253,7 +249,6 @@ hr.section-divider {
     }
 }
 
-/* ===== REPORT CHARTS SECTION ===== */
 .chart-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -388,12 +383,10 @@ hr.section-divider {
     max-width: 100%;
 }
 
-/* Extra bottom spacing para hindi matakpan ng floating buttons */
 #mainContent.admin-page-shell {
     padding-bottom: calc(6rem + env(safe-area-inset-bottom));
 }
 
-/* ===== REPORT CHARTS DARK MODE ===== */
 [data-theme="dark"] .chart-grid>.card,
 [data-theme="dark"] .chart-grid+.card,
 .dark .chart-grid>.card,
@@ -455,7 +448,6 @@ hr.section-divider {
     background: rgba(255, 255, 255, .015);
 }
 
-/* ===== REPORT CHARTS RESPONSIVE ===== */
 @media (max-width: 1100px) {
     .chart-grid {
         grid-template-columns: 1fr;
@@ -541,7 +533,6 @@ hr.section-divider {
     }
 }
 
-/* ===== INVENTORY / DENTAL SUPPLIES TABLE ===== */
 .alert-warning {
     display: flex;
     align-items: flex-start;
@@ -848,7 +839,6 @@ hr.section-divider {
     color: var(--text-muted, #8B949E) !important;
 }
 
-/* ===== INVENTORY / DENTAL SUPPLIES MOBILE VIEW ===== */
 @media (max-width: 767px) {
     .alert-warning {
         gap: .65rem;

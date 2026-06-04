@@ -295,13 +295,13 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                                                     onclick='openRuleModal("edit", {{ $rule->id }}, {{ json_encode($rule) }})'
                                                     class="cs-action-btn cs-action-edit" data-tooltip="Edit"
                                                     aria-label="Edit schedule rule">
-                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                    <i class="fa-solid fa-pen"></i>
                                                 </button>
 
                                                 <button type="button" class="cs-action-btn cs-action-delete"
                                                     data-tooltip="Delete" aria-label="Delete schedule rule"
                                                     onclick='openScheduleDeleteModal(@json(route("admin.clinic_schedule.destroy", $rule)), @json($rule->days_label))'>
-                                                    <i class="fa-solid fa-trash-can"></i>
+                                                    <i class="fa-solid fa-trash"></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -379,13 +379,13 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                                         onclick='openRuleModal("edit", {{ $rule->id }}, {{ json_encode($rule) }})'
                                         class="cs-action-btn cs-action-edit" data-tooltip="Edit"
                                         aria-label="Edit schedule rule">
-                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        <i class="fa-solid fa-pen"></i>
                                     </button>
 
                                     <button type="button" class="cs-action-btn cs-action-delete" data-tooltip="Delete"
                                         aria-label="Delete schedule rule"
                                         onclick='openScheduleDeleteModal(@json(route("admin.clinic_schedule.destroy", $rule)), @json($rule->days_label))'>
-                                        <i class="fa-solid fa-trash-can"></i>
+                                        <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -877,7 +877,7 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
         <div class="cs-delete-head">
             <div class="cs-delete-head-left">
                 <div class="cs-delete-icon">
-                    <i class="fa-solid fa-trash-can"></i>
+                    <i class="fa-solid fa-trash"></i>
                 </div>
 
                 <div>
@@ -915,7 +915,7 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                     @method('DELETE')
 
                     <button type="submit" class="cs-delete-confirm">
-                        <i class="fa-solid fa-trash-can"></i>
+                        <i class="fa-solid fa-trash"></i>
                         Delete
                     </button>
                 </form>
