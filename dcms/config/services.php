@@ -57,4 +57,10 @@ return [
         'threshold' => env('SIGNATURE_AI_THRESHOLD', 0.80),
     ],
 
+    'flss' => [
+    'base_url' => env('FLSS_BASE_URL', 'https://test-flss.alquatrilixbsit2027.com/api/v1'),
+    'hmac_secret' => env('FLSS_HMAC_SECRET'),
+    'system' => env('FLSS_SYSTEM', 'dms'),
+],
+
 ];
