@@ -307,21 +307,21 @@ class AppointmentController extends Controller
             'emergency_person'     => 'required|string|max:50',
             'emergency_number'     => 'required|string|max:15',
             'emergency_relation' => [
-                                        'required',
-                                        'string',
-                                        \Illuminate\Validation\Rule::in([
-                                            'Mother',
-                                            'Father',
-                                            'Sibling',
-                                            'Guardian',
-                                            'Spouse',
-                                            'Grandparent',
-                                            'Aunt',
-                                            'Uncle',
-                                            'Cousin',
-                                            'Child',
-                                        ]),
-                                    ],
+                'required',
+                'string',
+                \Illuminate\Validation\Rule::in([
+                    'Mother',
+                    'Father',
+                    'Sibling',
+                    'Guardian',
+                    'Spouse',
+                    'Grandparent',
+                    'Aunt',
+                    'Uncle',
+                    'Cousin',
+                    'Child',
+                ]),
+            ],
 
             'patient_signature' => [
                 'required',
@@ -458,22 +458,24 @@ class AppointmentController extends Controller
         $signatureFile = $request->file('patient_signature');
 
         $aiResult = $signatureVerifier->verify($signatureFile);
-        \Log::info('Validate Signature Endpoint Result', $aiResult);
 
-        $message = 'Invalid signature. Please upload a clear handwritten signature or initials image.';
+        \Log::info('Store Appointment Signature Result', $aiResult);
 
-        if (!empty($aiResult['detected_type']) || !empty($aiResult['reason'])) {
-            $message .= ' Detected: ' . ($aiResult['detected_type'] ?? 'unknown') .
-                '. Reason: ' . ($aiResult['reason'] ?? 'No reason returned.');
+        if (!($aiResult['accepted'] ?? false)) {
+            $reason = $aiResult['reason'] ?? 'The uploaded image did not pass signature validation.';
+            $detectedType = $aiResult['detected_type'] ?? 'unknown';
+            $confidence = $aiResult['confidence'] ?? 0;
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'patient_signature' =>
+                    'Signature could not be processed. Please try again. ' .
+                        'Reason: ' . $reason .
+                        ' Detected: ' . $detectedType .
+                        ' Confidence: ' . $confidence,
+                ]);
         }
-
-        return response()->json([
-            'valid' => false,
-            'message' => $message,
-            'detected_type' => $aiResult['detected_type'] ?? 'unknown',
-            'confidence' => $aiResult['confidence'] ?? 0,
-            'reason' => $aiResult['reason'] ?? '',
-        ], 422);
 
         $signaturePath = $signatureFile->store('signatures', 'public');
         $appointment = null;
@@ -835,41 +837,43 @@ class AppointmentController extends Controller
     /* =======================
    VALIDATE SIGNATURE AJAX
 ======================= */
-    public function validateSignature(Request $request, SignatureAiVerifier $signatureVerifier)
-    {
-        $request->validate([
-            'patient_signature' => [
-                'required',
-                'file',
-                'mimes:jpg,jpeg,png',
-                'max:25600', // 25 MB
-            ],
-        ]);
+  public function validateSignature(Request $request, SignatureAiVerifier $signatureVerifier)
+{
+    $request->validate([
+        'patient_signature' => [
+            'required',
+            'file',
+            'mimes:jpg,jpeg,png',
+            'max:25600', // 25 MB
+        ],
+    ]);
 
-        $signatureFile = $request->file('patient_signature');
+    $signatureFile = $request->file('patient_signature');
 
-        $aiResult = $signatureVerifier->verify($signatureFile);
+    $aiResult = $signatureVerifier->verify($signatureFile);
 
-        \Log::info('Validate Signature Endpoint Result', $aiResult);
+    \Log::info('Validate Signature Endpoint Result', $aiResult);
 
-        if (! $aiResult['accepted']) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Invalid signature. Please upload a clear handwritten signature or initials image.',
-                'detected_type' => $aiResult['detected_type'] ?? 'unknown',
-                'confidence' => $aiResult['confidence'] ?? 0,
-                'reason' => $aiResult['reason'] ?? '',
-            ], 422);
-        }
-
+    if (!($aiResult['accepted'] ?? false)) {
         return response()->json([
-            'valid' => true,
-            'message' => 'Valid signature image.',
-            'detected_type' => $aiResult['detected_type'] ?? 'signature',
+            'valid' => false,
+            'accepted' => false,
+            'message' => 'Signature could not be processed. Please try again.',
+            'detected_type' => $aiResult['detected_type'] ?? 'unknown',
             'confidence' => $aiResult['confidence'] ?? 0,
-            'reason' => $aiResult['reason'] ?? '',
-        ]);
+            'reason' => $aiResult['reason'] ?? 'The uploaded image did not pass signature validation.',
+        ], 422);
     }
+
+    return response()->json([
+        'valid' => true,
+        'accepted' => true,
+        'message' => 'Signature verified and accepted',
+        'detected_type' => $aiResult['detected_type'] ?? 'signature',
+        'confidence' => $aiResult['confidence'] ?? 0,
+        'reason' => $aiResult['reason'] ?? '',
+    ]);
+}
     /* =======================
        HELPERS
     ======================= */
