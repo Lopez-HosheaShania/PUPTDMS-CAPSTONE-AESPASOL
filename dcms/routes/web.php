@@ -44,6 +44,7 @@ use App\Services\StudentApiService;
 use App\Services\FacultyApiService;
 use App\Http\Controllers\Admin\DentalRecordController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\Dentist\OdontogramController;
 
 //api nila albert
 
@@ -1005,108 +1006,13 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
 
 
     // Odontogram
-    Route::get('/odontogram/{patient}', function (\App\Models\Patient $patient) {
-        return view('dentist.dentist-odontogram', compact('patient'));
-    })->name('dentist.odontogram');
+    Route::get('/odontogram/appointment/{appointment}', [OdontogramController::class, 'show'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.odontogram');
 
-    Route::post('/odontogram/{patient}/save', function (Request $request, \App\Models\Patient $patient) {
-        $request->validate([
-            'odontogram_data' => 'required|array',
-            'odontogram_data.*.tooth' => 'required|integer|min:1',
-            'odontogram_data.*.status.code' => 'nullable|string|max:20',
-            'odontogram_data.*.status.label' => 'nullable|string|max:255',
-            'odontogram_data.*.threeD.code' => 'nullable|string|max:20',
-            'odontogram_data.*.threeD.label' => 'nullable|string|max:255',
-            'odontogram_data.*.surfaces' => 'nullable|array',
-            'odontogram_data.*.surfaces.*.code' => 'nullable|string|max:20',
-            'odontogram_data.*.surfaces.*.label' => 'nullable|string|max:255',
-            'oral_examination' => 'nullable|string',
-            'diagnosis' => 'nullable|string',
-            'prescriptions' => 'nullable|string',
-        ]);
-
-        $legendCache = [];
-        $resolveLegendId = function (?string $code, ?string $label = null) use (&$legendCache) {
-            if (!$code) {
-                return null;
-            }
-
-            $normalizedCode = strtoupper(trim($code));
-            if ($normalizedCode === '') {
-                return null;
-            }
-
-            if (isset($legendCache[$normalizedCode])) {
-                return $legendCache[$normalizedCode];
-            }
-
-            $legend = \App\Models\ToothLegend::whereRaw('UPPER(code) = ?', [$normalizedCode])->first();
-
-            if (!$legend) {
-                $legend = \App\Models\ToothLegend::create([
-                    'code' => $normalizedCode,
-                    'description' => $label ?: $normalizedCode,
-                    'category' => 'Odontogram',
-                ]);
-            }
-
-            $legendCache[$normalizedCode] = $legend->id;
-
-            return $legend->id;
-        };
-
-        $surfaceMap = [
-            'top' => 1,
-            'right' => 2,
-            'bottom' => 3,
-            'left' => 4,
-            'center' => 5,
-        ];
-
-        $savedTeeth = 0;
-
-        DB::transaction(function () use ($request, $patient, $resolveLegendId, $surfaceMap, &$savedTeeth) {
-            foreach ($request->input('odontogram_data', []) as $entry) {
-                $toothNumber = (int) ($entry['tooth'] ?? 0);
-                if ($toothNumber <= 0) {
-                    continue;
-                }
-
-                $tooth = \App\Models\Tooth::firstOrCreate([
-                    'patient_id' => $patient->id,
-                    'tooth_number' => $toothNumber,
-                ]);
-
-                $savedTeeth++;
-
-                $toothLegendCode = data_get($entry, 'threeD.code') ?: data_get($entry, 'status.code');
-                $toothLegendLabel = data_get($entry, 'threeD.label') ?: data_get($entry, 'status.label');
-                $toothLegendId = $resolveLegendId($toothLegendCode, $toothLegendLabel);
-                $tooth->legends()->sync($toothLegendId ? [$toothLegendId] : []);
-
-                $surfaces = (array) ($entry['surfaces'] ?? []);
-
-                foreach ($surfaceMap as $surfaceKey => $surfaceNumber) {
-                    $surface = \App\Models\ToothSurface::firstOrCreate([
-                        'tooth_id' => $tooth->id,
-                        'surface_number' => $surfaceNumber,
-                    ]);
-
-                    $surfaceCode = data_get($surfaces, $surfaceKey . '.code');
-                    $surfaceLabel = data_get($surfaces, $surfaceKey . '.label');
-                    $surfaceLegendId = $resolveLegendId($surfaceCode, $surfaceLabel);
-
-                    $surface->legends()->sync($surfaceLegendId ? [$surfaceLegendId] : []);
-                }
-            }
-        });
-
-        return response()->json([
-            'message' => 'Odontogram saved successfully.',
-            'saved_teeth' => $savedTeeth,
-            'redirect_url' => route('dentist.dentist.patient.profile', $patient->id),
-        ]);
-    })->middleware('permission:manage_patient_profiles')->name('dentist.odontogram.save');
+    Route::post('/odontogram/appointment/{appointment}/save', [OdontogramController::class, 'save'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.odontogram.save');
 
     // Inventory
     Route::get('/inventory', [InventoryController::class, 'index'])
