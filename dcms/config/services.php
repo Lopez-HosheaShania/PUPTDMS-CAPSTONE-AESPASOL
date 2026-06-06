@@ -58,9 +58,14 @@ return [
     ],
 
     'flss' => [
-    'base_url' => env('FLSS_BASE_URL', 'https://test-flss.alquatrilixbsit2027.com/api/v1'),
-    'hmac_secret' => env('FLSS_HMAC_SECRET'),
-    'system' => env('FLSS_SYSTEM', 'dms'),
-],
+        'base_url' => env('FLSS_BASE_URL', 'https://test-flss.alquatrilixbsit2027.com'),
+        'api_url' => env('FLSS_API_URL', 'https://test-flss.alquatrilixbsit2027.com/api/v1'),
+
+        'system' => env('FLSS_SYSTEM', 'dms'),
+        'client' => env('FLSS_CLIENT', 'dms'),
+
+        'hmac_secret' => env('FLSS_HMAC_SECRET'),
+        'secret' => env('FLSS_HMAC_SECRET'),
+    ],
 
 ];

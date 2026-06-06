@@ -404,6 +404,9 @@ Route::prefix('admin')
         Route::patch('/academic-periods/{academicPeriod}/set-active', [AcademicPeriodController::class, 'setActive'])
             ->name('admin.academic_periods.set_active');
 
+        Route::post('/admin/academic-periods/sync-flss', [AcademicPeriodController::class, 'syncFromFlss'])
+            ->name('admin.academic_periods.sync_flss');
+
 
         /*
         |--------------------------------------------------------------------------
@@ -762,7 +765,7 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->name('book.appointment.store');
 
     Route::post('/book-appointment/validate-signature', [AppointmentController::class, 'validateSignature'])
-    ->name('book.appointment.validate-signature');
+        ->name('book.appointment.validate-signature');
 
     Route::get('/appointments', [AppointmentController::class, 'index'])
         ->middleware('permission:view_own_appointments')
@@ -1147,3 +1150,5 @@ Route::prefix('report')->middleware(['role:dentist', 'permission:manage_reports'
 });
 
 Route::post('/chat/send', [ChatbotController::class, 'chat']);
+
+
