@@ -405,6 +405,9 @@ Route::prefix('admin')
         Route::patch('/academic-periods/{academicPeriod}/set-active', [AcademicPeriodController::class, 'setActive'])
             ->name('admin.academic_periods.set_active');
 
+        Route::post('/admin/academic-periods/sync-flss', [AcademicPeriodController::class, 'syncFromFlss'])
+            ->name('admin.academic_periods.sync_flss');
+
 
         /*
         |--------------------------------------------------------------------------
@@ -1058,3 +1061,5 @@ Route::prefix('report')->middleware(['role:dentist', 'permission:manage_reports'
 });
 
 Route::post('/chat/send', [ChatbotController::class, 'chat']);
+
+

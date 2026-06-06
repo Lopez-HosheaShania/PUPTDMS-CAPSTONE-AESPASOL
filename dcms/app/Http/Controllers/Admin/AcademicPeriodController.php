@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Helpers\PhilippineHolidays;
 use App\Helpers\AuditLogger;
+use App\Services\FacultyApiService;
 
 class AcademicPeriodController extends Controller
 {
@@ -91,7 +92,7 @@ class AcademicPeriodController extends Controller
     {
         $validated = $request->validate([
             'academic_year' => ['required', 'string', 'max:20', 'regex:/^\d{4}-\d{4}$/'],
-            'semester' => ['required', 'in:1st Semester,2nd Semester,Summer'],
+            'semester' => ['required', 'in:First Semester,Second Semester,Summer'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after:start_date'],
             'description' => ['nullable', 'string'],
@@ -131,7 +132,7 @@ class AcademicPeriodController extends Controller
     {
         $validated = $request->validate([
             'academic_year' => ['required', 'string', 'max:20', 'regex:/^\d{4}-\d{4}$/'],
-            'semester' => ['required', 'in:1st Semester,2nd Semester,Summer'],
+            'semester' => ['required', 'in:First Semester,Second Semester,Summer'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after:start_date'],
             'description' => ['nullable', 'string'],
@@ -193,5 +194,26 @@ class AcademicPeriodController extends Controller
         return redirect()
             ->route('admin.academic_periods')
             ->with('success', 'Academic period set as active successfully.');
+    }
+
+    public function syncFromFlss(FacultyApiService $facultyApiService)
+    {
+        try {
+            $academicPeriod = $facultyApiService->syncActiveAcademicYearSemester();
+
+            AuditLogger::log(
+                'sync',
+                'academic_periods',
+                "Admin synced academic period from FLSS: {$academicPeriod->academic_year} - {$academicPeriod->semester}"
+            );
+
+            return redirect()
+                ->route('admin.academic_periods')
+                ->with('success', 'Academic period synced from FLSS successfully.');
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.academic_periods')
+                ->with('error', 'Failed to sync academic period from FLSS: ' . $e->getMessage());
+        }
     }
 }
