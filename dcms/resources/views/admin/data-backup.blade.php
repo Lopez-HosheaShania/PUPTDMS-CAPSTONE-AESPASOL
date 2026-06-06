@@ -23,131 +23,6 @@ return $bytes . ' B';
 $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : true;
 @endphp
 
-<div id="backupModal">
-    <div class="backup-modal-inner">
-        <div class="admin-modal-icon">
-            <i id="modalIcon" class="fa-solid fa-database"></i>
-        </div>
-
-        <div id="modalTitle" class="admin-modal-message-title">
-            Creating Backup...
-        </div>
-
-        <div id="modalSubtitle" class="admin-modal-message-subtitle">
-            Please wait while the system archives your data.
-        </div>
-
-        <div class="admin-progress-track">
-            <div id="modalBar" class="admin-progress-bar">
-            </div>
-        </div>
-
-        <div id="modalPct" class="admin-progress-label">0%</div>
-
-        <button class="terms-cancel-btn" id="modalClose" onclick="closeModal()" disabled>
-            Close
-        </button>
-    </div>
-</div>
-
-<div id="scheduleModal" class="admin-modal-backdrop backup-schedule-modal">
-    <div class="admin-modal-card backup-schedule-modal-card">
-        <div class="admin-modal-head">
-            <div>
-                <div class="admin-modal-title">
-                    Edit Backup Schedule
-                </div>
-                <div class="admin-modal-subtitle">
-                    Update recurring backup schedule settings
-                </div>
-            </div>
-
-            <button type="button" onclick="closeScheduleModal()" class="um-modal-x backup-modal-x"
-                aria-label="Close modal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <form id="scheduleForm">
-            <div class="admin-modal-grid backup-schedule-grid">
-                <div class="backup-schedule-field">
-                    <label class="backup-check-card" for="daily_enabled">
-                        <span class="backup-check-copy">
-                            <span class="backup-check-title">Daily Incremental</span>
-                            <span class="backup-check-sub">Small database changes every day</span>
-                        </span>
-
-                        <span class="backup-check-toggle">
-                            <input type="checkbox" id="daily_enabled" {{ $backupSchedule['daily_enabled'] ? 'checked'
-                                : '' }}>
-                            <span class="backup-check-slider"></span>
-                        </span>
-                    </label>
-
-                    <div class="backup-time-wrap">
-                        <input type="text" id="daily_time" value="{{ $backupSchedule['daily_time'] }}"
-                            class="admin-modal-input js-flatpickr-time backup-time-input" placeholder="Select time">
-                        <i class="fa-regular fa-clock"></i>
-                    </div>
-                </div>
-
-                <div class="backup-schedule-field">
-                    <label class="backup-check-card" for="weekly_enabled">
-                        <span class="backup-check-copy">
-                            <span class="backup-check-title">Weekly Full Backup</span>
-                            <span class="backup-check-sub">Complete copy every Sunday</span>
-                        </span>
-
-                        <span class="backup-check-toggle">
-                            <input type="checkbox" id="weekly_enabled" {{ $backupSchedule['weekly_enabled'] ? 'checked'
-                                : '' }}>
-                            <span class="backup-check-slider"></span>
-                        </span>
-                    </label>
-
-                    <div class="backup-time-wrap">
-                        <input type="text" id="weekly_time" value="{{ $backupSchedule['weekly_time'] }}"
-                            class="admin-modal-input js-flatpickr-time backup-time-input" placeholder="Select time">
-                        <i class="fa-regular fa-clock"></i>
-                    </div>
-                </div>
-
-                <div class="backup-schedule-field">
-                    <label class="backup-check-card" for="monthly_enabled">
-                        <span class="backup-check-copy">
-                            <span class="backup-check-title">Monthly Archive</span>
-                            <span class="backup-check-sub">Long-term monthly archive copy</span>
-                        </span>
-
-                        <span class="backup-check-toggle">
-                            <input type="checkbox" id="monthly_enabled" {{ $backupSchedule['monthly_enabled']
-                                ? 'checked' : '' }}>
-                            <span class="backup-check-slider"></span>
-                        </span>
-                    </label>
-
-                    <div class="backup-time-wrap">
-                        <input type="text" id="monthly_time" value="{{ $backupSchedule['monthly_time'] }}"
-                            class="admin-modal-input js-flatpickr-time backup-time-input" placeholder="Select time">
-                        <i class="fa-regular fa-clock"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="backup-modal-actions">
-                <button type="button" onclick="closeScheduleModal()" class="modal-btn-ghost backup-modal-cancel">
-                    Cancel
-                </button>
-
-                <button type="submit" class="backup-run-btn backup-save-btn">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <main id="mainContent" class="admin-page-shell backup-page page-enter mode-list">
     <div class="admin-page-container">
 
@@ -165,86 +40,6 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                 </div>
             </div>
         </div>
-        <div id="filterOverlay" class="filter-overlay-ui backup-filter-overlay"
-            onclick="closeFilterDrawer('filterPanel', 'filterOverlay')">
-        </div>
-
-        <aside id="filterPanel" class="filter-drawer-ui backup-filter-drawer" aria-label="Backup filters">
-            <div class="filter-drawer-header px-6 py-5 border-b">
-                <div class="flex items-center justify-between gap-4">
-                    <div class="filter-drawer-title flex items-center gap-3">
-                        <i class="fa-solid fa-filter"></i>
-                        <div>
-                            <h2 class="text-xl font-black leading-none">Filters</h2>
-                            <p class="text-xs font-bold text-gray-500 mt-1">Refine backup history results</p>
-                        </div>
-                    </div>
-
-                    <button type="button" class="admin-icon-button"
-                        onclick="closeFilterDrawer('filterPanel', 'filterOverlay')" aria-label="Close filters">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="filter-drawer-body px-6 py-5 space-y-6">
-                <div id="activeFiltersSection">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="filter-section-title !mb-0">Active Filters</span>
-
-                        <button type="button" id="clearAllChipsBtn" class="text-xs font-black"
-                            onclick="resetAjaxFilters()">
-                            Clear all
-                        </button>
-                    </div>
-
-                    <div id="activeChipsContainer"></div>
-                </div>
-
-                <div class="filter-soft-divider"></div>
-
-                <section>
-                    <div class="filter-section-title">Backup Type</div>
-
-                    <div id="backupTypeGroup" class="filter-chip-row">
-                        <button type="button" class="ftag" data-val="">All Types</button>
-                        <button type="button" class="ftag" data-val="full">Full</button>
-                        <button type="button" class="ftag" data-val="incremental">Incremental</button>
-                    </div>
-                </section>
-
-                <section>
-                    <div class="filter-section-title">Backup Status</div>
-
-                    <div id="backupStatusGroup" class="filter-chip-row">
-                        <button type="button" class="ftag" data-val="">All Status</button>
-                        <button type="button" class="ftag" data-val="completed">Completed</button>
-                        <button type="button" class="ftag" data-val="failed">Failed</button>
-                        <button type="button" class="ftag" data-val="in_progress">In Progress</button>
-                    </div>
-                </section>
-            </div>
-
-            <div class="filter-drawer-footer px-6 py-4 border-t">
-                <div class="flex items-center justify-between gap-3">
-                    <button type="button" id="filterResetBtn" class="filter-clear-btn" onclick="resetAjaxFilters()">
-                        Reset Filters
-                    </button>
-
-                    <div class="flex items-center gap-3">
-                        <button type="button" class="filter-cancel-btn px-5 py-3 rounded-xl font-black text-sm"
-                            onclick="closeFilterDrawer('filterPanel', 'filterOverlay')">
-                            Cancel
-                        </button>
-
-                        <button type="button" id="backupApplyFiltersBtn"
-                            class="filter-apply-btn filter-show-results-btn px-5 py-3 rounded-xl font-black text-sm">
-                            <span id="backupShowResultsText">Show results</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </aside>
 
         <div class="backup-stats admin-dashboard-stat-grid" id="backupStats">
             <div class="backup-stat stat-card s-all">
@@ -308,14 +103,13 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                         <div class="card-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
                         <div>
                             <div class="card-title">Backup History</div>
-                            <div class="card-subtitle">All archived snapshots</div>
                         </div>
                     </div>
 
                     <div class="backup-history-actions">
-                        <button type="button" id="filterBtn" class="global-filter-btn"
-                            onclick="openFilterDrawer('filterPanel', 'filterOverlay')" aria-pressed="false">
-                            <i class="fa-solid fa-filter"></i>
+                        <button type="button" id="filterBtn" class="global-filter-btn" onclick="openBackupFilterModal()"
+                            aria-pressed="false">
+                            <i class="fa-solid fa-sliders"></i>
                             <span>Filters</span>
                             <span id="filterBadge" class="filter-badge"></span>
                         </button>
@@ -382,16 +176,21 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                                     </td>
                                     <td>
                                         <div class="table-actions">
-                                            <a class="action-btn dl" title="Download"
-                                                href="{{ route('admin.data_backup.download', $backup->id) }}">
+                                            <button type="button" class="action-btn dl" aria-label="Download"
+                                                data-tooltip="Download"
+                                                onclick="openBackupActionModal('download', {{ $backup->id }}, '{{ $backup->backup_id }}', '{{ route('admin.data_backup.download', $backup->id) }}')">
                                                 <i class="fa-solid fa-download"></i>
-                                            </a>
-                                            <button type="button" class="action-btn restore" title="Restore"
-                                                onclick="restoreBackup({{ $backup->id }}, '{{ $backup->backup_id }}')">
+                                            </button>
+
+                                            <button type="button" class="action-btn restore" aria-label="Restore"
+                                                data-tooltip="Restore"
+                                                onclick="openBackupActionModal('restore', {{ $backup->id }}, '{{ $backup->backup_id }}')">
                                                 <i class="fa-solid fa-rotate-left"></i>
                                             </button>
-                                            <button type="button" class="action-btn del" title="Delete"
-                                                onclick="deleteBackup({{ $backup->id }}, '{{ $backup->backup_id }}')">
+
+                                            <button type="button" class="action-btn del" aria-label="Delete"
+                                                data-tooltip="Delete"
+                                                onclick="openBackupActionModal('delete', {{ $backup->id }}, '{{ $backup->backup_id }}')">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </div>
@@ -455,16 +254,21 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
 
                             <div class="backup-grid-footer">
                                 <div class="table-actions">
-                                    <a class="action-btn dl" title="Download"
-                                        href="{{ route('admin.data_backup.download', $backup->id) }}">
+                                    <button type="button" class="action-btn dl" aria-label="Download"
+                                        data-tooltip="Download"
+                                        onclick="openBackupActionModal('download', {{ $backup->id }}, '{{ $backup->backup_id }}', '{{ route('admin.data_backup.download', $backup->id) }}')">
                                         <i class="fa-solid fa-download"></i>
-                                    </a>
-                                    <button type="button" class="action-btn restore" title="Restore"
-                                        onclick="restoreBackup({{ $backup->id }}, '{{ $backup->backup_id }}')">
+                                    </button>
+
+                                    <button type="button" class="action-btn restore" aria-label="Restore"
+                                        data-tooltip="Restore"
+                                        onclick="openBackupActionModal('restore', {{ $backup->id }}, '{{ $backup->backup_id }}')">
                                         <i class="fa-solid fa-rotate-left"></i>
                                     </button>
-                                    <button type="button" class="action-btn del" title="Delete"
-                                        onclick="deleteBackup({{ $backup->id }}, '{{ $backup->backup_id }}')">
+
+                                    <button type="button" class="action-btn del" aria-label="Delete"
+                                        data-tooltip="Delete"
+                                        onclick="openBackupActionModal('delete', {{ $backup->id }}, '{{ $backup->backup_id }}')">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
@@ -605,7 +409,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                         </div>
 
                         <button class="schedule-edit-btn" type="button" onclick="openScheduleModal()">
-                            <i class="fa-solid fa-pen-to-square backup-edit-icon"></i> Edit Schedule
+                            <i class="fa-solid fa-pen backup-edit-icon"></i> Edit Schedule
                             Settings
                         </button>
                     </div>
@@ -614,6 +418,296 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         </div>
     </div>
 </main>
+
+<div id="backupModal" class="ui-modal modal-overlay backup-progress-modal" aria-hidden="true">
+    <div class="backup-modal-inner modal-box-inner" onclick="event.stopPropagation()">
+        <div class="admin-modal-icon">
+            <i id="modalIcon" class="fa-solid fa-database"></i>
+        </div>
+
+        <div id="modalTitle" class="admin-modal-message-title">
+            Creating Backup...
+        </div>
+
+        <div id="modalSubtitle" class="admin-modal-message-subtitle">
+            Please wait while the system archives your data.
+        </div>
+
+        <div class="admin-progress-track">
+            <div id="modalBar" class="admin-progress-bar">
+            </div>
+        </div>
+
+        <div id="modalPct" class="admin-progress-label">0%</div>
+
+        <button type="button" class="terms-cancel-btn backup-progress-close" id="modalClose"
+            onclick="closeBackupProgressModal()" disabled>
+            Close
+        </button>
+    </div>
+</div>
+
+<div id="scheduleModal" class="ui-modal modal-overlay admin-modal-backdrop backup-schedule-modal" aria-hidden="true">
+    <div class="modal-box modal-box-inner admin-modal-card backup-schedule-modal-card"
+        onclick="event.stopPropagation()">
+        <div class="admin-modal-head">
+            <div>
+                <div class="admin-modal-title">
+                    Edit Backup Schedule
+                </div>
+                <div class="admin-modal-subtitle">
+                    Update recurring backup schedule settings
+                </div>
+            </div>
+
+            <button type="button" onclick="closeScheduleModal()" class="um-modal-x backup-modal-x"
+                aria-label="Close modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="scheduleForm">
+            <div class="admin-modal-grid backup-schedule-grid">
+                <div class="backup-schedule-field">
+                    <label class="backup-check-card" for="daily_enabled">
+                        <span class="backup-check-copy">
+                            <span class="backup-check-title">Daily Incremental</span>
+                            <span class="backup-check-sub">Small database changes every day</span>
+                        </span>
+
+                        <span class="backup-check-toggle">
+                            <input type="checkbox" id="daily_enabled" {{ $backupSchedule['daily_enabled'] ? 'checked'
+                                : '' }}>
+                            <span class="backup-check-slider"></span>
+                        </span>
+                    </label>
+
+                    <div class="backup-time-wrap">
+                        <input type="text" id="daily_time" value="{{ $backupSchedule['daily_time'] }}"
+                            class="admin-modal-input js-flatpickr-time backup-time-input" placeholder="Select time">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
+                </div>
+
+                <div class="backup-schedule-field">
+                    <label class="backup-check-card" for="weekly_enabled">
+                        <span class="backup-check-copy">
+                            <span class="backup-check-title">Weekly Full Backup</span>
+                            <span class="backup-check-sub">Complete copy every Sunday</span>
+                        </span>
+
+                        <span class="backup-check-toggle">
+                            <input type="checkbox" id="weekly_enabled" {{ $backupSchedule['weekly_enabled'] ? 'checked'
+                                : '' }}>
+                            <span class="backup-check-slider"></span>
+                        </span>
+                    </label>
+
+                    <div class="backup-time-wrap">
+                        <input type="text" id="weekly_time" value="{{ $backupSchedule['weekly_time'] }}"
+                            class="admin-modal-input js-flatpickr-time backup-time-input" placeholder="Select time">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
+                </div>
+
+                <div class="backup-schedule-field">
+                    <label class="backup-check-card" for="monthly_enabled">
+                        <span class="backup-check-copy">
+                            <span class="backup-check-title">Monthly Archive</span>
+                            <span class="backup-check-sub">Long-term monthly archive copy</span>
+                        </span>
+
+                        <span class="backup-check-toggle">
+                            <input type="checkbox" id="monthly_enabled" {{ $backupSchedule['monthly_enabled']
+                                ? 'checked' : '' }}>
+                            <span class="backup-check-slider"></span>
+                        </span>
+                    </label>
+
+                    <div class="backup-time-wrap">
+                        <input type="text" id="monthly_time" value="{{ $backupSchedule['monthly_time'] }}"
+                            class="admin-modal-input js-flatpickr-time backup-time-input" placeholder="Select time">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="backup-modal-actions">
+                <button type="button" onclick="closeScheduleModal()" class="modal-btn-ghost backup-modal-cancel">
+                    Cancel
+                </button>
+
+                <button type="submit" class="backup-run-btn backup-save-btn">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay ui-modal backup-action-modal ap-delete-modal" id="backupActionModal" aria-hidden="true">
+    <div class="modal-box modal-box-inner ap-delete-shell backup-action-shell" onclick="event.stopPropagation()"
+        role="dialog" aria-modal="true" aria-labelledby="backupActionTitle">
+
+        <div class="ap-delete-head">
+            <div class="ap-delete-head-left">
+                <div id="backupActionIcon" class="ap-delete-head-icon backup-action-icon">
+                    <i class="fa-solid fa-download"></i>
+                </div>
+
+                <div>
+                    <h3 id="backupActionTitle" class="ap-delete-title">Download backup</h3>
+                    <p id="backupActionSubtitle" class="ap-delete-subtitle">This action requires confirmation</p>
+                </div>
+            </div>
+
+            <button type="button" onclick="closeBackupActionModal()" class="ap-delete-x"
+                aria-label="Close action modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="ap-delete-content backup-action-content">
+            <div id="backupActionWarning" class="ap-delete-warning backup-action-warning">
+                <i id="backupActionWarningIcon" class="fa-solid fa-circle-info"></i>
+
+                <div>
+                    <p id="backupActionMessage">
+                        Are you sure you want to continue?
+                    </p>
+                    <span id="backupActionHint">Please review this action before continuing.</span>
+                </div>
+            </div>
+
+            <div class="ap-delete-footer">
+                <button type="button" onclick="closeBackupActionModal()" class="modal-btn-ghost">
+                    Cancel
+                </button>
+
+                <button type="button" id="backupActionConfirmBtn" class="ap-delete-confirm-btn backup-action-confirm">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="filterModal" class="filter-drawer-wrapper backup-filter-modal">
+    <div class="filter-drawer-overlay" onclick="closeBackupFilterModal()"></div>
+
+    <div class="filter-drawer-panel flex flex-col bg-white">
+        <div class="px-6 py-5 flex items-center justify-between flex-shrink-0 bg-white border-b border-gray-100">
+            <div class="filter-drawer-title flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-xl"></i>
+                <h2 class="text-xl font-extrabold">Filters</h2>
+            </div>
+
+            <button id="closeFilterModalBtn" type="button" class="text-gray-400 hover:text-gray-700 transition-colors"
+                onclick="closeBackupFilterModal()" aria-label="Close filters">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="px-6 py-5 flex flex-col gap-6 flex-1 overflow-y-auto bg-white">
+            <div id="activeFiltersSection" class="hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[13px] font-bold text-gray-800">Active Filters</span>
+
+                    <button id="clearAllChipsBtn" type="button" class="text-xs font-bold text-[#8B0000] hover:underline"
+                        onclick="resetAjaxFilters()">
+                        Clear All
+                    </button>
+                </div>
+
+                <div id="activeChipsContainer" class="flex flex-wrap gap-2 pb-4 border-b border-gray-100"></div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Sort By</h3>
+                <div class="filter-chip-row" id="backupSortGroup">
+                    <button type="button" class="ftag ftag-active" data-val="newest">Newest First</button>
+                    <button type="button" class="ftag" data-val="oldest">Oldest First</button>
+                    <button type="button" class="ftag" data-val="largest">Largest Size</button>
+                    <button type="button" class="ftag" data-val="smallest">Smallest Size</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Filter by Date Range</h3>
+                <div class="filter-chip-row" id="backupDatePresetGroup">
+                    <button type="button" class="quick-date-chip" data-range="7">Last 7 Days</button>
+                    <button type="button" class="quick-date-chip" data-range="30">Last 30 Days</button>
+                    <button type="button" class="quick-date-chip" data-range="90">Last 3 Months</button>
+                    <button type="button" class="quick-date-chip" data-range="180">Last 6 Months</button>
+                    <button type="button" class="quick-date-chip" data-range="365">Last 12 Months</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Custom Date Range</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="filter-date-input-wrap">
+                        <input id="backupFromDate" type="text" class="js-flatpickr-date-range-from"
+                            placeholder="Start date" readonly autocomplete="off" />
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+
+                    <div class="filter-date-input-wrap">
+                        <input id="backupToDate" type="text" class="js-flatpickr-date-range-to" placeholder="End date"
+                            readonly autocomplete="off" />
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Backup Type</h3>
+                <div id="backupTypeGroup" class="filter-chip-row">
+                    <button type="button" class="ftag ftag-active" data-val="">All Types</button>
+                    <button type="button" class="ftag" data-val="full">Full</button>
+                    <button type="button" class="ftag" data-val="incremental">Incremental</button>
+                </div>
+            </div>
+
+            <div class="pb-6">
+                <h3 class="filter-section-title">Backup Status</h3>
+                <div id="backupStatusGroup" class="filter-chip-row">
+                    <button type="button" class="ftag ftag-active" data-val="">All Status</button>
+                    <button type="button" class="ftag" data-val="completed">Completed</button>
+                    <button type="button" class="ftag" data-val="failed">Failed</button>
+                    <button type="button" class="ftag" data-val="in_progress">In Progress</button>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="px-6 py-5 bg-white flex flex-col sm:flex-row items-center justify-between flex-shrink-0 border-t border-gray-100 gap-4 sm:gap-0 relative z-20">
+            <button id="clearFiltersModal" type="button"
+                class="filter-clear-btn flex items-center gap-2 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+                onclick="resetAjaxFilters()">
+                <i class="fa-regular fa-trash-can text-lg"></i>
+                <span class="text-[13px] font-bold leading-none whitespace-nowrap">Clear Filters</span>
+            </button>
+
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button id="cancelFilterBtn" type="button"
+                    class="filter-cancel-btn flex-1 sm:flex-none px-5 py-2.5 text-sm font-bold rounded-lg transition-colors"
+                    onclick="closeBackupFilterModal()">
+                    Cancel
+                </button>
+
+                <button id="backupApplyFiltersBtn" type="button"
+                    class="filter-show-results-btn filter-apply-btn flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-colors shadow-sm">
+                    <i class="fa-solid fa-check"></i>
+                    <span id="backupShowResultsText">Show results</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -627,6 +721,10 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
     const dataBackupUrl = @json(route('admin.data_backup'));
 
     let currentFilters = {
+        sort: @json(request('sort', 'newest')),
+        date_range: '',
+        date_from: @json(request('date_from', '')),
+        date_to: @json(request('date_to', '')),
         type: @json(request('type', '')),
         status: @json(request('status', '')),
         scope: @json(request('scope', '')),
@@ -714,61 +812,50 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         window.history.replaceState({}, '', url);
     }
 
-    function getActiveBackupFilterCount() {
-        return ['type', 'status', 'scope', 'stat'].filter(key => {
-            return String(currentFilters[key] || '').trim() !== '';
-        }).length;
-    }
+    function updateResetButtonVisibility() {
+        const count = getActiveBackupFilterCount();
 
-    function updateBackupActiveChips() {
-        const section = document.getElementById('activeFiltersSection');
-        const container = document.getElementById('activeChipsContainer');
-
-        if (!section || !container) return;
-
-        const chips = [];
-
-        const labels = {
-            type: {
-                full: 'Type: Full',
-                incremental: 'Type: Incremental',
-            },
-            status: {
-                completed: 'Status: Completed',
-                failed: 'Status: Failed',
-                in_progress: 'Status: In Progress',
-            },
-            scope: {
-                month: 'This Month',
-            },
-            stat: {
-                last: 'Last Backup',
-                auto: 'Auto-Schedule',
-            },
-        };
-
-        Object.keys(labels).forEach(key => {
-            const value = currentFilters[key];
-
-            if (!value || !labels[key][value]) return;
-
-            chips.push(`
-            <span class="filter-chip">
-                <span>${labels[key][value]}</span>
-                <button type="button" class="filter-chip-remove" onclick="clearBackupFilter('${key}')" aria-label="Remove ${labels[key][value]}">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </span>
-        `);
+        window.setGlobalFilterButtonState?.({
+            buttonId: 'filterBtn',
+            badgeId: 'filterBadge',
+            resetId: 'externalClearFilterBtn',
+            count,
         });
 
-        container.innerHTML = chips.join('');
-        section.style.display = chips.length ? '' : 'none';
+        updateBackupActiveChips();
+    }
+
+    function getBackupFilterGroupValue(groupId) {
+        const active = document.querySelector(`#${groupId} .ftag.ftag-active`);
+        return active?.getAttribute('data-val') || '';
+    }
+
+    function getBackupDatePresetValue() {
+        const active = document.querySelector('#backupDatePresetGroup .quick-date-chip.active');
+        return active?.getAttribute('data-range') || '';
+    }
+
+    function syncBackupChipGroup(groupId, value) {
+        document.querySelectorAll(`#${groupId} .ftag`).forEach(button => {
+            button.classList.toggle('ftag-active', button.dataset.val === String(value || ''));
+        });
+    }
+
+    function syncBackupDatePresets(value) {
+        document.querySelectorAll('#backupDatePresetGroup .quick-date-chip').forEach(button => {
+            button.classList.toggle('active', button.dataset.range === String(value || ''));
+        });
     }
 
     function getActiveBackupFilterCount() {
-        return ['type', 'status', 'scope', 'stat'].filter(key => {
-            return String(currentFilters[key] || '').trim() !== '';
+        return ['sort', 'date_range', 'date_from', 'date_to', 'type', 'status'].filter(key => {
+            const value = String(currentFilters[key] || '').trim();
+
+            if (key === 'sort') {
+                return value !== '' && value !== 'newest';
+            }
+
+            return value !== '';
         }).length;
     }
 
@@ -779,6 +866,19 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         if (!section || !container) return;
 
         const labels = {
+            sort: {
+                newest: 'Sort: Newest First',
+                oldest: 'Sort: Oldest First',
+                largest: 'Sort: Largest Size',
+                smallest: 'Sort: Smallest Size',
+            },
+            date_range: {
+                7: 'Last 7 Days',
+                30: 'Last 30 Days',
+                90: 'Last 3 Months',
+                180: 'Last 6 Months',
+                365: 'Last 12 Months',
+            },
             type: {
                 full: 'Type: Full',
                 incremental: 'Type: Incremental',
@@ -788,28 +888,52 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                 failed: 'Status: Failed',
                 in_progress: 'Status: In Progress',
             },
-            scope: {
-                month: 'This Month',
-            },
-            stat: {
-                last: 'Last Backup',
-                auto: 'Auto-Schedule',
-            },
         };
 
         const chips = [];
 
-        Object.keys(labels).forEach(key => {
+        if (currentFilters.sort && currentFilters.sort !== 'newest') {
+            chips.push(`
+            <span class="filter-chip">
+                <span>${labels.sort[currentFilters.sort] || 'Sort filter'}</span>
+                <button type="button" class="filter-chip-remove" onclick="clearBackupFilter('sort')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </span>
+        `);
+        }
+
+        if (currentFilters.date_range) {
+            chips.push(`
+            <span class="filter-chip">
+                <span>${labels.date_range[currentFilters.date_range] || 'Date range'}</span>
+                <button type="button" class="filter-chip-remove" onclick="clearBackupFilter('date_range')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </span>
+        `);
+        }
+
+        if (currentFilters.date_from || currentFilters.date_to) {
+            chips.push(`
+            <span class="filter-chip">
+                <span>Date: ${currentFilters.date_from || 'Any'} - ${currentFilters.date_to || 'Any'}</span>
+                <button type="button" class="filter-chip-remove" onclick="clearBackupFilter('custom_date')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </span>
+        `);
+        }
+
+        ['type', 'status'].forEach(key => {
             const value = currentFilters[key];
 
-            if (!value || !labels[key][value]) return;
+            if (!value || !labels[key]?.[value]) return;
 
             chips.push(`
             <span class="filter-chip">
                 <span>${labels[key][value]}</span>
-                <button type="button" class="filter-chip-remove"
-                    onclick="clearBackupFilter('${key}')"
-                    aria-label="Remove ${labels[key][value]}">
+                <button type="button" class="filter-chip-remove" onclick="clearBackupFilter('${key}')">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </span>
@@ -817,7 +941,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         });
 
         container.innerHTML = chips.join('');
-        section.style.display = chips.length ? '' : 'none';
+        section.classList.toggle('hidden', chips.length === 0);
     }
 
     function updateResetButtonVisibility() {
@@ -834,24 +958,72 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
     }
 
     function syncFilterInputs() {
-        window.syncFilterTagGroup?.('backupTypeGroup', currentFilters.type || '');
-        window.syncFilterTagGroup?.('backupStatusGroup', currentFilters.status || '');
+        syncBackupChipGroup('backupSortGroup', currentFilters.sort || 'newest');
+        syncBackupChipGroup('backupTypeGroup', currentFilters.type || '');
+        syncBackupChipGroup('backupStatusGroup', currentFilters.status || '');
+        syncBackupDatePresets(currentFilters.date_range || '');
+
+        const fromDate = document.getElementById('backupFromDate');
+        const toDate = document.getElementById('backupToDate');
+
+        if (fromDate) fromDate.value = currentFilters.date_from || '';
+        if (toDate) toDate.value = currentFilters.date_to || '';
 
         updateResetButtonVisibility();
     }
 
     function clearBackupFilter(key) {
-        if (!Object.prototype.hasOwnProperty.call(currentFilters, key)) return;
-
-        currentFilters[key] = '';
+        if (key === 'sort') {
+            currentFilters.sort = 'newest';
+        } else if (key === 'date_range') {
+            currentFilters.date_range = '';
+        } else if (key === 'custom_date') {
+            currentFilters.date_from = '';
+            currentFilters.date_to = '';
+        } else if (Object.prototype.hasOwnProperty.call(currentFilters, key)) {
+            currentFilters[key] = '';
+        }
 
         syncFilterInputs();
         fetchBackupTable();
     }
 
-    function getBackupFilterGroupValue(groupId) {
-        const active = document.querySelector(`#${groupId} .ftag.ftag-active`);
-        return active?.getAttribute('data-val') || '';
+    function openBackupFilterModal() {
+        const modal = document.getElementById('filterModal');
+
+        if (!modal) return;
+
+        // Keep the filter drawer outside grid/list containers.
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+
+        modal.classList.remove('closing');
+        modal.classList.add('open');
+
+        document.documentElement.classList.add('filter-lock');
+        document.body.classList.add('filter-lock');
+
+        if (window.initGlobalFlatpickr) {
+            window.initGlobalFlatpickr();
+        }
+
+        syncFilterInputs();
+    }
+
+    function closeBackupFilterModal() {
+        const modal = document.getElementById('filterModal');
+
+        if (!modal) return;
+
+        modal.classList.add('closing');
+        modal.classList.remove('open');
+
+        setTimeout(() => {
+            modal.classList.remove('closing');
+            document.documentElement.classList.remove('filter-lock');
+            document.body.classList.remove('filter-lock');
+        }, 260);
     }
 
     function setStatActiveByFilters() {
@@ -927,13 +1099,18 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                     </td>
                     <td>
                         <div class="table-actions">
-                            <a class="action-btn dl" title="Download" href="${backup.download_url}">
+                            <button type="button" class="action-btn dl" aria-label="Download" data-tooltip="Download"
+                                onclick="openBackupActionModal('download', ${backup.id}, '${backup.backup_id}', '${backup.download_url}')">
                                 <i class="fa-solid fa-download"></i>
-                            </a>
-                            <button type="button" class="action-btn restore" title="Restore" onclick="restoreBackup(${backup.id}, '${backup.backup_id}')">
+                            </button>
+
+                            <button type="button" class="action-btn restore" aria-label="Restore" data-tooltip="Restore"
+                                onclick="openBackupActionModal('restore', ${backup.id}, '${backup.backup_id}')">
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>
-                            <button type="button" class="action-btn del" title="Delete" onclick="deleteBackup(${backup.id}, '${backup.backup_id}')">
+
+                            <button type="button" class="action-btn del" aria-label="Delete" data-tooltip="Delete"
+                                onclick="openBackupActionModal('delete', ${backup.id}, '${backup.backup_id}')">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -977,15 +1154,23 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
 
                     <div class="backup-grid-footer">
                         <div class="table-actions">
-                            <a class="action-btn dl" title="Download" href="${backup.download_url}">
-                                <i class="fa-solid fa-download"></i>
-                            </a>
-                            <button type="button" class="action-btn restore" title="Restore" onclick="restoreBackup(${backup.id}, '${backup.backup_id}')">
-                                <i class="fa-solid fa-rotate-left"></i>
-                            </button>
-                            <button type="button" class="action-btn del" title="Delete" onclick="deleteBackup(${backup.id}, '${backup.backup_id}')">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
+                            <button type="button" class="action-btn dl"
+                            aria-label="Download" data-tooltip="Download"
+                            onclick="openBackupActionModal('download', ${backup.id}, '${backup.backup_id}', '${backup.download_url}')">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+
+                        <button type="button" class="action-btn restore"
+                            aria-label="Restore" data-tooltip="Restore"
+                            onclick="openBackupActionModal('restore', ${backup.id}, '${backup.backup_id}')">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+
+                        <button type="button" class="action-btn del"
+                            aria-label="Delete" data-tooltip="Delete"
+                            onclick="openBackupActionModal('delete', ${backup.id}, '${backup.backup_id}')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                         </div>
                     </div>
                 </div>
@@ -1067,6 +1252,10 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
             setLoading(true);
 
             const url = new URL(dataBackupUrl, window.location.origin);
+            if (currentFilters.sort && currentFilters.sort !== 'newest') url.searchParams.set('sort', currentFilters.sort);
+            if (currentFilters.date_range) url.searchParams.set('date_range', currentFilters.date_range);
+            if (currentFilters.date_from) url.searchParams.set('date_from', currentFilters.date_from);
+            if (currentFilters.date_to) url.searchParams.set('date_to', currentFilters.date_to);
             if (currentFilters.type) url.searchParams.set('type', currentFilters.type);
             if (currentFilters.status) url.searchParams.set('status', currentFilters.status);
             if (currentFilters.scope) url.searchParams.set('scope', currentFilters.scope);
@@ -1115,6 +1304,10 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
 
     function resetAjaxFilters() {
         currentFilters = {
+            sort: 'newest',
+            date_range: '',
+            date_from: '',
+            date_to: '',
             type: '',
             status: '',
             scope: '',
@@ -1161,7 +1354,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         sub.textContent = 'Please wait while the system archives your data.';
         icon.className = 'fa-solid fa-database spin';
         btn.disabled = true;
-        modal.classList.add('open');
+        openBackupProgressModal();
 
         let p = 0;
         const fakeProgress = setInterval(() => {
@@ -1196,6 +1389,8 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
             sub.textContent = result.message || 'Your data has been successfully backed up.';
             icon.className = 'fa-solid fa-circle-check';
             btn.disabled = false;
+            btn.removeAttribute('disabled');
+            btn.style.pointerEvents = 'auto';
 
             showToast('Backup Complete', result.message || 'New backup saved successfully.', 'success');
             await fetchBackupTable();
@@ -1205,6 +1400,8 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
             sub.textContent = error.message;
             icon.className = 'fa-solid fa-circle-exclamation';
             btn.disabled = false;
+            btn.removeAttribute('disabled');
+            btn.style.pointerEvents = 'auto';
             showToast('Backup Failed', error.message, 'error');
         } finally {
             if (backupBtn) {
@@ -1213,10 +1410,6 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                 backupBtn.style.pointerEvents = '';
             }
         }
-    }
-
-    function closeModal() {
-        document.getElementById('backupModal').classList.remove('open');
     }
 
     function setBackupTimePickerValue(inputId, value) {
@@ -1230,6 +1423,76 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         }
     }
 
+    function setBackupTimePickerValue(inputId, value) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        if (input._flatpickr) {
+            input._flatpickr.setDate(value, false, 'H:i');
+        } else {
+            input.value = value;
+        }
+    }
+
+    const dataBackupModalTimers = {};
+
+    function openDataBackupModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+
+        if (dataBackupModalTimers[id]) {
+            clearTimeout(dataBackupModalTimers[id]);
+            dataBackupModalTimers[id] = null;
+        }
+
+        modal.classList.remove('closing', 'is-closing');
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+
+        document.body.classList.add('modal-lock');
+
+        requestAnimationFrame(() => {
+            document.dispatchEvent(new CustomEvent('ui-modal:opened', {
+                detail: { modal }
+            }));
+        });
+    }
+
+    function closeDataBackupModal(id, afterClose = null) {
+        const modal = document.getElementById(id);
+
+        if (!modal || (!modal.classList.contains('open') && !modal.classList.contains('closing'))) return;
+
+        modal.classList.remove('open');
+        modal.classList.add('closing');
+        modal.setAttribute('aria-hidden', 'true');
+
+        if (dataBackupModalTimers[id]) {
+            clearTimeout(dataBackupModalTimers[id]);
+        }
+
+        dataBackupModalTimers[id] = setTimeout(() => {
+            modal.classList.remove('closing', 'is-closing');
+            dataBackupModalTimers[id] = null;
+
+            if (!document.querySelector('.ui-modal.open, .ui-modal.closing')) {
+                document.body.classList.remove('modal-lock');
+            }
+
+            if (typeof afterClose === 'function') {
+                afterClose();
+            }
+        }, 180);
+    }
+
+    function openBackupProgressModal() {
+        openDataBackupModal('backupModal');
+    }
+
+    function closeBackupProgressModal() {
+        closeDataBackupModal('backupModal');
+    }
+
     function openScheduleModal(updateUrl = false) {
         document.getElementById('daily_enabled').checked = !!backupSchedule.daily_enabled;
         document.getElementById('weekly_enabled').checked = !!backupSchedule.weekly_enabled;
@@ -1239,7 +1502,7 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         setBackupTimePickerValue('weekly_time', backupSchedule.weekly_time);
         setBackupTimePickerValue('monthly_time', backupSchedule.monthly_time);
 
-        document.getElementById('scheduleModal').style.display = 'flex';
+        openDataBackupModal('scheduleModal');
 
         if (window.initGlobalFlatpickr) {
             window.initGlobalFlatpickr();
@@ -1253,13 +1516,14 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
     }
 
     function closeScheduleModal() {
-        document.getElementById('scheduleModal').style.display = 'none';
+        closeDataBackupModal('scheduleModal', () => {
+            const url = new URL(window.location.href);
 
-        const url = new URL(window.location.href);
-        if (url.searchParams.get('stat') === 'auto') {
-            url.searchParams.delete('stat');
-            window.history.replaceState({}, '', url);
-        }
+            if (url.searchParams.get('stat') === 'auto') {
+                url.searchParams.delete('stat');
+                window.history.replaceState({}, '', url);
+            }
+        });
     }
 
     async function toggleSchedule(type) {
@@ -1304,56 +1568,164 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         }
     }
 
-    async function restoreBackup(id, backupId) {
-        if (!confirm(`Restore ${backupId}?`)) return;
+    let pendingBackupAction = null;
+
+    function openBackupActionModal(action, id, backupId, downloadUrl = '') {
+        const modal = document.getElementById('backupActionModal');
+        const title = document.getElementById('backupActionTitle');
+        const subtitle = document.getElementById('backupActionSubtitle');
+        const message = document.getElementById('backupActionMessage');
+        const hint = document.getElementById('backupActionHint');
+        const iconWrap = document.getElementById('backupActionIcon');
+        const warning = document.getElementById('backupActionWarning');
+        const warningIcon = document.getElementById('backupActionWarningIcon');
+        const confirmBtn = document.getElementById('backupActionConfirmBtn');
+
+        if (!modal || !title || !message || !confirmBtn || !iconWrap || !warning) return;
+
+        const config = {
+            download: {
+                title: 'Download Backup',
+                subtitle: 'Save a copy of this backup file',
+                message: `Download backup ${backupId}?`,
+                hint: 'The backup file will be downloaded to your device.',
+                icon: 'fa-download',
+                warningIcon: 'fa-circle-info',
+                tone: 'download',
+                button: 'Download',
+            },
+            restore: {
+                title: 'Restore Backup',
+                subtitle: 'This action requires confirmation',
+                message: `Are you sure you want to restore backup ${backupId}?`,
+                hint: 'Make sure this is the correct snapshot before continuing.',
+                icon: 'fa-rotate-left',
+                warningIcon: 'fa-triangle-exclamation',
+                tone: 'restore',
+                button: 'Restore',
+            },
+            delete: {
+                title: 'Delete Backup',
+                subtitle: 'This action requires confirmation',
+                message: `Are you sure you want to delete backup ${backupId}?`,
+                hint: 'This backup record and file will be permanently removed.',
+                icon: 'fa-trash-can',
+                warningIcon: 'fa-triangle-exclamation',
+                tone: 'delete',
+                button: 'Delete',
+            },
+        }[action];
+
+        if (!config) return;
+
+        pendingBackupAction = { action, id, backupId, downloadUrl };
+
+        title.textContent = config.title;
+        subtitle.textContent = config.subtitle;
+        message.textContent = config.message;
+
+        if (hint) hint.textContent = config.hint;
+
+        iconWrap.className = `ap-delete-head-icon backup-action-icon is-${config.tone}`;
+        iconWrap.innerHTML = `<i class="fa-solid ${config.icon}"></i>`;
+
+        warning.className = `ap-delete-warning backup-action-warning is-${config.tone}`;
+
+        if (warningIcon) {
+            warningIcon.className = `fa-solid ${config.warningIcon}`;
+        }
+
+        confirmBtn.className = `ap-delete-confirm-btn backup-action-confirm is-${config.tone}`;
+        confirmBtn.innerHTML = `<i class="fa-solid ${config.icon}"></i><span>${config.button}</span>`;
+
+        openDataBackupModal('backupActionModal');
+    }
+
+    function closeBackupActionModal() {
+        closeDataBackupModal('backupActionModal', () => {
+            pendingBackupAction = null;
+        });
+    }
+
+    async function runBackupAction() {
+        if (!pendingBackupAction) return;
+
+        const { action, id, backupId, downloadUrl } = pendingBackupAction;
+        const confirmBtn = document.getElementById('backupActionConfirmBtn');
+
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Processing`;
+        }
 
         try {
-            const response = await fetch(restoreUrlTemplate.replace('__ID__', id), {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                }
-            });
-
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-                throw new Error(result.message || 'Restore failed.');
+            if (action === 'download') {
+                closeBackupActionModal();
+                window.location.href = downloadUrl;
+                return;
             }
 
-            showToast('Restore', result.message, 'success');
+            if (action === 'restore') {
+                const response = await fetch(restoreUrlTemplate.replace('__ID__', id), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Restore failed.');
+                }
+
+                closeBackupActionModal();
+                window.showToast?.('Restore', result.message, 'success');
+                return;
+            }
+
+            if (action === 'delete') {
+                const response = await fetch(deleteUrlTemplate.replace('__ID__', id), {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Delete failed.');
+                }
+
+                closeBackupActionModal();
+                await fetchBackupTable();
+                window.showToast?.('Deleted', result.message, 'success');
+            }
         } catch (error) {
-            showToast('Restore Failed', error.message, 'error');
+            window.showToast?.('Action Failed', error.message, 'error');
+        } finally {
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+
+                const currentAction = pendingBackupAction?.action || action;
+                const labels = {
+                    download: ['fa-download', 'Download'],
+                    restore: ['fa-rotate-left', 'Restore'],
+                    delete: ['fa-trash-can', 'Delete'],
+                };
+
+                const [icon, label] = labels[currentAction] || ['fa-check', 'Continue'];
+                confirmBtn.innerHTML = `<i class="fa-solid ${icon}"></i><span>${label}</span>`;
+            }
         }
     }
 
-    async function deleteBackup(id, backupId) {
-        if (!confirm(`Delete ${backupId}? This cannot be undone.`)) return;
-
-        try {
-            const response = await fetch(deleteUrlTemplate.replace('__ID__', id), {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                }
-            });
-
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-                throw new Error(result.message || 'Delete failed.');
-            }
-
-            const row = document.getElementById(`row-${id}`);
-            if (row) row.remove();
-
-            showToast('Deleted', result.message, 'success');
-        } catch (error) {
-            showToast('Delete Failed', error.message, 'error');
-        }
-    }
+    document.getElementById('backupActionConfirmBtn')?.addEventListener('click', runBackupAction);
 
     function setActiveStat(el) {
         document.querySelectorAll('.backup-stat').forEach(stat => stat.classList.remove('active'));
@@ -1402,6 +1774,53 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
     document.addEventListener('DOMContentLoaded', function () {
 
         const scheduleForm = document.getElementById('scheduleForm');
+        document.querySelectorAll('#backupSortGroup .ftag').forEach(button => {
+            button.addEventListener('click', () => {
+                currentFilters.sort = button.dataset.val || 'newest';
+                syncFilterInputs();
+            });
+        });
+
+        document.querySelectorAll('#backupTypeGroup .ftag').forEach(button => {
+            button.addEventListener('click', () => {
+                currentFilters.type = button.dataset.val || '';
+                syncFilterInputs();
+            });
+        });
+
+        document.querySelectorAll('#backupStatusGroup .ftag').forEach(button => {
+            button.addEventListener('click', () => {
+                currentFilters.status = button.dataset.val || '';
+                syncFilterInputs();
+            });
+        });
+
+        document.querySelectorAll('#backupDatePresetGroup .quick-date-chip').forEach(button => {
+            button.addEventListener('click', () => {
+                currentFilters.date_range = button.dataset.range || '';
+                currentFilters.date_from = '';
+                currentFilters.date_to = '';
+                syncFilterInputs();
+            });
+        });
+
+        document.getElementById('backupFromDate')?.addEventListener('change', function () {
+            currentFilters.date_from = this.value;
+            currentFilters.date_range = '';
+            syncFilterInputs();
+        });
+
+        document.getElementById('backupToDate')?.addEventListener('change', function () {
+            currentFilters.date_to = this.value;
+            currentFilters.date_range = '';
+            syncFilterInputs();
+        });
+
+        document.getElementById('backupApplyFiltersBtn')?.addEventListener('click', function () {
+            fetchBackupTable();
+            closeBackupFilterModal();
+        });
+
         window.bindFilterTagGroup?.({
             groupId: 'backupTypeGroup',
             onChange: () => { },
@@ -1419,11 +1838,11 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                 stat: '',
             });
 
-            closeFilterDrawer('filterPanel', 'filterOverlay');
+            closeBackupFilterModal();
         });
 
         window.initGlobalViewToggles?.(document);
-        syncFilterInputs(); F
+        syncFilterInputs();
 
         if (scheduleForm) {
             scheduleForm.addEventListener('submit', async function (e) {

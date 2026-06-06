@@ -28,21 +28,22 @@ class DentistAppointmentController extends Controller
 
         $today = Carbon::today()->toDateString();
 
-        $appointments = Appointment::with('patient')
+        $upcomingAppointments = Appointment::with('patient')
+            ->whereIn('status', ['upcoming', 'rescheduled'])
             ->whereDate('appointment_date', '>=', $today)
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->get();
 
-        $upcomingAppointments = $appointments->filter(function ($a) use ($today) {
-            return in_array($a->status, ['upcoming', 'rescheduled'], true)
-                && $a->appointment_date >= $today;
-        })->values();
+        $appointments = $upcomingAppointments;
 
         $pastAppointments = Appointment::with('patient')
             ->where(function ($q) use ($today) {
                 $q->whereIn('status', ['completed', 'cancelled'])
-                    ->orWhereDate('appointment_date', '<', $today);
+                    ->orWhere(function ($sub) use ($today) {
+                        $sub->whereDate('appointment_date', '<', $today)
+                            ->whereIn('status', ['upcoming', 'rescheduled']);
+                    });
             })
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc')
@@ -149,13 +150,16 @@ class DentistAppointmentController extends Controller
         $today = Carbon::today()->toDateString();
 
         $futureVisits = Appointment::where('patient_id', $patient->id)
-            ->whereDate('appointment_date', '>=', $today)
+            ->whereIn('status', ['upcoming', 'rescheduled'])
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->get();
 
         $pastVisits = Appointment::where('patient_id', $patient->id)
-            ->whereDate('appointment_date', '<', $today)
+            ->where(function ($q) use ($today) {
+                $q->whereIn('status', ['completed', 'cancelled'])
+                    ->orWhereDate('appointment_date', '<', $today);
+            })
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc')
             ->get();
@@ -177,6 +181,37 @@ class DentistAppointmentController extends Controller
             'totalVisits',
             'notifications'
         ));
+    }
+
+    public function start($id)
+    {
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if ($activeRole !== 'dentist') {
+            return redirect('/login');
+        }
+
+        $appointment = Appointment::with('patient')->findOrFail($id);
+
+        if (!$appointment->patient) {
+            return redirect()
+                ->route('dentist.dentist.appointments')
+                ->with('error', 'Patient not found for this appointment.');
+        }
+
+        if (!in_array($appointment->status, ['upcoming', 'rescheduled'], true)) {
+            return redirect()
+                ->route('dentist.dentist.appointments')
+                ->with('error', 'Only upcoming or rescheduled appointments can be started.');
+        }
+
+        AuditLogger::log(
+            'view',
+            'dentist_appointments',
+            'Dentist started an appointment procedure'
+        );
+
+        return redirect()->route('dentist.odontogram', $appointment->id);
     }
 
     public function cancel(Request $request, $id)

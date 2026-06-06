@@ -1726,3 +1726,761 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.06),
         0 10px 22px rgba(0, 0, 0, 0.22) !important;
 }
+
+/* Dentist appointments: admin-style manage controls, status dropdown, and start procedure modal */
+.dentist-appointments-page .appointment-controls-bar {
+    display: grid !important;
+    grid-template-columns: minmax(180px, .55fr) minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.dentist-appointments-page .appointment-filter-wrap {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+}
+
+.dentist-appointments-page .appointment-filter-wrap .search-wrap.global-search {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+.dentist-appointments-page .appointment-filter-wrap .voice-input-toggle {
+    flex: 0 0 auto !important;
+}
+
+.dentist-appointments-page .appointment-controls-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+}
+
+.dentist-appointments-page .appointment-status-dropdown {
+    position: relative !important;
+    flex: 0 0 190px !important;
+    width: 190px !important;
+    z-index: 80 !important;
+}
+
+.dentist-appointments-page .appointment-status-dropdown.open {
+    z-index: 260 !important;
+}
+
+.dentist-appointments-page .appointment-status-trigger {
+    width: 100% !important;
+    min-height: 46px !important;
+    height: 46px !important;
+    padding: 6px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(139, 0, 0, .14) !important;
+    background: rgba(255, 255, 255, .78) !important;
+    box-shadow: 0 8px 24px rgba(139, 0, 0, .06), inset 0 1px 0 rgba(255, 255, 255, .78) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease !important;
+}
+
+.dentist-appointments-page .appointment-status-trigger-left,
+.dentist-appointments-page .appointment-status-trigger-right {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+}
+
+.dentist-appointments-page .appointment-status-trigger-icon {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 11px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--appt-option-bg, #EFF6FF) !important;
+    border: 1px solid var(--appt-option-border, #BFDBFE) !important;
+    color: var(--appt-option-text, #2563EB) !important;
+}
+
+.dentist-appointments-page .appointment-status-trigger-icon i,
+.dentist-appointments-page .appointment-status-option-icon i,
+.dentist-appointments-page .appointment-status-chevron {
+    color: currentColor !important;
+}
+
+.dentist-appointments-page .appointment-status-trigger-text {
+    display: grid !important;
+    gap: 1px !important;
+    text-align: left !important;
+    min-width: 0 !important;
+}
+
+.dentist-appointments-page .appointment-status-trigger-label {
+    font-size: 9px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .10em !important;
+    color: #9CA3AF !important;
+    line-height: 1 !important;
+}
+
+.dentist-appointments-page .appointment-status-trigger-text strong {
+    color: #111827 !important;
+    font-size: 12px !important;
+    font-weight: 950 !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+}
+
+.dentist-appointments-page .appointment-status-count-badge {
+    min-width: 26px !important;
+    height: 26px !important;
+    padding: 0 8px !important;
+    border-radius: 999px !important;
+    background: #FFE4E6 !important;
+    border: 1px solid #FDA4AF !important;
+    color: #E11D48 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 11px !important;
+    font-weight: 950 !important;
+    line-height: 1 !important;
+}
+
+.dentist-appointments-page .appointment-status-chevron {
+    color: #94A3B8 !important;
+    font-size: 11px !important;
+    transition: transform .18s ease !important;
+}
+
+.dentist-appointments-page .appointment-status-dropdown.open .appointment-status-chevron {
+    transform: rotate(180deg) !important;
+}
+
+.dentist-appointments-page .appointment-status-panel {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: auto !important;
+    width: 292px !important;
+    max-width: calc(100vw - 32px) !important;
+    padding: 12px !important;
+    border-radius: 20px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(229, 231, 235, 0.95) !important;
+    box-shadow: 0 22px 48px rgba(15, 23, 42, 0.16) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-6px) scale(.98) !important;
+    transform-origin: top left !important;
+    transition: opacity .18s ease, visibility .18s ease, transform .18s ease !important;
+    z-index: 280 !important;
+}
+
+.dentist-appointments-page .appointment-status-dropdown.open .appointment-status-panel {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+.dentist-appointments-page .appointment-status-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+    margin: 0 !important;
+}
+
+.dentist-appointments-page .appointment-status-option {
+    position: relative !important;
+    min-height: 82px !important;
+    padding: 9px 8px !important;
+    border-radius: 15px !important;
+    border: 1px solid transparent !important;
+    background: #F8FAFC !important;
+    color: #64748B !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    overflow: hidden !important;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease !important;
+}
+
+.dentist-appointments-page .appointment-status-option:hover,
+.dentist-appointments-page .appointment-status-option.is-active {
+    background: var(--appt-option-bg) !important;
+    border-color: var(--appt-option-border) !important;
+    color: var(--appt-option-text) !important;
+    box-shadow: 0 0 0 3px var(--appt-option-soft), 0 14px 28px var(--appt-option-soft), inset 0 1px 0 rgba(255, 255, 255, .82) !important;
+    transform: translateY(-1px) !important;
+}
+
+.dentist-appointments-page .appointment-status-option-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    background: var(--appt-option-bg) !important;
+    border: 1px solid var(--appt-option-border) !important;
+    color: var(--appt-option-text) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.dentist-appointments-page .appointment-status-option-label {
+    max-width: 100% !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    color: inherit !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.dentist-appointments-page .appointment-status-option-count {
+    position: absolute !important;
+    top: 9px !important;
+    right: 9px !important;
+    z-index: 5 !important;
+    min-width: 24px !important;
+    height: 24px !important;
+    padding: 0 7px !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--appt-option-border) !important;
+    color: var(--appt-option-text) !important;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, .08), inset 0 1px 0 rgba(255, 255, 255, .85) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 11px !important;
+    font-weight: 950 !important;
+    line-height: 1 !important;
+}
+
+.dentist-appointments-page .appointment-status-option.tone-all,
+.dentist-appointments-page .appointment-status-trigger-icon.tone-all {
+    --appt-option-bg: #EFF6FF;
+    --appt-option-text: #2563EB;
+    --appt-option-border: #BFDBFE;
+    --appt-option-soft: rgba(37, 99, 235, .16);
+}
+
+.dentist-appointments-page .appointment-status-option.tone-upcoming,
+.dentist-appointments-page .appointment-status-trigger-icon.tone-upcoming {
+    --appt-option-bg: #FFF7ED;
+    --appt-option-text: #EA580C;
+    --appt-option-border: #FED7AA;
+    --appt-option-soft: rgba(234, 88, 12, .16);
+}
+
+.dentist-appointments-page .appointment-status-option.tone-rescheduled,
+.dentist-appointments-page .appointment-status-trigger-icon.tone-rescheduled {
+    --appt-option-bg: #FEF9C3;
+    --appt-option-text: #A16207;
+    --appt-option-border: #FDE68A;
+    --appt-option-soft: rgba(202, 138, 4, .18);
+}
+
+.dentist-appointments-page .appointment-status-option.tone-completed,
+.dentist-appointments-page .appointment-status-trigger-icon.tone-completed {
+    --appt-option-bg: #F0FDF4;
+    --appt-option-text: #16A34A;
+    --appt-option-border: #BBF7D0;
+    --appt-option-soft: rgba(22, 163, 74, .18);
+}
+
+.dentist-appointments-page .appointment-status-option.tone-cancelled,
+.dentist-appointments-page .appointment-status-trigger-icon.tone-cancelled {
+    --appt-option-bg: #FEF2F2;
+    --appt-option-text: #DC2626;
+    --appt-option-border: #FECACA;
+    --appt-option-soft: rgba(220, 38, 38, .16);
+}
+
+.dentist-appointments-page .empty-state-controlled {
+    display: none !important;
+}
+
+.dentist-appointments-page .empty-state-controlled.show,
+.dentist-appointments-page .empty-state-controlled.is-visible {
+    display: flex !important;
+}
+
+.start-procedure-overlay {
+    background: radial-gradient(circle at 15% 12%, rgba(22, 163, 74, .20), transparent 32%), rgba(15, 23, 42, .56);
+    backdrop-filter: blur(8px) saturate(130%);
+    -webkit-backdrop-filter: blur(8px) saturate(130%);
+}
+
+.start-procedure-shell {
+    width: min(94vw, 560px);
+    max-height: calc(100dvh - 32px);
+    border-radius: 24px;
+    overflow: hidden;
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, .22), inset 0 1px 0 rgba(255, 255, 255, .70);
+    animation: modalUp .28s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+
+.start-procedure-header {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #eef2f7;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.start-procedure-header-left {
+    display: flex;
+    align-items: center;
+    gap: .95rem;
+    min-width: 0;
+}
+
+.start-procedure-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    background: linear-gradient(145deg, #047857, #16A34A);
+    box-shadow: 0 12px 24px rgba(22, 163, 74, .18);
+    flex-shrink: 0;
+}
+
+.start-procedure-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.35rem;
+    line-height: 1.1;
+    font-weight: 900;
+}
+
+.start-procedure-header p {
+    margin: .28rem 0 0;
+    color: #64748b;
+    font-size: .86rem;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+.start-procedure-close {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #94a3b8;
+    transition: all .2s ease;
+    flex-shrink: 0;
+}
+
+.start-procedure-close:hover {
+    color: #047857;
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+.start-procedure-body {
+    display: grid;
+    gap: 1rem;
+    padding: 1.15rem 1.5rem;
+    background: #f8fafc;
+}
+
+.start-procedure-alert,
+.start-procedure-card {
+    border: 1px solid #e9eef5;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+}
+
+.start-procedure-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: .85rem;
+    padding: 1rem;
+}
+
+.start-procedure-alert-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #16A34A;
+    background: #DCFCE7;
+    border: 1px solid #BBF7D0;
+    flex-shrink: 0;
+}
+
+.start-procedure-alert-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: .94rem;
+    font-weight: 900;
+}
+
+.start-procedure-alert-sub {
+    margin: .2rem 0 0;
+    color: #64748b;
+    font-size: .82rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.start-procedure-card {
+    display: grid;
+    padding: .95rem 1rem;
+    gap: .7rem;
+}
+
+.start-procedure-card-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.start-procedure-card-row span {
+    color: #94a3b8;
+    font-size: .70rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.start-procedure-card-row strong {
+    color: #0f172a;
+    font-size: .88rem;
+    font-weight: 900;
+    text-align: right;
+}
+
+.start-procedure-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .75rem;
+    padding: 1rem;
+    border-top: 1px solid #eef2f7;
+    background: rgba(255, 255, 255, .94);
+}
+
+.start-procedure-btn {
+    min-height: 44px;
+    border-radius: 14px;
+    padding: 0 1.1rem;
+    font-size: .82rem;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    border: 1px solid transparent;
+    transition: all .2s ease;
+}
+
+.start-procedure-btn-cancel {
+    background: #ffffff;
+    color: #4b5563;
+    border-color: #e5e7eb;
+}
+
+.start-procedure-btn-cancel:hover {
+    background: #f9fafb;
+    border-color: #cbd5e1;
+}
+
+.start-procedure-btn-primary {
+    background: linear-gradient(145deg, #047857, #16A34A);
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(22, 163, 74, .16);
+}
+
+.start-procedure-btn-primary:hover {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .dentist-appointments-page .appointment-status-trigger,
+.dark .dentist-appointments-page .appointment-status-trigger {
+    background: rgba(13, 17, 23, .82) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 14px 28px rgba(0, 0, 0, .22) !important;
+}
+
+[data-theme="dark"] .dentist-appointments-page .appointment-status-trigger-text strong,
+.dark .dentist-appointments-page .appointment-status-trigger-text strong {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] .dentist-appointments-page .appointment-status-count-badge,
+.dark .dentist-appointments-page .appointment-status-count-badge {
+    background: rgba(139, 0, 0, .22) !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .dentist-appointments-page .appointment-status-panel,
+.dark .dentist-appointments-page .appointment-status-panel {
+    background: linear-gradient(145deg, rgba(14, 13, 13, .10), rgba(26, 21, 21, .045)), rgba(13, 17, 23, .88) !important;
+    border-color: rgba(255, 255, 255, .14) !important;
+    box-shadow: 0 24px 58px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+    backdrop-filter: blur(18px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+}
+
+[data-theme="dark"] .dentist-appointments-page .appointment-status-option,
+.dark .dentist-appointments-page .appointment-status-option {
+    background: rgba(14, 16, 20, .58) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    color: #CBD5E1 !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .dentist-appointments-page .appointment-status-option:hover,
+[data-theme="dark"] .dentist-appointments-page .appointment-status-option.is-active,
+.dark .dentist-appointments-page .appointment-status-option:hover,
+.dark .dentist-appointments-page .appointment-status-option.is-active {
+    background: radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--appt-option-text) 24%, transparent), transparent 42%), linear-gradient(145deg, color-mix(in srgb, var(--appt-option-text) 18%, rgba(15, 23, 42, .92)), rgba(11, 12, 15, .72)) !important;
+    border-color: color-mix(in srgb, var(--appt-option-text) 48%, rgba(255, 255, 255, .12)) !important;
+    color: var(--appt-option-text) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--appt-option-text) 18%, transparent), 0 16px 34px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .dentist-appointments-page .appointment-status-option-icon,
+.dark .dentist-appointments-page .appointment-status-option-icon {
+    background: color-mix(in srgb, var(--appt-option-text) 16%, rgba(15, 23, 42, .88)) !important;
+    border-color: color-mix(in srgb, var(--appt-option-text) 42%, rgba(255, 255, 255, .12)) !important;
+    color: var(--appt-option-text) !important;
+}
+
+[data-theme="dark"] .dentist-appointments-page .appointment-status-option-count,
+.dark .dentist-appointments-page .appointment-status-option-count {
+    background: rgba(13, 17, 23, .92) !important;
+    border: 1px solid color-mix(in srgb, var(--appt-option-text) 58%, rgba(255, 255, 255, .12)) !important;
+    color: var(--appt-option-text) !important;
+}
+
+[data-theme="dark"] .start-procedure-overlay,
+.dark .start-procedure-overlay {
+    background: radial-gradient(circle at 15% 12%, rgba(22, 163, 74, .18), transparent 32%), rgba(2, 6, 23, .74) !important;
+}
+
+[data-theme="dark"] .start-procedure-shell,
+.dark .start-procedure-shell {
+    background: #0D1117 !important;
+    border: 1px solid #21262D !important;
+    color: #E5E7EB !important;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, .62), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] .start-procedure-header,
+[data-theme="dark"] .start-procedure-footer,
+.dark .start-procedure-header,
+.dark .start-procedure-footer {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] .start-procedure-body,
+.dark .start-procedure-body {
+    background: #0c111b !important;
+}
+
+[data-theme="dark"] .start-procedure-alert,
+[data-theme="dark"] .start-procedure-card,
+.dark .start-procedure-alert,
+.dark .start-procedure-card {
+    background: #161B22 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] .start-procedure-header h2,
+[data-theme="dark"] .start-procedure-alert-title,
+[data-theme="dark"] .start-procedure-card-row strong,
+.dark .start-procedure-header h2,
+.dark .start-procedure-alert-title,
+.dark .start-procedure-card-row strong {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] .start-procedure-header p,
+[data-theme="dark"] .start-procedure-alert-sub,
+[data-theme="dark"] .start-procedure-card-row span,
+.dark .start-procedure-header p,
+.dark .start-procedure-alert-sub,
+.dark .start-procedure-card-row span {
+    color: #9CA3AF !important;
+}
+
+[data-theme="dark"] .start-procedure-close,
+[data-theme="dark"] .start-procedure-btn-cancel,
+.dark .start-procedure-close,
+.dark .start-procedure-btn-cancel {
+    background: #161B22 !important;
+    border-color: #2b313a !important;
+    color: #9ca3af !important;
+}
+
+@media (max-width: 1180px) {
+    .dentist-appointments-page .appointment-controls-bar {
+        grid-template-columns: 1fr !important;
+    }
+
+    .dentist-appointments-page .appointment-control-copy,
+    .dentist-appointments-page .appointment-filter-wrap,
+    .dentist-appointments-page .appointment-controls-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .dentist-appointments-page .appointment-filter-wrap,
+    .dentist-appointments-page .appointment-controls-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .dentist-appointments-page .appointment-status-dropdown {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        flex-basis: auto !important;
+    }
+
+    .dentist-appointments-page .appointment-status-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .dentist-appointments-page .appointment-status-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .start-procedure-overlay {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    .start-procedure-shell {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    .start-procedure-header {
+        padding: 1.35rem 1rem .95rem;
+        padding-top: 2rem;
+    }
+
+    .start-procedure-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+    }
+
+    .start-procedure-header h2 {
+        font-size: 1rem;
+    }
+
+    .start-procedure-header p {
+        font-size: .72rem;
+    }
+
+    .start-procedure-body {
+        padding: .95rem 1rem 1rem;
+    }
+
+    .start-procedure-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: .85rem 1rem calc(.95rem + env(safe-area-inset-bottom));
+    }
+
+    .start-procedure-btn {
+        width: 100%;
+        min-width: 0;
+        height: 44px;
+        font-size: 12px;
+        padding: 0 .85rem;
+    }
+}
+
+/* Fix: keep the admin-style status dropdown above the appointment list/table */
+.dentist-appointments-page .appointment-header-wrap {
+    position: relative !important;
+    z-index: 500 !important;
+    overflow: visible !important;
+}
+
+.dentist-appointments-page .appointment-controls-bar {
+    position: relative !important;
+    z-index: 520 !important;
+    overflow: visible !important;
+}
+
+.dentist-appointments-page .appointment-filter-wrap,
+.dentist-appointments-page .appointment-controls-actions {
+    position: relative !important;
+    z-index: 530 !important;
+    overflow: visible !important;
+}
+
+.dentist-appointments-page .appointment-status-dropdown {
+    position: relative !important;
+    z-index: 540 !important;
+}
+
+.dentist-appointments-page .appointment-status-dropdown.open {
+    z-index: 9990 !important;
+}
+
+.dentist-appointments-page .appointment-status-panel {
+    z-index: 9999 !important;
+}
+
+.dentist-appointments-page #upcomingSection,
+.dentist-appointments-page #pastSection,
+.dentist-appointments-page .appt-month-group,
+.dentist-appointments-page .desktop-appointments-table,
+.dentist-appointments-page .mobile-appointments-list,
+.dentist-appointments-page .appt-table-head,
+.dentist-appointments-page .appt-card,
+.dentist-appointments-page .mobile-appt-card {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.dentist-appointments-page .action-tooltip {
+    z-index: 100000 !important;
+}

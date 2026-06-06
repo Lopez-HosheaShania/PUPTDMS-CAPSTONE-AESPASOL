@@ -42,9 +42,6 @@
     text-align: right;
 }
 
-/* ─────────────────────────────────────────────
-   Stat cards: display only, not filter buttons
-───────────────────────────────────────────── */
 .admin-dental-records-page #statCards.dental-records-stat-grid {
     margin-bottom: 1.25rem;
 }
@@ -120,9 +117,6 @@
     color: color-mix(in srgb, var(--stat-accent) 50%, #6b7280) !important;
 }
 
-/* ─────────────────────────────────────────────
-   Toolbar, patient-style dropdown, search cleanup
-───────────────────────────────────────────── */
 .admin-dental-records-page .patient-table-toolbar {
     background: rgba(255, 255, 255, .86);
     backdrop-filter: blur(14px);
@@ -438,9 +432,6 @@
     color: currentColor !important;
 }
 
-/* ─────────────────────────────────────────────
-   Table and panel polish
-───────────────────────────────────────────── */
 .admin-dental-records-page .table-card {
     background: #ffffff;
     border-color: #e8e4de !important;
@@ -467,9 +458,6 @@
     justify-content: center;
 }
 
-/* ─────────────────────────────────────────────
-   Quick actions: admin dashboard style
-───────────────────────────────────────────── */
 .admin-dental-records-page .quick-actions-list {
     display: grid;
     gap: .7rem;
@@ -718,9 +706,6 @@
     word-break: break-word;
 }
 
-/* ─────────────────────────────────────────────
-   Dark mode
-───────────────────────────────────────────── */
 [data-theme="dark"] .admin-dental-records-page .dental-record-grid-card,
 .dark .admin-dental-records-page .dental-record-grid-card {
     background: #161b22 !important;
@@ -1163,9 +1148,6 @@
     color: #ffffff !important;
 }
 
-/* ─────────────────────────────────────────────
-   Responsive
-───────────────────────────────────────────── */
 @media (max-width: 1024px) {
     .admin-dental-records-page .content-grid {
         grid-template-columns: 1fr !important;

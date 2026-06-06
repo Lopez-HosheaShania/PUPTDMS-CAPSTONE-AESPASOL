@@ -34,7 +34,7 @@
             </button>
 
             <button type="button" class="discard-modal-btn discard-modal-btn-discard" data-discard-confirm>
-                <i class="fa-solid fa-trash-can"></i>
+                <i class="fa-solid fa-trash"></i>
                 Discard
             </button>
         </div>

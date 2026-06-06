@@ -481,6 +481,7 @@ $today = Carbon::now()->format('F d, Y');
         let selectedMesh = null;
         let hoveredMesh = null;
         let pendingResetPayload = null;
+        let hasAppliedTreatmentThisSession = false;
 
         let historyStack = [];
         let redoStack = [];
@@ -643,7 +644,66 @@ $today = Carbon::now()->format('F d, Y');
         }
         ];
 
+        const rawSavedOdontogramData = @json($savedOdontogramData ?? []);
+        const savedOdontogramData = Array.isArray(rawSavedOdontogramData)
+            ? rawSavedOdontogramData
+            : Object.values(rawSavedOdontogramData || {});
+
         const odontogramState = {};
+
+        function createDefaultToothState(toothNumber) {
+            return {
+                tooth: Number(toothNumber),
+                toothName: getToothName(Number(toothNumber)),
+                status: null,
+                surfaces: {
+                    top: null,
+                    left: null,
+                    center: null,
+                    right: null,
+                    bottom: null
+                },
+                threeD: null
+            };
+        }
+
+        function normalizeOdontogramEntry(entry) {
+            if (!entry) return null;
+
+            const toothNumber = Number(entry.tooth || entry.tooth_number || 0);
+
+            if (!toothNumber) return null;
+
+            const defaultState = createDefaultToothState(toothNumber);
+
+            const surfaces =
+                entry.surfaces &&
+                typeof entry.surfaces === 'object' &&
+                !Array.isArray(entry.surfaces)
+                    ? entry.surfaces
+                    : {};
+
+            return {
+                ...defaultState,
+                ...entry,
+                tooth: toothNumber,
+                toothName: entry.toothName || entry.tooth_name || defaultState.toothName,
+                status: entry.status || null,
+                threeD: entry.threeD || entry.three_d || null,
+                surfaces: {
+                    ...defaultState.surfaces,
+                    ...surfaces
+                }
+            };
+        }
+
+        savedOdontogramData.forEach(function (entry) {
+            const normalizedEntry = normalizeOdontogramEntry(entry);
+
+            if (normalizedEntry) {
+                odontogramState[normalizedEntry.tooth] = normalizedEntry;
+            }
+        });
 
         const primaryUpperRight = [55, 54, 53, 52, 51];
         const primaryUpperLeft = [61, 62, 63, 64, 65];
@@ -749,22 +809,16 @@ $today = Carbon::now()->format('F d, Y');
         }
 
         function ensureToothState(toothNumber) {
-            if (!odontogramState[toothNumber]) {
-                odontogramState[toothNumber] = {
-                    tooth: toothNumber,
-                    toothName: getToothName(toothNumber),
-                    status: null,
-                    surfaces: {
-                        top: null,
-                        left: null,
-                        center: null,
-                        right: null,
-                        bottom: null
-                    },
-                    threeD: null
-                };
+            const numericToothNumber = Number(toothNumber);
+
+            if (!odontogramState[numericToothNumber]) {
+                odontogramState[numericToothNumber] = createDefaultToothState(numericToothNumber);
+            } else {
+                odontogramState[numericToothNumber] = normalizeOdontogramEntry(odontogramState[numericToothNumber])
+                    || createDefaultToothState(numericToothNumber);
             }
-            return odontogramState[toothNumber];
+
+            return odontogramState[numericToothNumber];
         }
 
         function updateHiddenInput() {
@@ -1122,6 +1176,7 @@ $today = Carbon::now()->format('F d, Y');
 
             const state = ensureToothState(selectedTooth);
             const payload = createLegendPayload(code);
+            hasAppliedTreatmentThisSession = true;
 
             if (selectedTargetType === 'status') {
                 state.status = payload;
@@ -1730,22 +1785,106 @@ $today = Carbon::now()->format('F d, Y');
 
         window.addEventListener('resize', handleResize);
 
-        document.getElementById('finishProcedureBtn').addEventListener('click', async function () {
-            const finishBtn = this;
-            const originalButtonHtml = finishBtn.innerHTML;
+        const finishProcedureBtn = document.getElementById('finishProcedureBtn');
+        const followUpBtn = document.getElementById('followUpBtn');
+        const saveProcedureUrl = @json(route('dentist.odontogram.save', $appointment->id));
+
+        function getCleanOdontogramDataForSave() {
+            let rawData = [];
+
+            try {
+                rawData = JSON.parse(odontogramDataInput.value || '[]');
+            } catch (error) {
+                rawData = [];
+            }
+
+            if (!Array.isArray(rawData)) {
+                rawData = Object.values(rawData || {});
+            }
+
+            return rawData
+                .map(function (entry) {
+                    const toothNumber = Number(entry?.tooth || 0);
+
+                    if (!toothNumber) {
+                        return null;
+                    }
+
+                    const cleanEntry = {
+                        tooth: toothNumber,
+                        toothName: entry.toothName || getToothName(toothNumber),
+                        status: null,
+                        surfaces: {
+                            top: null,
+                            left: null,
+                            center: null,
+                            right: null,
+                            bottom: null,
+                        },
+                        threeD: null,
+                    };
+
+                    if (entry.status && entry.status.code) {
+                        cleanEntry.status = entry.status;
+                    }
+
+                    if (entry.threeD && entry.threeD.code) {
+                        cleanEntry.threeD = entry.threeD;
+                    }
+
+                    const surfaces = entry.surfaces || {};
+
+                    ['top', 'left', 'center', 'right', 'bottom'].forEach(function (surfaceKey) {
+                        if (surfaces[surfaceKey] && surfaces[surfaceKey].code) {
+                            cleanEntry.surfaces[surfaceKey] = surfaces[surfaceKey];
+                        }
+                    });
+
+                    const hasTreatment =
+                        (cleanEntry.status && cleanEntry.status.code) ||
+                        (cleanEntry.threeD && cleanEntry.threeD.code) ||
+                        Object.values(cleanEntry.surfaces).some(function (surface) {
+                            return surface && surface.code;
+                        });
+
+                    return hasTreatment ? cleanEntry : null;
+                })
+                .filter(Boolean);
+        }
+
+        async function saveProcedure(completionAction, clickedButton, loadingText) {
+            const originalButtonHtml = clickedButton.innerHTML;
+
+            updateHiddenInput();
+
+            if (!hasAppliedTreatmentThisSession) {
+                alert('Please apply at least one treatment to the tooth chart before finishing the procedure.');
+                return;
+            }
+
+            const cleanOdontogramData = getCleanOdontogramDataForSave();
+
+            if (cleanOdontogramData.length === 0) {
+                alert('Please apply at least one treatment to the tooth chart before finishing the procedure.');
+                return;
+            }
 
             const payload = {
-                odontogram_data: JSON.parse(odontogramDataInput.value || '[]'),
+                odontogram_data: cleanOdontogramData,
                 oral_examination: document.getElementById('oralExaminationNotes').value,
                 diagnosis: document.getElementById('diagnosisNotes').value,
                 prescriptions: document.getElementById('prescriptionsNotes').value,
+                completion_action: completionAction,
+                has_applied_treatment: hasAppliedTreatmentThisSession,
             };
 
-            finishBtn.disabled = true;
-            finishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving Procedure...';
+            finishProcedureBtn.disabled = true;
+            followUpBtn.disabled = true;
+
+            clickedButton.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${loadingText}`;
 
             try {
-                const response = await fetch(@json(route('dentist.odontogram.save', $patient->id)), {
+                const response = await fetch(saveProcedureUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1759,22 +1898,31 @@ $today = Carbon::now()->format('F d, Y');
 
                 if (!response.ok) {
                     console.error(result);
-                    alert(result.message || 'Failed to save odontogram. Please check your inputs and try again.');
+                    alert(result.message || 'Failed to save procedure. Please check your inputs and try again.');
                     return;
                 }
 
-                alert(result.message || 'Odontogram saved successfully.');
+                alert(result.message || 'Procedure completed successfully.');
 
                 if (result.redirect_url) {
                     window.location.href = result.redirect_url;
                 }
             } catch (error) {
                 console.error(error);
-                alert('Something went wrong while saving the odontogram.');
+                alert('Something went wrong while saving the procedure.');
             } finally {
-                finishBtn.disabled = false;
-                finishBtn.innerHTML = originalButtonHtml;
+                finishProcedureBtn.disabled = false;
+                followUpBtn.disabled = false;
+                clickedButton.innerHTML = originalButtonHtml;
             }
+        }
+
+        finishProcedureBtn.addEventListener('click', function () {
+            saveProcedure('finished', this, 'Saving Procedure...');
+        });
+
+        followUpBtn.addEventListener('click', function () {
+            saveProcedure('follow_up', this, 'Saving Follow-Up...');
         });
 
         if (clearSelectionBtn) {
@@ -1838,15 +1986,19 @@ $today = Carbon::now()->format('F d, Y');
                 }
             });
         }
+
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape') {
                 closeResetModal();
                 closeCancelProcedureModal();
             }
         });
+
         updateProcedureTimer();
         setInterval(updateProcedureTimer, 1000);
+
         renderLegendButtons('');
+        updateHiddenInput();
         render2DOdontogram();
         updateSelectedToothUI();
         updateHistoryButtons();
@@ -1854,4 +2006,4 @@ $today = Carbon::now()->format('F d, Y');
         document.addEventListener('keydown', handleHistoryKeyboardShortcuts);
     });
 </script>
-@endsection
+@endsection  

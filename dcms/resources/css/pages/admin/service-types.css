@@ -908,7 +908,6 @@
     min-height: 138px !important;
 }
 
-/* Add service button */
 #addServiceForm .btn-submit {
     min-height: 44px !important;
     border-radius: 14px !important;
@@ -934,7 +933,6 @@
     color: currentColor !important;
 }
 
-/* Visibility pills */
 .service-visibility-badge.is-visible {
     background: rgba(16, 185, 129, .10) !important;
     border: 1px solid rgba(16, 185, 129, .22) !important;
@@ -952,7 +950,6 @@
     color: currentColor !important;
 }
 
-/* Action buttons */
 .btn-manage-sm,
 .btn-delete-sm {
     width: 34px !important;
@@ -986,7 +983,6 @@
     color: currentColor !important;
 }
 
-/* Delete modal */
 .st-delete-modal-card {
     width: min(475px, calc(100vw - 32px)) !important;
     border-radius: 24px !important;
@@ -1016,7 +1012,6 @@
     font-weight: 850 !important;
 }
 
-/* Manage modal */
 .st-manage-modal {
     z-index: 1500 !important;
 }
@@ -1132,7 +1127,6 @@
     color: currentColor !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] .card,
 .dark .card {
     background:
@@ -1283,7 +1277,6 @@
     border-color: rgba(255, 255, 255, .10) !important;
 }
 
-/* Dark delete modal */
 [data-theme="dark"] .st-delete-modal-card,
 .dark .st-delete-modal-card {
     background:
@@ -1321,7 +1314,6 @@
     color: #FFFFFF !important;
 }
 
-/* Dark manage modal */
 [data-theme="dark"] .st-modal-box,
 .dark .st-modal-box {
     background:
@@ -1419,7 +1411,6 @@
     color: #FCA5A5 !important;
 }
 
-/* Responsive */
 @media (max-width: 1200px) {
     .main-grid {
         grid-template-columns: minmax(380px, 420px) minmax(0, 1fr) !important;
@@ -1529,7 +1520,6 @@
     color: currentColor !important;
 }
 
-/* Save Service button */
 #addServiceForm .st-save-service-btn {
     width: max-content !important;
     min-height: 46px !important;
@@ -1568,7 +1558,6 @@
     color: currentColor !important;
 }
 
-/* Action buttons - same behavior as user management */
 .service-inline-actions,
 .service-type-card-actions,
 .service-center-cell,
@@ -1689,7 +1678,6 @@
     transform: translateX(-50%) translateY(0);
 }
 
-/* Delete modal center fix: override old #deleteServiceModal dialog CSS */
 #deleteServiceModal.ui-modal {
     position: fixed !important;
     inset: 0 !important;
@@ -1753,7 +1741,6 @@
     font-weight: 850 !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] #addServiceForm .st-save-service-btn,
 .dark #addServiceForm .st-save-service-btn {
     background: linear-gradient(135deg, #8B0000, #B91C1C) !important;
@@ -1789,7 +1776,6 @@
     border-color: rgba(255, 255, 255, .10) !important;
 }
 
-/* Responsive */
 @media (max-width: 767px) {
     .service-card-header-actions {
         width: 100% !important;
@@ -1845,7 +1831,6 @@
         0 6px 14px rgba(0, 0, 0, .16) !important;
 }
 
-/* Global validation behavior refinement */
 #addServiceForm .st-field-error.admin-hidden,
 #addServiceForm .st-field-error:empty {
     display: none !important;
@@ -1904,7 +1889,6 @@
     color: #16A34A !important;
 }
 
-/* Description counter */
 #addServiceForm .st-textarea-wrap {
     position: relative !important;
 }
@@ -1951,7 +1935,6 @@
     color: #DC2626 !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] #addServiceForm .st-field-error:not(.admin-hidden):not(:empty),
 .dark #addServiceForm .st-field-error:not(.admin-hidden):not(:empty) {
     background: rgba(239, 68, 68, .14) !important;
@@ -2029,7 +2012,6 @@
     overflow: visible !important;
 }
 
-/* Keep delete tooltip inside the container instead of overflowing right */
 #mainContent.admin-page-shell .action-btn.btn-delete-service::after {
     left: auto !important;
     right: 0 !important;
@@ -2049,7 +2031,6 @@
     transform: translateY(0) !important;
 }
 
-/* Label + copy bullet aligned in one row */
 .st-label-row {
     display: flex !important;
     align-items: center !important;
@@ -2129,7 +2110,6 @@
     color: #15803D !important;
 }
 
-/* Delete modal — user-management style */
 #deleteServiceModal.st-delete-confirm-modal {
     z-index: 99999 !important;
 }
@@ -2217,7 +2197,7 @@
     color: #991B1B !important;
 }
 
-#deleteServiceModal .st-delete-alert > i {
+#deleteServiceModal .st-delete-alert>i {
     margin-top: .1rem !important;
     color: #DC2626 !important;
 }
@@ -2295,7 +2275,6 @@
     outline: none !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] .st-copy-bullet-box,
 .dark .st-copy-bullet-box {
     background: rgba(255, 255, 255, .055) !important;
@@ -2376,8 +2355,8 @@
 
 [data-theme="dark"] #deleteServiceModal .st-delete-alert span,
 .dark #deleteServiceModal .st-delete-alert span,
-[data-theme="dark"] #deleteServiceModal .st-delete-alert > i,
-.dark #deleteServiceModal .st-delete-alert > i {
+[data-theme="dark"] #deleteServiceModal .st-delete-alert>i,
+.dark #deleteServiceModal .st-delete-alert>i {
     color: #FCA5A5 !important;
 }
 
@@ -2449,7 +2428,6 @@
     outline: none !important;
 }
 
-/* X position for service name input */
 #serviceNameClearBtn {
     right: 10px !important;
     top: 50% !important;
@@ -2461,18 +2439,15 @@
     transform: translateY(-50%) scale(1.03) !important;
 }
 
-/* Give the name input room for the X */
 #serviceNameInput.st-input {
     padding-right: 46px !important;
 }
 
-/* X position for description textarea */
 #serviceDescClearBtn {
     right: 12px !important;
     top: 12px !important;
 }
 
-/* Fix excessive inner padding of description textarea */
 #serviceDescInput.st-input.st-textarea {
     min-height: 138px !important;
     padding: 16px 52px 46px 16px !important;
@@ -2481,18 +2456,15 @@
     box-sizing: border-box !important;
 }
 
-/* Keep char counter clean and not too far from textarea edge */
 #serviceDescCount.st-char-count {
     right: 12px !important;
     bottom: 10px !important;
 }
 
-/* Make sure placeholder starts properly */
 #serviceDescInput.st-textarea::placeholder {
     text-indent: 0 !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] #addServiceForm .st-voice-clear-btn,
 .dark #addServiceForm .st-voice-clear-btn {
     color: #94A3B8 !important;

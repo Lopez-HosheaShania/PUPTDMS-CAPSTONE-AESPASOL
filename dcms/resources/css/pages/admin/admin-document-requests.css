@@ -89,7 +89,6 @@
     line-height: 1.25;
 }
 
-/* Document link badge. Prefer status-pill/status-ready in Blade when possible. */
 .document-badge {
     display: inline-flex;
     align-items: center;
@@ -115,7 +114,6 @@
     border-color: var(--brand-red, #8B0000);
 }
 
-/* Grid cards remain page-specific because document requests have a different information layout. */
 .requests-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -254,7 +252,6 @@
     word-break: break-word;
 }
 
-/* Detail panel compatibility */
 #panelRefNo {
     color: var(--brand-red, #8B0000);
 }
@@ -416,7 +413,6 @@
     }
 }
 
-/* Admin document request release state/action: use the global violet released tokens. */
 .docreq-option-icon.status-released,
 .docreq-select-leading.status-released {
     color: var(--status-released-text, #7C3AED);

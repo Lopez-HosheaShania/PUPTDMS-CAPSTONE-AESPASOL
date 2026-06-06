@@ -1142,11 +1142,11 @@
         <div class="modal-box-inner ap-delete-shell" onclick="event.stopPropagation()" role="dialog" aria-modal="true"
             aria-labelledby="academicDeleteTitle">
 
-            <div class="ap-delete-head">
-                <div class="ap-delete-head-left">
-                    <div class="ap-delete-head-icon">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </div>
+        <div class="ap-delete-head">
+            <div class="ap-delete-head-left">
+                <div class="ap-delete-head-icon">
+                    <i class="fa-solid fa-trash"></i>
+                </div>
 
                     <div>
                         <h3 id="academicDeleteTitle" class="ap-delete-title">Delete Academic Period</h3>
@@ -1182,11 +1182,10 @@
                             Cancel
                         </button>
 
-                        <button type="submit" class="ap-delete-confirm-btn">
-                            <i class="fa-solid fa-trash-can"></i>
-                            Delete
-                        </button>
-                    </div>
+                    <button type="submit" class="ap-delete-confirm-btn">
+                        <i class="fa-solid fa-trash"></i>
+                        Delete
+                    </button>
                 </div>
             </form>
         </div>

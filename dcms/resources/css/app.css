@@ -31,11 +31,11 @@
 @import './pages/admin/admin-shared.css';
 
 /* Dentist pages */
-@import './pages/dentist/document-requests.css';
-@import './pages/dentist/appointments.css';
-@import './pages/dentist/inventory.css';
+@import './pages/dentist/dentist-document-requests.css';
+@import './pages/dentist/dentist-appointments.css';
+@import './pages/dentist/dentist-inventory.css';
 @import './pages/dentist/patient-directory.css';
-@import './pages/dentist/reports.css';
+@import './pages/dentist/dentist-reports.css';
 @import './pages/dentist/patient-profile.css';
 @import './pages/dentist/odontogram.css';
 

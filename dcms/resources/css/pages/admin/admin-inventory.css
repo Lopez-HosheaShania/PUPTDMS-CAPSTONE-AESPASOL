@@ -360,7 +360,6 @@
     box-shadow: none !important;
 }
 
-/* Prevent category tabs from visually selecting stat cards */
 #mainContent.inventory-page #statCards .stat-card.active,
 #mainContent.inventory-page #statCards .stat-card.stat-active {
     transform: none !important;
@@ -666,7 +665,6 @@
     transform: translateY(-1px) !important;
 }
 
-/* Inventory delete modal same as clinic schedule delete modal */
 #deleteModal.inv-delete-modal {
     z-index: 99999 !important;
 }
@@ -854,7 +852,6 @@
     transform: translateY(-1px) !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] #addModal.inventory-form-modal .modal-box-custom,
 [data-theme="dark"] #editModal.inventory-form-modal .modal-box-custom,
 .dark #addModal.inventory-form-modal .modal-box-custom,
@@ -969,7 +966,6 @@
     color: #CBD5E1 !important;
 }
 
-/* Mobile */
 @media (max-width: 767px) {
 
     #addModal.inventory-form-modal,
@@ -1149,7 +1145,6 @@
     gap: 10px !important;
 }
 
-/* Custom category select */
 #addModal .inv-native-hidden-select {
     position: absolute !important;
     width: 1px !important;
@@ -1293,7 +1288,6 @@
     opacity: 1 !important;
 }
 
-/* Unit combo */
 #addModal .inv-combo-input-wrap {
     position: relative !important;
     flex: 1 1 auto !important;
@@ -1326,7 +1320,6 @@
     color: #8B0000 !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] #addModal.inventory-form-modal .inventory-modal-x,
 .dark #addModal.inventory-form-modal .inventory-modal-x {
     background: rgba(255, 255, 255, .06) !important;
@@ -1456,7 +1449,6 @@
     font-weight: 850 !important;
 }
 
-/* Unit input + arrow compact */
 #addModal .inv-combo-input-wrap .form-input-custom {
     min-height: 40px !important;
     height: 40px !important;
@@ -1470,14 +1462,12 @@
     right: .48rem !important;
 }
 
-/* Smaller opened focus outline */
 #addModal .inv-custom-select-btn:hover,
 #addModal .inv-custom-select.is-open .inv-custom-select-btn,
 #addModal .inv-combo-input-wrap:focus-within {
     box-shadow: 0 0 0 2px rgba(139, 0, 0, .10) !important;
 }
 
-/* Dark mode consistency */
 [data-theme="dark"] #addModal .inv-custom-select-menu,
 [data-theme="dark"] #addModal .inv-combo-menu,
 .dark #addModal .inv-custom-select-menu,
@@ -1492,7 +1482,7 @@
 .dark #addModal .inv-combo-option {
     color: #CBD5E1 !important;
 }
-/* Shared Add/Edit modal fixes: external mic, close button, and custom dropdowns */
+
 #addModal.inventory-form-modal,
 #editModal.inventory-form-modal {
     --voice-mic-size: 40px !important;
@@ -1739,8 +1729,8 @@
     box-shadow: 0 0 0 2px rgba(139, 0, 0, .10) !important;
 }
 
-#addModal #addCategory.is-invalid + .inv-custom-select .inv-custom-select-btn,
-#editModal #editCategory.is-invalid + .inv-custom-select .inv-custom-select-btn {
+#addModal #addCategory.is-invalid+.inv-custom-select .inv-custom-select-btn,
+#editModal #editCategory.is-invalid+.inv-custom-select .inv-custom-select-btn {
     border-color: #EF4444 !important;
     box-shadow: 0 0 0 3px rgba(239, 68, 68, .12) !important;
 }
