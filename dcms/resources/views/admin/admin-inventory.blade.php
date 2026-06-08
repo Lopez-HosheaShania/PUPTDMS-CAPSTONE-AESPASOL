@@ -104,6 +104,12 @@
 
                         <div class="inventory-mobile-actions">
 
+                            <button id="filterBtn" type="button" onclick="openFilterPanel()" class="global-filter-btn">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Filter</span>
+                                <span id="filterBadge" class="filter-badge"></span>
+                            </button>
+
                             <div class="view-toggle-container inventory-view-toggle" id="viewToggle">
                                 <div class="view-slider"></div>
 
@@ -117,12 +123,6 @@
                                     <i class="fa-solid fa-grip"></i>
                                 </button>
                             </div>
-
-                            <button id="filterBtn" type="button" onclick="openFilterPanel()" class="global-filter-btn">
-                                <i class="fa-solid fa-sliders"></i>
-                                <span>Filter</span>
-                                <span id="filterBadge" class="filter-badge"></span>
-                            </button>
 
                             <button id="externalClearFilterBtn" type="button" onclick="clearFilterPanel()"
                                 class="global-filter-reset-btn hidden" title="Reset filters">

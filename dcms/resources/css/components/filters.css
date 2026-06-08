@@ -1523,7 +1523,6 @@ body:has(#filterModal.closing) .ai-help-popover {
     font-weight: 800;
 }
 
-/* Status color source for dropdown accent */
 .global-filter-select-field[data-status-filter="all"] {
     --select-accent: #1E3A8A;
     --select-accent-border: rgba(30, 58, 138, 0.18);
@@ -1644,4 +1643,165 @@ body:has(#filterModal.closing) .ai-help-popover {
         width: calc(100vw - 24px) !important;
 
     }
+}
+
+#filterModal.filter-drawer-wrapper {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 1250 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+#filterModal.filter-drawer-wrapper.open,
+#filterModal.filter-drawer-wrapper.closing {
+    visibility: visible !important;
+}
+
+#filterModal.filter-drawer-wrapper.open {
+    pointer-events: auto !important;
+}
+
+#filterModal .filter-drawer-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    background: rgba(15, 23, 42, 0.42) !important;
+    backdrop-filter: blur(6px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(6px) saturate(130%) !important;
+    opacity: 0 !important;
+    transition: opacity .24s ease !important;
+}
+
+#filterModal.open .filter-drawer-overlay {
+    opacity: 1 !important;
+}
+
+#filterModal.closing .filter-drawer-overlay {
+    opacity: 0 !important;
+}
+
+#filterModal .filter-drawer-panel {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: min(540px, 100vw) !important;
+    max-width: 540px !important;
+    height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: 24px 0 0 24px !important;
+
+    background: var(--filter-panel-bg, #FFFFFF) !important;
+    color: var(--filter-panel-text, #374151) !important;
+    border-left: 1px solid var(--filter-panel-border, #f3f4f6) !important;
+    box-shadow: -22px 0 52px rgba(15, 23, 42, 0.15) !important;
+
+    transform: translateX(100%) !important;
+    transition: transform .30s cubic-bezier(.22, 1, .36, 1) !important;
+}
+
+#filterModal.open .filter-drawer-panel {
+    transform: translateX(0) !important;
+}
+
+#filterModal.closing .filter-drawer-panel {
+    transform: translateX(100%) !important;
+}
+
+#filterModal .filter-drawer-panel .bg-white,
+#filterModal .filter-drawer-panel>div {
+    background: var(--filter-panel-bg, #FFFFFF) !important;
+}
+
+#filterModal .filter-drawer-header {
+    flex: 0 0 auto !important;
+    background: var(--filter-panel-bg, #FFFFFF) !important;
+    border-bottom: 1px solid var(--filter-panel-border, #F3F4F6) !important;
+}
+
+#filterModal .filter-drawer-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+#filterModal .filter-drawer-footer {
+    flex: 0 0 auto !important;
+    background: var(--filter-panel-bg, #FFFFFF) !important;
+    border-top: 1px solid var(--filter-panel-border, #F3F4F6) !important;
+}
+
+@media (max-width: 767px) {
+    #filterModal.filter-drawer-wrapper {
+        display: flex !important;
+        align-items: flex-end !important;
+        justify-content: center !important;
+    }
+
+    #filterModal .filter-drawer-panel {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        left: auto !important;
+        bottom: auto !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
+        height: min(84dvh, 660px) !important;
+        max-height: min(84dvh, 660px) !important;
+        border-radius: 28px 28px 0 0 !important;
+        border-left: none !important;
+        border-top: 1px solid var(--filter-panel-border, #F3F4F6) !important;
+
+        transform: translateY(100%) !important;
+        transition: transform .28s cubic-bezier(.22, 1, .36, 1) !important;
+    }
+
+    #filterModal.open .filter-drawer-panel {
+        transform: translateY(0) !important;
+    }
+
+    #filterModal.closing .filter-drawer-panel {
+        transform: translateY(100%) !important;
+    }
+
+    #filterModal .filter-drawer-footer {
+        padding: 14px 20px calc(14px + env(safe-area-inset-bottom)) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    #filterModal .filter-drawer-footer .flex {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+}
+
+#filterModal #activeChipsContainer {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid var(--filter-panel-divider, #F3F4F6) !important;
+}
+
+#filterModal .filter-chip-row,
+#filterModal .filter-chip-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px 10px !important;
+    width: 100% !important;
+}
+
+/* Native/Custom selects and inputs containment blueprint */
+#filterModal .filter-date-input-wrap {
+    position: relative !important;
+    width: 100% !important;
 }

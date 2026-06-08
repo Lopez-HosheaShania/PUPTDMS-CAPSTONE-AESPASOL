@@ -16,7 +16,7 @@ class SystemLogController extends Controller
         }
 
         $perPage = in_array($request->input('per_page'), [10, 20, 50, 100])
-            ? (int) $request->input('per_page') : 20;
+            ? (int) $request->input('per_page') : 10;
 
         $role    = $request->input('role', 'all');
         $search  = $request->input('search');
@@ -45,6 +45,12 @@ class SystemLogController extends Controller
 
         if ($role === 'login') {
             $query->where('action', 'like', '%login%');
+        } elseif ($role === 'error') {
+            $query->where(function ($q) {
+                $q->where('action', 'like', '%error%')
+                    ->orWhere('action', 'like', '%failed%')
+                    ->orWhere('action', 'like', '%exception%');
+            });
         } elseif (in_array($role, ['admin', 'dentist', 'patient'])) {
             $query->where('actor_role', $role);
         }
@@ -52,11 +58,11 @@ class SystemLogController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('actor_identifier', 'like', "%{$search}%")
-                  ->orWhere('actor_name', 'like', "%{$search}%")
-                  ->orWhere('action', 'like', "%{$search}%")
-                  ->orWhere('module', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('actor_role', 'like', "%{$search}%");
+                    ->orWhere('actor_name', 'like', "%{$search}%")
+                    ->orWhere('action', 'like', "%{$search}%")
+                    ->orWhere('module', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('actor_role', 'like', "%{$search}%");
             });
         }
 
@@ -85,6 +91,11 @@ class SystemLogController extends Controller
         $dentistCount = AuditLog::where('actor_role', 'dentist')->count();
         $patientCount = AuditLog::where('actor_role', 'patient')->count();
         $loginCount   = AuditLog::where('action', 'like', '%login%')->count();
+        $errorCount = AuditLog::where(function ($q) {
+            $q->where('action', 'like', '%error%')
+                ->orWhere('action', 'like', '%failed%')
+                ->orWhere('action', 'like', '%exception%');
+        })->count();
 
         if ($request->ajax()) {
             return response()->json([
@@ -119,6 +130,7 @@ class SystemLogController extends Controller
                     'dentist' => $dentistCount,
                     'patient' => $patientCount,
                     'login'   => $loginCount,
+                    'error'   => $errorCount,
                 ],
 
                 'filters' => [
@@ -147,7 +159,8 @@ class SystemLogController extends Controller
             'adminCount',
             'dentistCount',
             'patientCount',
-            'loginCount'
+            'loginCount',
+            'errorCount'
         ));
     }
 
@@ -155,7 +168,7 @@ class SystemLogController extends Controller
     {
         $perPage = in_array($request->input('per_page'), [10, 20, 50, 100])
             ? (int) $request->input('per_page')
-            : 20;
+            : 10;
 
         $logs = AuditLog::latest()->take($perPage)->get();
 

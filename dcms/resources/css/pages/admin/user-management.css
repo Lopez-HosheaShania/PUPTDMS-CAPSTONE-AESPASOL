@@ -1290,14 +1290,6 @@ body.modal-open {
     border-color: rgba(139, 0, 0, .18);
 }
 
-#mainContent.user-management-page .empty-state {
-    min-height: 320px;
-}
-
-#mainContent.user-management-page .empty-state-btn {
-    text-decoration: none;
-}
-
 [data-theme="dark"] #mainContent.user-management-page,
 .dark #mainContent.user-management-page {
     background: #0b1117 !important;
