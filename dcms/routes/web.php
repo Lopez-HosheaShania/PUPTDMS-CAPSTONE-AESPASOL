@@ -711,6 +711,15 @@ Route::middleware(['role:patient'])->group(function () {
         ->middleware('permission:request_documents')
         ->name('patient.document.requests.index');
 
+    Route::get('/document-requests/{id}/approved', function ($id) {
+        return redirect()->route('patient.document.requests.index', [
+            'highlight' => $id,
+            'status' => 'approved',
+        ]);
+    })
+        ->middleware('permission:request_documents')
+        ->name('patient.document.approved');
+
     Route::post('/document-requests/{id}/status', [DocumentRequestController::class, 'updateStatus'])
         ->middleware('permission:request_documents')
         ->name('patient.document.requests.updateStatus');
@@ -1061,5 +1070,3 @@ Route::prefix('report')->middleware(['role:dentist', 'permission:manage_reports'
 });
 
 Route::post('/chat/send', [ChatbotController::class, 'chat']);
-
-
