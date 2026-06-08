@@ -34,9 +34,9 @@
     --filter-chip-text: #1c1d1f;
     --filter-chip-border: #a7a7a7;
 
-    --filter-chip-hover-bg: #daecf8;
+    --filter-chip-hover-bg: #f7e2e2;
     --filter-chip-hover-text: #660000;
-    --filter-chip-hover-border: rgba(29, 47, 128, 0.421);
+    --filter-chip-hover-border: #8B0000;
 
     --filter-chip-active-bg: #ffe7e7;
     --filter-chip-active-text: #8B0000;

@@ -20,7 +20,7 @@
 }
 
 #mainContent #statCards .stat-num {
-    font-size: 32px !important;
+    font-size: 24px !important;
     line-height: .9 !important;
     font-weight: 900 !important;
     letter-spacing: -0.04em !important;
@@ -315,7 +315,6 @@
     color: currentColor;
 }
 
-/* Shared active state */
 .stat-card.stat-active,
 .stat-card.tab-active,
 .stat-card.active {
@@ -419,7 +418,6 @@
     color: color-mix(in srgb, var(--stat-accent) 50%, #6b7280) !important;
 }
 
-/* Dark mode: admin dashboard stats only */
 [data-theme="dark"] #mainContent #statCards.admin-dashboard-stat-grid .stat-card,
 .dark #mainContent #statCards.admin-dashboard-stat-grid .stat-card {
     background:

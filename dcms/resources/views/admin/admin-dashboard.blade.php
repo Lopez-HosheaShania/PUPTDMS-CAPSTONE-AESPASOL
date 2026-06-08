@@ -127,7 +127,7 @@
                                 </button>
                             </div>
 
-                            <a href="#" class="card-link">
+                            <a href="{{ route('admin.system_logs') }}" class="card-link">
                                 View All
                                 <i class="fa-solid fa-arrow-right"></i>
                             </a>
@@ -217,7 +217,7 @@
 
                     <div class="logs-view" id="dashboardLogsGridView" hidden>
                         <div class="logs-grid">
-                            @foreach ($recentLogs ?? [] as $log)
+                            @foreach (collect($recentLogs ?? [])->take(6) as $log)
                             @php
                             $logId = data_get($log, 'id', '—');
                             $logDate = data_get($log, 'created_at');
@@ -265,9 +265,13 @@
                         </div>
                         <div style="padding:1.25rem;">
                             <div class="gad-placeholder">
-                                <div style="text-align:center;">
-                                    <i class="fa-solid fa-chart-area gad-placeholder-icon"></i>
-                                    <span class="gad-placeholder-text">Chart coming soon</span>
+                                <div class="gad-empty-content">
+                                    <span class="gad-empty-icon">
+                                        <i class="fa-solid fa-venus-mars"></i>
+                                    </span>
+                                    <span class="gad-empty-title">No GAD analytics data yet</span>
+                                    <span class="gad-empty-sub">Gender and development insights will appear once records
+                                        are available.</span>
                                 </div>
                             </div>
                         </div>
@@ -403,48 +407,62 @@
                         </div>
                     </div>
 
-                    <div class="card-body">
-                        <div class="qa-list">
-                            <button type="button" class="qa-btn">
-                                <div class="qa-icon"><i class="fa-solid fa-file-circle-plus"></i></div>
-                                <div class="qa-text">
-                                    <span class="qa-title">New Template</span>
-                                    <span class="qa-sub">Create document format</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right qa-arrow"></i>
-                                <i class="fa-solid fa-file-circle-plus qa-bg-icon"></i>
-                            </button>
+                    <div class="quick-actions-list dashboard-quick-actions-list">
+                        <a href="{{ route('admin.reports') }}" class="quick-action quick-action-card">
+                            <span class="quick-action-icon">
+                                <i class="fa-solid fa-chart-column"></i>
+                            </span>
 
-                            <button type="button" class="qa-btn">
-                                <div class="qa-icon"><i class="fa-solid fa-file-invoice"></i></div>
-                                <div class="qa-text">
-                                    <span class="qa-title">Generate Report</span>
-                                    <span class="qa-sub">Create report documents</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right qa-arrow"></i>
-                                <i class="fa-solid fa-file-invoice qa-bg-icon"></i>
-                            </button>
+                            <span class="quick-action-copy">
+                                <span class="quick-action-title">Reports</span>
+                                <span class="quick-action-sub">View analytics and summaries</span>
+                            </span>
 
-                            <a href="{{ route('admin.reports') }}" class="qa-btn">
-                                <div class="qa-icon"><i class="fa-solid fa-chart-column"></i></div>
-                                <div class="qa-text">
-                                    <span class="qa-title">View Reports</span>
-                                    <span class="qa-sub">All reports & analytics</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right qa-arrow"></i>
-                                <i class="fa-solid fa-chart-column qa-bg-icon"></i>
-                            </a>
+                            <i class="fa-solid fa-chevron-right quick-action-arrow"></i>
+                            <i class="fa-solid fa-chart-column quick-action-bg-icon"></i>
+                        </a>
 
-                            <a href="{{ route('admin.user_management') }}" class="qa-btn">
-                                <div class="qa-icon"><i class="fa-solid fa-user-plus"></i></div>
-                                <div class="qa-text">
-                                    <span class="qa-title">Add User</span>
-                                    <span class="qa-sub">Register new account</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right qa-arrow"></i>
-                                <i class="fa-solid fa-user-plus qa-bg-icon"></i>
-                            </a>
-                        </div>
+                        <a href="{{ route('admin.user_management') }}" class="quick-action quick-action-card">
+                            <span class="quick-action-icon">
+                                <i class="fa-solid fa-user-plus"></i>
+                            </span>
+
+                            <span class="quick-action-copy">
+                                <span class="quick-action-title">User Management</span>
+                                <span class="quick-action-sub">Manage accounts and roles</span>
+                            </span>
+
+                            <i class="fa-solid fa-chevron-right quick-action-arrow"></i>
+                            <i class="fa-solid fa-user-plus quick-action-bg-icon"></i>
+                        </a>
+
+                        <a href="{{ route('admin.inventory') }}" class="quick-action quick-action-card">
+                            <span class="quick-action-icon">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                            </span>
+
+                            <span class="quick-action-copy">
+                                <span class="quick-action-title">Inventory</span>
+                                <span class="quick-action-sub">Check supplies and stock levels</span>
+                            </span>
+
+                            <i class="fa-solid fa-chevron-right quick-action-arrow"></i>
+                            <i class="fa-solid fa-boxes-stacked quick-action-bg-icon"></i>
+                        </a>
+
+                        <a href="{{ route('admin.data_backup') }}" class="quick-action quick-action-card">
+                            <span class="quick-action-icon">
+                                <i class="fa-solid fa-database"></i>
+                            </span>
+
+                            <span class="quick-action-copy">
+                                <span class="quick-action-title">Data Backup</span>
+                                <span class="quick-action-sub">View backup status and history</span>
+                            </span>
+
+                            <i class="fa-solid fa-chevron-right quick-action-arrow"></i>
+                            <i class="fa-solid fa-database quick-action-bg-icon"></i>
+                        </a>
                     </div>
                 </div>
 

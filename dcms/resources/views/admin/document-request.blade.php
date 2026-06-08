@@ -8,86 +8,86 @@
 $docRequestsSource = $requests ?? collect();
 
 if (is_object($docRequestsSource) && method_exists($docRequestsSource, 'getCollection')) {
-    $docRequestsCollection = $docRequestsSource->getCollection();
+$docRequestsCollection = $docRequestsSource->getCollection();
 } else {
-    $docRequestsCollection = collect($docRequestsSource);
+$docRequestsCollection = collect($docRequestsSource);
 }
 
 $normalizeStatus = function ($status) {
-    $status = strtolower(str_replace('_', '-', (string) ($status ?: 'pending')));
+$status = strtolower(str_replace('_', '-', (string) ($status ?: 'pending')));
 
-    if (in_array($status, ['ready-for-pickup', 'ready-for-release'], true)) {
-        return 'ready';
-    }
+if (in_array($status, ['ready-for-pickup', 'ready-for-release'], true)) {
+return 'ready';
+}
 
-    return $status;
+return $status;
 };
 
 $formatDocumentType = function ($type) {
-    return ucwords(str_replace(['_', '-'], ' ', (string) ($type ?: 'Document')));
+return ucwords(str_replace(['_', '-'], ' ', (string) ($type ?: 'Document')));
 };
 
 $docRequestsPayload = $docRequestsCollection->map(function ($req) use ($normalizeStatus, $formatDocumentType) {
-    $patient = $req->patient ?? null;
-    $createdAt = $req->created_at ?? now();
+$patient = $req->patient ?? null;
+$createdAt = $req->created_at ?? now();
 
-    $patientName = data_get($patient, 'name') ?? 'Unknown Patient';
-    $patientIdentifier = data_get($patient, 'student_no')
-        ?? data_get($patient, 'student_number')
-        ?? data_get($patient, 'student_id')
-        ?? data_get($patient, 'faculty_code')
-        ?? data_get($patient, 'employee_no')
-        ?? data_get($patient, 'id')
-        ?? 'No ID set';
+$patientName = data_get($patient, 'name') ?? 'Unknown Patient';
+$patientIdentifier = data_get($patient, 'student_no')
+?? data_get($patient, 'student_number')
+?? data_get($patient, 'student_id')
+?? data_get($patient, 'faculty_code')
+?? data_get($patient, 'employee_no')
+?? data_get($patient, 'id')
+?? 'No ID set';
 
-    $documentLabel = $formatDocumentType($req->document_type ?? 'Document');
-    $status = $normalizeStatus($req->status ?? 'pending');
+$documentLabel = $formatDocumentType($req->document_type ?? 'Document');
+$status = $normalizeStatus($req->status ?? 'pending');
 
-    return [
-        'id' => $req->id,
-        'reference_number' => $req->reference_number ?? ('DR-' . str_pad((string) $req->id, 5, '0', STR_PAD_LEFT)),
-        'patient_name' => $patientName,
-        'patient_identifier' => $patientIdentifier,
-        'sub_label' => $patientIdentifier ?: 'No ID set',
-        'document_type' => $documentLabel,
-        'document_type_raw' => $req->document_type ?? $documentLabel,
-        'purpose' => $req->purpose ?: '—',
-        'status' => $status,
-        'request_date' => optional($createdAt)->format('M d, Y') ?? '—',
-        'request_time' => optional($createdAt)->format('h:i A') ?? '',
-        'request_sort_date' => optional($createdAt)->format('Y-m-d H:i:s') ?? '',
-        'filter_date' => optional($createdAt)->format('Y-m-d') ?? '',
-        'copies_needed' => $req->copies_needed ?? 1,
-        'patient_photo_url' => data_get($patient, 'profile_photo_url')
-            ?? data_get($patient, 'profile_picture_url')
-            ?? data_get($patient, 'avatar_url')
-            ?? data_get($patient, 'photo_url')
-            ?? '',
-    ];
+return [
+'id' => $req->id,
+'reference_number' => $req->reference_number ?? ('DR-' . str_pad((string) $req->id, 5, '0', STR_PAD_LEFT)),
+'patient_name' => $patientName,
+'patient_identifier' => $patientIdentifier,
+'sub_label' => $patientIdentifier ?: 'No ID set',
+'document_type' => $documentLabel,
+'document_type_raw' => $req->document_type ?? $documentLabel,
+'purpose' => $req->purpose ?: '—',
+'status' => $status,
+'request_date' => optional($createdAt)->format('M d, Y') ?? '—',
+'request_time' => optional($createdAt)->format('h:i A') ?? '',
+'request_sort_date' => optional($createdAt)->format('Y-m-d H:i:s') ?? '',
+'filter_date' => optional($createdAt)->format('Y-m-d') ?? '',
+'copies_needed' => $req->copies_needed ?? 1,
+'patient_photo_url' => data_get($patient, 'profile_photo_url')
+?? data_get($patient, 'profile_picture_url')
+?? data_get($patient, 'avatar_url')
+?? data_get($patient, 'photo_url')
+?? '',
+];
 });
 
 $statsSource = $stats ?? [];
 $countByStatus = function ($status) use ($docRequestsCollection, $normalizeStatus) {
-    return $docRequestsCollection->filter(function ($req) use ($status, $normalizeStatus) {
-        return $normalizeStatus($req->status ?? 'pending') === $status;
-    })->count();
+return $docRequestsCollection->filter(function ($req) use ($status, $normalizeStatus) {
+return $normalizeStatus($req->status ?? 'pending') === $status;
+})->count();
 };
 
 $docRequestStats = [
-    'all' => $statsSource['all'] ?? $statsSource['total'] ?? $docRequestsCollection->count(),
-    'pending' => $statsSource['pending'] ?? $countByStatus('pending'),
-    'approved' => $statsSource['approved'] ?? $countByStatus('approved'),
-    'ready' => $statsSource['ready'] ?? $countByStatus('ready'),
-    'released' => $statsSource['released'] ?? $countByStatus('released'),
-    'rejected' => $statsSource['rejected'] ?? $countByStatus('rejected'),
+'all' => $statsSource['all'] ?? $statsSource['total'] ?? $docRequestsCollection->count(),
+'pending' => $statsSource['pending'] ?? $countByStatus('pending'),
+'approved' => $statsSource['approved'] ?? $countByStatus('approved'),
+'ready' => $statsSource['ready'] ?? $countByStatus('ready'),
+'released' => $statsSource['released'] ?? $countByStatus('released'),
+'rejected' => $statsSource['rejected'] ?? $countByStatus('rejected'),
 ];
 
 $docRequestTypes = $docRequestsPayload
-    ->pluck('document_type')
-    ->filter()
-    ->unique()
-    ->sort()
-    ->values();
+->pluck('document_type')
+->filter()
+->unique()
+->sort()
+->values();
 @endphp
 
 <main id="mainContent" class="admin-page-shell page-enter docreq-page mode-list">
@@ -126,6 +126,26 @@ $docRequestTypes = $docRequestsPayload
 
                     <div
                         class="docreq-toolbar-actions flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-end">
+                        <div class="docreq-search-wrap flex-1 md:flex-none flex items-center gap-2">
+                            <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+
+                                <input id="searchInput" type="text" placeholder="Search name, ID, reference, document…"
+                                    data-search-input class="search-input" oninput="onSearch(this)" />
+
+                                <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
+                                    <i class="fa-solid fa-xmark text-xs"></i>
+                                </button>
+                            </div>
+
+                            <div class="voice-input-toggle">
+                                <span class="voice-status hidden" data-voice-status></span>
+                                <button type="button" class="voice-search-mic external" data-global-voice-trigger
+                                    data-voice-target="#searchInput" aria-label="Use voice search" title="Voice search">
+                                    <i class="fa-solid fa-microphone"></i>
+                                </button>
+                            </div>
+                        </div>
 
                         <div id="docreqStatusSelect"
                             class="docreq-custom-select docreq-status-dropdown docreq-toolbar-sort">
@@ -220,19 +240,11 @@ $docRequestTypes = $docRequestsPayload
                             </div>
                         </div>
 
-                        <div class="docreq-search-wrap flex-1 md:flex-none flex items-center gap-2">
-                            <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
-                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-
-                                <input id="searchInput" type="text"
-                                    placeholder="Search name, ID, reference, document…"
-                                    data-search-input class="search-input" oninput="onSearch(this)" />
-
-                                <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
-                                    <i class="fa-solid fa-xmark text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
+                        <button id="filterBtn" type="button" onclick="openFilterModal()" class="global-filter-btn">
+                            <i class="fa-solid fa-sliders"></i>
+                            <span>Filter</span>
+                            <span id="filterBadge" class="filter-badge" style="display:none;"></span>
+                        </button>
 
                         <div class="view-toggle-container hidden md:flex" id="docreqViewToggle">
                             <div class="view-slider"></div>
@@ -247,12 +259,6 @@ $docRequestTypes = $docRequestsPayload
                                 <i class="fa-solid fa-grip"></i>
                             </button>
                         </div>
-
-                        <button id="filterBtn" type="button" onclick="openFilterModal()" class="global-filter-btn">
-                            <i class="fa-solid fa-sliders"></i>
-                            <span>Filter</span>
-                            <span id="filterBadge" class="filter-badge" style="display:none;"></span>
-                        </button>
 
                         <button id="externalClearFilterBtn" type="button" onclick="resetAdvancedFilters()"
                             class="global-filter-reset-btn hidden" title="Reset filters">
@@ -565,7 +571,8 @@ $docRequestTypes = $docRequestsPayload
 
             <div class="approve-info-row">
                 <i class="fa-solid fa-circle-info"></i>
-                <span>This will mark the request as released. Confirm only after the patient has claimed the document.</span>
+                <span>This will mark the request as released. Confirm only after the patient has claimed the
+                    document.</span>
             </div>
         </div>
 
@@ -722,7 +729,8 @@ $docRequestTypes = $docRequestsPayload
                 <i class="fa-solid fa-paper-plane" style="font-size:1.7rem;"></i>
             </div>
             <div style="font-size:1.55rem;margin-bottom:.5rem;">Document Released!</div>
-            <p style="font-size:.82rem;opacity:.85;line-height:1.6;">The request has been marked as released.<br>The record will be updated after this closes.</p>
+            <p style="font-size:.82rem;opacity:.85;line-height:1.6;">The request has been marked as released.<br>The
+                record will be updated after this closes.</p>
             <button id="releasedResultClose"
                 style="margin-top:1.4rem;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:9px;padding:.5rem 1.5rem;font-weight:700;cursor:pointer;font-size:.83rem;">
                 Done
@@ -756,9 +764,9 @@ $docRequestTypes = $docRequestsPayload
 @section('scripts')
 <script>
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
-    const ADMIN_DOC_REQUESTS = @json($docRequestsPayload->values());
+    const ADMIN_DOC_REQUESTS = @json($docRequestsPayload -> values());
     const ADMIN_DOC_STATS = @json($docRequestStats);
-    const ADMIN_DOC_TYPES = @json($docRequestTypes->values());
+    const ADMIN_DOC_TYPES = @json($docRequestTypes -> values());
 
     let allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
     let activeFilter = @json(request('status', 'all') ?: 'all');
@@ -1052,7 +1060,7 @@ $docRequestTypes = $docRequestsPayload
 
         if (window.syncFilterTagGroup) {
             window.syncFilterTagGroup('fSortGroup', 'newest');
-            }
+        }
 
         setCustomSelectValue('docTypeSelect', '');
 
@@ -2162,7 +2170,7 @@ $docRequestTypes = $docRequestsPayload
         if (hasChips) {
             section.classList.remove("hidden");
             document.getElementById("clearAllChipsBtn").onclick = () => {
-                        setCustomSelectValue('docTypeSelect', '');
+                setCustomSelectValue('docTypeSelect', '');
                 document.getElementById('fDateFrom').value = "";
                 document.getElementById('fDateTo').value = "";
 

@@ -86,63 +86,98 @@ $recordItems->filter(fn($record) => strtolower($record->status ?? 'pending') ===
                             {{ $recordItems->count() }} records
                         </span>
 
+                        @php
+                        $recordAllCount = $recordItems->count();
+                        $recordTodayCount = $recordsTodayCount ?? 0;
+                        $recordPendingCount = $pendingCount ?? 0;
+                        $recordOngoingCount = $ongoingCount ?? $recordItems->where('status', 'ongoing')->count();
+                        $recordCompletedCount = $completedCount ?? $recordItems->where('status', 'completed')->count();
+                        $recordCancelledCount = $cancelledCount ?? $recordItems->where('status', 'cancelled')->count();
+                        @endphp
+
                         <div class="record-sort-dropdown" id="recordStatusField" data-status-filter="all">
                             <button type="button" class="record-sort-trigger" id="recordStatusDropdownBtn"
                                 aria-expanded="false" aria-haspopup="true">
-                                <span class="record-sort-icon" id="recordStatusSelectedIcon">
-                                    <i class="fa-solid fa-layer-group"></i>
+
+                                <span class="record-sort-trigger-left">
+                                    <span class="record-sort-icon" id="recordStatusSelectedIcon">
+                                        <i class="fa-solid fa-layer-group"></i>
+                                    </span>
+
+                                    <span class="record-sort-copy">
+                                        <span class="record-sort-label">Sort By</span>
+                                        <strong class="record-sort-value" id="recordStatusSelectedLabel">All
+                                            Records</strong>
+                                    </span>
                                 </span>
 
-                                <span class="record-sort-copy">
-                                    <span class="record-sort-label">Sort By</span>
-                                    <span class="record-sort-value" id="recordStatusSelectedLabel">All Records</span>
-                                </span>
+                                <span class="record-sort-trigger-right">
+                                    <span class="record-sort-count" id="recordSortCount">
+                                        {{ $recordAllCount }}
+                                    </span>
 
-                                <span class="record-sort-count" id="recordSortCount">
-                                    {{ $recordItems->count() }}
+                                    <i class="fa-solid fa-chevron-down record-sort-chevron"></i>
                                 </span>
-
-                                <i class="fa-solid fa-chevron-down record-sort-chevron"></i>
                             </button>
 
                             <input type="hidden" id="recordStatusFilter" value="all">
 
-                            <div class="record-sort-menu" id="recordStatusMenu">
-                                <button type="button" class="record-sort-option is-active" data-filter="all"
-                                    data-label="All Records" data-icon="fa-layer-group">
-                                    <span class="record-option-icon"><i class="fa-solid fa-layer-group"></i></span>
-                                    <span>All Records</span>
-                                </button>
+                            <div class="record-sort-panel" id="recordStatusMenu">
+                                <div class="record-sort-grid">
+                                    <button type="button" class="record-sort-option is-active s-all" data-filter="all"
+                                        data-label="All Records" data-icon="fa-layer-group">
+                                        <span class="record-option-icon">
+                                            <i class="fa-solid fa-layer-group"></i>
+                                        </span>
+                                        <span class="record-option-label">All Records</span>
+                                        <span class="record-option-count">{{ $recordAllCount }}</span>
+                                    </button>
 
-                                <button type="button" class="record-sort-option" data-filter="today"
-                                    data-label="Added Today" data-icon="fa-clock">
-                                    <span class="record-option-icon"><i class="fa-solid fa-clock"></i></span>
-                                    <span>Added Today</span>
-                                </button>
+                                    <button type="button" class="record-sort-option s-today" data-filter="today"
+                                        data-label="Added Today" data-icon="fa-clock">
+                                        <span class="record-option-icon">
+                                            <i class="fa-solid fa-clock"></i>
+                                        </span>
+                                        <span class="record-option-label">Added Today</span>
+                                        <span class="record-option-count">{{ $recordTodayCount }}</span>
+                                    </button>
 
-                                <button type="button" class="record-sort-option" data-filter="pending"
-                                    data-label="Pending" data-icon="fa-user-clock">
-                                    <span class="record-option-icon"><i class="fa-solid fa-user-clock"></i></span>
-                                    <span>Pending</span>
-                                </button>
+                                    <button type="button" class="record-sort-option s-pending" data-filter="pending"
+                                        data-label="Pending" data-icon="fa-user-clock">
+                                        <span class="record-option-icon">
+                                            <i class="fa-solid fa-user-clock"></i>
+                                        </span>
+                                        <span class="record-option-label">Pending</span>
+                                        <span class="record-option-count">{{ $recordPendingCount }}</span>
+                                    </button>
 
-                                <button type="button" class="record-sort-option" data-filter="ongoing"
-                                    data-label="Ongoing" data-icon="fa-spinner">
-                                    <span class="record-option-icon"><i class="fa-solid fa-spinner"></i></span>
-                                    <span>Ongoing</span>
-                                </button>
+                                    <button type="button" class="record-sort-option s-ongoing" data-filter="ongoing"
+                                        data-label="Ongoing" data-icon="fa-spinner">
+                                        <span class="record-option-icon">
+                                            <i class="fa-solid fa-spinner"></i>
+                                        </span>
+                                        <span class="record-option-label">Ongoing</span>
+                                        <span class="record-option-count">{{ $recordOngoingCount }}</span>
+                                    </button>
 
-                                <button type="button" class="record-sort-option" data-filter="completed"
-                                    data-label="Completed" data-icon="fa-check">
-                                    <span class="record-option-icon"><i class="fa-solid fa-check"></i></span>
-                                    <span>Completed</span>
-                                </button>
+                                    <button type="button" class="record-sort-option s-completed" data-filter="completed"
+                                        data-label="Completed" data-icon="fa-check-double">
+                                        <span class="record-option-icon">
+                                            <i class="fa-solid fa-check-double"></i>
+                                        </span>
+                                        <span class="record-option-label">Completed</span>
+                                        <span class="record-option-count">{{ $recordCompletedCount }}</span>
+                                    </button>
 
-                                <button type="button" class="record-sort-option" data-filter="cancelled"
-                                    data-label="Cancelled" data-icon="fa-xmark">
-                                    <span class="record-option-icon"><i class="fa-solid fa-xmark"></i></span>
-                                    <span>Cancelled</span>
-                                </button>
+                                    <button type="button" class="record-sort-option s-cancelled" data-filter="cancelled"
+                                        data-label="Cancelled" data-icon="fa-calendar-xmark">
+                                        <span class="record-option-icon">
+                                            <i class="fa-solid fa-calendar-xmark"></i>
+                                        </span>
+                                        <span class="record-option-label">Cancelled</span>
+                                        <span class="record-option-count">{{ $recordCancelledCount }}</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -474,7 +509,7 @@ $recordItems->filter(fn($record) => strtolower($record->status ?? 'pending') ===
                             </span>
 
                             <span class="quick-action-copy">
-                                <span class="quick-action-title">Dental Reports</span>
+                                <span class="quick-action-title">Reports</span>
                                 <span class="quick-action-sub">View analytics and summaries</span>
                             </span>
 
@@ -748,26 +783,54 @@ $recordItems->filter(fn($record) => strtolower($record->status ?? 'pending') ===
                 let sub = 'New records will appear here once they are added.';
                 let actionHtml = '';
 
+                const statusEmptyCopy = {
+                    today: {
+                        icon: 'fa-clock',
+                        title: 'No records added today',
+                        sub: 'Dental records created today will appear here.'
+                    },
+                    pending: {
+                        icon: 'fa-user-clock',
+                        title: 'No pending dental records',
+                        sub: 'Pending dental records will appear here once available.'
+                    },
+                    ongoing: {
+                        icon: 'fa-spinner',
+                        title: 'No ongoing dental records',
+                        sub: 'Ongoing dental procedures will appear here once started.'
+                    },
+                    completed: {
+                        icon: 'fa-check-double',
+                        title: 'No completed dental records',
+                        sub: 'Completed dental records will appear here once finalized.'
+                    },
+                    cancelled: {
+                        icon: 'fa-calendar-xmark',
+                        title: 'No cancelled dental records',
+                        sub: 'Cancelled dental records will appear here once available.'
+                    }
+                };
+
                 if (hasSearch) {
                     icon = 'fa-magnifying-glass';
                     title = `No results for "${q}"`;
                     sub = 'Try a different patient name, procedure, dentist, or status.';
                     actionHtml = `
-                    <button type="button" data-clear-search data-search-target="#dentalRecordSearch" class="empty-state-btn">
-                        <i class="fa-solid fa-xmark"></i>
-                        Clear search
-                    </button>
-                `;
+    <button type="button" data-clear-search data-search-target="#dentalRecordSearch" class="empty-state-btn">
+        <i class="fa-solid fa-xmark"></i>
+        Clear search
+    </button>
+`;
                 } else if (hasFilter) {
-                    icon = 'fa-sliders';
-                    title = 'No matches for your filter';
-                    sub = 'Try selecting another record status.';
-                    actionHtml = `
-                    <button type="button" onclick="resetRecordFilters()" class="empty-state-btn">
-                        <i class="fa-solid fa-rotate-left"></i>
-                        Reset filters
-                    </button>
-                `;
+                    const emptyCopy = statusEmptyCopy[selectedStatus] || {
+                        icon: 'fa-sliders',
+                        title: 'No matching dental records',
+                        sub: 'Try selecting another record status.'
+                    };
+
+                    icon = emptyCopy.icon;
+                    title = emptyCopy.title;
+                    sub = emptyCopy.sub;
                 }
 
                 emptyState.innerHTML = buildDentalRecordEmptyStateHtml({

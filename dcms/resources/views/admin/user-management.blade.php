@@ -109,7 +109,6 @@ $inactiveCount = $inactiveCount ?? 0;
 
                 <form method="GET" action="{{ route('admin.user_management') }}" id="umFilterForm"
                     class="um-users-filter-form">
-                    {{-- Search --}}
                     <div class="um-search-mobile um-search-row voice-search-row" data-voice-field>
                         <div class="search-wrap global-search" data-search-wrapper>
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>

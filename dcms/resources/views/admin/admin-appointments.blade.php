@@ -239,6 +239,15 @@ $notifCount = $notifications->count();
         </div>
 
         <div class="appointment-controls-actions">
+          <div class="appointment-filter-actions">
+            <button id="appointmentFilterBtn" type="button" onclick="openAppointmentFilterPanel()"
+              class="global-filter-btn">
+              <i class="fa-solid fa-sliders"></i>
+              <span>Filter</span>
+              <span id="appointmentFilterBadge" class="filter-badge" style="display:none;"></span>
+            </button>
+          </div>
+
           <div class="view-toggle-container hidden md:flex">
             <div class="view-slider"></div>
 
@@ -251,19 +260,10 @@ $notifCount = $notifications->count();
             </button>
           </div>
 
-          <div class="tab-toggle-wrap">
-            <button id="btnUpcoming" type="button" class="tab-btn-toggle active">
-              <i class="fa-solid fa-calendar-clock text-xs"></i>
-              Upcoming
-              <span class="tab-count-badge">{{ $upcomingTotal }}</span>
-            </button>
-
-            <button id="btnPast" type="button" class="tab-btn-toggle">
-              <i class="fa-solid fa-clock-rotate-left text-xs"></i>
-              Past
-              <span class="tab-count-badge">{{ $pastTotal }}</span>
-            </button>
-          </div>
+          <button id="appointmentClearFilterBtn" type="button" onclick="resetAppointmentFilters()"
+            class="global-filter-reset-btn hidden" title="Reset filters">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
         </div>
       </div>
 
@@ -352,6 +352,7 @@ $notifCount = $notifications->count();
               @endphp
 
               <div class="appt-card {{ $isToday ? 'is-today' : '' }}" data-appt-id="{{ $appt->id }}"
+                data-period="upcoming" data-date="{{ $appt->appointment_date }}"
                 data-patient="{{ strtolower($patientName) }}" data-service="{{ strtolower($serviceLabel) }}"
                 data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
                 data-status="{{ strtolower($appt->status ?? 'upcoming') }}" style="animation-delay:{{ $i * 0.04 }}s">
@@ -519,6 +520,7 @@ $notifCount = $notifications->count();
             @endphp
 
             <div class="mobile-appt-card {{ $isToday ? 'is-today' : '' }}" data-appt-id="{{ $appt->id }}"
+              data-period="upcoming" data-date="{{ $appt->appointment_date }}"
               data-patient="{{ strtolower($patientName) }}" data-service="{{ strtolower($serviceLabel) }}"
               data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
               data-status="{{ strtolower($appt->status ?? 'upcoming') }}" style="animation-delay:{{ $i * 0.04 }}s">
@@ -584,7 +586,7 @@ $notifCount = $notifications->count();
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-3">
+              <div class="mobile-appt-actions grid grid-cols-2 gap-3">
                 <button type="button" class="action-btn action-btn-start" onclick="openStartProcedureModal(this)"
                   data-id="{{ $appt->id }}" data-name="{{ $patientName }}" data-datetime="{{ $modalDatetime }}" {{
                   $isToday ? '' : 'disabled' }}>
@@ -640,6 +642,12 @@ $notifCount = $notifications->count();
           <p id="appointmentStatusEmptyUpcomingSub" class="empty-state-sub">
             New appointments will appear here once scheduled.
           </p>
+
+          <button type="button" onclick="resetAppointmentFilters()"
+            class="empty-state-btn appointment-panel-empty-clear hidden">
+            <i class="fa-solid fa-xmark"></i>
+            Clear filter
+          </button>
         </div>
 
         <div id="appointmentFilterEmptyUpcoming" class="empty-state empty-state-controlled">
@@ -743,7 +751,8 @@ $notifCount = $notifications->count();
               $recordPrescription = $appt->prescription ?? '';
               @endphp
 
-              <div class="appt-card opacity-70" data-patient="{{ strtolower($patientName) }}"
+              <div class="appt-card opacity-70" data-appt-id="{{ $appt->id }}" data-period="past"
+                data-date="{{ $appt->appointment_date }}" data-patient="{{ strtolower($patientName) }}"
                 data-service="{{ strtolower($serviceLabel) }}"
                 data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
                 data-status="{{ $isCancelledPast ? 'cancelled' : 'completed' }}"
@@ -870,7 +879,8 @@ $notifCount = $notifications->count();
             $recordPrescription = $appt->prescription ?? '';
             @endphp
 
-            <div class="mobile-appt-card opacity-75 border-gray-200" data-patient="{{ strtolower($patientName) }}"
+            <div class="mobile-appt-card opacity-75 border-gray-200" data-appt-id="{{ $appt->id }}" data-period="past"
+              data-date="{{ $appt->appointment_date }}" data-patient="{{ strtolower($patientName) }}"
               data-service="{{ strtolower($serviceLabel) }}"
               data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
               data-status="{{ $isCancelledPast ? 'cancelled' : 'completed' }}" style="animation-delay:{{ $i * 0.04 }}s">
@@ -900,7 +910,7 @@ $notifCount = $notifications->count();
                   </span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="mobile-appt-actions grid grid-cols-2 gap-3">
                   <button type="button" class="action-btn action-btn-record" onclick="openRecordModal(this)"
                     data-appt-id="{{ $appt->id }}" data-service="{{ $serviceLabel }}" data-date="{{ $dateLabel }}"
                     data-time="{{ $timeLabel }}" data-status="{{ $pastStatusLabel }}"
@@ -944,6 +954,12 @@ $notifCount = $notifications->count();
           <p id="appointmentStatusEmptyPastSub" class="empty-state-sub">
             Completed appointments will appear here.
           </p>
+
+          <button type="button" onclick="resetAppointmentFilters()"
+            class="empty-state-btn appointment-panel-empty-clear hidden">
+            <i class="fa-solid fa-xmark"></i>
+            Clear filter
+          </button>
         </div>
 
         <div id="appointmentFilterEmptyPast" class="empty-state empty-state-controlled">
@@ -970,8 +986,125 @@ $notifCount = $notifications->count();
     </div>
 </main>
 
-<div id="actionTooltip" class="action-tooltip">
-  <div class="action-tooltip-bubble" id="actionTooltipText"></div>
+<div id="filterModal" class="filter-drawer-wrapper" aria-hidden="true">
+  <div class="filter-drawer-overlay" onclick="document.getElementById('closeFilterModalBtn').click()"></div>
+
+  <div class="filter-drawer-panel flex flex-col bg-white">
+    <div class="px-6 py-5 flex items-center justify-between flex-shrink-0 bg-white border-b border-gray-100">
+      <div class="filter-drawer-title flex items-center gap-2">
+        <i class="fa-solid fa-sliders text-xl"></i>
+        <h2 class="text-xl font-extrabold">Filters</h2>
+      </div>
+
+      <button id="closeFilterModalBtn" type="button" class="text-gray-400 hover:text-gray-700 transition-colors">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+
+    <div class="px-6 py-5 flex flex-col gap-6 flex-1 overflow-y-auto bg-white">
+      <div id="activeFiltersSection" class="hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[13px] font-bold text-gray-800">Active Filters</span>
+          <button id="clearAllChipsBtn" type="button" class="text-xs font-bold text-[#8B0000] hover:underline">
+            Clear All
+          </button>
+        </div>
+        <div id="activeChipsContainer" class="flex flex-wrap gap-2 pb-4 border-b border-gray-100"></div>
+      </div>
+
+      <div>
+        <h3 class="filter-section-title">Sort By</h3>
+        <div class="filter-chip-row" id="apptSortGroup">
+          <button type="button" class="ftag ftag-active" data-sort="newest">Newest First</button>
+          <button type="button" class="ftag" data-sort="oldest">Oldest First</button>
+          <button type="button" class="ftag" data-sort="az">Patient Name A-Z</button>
+          <button type="button" class="ftag" data-sort="za">Patient Name Z-A</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="filter-section-title">Appointment View</h3>
+        <div class="filter-chip-row" id="apptPeriodGroup">
+          <label class="choice-chip">
+            <input type="radio" name="appointment_period" value="upcoming" class="filter-input radio-red chip-radio"
+              checked />
+            <span>Upcoming</span>
+          </label>
+          <label class="choice-chip">
+            <input type="radio" name="appointment_period" value="past" class="filter-input radio-red chip-radio" />
+            <span>Past</span>
+          </label>
+          <label class="choice-chip">
+            <input type="radio" name="appointment_period" value="all" class="filter-input radio-red chip-radio" />
+            <span>All appointments</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="filter-section-title">Status</h3>
+        <div class="filter-chip-row" id="apptStatusChipGroup">
+          @foreach ($statusOptions as $value => $meta)
+          <label class="choice-chip">
+            <input type="radio" name="appointment_status" value="{{ $value }}" class="filter-input radio-red chip-radio"
+              {{ $value==='all' ? 'checked' : '' }} />
+            <span>{{ $meta['label'] }}</span>
+          </label>
+          @endforeach
+        </div>
+      </div>
+
+      <div>
+        <h3 class="filter-section-title">Filter by Date Range</h3>
+        <div class="filter-chip-row" id="datePresetGroup">
+          <button type="button" class="quick-date-chip" data-range="7">Last 7 Days</button>
+          <button type="button" class="quick-date-chip" data-range="30">Last 30 Days</button>
+          <button type="button" class="quick-date-chip" data-range="90">Last 3 Months</button>
+          <button type="button" class="quick-date-chip" data-range="180">Last 6 Months</button>
+          <button type="button" class="quick-date-chip" data-range="365">Last 12 Months</button>
+        </div>
+      </div>
+
+      <div class="pb-6">
+        <h3 class="filter-section-title">Custom Date Range</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="filter-date-input-wrap">
+            <input id="fromDate" type="text" class="js-flatpickr-date-range-from" placeholder="Start date" readonly
+              autocomplete="off" />
+            <i class="fa-regular fa-calendar"></i>
+          </div>
+
+          <div class="filter-date-input-wrap">
+            <input id="toDate" type="text" class="js-flatpickr-date-range-to" placeholder="End date" readonly
+              autocomplete="off" />
+            <i class="fa-regular fa-calendar"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="px-6 py-5 bg-white flex flex-col sm:flex-row items-center justify-between flex-shrink-0 border-t border-gray-100 gap-4 sm:gap-0 relative z-20">
+      <button id="clearFiltersModal" type="button"
+        class="filter-clear-btn flex items-center gap-2 transition-colors w-full sm:w-auto justify-center sm:justify-start">
+        <i class="fa-regular fa-trash-can text-lg"></i>
+        <span class="text-[13px] font-bold leading-none whitespace-nowrap">Clear Filters</span>
+      </button>
+
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <button id="cancelFilterBtn" type="button"
+          class="filter-cancel-btn flex-1 sm:flex-none px-5 py-2.5 text-sm font-bold rounded-lg transition-colors">
+          Cancel
+        </button>
+
+        <button id="applyFilters" type="button"
+          class="filter-show-results-btn filter-apply-btn flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-colors shadow-sm">
+          <i class="fa-solid fa-check"></i>
+          <span id="showResultsText">Show 0 results</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="startProcedureModal"
@@ -1003,17 +1136,41 @@ $notifCount = $notifications->count();
 
 @section('scripts')
 <script>
-  document.getElementById('btnUpcoming')?.addEventListener('click', () => setActiveTab('upcoming'));
-  document.getElementById('btnPast')?.addEventListener('click', () => setActiveTab('past'));
+  let selectedApptId = null;
+  let apptSearchInput = null;
+  let apptStatusFilter = null;
 
-  function setActiveTab(tab) {
-    const isUpcoming = tab === 'upcoming';
-    document.getElementById('upcomingSection')?.classList.toggle('hidden', !isUpcoming);
-    document.getElementById('pastSection')?.classList.toggle('hidden', isUpcoming);
-    document.getElementById('btnUpcoming')?.classList.toggle('active', isUpcoming);
-    document.getElementById('btnPast')?.classList.toggle('active', !isUpcoming);
+  let appointmentPeriodFilter = 'upcoming';
+  let appointmentStatusFilter = 'all';
+  let appointmentStatusFilterSource = 'dropdown';
+  let appointmentSortFilter = 'newest';
+  let appointmentFromDate = '';
+  let appointmentToDate = '';
+
+  const apptStatusMeta = {
+    all: { label: 'All statuses', icon: 'fa-layer-group', tone: 'all' },
+    upcoming: { label: 'Upcoming', icon: 'fa-calendar-check', tone: 'upcoming' },
+    rescheduled: { label: 'Rescheduled', icon: 'fa-rotate-right', tone: 'rescheduled' },
+    completed: { label: 'Completed', icon: 'fa-circle-check', tone: 'completed' },
+    cancelled: { label: 'Cancelled', icon: 'fa-circle-xmark', tone: 'cancelled' }
+  };
+
+  function openStartProcedureModal(btn) {
+    selectedApptId = btn.dataset.id;
+    document.getElementById('startPatientName').textContent = btn.dataset.name || '—';
+    document.getElementById('startAppointmentDate').textContent = btn.dataset.datetime || '—';
+    document.getElementById('startProcedureModal').classList.remove('hidden');
   }
 
+  function closeStartProcedureModal() {
+    document.getElementById('startProcedureModal').classList.add('hidden');
+    selectedApptId = null;
+  }
+
+  function confirmStartProcedure() {
+    if (!selectedApptId) return;
+    window.location.href = `/admin/appointments/${selectedApptId}/start`;
+  }
 
   function normalizeCancelReasonLabel(reason) {
     reason = String(reason || '').trim();
@@ -1030,8 +1187,7 @@ $notifCount = $notifications->count();
   function hydratePastCancellationReasons() {
     document.querySelectorAll('.past-status-pill[data-status-base="Cancelled"]').forEach((pill) => {
       const apptId = pill.dataset.apptId || '';
-      const reason = normalizeCancelReasonLabel(pill.dataset.cancelReason || getStoredCancelReason(
-        apptId));
+      const reason = normalizeCancelReasonLabel(pill.dataset.cancelReason || getStoredCancelReason(apptId));
       const label = reason ? `Cancelled - ${reason}` : 'Cancelled';
       const text = pill.querySelector('.past-status-text');
 
@@ -1050,150 +1206,53 @@ $notifCount = $notifications->count();
     });
   }
 
-  document.addEventListener('DOMContentLoaded', hydratePastCancellationReasons);
-
   function switchView(mode) {
     const mainContent = document.getElementById('mainContent');
     const btnList = document.getElementById('btnListView');
     const btnGrid = document.getElementById('btnGridView');
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    if (!mainContent) return;
+    if (isMobile) mode = 'grid';
 
     if (mode === 'grid') {
       mainContent.classList.remove('mode-list');
       mainContent.classList.add('mode-grid');
-      btnList.classList.remove('active');
-      btnGrid.classList.add('active');
-      localStorage.setItem('apptViewMode', 'grid');
+      btnList?.classList.remove('active');
+      btnGrid?.classList.add('active');
+      if (!isMobile) localStorage.setItem('apptViewMode', 'grid');
     } else {
       mainContent.classList.remove('mode-grid');
       mainContent.classList.add('mode-list');
-      btnGrid.classList.remove('active');
-      btnList.classList.add('active');
+      btnGrid?.classList.remove('active');
+      btnList?.classList.add('active');
       localStorage.setItem('apptViewMode', 'list');
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    if (window.innerWidth <= 767) {
+  function syncResponsiveAppointmentView() {
+    if (window.matchMedia('(max-width: 767px)').matches) {
       switchView('grid');
-    } else {
-      const savedMode = localStorage.getItem('apptViewMode') || 'list';
-      switchView(savedMode);
+      return;
     }
-  });
 
-  window.addEventListener('resize', () => {
-    if (window.innerWidth <= 767) {
-      switchView('grid');
-    }
-  });
-
-  function initActionTooltips() {
-    const tooltip = document.getElementById('actionTooltip');
-    const tooltipText = document.getElementById('actionTooltipText');
-
-    if (!tooltip || !tooltipText) return;
-
-    const targets = document.querySelectorAll('.appt-actions-wrap [data-tooltip]');
-
-    const showTooltip = (el) => {
-      if (el.disabled) return;
-
-      tooltipText.textContent = el.dataset.tooltip || '';
-      tooltip.classList.add('show');
-
-      requestAnimationFrame(() => {
-        const rect = el.getBoundingClientRect();
-        const tooltipRect = tooltip.getBoundingClientRect();
-
-        const top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
-        const left = rect.left - tooltipRect.width - 12;
-
-        tooltip.style.top = `${Math.max(8, top)}px`;
-        tooltip.style.left = `${Math.max(8, left)}px`;
-      });
-    };
-
-    const hideTooltip = () => {
-      tooltip.classList.remove('show');
-    };
-
-    targets.forEach((el) => {
-      el.addEventListener('mouseenter', () => showTooltip(el));
-      el.addEventListener('mouseleave', hideTooltip);
-      el.addEventListener('focus', () => showTooltip(el));
-      el.addEventListener('blur', hideTooltip);
-    });
-
-    window.addEventListener('scroll', hideTooltip, true);
-    window.addEventListener('resize', hideTooltip);
+    switchView(localStorage.getItem('apptViewMode') || 'list');
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    initActionTooltips();
-  });
-
-  var selectedApptId = null;
-
-  function openStartProcedureModal(btn) {
-    selectedApptId = btn.dataset.id;
-    document.getElementById('startPatientName').textContent = btn.dataset.name || '—';
-    document.getElementById('startAppointmentDate').textContent = btn.dataset.datetime || '—';
-    document.getElementById('startProcedureModal').classList.remove('hidden');
-  }
-
-  function closeStartProcedureModal() {
-    document.getElementById('startProcedureModal').classList.add('hidden');
-    selectedApptId = null;
-  }
-
-  function confirmStartProcedure() {
-    window.location.href = `/admin/appointments/${selectedApptId}/start`;
-  }
-
-  const apptSearchInput = document.getElementById('apptSearchInput');
-  const apptStatusFilter = document.getElementById('apptStatusFilter');
-
-  const apptStatusMeta = {
-    all: {
-      label: 'All statuses',
-      icon: 'fa-layer-group',
-      tone: 'all'
-    },
-    upcoming: {
-      label: 'Upcoming',
-      icon: 'fa-calendar-check',
-      tone: 'upcoming'
-    },
-    rescheduled: {
-      label: 'Rescheduled',
-      icon: 'fa-rotate-right',
-      tone: 'rescheduled'
-    },
-    completed: {
-      label: 'Completed',
-      icon: 'fa-circle-check',
-      tone: 'completed'
-    },
-    cancelled: {
-      label: 'Cancelled',
-      icon: 'fa-circle-xmark',
-      tone: 'cancelled'
-    }
-  };
-
-  function setAppointmentStatusFilter(value = 'all') {
+  function setAppointmentStatusFilter(value = 'all', shouldApply = true, source = 'dropdown') {
     const nextValue = apptStatusMeta[value] ? value : 'all';
     const meta = apptStatusMeta[nextValue];
 
+    appointmentStatusFilter = nextValue;
+    appointmentStatusFilterSource = source === 'panel' ? 'panel' : 'dropdown';
+
     if (apptStatusFilter) {
       apptStatusFilter.value = nextValue;
-      apptStatusFilter.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     const label = document.getElementById('apptStatusSelectedLabel');
     const count = document.getElementById('apptStatusSelectedCount');
     const icon = document.getElementById('apptStatusIcon');
-
     const activeOption = document.querySelector(`.appointment-status-option[data-status-value="${nextValue}"]`);
 
     if (label) label.textContent = meta.label;
@@ -1207,6 +1266,156 @@ $notifCount = $notifications->count();
     document.querySelectorAll('.appointment-status-option').forEach(option => {
       option.classList.toggle('is-active', option.dataset.statusValue === nextValue);
     });
+
+    if (shouldApply) applyAppointmentFilters();
+  }
+
+  function closeAppointmentStatusDropdown() {
+    const dropdown = document.getElementById('apptStatusDropdown');
+    const toggle = document.getElementById('apptStatusToggle');
+    dropdown?.classList.remove('open');
+    toggle?.setAttribute('aria-expanded', 'false');
+  }
+
+  function setupAppointmentStatusDropdown() {
+    const dropdown = document.getElementById('apptStatusDropdown');
+    const toggle = document.getElementById('apptStatusToggle');
+    const panel = document.getElementById('apptStatusPanel');
+
+    toggle?.addEventListener('click', function (event) {
+      event.stopPropagation();
+      const isOpen = dropdown?.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    panel?.addEventListener('click', function (event) {
+      event.stopPropagation();
+      const option = event.target.closest('.appointment-status-option');
+      if (!option) return;
+      setAppointmentStatusFilter(option.dataset.statusValue || 'all');
+      closeAppointmentStatusDropdown();
+    });
+
+    document.addEventListener('click', closeAppointmentStatusDropdown);
+  }
+
+  function getAppointmentFilterModal() {
+    return document.getElementById('filterModal');
+  }
+
+  function openAppointmentFilterPanel() {
+    const modal = getAppointmentFilterModal();
+    if (!modal) return;
+
+    syncAppointmentFilterInputs();
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.documentElement.classList.add('filter-lock');
+    document.body.classList.add('filter-lock');
+    renderAppointmentFilterChips();
+    updateAppointmentShowResultsButton();
+  }
+
+  function closeAppointmentFilterPanel() {
+    const modal = getAppointmentFilterModal();
+    if (!modal) return;
+
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.documentElement.classList.remove('filter-lock');
+    document.body.classList.remove('filter-lock');
+  }
+
+  function setAppointmentPeriodFilter(period = 'upcoming') {
+    appointmentPeriodFilter = ['upcoming', 'past', 'all'].includes(period) ? period : 'upcoming';
+    document.getElementById('upcomingSection')?.classList.toggle('hidden', appointmentPeriodFilter === 'past');
+    document.getElementById('pastSection')?.classList.toggle('hidden', appointmentPeriodFilter === 'upcoming');
+  }
+
+  function normalizeAppointmentDate(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function getAppointmentCards() {
+    return Array.from(document.querySelectorAll('.appt-card, .mobile-appt-card'));
+  }
+
+  function getUniqueAppointmentCards() {
+    const seen = new Set();
+    return getAppointmentCards().filter((card) => {
+      const key = `${card.dataset.apptId || ''}-${card.dataset.period || ''}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function matchesAppointmentFilters(card, draft = null) {
+    const filters = draft || {
+      period: appointmentPeriodFilter,
+      status: appointmentStatusFilter,
+      sort: appointmentSortFilter,
+      fromDate: appointmentFromDate,
+      toDate: appointmentToDate,
+    };
+
+    const searchValue = (apptSearchInput?.value || '').toLowerCase().trim();
+    const patient = card.dataset.patient || '';
+    const patientId = card.dataset.patientId || '';
+    const service = card.dataset.service || '';
+    const status = card.dataset.status || '';
+    const period = card.dataset.period || '';
+    const date = normalizeAppointmentDate(card.dataset.date || '');
+
+    const matchesSearch = !searchValue ||
+      patient.includes(searchValue) ||
+      patientId.includes(searchValue) ||
+      service.includes(searchValue);
+
+    const matchesPeriod = filters.period === 'all' || period === filters.period;
+    const matchesStatus = filters.status === 'all' || status === filters.status ||
+      (filters.status === 'cancelled' && status === 'canceled');
+
+    let matchesDate = true;
+    const fromDate = normalizeAppointmentDate(filters.fromDate);
+    const toDate = normalizeAppointmentDate(filters.toDate);
+
+    if ((fromDate || toDate) && !date) {
+      matchesDate = false;
+    } else {
+      if (fromDate && date < fromDate) matchesDate = false;
+      if (toDate && date > toDate) matchesDate = false;
+    }
+
+    return matchesSearch && matchesPeriod && matchesStatus && matchesDate;
+  }
+
+  function sortAppointmentGroups() {
+    const sortValue = appointmentSortFilter;
+
+    document.querySelectorAll('.appt-month-group').forEach((group) => {
+      ['.desktop-appointments-table .space-y-2\\.5', '.mobile-appointments-list'].forEach((selector) => {
+        const holder = group.querySelector(selector);
+        if (!holder) return;
+
+        const cards = Array.from(holder.querySelectorAll(':scope > .appt-card, :scope > .mobile-appt-card'));
+        cards.sort((a, b) => {
+          const aName = a.dataset.patient || '';
+          const bName = b.dataset.patient || '';
+          const aDate = normalizeAppointmentDate(a.dataset.date || '') || new Date(0);
+          const bDate = normalizeAppointmentDate(b.dataset.date || '') || new Date(0);
+
+          if (sortValue === 'az') return aName.localeCompare(bName);
+          if (sortValue === 'za') return bName.localeCompare(aName);
+          if (sortValue === 'oldest') return aDate - bDate;
+          return bDate - aDate;
+        });
+
+        cards.forEach((card) => holder.appendChild(card));
+      });
+    });
   }
 
   function clearAppointmentSearch() {
@@ -1216,68 +1425,55 @@ $notifCount = $notifications->count();
       apptSearchInput.dispatchEvent(new Event('change', { bubbles: true }));
       apptSearchInput.focus();
     }
-
     applyAppointmentFilters();
   }
 
   function applyAppointmentFilters() {
-    const searchValue = (apptSearchInput?.value || '').toLowerCase().trim();
-    const statusValue = apptStatusFilter?.value || 'all';
+    setAppointmentPeriodFilter(appointmentPeriodFilter);
 
-    document.querySelectorAll('.appt-card, .mobile-appt-card').forEach((card) => {
-      const patient = card.dataset.patient || '';
-      const patientId = card.dataset.patientId || '';
-      const service = card.dataset.service || '';
-      const status = card.dataset.status || '';
-
-      const matchesSearch = !searchValue ||
-        patient.includes(searchValue) ||
-        patientId.includes(searchValue) ||
-        service.includes(searchValue);
-
-      const matchesStatus =
-        statusValue === 'all' ||
-        status === statusValue ||
-        (statusValue === 'cancelled' && status === 'canceled');
-
-      card.classList.toggle('hidden', !(matchesSearch && matchesStatus));
+    getAppointmentCards().forEach((card) => {
+      card.classList.toggle('hidden', !matchesAppointmentFilters(card));
     });
+
+    sortAppointmentGroups();
 
     document.querySelectorAll('.appt-month-group').forEach((group) => {
       const cards = Array.from(group.querySelectorAll('.appt-card, .mobile-appt-card'));
       const hasVisibleCard = cards.some((card) => !card.classList.contains('hidden'));
-
       group.classList.toggle('hidden', !hasVisibleCard);
     });
 
     updateFilteredEmptyState();
+    updateAppointmentFilterButtonState();
   }
 
   function updateFilteredEmptyState() {
     const searchValue = (apptSearchInput?.value || '').trim();
-    const statusValue = apptStatusFilter?.value || 'all';
-
     const hasSearch = searchValue.length > 0;
-    const hasStatusFilter = statusValue !== 'all';
 
-    const upcomingCards = Array.from(
-      document.querySelectorAll('#upcomingSection .appt-card, #upcomingSection .mobile-appt-card')
-    );
+    const hasPanelStatusFilter = appointmentStatusFilterSource === 'panel' && appointmentStatusFilter !== 'all';
+    const hasDropdownStatusFilter = appointmentStatusFilterSource !== 'panel' && appointmentStatusFilter !== 'all';
 
-    const pastCards = Array.from(
-      document.querySelectorAll('#pastSection .appt-card, #pastSection .mobile-appt-card')
-    );
+    const hasPanelFilters =
+      hasPanelStatusFilter ||
+      appointmentPeriodFilter !== 'upcoming' ||
+      appointmentSortFilter !== 'newest' ||
+      !!appointmentFromDate ||
+      !!appointmentToDate;
+
+    const upcomingCards = Array.from(document.querySelectorAll('#upcomingSection .appt-card, #upcomingSection .mobile-appt-card'));
+    const pastCards = Array.from(document.querySelectorAll('#pastSection .appt-card, #pastSection .mobile-appt-card'));
 
     const upcomingVisible = upcomingCards.some(card => !card.classList.contains('hidden'));
     const pastVisible = pastCards.some(card => !card.classList.contains('hidden'));
-
     const searchTitle = hasSearch ? `No results for "${searchValue}"` : 'No results found';
 
     const upcomingSearchEmpty = document.getElementById('appointmentFilterEmptyUpcoming');
     const pastSearchEmpty = document.getElementById('appointmentFilterEmptyPast');
-
     const upcomingStatusEmpty = document.getElementById('appointmentStatusEmptyUpcoming');
     const pastStatusEmpty = document.getElementById('appointmentStatusEmptyPast');
+    const upcomingStaticEmpty = document.getElementById('appointmentStaticEmptyUpcoming');
+    const pastStaticEmpty = document.getElementById('appointmentStaticEmptyPast');
 
     const upcomingSearchTitle = document.getElementById('appointmentFilterEmptyUpcomingTitle');
     const pastSearchTitle = document.getElementById('appointmentFilterEmptyPastTitle');
@@ -1286,34 +1482,20 @@ $notifCount = $notifications->count();
     if (pastSearchTitle) pastSearchTitle.textContent = searchTitle;
 
     const statusEmptyCopy = {
-      upcoming: {
-        icon: 'fa-regular fa-calendar-xmark',
-        title: 'No upcoming appointments',
-        sub: 'New appointments will appear here once scheduled.'
-      },
-      rescheduled: {
-        icon: 'fa-solid fa-rotate-right',
-        title: 'No rescheduled appointments',
-        sub: 'Rescheduled appointments will appear here once available.'
-      },
-      completed: {
-        icon: 'fa-solid fa-circle-check',
-        title: 'No completed appointments',
-        sub: 'Completed appointments will appear here.'
-      },
-      cancelled: {
-        icon: 'fa-regular fa-calendar-xmark',
-        title: 'No cancelled appointments',
-        sub: 'Cancelled appointments will appear here.'
-      },
+      upcoming: { icon: 'fa-regular fa-calendar-xmark', title: 'No upcoming appointments', sub: 'New appointments will appear here once scheduled.' },
+      rescheduled: { icon: 'fa-solid fa-rotate-right', title: 'No rescheduled appointments', sub: 'Rescheduled appointments will appear here once available.' },
+      completed: { icon: 'fa-solid fa-circle-check', title: 'No completed appointments', sub: 'Completed appointments will appear here.' },
+      cancelled: { icon: 'fa-regular fa-calendar-xmark', title: 'No cancelled appointments', sub: 'Cancelled appointments will appear here.' },
       all: {
-        icon: 'fa-regular fa-calendar-xmark',
-        title: 'No appointments found',
-        sub: 'Appointments will appear here once available.'
+        icon: 'fa-solid fa-sliders',
+        title: hasPanelFilters ? 'No matches for your filters' : 'No appointments found',
+        sub: hasPanelFilters ? 'Try removing or adjusting your filter criteria.' : 'Appointments will appear here once available.'
       }
     };
 
-    const meta = statusEmptyCopy[statusValue] || statusEmptyCopy.all;
+    const meta = hasPanelFilters
+      ? statusEmptyCopy.all
+      : (statusEmptyCopy[appointmentStatusFilter] || statusEmptyCopy.all);
 
     function setStatusEmptyContent(prefix) {
       const icon = document.getElementById(`appointmentStatusEmpty${prefix}Icon`);
@@ -1328,11 +1510,23 @@ $notifCount = $notifications->count();
     setStatusEmptyContent('Upcoming');
     setStatusEmptyContent('Past');
 
-    const showUpcomingSearchEmpty = hasSearch && !upcomingVisible;
-    const showPastSearchEmpty = hasSearch && !pastVisible;
+    const upcomingAllowed = appointmentPeriodFilter !== 'past';
+    const pastAllowed = appointmentPeriodFilter !== 'upcoming';
 
-    const showUpcomingStatusEmpty = !hasSearch && hasStatusFilter && !upcomingVisible;
-    const showPastStatusEmpty = !hasSearch && hasStatusFilter && !pastVisible;
+    const showUpcomingSearchEmpty = upcomingAllowed && hasSearch && !upcomingVisible;
+    const showPastSearchEmpty = pastAllowed && hasSearch && !pastVisible;
+
+    const showUpcomingStatusEmpty =
+      upcomingAllowed &&
+      !hasSearch &&
+      (hasPanelFilters || hasDropdownStatusFilter) &&
+      !upcomingVisible;
+
+    const showPastStatusEmpty =
+      pastAllowed &&
+      !hasSearch &&
+      (hasPanelFilters || hasDropdownStatusFilter) &&
+      !pastVisible;
 
     upcomingSearchEmpty?.classList.toggle('show', showUpcomingSearchEmpty);
     upcomingSearchEmpty?.classList.toggle('is-visible', showUpcomingSearchEmpty);
@@ -1345,44 +1539,268 @@ $notifCount = $notifications->count();
 
     pastStatusEmpty?.classList.toggle('show', showPastStatusEmpty);
     pastStatusEmpty?.classList.toggle('is-visible', showPastStatusEmpty);
+
+    document.querySelectorAll('.appointment-panel-empty-clear').forEach(btn => {
+      btn.classList.toggle('hidden', !hasPanelFilters);
+    });
+
+    upcomingStaticEmpty?.classList.toggle('hidden', !upcomingAllowed || showUpcomingSearchEmpty || showUpcomingStatusEmpty);
+    pastStaticEmpty?.classList.toggle('hidden', !pastAllowed || showPastSearchEmpty || showPastStatusEmpty);
   }
 
-  apptSearchInput?.addEventListener('input', applyAppointmentFilters);
-  apptStatusFilter?.addEventListener('change', applyAppointmentFilters);
+  function getDraftAppointmentFilters() {
+    const activeSort = document.querySelector('#apptSortGroup .ftag.ftag-active');
+    const selectedPeriod = document.querySelector('input[name="appointment_period"]:checked');
+    const selectedStatus = document.querySelector('input[name="appointment_status"]:checked');
+
+    return {
+      sort: activeSort?.dataset.sort || 'newest',
+      period: selectedPeriod?.value || 'upcoming',
+      status: selectedStatus?.value || 'all',
+      fromDate: document.getElementById('fromDate')?.value || '',
+      toDate: document.getElementById('toDate')?.value || '',
+    };
+  }
+
+  function countDraftAppointmentResults() {
+    const draft = getDraftAppointmentFilters();
+    return getUniqueAppointmentCards().filter((card) => matchesAppointmentFilters(card, draft)).length;
+  }
+
+  function updateAppointmentShowResultsButton() {
+    const showResultsText = document.getElementById('showResultsText');
+    if (!showResultsText) return;
+    const count = countDraftAppointmentResults();
+    showResultsText.textContent = `Show ${count} ${count === 1 ? 'result' : 'results'}`;
+  }
+
+  function updateAppointmentFilterButtonState() {
+    const badge = document.getElementById('appointmentFilterBadge');
+    const filterBtn = document.getElementById('appointmentFilterBtn');
+    const clearBtn = document.getElementById('appointmentClearFilterBtn');
+    const activeCount = [
+      appointmentPeriodFilter !== 'upcoming',
+      appointmentStatusFilterSource === 'panel' && appointmentStatusFilter !== 'all',
+      !!appointmentFromDate || !!appointmentToDate,
+      appointmentSortFilter !== 'newest',
+    ].filter(Boolean).length;
+
+    if (badge) {
+      badge.textContent = activeCount;
+      badge.style.display = activeCount ? 'inline-flex' : 'none';
+    }
+
+    filterBtn?.classList.toggle('has-filters', activeCount > 0);
+    filterBtn?.setAttribute('aria-pressed', activeCount > 0 ? 'true' : 'false');
+    clearBtn?.classList.toggle('hidden', activeCount === 0);
+  }
+
+  function renderAppointmentFilterChips() {
+    const container = document.getElementById('activeChipsContainer');
+    const section = document.getElementById('activeFiltersSection');
+    if (!container || !section) return;
+
+    container.innerHTML = '';
+    let hasChips = false;
+
+    function addChip(label, callback) {
+      hasChips = true;
+      const chip = document.createElement('div');
+      chip.className = 'filter-chip';
+      chip.innerHTML = `<span>${label}</span><span class="filter-chip-remove"><i class="fa-solid fa-xmark"></i></span>`;
+      chip.querySelector('.filter-chip-remove').onclick = function () {
+        callback();
+        renderAppointmentFilterChips();
+        updateAppointmentShowResultsButton();
+      };
+      container.appendChild(chip);
+    }
+
+    const draft = getDraftAppointmentFilters();
+
+    if (draft.sort !== 'newest') {
+      const sortLabel = document.querySelector(`#apptSortGroup .ftag[data-sort="${draft.sort}"]`)?.textContent.trim() || draft.sort;
+      addChip(`Sort: ${sortLabel}`, function () {
+        document.querySelectorAll('#apptSortGroup .ftag').forEach(btn => btn.classList.remove('ftag-active'));
+        document.querySelector('#apptSortGroup .ftag[data-sort="newest"]')?.classList.add('ftag-active');
+      });
+    }
+
+    if (draft.period !== 'upcoming') {
+      const periodLabel = document.querySelector(`input[name="appointment_period"][value="${draft.period}"]`)?.closest('label')?.textContent.trim() || draft.period;
+      addChip(`View: ${periodLabel}`, function () {
+        const input = document.querySelector('input[name="appointment_period"][value="upcoming"]');
+        if (input) input.checked = true;
+      });
+    }
+
+    if (draft.status !== 'all') {
+      const statusLabel = document.querySelector(`input[name="appointment_status"][value="${draft.status}"]`)?.closest('label')?.textContent.trim() || draft.status;
+
+      addChip(`Status: ${statusLabel}`, function () {
+        const input = document.querySelector('input[name="appointment_status"][value="all"]');
+        if (input) input.checked = true;
+      });
+    }
+
+    if (draft.fromDate || draft.toDate) {
+      addChip(`Date: ${draft.fromDate || 'Any'} to ${draft.toDate || 'Any'}`, function () {
+        const from = document.getElementById('fromDate');
+        const to = document.getElementById('toDate');
+        if (from) from.value = '';
+        if (to) to.value = '';
+        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => btn.classList.remove('active'));
+      });
+    }
+
+    section.classList.toggle('hidden', !hasChips);
+  }
+
+  function syncAppointmentFilterInputs() {
+    document.querySelectorAll('#apptSortGroup .ftag').forEach(btn => {
+      btn.classList.toggle('ftag-active', btn.dataset.sort === appointmentSortFilter);
+    });
+
+    const periodInput = document.querySelector(`input[name="appointment_period"][value="${appointmentPeriodFilter}"]`);
+    if (periodInput) periodInput.checked = true;
+
+    const panelStatusValue = appointmentStatusFilterSource === 'panel'
+      ? appointmentStatusFilter
+      : 'all';
+
+    const statusInput = document.querySelector(`input[name="appointment_status"][value="${panelStatusValue}"]`);
+    if (statusInput) statusInput.checked = true;
+
+    const from = document.getElementById('fromDate');
+    const to = document.getElementById('toDate');
+
+    if (from) from.value = appointmentFromDate;
+    if (to) to.value = appointmentToDate;
+  }
+
+  function resetAppointmentFilters() {
+    appointmentPeriodFilter = 'upcoming';
+    appointmentStatusFilter = 'all';
+    appointmentStatusFilterSource = 'dropdown';
+    appointmentSortFilter = 'newest';
+    appointmentFromDate = '';
+    appointmentToDate = '';
+
+    setAppointmentStatusFilter('all', false, 'dropdown');
+    syncAppointmentFilterInputs();
+
+    document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => btn.classList.remove('active'));
+
+    renderAppointmentFilterChips();
+    applyAppointmentFilters();
+  }
+
+  function setupAppointmentFilterPanel() {
+    const filterModal = getAppointmentFilterModal();
+    const closeBtn = document.getElementById('closeFilterModalBtn');
+    const cancelBtn = document.getElementById('cancelFilterBtn');
+    const applyBtn = document.getElementById('applyFilters');
+    const clearBtn = document.getElementById('clearFiltersModal');
+    const clearAllBtn = document.getElementById('clearAllChipsBtn');
+
+    closeBtn?.addEventListener('click', closeAppointmentFilterPanel);
+    cancelBtn?.addEventListener('click', closeAppointmentFilterPanel);
+
+    document.querySelectorAll('#apptSortGroup .ftag').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#apptSortGroup .ftag').forEach(item => item.classList.remove('ftag-active'));
+        btn.classList.add('ftag-active');
+        renderAppointmentFilterChips();
+        updateAppointmentShowResultsButton();
+      });
+    });
+
+    filterModal?.querySelectorAll('input[type="radio"]').forEach(input => {
+      input.addEventListener('change', function () {
+        renderAppointmentFilterChips();
+        updateAppointmentShowResultsButton();
+      });
+    });
+
+    filterModal?.querySelectorAll('#fromDate, #toDate').forEach(input => {
+      input.addEventListener('change', function () {
+        renderAppointmentFilterChips();
+        updateAppointmentShowResultsButton();
+      });
+    });
+
+    document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(item => item.classList.remove('active'));
+        btn.classList.add('active');
+
+        const days = parseInt(btn.dataset.range || '0', 10);
+        const toDate = new Date();
+        const fromDate = new Date();
+        fromDate.setDate(toDate.getDate() - days);
+
+        const formatDate = (date) => date.toISOString().slice(0, 10);
+        const from = document.getElementById('fromDate');
+        const to = document.getElementById('toDate');
+        if (from) from.value = formatDate(fromDate);
+        if (to) to.value = formatDate(toDate);
+
+        renderAppointmentFilterChips();
+        updateAppointmentShowResultsButton();
+      });
+    });
+
+    applyBtn?.addEventListener('click', function () {
+      const draft = getDraftAppointmentFilters();
+
+      appointmentSortFilter = draft.sort;
+      appointmentPeriodFilter = draft.period;
+      appointmentFromDate = draft.fromDate;
+      appointmentToDate = draft.toDate;
+
+      if (draft.status !== 'all') {
+        setAppointmentStatusFilter(draft.status, false, 'panel');
+      } else if (appointmentStatusFilterSource === 'panel') {
+        setAppointmentStatusFilter('all', false, 'dropdown');
+      }
+
+      applyAppointmentFilters();
+      closeAppointmentFilterPanel();
+    });
+
+    clearBtn?.addEventListener('click', function () {
+      resetAppointmentFilters();
+      openAppointmentFilterPanel();
+    });
+
+    clearAllBtn?.addEventListener('click', function () {
+      resetAppointmentFilters();
+      openAppointmentFilterPanel();
+    });
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
     window.initGlobalVoiceInputs?.();
 
-    const dropdown = document.getElementById('apptStatusDropdown');
-    const toggle = document.getElementById('apptStatusToggle');
-    const panel = document.getElementById('apptStatusPanel');
+    apptSearchInput = document.getElementById('apptSearchInput');
+    apptStatusFilter = document.getElementById('apptStatusFilter');
 
-    function closeAppointmentStatusDropdown() {
-      dropdown?.classList.remove('open');
-      toggle?.setAttribute('aria-expanded', 'false');
-    }
-
-    toggle?.addEventListener('click', function (event) {
-      event.stopPropagation();
-
-      const isOpen = dropdown?.classList.toggle('open');
-      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    });
-
-    panel?.addEventListener('click', function (event) {
-      event.stopPropagation();
-
-      const option = event.target.closest('.appointment-status-option');
-      if (!option) return;
-
-      setAppointmentStatusFilter(option.dataset.statusValue || 'all');
-      closeAppointmentStatusDropdown();
+    apptSearchInput?.addEventListener('input', applyAppointmentFilters);
+    apptStatusFilter?.addEventListener('change', function () {
+      appointmentStatusFilter = apptStatusFilter.value || 'all';
       applyAppointmentFilters();
     });
 
-    document.addEventListener('click', closeAppointmentStatusDropdown);
+    hydratePastCancellationReasons();
+    setupAppointmentStatusDropdown();
+    setupAppointmentFilterPanel();
+    syncResponsiveAppointmentView();
+    setAppointmentStatusFilter('all', false);
+    applyAppointmentFilters();
+    updateAppointmentFilterButtonState();
   });
 
+  window.addEventListener('resize', syncResponsiveAppointmentView);
 
   /* Admin fallback: keeps the dentist-style buttons working even if the shared dentist modal helpers are not loaded on the admin layout. */
   if (typeof window.openRescheduleModal !== 'function') {
@@ -1418,4 +1836,5 @@ $notifCount = $notifications->count();
     };
   }
 </script>
+
 @endsection

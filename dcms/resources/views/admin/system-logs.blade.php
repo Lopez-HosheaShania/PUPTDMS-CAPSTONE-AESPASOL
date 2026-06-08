@@ -6,13 +6,12 @@
 
 @php
 $logs = $logs ?? collect([]);
-$perPage = $perPage ?? 20;
+$perPage = $perPage ?? 10;
 @endphp
 
-<main id="mainContent" class="admin-page-shell">
-    <div class="admin-page-container">
+<main id="mainContent" class="admin-page-shell system-logs-page page-enter mode-list">
+    <div class="admin-page-container system-logs-shell">
 
-        <!-- Page Banner -->
         <div class="page-banner rounded-2xl mb-6">
             <div class="page-banner-inner">
                 <div>
@@ -23,119 +22,126 @@ $perPage = $perPage ?? 20;
                     <span class="sl-live">
                         <span class="sl-live-dot"></span> Live Monitoring
                     </span>
-
-                    <div class="sl-view-toggle" id="slViewToggle">
-                        <button type="button" class="sl-view-toggle-btn active" id="slListViewBtn" title="List view"
-                            aria-label="List view">
-                            <i class="fa-solid fa-table-list"></i>
-                        </button>
-                        <button type="button" class="sl-view-toggle-btn" id="slGridViewBtn" title="Grid view"
-                            aria-label="Grid view">
-                            <i class="fa-solid fa-grip"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- STAT CARDS --}}
-        <div class="stat-grid">
-            <div class="stat-card s-crimson">                <div class="stat-card-accent"></div>
-                <div class="stat-top">
-                    <div class="stat-icon">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                    </div>
-                    <span class="stat-badge">Total</span>
+        <div id="statCards" class="stat-grid sl-stat-grid">
+            <div class="stat-card s-crimson sl-stat-card">
+                <div class="stat-icon-wrapper">
+                    <i class="fa-solid fa-clipboard-list"></i>
                 </div>
-                <div class="stat-label">Total Logs</div>
-                <div class="stat-value" id="statTotal">{{ $totalCount }}</div>
-                <div class="stat-footer"><i class="fa-solid fa-list admin-icon-sm"></i>
-                    All recorded activity</div>
+                <div class="stat-card-info">
+                    <span class="stat-label">Total Logs</span>
+                    <span class="stat-num" id="statTotal">{{ $totalCount }}</span>
+                    <span class="sl-stat-hint">All recorded activity</span>
+                </div>
             </div>
-            <div class="stat-card s-red">                <div class="stat-card-accent"></div>
-                <div class="stat-top">
-                    <div class="stat-icon"><i class="fa-solid fa-user-tie"></i></div>
-                    <span class="stat-badge">Admin</span>
+
+            <div class="stat-card s-red sl-stat-card">
+                <div class="stat-icon-wrapper">
+                    <i class="fa-solid fa-user-tie"></i>
                 </div>
-                <div class="stat-label">Admin Actions</div>
-                <div class="stat-value" id="statAdmin">{{ $adminCount }}</div>
-                <div class="stat-footer"><i class="fa-solid fa-shield admin-icon-sm"></i>
-                    Administrator activity</div>
+                <div class="stat-card-info">
+                    <span class="stat-label">Admin Actions</span>
+                    <span class="stat-num" id="statAdmin">{{ $adminCount }}</span>
+                    <span class="sl-stat-hint">Administrator activity</span>
+                </div>
             </div>
-            <div class="stat-card s-blue">                <div class="stat-card-accent"></div>
-                <div class="stat-top">
-                    <div class="stat-icon"><i class="fa-solid fa-user-doctor"></i></div>
-                    <span class="stat-badge">Dentist</span>
+
+            <div class="stat-card s-blue sl-stat-card">
+                <div class="stat-icon-wrapper">
+                    <i class="fa-solid fa-user-doctor"></i>
                 </div>
-                <div class="stat-label">Dentist Actions</div>
-                <div class="stat-value" id="statDentist">{{ $dentistCount }}</div>
-                <div class="stat-footer"><i class="fa-solid fa-stethoscope admin-icon-sm"></i>
-                    Dentist activity</div>
+                <div class="stat-card-info">
+                    <span class="stat-label">Dentist Actions</span>
+                    <span class="stat-num" id="statDentist">{{ $dentistCount }}</span>
+                    <span class="sl-stat-hint">Dentist activity</span>
+                </div>
             </div>
-            <div class="stat-card s-green">                <div class="stat-card-accent"></div>
-                <div class="stat-top">
-                    <div class="stat-icon"><i class="fa-solid fa-user"></i></div>
-                    <span class="stat-badge">Patient</span>
+
+            <div class="stat-card s-green sl-stat-card">
+                <div class="stat-icon-wrapper">
+                    <i class="fa-solid fa-user"></i>
                 </div>
-                <div class="stat-label">Patient Actions</div>
-                <div class="stat-value" id="statPatient">{{ $patientCount }}</div>
-                <div class="stat-footer"><i class="fa-solid fa-heart-pulse admin-icon-sm"></i>
-                    Patient activity</div>
+                <div class="stat-card-info">
+                    <span class="stat-label">Patient Actions</span>
+                    <span class="stat-num" id="statPatient">{{ $patientCount }}</span>
+                    <span class="sl-stat-hint">Patient activity</span>
+                </div>
             </div>
         </div>
 
         <div class="card">
-            {{-- Card Header --}}
             <div class="card-header">
-                {{-- Left: icon + title + badge --}}
                 <div class="card-header-left">
                     <div class="card-header-icon"><i class="fa-solid fa-clipboard-list"></i></div>
                     <span class="card-title">Audit Trail</span>
-                    <span id="entryBadge"
-                        class="bg-red-50 text-[#8B0000] text-[0.68rem] font-bold px-2 py-0.5 rounded-full border border-red-200 ml-1.5">
+                    <span id="entryBadge" class="entry-badge">
                         {{ $totalCount }} {{ Str::plural('entry', $totalCount) }}
                     </span>
                 </div>
 
-                <div class="card-header-right">
-                    <div class="flex items-center gap-2">
-                        <div class="search-wrap sl-search-wrap">
-                            <i class="fa fa-search"></i>
-                            <input id="slSearch" name="search" placeholder="Search logs…" value="{{ $search ?? '' }}"
-                                onkeydown="if(event.key==='Enter'){event.preventDefault();slState.search=this.value;slState.page=1;slFetch();}">
+                <div class="card-header-right sl-toolbar-actions">
+                    <div class="voice-search-row sl-search-row">
+                        <div class="search-wrap global-search sl-search-wrap" data-search-wrapper>
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input id="slSearch" name="search" class="search-input" type="text"
+                                placeholder="Search logs…" value="{{ $search ?? '' }}" data-search-input
+                                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
                         </div>
 
-                        <button type="button" id="searchClearBtn"
-                            class="hidden text-xs font-semibold text-red-600 hover:text-red-800 transition-colors flex-shrink-0"
-                            onclick="clearSearch()">
-                            Clear
-                        </button>
+                        <div class="voice-input-toggle">
+                            <span class="voice-status hidden" data-voice-status></span>
+                            <button type="button" class="voice-search-mic external" data-global-voice-trigger
+                                data-voice-target="#slSearch" aria-label="Use voice search" title="Voice search">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="sl-filter-actions-wrap">
-                        <button type="button" id="slFilterBtn" class="sl-filter-btn" onclick="openSlFilterPanel()">
+                        <button type="button" id="slFilterBtn" class="global-filter-btn sl-filter-btn"
+                            onclick="openSlFilterPanel()" aria-pressed="false">
                             <i class="fa-solid fa-sliders"></i>
                             <span>Filter</span>
-                            <span id="slFilterBadge" class="sl-filter-badge hidden"></span>
-                        </button>
-
-                        <button type="button" id="slClearFilterBtn" class="sl-clear-filter-btn hidden"
-                            onclick="clearOnlySlFilters()" title="Clear filters">
-                            <i class="fa-solid fa-filter-circle-xmark"></i>
-                            <span>Clear</span>
+                            <span id="slFilterBadge" class="filter-badge hidden"></span>
                         </button>
                     </div>
+
+                    <div class="view-toggle-container sl-view-toggle" id="slViewToggle" aria-label="View toggle">
+                        <div class="view-slider"></div>
+                        <button type="button" class="btn-view-mode active" id="slListViewBtn" title="List view"
+                            aria-label="List view">
+                            <i class="fa-solid fa-table-list"></i>
+                        </button>
+                        <button type="button" class="btn-view-mode" id="slGridViewBtn" title="Grid view"
+                            aria-label="Grid view">
+                            <i class="fa-solid fa-grip"></i>
+                        </button>
+                    </div>
+
+                    <button id="slClearFilterBtn" type="button" onclick="clearOnlySlFilters()"
+                        class="global-filter-reset-btn hidden" title="Reset filters" aria-label="Reset filters">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
                 </div>
             </div>
 
-            {{-- Role Tabs --}}
             @php $activeRole = $role ?? 'all'; @endphp
-            <div class="flex gap-1 px-5 py-2.5 border-b border-gray-100 overflow-x-auto">
-                @foreach ([['key' => 'all', 'label' => 'All', 'icon' => 'fa-layer-group', 'count' => $totalCount],
-                ['key' => 'admin', 'label' => 'Admin', 'icon' => 'fa-user-tie', 'count' => $adminCount], ['key' =>
-                'dentist', 'label' => 'Dentist', 'icon' => 'fa-user-doctor', 'count' => $dentistCount], ['key' =>
-                'patient', 'label' => 'Patient', 'icon' => 'fa-user', 'count' => $patientCount], ['key' => 'login',
-                'label' => 'Logins', 'icon' => 'fa-right-to-bracket', 'count' => $loginCount]] as $tab)
+            <div class="sl-role-tabs">
+                @foreach ([
+                ['key' => 'all', 'label' => 'All', 'icon' => 'fa-layer-group', 'count' => $totalCount],
+                ['key' => 'admin', 'label' => 'Admin', 'icon' => 'fa-user-tie', 'count' => $adminCount],
+                ['key' => 'dentist', 'label' => 'Dentist', 'icon' => 'fa-user-doctor', 'count' => $dentistCount],
+                ['key' => 'patient', 'label' => 'Patient', 'icon' => 'fa-user', 'count' => $patientCount],
+                ['key' => 'login', 'label' => 'Logins', 'icon' => 'fa-right-to-bracket', 'count' => $loginCount],
+                ['key' => 'error', 'label' => 'Errors', 'icon' => 'fa-triangle-exclamation', 'count' => $errorCount ??
+                0],
+                ] as $tab)
                 <button class="tab-btn {{ $activeRole === $tab['key'] ? 'active' : '' }}"
                     onclick="slSetTab(this, '{{ $tab['key'] }}')">
                     <i class="fa-solid {{ $tab['icon'] }} mr-1 text-[0.7rem]"></i>{{ $tab['label'] }}
@@ -147,7 +153,6 @@ $perPage = $perPage ?? 20;
                 @endforeach
             </div>
 
-            {{-- Top pagebar --}}
             <div class="sl-pagebar sl-pagebar-top">
                 <div class="flex items-center gap-3 flex-wrap">
                     <span class="sl-pagebar-info">
@@ -158,22 +163,20 @@ $perPage = $perPage ?? 20;
                         Showing <strong>{{ $logs->count() }}</strong> {{ Str::plural('entry', $logs->count()) }}
                         @endif
                     </span>
-                    <div class="flex items-center gap-1.5">
-                        <label class="text-[0.7rem] text-gray-400 font-semibold">Show</label>
-                        <select id="perPageSelect"
-                            class="h-[30px] px-2 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white outline-none cursor-pointer transition-colors focus:border-[#8B0000]">
+                    <div class="sl-page-size-control">
+                        <label for="perPageSelect">Show</label>
+                        <select id="perPageSelect" class="sl-page-size-select">
                             @foreach ([10, 20, 50, 100] as $size)
                             <option value="{{ $size }}" {{ $perPage==$size ? 'selected' : '' }}>
                                 {{ $size }}</option>
                             @endforeach
                         </select>
-                        <span class="text-[0.7rem] text-gray-400 font-semibold">per page</span>
+                        <span>per page</span>
                     </div>
                 </div>
                 <div class="sl-pagination-wrap"></div>
             </div>
 
-            {{-- List View --}}
             <div class="sl-view" id="slListView">
                 <div class="sl-table-wrap">
                     <table class="data-table" id="slTable">
@@ -194,6 +197,8 @@ $perPage = $perPage ?? 20;
                             $role = strtolower($log->actor_role ?? 'other');
                             $action = strtolower($log->action ?? '');
                             $actionClass = match (true) {
+                            str_contains($action, 'error') || str_contains($action, 'failed') || str_contains($action,
+                            'exception') => 'error',
                             str_contains($action, 'login') => 'login',
                             str_contains($action, 'logout') => 'logout',
                             str_contains($action, 'create') => 'create',
@@ -207,6 +212,7 @@ $perPage = $perPage ?? 20;
                             'create' => 'fa-plus',
                             'update' => 'fa-pen',
                             'delete' => 'fa-trash',
+                            'error' => 'fa-triangle-exclamation',
                             default => 'fa-bolt',
                             };
                             $roleIcon = match ($role) {
@@ -235,8 +241,9 @@ $perPage = $perPage ?? 20;
                                 </td>
                                 <td>
                                     <span class="sl-action {{ $actionClass }}">
-                                        <i class="fa-solid {{ $actionIcon }}"></i>{{ ucwords(str_replace('_', ' ',
-                                        $log->action)) }}
+                                        <i
+                                            class="fa-solid {{ $actionIcon }} {{ $actionClass === 'error' ? 'sl-action-alert' : '' }}"></i>
+                                        {{ ucwords(str_replace('_', ' ', $log->action)) }}
                                     </span>
                                 </td>
                                 <td>
@@ -262,6 +269,8 @@ $perPage = $perPage ?? 20;
                     $role = strtolower($log->actor_role ?? 'other');
                     $action = strtolower($log->action ?? '');
                     $actionClass = match (true) {
+                    str_contains($action, 'error') || str_contains($action, 'failed') || str_contains($action,
+                    'exception') => 'error',
                     str_contains($action, 'login') => 'login',
                     str_contains($action, 'logout') => 'logout',
                     str_contains($action, 'create') => 'create',
@@ -275,6 +284,7 @@ $perPage = $perPage ?? 20;
                     'create' => 'fa-plus',
                     'update' => 'fa-pen',
                     'delete' => 'fa-trash',
+                    'error' => 'fa-triangle-exclamation',
                     default => 'fa-bolt',
                     };
                     $roleIcon = match ($role) {
@@ -290,8 +300,9 @@ $perPage = $perPage ?? 20;
                         <div class="sl-grid-top">
                             <div class="sl-grid-id">#{{ str_pad($log->id, 3, '0', STR_PAD_LEFT) }}</div>
                             <span class="sl-action {{ $actionClass }}">
-                                <i class="fa-solid {{ $actionIcon }}"></i>{{ ucwords(str_replace('_', ' ',
-                                $log->action)) }}
+                                <i
+                                    class="fa-solid {{ $actionIcon }} {{ $actionClass === 'error' ? 'sl-action-alert' : '' }}"></i>
+                                {{ ucwords(str_replace('_', ' ', $log->action)) }}
                             </span>
                         </div>
 
@@ -340,9 +351,8 @@ $perPage = $perPage ?? 20;
                 </div>
             </div>
 
-            <div id="emptyState" class="admin-hidden"></div>
+            <div id="emptyState" class="empty-state-host"></div>
 
-            {{-- Bottom pagebar --}}
             <div class="sl-pagebar">
                 <span class="sl-pagebar-info">
                     @if (method_exists($logs, 'total'))
@@ -358,131 +368,302 @@ $perPage = $perPage ?? 20;
 
     </div>
 </main>
-<div id="slFilterOverlay" class="sl-filter-overlay" onclick="closeSlFilterPanel()"></div>
+<div id="filterModal" class="filter-drawer-wrapper" aria-hidden="true">
+    <div class="filter-drawer-overlay" onclick="closeSlFilterPanel()"></div>
 
-<div id="slFilterPanel" class="sl-filter-panel">
-    <div class="sl-filter-head">
-        <span class="sl-filter-title">
-            <i class="fa-solid fa-sliders"></i> Filter logs
-        </span>
-        <button type="button" class="sl-filter-close" onclick="closeSlFilterPanel()">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
+    <div class="filter-drawer-panel" aria-label="Filter system logs">
+        <div class="filter-drawer-header px-6 py-5 flex items-center justify-between border-b border-gray-100">
+            <div class="filter-drawer-title flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-xl"></i>
+                <h2 class="text-xl font-extrabold">Filters</h2>
+            </div>
 
-    <div class="sl-filter-body">
-        <div id="slActiveFiltersSection" class="sl-active-filters-section hidden">
-            <div class="sl-active-filters-head">
-                <span class="sl-active-filters-title">Active Filters</span>
-                <button id="slClearAllChipsBtn" type="button" class="sl-active-filters-clear-all">
-                    Clear All
+            <button type="button" class="text-gray-400 hover:text-gray-700 transition-colors"
+                onclick="closeSlFilterPanel()" aria-label="Close filters">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="filter-drawer-body px-6 py-5 flex flex-col gap-6">
+            <div id="slActiveFiltersSection" class="hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[13px] font-bold text-gray-800">Active Filters</span>
+                    <button id="slClearAllChipsBtn" type="button"
+                        class="text-xs font-bold text-[#8B0000] hover:underline">
+                        Clear All
+                    </button>
+                </div>
+                <div id="slActiveChipsContainer"
+                    class="active-filters-container flex flex-wrap gap-2 pb-4 border-b border-gray-100"></div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Sort By</h3>
+                <input type="hidden" id="slSortOrder" value="desc">
+
+                <div class="filter-chip-row" id="slSortGroup">
+                    <button type="button" class="ftag" data-sl-sort="desc">
+                        <i class="fa-solid fa-arrow-down-wide-short"></i>
+                        Newest First
+                    </button>
+
+                    <button type="button" class="ftag" data-sl-sort="asc">
+                        <i class="fa-solid fa-arrow-up-wide-short"></i>
+                        Oldest First
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Filter by Date Range</h3>
+                <input type="hidden" id="slDatePreset" value="">
+
+                <div class="filter-chip-row" id="slDatePresetGroup">
+                    <button type="button" class="quick-date-chip" data-sl-date-preset="today"
+                        onclick="setSlQuickDate('today')">Today</button>
+                    <button type="button" class="quick-date-chip" data-sl-date-preset="week"
+                        onclick="setSlQuickDate('week')">Last 7 Days</button>
+                    <button type="button" class="quick-date-chip" data-sl-date-preset="month"
+                        onclick="setSlQuickDate('month')">Last 30 Days</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Custom Date Range</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="filter-date-input-wrap">
+                        <input type="text" id="slDateFrom" class="js-flatpickr-date-max-today" placeholder="Start date"
+                            readonly autocomplete="off">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+
+                    <div class="filter-date-input-wrap">
+                        <input type="text" id="slDateTo" class="js-flatpickr-date-max-today" placeholder="End date"
+                            readonly autocomplete="off">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Action Type</h3>
+                <input type="hidden" id="slActionType" value="">
+
+                <div class="sl-action-select" id="slActionSelect">
+                    <button type="button" class="sl-action-select-btn" id="slActionSelectBtn" aria-expanded="false">
+                        <span class="sl-action-select-current">
+                            <i id="slActionSelectIcon" class="fa-solid fa-layer-group"></i>
+                            <span id="slActionSelectLabel">All Actions</span>
+                        </span>
+                        <i class="fa-solid fa-chevron-down sl-action-select-chevron"></i>
+                    </button>
+
+                    <div class="sl-action-select-menu" id="slActionSelectMenu">
+                        <button type="button" class="sl-action-select-option active" data-value=""
+                            data-label="All Actions" data-icon="fa-layer-group">
+                            <span><i class="fa-solid fa-layer-group"></i> All Actions</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+
+                        <button type="button" class="sl-action-select-option" data-value="login" data-label="Login"
+                            data-icon="fa-right-to-bracket">
+                            <span><i class="fa-solid fa-right-to-bracket"></i> Login</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+
+                        <button type="button" class="sl-action-select-option" data-value="logout" data-label="Logout"
+                            data-icon="fa-right-from-bracket">
+                            <span><i class="fa-solid fa-right-from-bracket"></i> Logout</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="sl-action-select-option" data-value="error" data-label="Error"
+                            data-icon="fa-triangle-exclamation">
+                            <span><i class="fa-solid fa-triangle-exclamation"></i> Error</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" class="sl-action-select-option" data-value="create" data-label="Create"
+                            data-icon="fa-plus">
+                            <span><i class="fa-solid fa-plus"></i> Create</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+
+                        <button type="button" class="sl-action-select-option" data-value="update" data-label="Update"
+                            data-icon="fa-pen">
+                            <span><i class="fa-solid fa-pen"></i> Update</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+
+                        <button type="button" class="sl-action-select-option" data-value="delete" data-label="Delete"
+                            data-icon="fa-trash">
+                            <span><i class="fa-solid fa-trash"></i> Delete</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="filter-section-title">Module</h3>
+                <div class="filter-date-input-wrap">
+                    <input type="text" id="slModuleFilter" placeholder="e.g. appointments">
+                    <i class="fa-solid fa-cube"></i>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="filter-drawer-footer px-6 py-5 flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 gap-4">
+            <button type="button" onclick="clearSlFilterPanelDraft()"
+                class="filter-clear-btn flex items-center gap-2 transition-colors w-full sm:w-auto justify-center sm:justify-start">
+                <i class="fa-regular fa-trash-can text-lg"></i>
+                <span class="text-[13px] font-bold leading-none whitespace-nowrap">Clear Filters</span>
+            </button>
+
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button type="button" onclick="closeSlFilterPanel()"
+                    class="filter-cancel-btn flex-1 sm:flex-none px-5 py-2.5 text-sm font-bold rounded-lg transition-colors">
+                    Cancel
+                </button>
+
+                <button type="button" onclick="applySlFilters()"
+                    class="filter-show-results-btn filter-apply-btn flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-colors shadow-sm">
+                    <i class="fa-solid fa-check"></i>
+                    <span id="slShowResultsText">Show 0 results</span>
                 </button>
             </div>
-            <div id="slActiveChipsContainer" class="sl-active-filters-container"></div>
         </div>
-
-        <div class="sl-filter-section">
-            <div class="sl-filter-section-title">Sort order</div>
-            <div class="sl-filter-grid">
-                <div class="sl-filter-group">
-                    <label for="slSortOrder">Sort order</label>
-                    <select id="slSortOrder" class="sl-filter-select">
-                        <option value="desc">Newest first</option>
-                        <option value="asc">Oldest first</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="sl-filter-section">
-            <div class="sl-filter-section-title">Date range</div>
-            <div class="sl-filter-date-row">
-                <div class="sl-filter-date-group">
-                    <span class="sl-filter-date-label">From</span>
-                    <input type="date" id="slDateFrom" class="sl-filter-input">
-                </div>
-                <div class="sl-filter-date-group">
-                    <span class="sl-filter-date-label">To</span>
-                    <input type="date" id="slDateTo" class="sl-filter-input">
-                </div>
-            </div>
-        </div>
-
-        <div class="sl-filter-section">
-            <div class="sl-filter-section-title">Action type</div>
-            <div class="sl-filter-grid">
-                <div class="sl-filter-group">
-                    <label for="slActionType">Action type</label>
-                    <select id="slActionType" class="sl-filter-select">
-                        <option value="">All actions</option>
-                        <option value="login">Login</option>
-                        <option value="logout">Logout</option>
-                        <option value="create">Create</option>
-                        <option value="update">Update</option>
-                        <option value="delete">Delete</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="sl-filter-section">
-            <div class="sl-filter-section-title">Module</div>
-            <div class="sl-filter-grid">
-                <div class="sl-filter-group">
-                    <label for="slModuleFilter">Module</label>
-                    <input type="text" id="slModuleFilter" class="sl-filter-input" placeholder="e.g. appointments">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="sl-filter-footer">
-        <button type="button" class="sl-filter-reset" onclick="clearSlFilterPanelDraft()">Clear All</button>
-        <button type="button" class="sl-filter-apply" onclick="applySlFilters()">Apply</button>
     </div>
 </div>
 
-@endsection
-
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    var slState = {
+        role: @json($role ?? 'all'),
+        search: @json($search ?? ''),
+        perPage: {{ (int)($perPage ?? 10) }},
+    page: {{ (int) request('page', 1) }},
+    sort: @json($sort ?? 'desc'),
+    dateFrom: @json($dateFrom ?? ''),
+    dateTo: @json($dateTo ?? ''),
+    actionType: @json($actionType ?? ''),
+    module: @json($module ?? ''),
+    };
 
+    var slOverallTotal = {{ (int)($totalCount ?? 0) }};
+    var slSearchTimer = null;
+    var slController = null;
+    var slDraftCountController = null;
+    var slDraftCountTimer = null;
+
+    document.addEventListener('DOMContentLoaded', function () {
         syncSlFilterInputs();
         updateSlClearFilterButton();
         initSlViewToggle();
 
+        window.initSearchClearButtons?.();
+        window.initGlobalVoiceInputs?.();
 
         document.getElementById('slFilterPanel')?.addEventListener('click', function (e) {
             e.stopPropagation();
         });
 
-        ['slSortOrder', 'slDateFrom', 'slDateTo', 'slActionType', 'slModuleFilter'].forEach(function (id) {
+        ['slDateFrom', 'slDateTo'].forEach(function (id) {
             var el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('change', renderSlFilterChips);
-                el.addEventListener('input', renderSlFilterChips);
-            }
+            if (!el) return;
+
+            el.addEventListener('change', function () {
+                var preset = document.getElementById('slDatePreset');
+                if (preset) preset.value = '';
+
+                syncSlQuickDateChips();
+                renderSlFilterChips();
+                updateSlShowResultsButton();
+            });
+
+            el.addEventListener('input', function () {
+                var preset = document.getElementById('slDatePreset');
+                if (preset) preset.value = '';
+
+                syncSlQuickDateChips();
+                renderSlFilterChips();
+                updateSlShowResultsButton();
+            });
         });
+
+        ['slModuleFilter'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+
+            el.addEventListener('change', function () {
+                renderSlFilterChips();
+                updateSlShowResultsButton();
+            });
+
+            el.addEventListener('input', function () {
+                renderSlFilterChips();
+                updateSlShowResultsButton();
+            });
+        });
+
+        document.querySelectorAll('#slSortGroup [data-sl-sort]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var sort = document.getElementById('slSortOrder');
+
+                if (sort) {
+                    sort.value = this.dataset.slSort || 'desc';
+                }
+
+                syncSlFilterChoiceControls();
+                renderSlFilterChips();
+                updateSlShowResultsButton();
+            });
+        });
+
+        initSlActionDropdown();
+        syncSlFilterChoiceControls();
+        updateSlShowResultsButton();
 
         @if (method_exists($logs, 'total') && $logs -> total() > 0)
             slRenderPagebar({
-                total: {{ $logs-> total() }},
-        from: {{ $logs-> firstItem() ?? 0 }},
-        to: {{ $logs-> lastItem() ?? 0 }},
-        current_page: {{ $logs-> currentPage() }},
-        last_page: {{ $logs-> lastPage() }},
-        per_page: {{ $logs-> perPage() }},
-                });
+                total: {{ (int) $logs -> total() }},
+        from: {{ (int)($logs -> firstItem() ?? 0) }},
+        to: {{ (int)($logs -> lastItem() ?? 0) }},
+        current_page: {{ (int) $logs -> currentPage() }},
+        last_page: {{ (int) $logs -> lastPage() }},
+        per_page: {{ (int) $logs -> perPage() }},
+            });
+    @else
+    slRenderPagebar({
+        total: {{ method_exists($logs, 'count') ? (int) $logs -> count() : 0 }},
+        from: 0,
+        to: 0,
+        current_page: 1,
+        last_page: 1,
+        per_page: {{ (int)($perPage ?? 10) }},
+            });
+    @endif
+
+    @if (method_exists($logs, 'count') && $logs -> count() === 0)
+        showEmptyState(slState.search);
     @endif
 
     var searchInput = document.getElementById('slSearch');
     if (searchInput) {
+        searchInput.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter') return;
+
+            event.preventDefault();
+            clearTimeout(slSearchTimer);
+            slState.search = searchInput.value.trim();
+            slState.page = 1;
+            slFetch();
+        });
+
         searchInput.addEventListener('input', function () {
-            toggleSearchClear(this);
             clearTimeout(slSearchTimer);
             slSearchTimer = setTimeout(function () {
-                slState.search = searchInput.value;
+                slState.search = searchInput.value.trim();
                 slState.page = 1;
                 slFetch(true);
             }, 400);
@@ -491,8 +672,10 @@ $perPage = $perPage ?? 20;
 
     var perPageSelect = document.getElementById('perPageSelect');
     if (perPageSelect) {
+        perPageSelect.value = String(slState.perPage);
+
         perPageSelect.addEventListener('change', function () {
-            slState.perPage = parseInt(this.value);
+            slState.perPage = Number(this.value) || 10;
             slState.page = 1;
             slFetch();
         });
@@ -500,7 +683,7 @@ $perPage = $perPage ?? 20;
 
     @php $latestLogId = optional(($logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $logs -> getCollection() : $logs) -> first()) -> id ?? 0; @endphp
 
-    var lastKnownId = {{ $latestLogId }};
+    var lastKnownId = {{ (int) $latestLogId }};
     var notifBanner = null;
 
     function checkForNewLogs() {
@@ -523,32 +706,39 @@ $perPage = $perPage ?? 20;
 
     function showNewLogBanner() {
         if (notifBanner) notifBanner.remove();
+
         notifBanner = document.createElement('div');
-        notifBanner.style.cssText =
-            'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:.6rem;background:#fff;border:1.5px solid #a7f3d0;border-radius:12px;padding:.65rem 1.1rem;box-shadow:0 8px 24px rgba(0,0,0,.12);font-size:.78rem;font-weight:600;color:#059669;white-space:nowrap;max-width:90vw;';
+        notifBanner.className = 'sl-new-log-banner';
         notifBanner.innerHTML =
-            '<i class="fa-solid fa-circle-check"></i> New log entries detected. <span class="sl-toast-refresh" onclick="slState.page=1;slFetch();this.closest(\'div\').remove();">Refresh to see</span><button onclick="this.parentElement.remove()" class="sl-toast-close"><i class="fa-solid fa-xmark"></i></button>';
+            '<i class="fa-solid fa-circle-check"></i>' +
+            '<span>New log entries detected.</span>' +
+            '<button type="button" class="sl-toast-refresh">Refresh to see</button>' +
+            '<button type="button" class="sl-toast-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>';
+
+        notifBanner.querySelector('.sl-toast-refresh')?.addEventListener('click', function () {
+            slState.page = 1;
+            slFetch();
+            notifBanner.remove();
+        });
+
+        notifBanner.querySelector('.sl-toast-close')?.addEventListener('click', function () {
+            notifBanner.remove();
+        });
+
         document.body.appendChild(notifBanner);
     }
 
     setInterval(checkForNewLogs, 5000);
-        });
+    });
 
-    var slState = {
-        role: '{{ $role ?? 'all' }}',
-        search: '{{ $search ?? '' }}',
-        perPage: {{ $perPage ?? 20 }},
-    page: { { request('page', 1) } },
-    sort: '{{ $sort ?? 'desc' }}',
-        dateFrom: '{{ $dateFrom ?? '' }}',
-            dateTo: '{{ $dateTo ?? '' }}',
-                actionType: '{{ $actionType ?? '' }}',
-                    module: '{{ $module ?? '' }}',
-        };
-
-    var slOverallTotal = {{ $totalCount }};
-    var slSearchTimer = null;
-    var slController = null;
+    function escapeSlHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
 
     function getPreferredSlView() {
         if (window.innerWidth <= 767) return 'grid';
@@ -560,21 +750,29 @@ $perPage = $perPage ?? 20;
         var gridView = document.getElementById('slGridView');
         var listBtn = document.getElementById('slListViewBtn');
         var gridBtn = document.getElementById('slGridViewBtn');
+        var mainContent = document.getElementById('mainContent');
 
         if (!listView || !gridView) return;
 
         var finalView = window.innerWidth <= 767 ? 'grid' : view;
 
-        if (finalView === 'grid') {
-            listView.hidden = true;
-            gridView.hidden = false;
-        } else {
-            listView.hidden = false;
-            gridView.hidden = true;
+        listView.hidden = finalView !== 'list';
+        gridView.hidden = finalView !== 'grid';
+
+        if (mainContent) {
+            mainContent.classList.toggle('mode-list', finalView === 'list');
+            mainContent.classList.toggle('mode-grid', finalView === 'grid');
         }
 
-        if (listBtn) listBtn.classList.toggle('active', finalView === 'list');
-        if (gridBtn) gridBtn.classList.toggle('active', finalView === 'grid');
+        if (listBtn) {
+            listBtn.classList.toggle('active', finalView === 'list');
+            listBtn.setAttribute('aria-pressed', finalView === 'list' ? 'true' : 'false');
+        }
+
+        if (gridBtn) {
+            gridBtn.classList.toggle('active', finalView === 'grid');
+            gridBtn.setAttribute('aria-pressed', finalView === 'grid' ? 'true' : 'false');
+        }
 
         if (save && window.innerWidth > 767) {
             localStorage.setItem('systemLogsView', finalView);
@@ -600,30 +798,30 @@ $perPage = $perPage ?? 20;
                 applySlView('grid', true);
             });
         }
-    }
 
-    function toggleSearchClear(input) {
-        var btn = document.getElementById('searchClearBtn');
-        if (!btn) return;
-
-        if ((input.value || '').trim().length > 0) {
-            btn.classList.remove('hidden');
-        } else {
-            btn.classList.add('hidden');
+        if (!window.__systemLogsResizeBound) {
+            window.__systemLogsResizeBound = true;
+            window.addEventListener('resize', function () {
+                applySlView(getPreferredSlView(), false);
+            });
         }
     }
 
     function clearSearch() {
         var input = document.getElementById('slSearch');
-        var btn = document.getElementById('searchClearBtn');
+
         if (!input) return;
 
-        input.value = '';
+        if (window.clearSearchInput) {
+            window.clearSearchInput(input);
+        } else {
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        clearTimeout(slSearchTimer);
         slState.search = '';
         slState.page = 1;
-
-        if (btn) btn.classList.add('hidden');
-
         slFetch();
         input.focus();
     }
@@ -631,21 +829,23 @@ $perPage = $perPage ?? 20;
     function slSetTab(el, role) {
         slState.role = role;
         slState.page = 1;
-        document.querySelectorAll('.tab-btn').forEach(function (b) {
-            b.classList.remove('active');
+
+        document.querySelectorAll('.sl-role-tabs .tab-btn').forEach(function (button) {
+            button.classList.remove('active');
+            button.querySelector('.tab-count')?.classList.remove('active');
         });
-        el.classList.add('active');
-        document.querySelectorAll('.tab-btn .tab-count').forEach(function (span) {
-            span.className =
-                'tab-count bg-gray-200 text-gray-500 text-[0.62rem] font-bold px-1.5 py-0.5 rounded-full ml-1';
-        });
-        var activeSpan = el.querySelector('.tab-count');
-        if (activeSpan) activeSpan.className =
-            'tab-count bg-red-200 text-[#8B0000] text-[0.62rem] font-bold px-1.5 py-0.5 rounded-full ml-1';
+
+        el?.classList.add('active');
+        el?.querySelector('.tab-count')?.classList.add('active');
+
         slFetch();
     }
 
     function slGoPage(page) {
+        page = Number(page) || 1;
+
+        if (page < 1 || page === slState.page) return;
+
         slState.page = page;
         slFetch();
     }
@@ -656,58 +856,238 @@ $perPage = $perPage ?? 20;
             !!slState.actionType || !!slState.module;
     }
 
+    function detectSlDatePreset(from, to) {
+        if (!from || !to) return '';
+
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        var todayValue = formatSlDate(today);
+
+        var week = new Date(today);
+        week.setDate(today.getDate() - 6);
+
+        var month = new Date(today);
+        month.setDate(today.getDate() - 29);
+
+        if (from === todayValue && to === todayValue) return 'today';
+        if (from === formatSlDate(week) && to === todayValue) return 'week';
+        if (from === formatSlDate(month) && to === todayValue) return 'month';
+
+        return '';
+    }
+
+    function getSlDatePresetText(preset) {
+        if (preset === 'today') return 'Today';
+        if (preset === 'week') return 'Last 7 Days';
+        if (preset === 'month') return 'Last 30 Days';
+        return '';
+    }
+
+    function getSlDateChipLabel(from, to) {
+        var preset = document.getElementById('slDatePreset')?.value || '';
+
+        if (preset) {
+            return getSlDatePresetText(preset);
+        }
+
+        if (from && to) return from + ' to ' + to;
+        if (from) return 'From ' + from;
+        if (to) return 'Until ' + to;
+
+        return '';
+    }
+
+    function getSlActionOption(value) {
+        var options = Array.from(document.querySelectorAll('#slActionSelectMenu .sl-action-select-option'));
+
+        return options.find(function (option) {
+            return String(option.dataset.value || '') === String(value || '');
+        }) || options[0] || null;
+    }
+
+    function syncSlActionDropdownLabel(value) {
+        var option = getSlActionOption(value);
+        var label = document.getElementById('slActionSelectLabel');
+        var icon = document.getElementById('slActionSelectIcon');
+
+        if (!option) return;
+
+        if (label) {
+            label.textContent = option.dataset.label || 'All Actions';
+        }
+
+        if (icon) {
+            icon.className = 'fa-solid ' + (option.dataset.icon || 'fa-layer-group');
+        }
+
+        document.querySelectorAll('#slActionSelectMenu .sl-action-select-option').forEach(function (button) {
+            button.classList.toggle('active', button === option);
+        });
+    }
+
+    function closeSlActionDropdown() {
+        var select = document.getElementById('slActionSelect');
+        var button = document.getElementById('slActionSelectBtn');
+
+        select?.classList.remove('is-open');
+        button?.setAttribute('aria-expanded', 'false');
+    }
+
+    function setSlActionType(value) {
+        var action = document.getElementById('slActionType');
+
+        if (action) {
+            action.value = value || '';
+        }
+
+        syncSlFilterChoiceControls();
+        renderSlFilterChips();
+        updateSlShowResultsButton();
+    }
+
+    function initSlActionDropdown() {
+        var select = document.getElementById('slActionSelect');
+        var button = document.getElementById('slActionSelectBtn');
+        var menu = document.getElementById('slActionSelectMenu');
+
+        if (!select || !button || !menu || select.dataset.bound === '1') return;
+
+        select.dataset.bound = '1';
+
+        button.addEventListener('click', function (event) {
+            event.stopPropagation();
+
+            var isOpen = select.classList.toggle('is-open');
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        menu.querySelectorAll('.sl-action-select-option').forEach(function (option) {
+            option.addEventListener('click', function (event) {
+                event.stopPropagation();
+                setSlActionType(this.dataset.value || '');
+                closeSlActionDropdown();
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!select.contains(event.target)) {
+                closeSlActionDropdown();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeSlActionDropdown();
+            }
+        });
+    }
+
+    function syncSlQuickDateChips() {
+        var preset = document.getElementById('slDatePreset')?.value || '';
+
+        document.querySelectorAll('#slDatePresetGroup .quick-date-chip').forEach(function (button) {
+            button.classList.toggle('active', String(button.dataset.slDatePreset || '') === String(preset || ''));
+        });
+    }
+
+    function syncSlFilterChoiceControls() {
+        var sortEl = document.getElementById('slSortOrder');
+        var actionEl = document.getElementById('slActionType');
+
+        var sortValue = sortEl ? sortEl.value || 'desc' : slState.sort || 'desc';
+        var actionValue = actionEl ? actionEl.value || '' : slState.actionType || '';
+
+        document.querySelectorAll('#slSortGroup [data-sl-sort]').forEach(function (button) {
+            button.classList.toggle('ftag-active', String(button.dataset.slSort || '') === String(sortValue || 'desc'));
+        });
+
+        syncSlActionDropdownLabel(actionValue);
+        syncSlQuickDateChips();
+    }
+
     function syncSlFilterInputs() {
         var sort = document.getElementById('slSortOrder');
         var from = document.getElementById('slDateFrom');
         var to = document.getElementById('slDateTo');
         var action = document.getElementById('slActionType');
         var module = document.getElementById('slModuleFilter');
+        var preset = document.getElementById('slDatePreset');
 
         if (sort) sort.value = slState.sort || 'desc';
         if (from) from.value = slState.dateFrom || '';
         if (to) to.value = slState.dateTo || '';
+        if (preset) preset.value = detectSlDatePreset(slState.dateFrom || '', slState.dateTo || '');
         if (action) action.value = slState.actionType || '';
         if (module) module.value = slState.module || '';
+
+        syncSlFilterChoiceControls();
+    }
+
+    function getSlFilterModal() {
+        return document.getElementById('filterModal');
     }
 
     function openSlFilterPanel() {
         syncSlFilterInputs();
         renderSlFilterChips();
 
-        document.getElementById('slFilterPanel')?.classList.add('open');
-        document.getElementById('slFilterOverlay')?.classList.add('open');
-        document.getElementById('slFilterBtn')?.classList.add('active');
-        document.body.classList.add('overflow-hidden');
+        if (typeof window.openFilterDrawer === 'function') {
+            window.openFilterDrawer('filterModal');
+        } else {
+            document.getElementById('filterModal')?.classList.add('open');
+            document.documentElement.classList.add('filter-lock');
+            document.body.classList.add('filter-lock');
+        }
+
+        document.getElementById('filterModal')?.setAttribute('aria-hidden', 'false');
     }
 
     function closeSlFilterPanel() {
-        document.getElementById('slFilterPanel')?.classList.remove('open');
-        document.getElementById('slFilterOverlay')?.classList.remove('open');
-        document.getElementById('slFilterBtn')?.classList.remove('active');
-        document.body.classList.remove('overflow-hidden');
+        if (typeof window.closeFilterDrawer === 'function') {
+            window.closeFilterDrawer('filterModal');
+        } else {
+            document.getElementById('filterModal')?.classList.remove('open');
+            document.documentElement.classList.remove('filter-lock');
+            document.body.classList.remove('filter-lock');
+        }
+
+        document.getElementById('filterModal')?.setAttribute('aria-hidden', 'true');
     }
 
     function updateSlClearFilterButton() {
-        var btn = document.getElementById('slClearFilterBtn');
-        var badge = document.getElementById('slFilterBadge');
-        if (!btn || !badge) return;
-
         var count = 0;
+
         if (slState.sort && slState.sort !== 'desc') count++;
         if (slState.dateFrom || slState.dateTo) count++;
         if (slState.actionType) count++;
         if (slState.module) count++;
 
+        if (typeof window.setGlobalFilterButtonState === 'function') {
+            window.setGlobalFilterButtonState({
+                buttonId: 'slFilterBtn',
+                badgeId: 'slFilterBadge',
+                resetId: 'slClearFilterBtn',
+                count: count
+            });
+
+            return;
+        }
+
         var has = count > 0;
+        var btn = document.getElementById('slClearFilterBtn');
+        var badge = document.getElementById('slFilterBadge');
+        var filterBtn = document.getElementById('slFilterBtn');
 
-        btn.classList.toggle('hidden', !has);
+        btn?.classList.toggle('hidden', !has);
+        btn?.classList.toggle('show', has);
 
-        if (has) {
-            badge.classList.remove('hidden');
-            badge.textContent = count;
-        } else {
-            badge.classList.add('hidden');
-            badge.textContent = '';
+        filterBtn?.classList.toggle('has-filters', has);
+        filterBtn?.setAttribute('aria-pressed', has ? 'true' : 'false');
+
+        if (badge) {
+            badge.classList.toggle('show', has);
+            badge.textContent = has ? String(count) : '';
         }
     }
 
@@ -720,6 +1100,7 @@ $perPage = $perPage ?? 20;
         slState.page = 1;
 
         syncSlFilterInputs();
+        renderSlFilterChips();
         updateSlClearFilterButton();
         closeSlFilterPanel();
         slFetch();
@@ -738,6 +1119,7 @@ $perPage = $perPage ?? 20;
         if (action) action.value = '';
         if (module) module.value = '';
 
+        syncSlFilterChoiceControls();
         renderSlFilterChips();
     }
 
@@ -755,13 +1137,14 @@ $perPage = $perPage ?? 20;
             hasChips = true;
 
             var chip = document.createElement('div');
-            chip.className = 'sl-filter-chip';
+            chip.className = 'filter-chip sl-filter-chip';
             chip.innerHTML =
-                "<span>" + label +
-                "</span><span class='sl-filter-chip-remove'><i class='fa-solid fa-xmark'></i></span>";
+                '<span>' + escapeSlHtml(label) +
+                '</span><span class="filter-chip-remove sl-filter-chip-remove"><i class="fa-solid fa-xmark"></i></span>';
 
             chip.querySelector('.sl-filter-chip-remove').onclick = function () {
                 callback();
+                syncSlFilterChoiceControls();
                 renderSlFilterChips();
             };
 
@@ -781,10 +1164,14 @@ $perPage = $perPage ?? 20;
         }
 
         if (fromVal || toVal) {
-            var lbl = fromVal && toVal ? (fromVal + ' to ' + toVal) : (fromVal ? 'From ' + fromVal : 'Until ' + toVal);
+            var lbl = getSlDateChipLabel(fromVal, toVal);
+
             addChip('Date: ' + lbl, function () {
                 document.getElementById('slDateFrom').value = '';
                 document.getElementById('slDateTo').value = '';
+
+                var preset = document.getElementById('slDatePreset');
+                if (preset) preset.value = '';
             });
         }
 
@@ -800,17 +1187,114 @@ $perPage = $perPage ?? 20;
             });
         }
 
-        if (hasChips) {
-            section.classList.remove('hidden');
+        section.classList.toggle('hidden', !hasChips);
 
-            if (clearAllBtn) {
-                clearAllBtn.onclick = function () {
-                    clearSlFilterPanelDraft();
-                };
-            }
-        } else {
-            section.classList.add('hidden');
+        if (clearAllBtn) {
+            clearAllBtn.onclick = function () {
+                clearSlFilterPanelDraft();
+            };
         }
+
+        updateSlShowResultsButton();
+    }
+
+    function formatSlDate(date) {
+        var yyyy = date.getFullYear();
+        var mm = String(date.getMonth() + 1).padStart(2, '0');
+        var dd = String(date.getDate()).padStart(2, '0');
+        return yyyy + '-' + mm + '-' + dd;
+    }
+
+    function setSlQuickDate(type) {
+        var from = document.getElementById('slDateFrom');
+        var to = document.getElementById('slDateTo');
+        var preset = document.getElementById('slDatePreset');
+
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (!from || !to) return;
+        if (!['today', 'week', 'month'].includes(type)) return;
+
+        var start = new Date(today);
+
+        if (type === 'week') {
+            start.setDate(today.getDate() - 6);
+        } else if (type === 'month') {
+            start.setDate(today.getDate() - 29);
+        }
+
+        from.value = formatSlDate(start);
+        to.value = formatSlDate(today);
+
+        if (preset) {
+            preset.value = type;
+        }
+
+        syncSlQuickDateChips();
+        renderSlFilterChips();
+        updateSlShowResultsButton();
+    }
+
+    function setSlShowResultsText(total) {
+        var text = document.getElementById('slShowResultsText');
+        if (!text) return;
+
+        var count = Number(total || 0);
+        text.textContent = 'Show ' + count + ' ' + (count === 1 ? 'result' : 'results');
+    }
+
+    function getSlDraftFilterParams() {
+        return new URLSearchParams({
+            role: slState.role || 'all',
+            search: slState.search || '',
+            per_page: 1,
+            page: 1,
+            sort: document.getElementById('slSortOrder')?.value || 'desc',
+            date_from: document.getElementById('slDateFrom')?.value || '',
+            date_to: document.getElementById('slDateTo')?.value || '',
+            action_type: document.getElementById('slActionType')?.value || '',
+            module: document.getElementById('slModuleFilter')?.value.trim() || '',
+        });
+    }
+
+    function updateSlShowResultsButton(total) {
+        if (typeof total === 'number') {
+            setSlShowResultsText(total);
+            return;
+        }
+
+        clearTimeout(slDraftCountTimer);
+
+        slDraftCountTimer = setTimeout(function () {
+            if (slDraftCountController) {
+                slDraftCountController.abort();
+            }
+
+            slDraftCountController = new AbortController();
+
+            fetch('{{ route('admin.system_logs') }}?' + getSlDraftFilterParams().toString(), {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+                },
+                signal: slDraftCountController.signal
+            })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Draft count request failed');
+                    return res.json();
+                })
+                .then(function (data) {
+                    var total = Number(data.pagination?.total ?? 0);
+                    setSlShowResultsText(total);
+                })
+                .catch(function (e) {
+                    if (e.name !== 'AbortError') {
+                        setSlShowResultsText(slOverallTotal || 0);
+                    }
+                });
+        }, 220);
     }
 
     function applySlFilters() {
@@ -818,7 +1302,7 @@ $perPage = $perPage ?? 20;
         slState.dateFrom = document.getElementById('slDateFrom')?.value || '';
         slState.dateTo = document.getElementById('slDateTo')?.value || '';
         slState.actionType = document.getElementById('slActionType')?.value || '';
-        slState.module = document.getElementById('slModuleFilter')?.value || '';
+        slState.module = document.getElementById('slModuleFilter')?.value.trim() || '';
         slState.page = 1;
 
         updateSlClearFilterButton();
@@ -832,27 +1316,38 @@ $perPage = $perPage ?? 20;
 
     function slFetch(silent) {
         if (slController) slController.abort();
+
         slController = new AbortController();
 
         var params = new URLSearchParams({
-            role: slState.role,
-            search: slState.search,
-            per_page: slState.perPage,
-            page: slState.page,
-            sort: slState.sort,
-            date_from: slState.dateFrom,
-            date_to: slState.dateTo,
-            action_type: slState.actionType,
-            module: slState.module,
+            role: slState.role || 'all',
+            search: slState.search || '',
+            per_page: slState.perPage || 20,
+            page: slState.page || 1,
+            sort: slState.sort || 'desc',
+            date_from: slState.dateFrom || '',
+            date_to: slState.dateTo || '',
+            action_type: slState.actionType || '',
+            module: slState.module || '',
         });
 
         history.replaceState(null, '', window.location.pathname + '?' + params.toString());
 
+        var tableBody = document.getElementById('slTableBody');
+        var gridBody = document.getElementById('slGridBody');
+        var emptyState = document.getElementById('emptyState');
+
         if (!silent) {
-            document.getElementById('slTableBody').innerHTML = slSkeletonRows(slState.perPage);
+            if (tableBody) tableBody.innerHTML = slSkeletonRows(slState.perPage);
+            if (gridBody) gridBody.innerHTML = slSkeletonCards(slState.perPage);
         }
-        document.getElementById('emptyState').style.display = 'none';
-        document.getElementById('slTable').style.display = '';
+
+        if (emptyState) {
+            emptyState.className = 'empty-state-host';
+            emptyState.innerHTML = '';
+        }
+
+        applySlView(getPreferredSlView(), false);
 
         fetch('{{ route('admin.system_logs') }}?' + params.toString(), {
             headers: {
@@ -863,12 +1358,15 @@ $perPage = $perPage ?? 20;
             signal: slController.signal
         })
             .then(function (res) {
+                if (!res.ok) throw new Error('Request failed');
                 return res.json();
             })
             .then(function (data) {
-                slRenderRows(data.logs);
+                slRenderRows(data.logs || []);
                 slRenderPagebar(data.pagination);
                 slRenderCounts(data.counts);
+                updateSlClearFilterButton();
+                updateSlShowResultsButton(Number(data.pagination?.total ?? 0));
             })
             .catch(function (e) {
                 if (e.name !== 'AbortError') console.error('Fetch error:', e);
@@ -886,7 +1384,20 @@ $perPage = $perPage ?? 20;
             '<td><span class="sl-skeleton sl-skeleton-desc">&nbsp;</span></td>' +
             '</tr>';
         var html = '';
-        for (var i = 0; i < Math.min(count, 5); i++) html += row;
+        for (var i = 0; i < Math.min(Number(count) || 5, 5); i++) html += row;
+        return html;
+    }
+
+    function slSkeletonCards(count) {
+        var html = '';
+        for (var i = 0; i < Math.min(Number(count) || 4, 4); i++) {
+            html += '<div class="sl-grid-card sl-grid-card-skeleton">' +
+                '<span class="sl-skeleton sl-skeleton-id"></span>' +
+                '<span class="sl-skeleton sl-skeleton-user"></span>' +
+                '<span class="sl-skeleton sl-skeleton-desc"></span>' +
+                '<span class="sl-skeleton sl-skeleton-desc"></span>' +
+                '</div>';
+        }
         return html;
     }
 
@@ -907,6 +1418,7 @@ $perPage = $perPage ?? 20;
             create: 'fa-plus',
             update: 'fa-pen',
             delete: 'fa-trash',
+            error: 'fa-triangle-exclamation',
             default: 'fa-bolt'
         };
 
@@ -922,60 +1434,62 @@ $perPage = $perPage ?? 20;
         logs.forEach(function (log) {
             var role = (log.actor_role || 'other').toLowerCase();
             var action = (log.action || '').toLowerCase();
-            var actionClass = action.includes('login') ? 'login' :
-                action.includes('logout') ? 'logout' :
-                    action.includes('create') ? 'create' :
-                        action.includes('update') ? 'update' :
-                            action.includes('delete') ? 'delete' :
-                                'default';
+            var actionClass = (action.includes('error') || action.includes('failed') || action.includes('exception')) ? 'error' :
+                action.includes('login') ? 'login' :
+                    action.includes('logout') ? 'logout' :
+                        action.includes('create') ? 'create' :
+                            action.includes('update') ? 'update' :
+                                action.includes('delete') ? 'delete' :
+                                    'default';
 
             var actionIcon = actionIcons[actionClass] || 'fa-bolt';
+            var actionIconHtml = '<i class="fa-solid ' + actionIcon + (actionClass === 'error' ? ' sl-action-alert' : '') + '"></i>';
             var roleIcon = roleIcons[role] || 'fa-circle-user';
-            var letter = (log.actor_name || role).charAt(0).toUpperCase();
-            var idPadded = '#' + String(log.id).padStart(3, '0');
-            var actionLabel = (log.action || '').replace(/_/g, ' ').replace(/\b\w/g, function (c) {
+            var letter = escapeSlHtml((log.actor_name || role).charAt(0).toUpperCase());
+            var idPadded = '#' + String(log.id || '').padStart(3, '0');
+            var actionLabel = escapeSlHtml((log.action || '').replace(/_/g, ' ').replace(/\b\w/g, function (c) {
                 return c.toUpperCase();
-            });
-            var moduleLabel = (log.module || '').replace(/_/g, ' ').replace(/\b\w/g, function (c) {
+            }));
+            var moduleLabel = escapeSlHtml((log.module || '').replace(/_/g, ' ').replace(/\b\w/g, function (c) {
                 return c.toUpperCase();
-            });
-            var actorName = log.actor_name ?? log.actor_identifier ?? 'Unknown User';
-            var description = log.description || 'No description provided.';
+            }));
+            var actorName = escapeSlHtml(log.actor_name ?? log.actor_identifier ?? 'Unknown User');
+            var description = escapeSlHtml(log.description || 'No description provided.');
+            var createdDay = escapeSlHtml(log.created_at_day || '');
+            var createdTime = escapeSlHtml(log.created_at_time || '');
 
-            tableHtml += '<tr data-role="' + role + '" data-action="' + actionClass + '" class="sl-row-new">';
+            tableHtml += '<tr data-role="' + escapeSlHtml(role) + '" data-action="' + escapeSlHtml(actionClass) + '">';
             tableHtml += '<td><span class="sl-id">' + idPadded + '</span></td>';
-            tableHtml += '<td><span class="sl-date-day">' + log.created_at_day +
-                '</span><span class="sl-date-time">' + log.created_at_time + '</span></td>';
-            tableHtml += '<td><span class="sl-role ' + role + '"><i class="fa-solid ' + roleIcon + '"></i>' +
-                role.charAt(0).toUpperCase() + role.slice(1) + '</span></td>';
-            tableHtml += '<td><div class="sl-user"><div class="sl-avatar ' + role + '">' + letter +
+            tableHtml += '<td><span class="sl-date-day">' + createdDay +
+                '</span><span class="sl-date-time">' + createdTime + '</span></td>';
+            tableHtml += '<td><span class="sl-role ' + escapeSlHtml(role) + '"><i class="fa-solid ' + roleIcon + '"></i>' +
+                escapeSlHtml(role.charAt(0).toUpperCase() + role.slice(1)) + '</span></td>';
+            tableHtml += '<td><div class="sl-user"><div class="sl-avatar ' + escapeSlHtml(role) + '">' + letter +
                 '</div><span class="sl-username">' + actorName + '</span></div></td>';
-            tableHtml += '<td><span class="sl-action ' + actionClass + '"><i class="fa-solid ' + actionIcon +
-                '"></i>' + actionLabel + '</span></td>';
+            tableHtml += '<td><span class="sl-action ' + escapeSlHtml(actionClass) + '">' + actionIconHtml + ' ' + actionLabel + '</span ></td > ';
             tableHtml += '<td><span class="sl-module"><i class="fa-solid fa-cube"></i>' + moduleLabel +
                 '</span></td>';
             tableHtml += '<td><span class="sl-desc" title="' + description + '">' + description +
                 '</span></td>';
             tableHtml += '</tr>';
 
-            gridHtml += '<div class="sl-grid-card">';
+            gridHtml += '<div class="sl-grid-card" data-role="' + escapeSlHtml(role) + '" data-action="' + escapeSlHtml(actionClass) + '">';
             gridHtml += '<div class="sl-grid-top">';
             gridHtml += '<div class="sl-grid-id">' + idPadded + '</div>';
-            gridHtml += '<span class="sl-action ' + actionClass + '"><i class="fa-solid ' + actionIcon +
-                '"></i>' + actionLabel + '</span>';
+            gridHtml += '<span class="sl-action ' + escapeSlHtml(actionClass) + '"> ' + actionIconHtml + ' ' + actionLabel + '</span > ';
             gridHtml += '</div>';
 
-            gridHtml += '<div class="sl-user"><div class="sl-avatar ' + role + '">' + letter +
+            gridHtml += '<div class="sl-user"><div class="sl-avatar ' + escapeSlHtml(role) + '">' + letter +
                 '</div><span class="sl-username">' + actorName + '</span></div>';
 
             gridHtml += '<div class="sl-grid-meta">';
             gridHtml +=
                 '<div class="sl-grid-field"><div class="sl-grid-label">Timestamp</div><div class="sl-grid-value">' +
-                log.created_at_day + '<br>' + log.created_at_time + '</div></div>';
+                createdDay + '<br>' + createdTime + '</div></div>';
             gridHtml +=
                 '<div class="sl-grid-field"><div class="sl-grid-label">Role</div><div class="sl-grid-value"><span class="sl-role ' +
-                role + '"><i class="fa-solid ' + roleIcon + '"></i>' + role.charAt(0).toUpperCase() + role
-                    .slice(1) + '</span></div></div>';
+                escapeSlHtml(role) + '"><i class="fa-solid ' + roleIcon + '"></i>' + escapeSlHtml(role.charAt(0).toUpperCase() + role
+                    .slice(1)) + '</span></div></div>';
             gridHtml +=
                 '<div class="sl-grid-field"><div class="sl-grid-label">Module</div><div class="sl-grid-value"><span class="sl-module"><i class="fa-solid fa-cube"></i>' +
                 moduleLabel + '</span></div></div>';
@@ -989,134 +1503,191 @@ $perPage = $perPage ?? 20;
         if (tableBody) tableBody.innerHTML = tableHtml;
         if (gridBody) gridBody.innerHTML = gridHtml;
 
-        document.getElementById('emptyState').style.display = 'none';
+        var emptyState = document.getElementById('emptyState');
+        if (emptyState) {
+            emptyState.className = 'empty-state-host';
+            emptyState.innerHTML = '';
+        }
+
         applySlView(getPreferredSlView(), false);
     }
 
     function slRenderPagebar(p) {
         if (!p) return;
-        var infoHtml = 'Showing <strong>' + p.from + '–' + p.to + '</strong> of <strong>' + p.total +
-            '</strong> entries';
+
+        var from = Number(p.from || 0);
+        var to = Number(p.to || 0);
+        var total = Number(p.total || 0);
+        var infoHtml = total > 0
+            ? 'Showing <strong>' + from + '–' + to + '</strong> of <strong>' + total + '</strong> entries'
+            : 'Showing <strong>0</strong> entries';
+
         document.querySelectorAll('.sl-pagebar-info').forEach(function (el) {
             el.innerHTML = infoHtml;
         });
+
         var navHtml = slBuildPagination(p);
         document.querySelectorAll('.sl-pagination-wrap').forEach(function (el) {
             el.innerHTML = navHtml;
         });
+
+        var perPageSelect = document.getElementById('perPageSelect');
+        if (perPageSelect && p.per_page) {
+            perPageSelect.value = String(p.per_page);
+        }
+
         var badge = document.getElementById('entryBadge');
         if (badge) badge.textContent = slOverallTotal + ' ' + (slOverallTotal === 1 ? 'entry' : 'entries');
     }
 
     function slBuildPagination(p) {
-        if (p.last_page <= 1) return '';
-        var current = p.current_page,
-            last = p.last_page;
-        var winSize = 5,
-            half = Math.floor(winSize / 2);
+        if (!p || Number(p.last_page || 1) <= 1) return '';
+
+        var current = Number(p.current_page || 1);
+        var last = Number(p.last_page || 1);
+        var winSize = 5;
+        var half = Math.floor(winSize / 2);
         var start = Math.max(1, current - half);
         var end = Math.min(last, start + winSize - 1);
+
         if (end - start + 1 < winSize) start = Math.max(1, end - winSize + 1);
 
-        var btn = 'class="sl-page-btn"';
-        var btnActive = 'class="sl-page-current"';
-        var btnDis = 'class="sl-page-disabled"';
-        var dots = '<span class="sl-page-ellipsis">&hellip;</span>';
+        var html = '<nav class="sl-pagination" aria-label="System logs pagination">';
 
-        var html = '<nav class="sl-pagination">';
-        if (current <= 1) {
-            html += '<button disabled ' + btnDis +
-                '><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>';
-        } else {
-            html += '<button onclick="slGoPage(' + (current - 1) + ')" ' + btn +
-                '><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>';
-        }
+        html += current <= 1
+            ? '<button type="button" disabled class="sl-page-disabled" aria-label="Previous page"><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>'
+            : '<button type="button" onclick="slGoPage(' + (current - 1) + ')" class="sl-page-btn" aria-label="Previous page"><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>';
+
         if (start > 1) {
-            html += '<button onclick="slGoPage(1)" ' + btn + '>1</button>';
-            if (start > 2) html += dots;
+            html += '<button type="button" onclick="slGoPage(1)" class="sl-page-btn">1</button>';
+            if (start > 2) html += '<span class="sl-page-ellipsis" aria-hidden="true">&hellip;</span>';
         }
+
         for (var i = start; i <= end; i++) {
-            html += i === current ? '<span ' + btnActive + '>' + i + '</span>' : '<button onclick="slGoPage(' + i +
-                ')" ' + btn + '>' + i + '</button>';
+            html += i === current
+                ? '<span class="sl-page-current" aria-current="page">' + i + '</span>'
+                : '<button type="button" onclick="slGoPage(' + i + ')" class="sl-page-btn">' + i + '</button>';
         }
+
         if (end < last) {
-            if (end < last - 1) html += dots;
-            html += '<button onclick="slGoPage(' + last + ')" ' + btn + '>' + last + '</button>';
+            if (end < last - 1) html += '<span class="sl-page-ellipsis" aria-hidden="true">&hellip;</span>';
+            html += '<button type="button" onclick="slGoPage(' + last + ')" class="sl-page-btn">' + last + '</button>';
         }
-        if (current >= last) {
-            html += '<button disabled ' + btnDis +
-                '><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>';
-        } else {
-            html += '<button onclick="slGoPage(' + (current + 1) + ')" ' + btn +
-                '><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>';
-        }
+
+        html += current >= last
+            ? '<button type="button" disabled class="sl-page-disabled" aria-label="Next page"><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>'
+            : '<button type="button" onclick="slGoPage(' + (current + 1) + ')" class="sl-page-btn" aria-label="Next page"><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>';
+
         html += '</nav>';
         return html;
     }
 
     function slRenderCounts(counts) {
         if (!counts) return;
-        slOverallTotal = counts.total;
-        document.getElementById('statTotal').textContent = counts.total;
-        document.getElementById('statAdmin').textContent = counts.admin;
-        document.getElementById('statDentist').textContent = counts.dentist;
-        document.getElementById('statPatient').textContent = counts.patient;
+
+        slOverallTotal = Number(counts.total || 0);
+
+        if (document.getElementById('statTotal')) document.getElementById('statTotal').textContent = counts.total ?? 0;
+        if (document.getElementById('statAdmin')) document.getElementById('statAdmin').textContent = counts.admin ?? 0;
+        if (document.getElementById('statDentist')) document.getElementById('statDentist').textContent = counts.dentist ?? 0;
+        if (document.getElementById('statPatient')) document.getElementById('statPatient').textContent = counts.patient ?? 0;
+
         var badge = document.getElementById('entryBadge');
         if (badge) badge.textContent = slOverallTotal + ' ' + (slOverallTotal === 1 ? 'entry' : 'entries');
+
+        updateTabCount('all', counts.total);
+        updateTabCount('admin', counts.admin);
+        updateTabCount('dentist', counts.dentist);
+        updateTabCount('patient', counts.patient);
+        updateTabCount('login', counts.login);
+        updateTabCount('error', counts.error);
+    }
+
+    function updateTabCount(role, value) {
+        var buttons = document.querySelectorAll('.sl-role-tabs .tab-btn');
+
+        buttons.forEach(function (button) {
+            if (!button.getAttribute('onclick')?.includes("'" + role + "'")) return;
+
+            var count = button.querySelector('.tab-count');
+            if (count && value !== undefined && value !== null) {
+                count.textContent = value;
+            }
+        });
     }
 
     function showEmptyState(query) {
         var emptyState = document.getElementById('emptyState');
-        var table = document.getElementById('slTable');
-        if (!emptyState) return;
-        if (table) table.style.display = '';
         var listView = document.getElementById('slListView');
         var gridView = document.getElementById('slGridView');
+
+        if (!emptyState) return;
+
         if (listView) listView.hidden = true;
         if (gridView) gridView.hidden = true;
-        emptyState.style.display = 'block';
 
-        var icon, title, sub, extra = '';
+        emptyState.className = 'empty-state-host show';
+
+        var icon = 'fa-clipboard-list';
+        var title = 'No system logs yet';
+        var sub = 'Activity will appear here once users interact with the system.';
+        var actionHtml = '';
+
         if (query) {
             icon = 'fa-magnifying-glass';
-            title = 'No results for \u201c' + query + '\u201d';
-            sub = 'Try a different name, action, or user.';
-            extra =
-                '<button onclick="clearSearch()" class="sl-empty-action"><i class="fa-solid fa-xmark"></i>Clear search</button>';
+            title = 'No results for “' + escapeSlHtml(query) + '”';
+            sub = 'Try a different name, action, module, or user.';
+            actionHtml =
+                '<button type="button" class="empty-state-btn" data-empty-action="clear-search">' +
+                '<i class="fa-solid fa-xmark"></i>' +
+                'Clear search' +
+                '</button>';
+        } else if (hasActiveSlFilters()) {
+            icon = 'fa-filter-circle-xmark';
+            title = 'No logs match the selected filters';
+            sub = 'Try adjusting the filter panel or clearing all filters.';
+            actionHtml =
+                '<button type="button" class="empty-state-btn" data-empty-action="clear-filters">' +
+                '<i class="fa-solid fa-filter-circle-xmark"></i>' +
+                'Clear filters' +
+                '</button>';
         } else if (slState.role !== 'all') {
             var labels = {
                 admin: 'Admin',
                 dentist: 'Dentist',
                 patient: 'Patient',
-                login: 'Login'
+                login: 'Login',
+                error: 'Error'
             };
+
             icon = 'fa-filter';
-            title = 'No ' + (labels[slState.role] || slState.role) + ' logs found';
-            sub = 'There are no logs matching this filter yet.';
-            extra =
-                '<button onclick="slSetTab(document.querySelector(\'.tab-btn\'),\'all\')" class="sl-empty-action"><i class="fa-solid fa-xmark"></i>Show all logs</button>';
-        } else if (hasActiveSlFilters()) {
-            icon = 'fa-filter-circle-xmark';
-            title = 'No logs match the selected filters';
-            sub = 'Try adjusting or clearing the filters.';
-            extra =
-                '<button onclick="clearOnlySlFilters()" class="sl-empty-action"><i class="fa-solid fa-filter-circle-xmark"></i>Clear filters</button>';
-        } else {
-            icon = 'fa-clipboard-list';
-            title = 'No system logs yet';
-            sub = 'Activity will appear here once users interact with the system.';
+            title = 'No ' + escapeSlHtml(labels[slState.role] || slState.role) + ' logs found';
+            sub = 'There are no logs matching this tab yet.';
+            actionHtml =
+                '<button type="button" class="empty-state-btn" data-empty-action="show-all">' +
+                '<i class="fa-solid fa-layer-group"></i>' +
+                'Show all logs' +
+                '</button>';
         }
 
         emptyState.innerHTML =
-            '<div class="sl-empty-state"><div class="sl-empty-icon"><i class="fa-solid ' +
-            icon +
-            '"></i></div><p class="sl-empty-title">' +
-            title + '</p><p class="sl-empty-subtitle">' + sub + '</p>' + extra +
+            '<div class="empty-state">' +
+            '<div class="empty-state-icon">' +
+            '<i class="fa-solid ' + icon + '"></i>' +
+            '</div>' +
+            '<h3 class="empty-state-title">' + title + '</h3>' +
+            '<p class="empty-state-sub">' + sub + '</p>' +
+            actionHtml +
             '</div>';
 
-        window.addEventListener('resize', function () {
-            applySlView(getPreferredSlView(), false);
+        emptyState.querySelector('[data-empty-action="clear-search"]')?.addEventListener('click', clearSearch);
+
+        emptyState.querySelector('[data-empty-action="clear-filters"]')?.addEventListener('click', clearOnlySlFilters);
+
+        emptyState.querySelector('[data-empty-action="show-all"]')?.addEventListener('click', function () {
+            slSetTab(document.querySelector('.sl-role-tabs .tab-btn'), 'all');
         });
     }
+
 </script>
 @endsection
