@@ -7,6 +7,7 @@ use App\Models\DocumentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
 use App\Notifications\DocumentRequestApprovedNotification;
 use App\Notifications\DocumentRequestRejectedNotification;
 
@@ -125,58 +126,92 @@ class DocumentRequestController extends Controller
         ]);
     }
 
-    public function approve($id)
-    {
+  public function approve($id)
+{
+    try {
         $documentRequest = DocumentRequest::with('patient.user')->findOrFail($id);
 
-        $documentRequest->status = 'approved';
-        $documentRequest->save();
+        $documentRequest->update([
+            'status' => 'approved',
+        ]);
 
-        if ($documentRequest->patient && $documentRequest->patient->user) {
+        $documentRequest->refresh();
+        $documentRequest->loadMissing('patient.user');
+
+        if ($documentRequest->patient?->user) {
             $documentRequest->patient->user->notify(
                 new DocumentRequestApprovedNotification($documentRequest)
             );
+        } else {
+            Log::warning('Document request approved but patient user was not found.', [
+                'document_request_id' => $documentRequest->id,
+                'patient_id' => $documentRequest->patient_id,
+            ]);
         }
 
-        return redirect()
-            ->route('admin.document-requests.index')
-            ->with('success', 'Document request approved successfully.');
-    }
-
-    public function release($id)
-    {
-        $documentRequest = DocumentRequest::findOrFail($id);
-        $documentRequest->status = 'released';
-        $documentRequest->save();
-
-        return redirect()
-            ->route('admin.document-requests.index')
-            ->with('success', 'Document request released successfully.');
-    }
-
-    public function reject(Request $request, $id)
-    {
-        $request->validate([
-            'reason' => 'required|string|max:255'
+        return response()->json([
+            'success' => true,
+            'message' => 'Document request approved successfully.',
+            'status' => 'approved',
+        ]);
+    } catch (\Throwable $e) {
+        Log::error('Document request approval failed.', [
+            'document_request_id' => $id ?? null,
+            'error' => $e->getMessage(),
         ]);
 
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to approve document request.',
+        ], 500);
+    }
+}
+
+   public function reject(Request $request, $id)
+{
+    $request->validate([
+        'reason' => 'nullable|string|max:255',
+    ]);
+
+    try {
         $documentRequest = DocumentRequest::with('patient.user')->findOrFail($id);
 
         $documentRequest->update([
             'status' => 'rejected',
-            'rejection_reason' => $request->reason
+            'rejection_reason' => $request->reason,
         ]);
 
-        if ($documentRequest->patient && $documentRequest->patient->user) {
+        $documentRequest->refresh();
+        $documentRequest->loadMissing('patient.user');
+
+        if ($documentRequest->patient?->user) {
             $documentRequest->patient->user->notify(
                 new DocumentRequestRejectedNotification($documentRequest)
             );
+        } else {
+            Log::warning('Document request rejected but patient user was not found.', [
+                'document_request_id' => $documentRequest->id,
+                'patient_id' => $documentRequest->patient_id,
+            ]);
         }
 
-        return redirect()
-            ->route('admin.document-requests.index')
-            ->with('success', 'Document request rejected successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Document request rejected successfully.',
+            'status' => 'rejected',
+        ]);
+    } catch (\Throwable $e) {
+        Log::error('Document request rejection failed.', [
+            'document_request_id' => $id ?? null,
+            'error' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to reject document request.',
+        ], 500);
     }
+}
 
     public function export(Request $request)
     {

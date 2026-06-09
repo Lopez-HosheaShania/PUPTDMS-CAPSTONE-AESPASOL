@@ -736,25 +736,12 @@ class AppointmentController extends Controller
             }
         });
 
-        if ($appointment) {
+       if ($appointment) {
             AuditLogger::log(
                 'create',
                 'appointments',
                 "Patient booked appointment for {$appointment->appointment_date} at {$appointment->appointment_time}"
             );
-
-            $dentists = User::query()
-                ->where('status', 'active')
-                ->whereHas('role', function ($query) {
-                    $query->where('slug', 'dentist');
-                })
-                ->get();
-
-            if ($dentists->isNotEmpty()) {
-                foreach ($dentists as $dentist) {
-                    $dentist->notify(new AppointmentBookedNotification($appointment, $patient));
-                }
-            }
         }
 
         return redirect()->route('homepage')->with('success', 'Appointment booked successfully!');

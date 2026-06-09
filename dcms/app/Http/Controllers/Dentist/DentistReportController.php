@@ -208,6 +208,91 @@ class DentistReportController extends Controller
         ]);
     }
 
+    public function dailyTreatmentRecord()
+    {
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if ($activeRole !== 'dentist') {
+            return redirect('/login');
+        }
+
+        AuditLogger::log(
+            'view',
+            'dentist_daily_treatment_record',
+            'Dentist viewed daily treatment record'
+        );
+
+        return view('dentist.daily-treatment');
+    }
+
+    public function dailyTreatmentRecordList(Request $request)
+    {
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if ($activeRole !== 'dentist') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $query = DB::table('daily_treatment_records');
+
+        if ($request->filled('month')) {
+            [$year, $month] = explode('-', $request->input('month'));
+
+            $query->whereYear('treatment_date', $year)
+                ->whereMonth('treatment_date', $month);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+
+            $query->where(function ($q) use ($search) {
+                $q->where('patient_name', 'like', "%{$search}%")
+                    ->orWhere('patient_email', 'like', "%{$search}%")
+                    ->orWhere('patient_phone', 'like', "%{$search}%")
+                    ->orWhere('office_type', 'like', "%{$search}%")
+                    ->orWhere('program_code', 'like', "%{$search}%")
+                    ->orWhere('treatment_done', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('office_type')) {
+            $query->where('office_type', $request->input('office_type'));
+        }
+
+        if ($request->filled('program_code')) {
+            $query->where('program_code', $request->input('program_code'));
+        }
+
+        if ($request->input('sort_name') === 'az') {
+            $query->orderBy('patient_name', 'asc');
+        } elseif ($request->input('sort_name') === 'za') {
+            $query->orderBy('patient_name', 'desc');
+        } elseif ($request->input('sort_date') === 'asc') {
+            $query->orderBy('treatment_date', 'asc');
+        } else {
+            $query->orderBy('treatment_date', 'desc');
+        }
+
+        $records = $query->get()->map(function ($record) {
+            return [
+                'treatment_date' => $record->treatment_date ?? null,
+                'patient_name' => $record->patient_name ?? '',
+                'patient_email' => $record->patient_email ?? '',
+                'patient_phone' => $record->patient_phone ?? '',
+                'office_type' => $record->office_type ?? '',
+                'program_code' => $record->program_code ?? '',
+                'gender' => $record->gender ?? '',
+                'treatment_done' => $record->treatment_done ?? '',
+                'minutes_processed' => $record->minutes_processed ?? 0,
+                'has_signature' => !empty($record->patient_signature ?? null),
+            ];
+        });
+
+        return response()->json([
+            'data' => $records,
+        ]);
+    }
+
     private function buildGadData(int $year, int $month): array
     {
         $gadRaw = DB::table('daily_treatment_records')

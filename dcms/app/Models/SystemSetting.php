@@ -80,16 +80,16 @@ class SystemSetting extends Model
         return false;
     }
 
-    public static function notificationVia(string $settingKey): array
+    public static function notificationVia(string $key): array
     {
-        if (! static::isEnabled($settingKey)) {
-            return [];
-        }
+        $defaults = [
+            'notif_new_appointment' => ['database', 'broadcast'],
+            'notif_appointment_cancelled' => ['database', 'broadcast'],
+            'notif_document_request' => ['database', 'broadcast'],
 
-        if (! static::notificationChannelEnabled('In-App')) {
-            return [];
-        }
+            'notif_dentist_emergency_out' => ['database', 'broadcast'],
+        ];
 
-        return ['database', 'broadcast'];
+        return $defaults[$key] ?? ['database'];
     }
 }

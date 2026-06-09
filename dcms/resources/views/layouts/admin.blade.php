@@ -2,8 +2,12 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
+   <meta charset="UTF-8" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @if (auth()->check())
+        <meta name="auth-user-id" content="{{ auth()->id() }}">
+    @endif
     <script>
         (function() {
             const theme = localStorage.getItem('theme') || 'light';

@@ -4,6 +4,25 @@ function escapeHtml(value) {
     return div.innerHTML;
 }
 
+function getNotificationDedupeKey(notification) {
+    return notification.dedupe_key
+        ?? notification.data?.dedupe_key
+        ?? notification.id
+        ?? notification.notification_id
+        ?? notification.uuid
+        ?? notification.data?.id
+        ?? null;
+}
+
+function notificationAlreadyExists(notification) {
+    const dedupeKey = getNotificationDedupeKey(notification);
+
+    if (!dedupeKey) return false;
+
+    return Array.from(document.querySelectorAll('[data-notif-dedupe-key]'))
+        .some(item => item.dataset.notifDedupeKey === String(dedupeKey));
+}
+
 function syncBellBadge(unreadCount) {
     const notifBtn = document.querySelector('#notifBtn');
     if (!notifBtn) return;
@@ -57,7 +76,11 @@ function removeEmptyState() {
 
 function prependNotificationItem(notification) {
     const notifBody = document.querySelector('.header-notif-body');
-    if (!notifBody) return;
+    if (!notifBody) return false;
+
+    if (notificationAlreadyExists(notification)) {
+        return false;
+    }
 
     removeEmptyState();
 
@@ -66,11 +89,16 @@ function prependNotificationItem(notification) {
     const url = notification.url ?? '#';
     const icon = notification.icon ?? 'fa-bell';
     const createdAtLabel = notification.created_at_label ?? 'Just now';
+    const dedupeKey = getNotificationDedupeKey(notification);
 
     const item = document.createElement('div');
     item.className = 'header-notif-item is-unread';
     item.setAttribute('data-notif-state', 'unread');
     item.setAttribute('data-notif-item', '');
+
+    if (dedupeKey) {
+        item.setAttribute('data-notif-dedupe-key', String(dedupeKey));
+    }
 
     item.innerHTML = `
         <div class="header-notif-item-icon">
@@ -106,9 +134,92 @@ function prependNotificationItem(notification) {
     } else {
         notifBody.prepend(item);
     }
+
+    return true;
 }
 
+function getCurrentMonthKey() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+
+    return `${year}-${month}`;
+}
+
+function parseCounterNumber(value) {
+    const cleaned = String(value ?? '').replace(/[^\d]/g, '');
+    return Number(cleaned || 0);
+}
+
+function formatCounterNumber(value) {
+    return new Intl.NumberFormat().format(Number(value || 0));
+}
+
+function animateDashboardCounter(counter, card = null) {
+    if (counter?.animate) {
+        counter.animate(
+            [
+                { transform: 'scale(1)', opacity: 1 },
+                { transform: 'scale(1.12)', opacity: 0.85 },
+                { transform: 'scale(1)', opacity: 1 },
+            ],
+            {
+                duration: 420,
+                easing: 'ease-out',
+            }
+        );
+    }
+
+    if (card?.animate) {
+        card.animate(
+            [
+                { transform: 'translateY(0)' },
+                { transform: 'translateY(-4px)' },
+                { transform: 'translateY(0)' },
+            ],
+            {
+                duration: 420,
+                easing: 'ease-out',
+            }
+        );
+    }
+}
+
+function syncAdminDashboardAppointmentStats(notification) {
+    if ((notification.event ?? notification.data?.event) !== 'appointment.booked') {
+        return;
+    }
+
+    const counter = document.querySelector('[data-admin-dashboard-counter="appointments-this-month"]');
+
+    if (!counter) {
+        return;
+    }
+
+    const appointmentMonth = notification.appointment_month ?? notification.data?.appointment_month ?? null;
+    const currentMonth = getCurrentMonthKey();
+
+    if (appointmentMonth && appointmentMonth !== currentMonth) {
+        return;
+    }
+
+    const currentValue = parseCounterNumber(counter.textContent);
+    const nextValue = currentValue + 1;
+
+    counter.textContent = formatCounterNumber(nextValue);
+
+    const card =
+        document.querySelector('[data-admin-dashboard-card="appointments-this-month"]') ||
+        counter.closest('.stat-card');
+
+    animateDashboardCounter(counter, card);
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.__notificationsRealtimeInitialized) return;
+    window.__notificationsRealtimeInitialized = true;
+
     const userIdMeta = document.querySelector('meta[name="auth-user-id"]');
 
     if (!userIdMeta || !window.Echo) return;
@@ -117,12 +228,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!userId) return;
 
     window.Echo.private(`App.Models.User.${userId}`)
-        .notification((notification) => {
-            console.log('REALTIME NOTIF:', notification);
+    .notification((notification) => {
+        console.log('REALTIME NOTIF:', notification);
 
-            updateNotificationCounts(1, 1);
-            const unreadTab = document.querySelector('[data-notif-tab-count="unread"]');
-            syncBellBadge(parseInt(unreadTab?.textContent?.trim() || '0', 10));
-            prependNotificationItem(notification);
-        });
+        const added = prependNotificationItem(notification);
+
+        if (!added) return;
+
+        updateNotificationCounts(1, 1);
+
+        const unreadTab = document.querySelector('[data-notif-tab-count="unread"]');
+        syncBellBadge(parseInt(unreadTab?.textContent?.trim() || '0', 10));
+
+        syncAdminDashboardAppointmentStats(notification);
+    });
 });

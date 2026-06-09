@@ -2651,21 +2651,49 @@ return `
         }, 150);
     }
 
-    function confirmStatus() {
+    async function confirmStatus() {
+    const confirmBtn = document.getElementById('confirmStatusBtn');
+
+    const newStatus = dentistIsIn ? 'out' : 'in';
+
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+    try {
+        const response = await fetch("{{ route('dentist.clinic-status.update') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+            },
+            body: JSON.stringify({
+                status: newStatus
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Failed to update clinic status.");
+        }
+
+        dentistIsIn = data.status === 'in';
+
         const btn = document.getElementById('statusBtn');
         const label = document.getElementById('statusLabel');
         const kpiLabel = document.getElementById('statusKpiLabel');
         const kpiIcon = document.getElementById('statusKpiIcon');
 
-        dentistIsIn = !dentistIsIn;
-
         if (dentistIsIn) {
             btn.style.background = '#00A96E';
             label.innerHTML = '<span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> IN';
+
             if (kpiLabel) {
                 kpiLabel.textContent = 'Open';
                 kpiLabel.style.color = '#00A96E';
             }
+
             if (kpiIcon) {
                 kpiIcon.className = 'fa-solid fa-door-open text-base';
                 kpiIcon.style.color = '#00A96E';
@@ -2673,17 +2701,28 @@ return `
         } else {
             btn.style.background = '#EF4444';
             label.innerHTML = '<span class="w-2 h-2 bg-white rounded-full"></span> OUT';
+
             if (kpiLabel) {
                 kpiLabel.textContent = 'Closed';
                 kpiLabel.style.color = '#EF4444';
             }
+
             if (kpiIcon) {
                 kpiIcon.className = 'fa-solid fa-door-closed text-base';
                 kpiIcon.style.color = '#EF4444';
             }
         }
+
         closeStatusModal();
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "Something went wrong while updating clinic status.");
+    } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = 'Confirm';
     }
+}
 
     document.getElementById('statusModal').addEventListener('click', function (e) {
         if (e.target === this) closeStatusModal();
