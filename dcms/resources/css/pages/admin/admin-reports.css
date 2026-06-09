@@ -1106,3 +1106,352 @@ body[data-theme="dark"] #mainContent .report-inventory-card .report-inventory-ta
     background: var(--status-deleted-bg, rgba(220, 38, 38, .16)) !important;
     border-color: var(--status-deleted-border, rgba(252, 165, 165, .30)) !important;
 }
+
+.report-movement-card {
+    margin-top: 1rem;
+}
+
+.inventory-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .85rem;
+    padding: 1rem 1.25rem 0;
+}
+
+.inventory-kpi-card {
+    --kpi-accent: var(--brand-red, #8B0000);
+    --kpi-soft: rgba(139, 0, 0, .08);
+    min-width: 0;
+    padding: .95rem 1rem;
+    border-radius: 16px;
+    background:
+        radial-gradient(circle at top right, color-mix(in srgb, var(--kpi-accent) 12%, transparent), transparent 42%),
+        #FFFFFF;
+    border: 1px solid color-mix(in srgb, var(--kpi-accent) 18%, #E5E7EB);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .045);
+}
+
+.inventory-kpi-card.kpi-used {
+    --kpi-accent: #2563EB;
+}
+
+.inventory-kpi-card.kpi-stock {
+    --kpi-accent: #16A34A;
+}
+
+.inventory-kpi-card.kpi-critical {
+    --kpi-accent: #DC2626;
+}
+
+.inventory-kpi-card.kpi-reorder {
+    --kpi-accent: #D97706;
+}
+
+.inventory-kpi-label {
+    display: block;
+    margin-bottom: .5rem;
+    color: var(--um-muted, #6B7280);
+    font-size: .86rem !important;
+    font-weight: 900;
+    letter-spacing: .07em;
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+
+.inventory-kpi-card strong {
+    display: block;
+    color: var(--kpi-accent);
+    font-size: 1.55rem;
+    font-weight: 950;
+    line-height: .95;
+    letter-spacing: -.04em;
+}
+
+.inventory-kpi-card small {
+    display: block;
+    margin-top: .42rem;
+    color: var(--um-muted, #6B7280);
+    font-size: .72rem;
+    font-weight: 650;
+    line-height: 1.25;
+}
+
+.forecast-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    margin: 1rem 1.25rem;
+    padding: .8rem .9rem;
+    border-radius: 14px;
+    color: #6B7280;
+    background: rgba(139, 0, 0, .045);
+    border: 1px solid rgba(139, 0, 0, .10);
+    font-size: .75rem;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.forecast-note i {
+    margin-top: .12rem;
+    color: var(--brand-red, #8B0000) !important;
+    flex-shrink: 0;
+}
+
+.report-movement-table-wrap {
+    border-top: 1px solid rgba(229, 231, 235, .72);
+}
+
+.report-movement-table {
+    min-width: 1120px;
+}
+
+.report-movement-table th,
+.report-movement-table td {
+    font-size: .76rem;
+}
+
+.report-movement-table .forecast-num,
+.report-movement-table .forecast-days {
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.report-movement-table .forecast-opening {
+    color: #7C3AED !important;
+}
+
+.report-movement-table .forecast-stock-in {
+    color: #0F766E !important;
+}
+
+.report-movement-table .forecast-used {
+    color: #2563EB !important;
+}
+
+.report-movement-table .forecast-ending {
+    color: #15803D !important;
+}
+
+.report-movement-table .forecast-average {
+    color: #D97706 !important;
+}
+
+.report-movement-table .forecast-days {
+    color: #475569 !important;
+}
+
+.report-movement-table .forecast-reorder {
+    color: #B45309 !important;
+}
+
+.inv-table .report-stock-pill.pill-watch {
+    color: #7C3AED !important;
+    background: #F5F3FF !important;
+    border-color: #DDD6FE !important;
+}
+
+[data-theme="dark"] .inventory-kpi-card,
+.dark .inventory-kpi-card {
+    background:
+        radial-gradient(circle at top right, color-mix(in srgb, var(--kpi-accent) 20%, transparent), transparent 44%),
+        rgba(13, 17, 23, .70) !important;
+    border-color: color-mix(in srgb, var(--kpi-accent) 34%, rgba(255, 255, 255, .10)) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .06),
+        0 12px 28px rgba(0, 0, 0, .32) !important;
+}
+
+[data-theme="dark"] .inventory-kpi-label,
+[data-theme="dark"] .inventory-kpi-card small,
+.dark .inventory-kpi-label,
+.dark .inventory-kpi-card small {
+    color: var(--text-muted, #8B949E) !important;
+}
+
+[data-theme="dark"] .inventory-kpi-card.kpi-used strong,
+.dark .inventory-kpi-card.kpi-used strong {
+    color: #60A5FA !important;
+}
+
+[data-theme="dark"] .inventory-kpi-card.kpi-stock strong,
+.dark .inventory-kpi-card.kpi-stock strong {
+    color: #86EFAC !important;
+}
+
+[data-theme="dark"] .inventory-kpi-card.kpi-critical strong,
+.dark .inventory-kpi-card.kpi-critical strong {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .inventory-kpi-card.kpi-reorder strong,
+.dark .inventory-kpi-card.kpi-reorder strong {
+    color: #FCD34D !important;
+}
+
+[data-theme="dark"] .forecast-note,
+.dark .forecast-note {
+    color: var(--text-muted, #8B949E) !important;
+    background: rgba(139, 0, 0, .14) !important;
+    border-color: rgba(252, 165, 165, .16) !important;
+}
+
+[data-theme="dark"] .forecast-note i,
+.dark .forecast-note i {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .report-movement-table-wrap,
+.dark .report-movement-table-wrap {
+    border-top-color: rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .report-movement-table .forecast-opening,
+.dark .report-movement-table .forecast-opening {
+    color: #C4B5FD !important;
+}
+
+[data-theme="dark"] .report-movement-table .forecast-stock-in,
+.dark .report-movement-table .forecast-stock-in {
+    color: #5EEAD4 !important;
+}
+
+[data-theme="dark"] .report-movement-table .forecast-used,
+.dark .report-movement-table .forecast-used {
+    color: #60A5FA !important;
+}
+
+[data-theme="dark"] .report-movement-table .forecast-ending,
+.dark .report-movement-table .forecast-ending {
+    color: #86EFAC !important;
+}
+
+[data-theme="dark"] .report-movement-table .forecast-average,
+.dark .report-movement-table .forecast-average {
+    color: #FCD34D !important;
+}
+
+[data-theme="dark"] .report-movement-table .forecast-days,
+.dark .report-movement-table .forecast-days {
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .report-movement-table .forecast-reorder,
+.dark .report-movement-table .forecast-reorder {
+    color: #FDBA74 !important;
+}
+
+[data-theme="dark"] .inv-table .report-stock-pill.pill-watch,
+.dark .inv-table .report-stock-pill.pill-watch {
+    color: #C4B5FD !important;
+    background: rgba(124, 58, 237, .16) !important;
+    border-color: rgba(196, 181, 253, .28) !important;
+}
+
+@media (max-width: 1100px) {
+    .inventory-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    .inventory-kpi-grid {
+        grid-template-columns: 1fr;
+        gap: .7rem;
+        padding: .9rem 1rem 0;
+    }
+
+    .inventory-kpi-card {
+        padding: .85rem .9rem;
+        border-radius: 14px;
+    }
+
+    .forecast-note {
+        margin: .9rem 1rem;
+        font-size: .7rem;
+    }
+
+    .report-movement-table {
+        display: block;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .report-movement-table thead {
+        display: none;
+    }
+
+    .report-movement-table tbody {
+        display: grid;
+        gap: .75rem;
+    }
+
+    .report-movement-table tr {
+        display: grid;
+        gap: .58rem;
+        padding: .9rem;
+        border-radius: 15px;
+        background: var(--um-surface, #FFFFFF);
+        border: 1px solid var(--um-border, #ebe7e2);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .055);
+    }
+
+    .report-movement-table td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .85rem;
+        width: 100%;
+        padding: 0;
+        border-bottom: 0;
+        text-align: right !important;
+        font-size: .77rem;
+        line-height: 1.35;
+    }
+
+    .report-movement-table td::before {
+        content: attr(data-label) !important;
+        flex-shrink: 0;
+        color: var(--um-muted, #6B7280);
+        font-size: .64rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        text-align: left;
+    }
+
+    .report-movement-table .item-cell {
+        display: block;
+        padding-bottom: .65rem;
+        text-align: left !important;
+        font-size: .9rem;
+        border-bottom: 1px solid var(--um-border, #ebe7e2);
+    }
+
+    .report-movement-table .item-cell::before {
+        display: none !important;
+    }
+
+    .report-movement-table .report-stock-pill {
+        max-width: 70%;
+        white-space: normal !important;
+        text-align: center;
+        line-height: 1.2 !important;
+    }
+
+    [data-theme="dark"] .report-movement-table tr,
+    .dark .report-movement-table tr {
+        background: rgba(13, 17, 23, .58) !important;
+        border-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .30) !important;
+    }
+
+    [data-theme="dark"] .report-movement-table td::before,
+    .dark .report-movement-table td::before {
+        color: var(--text-muted, #8B949E) !important;
+    }
+
+    [data-theme="dark"] .report-movement-table .item-cell,
+    .dark .report-movement-table .item-cell {
+        border-bottom-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
+    }
+}

@@ -359,6 +359,9 @@ Route::prefix('admin')
         Route::get('/appointments/{id}/reschedule', [AdminAppointmentController::class, 'reschedule'])
             ->name('admin.admin.appointments.reschedule');
 
+        Route::put('/appointments/{id}/reschedule', [AdminAppointmentController::class, 'updateReschedule'])
+            ->name('admin.admin.appointments.reschedule.update');
+
         Route::get('/appointments/{id}/start', [AdminAppointmentController::class, 'start'])
             ->name('admin.admin.appointments.start');
 

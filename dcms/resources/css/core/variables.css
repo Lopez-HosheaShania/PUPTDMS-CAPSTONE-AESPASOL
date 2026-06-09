@@ -186,6 +186,14 @@
     --crimson-dark: #6b0000;
     --crimson-light: #fef2f2;
     --crimson-mid: #fce8e8;
+    --crimson-soft: #FDF1F1;
+    --surface: #FAFAF8;
+    --card: #FFFFFF;
+    --border: #EDE8E4;
+    --text-1: #1C1410;
+    --text-2: #5C5550;
+    --text-3: #9E9690;
+    --gold: #C9A84C;
 
     --um-primary: #8B0000;
     --um-primary-dark: #6b0000;
@@ -203,6 +211,29 @@
     --accessibility-bottom-final: var(--fab-base-bottom);
     --chatbot-bottom-final: calc(var(--accessibility-bottom-final) + var(--fab-final-size) + var(--fab-final-gap));
     --back-top-bottom-final: calc(var(--chatbot-bottom-final) + var(--fab-final-size) + var(--fab-final-gap));
+
+    --sidebar-w: 220px;
+    --sidebar-collapsed-w: 64px;
+    --header-h: 64px;
+
+    --page-bg: #f8fafc;
+    --page-text: #111827;
+
+    --sidebar-bg: #ffffff;
+    --sidebar-border: #eff0f2;
+    --sidebar-shadow: 4px 0 24px rgba(0, 0, 0, .04);
+    --sidebar-link-text: #4a5568;
+    --sidebar-link-hover-bg: #63636317;
+    --sidebar-icon-bg: rgba(244, 2, 2, 0.07);
+    --sidebar-muted-text: #b0b7c3;
+
+    --drawer-bg: #ffffff;
+    --drawer-footer-border: #f3f4f6;
+    --drawer-overlay-bg: rgba(0, 0, 0, .45);
+
+    --danger-soft-bg: #fdf5f5;
+    --danger-soft-border: #fce8e8;
+    --danger-soft-hover: #fce8e8;
 }
 
 [data-theme="dark"],
@@ -361,6 +392,25 @@
     --status-denied-text: #CBD5E1;
     --status-denied-border: rgba(203, 213, 225, 0.22);
     --status-denied-solid: #CBD5E1;
+
+    --page-bg: #000D1A;
+    --page-text: #E5E7EB;
+
+    --sidebar-bg: #07111F;
+    --sidebar-border: #1E293B;
+    --sidebar-shadow: 4px 0 24px rgba(0, 0, 0, .35);
+    --sidebar-link-text: #CBD5E1;
+    --sidebar-link-hover-bg: rgba(139, 0, 0, .38);
+    --sidebar-icon-bg: rgba(139, 0, 0, 0.18);
+    --sidebar-muted-text: #64748B;
+
+    --drawer-bg: #07111F;
+    --drawer-footer-border: #1E293B;
+    --drawer-overlay-bg: rgba(0, 0, 0, .68);
+
+    --danger-soft-bg: rgba(139, 0, 0, .18);
+    --danger-soft-border: rgba(248, 113, 113, .25);
+    --danger-soft-hover: rgba(139, 0, 0, .32);
 }
 
 @media (max-width: 1199px) {

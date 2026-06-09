@@ -108,7 +108,7 @@ $notifCount = $notifications->count();
                             <i class="fa-solid fa-clock"></i>
                           </span>
                           <span class="patient-stat-option-label">Today</span>
-                          <span class="patient-stat-option-count" id="statUpcoming">{{ $todayCount ?? 0 }}</span>
+                          <span class="patient-stat-option-count" id="statToday">{{ $todayCount ?? 0 }}</span>
                         </button>
 
                         <button type="button" class="patient-stat-option filter-btn s-upcoming" data-filter="upcoming">
@@ -116,7 +116,7 @@ $notifCount = $notifications->count();
                             <i class="fa-solid fa-calendar-check"></i>
                           </span>
                           <span class="patient-stat-option-label">Upcoming</span>
-                          <span class="patient-stat-option-count" id="statScheduled">{{ $upcomingCount ?? 0 }}</span>
+                          <span class="patient-stat-option-count" id="statUpcoming">{{ $upcomingCount ?? 0 }}</span>
                         </button>
 
                         <button type="button" class="patient-stat-option filter-btn s-rescheduled"
@@ -795,13 +795,13 @@ $notifCount = $notifications->count();
         label: 'Today',
         icon: 'fa-clock',
         tone: 's-today',
-        countId: 'statUpcoming'
+        countId: 'statToday'
       },
       upcoming: {
         label: 'Upcoming',
         icon: 'fa-calendar-check',
         tone: 's-upcoming',
-        countId: 'statScheduled'
+        countId: 'statUpcoming'
       },
       rescheduled: {
         label: 'Rescheduled',
