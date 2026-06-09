@@ -496,6 +496,23 @@ Route::prefix('admin')
             ->name('document-template');
 
         // PREVIEW (AJAX)
+        // Special default template preview for Dental Health Form
+        Route::get('/document-template/default/dental-health', function () {
+            $html = view('admin.document-templates-defaults.dental-health-form')->render();
+
+            return response()->json([
+                'id' => 'default-dental',
+                'name' => 'Dental Health Record',
+                'document_type' => 'record',
+                'category' => 'record',
+                'content' => $html,
+                'status' => 'active',
+                'is_default' => true,
+                'paper_size' => 'A4',
+                'orientation' => 'portrait',
+            ]);
+        })->name('document-template.default.dental');
+
         Route::get('/document-template/{id}', [DocumentTemplateController::class, 'show'])
             ->name('document-template.show');
 
