@@ -30,9 +30,6 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/header.css') }}">
 
-    @include('partials.patient.styles')
-    @include('partials.terms-styles')
-    @include('partials.global-toast-styles')
     @yield('styles')
 
 </head>
@@ -77,7 +74,6 @@
 
     {{-- GLOBAL TERMS MODAL --}}
     @include('partials.terms-modal')
-    @include('partials.terms-scripts')
 
     @stack('scripts')
     @yield('scripts')

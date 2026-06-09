@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\AppointmentCompletedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class AdminAppointmentController extends Controller
 {
@@ -116,7 +117,6 @@ class AdminAppointmentController extends Controller
         $appointment = Appointment::findOrFail($id);
         $appointment->status = 'cancelled';
 
-        // optional fields if meron sa table mo
         if (isset($appointment->cancellation_reason)) {
             $appointment->cancellation_reason = $request->reason;
         }

@@ -387,18 +387,6 @@
     animation: errorShake .35s ease;
 }
 
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1
-    }
-
-    50% {
-        opacity: .4
-    }
-}
-
 @keyframes toastIn {
     from {
         opacity: 0;
@@ -1700,4 +1688,57 @@ body.dark #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-st
     border-color: var(--appt-option-border) !important;
     color: var(--appt-option-text) !important;
     box-shadow: none !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-summary {
+    list-style: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+    margin-bottom: 1rem !important;
+    padding: .75rem .9rem !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, .78) !important;
+    border: 1px solid rgba(139, 0, 0, .10) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, .045) !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-summary::-webkit-details-marker {
+    display: none !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-left {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-title {
+    font-size: 1.05rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-chevron {
+    color: #94A3B8 !important;
+    font-size: .8rem !important;
+    transition: transform .18s ease !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-group[open] .appt-month-chevron {
+    transform: rotate(180deg) !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-group:not([open]) {
+    margin-bottom: .8rem !important;
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .appt-month-summary,
+.dark #mainContent.admin-appointments-page .appt-month-summary {
+    background: rgba(13, 17, 23, .82) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, .22) !important;
 }
