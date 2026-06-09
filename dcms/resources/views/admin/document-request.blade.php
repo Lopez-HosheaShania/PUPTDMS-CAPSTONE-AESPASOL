@@ -16,8 +16,12 @@ $docRequestsCollection = collect($docRequestsSource);
 $normalizeStatus = function ($status) {
 $status = strtolower(str_replace('_', '-', (string) ($status ?: 'pending')));
 
-if (in_array($status, ['ready-for-pickup', 'ready-for-release'], true)) {
-return 'ready';
+if (in_array($status, ['ready', 'ready-for-pickup', 'ready-for-release', 'released'], true)) {
+return 'approved';
+}
+
+if (!in_array($status, ['pending', 'approved', 'rejected'], true)) {
+return 'pending';
 }
 
 return $status;
@@ -67,18 +71,17 @@ return [
 });
 
 $statsSource = $stats ?? [];
-$countByStatus = function ($status) use ($docRequestsCollection, $normalizeStatus) {
-return $docRequestsCollection->filter(function ($req) use ($status, $normalizeStatus) {
-return $normalizeStatus($req->status ?? 'pending') === $status;
-})->count();
+
+$countByStatus = function ($status) use ($docRequestsPayload) {
+return $docRequestsPayload
+->filter(fn ($req) => ($req['status'] ?? 'pending') === $status)
+->count();
 };
 
 $docRequestStats = [
-'all' => $statsSource['all'] ?? $statsSource['total'] ?? $docRequestsCollection->count(),
+'all' => $docRequestsPayload->count(),
 'pending' => $statsSource['pending'] ?? $countByStatus('pending'),
 'approved' => $statsSource['approved'] ?? $countByStatus('approved'),
-'ready' => $statsSource['ready'] ?? $countByStatus('ready'),
-'released' => $statsSource['released'] ?? $countByStatus('released'),
 'rejected' => $statsSource['rejected'] ?? $countByStatus('rejected'),
 ];
 
@@ -88,6 +91,31 @@ $docRequestTypes = $docRequestsPayload
 ->unique()
 ->sort()
 ->values();
+
+$perPage = $perPage ?? (
+is_object($requests ?? null) && method_exists($requests, 'perPage')
+? $requests->perPage()
+: 10
+);
+
+$docRequestPagination = [
+'total' => is_object($requests ?? null) && method_exists($requests, 'total')
+? $requests->total()
+: $docRequestsPayload->count(),
+'from' => is_object($requests ?? null) && method_exists($requests, 'firstItem')
+? ($requests->firstItem() ?? 0)
+: ($docRequestsPayload->count() ? 1 : 0),
+'to' => is_object($requests ?? null) && method_exists($requests, 'lastItem')
+? ($requests->lastItem() ?? 0)
+: $docRequestsPayload->count(),
+'current_page' => is_object($requests ?? null) && method_exists($requests, 'currentPage')
+? $requests->currentPage()
+: 1,
+'last_page' => is_object($requests ?? null) && method_exists($requests, 'lastPage')
+? $requests->lastPage()
+: 1,
+'per_page' => $perPage,
+];
 @endphp
 
 <main id="mainContent" class="admin-page-shell page-enter docreq-page mode-list">
@@ -112,7 +140,7 @@ $docRequestTypes = $docRequestsPayload
             </div>
         </div>
 
-        <div class="table-card rounded-2xl border border-gray-200 shadow-sm overflow-hidden bg-white">
+        <div class="table-card rounded-2xl border border-gray-200 shadow-sm bg-white">
 
             <div class="px-4 md:px-6 py-3.5 border-b border-gray-100 bg-[#FAFAFA]/50">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -126,6 +154,7 @@ $docRequestTypes = $docRequestsPayload
 
                     <div
                         class="docreq-toolbar-actions flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-end">
+
                         <div class="docreq-search-wrap flex-1 md:flex-none flex items-center gap-2">
                             <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
                                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
@@ -148,95 +177,88 @@ $docRequestTypes = $docRequestsPayload
                         </div>
 
                         <div id="docreqStatusSelect"
-                            class="docreq-custom-select docreq-status-dropdown docreq-toolbar-sort">
-                            <button type="button" class="docreq-select-button" data-select-button
-                                aria-haspopup="listbox" aria-expanded="false" aria-controls="docreqStatusMenu"
-                                onclick="toggleDocreqDropdown('docreqStatusSelect')">
-                                <span class="docreq-select-leading status-all">
-                                    <i class="fa-solid fa-file-medical"></i>
-                                </span>
+                            class="docreq-custom-select docreq-status-dropdown docreq-sort-dropdown docreq-toolbar-sort"
+                            data-status-filter="all">
 
-                                <span class="docreq-select-text">
-                                    <span>Sort by</span>
-                                    <strong id="statusDropdownLabel">All Requests</strong>
-                                </span>
+                            <button type="button" class="docreq-sort-trigger" id="docreqStatusDropdownBtn"
+                                data-select-button aria-expanded="false" aria-haspopup="true"
+                                aria-controls="docreqStatusMenu" onclick="toggleDocreqDropdown('docreqStatusSelect')">
 
-                                <span id="statusDropdownCount" class="docreq-select-count">0</span>
-                                <i class="fa-solid fa-chevron-down docreq-select-chevron"></i>
-                            </button>
-
-                            <div id="docreqStatusMenu" class="docreq-select-menu" role="listbox">
-                                <button type="button" class="docreq-select-option active" data-value="all"
-                                    onclick="selectStatusFilter('all')">
-                                    <span class="docreq-option-icon status-all">
+                                <span class="docreq-sort-trigger-left">
+                                    <span class="docreq-sort-icon status-all" id="docreqStatusSelectedIcon">
                                         <i class="fa-solid fa-file-medical"></i>
                                     </span>
-                                    <span class="docreq-option-copy">
-                                        <strong>All Requests</strong>
-                                        <small>Show every document request</small>
-                                    </span>
-                                    <span class="docreq-option-count" id="statAll">0</span>
-                                </button>
 
-                                <button type="button" class="docreq-select-option" data-value="pending"
-                                    onclick="selectStatusFilter('pending')">
-                                    <span class="docreq-option-icon status-pending">
-                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <span class="docreq-sort-copy">
+                                        <span class="docreq-sort-label">Sort By</span>
+                                        <strong class="docreq-sort-value" id="statusDropdownLabel">All Requests</strong>
                                     </span>
-                                    <span class="docreq-option-copy">
-                                        <strong>Pending</strong>
-                                        <small>Needs review</small>
-                                    </span>
-                                    <span class="docreq-option-count" id="statPending">0</span>
-                                </button>
+                                </span>
 
-                                <button type="button" class="docreq-select-option" data-value="approved"
-                                    onclick="selectStatusFilter('approved')">
-                                    <span class="docreq-option-icon status-approved">
-                                        <i class="fa-solid fa-file-circle-check"></i>
+                                <span class="docreq-sort-trigger-right">
+                                    <span id="statusDropdownCount" class="docreq-sort-count">
+                                        {{ $docRequestStats['all'] ?? 0 }}
                                     </span>
-                                    <span class="docreq-option-copy">
-                                        <strong>Approved</strong>
-                                        <small>Ready for release</small>
-                                    </span>
-                                    <span class="docreq-option-count" id="statApproved">0</span>
-                                </button>
+                                    <i class="fa-solid fa-chevron-down docreq-sort-chevron"></i>
+                                </span>
+                            </button>
 
-                                <button type="button" class="docreq-select-option" data-value="ready"
-                                    onclick="selectStatusFilter('ready')">
-                                    <span class="docreq-option-icon status-released">
-                                        <i class="fa-solid fa-box-open"></i>
-                                    </span>
-                                    <span class="docreq-option-copy">
-                                        <strong>Ready</strong>
-                                        <small>Prepared for pickup</small>
-                                    </span>
-                                    <span class="docreq-option-count" id="statReady">0</span>
-                                </button>
+                            <input type="hidden" id="docreqStatusFilter" value="all">
 
-                                <button type="button" class="docreq-select-option" data-value="released"
-                                    onclick="selectStatusFilter('released')">
-                                    <span class="docreq-option-icon status-released">
-                                        <i class="fa-solid fa-paper-plane"></i>
-                                    </span>
-                                    <span class="docreq-option-copy">
-                                        <strong>Released</strong>
-                                        <small>Claimed documents</small>
-                                    </span>
-                                    <span class="docreq-option-count" id="statReleased">0</span>
-                                </button>
+                            <div class="docreq-sort-panel" id="docreqStatusMenu" role="listbox">
+                                <div class="docreq-sort-grid">
+                                    <button type="button" class="docreq-sort-option is-active status-all"
+                                        data-value="all" data-label="All Requests" data-icon="fa-file-medical"
+                                        data-count="{{ $docRequestStats['all'] ?? 0 }}"
+                                        onclick="selectStatusFilter('all')">
+                                        <span class="docreq-option-icon status-all">
+                                            <i class="fa-solid fa-file-medical"></i>
+                                        </span>
+                                        <span class="docreq-option-label">All Requests</span>
+                                        <span class="docreq-sort-option-count docreq-option-count" id="statAll">
+                                            {{ $docRequestStats['all'] ?? 0 }}
+                                        </span>
+                                    </button>
 
-                                <button type="button" class="docreq-select-option" data-value="rejected"
-                                    onclick="selectStatusFilter('rejected')">
-                                    <span class="docreq-option-icon status-rejected">
-                                        <i class="fa-solid fa-file-circle-xmark"></i>
-                                    </span>
-                                    <span class="docreq-option-copy">
-                                        <strong>Rejected</strong>
-                                        <small>Not approved</small>
-                                    </span>
-                                    <span class="docreq-option-count" id="statRejected">0</span>
-                                </button>
+                                    <button type="button" class="docreq-sort-option status-pending" data-value="pending"
+                                        data-label="Pending" data-icon="fa-clock-rotate-left"
+                                        data-count="{{ $docRequestStats['pending'] ?? 0 }}"
+                                        onclick="selectStatusFilter('pending')">
+                                        <span class="docreq-option-icon status-pending">
+                                            <i class="fa-solid fa-clock-rotate-left"></i>
+                                        </span>
+                                        <span class="docreq-option-label">Pending</span>
+                                        <span class="docreq-sort-option-count docreq-option-count" id="statPending">
+                                            {{ $docRequestStats['pending'] ?? 0 }}
+                                        </span>
+                                    </button>
+
+                                    <button type="button" class="docreq-sort-option status-approved"
+                                        data-value="approved" data-label="Approved" data-icon="fa-file-circle-check"
+                                        data-count="{{ $docRequestStats['approved'] ?? 0 }}"
+                                        onclick="selectStatusFilter('approved')">
+                                        <span class="docreq-option-icon status-approved">
+                                            <i class="fa-solid fa-file-circle-check"></i>
+                                        </span>
+                                        <span class="docreq-option-label">Approved</span>
+                                        <span class="docreq-sort-option-count docreq-option-count" id="statApproved">
+                                            {{ $docRequestStats['approved'] ?? 0 }}
+                                        </span>
+                                    </button>
+
+                                    <button type="button" class="docreq-sort-option status-rejected"
+                                        data-value="rejected" data-label="Rejected" data-icon="fa-file-circle-xmark"
+                                        data-count="{{ $docRequestStats['rejected'] ?? 0 }}"
+                                        onclick="selectStatusFilter('rejected')">
+                                        <span class="docreq-option-icon status-rejected">
+                                            <i class="fa-solid fa-file-circle-xmark"></i>
+                                        </span>
+                                        <span class="docreq-option-label">Rejected</span>
+                                        <span class="docreq-sort-option-count docreq-option-count" id="statRejected">
+                                            {{ $docRequestStats['rejected'] ?? 0 }}
+                                        </span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -280,12 +302,70 @@ $docRequestTypes = $docRequestsPayload
                 <div class="text-right">Actions</div>
             </div>
 
+            <div class="sl-pagebar sl-pagebar-top docreq-pagebar docreq-pagebar-top">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="sl-pagebar-info docreq-page-info" id="pageInfoTop"></span>
+
+                    <div class="sl-page-size-control docreq-page-size-control">
+                        <label for="docreqPerPageBtn">Show</label>
+
+                        <div id="docreqPerPageCustom" class="docreq-custom-select docreq-page-size-select-wrap">
+                            <button type="button" id="docreqPerPageBtn" class="docreq-page-size-trigger"
+                                data-select-button aria-expanded="false" aria-haspopup="true"
+                                onclick="toggleDocreqDropdown('docreqPerPageCustom')">
+                                <span id="docreqPerPageValue">10</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+
+                            <input type="hidden" id="docreqPerPageSelect" value="10">
+
+                            <div class="docreq-page-size-menu" role="listbox">
+                                <button type="button" class="docreq-page-size-option is-active" data-value="10"
+                                    onclick="selectDocreqPerPage(10)">
+                                    <span>10</span>
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+
+                                <button type="button" class="docreq-page-size-option" data-value="20"
+                                    onclick="selectDocreqPerPage(20)">
+                                    <span>20</span>
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+
+                                <button type="button" class="docreq-page-size-option" data-value="50"
+                                    onclick="selectDocreqPerPage(50)">
+                                    <span>50</span>
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+
+                                <button type="button" class="docreq-page-size-option" data-value="100"
+                                    onclick="selectDocreqPerPage(100)">
+                                    <span>100</span>
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <span>per page</span>
+                    </div>
+                </div>
+
+                <div class="sl-pagination-wrap docreq-pagination-wrap">
+                    <div id="pagControlsTop" class="sl-pagination docreq-page-controls"></div>
+                </div>
+            </div>
+
             <div id="requestListContainer" class="docreq-list-container"></div>
             <div id="requestGridContainer" class="docreq-grid"></div>
 
-            <div class="tfoot-bar">
-                <span style="font-size:12px;color:#9A9490;" id="pageInfo"></span>
-                <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;" id="pagControls"></div>
+            <div class="sl-pagebar docreq-pagebar docreq-pagebar-bottom">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="sl-pagebar-info docreq-page-info" id="pageInfo"></span>
+                </div>
+
+                <div class="sl-pagination-wrap docreq-pagination-wrap">
+                    <div id="pagControls" class="sl-pagination docreq-page-controls"></div>
+                </div>
             </div>
 
         </div>
@@ -507,95 +587,6 @@ $docRequestTypes = $docRequestsPayload
 
 <input type="hidden" id="approveRequestId">
 
-<div id="releaseModal" class="modal-overlay docreq-decision-overlay">
-    <div class="modal-box-inner docreq-decision-modal docreq-approve-modal">
-        <button type="button" class="modal-float-x" id="releaseCancelBtn">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <div class="approve-hero">
-            <div class="approve-icon-ring">
-                <div class="approve-icon-inner">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </div>
-            </div>
-
-            <div class="approve-hero-title">Release Document</div>
-            <div class="approve-hero-sub">Confirm that this document has been released to the patient</div>
-        </div>
-
-        <div class="docreq-decision-body">
-            <div class="docreq-decision-patient-card">
-                <div class="docreq-decision-avatar">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-
-                <div class="docreq-decision-person-copy">
-                    <div class="docreq-decision-label">Patient</div>
-                    <div id="releasePatientName" class="docreq-decision-patient-name">—</div>
-                </div>
-            </div>
-
-            <div class="docreq-decision-request-card">
-                <div class="docreq-decision-info">
-                    <div class="docreq-decision-info-icon">
-                        <i class="fa-regular fa-calendar"></i>
-                    </div>
-                    <div class="docreq-decision-info-copy">
-                        <span>Date & Time</span>
-                        <strong id="releaseRequestDate">—</strong>
-                        <small id="releaseRequestTime">—</small>
-                    </div>
-                </div>
-
-                <div class="docreq-decision-info">
-                    <div class="docreq-decision-info-icon">
-                        <i class="fa-regular fa-file-lines"></i>
-                    </div>
-                    <div class="docreq-decision-info-copy">
-                        <span>Document</span>
-                        <strong id="releaseRequestDocument">—</strong>
-                    </div>
-                </div>
-
-                <div class="docreq-decision-info docreq-decision-info-wide">
-                    <div class="docreq-decision-info-icon">
-                        <i class="fa-solid fa-message"></i>
-                    </div>
-                    <div class="docreq-decision-info-copy">
-                        <span>Purpose</span>
-                        <strong id="releaseRequestPurpose">—</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div class="approve-info-row">
-                <i class="fa-solid fa-circle-info"></i>
-                <span>This will mark the request as released. Confirm only after the patient has claimed the
-                    document.</span>
-            </div>
-        </div>
-
-        <div class="approve-footer">
-            <button type="button" class="modal-btn-ghost" id="releaseCancelBtn2">
-                <i class="fa-solid fa-arrow-left"></i>
-                Cancel
-            </button>
-
-            <button type="button" class="modal-btn-confirm-approve" id="releaseConfirmBtn">
-                <span class="btn-confirm-icon">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </span>
-                Confirm Release
-            </button>
-        </div>
-    </div>
-</div>
-
-<input type="hidden" id="releaseRequestId">
-
-
-
 <div id="rejectModal" class="modal-overlay docreq-decision-overlay">
     <div class="modal-box-inner docreq-decision-modal docreq-reject-modal">
         <button type="button" class="modal-float-x modal-float-x--red" id="rejectCancelBtn">
@@ -700,64 +691,6 @@ $docRequestTypes = $docRequestsPayload
 
 <input type="hidden" id="rejectRequestId">
 
-<div id="approvedResultModal" class="modal-overlay">
-    <div class="modal-box-inner">
-        <div
-            style="background:linear-gradient(135deg,#15803d,#16a34a);padding:2.5rem 2rem;text-align:center;color:#fff;">
-            <div
-                style="width:58px;height:58px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;">
-                <i class="fa-solid fa-circle-check" style="font-size:1.7rem;"></i>
-            </div>
-            <div style="font-size:1.55rem;margin-bottom:.5rem;">Request Approved!</div>
-            <p style="font-size:.82rem;opacity:.85;line-height:1.6;">The document has been approved and will
-                be<br>prepared
-                for printing. The patient will be notified.</p>
-            <button id="approvedResultClose"
-                style="margin-top:1.4rem;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:9px;padding:.5rem 1.5rem;font-weight:700;cursor:pointer;font-size:.83rem;">
-                Done
-            </button>
-        </div>
-    </div>
-</div>
-
-<div id="releasedResultModal" class="modal-overlay">
-    <div class="modal-box-inner">
-        <div
-            style="background:linear-gradient(135deg,#2563eb,#0ea5e9);padding:2.5rem 2rem;text-align:center;color:#fff;">
-            <div
-                style="width:58px;height:58px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;">
-                <i class="fa-solid fa-paper-plane" style="font-size:1.7rem;"></i>
-            </div>
-            <div style="font-size:1.55rem;margin-bottom:.5rem;">Document Released!</div>
-            <p style="font-size:.82rem;opacity:.85;line-height:1.6;">The request has been marked as released.<br>The
-                record will be updated after this closes.</p>
-            <button id="releasedResultClose"
-                style="margin-top:1.4rem;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:9px;padding:.5rem 1.5rem;font-weight:700;cursor:pointer;font-size:.83rem;">
-                Done
-            </button>
-        </div>
-    </div>
-</div>
-
-<div id="rejectedResultModal" class="modal-overlay">
-    <div class="modal-box-inner">
-        <div
-            style="background:linear-gradient(135deg,#991b1b,#b91c1c);padding:2.5rem 2rem;text-align:center;color:#fff;">
-            <div
-                style="width:58px;height:58px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;">
-                <i class="fa-solid fa-circle-xmark" style="font-size:1.7rem;"></i>
-            </div>
-            <div style="font-size:1.55rem;margin-bottom:.5rem;">Request Rejected</div>
-            <p style="font-size:.82rem;opacity:.85;line-height:1.6;">The request has been rejected. The patient<br>will
-                be
-                notified of the decision.</p>
-            <button id="rejectedResultClose"
-                style="margin-top:1.4rem;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:9px;padding:.5rem 1.5rem;font-weight:700;cursor:pointer;font-size:.83rem;">
-                Done
-            </button>
-        </div>
-    </div>
-</div>
 
 @endsection
 
@@ -770,9 +703,35 @@ $docRequestTypes = $docRequestsPayload
 
     let allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
     let activeFilter = @json(request('status', 'all') ?: 'all');
+
+    const DOCREQ_DROPDOWN_STATUSES = ['all', 'pending', 'approved', 'rejected'];
+
+    if (!DOCREQ_DROPDOWN_STATUSES.includes(activeFilter)) {
+        activeFilter = 'all';
+    }
+
+    const DOCREQ_DATA_URL = `${window.location.pathname.replace(/\/$/, '')}/data`;
+
+    let docreqKnownIds = new Set(allRequests.map((request) => Number(request.id)));
+    let docreqServerSnapshot = null;
+    let docreqPollTimer = null;
+
     let searchQuery = '';
-    const PER_PAGE = 8;
-    let currentPage = 1;
+
+    const DOCREQ_INDEX_URL = @json(route('admin.document-requests.index'));
+    const DOCREQ_INITIAL_PAGINATION = @json($docRequestPagination);
+
+    let docreqPagination = DOCREQ_INITIAL_PAGINATION || {
+        total: allRequests.length,
+        from: allRequests.length ? 1 : 0,
+        to: allRequests.length,
+        current_page: 1,
+        last_page: 1,
+        per_page: 10
+    };
+
+    let docreqPerPage = Number(docreqPagination.per_page || 10);
+    let currentPage = Number(docreqPagination.current_page || 1);
     let filterStatus = activeFilter;
     let filterDocType = '';
     let filterDateFrom = '';
@@ -795,6 +754,10 @@ $docRequestTypes = $docRequestsPayload
             b.classList.remove('active');
         });
 
+        document.querySelectorAll('.btn-view-mode').forEach(function (b) {
+            b.classList.remove('active');
+        });
+
         const targetBtn = btn || document.querySelector('.btn-view-mode[data-view="' + mode + '"]');
         if (targetBtn) targetBtn.classList.add('active');
 
@@ -804,13 +767,171 @@ $docRequestTypes = $docRequestsPayload
         renderList();
     }
 
+    function docreqToast(type, title, message) {
+        if (typeof window.showToast === 'function') {
+            window.showToast({
+                type,
+                title,
+                message,
+                duration: 5000
+            });
+            return;
+        }
+
+        alert(`${title}\n${message}`);
+    }
+
+    function normalizeDocreqStatus(status) {
+        const normalized = String(status || 'pending').replace(/_/g, '-').toLowerCase();
+
+        if (['ready', 'ready-for-pickup', 'ready-for-release', 'released'].includes(normalized)) {
+            return 'approved';
+        }
+
+        if (!['pending', 'approved', 'rejected'].includes(normalized)) {
+            return 'pending';
+        }
+
+        return normalized;
+    }
+
+    function normalizeDocreqRequest(request) {
+        return {
+            ...request,
+            status: normalizeDocreqStatus(request.status)
+        };
+    }
+
+    function recalculateDocreqStats(source = allRequests) {
+        const normalized = source.map(normalizeDocreqRequest);
+
+        return {
+            all: normalized.length,
+            pending: normalized.filter((request) => request.status === 'pending').length,
+            approved: normalized.filter((request) => request.status === 'approved').length,
+            rejected: normalized.filter((request) => request.status === 'rejected').length
+        };
+    }
+
+    function syncLocalDocRequestStatus(id, status, extra = {}) {
+        const normalizedStatus = normalizeDocreqStatus(status);
+
+        allRequests = allRequests.map((request) => {
+            if (Number(request.id) !== Number(id)) return request;
+
+            return normalizeDocreqRequest({
+                ...request,
+                ...extra,
+                status: normalizedStatus
+            });
+        });
+
+        updateStats(recalculateDocreqStats());
+        renderDocTypeOptions(documentTypeOptions);
+        renderList();
+    }
+
+    function applyDocreqServerSnapshot(payload) {
+        if (!payload || !Array.isArray(payload.requests)) return;
+
+        allRequests = payload.requests.map(normalizeDocreqRequest);
+        docreqKnownIds = new Set(allRequests.map((request) => Number(request.id)));
+
+        documentTypeOptions = normalizeDocTypes(
+            Array.isArray(payload.types) && payload.types.length
+                ? payload.types
+                : allRequests.map((request) => request.document_type)
+        );
+
+        renderDocTypeOptions(documentTypeOptions);
+        updateStats(payload.stats || recalculateDocreqStats());
+        renderList();
+
+        document.getElementById('docreqRefreshNotice')?.remove();
+        docreqServerSnapshot = null;
+    }
+
+    function showDocreqRefreshNotice(newCount = 1) {
+        let notice = document.getElementById('docreqRefreshNotice');
+
+        if (!notice) {
+            notice = document.createElement('div');
+            notice.id = 'docreqRefreshNotice';
+            notice.className = 'docreq-refresh-notice';
+
+            const tableCard = document.querySelector('.docreq-page .table-card');
+            tableCard?.parentNode?.insertBefore(notice, tableCard);
+        }
+
+        notice.innerHTML = `
+        <div class="docreq-refresh-copy">
+            <span class="docreq-refresh-icon">
+                <i class="fa-solid fa-rotate"></i>
+            </span>
+            <div>
+                <strong>${newCount} new document request${newCount === 1 ? '' : 's'} available</strong>
+                <small>Refresh to see the latest request${newCount === 1 ? '' : 's'}.</small>
+            </div>
+        </div>
+
+        <button type="button" class="docreq-refresh-btn" id="docreqRefreshNowBtn">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            Refresh
+        </button>
+    `;
+
+        notice.querySelector('#docreqRefreshNowBtn')?.addEventListener('click', () => {
+            applyDocreqServerSnapshot(docreqServerSnapshot);
+            docreqToast('info', 'Document requests updated', 'Latest document requests are now shown.');
+        });
+    }
+
+    async function checkDocreqUpdates() {
+        try {
+            const response = await fetch(DOCREQ_DATA_URL, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) return;
+
+            const payload = await response.json();
+            const incoming = Array.isArray(payload.requests)
+                ? payload.requests.map(normalizeDocreqRequest)
+                : [];
+
+            const newRequests = incoming.filter((request) => !docreqKnownIds.has(Number(request.id)));
+
+            if (newRequests.length > 0) {
+                docreqServerSnapshot = {
+                    ...payload,
+                    requests: incoming
+                };
+
+                showDocreqRefreshNotice(newRequests.length);
+            }
+        } catch (error) {
+            console.warn('Document request refresh check failed:', error);
+        }
+    }
+
+    function initDocreqRefreshWatcher() {
+        if (docreqPollTimer) clearInterval(docreqPollTimer);
+
+        docreqKnownIds = new Set(allRequests.map((request) => Number(request.id)));
+
+        docreqPollTimer = setInterval(checkDocreqUpdates, 15000);
+    }
+
     function loadData() {
         allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
 
         documentTypeOptions = normalizeDocTypes(
-            Array.isArray(ADMIN_DOC_TYPES) && ADMIN_DOC_TYPES.length
-                ? ADMIN_DOC_TYPES
-                : allRequests.map(r => r.document_type)
+            Array.isArray(ADMIN_DOC_TYPES) && ADMIN_DOC_TYPES.length ?
+                ADMIN_DOC_TYPES :
+                allRequests.map(r => r.document_type)
         );
 
         if (filterDocType && !documentTypeOptions.includes(filterDocType)) {
@@ -819,6 +940,7 @@ $docRequestTypes = $docRequestsPayload
 
         renderDocTypeOptions(documentTypeOptions);
         updateStats(ADMIN_DOC_STATS || {});
+        renderDocreqPagebar(docreqPagination);
         renderList();
     }
 
@@ -880,18 +1002,20 @@ $docRequestTypes = $docRequestsPayload
         const rowCountEl = document.getElementById('rowCount');
         if (rowCountEl) rowCountEl.textContent = 'Loading...';
 
-        document.getElementById('pageInfo').textContent = '';
-        document.getElementById('pagControls').innerHTML = '';
+        const pageInfo = document.getElementById('pageInfo');
+        const pagControls = document.getElementById('pagControls');
+
+        if (pageInfo) pageInfo.textContent = '';
+        if (pagControls) pagControls.innerHTML = '';
     }
 
     function updateStats(stats) {
         stats = stats || {};
+
         const values = {
-            all: stats.all ?? stats.total ?? 0,
+            all: stats.all ?? stats.total ?? allRequests.length ?? 0,
             pending: stats.pending ?? 0,
             approved: stats.approved ?? 0,
-            ready: stats.ready ?? 0,
-            released: stats.released ?? 0,
             rejected: stats.rejected ?? 0
         };
 
@@ -899,16 +1023,24 @@ $docRequestTypes = $docRequestsPayload
             all: ['statAll', 'miniStatAll'],
             pending: ['statPending', 'miniStatPending'],
             approved: ['statApproved', 'miniStatApproved'],
-            ready: ['statReady', 'miniStatReady'],
-            released: ['statReleased', 'miniStatReleased'],
             rejected: ['statRejected', 'miniStatRejected']
         };
 
         Object.keys(ids).forEach((key) => {
+            const value = values[key] ?? 0;
+
             ids[key].forEach((id) => {
                 const el = document.getElementById(id);
-                if (el) el.textContent = values[key] ?? 0;
+                if (el) el.textContent = value;
             });
+
+            const option = document.querySelector(
+                `#docreqStatusSelect .docreq-sort-option[data-value="${CSS.escape(key)}"]`
+            );
+
+            if (option) {
+                option.dataset.count = value;
+            }
         });
 
         updateStatusDropdownUI(activeFilter);
@@ -1048,7 +1180,7 @@ $docRequestTypes = $docRequestsPayload
 
         updateFilterBtn();
         renderFilterChips();
-        renderList();
+        fetchDocRequests();
     }
 
     function resetAdvancedFilters() {
@@ -1076,26 +1208,96 @@ $docRequestTypes = $docRequestsPayload
 
         updateFilterBtn();
         renderFilterChips();
-        renderList();
+        fetchDocRequests();
+    }
+
+    let docreqFetchController = null;
+
+    function getDocreqFetchParams() {
+        return new URLSearchParams({
+            search: searchQuery || '',
+            status: activeFilter || 'all',
+            type: filterDocType || '',
+            date_from: filterDateFrom || '',
+            date_to: filterDateTo || '',
+            sort: filterSort || 'newest',
+            per_page: docreqPerPage || 10,
+            page: currentPage || 1,
+        });
+    }
+
+    async function fetchDocRequests(silent = false) {
+        if (docreqFetchController) {
+            docreqFetchController.abort();
+        }
+
+        docreqFetchController = new AbortController();
+
+        const params = getDocreqFetchParams();
+        history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+
+        if (!silent) {
+            showSkeleton();
+        }
+
+        try {
+            const response = await fetch(`${DOCREQ_INDEX_URL}?${params.toString()}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF
+                },
+                signal: docreqFetchController.signal
+            });
+
+            if (!response.ok) {
+                throw new Error(`Request failed. Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            allRequests = Array.isArray(data.requests)
+                ? data.requests.map(normalizeDocreqRequest)
+                : [];
+
+            if (Array.isArray(data.types)) {
+                documentTypeOptions = normalizeDocTypes(data.types);
+                renderDocTypeOptions(documentTypeOptions);
+            }
+
+            if (data.stats) {
+                updateStats(data.stats);
+            }
+
+            if (data.pagination) {
+                currentPage = Number(data.pagination.current_page || 1);
+                docreqPerPage = Number(data.pagination.per_page || docreqPerPage || 10);
+                renderDocreqPagebar(data.pagination);
+            }
+
+            renderList();
+            renderFilterChips();
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Document request fetch failed:', error);
+
+                if (typeof window.showToast === 'function') {
+                    window.showToast({
+                        type: 'error',
+                        title: 'Load failed',
+                        message: 'Document requests could not be refreshed.'
+                    });
+                }
+            }
+        }
     }
 
     function renderList() {
-        const filtered = getFiltered();
-        const total = filtered.length;
+        const page = getFiltered();
         const tableHead = document.getElementById('docreqTableHead');
         const isMobile = window.innerWidth <= 767;
-        const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
-        if (currentPage > lastPage) currentPage = lastPage;
-        const start = (currentPage - 1) * PER_PAGE;
-        const page = filtered.slice(start, start + PER_PAGE);
 
-        const rowCountEl = document.getElementById('rowCount');
-        if (rowCountEl) rowCountEl.textContent = `${total} ${total === 1 ? 'request' : 'requests'}`;
-
-        document.getElementById('pageInfo').textContent =
-            total === 0 ? '' : `Showing ${start + 1}–${Math.min(start + PER_PAGE, total)} of ${total} requests`;
-
-        renderPagination(total, lastPage);
+        renderDocreqPagebar(docreqPagination);
 
         const listContainer = document.getElementById('requestListContainer');
         const gridContainer = document.getElementById('requestGridContainer');
@@ -1113,6 +1315,7 @@ $docRequestTypes = $docRequestsPayload
                     listContainer.style.display = 'none';
                     listContainer.innerHTML = '';
                 }
+
                 if (gridContainer) {
                     gridContainer.style.display = 'block';
                     gridContainer.innerHTML = emptyHtml;
@@ -1122,6 +1325,7 @@ $docRequestTypes = $docRequestsPayload
                     gridContainer.style.display = 'none';
                     gridContainer.innerHTML = '';
                 }
+
                 if (listContainer) {
                     listContainer.style.display = 'flex';
                     listContainer.innerHTML = emptyHtml;
@@ -1173,7 +1377,6 @@ $docRequestTypes = $docRequestsPayload
     function getPatientDisplayName(name) {
         const raw = String(name || '').trim();
 
-        // Converts: "Romero, Dianna Rain Margaja" -> "Dianna Rain Margaja Romero"
         if (raw.includes(',')) {
             const [lastName, firstPart] = raw.split(',').map(part => part.trim());
             return `${firstPart} ${lastName}`.replace(/\s+/g, ' ').trim();
@@ -1227,27 +1430,27 @@ $docRequestTypes = $docRequestsPayload
 
     function getStatusLabel(status) {
         const normalized = String(status || 'pending').replace(/_/g, '-').toLowerCase();
-        const labels = {
-            pending: 'Pending',
-            approved: 'Approved',
-            ready: 'Ready',
-            released: 'Released',
-            rejected: 'Rejected'
-        };
 
-        return labels[normalized] || normalized.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        if (normalized === 'approved' || normalized === 'ready' || normalized === 'released') {
+            return 'Approved';
+        }
+
+        if (normalized === 'rejected') return 'Rejected';
+
+        return 'Pending';
     }
 
     function jsStringArg(value) {
         return JSON.stringify(String(value ?? '')).replace(/"/g, '&quot;');
     }
 
-
     function getStatusBadgeClass(status) {
         const normalized = String(status || 'pending').replace(/_/g, '-').toLowerCase();
 
-        if (normalized === 'ready' || normalized === 'released') return 'badge-released';
-        if (normalized === 'approved') return 'badge-approved';
+        if (normalized === 'approved' || normalized === 'ready' || normalized === 'released') {
+            return 'badge-approved';
+        }
+
         if (normalized === 'rejected') return 'badge-rejected';
 
         return 'badge-pending';
@@ -1257,31 +1460,26 @@ $docRequestTypes = $docRequestsPayload
         const displayName = getPatientDisplayName(r.patient_name);
         const patientArg = jsStringArg(displayName);
         const statusLabel = getStatusLabel(r.status);
+        const status = String(r.status || 'pending').replace(/_/g, '-').toLowerCase();
+        const listClass = layout === 'list' ? 'docreq-list-action-btn' : '';
 
         const approveBtn = `
-            <button type="button" class="btn-approve ${layout === 'list' ? 'docreq-list-action-btn' : ''}" onclick="event.stopPropagation(); openApprove(${r.id}, ${patientArg})">
-                <i class="fa-solid fa-check"></i>
-                <span>Approve</span>
-            </button>
-        `;
-
-        const releaseBtn = `
-            <button type="button" class="btn-release ${layout === 'list' ? 'docreq-list-action-btn' : ''}" onclick="event.stopPropagation(); openRelease(${r.id}, ${patientArg})">
-                <i class="fa-solid fa-paper-plane"></i>
-                <span>Release</span>
-            </button>
-        `;
+        <button type="button" class="btn-approve ${listClass}" onclick="event.stopPropagation(); openApprove(${r.id}, ${patientArg})">
+            <i class="fa-solid fa-check"></i>
+            <span>Approve</span>
+        </button>
+    `;
 
         const rejectBtn = `
-            <button type="button" class="btn-reject ${layout === 'list' ? 'docreq-list-action-btn' : ''}" onclick="event.stopPropagation(); openReject(${r.id}, ${patientArg})">
-                <i class="fa-solid fa-xmark"></i>
-                <span>Reject</span>
-            </button>
-        `;
+        <button type="button" class="btn-reject ${listClass}" onclick="event.stopPropagation(); openReject(${r.id}, ${patientArg})">
+            <i class="fa-solid fa-xmark"></i>
+            <span>Reject</span>
+        </button>
+    `;
 
-        if (r.status === 'pending') return `${approveBtn}${rejectBtn}`;
-        if (r.status === 'approved') return `${releaseBtn}${rejectBtn}`;
-        if (r.status === 'ready') return `${releaseBtn}`;
+        if (status === 'pending') {
+            return `${approveBtn}${rejectBtn}`;
+        }
 
         return `<span class="docreq-mobile-state-note">${statusLabel}</span>`;
     }
@@ -1426,117 +1624,76 @@ $docRequestTypes = $docRequestsPayload
 
     function buildEmptyStateHtml() {
         const isSearchMiss = searchQuery !== '';
-        const hasAdvancedFilters =
-            filterDocType !== '' ||
-            filterDateFrom !== '' ||
-            filterDateTo !== '' ||
-            filterSort !== 'newest' ||
-            activeFilter !== 'all';
-
         const isDataEmpty = allRequests.length === 0;
+
+        const statusEmptyCopy = {
+            pending: {
+                stateClass: 'empty-pending',
+                iconHtml: '<i class="fa-solid fa-clock-rotate-left"></i>',
+                title: 'No pending requests',
+                subtitle: 'Pending document requests will appear here once submitted.'
+            },
+            approved: {
+                stateClass: 'empty-approved',
+                iconHtml: '<i class="fa-solid fa-file-circle-check"></i>',
+                title: 'No approved requests',
+                subtitle: 'Approved document requests will appear here after review.'
+            },
+            rejected: {
+                stateClass: 'empty-rejected',
+                iconHtml: '<i class="fa-solid fa-file-circle-xmark"></i>',
+                title: 'No rejected requests',
+                subtitle: 'Rejected document requests will appear here when applicable.'
+            }
+        };
 
         let stateClass = 'empty-neutral';
         let iconHtml = '<i class="fa-regular fa-folder-open"></i>';
         let title = 'No document requests yet';
         let subtitle = 'Incoming patient document requests will appear here once submitted.';
-        let buttonLabel = '';
-        let buttonAction = '';
-        const compactClass = 'compact';
+        let buttonHtml = '';
 
         if (isSearchMiss) {
             stateClass = 'empty-search';
             iconHtml = '<i class="fa-solid fa-magnifying-glass"></i>';
             title = `No results for "${esc(searchQuery)}"`;
             subtitle = 'Try another patient name or clear the search to see all requests.';
-            buttonLabel = 'Clear search';
-            buttonAction = 'clearSearch()';
-        } else if (activeFilter === 'pending') {
-            stateClass = 'empty-pending';
-            iconHtml = '<i class="fa-solid fa-clock-rotate-left"></i>';
-            title = 'No pending requests';
-            subtitle = isDataEmpty && !hasAdvancedFilters ?
-                'There are no document requests waiting for review right now.' :
-                'No pending requests match your current filters.';
-            if (hasAdvancedFilters && !isDataEmpty) {
-                buttonLabel = 'Clear filters';
-                buttonAction = 'resetAllFilters()';
-            }
-        } else if (activeFilter === 'approved') {
-            stateClass = 'empty-approved';
-            iconHtml = '<i class="fa-solid fa-file-circle-check"></i>';
-            title = 'No approved requests';
-            subtitle = isDataEmpty && !hasAdvancedFilters ?
-                'Approved document requests will appear here after review.' :
-                'No approved requests match your current filters.';
-            if (hasAdvancedFilters && !isDataEmpty) {
-                buttonLabel = 'Clear filters';
-                buttonAction = 'resetAllFilters()';
-            }
-        } else if (activeFilter === 'ready') {
-            stateClass = 'empty-approved';
-            iconHtml = '<i class="fa-solid fa-box-open"></i>';
-            title = 'No ready requests';
-            subtitle = isDataEmpty && !hasAdvancedFilters ?
-                'Prepared document requests will appear here when ready for pickup.' :
-                'No ready requests match your current filters.';
-            if (hasAdvancedFilters && !isDataEmpty) {
-                buttonLabel = 'Clear filters';
-                buttonAction = 'resetAllFilters()';
-            }
-        } else if (activeFilter === 'released') {
-            stateClass = 'empty-approved';
-            iconHtml = '<i class="fa-solid fa-paper-plane"></i>';
-            title = 'No released requests';
-            subtitle = isDataEmpty && !hasAdvancedFilters ?
-                'Released document requests will appear here after claiming.' :
-                'No released requests match your current filters.';
-            if (hasAdvancedFilters && !isDataEmpty) {
-                buttonLabel = 'Clear filters';
-                buttonAction = 'resetAllFilters()';
-            }
-        } else if (activeFilter === 'rejected') {
-            stateClass = 'empty-rejected';
-            iconHtml = '<i class="fa-solid fa-file-circle-xmark"></i>';
-            title = 'No rejected requests';
-            subtitle = isDataEmpty && !hasAdvancedFilters ?
-                'Rejected document requests will appear here when applicable.' :
-                'No rejected requests match your current filters.';
-            if (hasAdvancedFilters && !isDataEmpty) {
-                buttonLabel = 'Clear filters';
-                buttonAction = 'resetAllFilters()';
-            }
-        } else if (isDataEmpty && !hasAdvancedFilters) {
-            stateClass = 'empty-neutral';
-            iconHtml = '<i class="fa-regular fa-folder-open"></i>';
-            title = 'No document requests yet';
-            subtitle = 'Incoming patient document requests will appear here once submitted.';
-        } else {
+            buttonHtml = `
+            <button type="button"
+                data-clear-search
+                data-search-target="#searchInput"
+                class="empty-state-btn">
+                <i class="fa-solid fa-xmark"></i>
+                Clear search
+            </button>
+        `;
+        } else if (activeFilter !== 'all') {
+            const copy = statusEmptyCopy[activeFilter] || {
+                stateClass: 'empty-filter',
+                iconHtml: '<i class="fa-solid fa-filter-circle-xmark"></i>',
+                title: 'No matching requests found',
+                subtitle: 'No document requests are available for this status.'
+            };
+
+            stateClass = copy.stateClass;
+            iconHtml = copy.iconHtml;
+            title = copy.title;
+            subtitle = copy.subtitle;
+        } else if (!isDataEmpty) {
             stateClass = 'empty-filter';
             iconHtml = '<i class="fa-solid fa-filter-circle-xmark"></i>';
             title = 'No matching requests found';
-            subtitle = 'Your current filters did not return any records. Try adjusting or clearing them.';
-            buttonLabel = 'Clear filters';
-            buttonAction = 'resetAllFilters()';
+            subtitle = 'No document requests match the selected filters.';
         }
 
         return `
-  <div class="empty-state ${stateClass}">
-    <div class="empty-state-icon">${iconHtml}</div>
-    <p class="empty-state-title">${title}</p>
-    <p class="empty-state-sub">${subtitle}</p>
-
-    ${buttonLabel ? `
-              <button
-                type="button"
-                ${buttonAction === 'clearSearch()' ? 'data-clear-search data-search-target="#searchInput"' : `onclick="${buttonAction}"`}
-                class="empty-state-btn"
-              >
-                <i class="fa-solid fa-xmark"></i>
-                ${buttonLabel}
-              </button>
-            ` : ''}
-  </div>
-`;
+        <div class="empty-state ${stateClass}">
+            <div class="empty-state-icon">${iconHtml}</div>
+            <p class="empty-state-title">${title}</p>
+            <p class="empty-state-sub">${subtitle}</p>
+            ${buttonHtml}
+        </div>
+    `;
     }
 
     function buildMobileCard(r) {
@@ -1670,9 +1827,13 @@ $docRequestTypes = $docRequestsPayload
     function getDocumentAccent(status) {
         const normalized = String(status || 'pending').replace(/_/g, '-').toLowerCase();
 
-        if (normalized === 'approved') return getCssVar('--status-approved-solid', '#16A34A');
-        if (normalized === 'ready' || normalized === 'released') return getCssVar('--status-released-solid', '#8B5CF6');
-        if (normalized === 'rejected') return getCssVar('--status-rejected-solid', '#DC2626');
+        if (normalized === 'approved' || normalized === 'ready' || normalized === 'released') {
+            return getCssVar('--status-approved-solid', '#16A34A');
+        }
+
+        if (normalized === 'rejected') {
+            return getCssVar('--status-rejected-solid', '#DC2626');
+        }
 
         return getCssVar('--status-pending-solid', '#D97706');
     }
@@ -1682,36 +1843,121 @@ $docRequestTypes = $docRequestsPayload
             '&quot;');
     }
 
-    function renderPagination(total, lastPage) {
-        const ctrl = document.getElementById('pagControls');
-        if (lastPage <= 1) {
-            ctrl.innerHTML = '';
-            return;
-        }
-        let html = '';
-        html +=
-            `<button class="pag-btn" ${currentPage > 1 ? '' : 'disabled'} onclick="goPage(${currentPage - 1})">‹ Prev</button>`;
-        for (let p = 1; p <= lastPage; p++) html +=
-            `<button class="pag-btn ${p === currentPage ? 'pag-active' : ''}" onclick="goPage(${p})">${p}</button>`;
-        html +=
-            `<button class="pag-btn" ${currentPage < lastPage ? '' : 'disabled'} onclick="goPage(${currentPage + 1})">Next ›</button>`;
-        ctrl.innerHTML = html;
+    function updateDocreqPerPageUI(value) {
+        const allowed = ['10', '20', '50', '100'];
+        const selectedValue = allowed.includes(String(value)) ? String(value) : '10';
+
+        const hiddenInput = document.getElementById('docreqPerPageSelect');
+        const valueLabel = document.getElementById('docreqPerPageValue');
+
+        if (hiddenInput) hiddenInput.value = selectedValue;
+        if (valueLabel) valueLabel.textContent = selectedValue;
+
+        document.querySelectorAll('#docreqPerPageCustom .docreq-page-size-option').forEach((option) => {
+            const active = option.dataset.value === selectedValue;
+            option.classList.toggle('is-active', active);
+            option.classList.toggle('active', active);
+        });
     }
 
-    function goPage(p) {
-        currentPage = p;
-        renderList();
-        const activeContainer = currentViewMode === 'grid' ?
-            document.getElementById('requestGridContainer') :
-            document.getElementById('requestListContainer');
+    function selectDocreqPerPage(value) {
+        const selectedValue = Number(value) || 10;
 
-        if (activeContainer) {
-            activeContainer.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
+        docreqPerPage = selectedValue;
+        currentPage = 1;
+
+        updateDocreqPerPageUI(selectedValue);
+        closeDocreqDropdowns();
+        fetchDocRequests();
+    }
+
+    window.selectDocreqPerPage = selectDocreqPerPage;
+
+    function renderDocreqPagebar(p) {
+        if (!p) return;
+
+        docreqPagination = p;
+
+        const from = Number(p.from || 0);
+        const to = Number(p.to || 0);
+        const total = Number(p.total || 0);
+
+        const infoHtml = total > 0
+            ? `Showing <strong>${from}–${to}</strong> of <strong>${total}</strong> requests`
+            : 'Showing <strong>0</strong> requests';
+
+        document.querySelectorAll('.docreq-pagebar .sl-pagebar-info').forEach((el) => {
+            el.innerHTML = infoHtml;
+        });
+
+        const navHtml = buildDocreqPagination(p);
+
+        document.querySelectorAll('.docreq-pagination-wrap').forEach((el) => {
+            el.innerHTML = navHtml;
+        });
+
+        if (p.per_page) {
+            updateDocreqPerPageUI(p.per_page);
+        }
+
+        const rowCountEl = document.getElementById('rowCount');
+        if (rowCountEl) {
+            rowCountEl.textContent = `${total} ${total === 1 ? 'request' : 'requests'}`;
         }
     }
+
+    function buildDocreqPagination(p) {
+        if (!p || Number(p.last_page || 1) <= 1) return '';
+
+        const current = Number(p.current_page || 1);
+        const last = Number(p.last_page || 1);
+        const winSize = 5;
+        const half = Math.floor(winSize / 2);
+
+        let start = Math.max(1, current - half);
+        let end = Math.min(last, start + winSize - 1);
+
+        if (end - start + 1 < winSize) {
+            start = Math.max(1, end - winSize + 1);
+        }
+
+        let html = '<nav class="sl-pagination" aria-label="Document requests pagination">';
+
+        html += current <= 1
+            ? '<button type="button" disabled class="sl-page-disabled" aria-label="Previous page"><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>'
+            : `<button type="button" onclick="docreqGoPage(${current - 1})" class="sl-page-btn" aria-label="Previous page"><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>`;
+
+        if (start > 1) {
+            html += '<button type="button" onclick="docreqGoPage(1)" class="sl-page-btn">1</button>';
+            if (start > 2) html += '<span class="sl-page-ellipsis" aria-hidden="true">&hellip;</span>';
+        }
+
+        for (let i = start; i <= end; i++) {
+            html += i === current
+                ? `<span class="sl-page-current" aria-current="page">${i}</span>`
+                : `<button type="button" onclick="docreqGoPage(${i})" class="sl-page-btn">${i}</button>`;
+        }
+
+        if (end < last) {
+            if (end < last - 1) html += '<span class="sl-page-ellipsis" aria-hidden="true">&hellip;</span>';
+            html += `<button type="button" onclick="docreqGoPage(${last})" class="sl-page-btn">${last}</button>`;
+        }
+
+        html += current >= last
+            ? '<button type="button" disabled class="sl-page-disabled" aria-label="Next page"><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>'
+            : `<button type="button" onclick="docreqGoPage(${current + 1})" class="sl-page-btn" aria-label="Next page"><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>`;
+
+        html += '</nav>';
+
+        return html;
+    }
+
+    function docreqGoPage(page) {
+        currentPage = Number(page) || 1;
+        fetchDocRequests();
+    }
+
+    window.docreqGoPage = docreqGoPage;
 
     function toggleDocreqDropdown(selectId) {
         const wrap = document.getElementById(selectId);
@@ -1885,18 +2131,6 @@ $docRequestTypes = $docRequestsPayload
                 tone: 'status-approved',
                 countId: 'statApproved'
             },
-            ready: {
-                label: 'Ready',
-                icon: 'fa-box-open',
-                tone: 'status-released',
-                countId: 'statReady'
-            },
-            released: {
-                label: 'Released',
-                icon: 'fa-paper-plane',
-                tone: 'status-released',
-                countId: 'statReleased'
-            },
             rejected: {
                 label: 'Rejected',
                 icon: 'fa-file-circle-xmark',
@@ -1910,34 +2144,58 @@ $docRequestTypes = $docRequestsPayload
 
     function getStatusCount(status) {
         const meta = getStatusMeta(status);
-        return document.getElementById(meta.countId)?.textContent || '0';
+        const option = document.querySelector(
+            `#docreqStatusSelect .docreq-sort-option[data-value="${CSS.escape(status)}"]`
+        );
+
+        return option?.dataset.count ||
+            document.getElementById(meta.countId)?.textContent?.trim() ||
+            '0';
     }
 
     function updateStatusDropdownUI(status) {
+        if (!DOCREQ_DROPDOWN_STATUSES.includes(status)) {
+            status = 'all';
+        }
+
         const meta = getStatusMeta(status);
+        const wrap = document.getElementById('docreqStatusSelect');
+        const hiddenInput = document.getElementById('docreqStatusFilter');
         const label = document.getElementById('statusDropdownLabel');
         const count = document.getElementById('statusDropdownCount');
-        const leading = document.querySelector('#docreqStatusSelect .docreq-select-leading');
+        const leading = document.getElementById('docreqStatusSelectedIcon');
 
+        if (wrap) wrap.dataset.statusFilter = status;
+        if (hiddenInput) hiddenInput.value = status;
         if (label) label.textContent = meta.label;
         if (count) count.textContent = getStatusCount(status);
 
         if (leading) {
-            leading.className = `docreq-select-leading ${meta.tone}`;
+            leading.className = `docreq-sort-icon ${meta.tone}`;
             leading.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
         }
 
-        document.querySelectorAll('#docreqStatusSelect .docreq-select-option').forEach((option) => {
-            option.classList.toggle('active', option.getAttribute('data-value') === status);
+        document.querySelectorAll('#docreqStatusSelect .docreq-sort-option').forEach((option) => {
+            const active = option.getAttribute('data-value') === status;
+            option.classList.toggle('is-active', active);
+            option.classList.toggle('active', active);
         });
     }
 
     function selectStatusFilter(status) {
+        if (!DOCREQ_DROPDOWN_STATUSES.includes(status)) {
+            status = 'all';
+        }
+
         closeDocreqDropdowns();
         setFilter(status);
     }
 
     function setFilter(f) {
+        if (!DOCREQ_DROPDOWN_STATUSES.includes(f)) {
+            f = 'all';
+        }
+
         activeFilter = f;
         filterStatus = f;
         currentPage = 1;
@@ -1945,13 +2203,19 @@ $docRequestTypes = $docRequestsPayload
         updateStatusDropdownUI(f);
         updateFilterBtn();
         renderFilterChips();
-        renderList();
+        fetchDocRequests();
     }
+
+    let docreqSearchTimer = null;
 
     function onSearch(input) {
         searchQuery = input.value.trim();
         currentPage = 1;
-        renderList();
+
+        clearTimeout(docreqSearchTimer);
+        docreqSearchTimer = setTimeout(() => {
+            fetchDocRequests(true);
+        }, 350);
     }
 
     function outside(id) {
@@ -1976,9 +2240,9 @@ $docRequestTypes = $docRequestsPayload
     function fillDecisionModal(prefix, id, fallbackName = '') {
         const request = getDecisionRequest(id);
 
-        const patientName = request
-            ? getPatientDisplayName(request.patient_name)
-            : getPatientDisplayName(fallbackName);
+        const patientName = request ?
+            getPatientDisplayName(request.patient_name) :
+            getPatientDisplayName(fallbackName);
 
         setDecisionText(`${prefix}PatientName`, patientName);
         setDecisionText(`${prefix}RequestDate`, request?.request_date);
@@ -2010,12 +2274,6 @@ $docRequestTypes = $docRequestsPayload
         setTimeout(() => notes?.focus(), 80);
     }
 
-
-    function openRelease(id, name) {
-        document.getElementById('releaseRequestId').value = id;
-        fillDecisionModal('release', id, name);
-        window.openModal('releaseModal');
-    }
 
     function openFilterModal() {
         window.syncFilterTagGroup('fSortGroup', filterSort);
@@ -2068,7 +2326,7 @@ $docRequestTypes = $docRequestsPayload
         renderFilterChips();
         currentPage = 1;
         closeFilterModal();
-        renderList();
+        fetchDocRequests();
     }
 
     function getDraftDocRequestFilters() {
@@ -2266,7 +2524,8 @@ $docRequestTypes = $docRequestsPayload
         document.addEventListener('keydown', e => {
             if (e.key !== 'Escape') return;
             closeDocreqDropdowns();
-            ['approveModal', 'rejectModal', 'releaseModal', 'approvedResultModal', 'rejectedResultModal', 'releasedResultModal', 'filterModal']
+            ['approveModal', 'rejectModal', 'filterModal']
+
                 .forEach(id => {
                     const m = document.getElementById(id);
                     if (!m?.classList.contains('open')) return;
@@ -2275,7 +2534,8 @@ $docRequestTypes = $docRequestsPayload
                 });
         });
 
-        ['approveModal', 'rejectModal', 'releaseModal', 'approvedResultModal', 'rejectedResultModal', 'releasedResultModal', 'filterModal']
+        ['approveModal', 'rejectModal', 'filterModal']
+
             .forEach(id => outside(id));
 
         const filterModal = document.getElementById('filterModal');
@@ -2288,46 +2548,65 @@ $docRequestTypes = $docRequestsPayload
             updateShowResultsButton();
         });
 
-        const approveModal = document.getElementById('approveModal');
-        const approvedModal = document.getElementById('approvedResultModal');
         ['approveCancelBtn', 'approveCancelBtn2'].forEach(id =>
-            document.getElementById(id)?.addEventListener('click', () => window.closeModal('approveModal')));
-        document.getElementById('approvedResultClose').addEventListener('click', () => {
-            window.closeModal('approvedResultModal');
-            window.location.reload();
-        });
-        document.getElementById('approveConfirmBtn').addEventListener('click', async () => {
+            document.getElementById(id)?.addEventListener('click', () => window.closeModal('approveModal'))
+        );
+
+        document.getElementById('approveConfirmBtn')?.addEventListener('click', async () => {
             const id = document.getElementById('approveRequestId').value;
             const btn = document.getElementById('approveConfirmBtn');
+
             if (!id) return;
+
             btn.disabled = true;
-            const res = await fetch(`/admin/document-requests/${id}/approve`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': CSRF
-                },
-                body: '{}'
-            });
-            btn.disabled = false;
-            if (res.ok) {
+
+            try {
+                const res = await fetch(`/admin/document-requests/${id}/approve`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    throw new Error(data.message || `Approval failed. Status: ${res.status}`);
+                }
+
                 window.closeModal('approveModal');
-                window.openModal('approvedResultModal');
-            } else alert('Something went wrong.');
+                syncLocalDocRequestStatus(id, 'approved');
+
+                docreqToast(
+                    'success',
+                    'Request approved',
+                    data.message || 'The document request has been approved. The patient will be notified.'
+                );
+            } catch (error) {
+                console.error('Approve request error:', error);
+
+                docreqToast(
+                    'error',
+                    'Approval failed',
+                    error.message || 'Approval failed because of a network or JavaScript error.'
+                );
+            } finally {
+                btn.disabled = false;
+            }
         });
 
-        const rejectModal = document.getElementById('rejectModal');
-        const rejectedModal = document.getElementById('rejectedResultModal');
         ['rejectCancelBtn', 'rejectCancelBtn2'].forEach(id =>
-            document.getElementById(id)?.addEventListener('click', () => window.closeModal('rejectModal')));
-        document.getElementById('rejectedResultClose').addEventListener('click', () => {
-            window.closeModal('rejectedResultModal');
-            window.location.reload();
-        });
-        document.getElementById('rejectConfirmBtn').addEventListener('click', async () => {
+            document.getElementById(id)?.addEventListener('click', () => window.closeModal('rejectModal'))
+        );
+
+        document.getElementById('rejectConfirmBtn')?.addEventListener('click', async () => {
             const id = document.getElementById('rejectRequestId').value;
             const btn = document.getElementById('rejectConfirmBtn');
-            const notes = document.getElementById('rejectNotes').value.trim();
+            const notes = document.getElementById('rejectNotes')?.value.trim() || '';
 
             if (!id) return;
 
@@ -2337,59 +2616,54 @@ $docRequestTypes = $docRequestsPayload
             }
 
             btn.disabled = true;
-            const res = await fetch(`/admin/document-requests/${id}/reject`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': CSRF
-                },
-                body: JSON.stringify({
-                    reason: notes
-                })
-            });
-            btn.disabled = false;
-            if (res.ok) {
+
+            try {
+                const res = await fetch(`/admin/document-requests/${id}/reject`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        reason: notes
+                    })
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    throw new Error(data.message || `Rejection failed. Status: ${res.status}`);
+                }
+
                 window.closeModal('rejectModal');
-                window.openModal('rejectedResultModal');
-            } else alert('Something went wrong.');
-        });
+                syncLocalDocRequestStatus(id, 'rejected', {
+                    rejection_reason: notes
+                });
 
+                docreqToast(
+                    'success',
+                    'Request rejected',
+                    data.message || 'The document request has been rejected. The patient will be notified.'
+                );
+            } catch (error) {
+                console.error('Reject request error:', error);
 
-        ['releaseCancelBtn', 'releaseCancelBtn2'].forEach(id =>
-            document.getElementById(id)?.addEventListener('click', () => window.closeModal('releaseModal')));
-
-        document.getElementById('releasedResultClose')?.addEventListener('click', () => {
-            window.closeModal('releasedResultModal');
-            window.location.reload();
-        });
-
-        document.getElementById('releaseConfirmBtn')?.addEventListener('click', async () => {
-            const id = document.getElementById('releaseRequestId').value;
-            const btn = document.getElementById('releaseConfirmBtn');
-
-            if (!id) return;
-
-            btn.disabled = true;
-            const res = await fetch(`/admin/document-requests/${id}/release`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': CSRF
-                },
-                body: '{}'
-            });
-            btn.disabled = false;
-
-            if (res.ok) {
-                window.closeModal('releaseModal');
-                window.openModal('releasedResultModal');
-            } else {
-                alert('Something went wrong.');
+                docreqToast(
+                    'error',
+                    'Rejection failed',
+                    error.message || 'Rejection failed because of a network or JavaScript error.'
+                );
+            } finally {
+                btn.disabled = false;
             }
         });
 
-        loadData();
-    });
+        updateDocreqPerPageUI(docreqPerPage || 10);
 
+        loadData();
+        initDocreqRefreshWatcher();
+    });
 </script>
 @endsection

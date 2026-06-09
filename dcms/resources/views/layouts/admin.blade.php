@@ -2,8 +2,12 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
+   <meta charset="UTF-8" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @if (auth()->check())
+        <meta name="auth-user-id" content="{{ auth()->id() }}">
+    @endif
     <script>
         (function() {
             const theme = localStorage.getItem('theme') || 'light';
@@ -27,10 +31,6 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"rel="stylesheet">
 
     <link rel="stylesheet" href="{{ asset('css/header.css') }}">
-
-    @include('partials.admin.styles')
-    @include('partials.terms-styles')
-    @include('partials.global-toast-styles')
 
     @yield('styles')
 
@@ -60,6 +60,10 @@
 
     @include('components.discard-changes')
     @include('components.patient-record-modal')
+
+    @include('components.reschedule-modal')
+    @include('components.cancel-modal')
+
     {{-- Sienna Accessibility Widget --}}
     <script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
         data-position="bottom-right" data-offset="18,24" defer></script>
@@ -68,8 +72,10 @@
 
     {{-- GLOBAL TERMS MODAL --}}
     @include('partials.terms-modal')
-    @include('partials.terms-scripts')
 
+    @include('components.reschedule-modal-script')
+    @include('components.cancel-modal-script')
+    
     @stack('scripts')
     @yield('scripts')
 

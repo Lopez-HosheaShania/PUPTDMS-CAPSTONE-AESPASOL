@@ -31,10 +31,6 @@
 
     <link rel="stylesheet" href="{{ asset('css/header.css') }}">
 
-    @include('partials.dentist.styles')
-    @include('partials.terms-styles')
-    @include('partials.global-toast-styles')
-
     @yield('styles')
 
 </head>
@@ -52,8 +48,6 @@
     @include('partials.dentist.drawer')
 
     @include('partials.impersonation-banner')
-
-    <div id="toastContainer"></div>
 
     @include('components.reschedule-modal')
     @include('components.cancel-modal')
@@ -74,7 +68,6 @@
 
     {{-- GLOBAL TERMS MODAL --}}
     @include('partials.terms-modal')
-    @include('partials.terms-scripts')
 
     @if (View::hasSection('usesAppointmentCalendar'))
         @include('components.appointment-calendar-script', [
