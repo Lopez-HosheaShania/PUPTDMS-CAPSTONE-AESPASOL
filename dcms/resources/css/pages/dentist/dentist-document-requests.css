@@ -62,8 +62,8 @@
 }
 
 .docreq-decision-modal {
-    max-width: 460px !important;
-    width: min(460px, calc(100vw - 32px)) !important;
+    max-width: 580px !important;
+    width: min(580px, calc(100vw - 32px)) !important;
     max-height: min(88dvh, 720px) !important;
     border-radius: 22px !important;
     display: flex !important;
