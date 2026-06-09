@@ -2119,8 +2119,8 @@
 }
 
 #deleteServiceModal .st-delete-user-modal {
-    width: min(94vw, 440px) !important;
-    max-width: 440px !important;
+    width: min(92vw, 450px) !important;
+    max-width: 480px !important;
     max-height: calc(100dvh - 2rem) !important;
     border-radius: 22px !important;
     overflow: hidden !important;
@@ -2132,7 +2132,7 @@
 }
 
 #deleteServiceModal .st-delete-head {
-    padding: 1.25rem 1.35rem !important;
+    padding: 1rem 1.15rem !important;
     border-bottom: 1px solid #EEF2F7 !important;
     background:
         radial-gradient(circle at top right, rgba(239, 68, 68, .10), transparent 38%),
@@ -2141,12 +2141,25 @@
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 1rem !important;
+    gap: .85rem !important;
+}
+
+#deleteServiceModal .st-delete-head-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: .8rem !important;
+    min-width: 0 !important;
+    text-align: left !important;
+}
+
+#deleteServiceModal .st-delete-head-left>div:last-child {
+    min-width: 0 !important;
 }
 
 #deleteServiceModal .st-delete-head-icon {
-    width: 42px !important;
-    height: 42px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
     border-radius: 14px !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -2167,11 +2180,10 @@
     font-size: 1rem !important;
     line-height: 1.1 !important;
     font-weight: 900 !important;
-    letter-spacing: -.02em !important;
 }
 
 #deleteServiceModal .st-delete-subtitle {
-    margin: .25rem 0 0 !important;
+    margin: .2rem 0 0 !important;
     color: #8B95A7 !important;
     font-size: .72rem !important;
     line-height: 1.25 !important;
@@ -2179,17 +2191,17 @@
 }
 
 #deleteServiceModal .st-delete-body {
-    padding: 1.35rem !important;
+    padding: 1.15rem !important;
     background: #FFFFFF !important;
 }
 
 #deleteServiceModal .st-delete-alert {
     display: flex !important;
     align-items: flex-start !important;
-    gap: .85rem !important;
+    gap: .75rem !important;
 
-    padding: 1rem !important;
-    margin-bottom: 1.1rem !important;
+    padding: .9rem !important;
+    margin-bottom: 1rem !important;
     border-radius: 16px !important;
 
     background: #FEF2F2 !important;
@@ -2232,39 +2244,47 @@
 
 #deleteServiceModal .st-delete-actions {
     display: flex !important;
-    align-items: center !important;
     justify-content: flex-end !important;
-    gap: .75rem !important;
+    gap: .7rem !important;
 }
 
 #deleteServiceModal .service-delete-form {
+    width: auto !important;
     margin: 0 !important;
 }
 
 #deleteServiceModal .st-delete-confirm-btn {
-    min-height: 44px !important;
-    padding: 0 1.35rem !important;
+    min-height: 42px !important;
+    padding: 0 1.15rem !important;
     border: 0 !important;
     border-radius: 12px !important;
 
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: .55rem !important;
+    gap: .5rem !important;
 
     background: linear-gradient(135deg, #DC2626, #EF4444) !important;
     color: #FFFFFF !important;
 
-    font-size: .875rem !important;
+    font-size: .84rem !important;
     font-weight: 900 !important;
     line-height: 1 !important;
     cursor: pointer !important;
 
     box-shadow: 0 10px 22px rgba(220, 38, 38, .24) !important;
-    transition:
-        background .18s ease,
-        transform .18s ease,
-        box-shadow .18s ease !important;
+    transition: all .18s ease !important;
+}
+
+#deleteServiceModal .modal-btn-ghost {
+    min-height: 42px !important;
+    padding: 0 1.15rem !important;
+    border-radius: 12px !important;
+    border: 1px solid #E5E7EB !important;
+    background: #FFFFFF !important;
+    color: #4B5563 !important;
+    font-size: .84rem !important;
+    font-weight: 900 !important;
 }
 
 #deleteServiceModal .st-delete-confirm-btn:hover,
@@ -2477,4 +2497,94 @@
     background: rgba(252, 165, 165, .12) !important;
     border-color: rgba(252, 165, 165, .20) !important;
     color: #FCA5A5 !important;
+}
+
+body>#manageServiceModal.st-manage-modal,
+body>#deleteServiceModal.st-delete-confirm-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: clamp(14px, 3vh, 24px) !important;
+    z-index: 99999 !important;
+}
+
+body>#manageServiceModal.st-manage-modal .st-modal-box {
+    width: min(900px, calc(100vw - 48px)) !important;
+    max-height: min(760px, calc(100dvh - 48px)) !important;
+    margin: 0 auto !important;
+    transform: none !important;
+}
+
+body>#manageServiceModal.st-manage-modal .st-manage-form {
+    max-height: min(760px, calc(100dvh - 48px)) !important;
+}
+
+body>#manageServiceModal.st-manage-modal .st-modal-body {
+    max-height: min(460px, calc(100dvh - 220px)) !important;
+}
+
+body>#deleteServiceModal.st-delete-confirm-modal .st-delete-user-modal {
+    margin: 0 auto !important;
+    transform: none !important;
+}
+
+body.modal-lock {
+    overflow: hidden !important;
+}
+
+.st-btn:disabled,
+.st-delete-confirm-btn:disabled,
+.st-save-service-btn:disabled {
+    opacity: .72 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+.st-btn .spin,
+.st-delete-confirm-btn .spin,
+.st-save-service-btn .spin {
+    color: currentColor !important;
+}
+
+.service-type-card,
+#serviceTypeTableBody tr {
+    transition:
+        background-color .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease,
+        opacity .18s ease,
+        transform .18s ease;
+}
+
+@media (max-width: 767px) {
+    body>#manageServiceModal.st-manage-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    body>#manageServiceModal.st-manage-modal .st-modal-box {
+        width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 26px 26px 0 0 !important;
+    }
+
+    body>#manageServiceModal.st-manage-modal .st-manage-form {
+        max-height: 88dvh !important;
+    }
+
+    body>#manageServiceModal.st-manage-modal .st-modal-body {
+        max-height: calc(88dvh - 170px) !important;
+    }
+
+    body>#deleteServiceModal.st-delete-confirm-modal {
+        padding: 18px !important;
+    }
 }

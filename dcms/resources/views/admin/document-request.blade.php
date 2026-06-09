@@ -27,43 +27,12 @@
             return ucwords(str_replace(['_', '-'], ' ', (string) ($type ?: 'Document')));
         };
 
-        $docRequestsPayload = $docRequestsCollection->map(function ($req) use ($normalizeStatus, $formatDocumentType) {
-            $patient = $req->patient ?? null;
-            $createdAt = $req->created_at ?? now();
+                    <div
+                        class="docreq-toolbar-actions flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-end">
 
-            $patientName = data_get($patient, 'name') ?? 'Unknown Patient';
-            $patientIdentifier =
-                data_get($patient, 'student_no') ??
-                (data_get($patient, 'student_number') ??
-                    (data_get($patient, 'student_id') ??
-                        (data_get($patient, 'faculty_code') ??
-                            (data_get($patient, 'employee_no') ?? (data_get($patient, 'id') ?? 'No ID set')))));
-
-            $documentLabel = $formatDocumentType($req->document_type ?? 'Document');
-            $status = $normalizeStatus($req->status ?? 'pending');
-
-            return [
-                'id' => $req->id,
-                'reference_number' =>
-                    $req->reference_number ?? 'DR-' . str_pad((string) $req->id, 5, '0', STR_PAD_LEFT),
-                'patient_name' => $patientName,
-                'patient_identifier' => $patientIdentifier,
-                'sub_label' => $patientIdentifier ?: 'No ID set',
-                'document_type' => $documentLabel,
-                'document_type_raw' => $req->document_type ?? $documentLabel,
-                'purpose' => $req->purpose ?: '—',
-                'status' => $status,
-                'request_date' => optional($createdAt)->format('M d, Y') ?? '—',
-                'request_time' => optional($createdAt)->format('h:i A') ?? '',
-                'request_sort_date' => optional($createdAt)->format('Y-m-d H:i:s') ?? '',
-                'filter_date' => optional($createdAt)->format('Y-m-d') ?? '',
-                'copies_needed' => $req->copies_needed ?? 1,
-                'patient_photo_url' =>
-                    data_get($patient, 'profile_photo_url') ??
-                    (data_get($patient, 'profile_picture_url') ??
-                        (data_get($patient, 'avatar_url') ?? (data_get($patient, 'photo_url') ?? ''))),
-            ];
-        });
+                        <div class="docreq-search-wrap flex-1 md:flex-none flex items-center gap-2">
+                            <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
 
         $statsSource = $stats ?? [];
         $countByStatus = function ($status) use ($docRequestsCollection, $normalizeStatus) {
@@ -86,153 +55,87 @@
         $docRequestTypes = $docRequestsPayload->pluck('document_type')->filter()->unique()->sort()->values();
     @endphp
 
-    <main id="mainContent" class="admin-page-shell page-enter docreq-page mode-list">
-        <div class="w-full">
+                        <div id="docreqStatusSelect"
+                            class="docreq-custom-select docreq-status-dropdown docreq-sort-dropdown docreq-toolbar-sort"
+                            data-status-filter="all">
 
-            <div class="page-banner docreq-header-wrap">
-                <div class="page-banner-inner">
-                    <div>
-                        <h1 class="page-title">Document Requests</h1>
-                    </div>
+                            <button type="button" class="docreq-sort-trigger" id="docreqStatusDropdownBtn"
+                                data-select-button aria-expanded="false" aria-haspopup="true"
+                                aria-controls="docreqStatusMenu" onclick="toggleDocreqDropdown('docreqStatusSelect')">
 
-                    <div class="page-banner-actions">
-                        <a href="{{ route('admin.document-requests.export') }}" class="ui-btn ui-btn-secondary">
-                            <i class="fa-solid fa-file-export text-xs"></i>
-                            Export CSV
-                        </a>
-                        <a href="{{ route('admin.document-requests.print-queue') }}" class="ui-btn ui-btn-primary">
-                            <i class="fa-solid fa-print text-xs"></i>
-                            Print Queue
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="table-card rounded-2xl border border-gray-200 shadow-sm overflow-hidden bg-white">
-
-                <div class="px-4 md:px-6 py-3.5 border-b border-gray-100 bg-[#FAFAFA]/50">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-
-                        <div class="order-2 md:order-1">
-                            <span id="rowCount"
-                                class="text-[11px] md:text-sm font-bold text-gray-400 uppercase tracking-wider">
-                                {{ $docRequestStats['all'] }} requests
-                            </span>
-                        </div>
-
-                        <div
-                            class="docreq-toolbar-actions flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-end">
-                            <div class="docreq-search-wrap flex-1 md:flex-none flex items-center gap-2">
-                                <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
-                                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-
-                                    <input id="searchInput" type="text"
-                                        placeholder="Search name, ID, reference, document…" data-search-input
-                                        class="search-input" oninput="onSearch(this)" />
-
-                                    <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
-                                        <i class="fa-solid fa-xmark text-xs"></i>
-                                    </button>
-                                </div>
-
-                                <div class="voice-input-toggle">
-                                    <span class="voice-status hidden" data-voice-status></span>
-                                    <button type="button" class="voice-search-mic external" data-global-voice-trigger
-                                        data-voice-target="#searchInput" aria-label="Use voice search" title="Voice search">
-                                        <i class="fa-solid fa-microphone"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div id="docreqStatusSelect"
-                                class="docreq-custom-select docreq-status-dropdown docreq-toolbar-sort">
-                                <button type="button" class="docreq-select-button" data-select-button
-                                    aria-haspopup="listbox" aria-expanded="false" aria-controls="docreqStatusMenu"
-                                    onclick="toggleDocreqDropdown('docreqStatusSelect')">
-                                    <span class="docreq-select-leading status-all">
+                                <span class="docreq-sort-trigger-left">
+                                    <span class="docreq-sort-icon status-all" id="docreqStatusSelectedIcon">
                                         <i class="fa-solid fa-file-medical"></i>
                                     </span>
 
-                                    <span class="docreq-select-text">
-                                        <span>Sort by</span>
-                                        <strong id="statusDropdownLabel">All Requests</strong>
+                                    <span class="docreq-sort-copy">
+                                        <span class="docreq-sort-label">Sort By</span>
+                                        <strong class="docreq-sort-value" id="statusDropdownLabel">All Requests</strong>
                                     </span>
+                                </span>
 
-                                    <span id="statusDropdownCount" class="docreq-select-count">0</span>
-                                    <i class="fa-solid fa-chevron-down docreq-select-chevron"></i>
-                                </button>
+                                <span class="docreq-sort-trigger-right">
+                                    <span id="statusDropdownCount" class="docreq-sort-count">
+                                        {{ $docRequestStats['all'] ?? 0 }}
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down docreq-sort-chevron"></i>
+                                </span>
+                            </button>
 
-                                <div id="docreqStatusMenu" class="docreq-select-menu" role="listbox">
-                                    <button type="button" class="docreq-select-option active" data-value="all"
+                            <input type="hidden" id="docreqStatusFilter" value="all">
+
+                            <div class="docreq-sort-panel" id="docreqStatusMenu" role="listbox">
+                                <div class="docreq-sort-grid">
+                                    <button type="button" class="docreq-sort-option is-active status-all"
+                                        data-value="all" data-label="All Requests" data-icon="fa-file-medical"
+                                        data-count="{{ $docRequestStats['all'] ?? 0 }}"
                                         onclick="selectStatusFilter('all')">
                                         <span class="docreq-option-icon status-all">
                                             <i class="fa-solid fa-file-medical"></i>
                                         </span>
-                                        <span class="docreq-option-copy">
-                                            <strong>All Requests</strong>
-                                            <small>Show every document request</small>
+                                        <span class="docreq-option-label">All Requests</span>
+                                        <span class="docreq-sort-option-count docreq-option-count" id="statAll">
+                                            {{ $docRequestStats['all'] ?? 0 }}
                                         </span>
-                                        <span class="docreq-option-count" id="statAll">0</span>
                                     </button>
 
-                                    <button type="button" class="docreq-select-option" data-value="pending"
+                                    <button type="button" class="docreq-sort-option status-pending" data-value="pending"
+                                        data-label="Pending" data-icon="fa-clock-rotate-left"
+                                        data-count="{{ $docRequestStats['pending'] ?? 0 }}"
                                         onclick="selectStatusFilter('pending')">
                                         <span class="docreq-option-icon status-pending">
                                             <i class="fa-solid fa-clock-rotate-left"></i>
                                         </span>
-                                        <span class="docreq-option-copy">
-                                            <strong>Pending</strong>
-                                            <small>Needs review</small>
+                                        <span class="docreq-option-label">Pending</span>
+                                        <span class="docreq-sort-option-count docreq-option-count" id="statPending">
+                                            {{ $docRequestStats['pending'] ?? 0 }}
                                         </span>
-                                        <span class="docreq-option-count" id="statPending">0</span>
                                     </button>
 
-                                    <button type="button" class="docreq-select-option" data-value="approved"
+                                    <button type="button" class="docreq-sort-option status-approved"
+                                        data-value="approved" data-label="Approved" data-icon="fa-file-circle-check"
+                                        data-count="{{ $docRequestStats['approved'] ?? 0 }}"
                                         onclick="selectStatusFilter('approved')">
                                         <span class="docreq-option-icon status-approved">
                                             <i class="fa-solid fa-file-circle-check"></i>
                                         </span>
-                                        <span class="docreq-option-copy">
-                                            <strong>Approved</strong>
-                                            <small>Ready for release</small>
+                                        <span class="docreq-option-label">Approved</span>
+                                        <span class="docreq-sort-option-count docreq-option-count" id="statApproved">
+                                            {{ $docRequestStats['approved'] ?? 0 }}
                                         </span>
-                                        <span class="docreq-option-count" id="statApproved">0</span>
                                     </button>
 
-                                    <button type="button" class="docreq-select-option" data-value="ready"
-                                        onclick="selectStatusFilter('ready')">
-                                        <span class="docreq-option-icon status-released">
-                                            <i class="fa-solid fa-box-open"></i>
-                                        </span>
-                                        <span class="docreq-option-copy">
-                                            <strong>Ready</strong>
-                                            <small>Prepared for pickup</small>
-                                        </span>
-                                        <span class="docreq-option-count" id="statReady">0</span>
-                                    </button>
-
-                                    <button type="button" class="docreq-select-option" data-value="released"
-                                        onclick="selectStatusFilter('released')">
-                                        <span class="docreq-option-icon status-released">
-                                            <i class="fa-solid fa-paper-plane"></i>
-                                        </span>
-                                        <span class="docreq-option-copy">
-                                            <strong>Released</strong>
-                                            <small>Claimed documents</small>
-                                        </span>
-                                        <span class="docreq-option-count" id="statReleased">0</span>
-                                    </button>
-
-                                    <button type="button" class="docreq-select-option" data-value="rejected"
+                                    <button type="button" class="docreq-sort-option status-rejected"
+                                        data-value="rejected" data-label="Rejected" data-icon="fa-file-circle-xmark"
+                                        data-count="{{ $docRequestStats['rejected'] ?? 0 }}"
                                         onclick="selectStatusFilter('rejected')">
                                         <span class="docreq-option-icon status-rejected">
                                             <i class="fa-solid fa-file-circle-xmark"></i>
                                         </span>
-                                        <span class="docreq-option-copy">
-                                            <strong>Rejected</strong>
-                                            <small>Not approved</small>
+                                        <span class="docreq-option-label">Rejected</span>
+                                        <span class="docreq-sort-option-count docreq-option-count" id="statRejected">
+                                            {{ $docRequestStats['rejected'] ?? 0 }}
                                         </span>
-                                        <span class="docreq-option-count" id="statRejected">0</span>
                                     </button>
                                 </div>
                             </div>
@@ -651,34 +554,43 @@
 @endsection
 
 @section('scripts')
-    <script>
-        const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
-        const ADMIN_DOC_REQUESTS = @json($docRequestsPayload->values());
-        const ADMIN_DOC_STATS = @json($docRequestStats);
-        const ADMIN_DOC_TYPES = @json($docRequestTypes->values());
+<script>
+    const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+    const ADMIN_DOC_REQUESTS = @json($docRequestsPayload -> values());
+    const ADMIN_DOC_STATS = @json($docRequestStats);
+    const ADMIN_DOC_TYPES = @json($docRequestTypes -> values());
 
-        let allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
-        let activeFilter = @json(request('status', 'all') ?: 'all');
-        let searchQuery = '';
-        const PER_PAGE = 8;
-        let currentPage = 1;
-        let filterStatus = activeFilter;
-        let filterDocType = '';
-        let filterDateFrom = '';
-        let filterDateTo = '';
-        let filterSort = 'newest';
-        let documentTypeOptions = [];
+    let allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
+    let activeFilter = @json(request('status', 'all') ?: 'all');
+    const DOCREQ_DROPDOWN_STATUSES = ['all', 'pending', 'approved', 'rejected'];
 
-        let currentViewMode = window.innerWidth <= 767 ? 'grid' : 'list';
+    if (!DOCREQ_DROPDOWN_STATUSES.includes(activeFilter)) {
+        activeFilter = 'all';
+    }
+    let searchQuery = '';
+    const PER_PAGE = 8;
+    let currentPage = 1;
+    let filterStatus = activeFilter;
+    let filterDocType = '';
+    let filterDateFrom = '';
+    let filterDateTo = '';
+    let filterSort = 'newest';
+    let documentTypeOptions = [];
 
-        function setViewMode(mode, btn) {
-            const mainContent = document.getElementById('mainContent');
-            currentViewMode = mode;
+    let currentViewMode = window.innerWidth <= 767 ? 'grid' : 'list';
 
-            if (mainContent) {
-                mainContent.classList.toggle('mode-grid', mode === 'grid');
-                mainContent.classList.toggle('mode-list', mode !== 'grid');
-            }
+    function setViewMode(mode, btn) {
+        const mainContent = document.getElementById('mainContent');
+        currentViewMode = mode;
+
+        if (mainContent) {
+            mainContent.classList.toggle('mode-grid', mode === 'grid');
+            mainContent.classList.toggle('mode-list', mode !== 'grid');
+        }
+
+        document.querySelectorAll('.btn-view-mode').forEach(function (b) {
+            b.classList.remove('active');
+        });
 
             document.querySelectorAll('.btn-view-mode').forEach(function(b) {
                 b.classList.remove('active');
@@ -773,32 +685,39 @@
             document.getElementById('pagControls').innerHTML = '';
         }
 
-        function updateStats(stats) {
-            stats = stats || {};
-            const values = {
-                all: stats.all ?? stats.total ?? 0,
-                pending: stats.pending ?? 0,
-                approved: stats.approved ?? 0,
-                ready: stats.ready ?? 0,
-                released: stats.released ?? 0,
-                rejected: stats.rejected ?? 0
-            };
+    function updateStats(stats) {
+        stats = stats || {};
 
-            const ids = {
-                all: ['statAll', 'miniStatAll'],
-                pending: ['statPending', 'miniStatPending'],
-                approved: ['statApproved', 'miniStatApproved'],
-                ready: ['statReady', 'miniStatReady'],
-                released: ['statReleased', 'miniStatReleased'],
-                rejected: ['statRejected', 'miniStatRejected']
-            };
+        const values = {
+            all: stats.all ?? stats.total ?? 0,
+            pending: stats.pending ?? 0,
+            approved: stats.approved ?? 0,
+            rejected: stats.rejected ?? 0
+        };
 
-            Object.keys(ids).forEach((key) => {
-                ids[key].forEach((id) => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = values[key] ?? 0;
-                });
+        const ids = {
+            all: ['statAll', 'miniStatAll'],
+            pending: ['statPending', 'miniStatPending'],
+            approved: ['statApproved', 'miniStatApproved'],
+            rejected: ['statRejected', 'miniStatRejected']
+        };
+
+        Object.keys(ids).forEach((key) => {
+            const value = values[key] ?? 0;
+
+            ids[key].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
             });
+
+            const option = document.querySelector(
+                `#docreqStatusSelect .docreq-sort-option[data-value="${CSS.escape(key)}"]`
+            );
+
+            if (option) {
+                option.dataset.count = value;
+            }
+        });
 
             updateStatusDropdownUI(activeFilter);
         }
@@ -1308,120 +1227,91 @@
     `;
         }
 
-        function buildEmptyStateHtml() {
-            const isSearchMiss = searchQuery !== '';
-            const hasAdvancedFilters =
-                filterDocType !== '' ||
-                filterDateFrom !== '' ||
-                filterDateTo !== '' ||
-                filterSort !== 'newest' ||
-                activeFilter !== 'all';
+    function buildEmptyStateHtml() {
+        const isSearchMiss = searchQuery !== '';
+        const isDataEmpty = allRequests.length === 0;
 
-            const isDataEmpty = allRequests.length === 0;
-
-            let stateClass = 'empty-neutral';
-            let iconHtml = '<i class="fa-regular fa-folder-open"></i>';
-            let title = 'No document requests yet';
-            let subtitle = 'Incoming patient document requests will appear here once submitted.';
-            let buttonLabel = '';
-            let buttonAction = '';
-            const compactClass = 'compact';
-
-            if (isSearchMiss) {
-                stateClass = 'empty-search';
-                iconHtml = '<i class="fa-solid fa-magnifying-glass"></i>';
-                title = `No results for "${esc(searchQuery)}"`;
-                subtitle = 'Try another patient name or clear the search to see all requests.';
-                buttonLabel = 'Clear search';
-                buttonAction = 'clearSearch()';
-            } else if (activeFilter === 'pending') {
-                stateClass = 'empty-pending';
-                iconHtml = '<i class="fa-solid fa-clock-rotate-left"></i>';
-                title = 'No pending requests';
-                subtitle = isDataEmpty && !hasAdvancedFilters ?
-                    'There are no document requests waiting for review right now.' :
-                    'No pending requests match your current filters.';
-                if (hasAdvancedFilters && !isDataEmpty) {
-                    buttonLabel = 'Clear filters';
-                    buttonAction = 'resetAllFilters()';
-                }
-            } else if (activeFilter === 'approved') {
-                stateClass = 'empty-approved';
-                iconHtml = '<i class="fa-solid fa-file-circle-check"></i>';
-                title = 'No approved requests';
-                subtitle = isDataEmpty && !hasAdvancedFilters ?
-                    'Approved document requests will appear here after review.' :
-                    'No approved requests match your current filters.';
-                if (hasAdvancedFilters && !isDataEmpty) {
-                    buttonLabel = 'Clear filters';
-                    buttonAction = 'resetAllFilters()';
-                }
-            } else if (activeFilter === 'ready') {
-                stateClass = 'empty-approved';
-                iconHtml = '<i class="fa-solid fa-box-open"></i>';
-                title = 'No ready requests';
-                subtitle = isDataEmpty && !hasAdvancedFilters ?
-                    'Prepared document requests will appear here when ready for pickup.' :
-                    'No ready requests match your current filters.';
-                if (hasAdvancedFilters && !isDataEmpty) {
-                    buttonLabel = 'Clear filters';
-                    buttonAction = 'resetAllFilters()';
-                }
-            } else if (activeFilter === 'released') {
-                stateClass = 'empty-approved';
-                iconHtml = '<i class="fa-solid fa-paper-plane"></i>';
-                title = 'No released requests';
-                subtitle = isDataEmpty && !hasAdvancedFilters ?
-                    'Released document requests will appear here after claiming.' :
-                    'No released requests match your current filters.';
-                if (hasAdvancedFilters && !isDataEmpty) {
-                    buttonLabel = 'Clear filters';
-                    buttonAction = 'resetAllFilters()';
-                }
-            } else if (activeFilter === 'rejected') {
-                stateClass = 'empty-rejected';
-                iconHtml = '<i class="fa-solid fa-file-circle-xmark"></i>';
-                title = 'No rejected requests';
-                subtitle = isDataEmpty && !hasAdvancedFilters ?
-                    'Rejected document requests will appear here when applicable.' :
-                    'No rejected requests match your current filters.';
-                if (hasAdvancedFilters && !isDataEmpty) {
-                    buttonLabel = 'Clear filters';
-                    buttonAction = 'resetAllFilters()';
-                }
-            } else if (isDataEmpty && !hasAdvancedFilters) {
-                stateClass = 'empty-neutral';
-                iconHtml = '<i class="fa-regular fa-folder-open"></i>';
-                title = 'No document requests yet';
-                subtitle = 'Incoming patient document requests will appear here once submitted.';
-            } else {
-                stateClass = 'empty-filter';
-                iconHtml = '<i class="fa-solid fa-filter-circle-xmark"></i>';
-                title = 'No matching requests found';
-                subtitle = 'Your current filters did not return any records. Try adjusting or clearing them.';
-                buttonLabel = 'Clear filters';
-                buttonAction = 'resetAllFilters()';
+        const statusEmptyCopy = {
+            pending: {
+                stateClass: 'empty-pending',
+                iconHtml: '<i class="fa-solid fa-clock-rotate-left"></i>',
+                title: 'No pending requests',
+                subtitle: 'Pending document requests will appear here once submitted.'
+            },
+            approved: {
+                stateClass: 'empty-approved',
+                iconHtml: '<i class="fa-solid fa-file-circle-check"></i>',
+                title: 'No approved requests',
+                subtitle: 'Approved document requests will appear here after review.'
+            },
+            ready: {
+                stateClass: 'empty-ready',
+                iconHtml: '<i class="fa-solid fa-box-open"></i>',
+                title: 'No ready requests',
+                subtitle: 'Prepared document requests will appear here when ready for pickup.'
+            },
+            released: {
+                stateClass: 'empty-released',
+                iconHtml: '<i class="fa-solid fa-paper-plane"></i>',
+                title: 'No released requests',
+                subtitle: 'Released document requests will appear here after claiming.'
+            },
+            rejected: {
+                stateClass: 'empty-rejected',
+                iconHtml: '<i class="fa-solid fa-file-circle-xmark"></i>',
+                title: 'No rejected requests',
+                subtitle: 'Rejected document requests will appear here when applicable.'
             }
+        };
 
-            return `
-  <div class="empty-state ${stateClass}">
-    <div class="empty-state-icon">${iconHtml}</div>
-    <p class="empty-state-title">${title}</p>
-    <p class="empty-state-sub">${subtitle}</p>
+        let stateClass = 'empty-neutral';
+        let iconHtml = '<i class="fa-regular fa-folder-open"></i>';
+        let title = 'No document requests yet';
+        let subtitle = 'Incoming patient document requests will appear here once submitted.';
+        let buttonHtml = '';
 
-    ${buttonLabel ? `
-                  <button
-                    type="button"
-                    ${buttonAction === 'clearSearch()' ? 'data-clear-search data-search-target="#searchInput"' : `onclick="${buttonAction}"`}
-                    class="empty-state-btn"
-                  >
-                    <i class="fa-solid fa-xmark"></i>
-                    ${buttonLabel}
-                  </button>
-                ` : ''}
-  </div>
-`;
+        if (isSearchMiss) {
+            stateClass = 'empty-search';
+            iconHtml = '<i class="fa-solid fa-magnifying-glass"></i>';
+            title = `No results for "${esc(searchQuery)}"`;
+            subtitle = 'Try another patient name or clear the search to see all requests.';
+            buttonHtml = `
+            <button type="button"
+                data-clear-search
+                data-search-target="#searchInput"
+                class="empty-state-btn">
+                <i class="fa-solid fa-xmark"></i>
+                Clear search
+            </button>
+        `;
+        } else if (activeFilter !== 'all') {
+            const copy = statusEmptyCopy[activeFilter] || {
+                stateClass: 'empty-filter',
+                iconHtml: '<i class="fa-solid fa-filter-circle-xmark"></i>',
+                title: 'No matching requests found',
+                subtitle: 'No document requests are available for this status.'
+            };
+
+            stateClass = copy.stateClass;
+            iconHtml = copy.iconHtml;
+            title = copy.title;
+            subtitle = copy.subtitle;
+        } else if (!isDataEmpty) {
+            stateClass = 'empty-filter';
+            iconHtml = '<i class="fa-solid fa-filter-circle-xmark"></i>';
+            title = 'No matching requests found';
+            subtitle = 'No document requests match the selected filters.';
         }
+
+        return `
+        <div class="empty-state ${stateClass}">
+            <div class="empty-state-icon">${iconHtml}</div>
+            <p class="empty-state-title">${title}</p>
+            <p class="empty-state-sub">${subtitle}</p>
+            ${buttonHtml}
+        </div>
+    `;
+    }
 
         function buildMobileCard(r) {
             const accentHex = getDocumentAccent(r.status);
@@ -1789,37 +1679,79 @@
                 }
             };
 
-            return map[status] || map.all;
-        }
+    function getStatusMeta(status) {
+        const map = {
+            all: {
+                label: 'All Requests',
+                icon: 'fa-file-medical',
+                tone: 'status-all',
+                countId: 'statAll'
+            },
+            pending: {
+                label: 'Pending',
+                icon: 'fa-clock-rotate-left',
+                tone: 'status-pending',
+                countId: 'statPending'
+            },
+            approved: {
+                label: 'Approved',
+                icon: 'fa-file-circle-check',
+                tone: 'status-approved',
+                countId: 'statApproved'
+            },
+            rejected: {
+                label: 'Rejected',
+                icon: 'fa-file-circle-xmark',
+                tone: 'status-rejected',
+                countId: 'statRejected'
+            }
+        };
 
         function getStatusCount(status) {
             const meta = getStatusMeta(status);
             return document.getElementById(meta.countId)?.textContent || '0';
         }
 
-        function updateStatusDropdownUI(status) {
-            const meta = getStatusMeta(status);
-            const label = document.getElementById('statusDropdownLabel');
-            const count = document.getElementById('statusDropdownCount');
-            const leading = document.querySelector('#docreqStatusSelect .docreq-select-leading');
+    function getStatusCount(status) {
+        const meta = getStatusMeta(status);
+        const option = document.querySelector(
+            `#docreqStatusSelect .docreq-sort-option[data-value="${CSS.escape(status)}"]`
+        );
 
-            if (label) label.textContent = meta.label;
-            if (count) count.textContent = getStatusCount(status);
+        return option?.dataset.count ||
+            document.getElementById(meta.countId)?.textContent?.trim() ||
+            '0';
+    }
 
-            if (leading) {
-                leading.className = `docreq-select-leading ${meta.tone}`;
-                leading.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
-            }
+    function updateStatusDropdownUI(status) {
+        const meta = getStatusMeta(status);
+        const wrap = document.getElementById('docreqStatusSelect');
+        const hiddenInput = document.getElementById('docreqStatusFilter');
+        const label = document.getElementById('statusDropdownLabel');
+        const count = document.getElementById('statusDropdownCount');
+        const leading = document.getElementById('docreqStatusSelectedIcon');
 
-            document.querySelectorAll('#docreqStatusSelect .docreq-select-option').forEach((option) => {
-                option.classList.toggle('active', option.getAttribute('data-value') === status);
-            });
+        if (wrap) wrap.dataset.statusFilter = status;
+        if (hiddenInput) hiddenInput.value = status;
+        if (label) label.textContent = meta.label;
+        if (count) count.textContent = getStatusCount(status);
+
+        if (leading) {
+            leading.className = `docreq-sort-icon ${meta.tone}`;
+            leading.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
         }
 
-        function selectStatusFilter(status) {
-            closeDocreqDropdowns();
-            setFilter(status);
-        }
+        document.querySelectorAll('#docreqStatusSelect .docreq-sort-option').forEach((option) => {
+            const active = option.getAttribute('data-value') === status;
+            option.classList.toggle('is-active', active);
+            option.classList.toggle('active', active);
+        });
+    }
+
+    function selectStatusFilter(status) {
+        closeDocreqDropdowns();
+        setFilter(status);
+    }
 
         function setFilter(f) {
             activeFilter = f;

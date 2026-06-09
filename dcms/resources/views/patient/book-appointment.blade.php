@@ -26,17 +26,17 @@
         @keyframes confirmModalPop {
             0% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0.86);
+                transform: translate3d(-50%, -50%, 0) scale(0.92);
             }
 
             60% {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1.03);
+                transform: translate3d(-50%, -50%, 0) scale(1.03);
             }
 
             100% {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
+                transform: translate3d(-50%, -50%, 0) scale(1);
             }
         }
 
@@ -73,9 +73,24 @@
             animation: confirmBackdropFade 0.25s ease-out;
         }
 
+        #confirmModal {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin: 0 !important;
+
+            transform: translate3d(-50%, -50%, 0) scale(1) !important;
+            transform-origin: center !important;
+
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
         #confirmModal[open] {
-            animation: confirmModalPop 0.38s cubic-bezier(0.22, 1, 0.36, 1);
-            transform-origin: center;
+            opacity: 1;
+            animation: confirmModalPop 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         #confirmModal .confirm-modal-icon {
@@ -3589,7 +3604,7 @@
             </dialog>
 
             <dialog id="confirmModal"
-                class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 border-0 p-0 rounded-2xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.25)] max-w-[480px] w-[calc(100vw-2rem)]">
+                class="border-0 p-0 rounded-2xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.25)] max-w-[480px] w-[calc(100vw-2rem)]">
                 <div class="bg-[#8B0000] px-8 py-10 text-center">
                     <div
                         class="confirm-modal-icon w-16 h-16 rounded-full bg-white/15 flex items-center justify-center mx-auto mb-6">

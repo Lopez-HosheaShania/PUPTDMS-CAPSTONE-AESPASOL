@@ -12,8 +12,8 @@
             </div>
 
             <div class="admin-banner-actions">
-                <span class="admin-banner-pill">
-                    Active Services: {{ $services->count() }}
+                <span class="admin-banner-pill" id="serviceActiveCountPill">
+                    Active Services: <span data-service-count>{{ $services->count() }}</span>
                 </span>
             </div>
         </div>
@@ -116,7 +116,7 @@
                         </div>
 
                         <div class="service-card-header-actions">
-                            <span class="entry-badge">
+                            <span class="entry-badge" id="serviceEntryCountBadge">
                                 {{ $services->count() }} {{ Str::plural('Item', $services->count()) }}
                             </span>
 
@@ -149,7 +149,7 @@
                                         <th class="service-col-action">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="serviceTypeTableBody">
                                     @forelse($services as $service)
                                     <tr>
                                         <td><span class="service-badge">#{{ $service->id }}</span></td>
@@ -212,12 +212,14 @@
                                     <tr>
                                         <td colspan="5">
                                             <div class="empty-state">
-                                                <div class="empty-icon"><i class="fa-solid fa-folder-open"></i></div>
+                                                <div class="empty-icon"><i class="fa-solid fa-folder-open"></i>
+                                                </div>
                                                 <p class="service-empty-title">
                                                     No services found
                                                 </p>
                                                 <p class="service-empty-subtitle">
-                                                    Your clinic doesn't have any service types yet. Use the form to add
+                                                    Your clinic doesn't have any service types yet. Use the form to
+                                                    add
                                                     one.
                                                 </p>
                                             </div>
@@ -230,9 +232,9 @@
                     </div>
 
                     <div class="service-type-view" id="serviceTypeGridView" hidden>
-                        @if($services->count())
-                        <div class="service-types-grid">
-                            @foreach($services as $service)
+                        @if ($services->count())
+                        <div class="service-types-grid" id="serviceTypeGridContainer">
+                            @foreach ($services as $service)
                             <div class="service-type-card">
                                 <div class="service-type-card-top">
                                     <span class="service-badge service-type-card-id">#{{ $service->id }}</span>
@@ -319,7 +321,7 @@
             onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="deleteServiceTitle">
 
             <div class="st-delete-head">
-                <div class="flex items-center gap-3">
+                <div class="st-delete-head-left">
                     <div class="st-delete-head-icon">
                         <i class="fa-solid fa-trash"></i>
                     </div>
@@ -474,6 +476,30 @@
 </main>
 @endsection
 
+@php
+$serviceTypePayload = $services
+->map(function ($service) {
+return [
+'id' => $service->id,
+'name' => $service->name,
+'description' => $service->description,
+'is_active_for_booking' => (bool) $service->is_active_for_booking,
+'is_default' => (bool) $service->is_default,
+];
+})
+->values()
+->toArray();
+
+$serviceTypeUpdateRoute = route('admin.service-types.update', 0);
+$serviceTypeDestroyRoute = route('admin.service-types.destroy', 0);
+
+$serviceTypeRoutes = [
+'store' => route('admin.service-types.store'),
+'update' => preg_replace('/0$/', '__SERVICE_ID__', $serviceTypeUpdateRoute),
+'destroy' => preg_replace('/0$/', '__SERVICE_ID__', $serviceTypeDestroyRoute),
+];
+@endphp
+
 @section('scripts')
 <script>
     const addServiceForm = document.getElementById('addServiceForm');
@@ -625,6 +651,7 @@
             gridBtn.addEventListener('click', () => applyServiceTypeView('grid', true));
         }
     }
+
     function copyTextToClipboard(text) {
         if (navigator.clipboard && window.isSecureContext) {
             return navigator.clipboard.writeText(text);
@@ -671,12 +698,11 @@
                         label.textContent = 'Copied';
                     }
 
-                    window.showToast?.({
-                        type: 'success',
-                        title: 'Copied',
-                        message: 'Bullet copied. You can now paste it in the description.',
-                        duration: 2200,
-                    });
+                    showServiceToast(
+                        'success',
+                        'Copied',
+                        'Bullet copied. You can now paste it in the description.'
+                    );
 
                     setTimeout(() => {
                         button.classList.remove('copied');
@@ -686,12 +712,12 @@
                         }
                     }, 1400);
                 } catch (error) {
-                    window.showToast?.({
-                        type: 'error',
-                        title: 'Copy failed',
-                        message: 'Unable to copy bullet.',
-                        duration: 2500,
-                    });
+                    showServiceToast(
+                        'error',
+                        'Copy failed',
+                        'Unable to copy bullet.'
+                    );
+
                 }
             });
         });
@@ -719,8 +745,12 @@
 
             clearBtn.addEventListener('click', () => {
                 field.value = '';
-                field.dispatchEvent(new Event('input', { bubbles: true }));
-                field.dispatchEvent(new Event('change', { bubbles: true }));
+                field.dispatchEvent(new Event('input', {
+                    bubbles: true
+                }));
+                field.dispatchEvent(new Event('change', {
+                    bubbles: true
+                }));
                 toggleClear();
                 field.focus();
             });
@@ -738,11 +768,26 @@
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) return;
 
-            const voiceInputs = [
-                { inputId: 'serviceNameInput', toggleWrapperId: 'serviceNameVoiceToggle', micId: 'serviceNameMicBtn' },
-                { inputId: 'serviceDescInput', toggleWrapperId: 'serviceDescVoiceToggle', micId: 'serviceDescMicBtn' },
-                { inputId: 'manageServiceName', toggleWrapperId: 'manageServiceNameVoiceToggle', micId: 'manageServiceNameMicBtn' },
-                { inputId: 'manageServiceDescription', toggleWrapperId: 'manageServiceDescVoiceToggle', micId: 'manageServiceDescMicBtn' }
+            const voiceInputs = [{
+                inputId: 'serviceNameInput',
+                toggleWrapperId: 'serviceNameVoiceToggle',
+                micId: 'serviceNameMicBtn'
+            },
+            {
+                inputId: 'serviceDescInput',
+                toggleWrapperId: 'serviceDescVoiceToggle',
+                micId: 'serviceDescMicBtn'
+            },
+            {
+                inputId: 'manageServiceName',
+                toggleWrapperId: 'manageServiceNameVoiceToggle',
+                micId: 'manageServiceNameMicBtn'
+            },
+            {
+                inputId: 'manageServiceDescription',
+                toggleWrapperId: 'manageServiceDescVoiceToggle',
+                micId: 'manageServiceDescMicBtn'
+            }
             ];
 
             voiceInputs.forEach(config => {
@@ -782,9 +827,9 @@
                 const setMicState = (active) => {
                     micBtn.classList.toggle('mic-active', !!active);
                     micBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
-                    micBtn.innerHTML = active
-                        ? '<i class="fa-solid fa-stop"></i>'
-                        : '<i class="fa-solid fa-microphone"></i>';
+                    micBtn.innerHTML = active ?
+                        '<i class="fa-solid fa-stop"></i>' :
+                        '<i class="fa-solid fa-microphone"></i>';
                 };
 
                 // ── FIX: manual stop now checks whether speech was captured ──
@@ -802,8 +847,12 @@
                     }
 
                     if (recognition) {
-                        try { recognition.abort(); } catch (e) {
-                            try { recognition.stop(); } catch (_) { }
+                        try {
+                            recognition.abort();
+                        } catch (e) {
+                            try {
+                                recognition.stop();
+                            } catch (_) { }
                         }
                     }
                 };
@@ -822,16 +871,28 @@
                     const LISTEN_TIMEOUT = 6000;
 
                     const clearTimeout_ = () => {
-                        if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+                        if (timeoutId) {
+                            clearTimeout(timeoutId);
+                            timeoutId = null;
+                        }
                     };
 
                     r.onstart = () => {
                         timeoutId = setTimeout(() => {
-                            if (listening && !sawSpeech) { try { r.stop(); } catch (e) { } }
+                            if (listening && !sawSpeech) {
+                                try {
+                                    r.stop();
+                                } catch (e) { }
+                            }
                         }, LISTEN_TIMEOUT);
                     };
 
-                    r.onspeechend = () => { clearTimeout_(); try { r.stop(); } catch (e) { } };
+                    r.onspeechend = () => {
+                        clearTimeout_();
+                        try {
+                            r.stop();
+                        } catch (e) { }
+                    };
 
                     r.onresult = (event) => {
                         let transcript = '';
@@ -851,8 +912,12 @@
                             clearTimeout_();
                             capturedText = true; // ← speech was actually received
                             input.value = transcript;
-                            input.dispatchEvent(new Event('input', { bubbles: true }));
-                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                            input.dispatchEvent(new Event('input', {
+                                bubbles: true
+                            }));
+                            input.dispatchEvent(new Event('change', {
+                                bubbles: true
+                            }));
                             setStatus('Listening...', 'listening');
                         }
                     };
@@ -860,7 +925,10 @@
                     r.onerror = () => {
                         clearTimeout_();
                         listening = false;
-                        if (manualStop) { manualStop = false; return; }
+                        if (manualStop) {
+                            manualStop = false;
+                            return;
+                        }
                         setMicState(false);
                         setStatus("Didn't catch that. Try again.", 'error');
                         setTimeout(() => setStatus('', null), 2500);
@@ -868,7 +936,12 @@
 
                     r.onend = () => {
                         clearTimeout_();
-                        if (manualStop) { manualStop = false; listening = false; setMicState(false); return; }
+                        if (manualStop) {
+                            manualStop = false;
+                            listening = false;
+                            setMicState(false);
+                            return;
+                        }
                         const hadSpeech = sawSpeech || capturedText;
                         listening = false;
                         setMicState(false);
@@ -886,7 +959,10 @@
 
                 // Click: toggle on / off
                 micBtn.addEventListener('click', () => {
-                    if (listening && recognition) { stopNow(); return; }
+                    if (listening && recognition) {
+                        stopNow();
+                        return;
+                    }
                     recognition = createRecognition();
                     try {
                         recognition.start();
@@ -908,9 +984,13 @@
                         ev.preventDefault();
                         ev.stopPropagation();
                         manualStop = true;
-                        try { recognition.stop(); } catch (e) { }
+                        try {
+                            recognition.stop();
+                        } catch (e) { }
                     }
-                }, { passive: false });
+                }, {
+                    passive: false
+                });
             });
         })();
 
@@ -927,7 +1007,8 @@
                 const currentLength = descInput.value.length;
                 charCount.textContent = `${currentLength} / ${maxChars}`;
 
-                charCount.classList.toggle('near-limit', currentLength >= maxChars * 0.8 && currentLength < maxChars);
+                charCount.classList.toggle('near-limit', currentLength >= maxChars * 0.8 && currentLength <
+                    maxChars);
                 charCount.classList.toggle('at-limit', currentLength >= maxChars);
             }
 
@@ -941,5 +1022,544 @@
     window.addEventListener('resize', () => {
         applyServiceTypeView(getPreferredServiceTypeView(), false);
     });
+
+    /* ─────────────────────────────────────────────────────────────
+       Service Types AJAX + viewport-centered modals
+       Keeps add/edit/delete from reloading the page.
+    ───────────────────────────────────────────────────────────── */
+    (() => {
+        const initialServices = @json($serviceTypePayload);
+
+        let serviceTypeServices = Array.isArray(initialServices) ? [...initialServices] : [];
+
+        const routes = @json($serviceTypeRoutes);
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+            document.querySelector('input[name="_token"]')?.value ||
+            '';
+
+        const escapeHtml = (value = '') => String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+
+        const normalizeService = (service) => ({
+            id: Number(service.id),
+            name: service.name || '',
+            description: service.description || '',
+            is_active_for_booking: Boolean(service.is_active_for_booking),
+            is_default: Boolean(service.is_default),
+        });
+
+        const serviceUpdateUrl = (id) => routes.update.replace('__SERVICE_ID__', encodeURIComponent(id));
+        const serviceDestroyUrl = (id) => routes.destroy.replace('__SERVICE_ID__', encodeURIComponent(id));
+
+        function sortServices() {
+            serviceTypeServices.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+        }
+
+        function servicePlural(count) {
+            return count === 1 ? 'Item' : 'Items';
+        }
+
+        function updateServiceCounts() {
+            const count = serviceTypeServices.length;
+            document.querySelectorAll('[data-service-count]').forEach((node) => {
+                node.textContent = count;
+            });
+
+            const entryBadge = document.getElementById('serviceEntryCountBadge');
+            if (entryBadge) {
+                entryBadge.textContent = `${count} ${servicePlural(count)}`;
+            }
+        }
+
+        function visibilityBadge(service) {
+            return service.is_active_for_booking ?
+                `<span class="service-visibility-badge is-visible"><i class="fa-solid fa-thumbtack"></i> Visible</span>` :
+                `<span class="service-visibility-badge is-hidden"><i class="fa-solid fa-eye-slash"></i> Hidden</span>`;
+        }
+
+        function defaultBadge(service) {
+            return service.is_default ?
+                `<span class="service-badge service-badge-bookable">Default</span>` :
+                '';
+        }
+
+        function actionButtons(service) {
+            const deleteButton = service.is_default ? '' : `
+            <button type="button"
+                class="action-btn btn-delete-service"
+                title="Delete service"
+                data-service-action="delete"
+                data-service-id="${service.id}">
+                <i class="fa-solid fa-trash"></i>
+            </button>`;
+
+            return `
+            <button type="button"
+                class="action-btn btn-edit"
+                title="Manage service"
+                data-service-action="edit"
+                data-service-id="${service.id}">
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            ${deleteButton}`;
+        }
+
+        function emptyStateHtml() {
+            return `
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fa-solid fa-folder-open"></i></div>
+                <p class="service-empty-title">No services found</p>
+                <p class="service-empty-subtitle">
+                    Your clinic doesn't have any service types yet. Use the form to add one.
+                </p>
+            </div>`;
+        }
+
+        function renderServiceTable() {
+            const tbody = document.getElementById('serviceTypeTableBody');
+            if (!tbody) return;
+
+            if (!serviceTypeServices.length) {
+                tbody.innerHTML = `<tr><td colspan="5">${emptyStateHtml()}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = serviceTypeServices.map((service) => `
+            <tr data-service-id="${service.id}">
+                <td><span class="service-badge">#${service.id}</span></td>
+                <td>
+                    <div class="service-name-cell">
+                        <div class="service-name-icon">
+                            <i class="fa-solid fa-tooth"></i>
+                        </div>
+                        <span class="service-name-text">${escapeHtml(service.name)}</span>
+                    </div>
+                </td>
+                <td class="service-desc-cell">${service.description ? escapeHtml(service.description) : '—'}</td>
+                <td class="service-center-cell">
+                    <div class="service-visibility-actions">
+                        ${visibilityBadge(service)}
+                        ${defaultBadge(service)}
+                    </div>
+                </td>
+                <td class="service-center-cell">
+                    <div class="service-inline-actions">
+                        ${actionButtons(service)}
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+        }
+
+        function renderServiceGrid() {
+            const gridView = document.getElementById('serviceTypeGridView');
+            if (!gridView) return;
+
+            if (!serviceTypeServices.length) {
+                gridView.innerHTML = emptyStateHtml();
+                return;
+            }
+
+            gridView.innerHTML = `
+            <div class="service-types-grid" id="serviceTypeGridContainer">
+                ${serviceTypeServices.map((service) => `
+                        <div class="service-type-card" data-service-id="${service.id}">
+                            <div class="service-type-card-top">
+                                <span class="service-badge service-type-card-id">#${service.id}</span>
+                                ${defaultBadge(service)}
+                            </div>
+
+                            <div class="service-type-card-name-wrap">
+                                <div class="service-type-card-icon">
+                                    <i class="fa-solid fa-tooth"></i>
+                                </div>
+                                <div class="service-type-card-name">${escapeHtml(service.name)}</div>
+                            </div>
+
+                            <div class="service-type-card-desc-wrap">
+                                <div class="service-type-card-label">Description</div>
+                                <div class="service-type-card-desc">
+                                    ${service.description ? escapeHtml(service.description) : '—'}
+                                </div>
+                            </div>
+
+                            <div class="service-type-card-footer">
+                                <div class="service-card-actions">
+                                    ${visibilityBadge(service)}
+                                </div>
+
+                                <div class="service-type-card-actions">
+                                    ${actionButtons(service)}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+            </div>`;
+        }
+
+        function renderServices() {
+            sortServices();
+            updateServiceCounts();
+            renderServiceTable();
+            renderServiceGrid();
+
+            if (typeof applyServiceTypeView === 'function') {
+                applyServiceTypeView(getPreferredServiceTypeView(), false);
+            }
+        }
+
+        function showServiceToast(type, title, message) {
+            if (typeof window.showToast === 'function') {
+                window.showToast({
+                    type,
+                    title,
+                    message
+                });
+                return;
+            }
+
+            console[type === 'error' ? 'error' : 'log'](`${title}: ${message}`);
+        }
+
+        function firstValidationMessage(data, fallback = 'Please check the form and try again.') {
+            const errors = data?.errors || {};
+            const firstKey = Object.keys(errors)[0];
+
+            if (firstKey && Array.isArray(errors[firstKey]) && errors[firstKey][0]) {
+                return errors[firstKey][0];
+            }
+
+            return data?.message || fallback;
+        }
+
+        async function parseJsonResponse(response) {
+            const contentType = response.headers.get('content-type') || '';
+
+            if (contentType.includes('application/json')) {
+                return response.json();
+            }
+
+            return {
+                success: false,
+                message: 'The server returned an unexpected response. Please check your route or controller.',
+            };
+        }
+
+        function setButtonLoading(button, isLoading, loadingText = 'Saving...') {
+            if (!button) return;
+
+            if (isLoading) {
+                button.dataset.originalHtml = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = `<i class="fa-solid fa-spinner spin"></i> ${loadingText}`;
+                return;
+            }
+
+            button.disabled = false;
+
+            if (button.dataset.originalHtml) {
+                button.innerHTML = button.dataset.originalHtml;
+                delete button.dataset.originalHtml;
+            }
+        }
+
+        async function submitJson(form, submitButton, loadingText = 'Saving...') {
+            setButtonLoading(submitButton, true, loadingText);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        ...(csrfToken ? {
+                            'X-CSRF-TOKEN': csrfToken
+                        } : {}),
+                    },
+                    body: new FormData(form),
+                });
+
+                const data = await parseJsonResponse(response);
+
+                if (!response.ok || data.success === false) {
+                    throw data;
+                }
+
+                return data;
+            } finally {
+                setButtonLoading(submitButton, false);
+            }
+        }
+
+        function addOrUpdateService(service) {
+            const normalized = normalizeService(service);
+            const existingIndex = serviceTypeServices.findIndex((item) => Number(item.id) === Number(normalized
+                .id));
+
+            if (existingIndex >= 0) {
+                serviceTypeServices[existingIndex] = normalized;
+            } else {
+                serviceTypeServices.push(normalized);
+            }
+
+            renderServices();
+        }
+
+        function removeService(id) {
+            serviceTypeServices = serviceTypeServices.filter((service) => Number(service.id) !== Number(id));
+            renderServices();
+        }
+
+        function closeServiceModal(id) {
+            if (typeof window.closeModal === 'function') {
+                window.closeModal(id);
+                return;
+            }
+
+            const modal = document.getElementById(id);
+            if (!modal) return;
+
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-lock');
+        }
+
+        function openServiceModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+
+            modal.classList.remove('closing');
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-lock');
+
+            if (typeof window.openModal === 'function') {
+                window.openModal(id);
+            }
+        }
+
+        function relocateServiceModals() {
+            ['deleteServiceModal', 'manageServiceModal'].forEach((id) => {
+                const modal = document.getElementById(id);
+
+                if (modal && modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+            });
+        }
+
+        window.closeModalOnBackdrop = window.closeModalOnBackdrop || function (event, modalId) {
+            if (event.target?.id === modalId) {
+                closeServiceModal(modalId);
+            }
+        };
+
+        window.closeDeleteModal = function () {
+            closeServiceModal('deleteServiceModal');
+        };
+
+        window.openManageServiceById = function (id) {
+            const service = serviceTypeServices.find((item) => Number(item.id) === Number(id));
+
+            if (!service) {
+                showServiceToast('error', 'Service not found', 'Unable to find the selected service.');
+                return;
+            }
+
+            window.openManageServiceModal(
+                serviceUpdateUrl(service.id),
+                service.name,
+                service.description,
+                service.is_active_for_booking,
+                service.is_default,
+                service.id
+            );
+        };
+
+        window.openDeleteServiceById = function (id) {
+            const service = serviceTypeServices.find((item) => Number(item.id) === Number(id));
+
+            if (!service) {
+                showServiceToast('error', 'Service not found', 'Unable to find the selected service.');
+                return;
+            }
+
+            window.openDeleteModal(serviceDestroyUrl(service.id), service.name, service.id);
+        };
+
+        window.openDeleteModal = function (actionUrl, serviceName, serviceId = null) {
+            relocateServiceModals();
+
+            const form = document.getElementById('deleteServiceForm');
+            const name = document.getElementById('deleteServiceName');
+
+            if (!form || !name) return;
+
+            name.textContent = serviceName || '';
+            form.action = actionUrl;
+            form.dataset.serviceId = serviceId || String(actionUrl).split('/').filter(Boolean).pop() || '';
+
+            openServiceModal('deleteServiceModal');
+        };
+
+        window.openManageServiceModal = function (actionUrl, serviceName, serviceDescription, isActiveForBooking,
+            isDefault, serviceId = null) {
+            relocateServiceModals();
+
+            const form = document.getElementById('manageServiceForm');
+            const nameInput = document.getElementById('manageServiceName');
+            const descInput = document.getElementById('manageServiceDescription');
+            const bookingToggle = document.getElementById('manageServiceBookingToggle');
+            const defaultNote = document.getElementById('manageDefaultNote');
+
+            if (!form || !nameInput || !descInput || !bookingToggle || !defaultNote) {
+                console.error('Manage modal elements not found.');
+                return;
+            }
+
+            form.action = actionUrl;
+            form.dataset.serviceId = serviceId || String(actionUrl).split('/').filter(Boolean).pop() || '';
+
+            nameInput.value = serviceName ?? '';
+            descInput.value = serviceDescription ?? '';
+            bookingToggle.checked = Boolean(isActiveForBooking);
+
+            defaultNote.classList.toggle('admin-hidden', !isDefault);
+            defaultNote.style.display = isDefault ? 'block' : 'none';
+
+            openServiceModal('manageServiceModal');
+
+            setTimeout(() => {
+                nameInput.focus();
+            }, 180);
+        };
+
+        function bindAjaxForms() {
+            const addForm = document.getElementById('addServiceForm');
+            const manageForm = document.getElementById('manageServiceForm');
+            const deleteForm = document.getElementById('deleteServiceForm');
+
+            addForm?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                const nameInput = document.getElementById('serviceNameInput');
+                const submitButton = addForm.querySelector('[type="submit"]');
+                const value = nameInput?.value.trim() || '';
+
+                if (!value) {
+                    if (typeof setAddServiceNameError === 'function') {
+                        setAddServiceNameError('Please provide a service name.');
+                    }
+
+                    nameInput?.focus();
+                    return;
+                }
+
+                try {
+                    const data = await submitJson(addForm, submitButton, 'Saving...');
+                    addOrUpdateService(data.service);
+
+                    addForm.reset();
+                    document.getElementById('serviceDescCount') && (document.getElementById(
+                        'serviceDescCount').textContent = '0 / 255');
+                    document.getElementById('serviceNameClearBtn')?.classList.add('hidden');
+                    document.getElementById('serviceDescClearBtn')?.classList.add('hidden');
+
+                    if (typeof setAddServiceNameError === 'function') {
+                        setAddServiceNameError('');
+                    }
+
+                    document.getElementById('serviceNameInput')?.classList.remove('is-valid',
+                        'is-invalid');
+                    document.getElementById('serviceDescInput')?.classList.remove('is-valid',
+                        'is-invalid');
+
+                    showServiceToast(
+                        'success',
+                        'Service added',
+                        data.service?.is_active_for_booking
+                            ? 'Patients can now select it when booking.'
+                            : 'Saved in Service Types and hidden from booking.'
+                    );
+                } catch (error) {
+                    const message = firstValidationMessage(error, 'Unable to add service type.');
+
+                    if (error?.errors?.name && typeof setAddServiceNameError === 'function') {
+                        setAddServiceNameError(message);
+                        nameInput?.focus();
+                    } else {
+                        showServiceToast('error', 'Add failed', message);
+                    }
+                }
+            }, true);
+
+            manageForm?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const submitButton = manageForm.querySelector('[type="submit"]');
+
+                try {
+                    const data = await submitJson(manageForm, submitButton, 'Saving...');
+                    addOrUpdateService(data.service);
+                    closeServiceModal('manageServiceModal');
+                    showServiceToast(
+                        'success',
+                        'Changes saved',
+                        'Service details and booking visibility updated.'
+                    );
+                } catch (error) {
+                    showServiceToast('error', 'Update failed', firstValidationMessage(error,
+                        'Unable to update service type.'));
+                }
+            });
+
+            deleteForm?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const submitButton = deleteForm.querySelector('[type="submit"]');
+
+                try {
+                    const data = await submitJson(deleteForm, submitButton, 'Deleting...');
+                    removeService(data.deleted_id || deleteForm.dataset.serviceId);
+                    closeServiceModal('deleteServiceModal');
+                    showServiceToast(
+                        'success',
+                        'Service deleted',
+                        'Removed from the service list.'
+                    );
+                } catch (error) {
+                    showServiceToast('error', 'Delete failed', firstValidationMessage(error,
+                        'Unable to delete service type.'));
+                }
+            });
+        }
+
+        document.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-service-action]');
+            if (!button) return;
+
+            const id = button.dataset.serviceId;
+
+            if (button.dataset.serviceAction === 'edit') {
+                window.openManageServiceById(id);
+            }
+
+            if (button.dataset.serviceAction === 'delete') {
+                window.openDeleteServiceById(id);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            relocateServiceModals();
+            renderServices();
+            bindAjaxForms();
+        });
+    })();
 </script>
 @endsection

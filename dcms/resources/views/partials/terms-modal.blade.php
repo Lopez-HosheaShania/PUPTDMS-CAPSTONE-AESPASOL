@@ -1,4 +1,4 @@
-<dialog id="termsModal">
+<dialog id="termsModal" data-show-terms="{{ session('show_terms_modal') ? 'true' : 'false' }}">
     <div class="terms-header">
         <div class="terms-header-icon"><i class="fa-solid fa-file-shield"></i></div>
         <div>
@@ -18,7 +18,7 @@
         <div class="terms-divider"></div>
 
         <label class="terms-checkbox-row">
-            <input type="checkbox" id="termsCheckbox">
+            <input type="checkbox" id="termsCheckbox" data-terms-checkbox>
             <span>
                 I Agree and acknowledge the
                 <a href="https://www.pup.edu.ph/terms/" target="_blank" onclick="event.stopPropagation()"
@@ -32,7 +32,7 @@
                 @csrf
                 <button type="submit" class="terms-cancel-btn">Cancel</button>
             </form>
-            <button id="termsContinueBtn" class="terms-continue-btn" disabled onclick="acceptTerms()">
+            <button type="button" id="termsContinueBtn" class="terms-continue-btn" disabled data-terms-continue>
                 <i class="fa-solid fa-check" style="font-size:.75rem; margin-right:5px;"></i> Continue
             </button>
         </div>
