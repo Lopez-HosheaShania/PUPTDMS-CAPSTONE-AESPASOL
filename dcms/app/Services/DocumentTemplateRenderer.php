@@ -156,84 +156,68 @@ class DocumentTemplateRenderer
         $monthYear = strtoupper($currentMonth->format('F Y'));
         $campusName = strtoupper(setting('clinic_name', 'Taguig Dental Clinic'));
 
-        $records = DailyTreatmentRecord::query()
-            ->whereYear('treatment_date', $currentMonth->year)
-            ->whereMonth('treatment_date', $currentMonth->month)
-            ->select('office_type', 'gender', 'treatment_done', DB::raw('COUNT(*) as total'))
-            ->groupBy('office_type', 'gender', 'treatment_done')
+        $records = DentalServiceRecord::query()
+            ->whereYear('time_in', $currentMonth->year)
+            ->whereMonth('time_in', $currentMonth->month)
             ->get();
 
-        $officeTypes = [
-            'students' => null,
-            'faculty' => 'Faculty',
-            'administrative' => 'Administrative',
-            'dependent' => 'Dependent',
+        $departmentLabels = [
+            'students' => ['student'],
+            'faculty' => ['faculty'],
+            'administrative' => ['administrative'],
+            'dependent' => ['dependent'],
         ];
+
+        $countByDepartmentAndGender = function (string $gender, callable $filter) use ($records, $departmentLabels): array {
+            $counts = [];
+
+            foreach ($departmentLabels as $key => $labels) {
+                $counts[$key] = (int) $records->filter(function ($record) use ($gender, $filter, $labels) {
+                    $department = strtolower(trim((string) $record->department));
+
+                    return in_array($department, $labels, true)
+                        && strtolower((string) $record->gender) === $gender
+                        && $filter($record);
+                })->count();
+            }
+
+            return $counts;
+        };
+
+        $groupFilters = [
+            fn ($record) => !((bool) $record->is_senior) && !((bool) $record->is_pwd),
+            fn ($record) => (bool) $record->is_senior,
+            fn ($record) => (bool) $record->is_pwd,
+        ];
+
+        $maleRows = [];
+        $femaleRows = [];
+        $rowLabels = ['—', 'Senior Citizen', 'PWD'];
+
+        foreach ($groupFilters as $index => $filter) {
+            $maleRows[$index] = $countByDepartmentAndGender('male', $filter);
+            $femaleRows[$index] = $countByDepartmentAndGender('female', $filter);
+        }
 
         $headers = [];
-        foreach ($officeTypes as $key => $label) {
-            $headers[$key] = (int) $records->where('office_type', $label)->sum('total');
+        foreach ($departmentLabels as $key => $labels) {
+            $headers[$key] = (int) $records->filter(function ($record) use ($labels) {
+                return in_array(strtolower(trim((string) $record->department)), $labels, true);
+            })->count();
         }
 
-        $categoryRows = $records
-            ->groupBy('treatment_done')
-            ->map(fn ($group, $name) => [
-                'name' => $name,
-                'total' => (int) $group->sum('total'),
-            ])
-            ->sortByDesc('total')
-            ->take(3)
-            ->values();
+        $headers['total'] = (int) $records->count();
 
-        $officeCategoryTotals = [];
-        foreach (['students', 'faculty', 'administrative', 'dependent'] as $officeKey) {
-            $officeCategoryTotals[$officeKey] = [];
-            for ($i = 0; $i < 3; $i++) {
-                $officeCategoryTotals[$officeKey][$i] = [
-                    'male' => 0,
-                    'female' => 0,
-                    'total' => 0,
-                ];
-            }
-        }
+        $rowTotals = function (array $rows, int $index): string {
+            return (string) array_sum([
+                $rows[$index]['students'] ?? 0,
+                $rows[$index]['faculty'] ?? 0,
+                $rows[$index]['administrative'] ?? 0,
+                $rows[$index]['dependent'] ?? 0,
+            ]);
+        };
 
-        foreach ($categoryRows as $index => $category) {
-            $treatmentName = $category['name'];
-            $rowsForTreatment = $records->where('treatment_done', $treatmentName);
-
-            foreach (['students' => null, 'faculty' => 'Faculty', 'administrative' => 'Administrative', 'dependent' => 'Dependent'] as $officeKey => $officeLabel) {
-                $officeRows = $rowsForTreatment->where('office_type', $officeLabel);
-                $male = (int) $officeRows->where('gender', 'Male')->sum('total');
-                $female = (int) $officeRows->where('gender', 'Female')->sum('total');
-
-                $officeCategoryTotals[$officeKey][$index] = [
-                    'male' => $male,
-                    'female' => $female,
-                    'total' => $male + $female,
-                ];
-            }
-        }
-
-        $maleTotals = [
-            (int) $records->where('office_type', null)->where('gender', 'Male')->sum('total'),
-            (int) $records->where('office_type', 'Faculty')->where('gender', 'Male')->sum('total'),
-            (int) $records->where('office_type', 'Administrative')->where('gender', 'Male')->sum('total'),
-            (int) $records->where('office_type', 'Dependent')->where('gender', 'Male')->sum('total'),
-        ];
-
-        $femaleTotals = [
-            (int) $records->where('office_type', null)->where('gender', 'Female')->sum('total'),
-            (int) $records->where('office_type', 'Faculty')->where('gender', 'Female')->sum('total'),
-            (int) $records->where('office_type', 'Administrative')->where('gender', 'Female')->sum('total'),
-            (int) $records->where('office_type', 'Dependent')->where('gender', 'Female')->sum('total'),
-        ];
-
-        $totalStudents = $maleTotals[0] + $femaleTotals[0];
-        $totalFaculty = $maleTotals[1] + $femaleTotals[1];
-        $totalAdministrative = $maleTotals[2] + $femaleTotals[2];
-        $totalDependent = $maleTotals[3] + $femaleTotals[3];
-
-        $grandTotal = $totalStudents + $totalFaculty + $totalAdministrative + $totalDependent;
+        $grandTotal = (int) $records->count();
 
         return [
             'pup_logo' => asset('images/PUP.png'),
@@ -247,73 +231,43 @@ class DocumentTemplateRenderer
             'header_administrative' => (string) $headers['administrative'],
             'header_dependent' => (string) $headers['dependent'],
             'header_total' => (string) $grandTotal,
-            'gad_category_1' => $categoryRows[0]['name'] ?? '—',
-            'gad_category_2' => $categoryRows[1]['name'] ?? '—',
-            'gad_category_3' => $categoryRows[2]['name'] ?? '—',
-            'cat1_male_students' => (string) ($officeCategoryTotals['students'][0]['male'] ?? 0),
-            'cat1_male_faculty' => (string) ($officeCategoryTotals['faculty'][0]['male'] ?? 0),
-            'cat1_male_administrative' => (string) ($officeCategoryTotals['administrative'][0]['male'] ?? 0),
-            'cat1_male_dependent' => (string) ($officeCategoryTotals['dependent'][0]['male'] ?? 0),
-            'cat1_male_total' => (string) array_sum([
-                $officeCategoryTotals['students'][0]['male'] ?? 0,
-                $officeCategoryTotals['faculty'][0]['male'] ?? 0,
-                $officeCategoryTotals['administrative'][0]['male'] ?? 0,
-                $officeCategoryTotals['dependent'][0]['male'] ?? 0,
-            ]),
-            'cat1_female_students' => (string) ($officeCategoryTotals['students'][0]['female'] ?? 0),
-            'cat1_female_faculty' => (string) ($officeCategoryTotals['faculty'][0]['female'] ?? 0),
-            'cat1_female_administrative' => (string) ($officeCategoryTotals['administrative'][0]['female'] ?? 0),
-            'cat1_female_dependent' => (string) ($officeCategoryTotals['dependent'][0]['female'] ?? 0),
-            'cat1_female_total' => (string) array_sum([
-                $officeCategoryTotals['students'][0]['female'] ?? 0,
-                $officeCategoryTotals['faculty'][0]['female'] ?? 0,
-                $officeCategoryTotals['administrative'][0]['female'] ?? 0,
-                $officeCategoryTotals['dependent'][0]['female'] ?? 0,
-            ]),
-            'cat2_male_students' => (string) ($officeCategoryTotals['students'][1]['male'] ?? 0),
-            'cat2_male_faculty' => (string) ($officeCategoryTotals['faculty'][1]['male'] ?? 0),
-            'cat2_male_administrative' => (string) ($officeCategoryTotals['administrative'][1]['male'] ?? 0),
-            'cat2_male_dependent' => (string) ($officeCategoryTotals['dependent'][1]['male'] ?? 0),
-            'cat2_male_total' => (string) array_sum([
-                $officeCategoryTotals['students'][1]['male'] ?? 0,
-                $officeCategoryTotals['faculty'][1]['male'] ?? 0,
-                $officeCategoryTotals['administrative'][1]['male'] ?? 0,
-                $officeCategoryTotals['dependent'][1]['male'] ?? 0,
-            ]),
-            'cat2_female_students' => (string) ($officeCategoryTotals['students'][1]['female'] ?? 0),
-            'cat2_female_faculty' => (string) ($officeCategoryTotals['faculty'][1]['female'] ?? 0),
-            'cat2_female_administrative' => (string) ($officeCategoryTotals['administrative'][1]['female'] ?? 0),
-            'cat2_female_dependent' => (string) ($officeCategoryTotals['dependent'][1]['female'] ?? 0),
-            'cat2_female_total' => (string) array_sum([
-                $officeCategoryTotals['students'][1]['female'] ?? 0,
-                $officeCategoryTotals['faculty'][1]['female'] ?? 0,
-                $officeCategoryTotals['administrative'][1]['female'] ?? 0,
-                $officeCategoryTotals['dependent'][1]['female'] ?? 0,
-            ]),
-            'cat3_male_students' => (string) ($officeCategoryTotals['students'][2]['male'] ?? 0),
-            'cat3_male_faculty' => (string) ($officeCategoryTotals['faculty'][2]['male'] ?? 0),
-            'cat3_male_administrative' => (string) ($officeCategoryTotals['administrative'][2]['male'] ?? 0),
-            'cat3_male_dependent' => (string) ($officeCategoryTotals['dependent'][2]['male'] ?? 0),
-            'cat3_male_total' => (string) array_sum([
-                $officeCategoryTotals['students'][2]['male'] ?? 0,
-                $officeCategoryTotals['faculty'][2]['male'] ?? 0,
-                $officeCategoryTotals['administrative'][2]['male'] ?? 0,
-                $officeCategoryTotals['dependent'][2]['male'] ?? 0,
-            ]),
-            'cat3_female_students' => (string) ($officeCategoryTotals['students'][2]['female'] ?? 0),
-            'cat3_female_faculty' => (string) ($officeCategoryTotals['faculty'][2]['female'] ?? 0),
-            'cat3_female_administrative' => (string) ($officeCategoryTotals['administrative'][2]['female'] ?? 0),
-            'cat3_female_dependent' => (string) ($officeCategoryTotals['dependent'][2]['female'] ?? 0),
-            'cat3_female_total' => (string) array_sum([
-                $officeCategoryTotals['students'][2]['female'] ?? 0,
-                $officeCategoryTotals['faculty'][2]['female'] ?? 0,
-                $officeCategoryTotals['administrative'][2]['female'] ?? 0,
-                $officeCategoryTotals['dependent'][2]['female'] ?? 0,
-            ]),
-            'total_students' => (string) $totalStudents,
-            'total_faculty' => (string) $totalFaculty,
-            'total_administrative' => (string) $totalAdministrative,
-            'total_dependent' => (string) $totalDependent,
+            'gad_category_1' => '—',
+            'gad_category_2' => 'Senior Citizen',
+            'gad_category_3' => 'PWD',
+            'cat1_male_students' => (string) ($maleRows[0]['students'] ?? 0),
+            'cat1_male_faculty' => (string) ($maleRows[0]['faculty'] ?? 0),
+            'cat1_male_administrative' => (string) ($maleRows[0]['administrative'] ?? 0),
+            'cat1_male_dependent' => (string) ($maleRows[0]['dependent'] ?? 0),
+            'cat1_male_total' => $rowTotals($maleRows, 0),
+            'cat1_female_students' => (string) ($femaleRows[0]['students'] ?? 0),
+            'cat1_female_faculty' => (string) ($femaleRows[0]['faculty'] ?? 0),
+            'cat1_female_administrative' => (string) ($femaleRows[0]['administrative'] ?? 0),
+            'cat1_female_dependent' => (string) ($femaleRows[0]['dependent'] ?? 0),
+            'cat1_female_total' => $rowTotals($femaleRows, 0),
+            'cat2_male_students' => (string) ($maleRows[1]['students'] ?? 0),
+            'cat2_male_faculty' => (string) ($maleRows[1]['faculty'] ?? 0),
+            'cat2_male_administrative' => (string) ($maleRows[1]['administrative'] ?? 0),
+            'cat2_male_dependent' => (string) ($maleRows[1]['dependent'] ?? 0),
+            'cat2_male_total' => $rowTotals($maleRows, 1),
+            'cat2_female_students' => (string) ($femaleRows[1]['students'] ?? 0),
+            'cat2_female_faculty' => (string) ($femaleRows[1]['faculty'] ?? 0),
+            'cat2_female_administrative' => (string) ($femaleRows[1]['administrative'] ?? 0),
+            'cat2_female_dependent' => (string) ($femaleRows[1]['dependent'] ?? 0),
+            'cat2_female_total' => $rowTotals($femaleRows, 1),
+            'cat3_male_students' => (string) ($maleRows[2]['students'] ?? 0),
+            'cat3_male_faculty' => (string) ($maleRows[2]['faculty'] ?? 0),
+            'cat3_male_administrative' => (string) ($maleRows[2]['administrative'] ?? 0),
+            'cat3_male_dependent' => (string) ($maleRows[2]['dependent'] ?? 0),
+            'cat3_male_total' => $rowTotals($maleRows, 2),
+            'cat3_female_students' => (string) ($femaleRows[2]['students'] ?? 0),
+            'cat3_female_faculty' => (string) ($femaleRows[2]['faculty'] ?? 0),
+            'cat3_female_administrative' => (string) ($femaleRows[2]['administrative'] ?? 0),
+            'cat3_female_dependent' => (string) ($femaleRows[2]['dependent'] ?? 0),
+            'cat3_female_total' => $rowTotals($femaleRows, 2),
+            'total_students' => (string) ($headers['students'] ?? 0),
+            'total_faculty' => (string) ($headers['faculty'] ?? 0),
+            'total_administrative' => (string) ($headers['administrative'] ?? 0),
+            'total_dependent' => (string) ($headers['dependent'] ?? 0),
             'grand_total' => (string) $grandTotal,
             'prepared_by_signature' => asset('images/sir.lim-sign.png'),
             'prepared_by' => 'Ronilo I. Lim',

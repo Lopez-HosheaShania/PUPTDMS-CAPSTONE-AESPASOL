@@ -113,6 +113,50 @@
         @else
         <div>
             <div class="templates-grid" id="templatesGrid">
+
+                <!-- Default Dental Health Form card -->
+                <div class="template-card status-active" data-id="default-dental" data-name="dental health record"
+                    data-type="record" data-category="record" data-status="active"
+                    onclick="openDefaultDentalPreview()">
+                    <div class="template-card-top">
+                        <div class="template-top-row">
+                            <div class="template-doc-icon">
+                                <i class="fa-solid fa-tooth"></i>
+                            </div>
+
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;">
+                                <span class="status-badge active">Active</span>
+                                <span class="status-badge" style="background:#dbeafe;color:#1d4ed8;">Default</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="template-name">Dental Health Record</div>
+                            <div class="template-code">TPL-DEFAULT-DENTAL</div>
+                        </div>
+                    </div>
+
+                    <div class="template-card-body">
+                        <p class="template-description">Printable dental health form (default system template).</p>
+
+                        <div class="template-meta-row">
+                            <div class="flex items-center gap-2">
+                                <span class="template-meta-item">
+                                    <i class="fa-solid fa-tag" style="font-size:.6rem;color:#8B0000;"></i>
+                                    Record
+                                </span>
+                            </div>
+
+                            <div class="template-actions" onclick="event.stopPropagation()">
+                                <button type="button" class="action-btn view" title="Preview"
+                                    onclick="openDefaultDentalPreview(); event.stopPropagation();">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 @foreach($templates as $tpl)
                 @php
                 $category = strtolower(trim((string) ($tpl->category ?? '')));
@@ -351,6 +395,70 @@
                         </button>
                     </form>
                 `}
+            `;
+        } catch (e) {
+            titleEl.textContent = 'Template Preview';
+            subtitleEl.textContent = 'Failed to load';
+            frameEl.srcdoc = '<p style="padding:2rem;text-align:center;color:#dc2626;font-family:Arial,sans-serif;">Failed to load template preview.</p>';
+        }
+    }
+
+    // Fetch and open the default dental health form preview
+    async function openDefaultDentalPreview() {
+        openPreviewModal();
+
+        const titleEl = document.getElementById('templatePreviewTitle');
+        const subtitleEl = document.getElementById('templatePreviewSubtitle');
+        const metaEl = document.getElementById('templatePreviewMeta');
+        const frameEl = document.getElementById('templatePreviewFrame');
+        const footerEl = document.getElementById('templatePreviewFooter');
+
+        titleEl.textContent = 'Loading...';
+        subtitleEl.textContent = 'Please wait';
+        metaEl.innerHTML = '';
+        footerEl.innerHTML = '';
+        frameEl.srcdoc = '<p style="padding:2rem;text-align:center;color:#94a3b8;font-family:Arial,sans-serif;">Loading preview...</p>';
+
+        try {
+            const res = await fetch(`/admin/document-template/default/dental-health`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            });
+
+            if (!res.ok) throw new Error('Failed to fetch');
+
+            const d = await res.json();
+
+            titleEl.textContent = d.name || 'Template Preview';
+            subtitleEl.textContent = formatTitle(d.document_type);
+
+            metaEl.innerHTML = `
+                <span class="template-preview-chip">
+                    <i class="fa-solid fa-file-lines"></i>
+                    ${formatTitle(d.document_type)}
+                </span>
+                <span class="template-preview-chip">
+                    <i class="fa-solid fa-layer-group"></i>
+                    ${d.category || '—'}
+                </span>
+                <span class="template-preview-chip">
+                    <i class="fa-solid fa-print"></i>
+                    ${d.paper_size || '—'} • ${formatTitle(d.orientation || '')}
+                </span>
+                <span class="template-preview-chip" style="background:${d.status === 'active' ? '#d1fae5' : '#f3f4f6'};color:${d.status === 'active' ? '#065f46' : '#6b7280'};">
+                    ${d.status ? d.status.charAt(0).toUpperCase() + d.status.slice(1) : '—'}
+                </span>
+                ${d.is_default ? `<span class="template-preview-chip" style="background:#dbeafe;color:#1d4ed8;">Default</span>` : ''}
+            `;
+
+            frameEl.srcdoc = d.content || '<p style="padding:1rem;color:#9ca3af;">No preview available.</p>';
+
+            footerEl.innerHTML = `
+                <button type="button" class="btn-primary" onclick="window.open('/admin/document-template/default/dental-health', '_blank')">
+                    <i class="fa-solid fa-print"></i> Open
+                </button>
             `;
         } catch (e) {
             titleEl.textContent = 'Template Preview';
