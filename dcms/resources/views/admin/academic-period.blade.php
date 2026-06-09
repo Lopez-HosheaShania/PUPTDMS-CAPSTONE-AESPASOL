@@ -58,15 +58,6 @@ $activePeriodPayload = $activePeriod
         </div>
         @endif
 
-        @if (session('success'))
-        <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-            <div class="flex items-center gap-2 font-bold">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-        </div>
-        @endif
-
         @if (session('error'))
         <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <div class="flex items-center gap-2 font-bold">
@@ -83,14 +74,10 @@ $activePeriodPayload = $activePeriod
                 </div>
 
                 <div class="flex items-center gap-3 flex-wrap w-full sm:w-auto">
-                    <form method="POST" action="{{ route('admin.academic_periods.sync_flss') }}" class="inline">
-                        @csrf
-                        <button type="submit" class="um-hero-btn ap-banner-add-btn"
-                            onclick="return confirm('Sync the active academic year and semester from FLSS?')">
-                            <i class="fa-solid fa-rotate"></i>
-                            <span>Sync from FLSS</span>
-                        </button>
-                    </form>
+                    <button type="button" class="um-hero-btn ap-banner-add-btn" data-sync-flss-trigger>
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>Sync from FLSS</span>
+                    </button>
 
                     <button id="openAddPeriodBtn" type="button" data-open-modal="addModal"
                         onclick="openModal('addModal')" class="um-hero-btn ap-banner-add-btn">
@@ -572,23 +559,19 @@ $activePeriodPayload = $activePeriod
                             <i class="fa-solid fa-pen quick-action-bg-icon"></i>
                         </button>
 
-                        <form method="POST" action="{{ route('admin.academic_periods.sync_flss') }}">
-                            @csrf
-                            <button type="submit" class="quick-action quick-action-card w-full text-left"
-                                onclick="return confirm('Sync the active academic year and semester from FLSS?')">
-                                <span class="quick-action-icon">
-                                    <i class="fa-solid fa-rotate"></i>
-                                </span>
+                        <button type="button" class="quick-action quick-action-card" data-sync-flss-trigger>
+                            <span class="quick-action-icon">
+                                <i class="fa-solid fa-rotate"></i>
+                            </span>
 
-                                <span class="quick-action-copy">
-                                    <span class="quick-action-title">Sync from FLSS</span>
-                                    <span class="quick-action-sub">Fetch active academic year automatically</span>
-                                </span>
+                            <span class="quick-action-copy">
+                                <span class="quick-action-title">Sync from FLSS</span>
+                                <span class="quick-action-sub">Fetch active academic year automatically</span>
+                            </span>
 
-                                <i class="fa-solid fa-chevron-right quick-action-arrow"></i>
-                                <i class="fa-solid fa-cloud-arrow-down quick-action-bg-icon"></i>
-                            </button>
-                        </form>
+                            <i class="fa-solid fa-chevron-right quick-action-arrow"></i>
+                            <i class="fa-solid fa-cloud-arrow-down quick-action-bg-icon"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -867,7 +850,6 @@ $activePeriodPayload = $activePeriod
                     </div>
                 </div>
 
-                {{-- ── Description with external circular mic button ── --}}
                 <div class="ap-col-span-2 ap-panel ap-desc-panel">
                     <div class="ap-label">
                         <span class="ap-label-text">Description</span>
@@ -945,20 +927,23 @@ $activePeriodPayload = $activePeriod
             @csrf
             @method('PUT')
 
-            <div class="ap-add-header-left">
-                <div class="ap-add-header-icon" style="background: linear-gradient(145deg, #2563eb, #1d4ed8);">
-                    <i class="fa-solid fa-pen text-xl"></i>
+            <div class="ap-add-header">
+                <div class="ap-add-header-left">
+                    <div class="ap-add-header-icon" style="background: linear-gradient(145deg, #2563eb, #1d4ed8);">
+                        <i class="fa-solid fa-pen text-xl"></i>
+                    </div>
+
+                    <div>
+                        <h3 class="ap-add-header-title">Edit Academic Period</h3>
+                        <p class="ap-add-header-subtitle" id="editSubtitle">Updating period details</p>
+                    </div>
                 </div>
 
-                <div>
-                    <h3 class="ap-add-header-title">Edit Academic Period</h3>
-                    <p class="ap-add-header-subtitle" id="editSubtitle">Updating period details</p>
-                </div>
+                <button type="button" onclick="closeAcademicPeriodModal('editModal')" class="ap-add-close"
+                    aria-label="Close edit modal">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
-
-            <button type="button" data-discard-close="editModal" class="ap-add-close">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
 
             <div class="ap-add-body">
                 <div class="ap-panel ap-panel-soft">
@@ -1060,7 +1045,6 @@ $activePeriodPayload = $activePeriod
                     </div>
                 </div>
 
-                {{-- ── Description with external circular mic button ── --}}
                 <div class="ap-col-span-2 ap-panel ap-desc-panel">
                     <div class="ap-label">
                         <span class="ap-label-text">Description</span>
@@ -1116,7 +1100,8 @@ $activePeriodPayload = $activePeriod
             </div>
 
             <div class="ap-add-footer">
-                <button type="button" data-discard-close="editModal" class="ap-add-btn ap-add-btn-cancel">
+                <button type="button" onclick="closeAcademicPeriodModal('editModal')"
+                    class="ap-add-btn ap-add-btn-cancel">
                     Cancel
                 </button>
 
@@ -1179,13 +1164,65 @@ $activePeriodPayload = $activePeriod
                         Delete
                     </button>
                 </div>
+            </div>
         </form>
     </div>
+</div>
+
+<div class="modal-overlay ui-modal ap-sync-modal" id="syncFlssModal" aria-hidden="true" data-sync-flss-modal>
+    <form method="POST" action="{{ route('admin.academic_periods.sync_flss') }}"
+        class="modal-box modal-box-inner ap-sync-shell" onclick="event.stopPropagation()">
+        @csrf
+
+        <div class="ap-sync-head">
+            <div class="ap-sync-head-left">
+                <div class="ap-sync-head-icon">
+                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                </div>
+
+                <div>
+                    <h3 class="ap-sync-title">Sync from FLSS</h3>
+                    <p class="ap-sync-subtitle">Update the active academic year and semester</p>
+                </div>
+            </div>
+
+            <button type="button" class="ap-sync-x" data-sync-flss-close aria-label="Close sync modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="ap-sync-body">
+            <div class="ap-sync-alert">
+                <i class="fa-solid fa-circle-info"></i>
+                <div>
+                    <p>Sync the active academic period from FLSS?</p>
+                    <span>This will fetch the current academic year and semester from the external FLSS source.</span>
+                </div>
+            </div>
+
+            <div class="ap-sync-note">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Existing records will only be updated based on the FLSS response.</span>
+            </div>
+        </div>
+
+        <div class="ap-sync-footer">
+            <button type="button" class="modal-btn-ghost" data-sync-flss-close>
+                Cancel
+            </button>
+
+            <button type="submit" class="ap-sync-confirm-btn">
+                <i class="fa-solid fa-rotate"></i>
+                Sync Now
+            </button>
+        </div>
+    </form>
 </div>
 @endsection
 
 @section('scripts')
 <script>
+
     document.addEventListener('DOMContentLoaded', () => {
         const addForm = document.querySelector('#addModal form');
         if (!addForm) return;
@@ -1200,15 +1237,12 @@ $activePeriodPayload = $activePeriod
         const editDescCounter = document.getElementById('editDescCounter');
 
         function getErr(field) {
-            // For description fields
             if (field.id === 'addDesc' || field.id === 'editDesc') {
                 return field.closest('.ap-desc-panel')?.querySelector('.field-error') || null;
             }
 
-            // For other fields, search up to the nearest .ap-panel or parent wrapper
             let current = field;
             while (current) {
-                // Check if we're in a .ap-panel or .ap-panel-soft
                 const panel = current.closest('.ap-panel, .ap-panel-soft, .ap-col-span-2');
                 if (panel) {
                     return panel.querySelector('.field-error');
@@ -1628,9 +1662,90 @@ $activePeriodPayload = $activePeriod
         setModalState(id, false);
     };
 
-    window.closeModalOutside = function () {
-        return false;
+    window.closeAcademicPeriodModal = function (id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+
+        const closeNow = () => {
+            setModalState(id, false);
+        };
+
+        if (
+            (id === 'addModal' || id === 'editModal') &&
+            window.DiscardChanges &&
+            typeof window.DiscardChanges.confirmClose === 'function'
+        ) {
+            window.DiscardChanges.confirmClose(id, closeNow);
+            return;
+        }
+
+        closeNow();
     };
+
+    window.openSyncFlssModal = function () {
+        const modal = document.getElementById('syncFlssModal');
+        if (!modal) {
+            console.warn('syncFlssModal was not found.');
+            return;
+        }
+
+        modal.classList.remove('closing');
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+
+        modal.style.display = 'flex';
+        modal.style.opacity = '1';
+        modal.style.visibility = 'visible';
+        modal.style.pointerEvents = 'auto';
+
+        document.body.classList.add('modal-lock');
+    };
+
+    window.closeSyncFlssModal = function () {
+        const modal = document.getElementById('syncFlssModal');
+        if (!modal) return;
+
+        modal.classList.remove('open');
+        modal.classList.add('closing');
+        modal.setAttribute('aria-hidden', 'true');
+
+        setTimeout(() => {
+            modal.classList.remove('closing');
+            modal.style.display = '';
+            modal.style.opacity = '';
+            modal.style.visibility = '';
+            modal.style.pointerEvents = '';
+
+            if (!document.querySelector('.ui-modal.open, .ui-modal.closing')) {
+                document.body.classList.remove('modal-lock');
+            }
+        }, 180);
+    };
+
+    document.addEventListener('click', function (event) {
+        const openBtn = event.target.closest('[data-sync-flss-trigger]');
+        if (openBtn) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.openSyncFlssModal();
+            return;
+        }
+
+        const closeBtn = event.target.closest('[data-sync-flss-close]');
+        if (closeBtn) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.closeSyncFlssModal();
+            return;
+        }
+
+        const syncModal = event.target.closest('[data-sync-flss-modal]');
+        if (syncModal && event.target === syncModal) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.closeSyncFlssModal();
+        }
+    }, true);
 
     window.openEditModal = function (period) {
         document.getElementById('editForm').action = `/admin/academic-periods/${period.id}`;
@@ -2295,11 +2410,40 @@ $activePeriodPayload = $activePeriod
             applyAcademicView(getPreferredAcademicView(), false);
         });
 
-        document.querySelectorAll('[data-open-modal]').forEach(button => {
-            button.addEventListener('click', () => {
-                const target = button.getAttribute('data-open-modal');
-                if (target) window.openModal(target);
-            });
+        document.addEventListener('click', function (event) {
+            const openButton = event.target.closest('[data-open-modal]');
+            if (!openButton) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const target = openButton.getAttribute('data-open-modal');
+            if (!target) return;
+
+            if (typeof window.openModal === 'function') {
+                window.openModal(target);
+                return;
+            }
+
+            const modal = document.getElementById(target);
+            if (!modal) return;
+
+            modal.classList.remove('closing');
+            modal.classList.add('open');
+            document.body.classList.add('modal-lock');
+        });
+
+        document.addEventListener('click', function (event) {
+            const closeButton = event.target.closest('[data-discard-close]');
+            if (!closeButton) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const targetModal = closeButton.getAttribute('data-discard-close');
+            if (!targetModal) return;
+
+            window.closeModal(targetModal);
         });
 
         document.querySelectorAll('[data-close-modal]').forEach(button => {

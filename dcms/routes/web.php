@@ -466,15 +466,18 @@ Route::prefix('admin')
         Route::get('/document-requests', [AdminDocumentRequestController::class, 'index'])
             ->name('admin.document-requests.index');
 
+        Route::get('/document-requests/data', [AdminDocumentRequestController::class, 'data'])
+            ->name('admin.document-requests.data');
+
         Route::get('/document-requests/export', [AdminDocumentRequestController::class, 'export'])
             ->name('admin.document-requests.export');
 
         Route::get('/document-requests/print-queue', [AdminDocumentRequestController::class, 'printQueue'])
             ->name('admin.document-requests.print-queue');
 
-        Route::get('/document-requests/{documentRequest}', [AdminDocumentRequestController::class, 'show'])
+        Route::get('/document-requests/{id}', [AdminDocumentRequestController::class, 'show'])
             ->name('admin.document-requests.show');
-            
+
         Route::patch('/document-requests/{id}/approve', [AdminDocumentRequestController::class, 'approve'])
             ->name('admin.document-requests.approve');
 
@@ -988,7 +991,7 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
     Route::get('/report/weekly-data', [\App\Http\Controllers\Dentist\DentistReportController::class, 'weeklyData'])
         ->middleware('permission:manage_reports')
         ->name('dentist.dentist.report.weekly-data');
-    
+
     Route::get('/report/daily-treatment-record', [\App\Http\Controllers\Dentist\DentistReportController::class, 'dailyTreatmentRecord'])
         ->middleware('permission:manage_reports')
         ->name('dentist.dentist.report.daily-treatment');
@@ -1063,7 +1066,7 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
 
     //clinic status
     Route::post('/dentist/clinic-status', [DentistDashboardController::class, 'updateClinicStatus'])
-    ->name('dentist.clinic-status.update');
+        ->name('dentist.clinic-status.update');
 });
 
 
