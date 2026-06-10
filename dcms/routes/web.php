@@ -471,14 +471,11 @@ Route::prefix('admin')
 
         Route::get('/document-requests/{documentRequest}', [AdminDocumentRequestController::class, 'show'])
             ->name('admin.document-requests.show');
-
-        Route::patch('/document-requests/{documentRequest}/approve', [AdminDocumentRequestController::class, 'approve'])
+            
+        Route::patch('/document-requests/{id}/approve', [AdminDocumentRequestController::class, 'approve'])
             ->name('admin.document-requests.approve');
 
-        Route::patch('/document-requests/{documentRequest}/release', [AdminDocumentRequestController::class, 'release'])
-            ->name('admin.document-requests.release');
-
-        Route::patch('/document-requests/{documentRequest}/reject', [AdminDocumentRequestController::class, 'reject'])
+        Route::patch('/document-requests/{id}/reject', [AdminDocumentRequestController::class, 'reject'])
             ->name('admin.document-requests.reject');
     });
 
@@ -713,8 +710,8 @@ Route::middleware(['role:patient'])->group(function () {
 
     Route::get('/document-requests/{id}/approved', function ($id) {
         return redirect()->route('patient.document.requests.index', [
-            'highlight' => $id,
             'status' => 'approved',
+            'highlight' => $id,
         ]);
     })
         ->middleware('permission:request_documents')
@@ -988,6 +985,20 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
     Route::get('/report/weekly-data', [\App\Http\Controllers\Dentist\DentistReportController::class, 'weeklyData'])
         ->middleware('permission:manage_reports')
         ->name('dentist.dentist.report.weekly-data');
+    
+    Route::get('/report/daily-treatment-record', [\App\Http\Controllers\Dentist\DentistReportController::class, 'dailyTreatmentRecord'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.daily-treatment');
+
+    Route::get('/report/dental-services', function () {
+        return view('dentist.dental-services');
+    })
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.dental-services');
+
+    Route::get('/report/daily-treatment-record/list', [\App\Http\Controllers\Dentist\DentistReportController::class, 'dailyTreatmentRecordList'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.reports.daily-treatment-record.list');
 
     // Document Requests
     //     if (session('role') !== 'dentist') {
@@ -1046,6 +1057,10 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
     Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])
         ->middleware('permission:manage_inventory')
         ->name('dentist.dentist.inventory.destroy');
+
+    //clinic status
+    Route::post('/dentist/clinic-status', [DentistDashboardController::class, 'updateClinicStatus'])
+    ->name('dentist.clinic-status.update');
 });
 
 
@@ -1055,7 +1070,7 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('report')->middleware(['role:dentist', 'permission:manage_reports'])->group(function () {
+/*Route::prefix('report')->middleware(['role:dentist', 'permission:manage_reports'])->group(function () {
 
     Route::get('/', [\App\Http\Controllers\Dentist\DentistReportController::class, 'index'])
         ->name('dentist.report.legacy');
@@ -1067,6 +1082,6 @@ Route::prefix('report')->middleware(['role:dentist', 'permission:manage_reports'
     Route::get('/dental-services', function () {
         return view('dentist.dental-services');
     })->name('dentist.dentist.report.dental-services');
-});
+});*/
 
 Route::post('/chat/send', [ChatbotController::class, 'chat']);

@@ -8,6 +8,12 @@ use App\Models\BlockedDate;
 use App\Models\ClinicSchedule;
 use App\Helpers\PhilippineHolidays;
 use Carbon\Carbon;
+use App\Models\SystemSetting;
+use App\Models\User;
+use App\Notifications\DentistEmergencyOutNotification;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DentistDashboardController extends Controller
 {
@@ -82,4 +88,101 @@ class DentistDashboardController extends Controller
             'calendarAppointmentDetails'
         ));
     }
+
+    public function updateClinicStatus(Request $request)
+        {
+            $request->validate([
+                'status' => ['required', 'in:in,out'],
+            ]);
+
+            $oldStatus = SystemSetting::getSetting('clinic_status', 'in');
+            $newStatus = strtolower($request->status);
+
+            SystemSetting::setSetting('clinic_status', $newStatus, 'clinic');
+
+            if ($oldStatus !== 'out' && $newStatus === 'out') {
+                $this->notifyPatientsWithAppointmentsToday();
+            }
+
+            return response()->json([
+                'success' => true,
+                'status' => $newStatus,
+                'message' => $newStatus === 'out'
+                    ? 'Clinic marked as closed.'
+                    : 'Clinic marked as open.',
+            ]);
+        }
+
+        private function notifyPatientsWithAppointmentsToday(): void
+        {
+            $appointments = Appointment::query()
+                ->with('patient')
+                ->whereDate('appointment_date', Carbon::today())
+                ->whereIn('status', ['upcoming', 'rescheduled'])
+                ->get();
+
+            $notifiedUserIds = [];
+
+            foreach ($appointments as $appointment) {
+                $patient = $appointment->patient;
+
+                if (!$patient) {
+                    Log::warning('Emergency OUT notification skipped because patient was not found.', [
+                        'appointment_id' => $appointment->id,
+                        'patient_id' => $appointment->patient_id,
+                    ]);
+
+                    continue;
+                }
+
+                $patientUser = $this->resolvePatientUser($patient);
+
+                if (!$patientUser) {
+                    Log::warning('Emergency OUT notification skipped because patient user was not found.', [
+                        'appointment_id' => $appointment->id,
+                        'patient_id' => $patient->id,
+                    ]);
+
+                    continue;
+                }
+
+                // Prevent duplicate notification in the same request
+                if (in_array($patientUser->id, $notifiedUserIds, true)) {
+                    continue;
+                }
+
+                // Prevent duplicate notification already saved today
+                $alreadyNotifiedToday = DB::table('notifications')
+                    ->where('notifiable_type', User::class)
+                    ->where('notifiable_id', $patientUser->id)
+                    ->whereDate('created_at', Carbon::today())
+                    ->where('data->type', 'dentist_emergency_out')
+                    ->exists();
+
+                if ($alreadyNotifiedToday) {
+                    continue;
+                }
+
+                $patientUser->notify(new DentistEmergencyOutNotification($appointment));
+
+                $notifiedUserIds[] = $patientUser->id;
+            }
+        }
+
+        private function resolvePatientUser($patient): ?User
+        {
+            if (isset($patient->user) && $patient->user instanceof User) {
+                return $patient->user;
+            }
+
+            if (!empty($patient->user_id)) {
+                return User::find($patient->user_id);
+            }
+
+            if (!empty($patient->email)) {
+                return User::where('email', $patient->email)->first();
+            }
+
+            return User::where('patient_id', $patient->id)->first();
+        }
 }

@@ -71,10 +71,14 @@
                 </div>
             </div>
 
-            <div class="stat-card s-ongoing">
+           <div class="stat-card s-ongoing" data-admin-dashboard-card="appointments-this-month">
                 <div class="stat-card-info">
                     <div class="stat-label">Appointments</div>
-                    <div class="stat-value">{{ $appointmentsThisMonth }}</div>
+
+                    <div class="stat-value" data-admin-dashboard-counter="appointments-this-month">
+                        {{ $appointmentsThisMonth }}
+                    </div>
+
                     <div class="stat-footer">
                         <i class="fa-solid fa-clock"></i>
                         This month

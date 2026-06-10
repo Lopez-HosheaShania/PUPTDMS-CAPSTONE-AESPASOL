@@ -37,7 +37,10 @@ class AppointmentBookedNotification extends Notification
             'icon' => 'fa-calendar-check',
             'appointment_id' => $this->appointment->id,
             'patient_id' => $this->patient->id,
+            'appointment_date' => $this->formatDateForPayload(),
+            'appointment_month' => $this->formatMonthForPayload(),
             'event' => 'appointment.booked',
+            'dedupe_key' => 'appointment.booked.' . $this->appointment->id,
         ];
     }
 
@@ -55,11 +58,41 @@ class AppointmentBookedNotification extends Notification
             'icon' => 'fa-calendar-check',
             'appointment_id' => $this->appointment->id,
             'patient_id' => $this->patient->id,
+            'appointment_date' => $this->formatDateForPayload(),
+            'appointment_month' => $this->formatMonthForPayload(),
             'event' => 'appointment.booked',
             'created_at_label' => 'Just now',
             'state' => 'unread',
+            'dedupe_key' => 'appointment.booked.' . $this->appointment->id,
         ]);
     }
+
+    private function formatDateForPayload(): ?string
+    {
+        if (empty($this->appointment->appointment_date)) {
+            return null;
+        }
+
+        try {
+            return \Carbon\Carbon::parse($this->appointment->appointment_date)->format('Y-m-d');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function formatMonthForPayload(): ?string
+    {
+        if (empty($this->appointment->appointment_date)) {
+            return null;
+        }
+
+        try {
+            return \Carbon\Carbon::parse($this->appointment->appointment_date)->format('Y-m');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     private function formatTime(?string $time): string
     {
         if (empty($time)) {

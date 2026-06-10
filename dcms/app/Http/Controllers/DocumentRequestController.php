@@ -48,12 +48,12 @@ class DocumentRequestController extends Controller
                 ]);
             });
 
-            $dentists = User::whereHas('role', function ($query) {
-                $query->where('slug', 'dentist');
-            })->get();
+           $recipients = User::whereHas('role', function ($query) {
+                $query->whereIn('slug', ['dentist', 'admin']);
+            })->get()->unique('id');
 
-            foreach ($dentists as $dentist) {
-                $dentist->notify(new DocumentRequestSubmittedNotification($documentRequest));
+            foreach ($recipients as $recipient) {
+                $recipient->notify(new DocumentRequestSubmittedNotification($documentRequest));
             }
 
             if ($patient) {
