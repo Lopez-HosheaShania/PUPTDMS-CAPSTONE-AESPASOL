@@ -575,7 +575,7 @@ function formatToastMessage(message) {
 
 function normalizeToastArgs(first = 'success', second = '', third = undefined, fourth = undefined) {
     const validTypes = ['success', 'error', 'warning', 'info'];
-    const defaultDuration = 7000;
+    const defaultDuration = 5000;
 
     if (typeof first === 'object' && first !== null) {
         const type = validTypes.includes(String(first.type || '').toLowerCase())
@@ -830,6 +830,77 @@ function dismissToast(toast) {
 
 window.showToast = showToast;
 window.dismissToast = dismissToast;
+
+function readJsonPayload(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+
+    try {
+        return JSON.parse(el.textContent || 'null');
+    } catch (_) {
+        return null;
+    }
+}
+
+function initFlashToasts() {
+    const payload = readJsonPayload('flashToastPayload');
+
+    if (!Array.isArray(payload)) return;
+
+    payload.forEach((toast) => {
+        if (!toast || !toast.message) return;
+
+        showToast({
+            type: toast.type || 'info',
+            title: toast.title || 'Notification',
+            message: toast.message,
+        });
+    });
+}
+
+function acceptTerms() {
+    const modal = document.getElementById('termsModal');
+
+    if (modal?.open) {
+        modal.close();
+    }
+}
+
+function initTermsModal() {
+    const modal = document.getElementById('termsModal');
+    if (!modal) return;
+
+    const checkbox = modal.querySelector('#termsCheckbox, [data-terms-checkbox]');
+    const continueBtn = modal.querySelector('#termsContinueBtn, [data-terms-continue]');
+
+    if (checkbox && continueBtn) {
+        checkbox.checked = false;
+        continueBtn.disabled = true;
+
+        checkbox.addEventListener('change', () => {
+            continueBtn.disabled = !checkbox.checked;
+        });
+
+        continueBtn.addEventListener('click', acceptTerms);
+    }
+
+    const shouldShow = modal.dataset.showTerms === 'true';
+
+    if (shouldShow && typeof modal.showModal === 'function' && !modal.open) {
+        requestAnimationFrame(() => {
+            modal.showModal();
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initFlashToasts();
+    initTermsModal();
+});
+
+window.acceptTerms = acceptTerms;
+window.initTermsModal = initTermsModal;
+window.initFlashToasts = initFlashToasts;
 
 const modalTimers = {};
 

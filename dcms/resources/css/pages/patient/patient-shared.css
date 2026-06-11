@@ -1,0 +1,317 @@
+body.role-patient {
+    background-color: var(--page-bg);
+    color: var(--page-text);
+}
+
+body.role-patient #sidebar {
+    position: fixed;
+    top: var(--header-h);
+    left: 0;
+    width: clamp(200px, 20vw, 220px);
+    height: calc(100dvh - var(--header-h));
+    min-height: calc(100vh - var(--header-h));
+    background: #fff;
+    border-right: 1px solid #f0eaea;
+    box-shadow: 2px 0 16px rgba(139, 0, 0, .05);
+    z-index: 12000;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+body.role-patient .toggle-row,
+body.role-patient #desktopSidebarToggle {
+    position: relative;
+    z-index: 12010;
+    pointer-events: auto !important;
+}
+
+body.role-patient .sidebar-inner {
+    flex: 1;
+    padding: 20px 14px 8px;
+    overflow-y: auto;
+}
+
+body.role-patient #sidebar .nav-link,
+body.role-patient #sidebar .logout-btn,
+body.role-patient #desktopSidebarToggle {
+    pointer-events: auto;
+}
+
+body.role-patient #mainContent {
+    position: relative;
+    z-index: 1;
+}
+
+body.role-patient .nav-section-label {
+    font-size: .6rem;
+    font-weight: 800;
+    color: #b0b7c3;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    padding: 0 8px 6px;
+}
+
+body.role-patient .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    font-size: .8rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-decoration: none;
+    transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+    position: relative;
+    overflow: visible;
+}
+
+body.role-patient .nav-link i {
+    font-size: 14px;
+    color: var(--crimson);
+    width: 20px;
+    text-align: center;
+}
+
+body.role-patient .nav-link:hover {
+    background: var(--crimson-light);
+    color: var(--crimson);
+}
+
+body.role-patient .nav-link.active {
+    background: linear-gradient(135deg, var(--crimson) 0%, var(--crimson-dark) 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, .25);
+}
+
+body.role-patient .nav-link.active i {
+    color: #fff;
+}
+
+body.role-patient .sidebar-bottom {
+    padding: 14px;
+    border-top: 1px solid #f3f4f6;
+}
+
+body.role-patient .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #ef4444;
+    font-size: .8rem;
+    font-weight: 700;
+    transition: background .15s;
+}
+
+body.role-patient .logout-btn:hover {
+    background: #fef2f2;
+}
+
+body.role-patient .logout-icon {
+    width: 32px;
+    height: 32px;
+    background: #fef2f2;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.role-patient #mobileBottomNav {
+    position: fixed;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    width: min(calc(100dvw - 24px), 420px);
+    max-width: 420px;
+    margin: 0;
+}
+
+body.role-patient #mobFabMenu {
+    position: fixed;
+    left: 50%;
+    bottom: 96px;
+    width: min(230px, calc(100dvw - 32px));
+    transform: translateX(-50%) translateY(10px) scale(.95);
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .22s ease, transform .22s ease, visibility .22s ease;
+    z-index: 10000;
+}
+
+body.role-patient #mobFabMenu.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+body.role-patient #mobFab i {
+    transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+}
+
+body.role-patient #mobFab.open i {
+    transform: rotate(135deg);
+}
+
+@media only screen and (max-width: 1199px) {
+
+    body.role-patient #sidebar,
+    body.role-patient #sidebar * {
+        pointer-events: none !important;
+    }
+
+    body.role-patient #sidebar {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+
+    body.role-patient #mainContent {
+        margin-left: 0 !important;
+        padding-bottom: 100px;
+    }
+
+    body.role-patient #mobileBottomNav {
+        display: block !important;
+        position: fixed !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: 12px !important;
+        transform: translateX(-50%) !important;
+        width: min(calc(100vw - 24px), 420px) !important;
+        max-width: 420px !important;
+        margin: 0 !important;
+        z-index: 9999 !important;
+    }
+
+    body.role-patient #mobFabMenu {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) translateY(10px) scale(.95) !important;
+        z-index: 10000 !important;
+    }
+
+    body.role-patient #mobFabMenu.open {
+        transform: translateX(-50%) translateY(0) scale(1) !important;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    body.role-patient #mobileBottomNav {
+        display: none !important;
+    }
+
+    body.role-patient #sidebar {
+        display: flex !important;
+    }
+
+    body.role-patient #mainContent {
+        margin-left: clamp(200px, 20vw, 220px);
+        transition: margin-left .3s;
+    }
+
+    body.role-patient.sidebar-collapsed #sidebar {
+        width: 64px;
+        overflow: visible;
+    }
+
+    body.role-patient.sidebar-collapsed #mainContent {
+        margin-left: 64px !important;
+    }
+
+    body.role-patient.sidebar-collapsed #sidebar .sidebar-inner {
+        padding-left: 8px;
+        padding-right: 8px;
+        overflow-x: visible;
+    }
+
+    body.role-patient.sidebar-collapsed #sidebar .sidebar-bottom {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    body.role-patient.sidebar-collapsed #sidebar .nav-section-label,
+    body.role-patient.sidebar-collapsed #sidebar .menu-text {
+        display: none !important;
+    }
+
+    body.role-patient.sidebar-collapsed #sidebar .nav-link,
+    body.role-patient.sidebar-collapsed #sidebar .logout-btn {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        margin: 6px auto;
+        border-radius: 12px;
+        gap: 0;
+        position: relative;
+        display: flex;
+    }
+
+    body.role-patient.sidebar-collapsed #sidebar .nav-link .nav-icon-wrap,
+    body.role-patient.sidebar-collapsed #sidebar .logout-btn .logout-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    body.role-patient.sidebar-collapsed #sidebar .nav-icon-wrap,
+    body.role-patient.sidebar-collapsed #sidebar .logout-icon {
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    body.role-patient.sidebar-collapsed #sidebar .toggle-row {
+        justify-content: center !important;
+    }
+}
+
+[data-theme="dark"] body.role-patient {
+    background-color: #000D1A;
+    color: #E5E7EB;
+}
+
+[data-theme="dark"] body.role-patient .nav-link {
+    color: #d1d5db;
+}
+
+[data-theme="dark"] body.role-patient .nav-link i {
+    color: #ff6b6b;
+}
+
+[data-theme="dark"] body.role-patient .nav-link.active i {
+    color: #fff;
+}
+
+[data-theme="dark"] body.role-patient #sidebar,
+[data-theme="dark"] body.role-patient #mobileBottomNav {
+    background-color: #0d1117;
+    border-color: #21262d;
+}
+
+[data-theme="dark"] body.role-patient .nav-link:hover {
+    background: rgba(139, 0, 0, .2);
+}
+
+[data-theme="dark"] body.role-patient .sidebar-bottom {
+    border-color: #21262d;
+}
+
+[data-theme="dark"] body.role-patient #mobFab {
+    border-color: #000D1A;
+}

@@ -43,6 +43,7 @@
 @import './pages/patient/dashboard.css';
 @import './pages/patient/book-appointment.css';
 @import './pages/patient/records.css';
+@import './pages/patient/about-us.css';
 
 /* Admin pages */
 @import './pages/admin/admin-dashboard.css';

@@ -269,14 +269,18 @@ $notifCount = $notifications->count();
 
       <section id="upcomingSection" class="pb-16">
         @forelse($upcomingGrouped as $month => $items)
-        <div class="appt-month-group mb-10 sm:mb-14">
-          <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5">
-            <div class="timeline-dot"></div>
-            <h2 class="text-lg sm:text-xl font-bold text-[#8b0000]">{{ $month }}</h2>
-            <span class="month-count-pill">
-              {{ $items->count() }} {{ Str::plural('appointment', $items->count()) }}
+        <details class="appt-month-group mb-10 sm:mb-14" open>
+          <summary class="appt-month-summary">
+            <span class="appt-month-left">
+              <span class="timeline-dot"></span>
+              <span class="appt-month-title text-[#8b0000]">{{ $month }}</span>
+              <span class="month-count-pill">
+                {{ $items->count() }} {{ Str::plural('appointment', $items->count()) }}
+              </span>
             </span>
-          </div>
+
+            <i class="fa-solid fa-chevron-down appt-month-chevron"></i>
+          </summary>
 
           <div class="desktop-appointments-table relative pl-10">
             <div
@@ -446,12 +450,12 @@ $notifCount = $notifications->count();
                     </button>
 
                     <button type="button" class="action-btn action-btn-reschedule" data-tooltip="Reschedule" onclick="openRescheduleModal({
-      id: '{{ $appt->id }}',
-      name: @js($patientName),
-      datetime: @js($modalDatetime),
-      serviceType: @js($appt->service_type),
-      updateUrl: '{{ route('admin.admin.appointments.reschedule', ['id' => $appt->id]) }}'
-    })">
+                          id: '{{ $appt->id }}',
+                          name: @js($patientName),
+                          datetime: @js($modalDatetime),
+                          serviceType: @js($appt->service_type),
+                          updateUrl: '{{ route('admin.admin.appointments.reschedule.update', ['id' => $appt->id]) }}'
+                        })">
                       <i class="fa-solid fa-rotate-right"></i>
                     </button>
 
@@ -603,7 +607,7 @@ $notifCount = $notifications->count();
                     name: @js($patientName),
                     datetime: @js($modalDatetime),
                     serviceType: @js($appt->service_type),
-                    updateUrl: '{{ route('admin.admin.appointments.reschedule', ['id' => $appt->id]) }}'
+                    updateUrl: '{{ route('admin.admin.appointments.reschedule.update', ['id' => $appt->id]) }}'
                 })" data-id="{{ $appt->id }}" data-name="{{ $patientName }}" data-datetime="{{ $modalDatetime }}">
                   <i class="fa-solid fa-rotate-right text-[10px]"></i> Reschedule
                 </button>
@@ -616,223 +620,93 @@ $notifCount = $notifications->count();
 
             </div>
             @endforeach
-          </div>
+        </details>
 
+    </div>
+    @empty
+    <div id="appointmentStaticEmptyUpcoming" class="empty-state">
+      <div class="empty-state-icon appointment-empty-icon">
+        <i class="fa-regular fa-calendar-xmark"></i>
+      </div>
+
+      <p class="empty-state-title">No upcoming appointments</p>
+      <p class="empty-state-sub">New appointments will appear here once scheduled.</p>
+    </div>
+    @endforelse
+
+    <div id="appointmentStatusEmptyUpcoming" class="empty-state empty-state-controlled">
+      <div class="empty-state-icon appointment-empty-icon">
+        <i id="appointmentStatusEmptyUpcomingIcon" class="fa-regular fa-calendar-xmark"></i>
+      </div>
+
+      <p id="appointmentStatusEmptyUpcomingTitle" class="empty-state-title">
+        No upcoming appointments
+      </p>
+
+      <p id="appointmentStatusEmptyUpcomingSub" class="empty-state-sub">
+        New appointments will appear here once scheduled.
+      </p>
+
+      <button type="button" onclick="resetAppointmentFilters()"
+        class="empty-state-btn appointment-panel-empty-clear hidden">
+        <i class="fa-solid fa-xmark"></i>
+        Clear filter
+      </button>
+    </div>
+
+    <div id="appointmentFilterEmptyUpcoming" class="empty-state empty-state-controlled">
+      <div class="empty-state-icon appointment-empty-icon">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+
+      <p id="appointmentFilterEmptyUpcomingTitle" class="empty-state-title">
+        No results found
+      </p>
+
+      <p class="empty-state-sub">
+        Try a different patient name, ID, or status.
+      </p>
+
+      <button type="button" onclick="clearAppointmentSearch()" class="empty-state-btn">
+        <i class="fa-solid fa-xmark"></i>
+        Clear search
+      </button>
+    </div>
+    </section>
+
+    <section id="pastSection" class="pb-16 hidden">
+      @forelse($pastGrouped as $month => $items)
+      <div class="appt-month-group mb-10 sm:mb-14">
+        <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5 pl-2">
+          <div class="timeline-dot-past"></div>
+          <h2 class="text-lg sm:text-xl font-bold text-gray-400">{{ $month }}</h2>
+          <span class="bg-gray-100 text-gray-400 text-xs font-semibold px-3 py-1 rounded-full">
+            {{ $items->count() }} {{ Str::plural('appointment', $items->count()) }}
+          </span>
         </div>
-        @empty
-        <div id="appointmentStaticEmptyUpcoming" class="empty-state">
-          <div class="empty-state-icon appointment-empty-icon">
-            <i class="fa-regular fa-calendar-xmark"></i>
-          </div>
 
-          <p class="empty-state-title">No upcoming appointments</p>
-          <p class="empty-state-sub">New appointments will appear here once scheduled.</p>
-        </div>
-        @endforelse
+        <div class="desktop-appointments-table relative pl-10">
+          <div class="absolute left-[8px] top-0 bottom-0 w-[2px] bg-gray-200 rounded-full"></div>
 
-        <div id="appointmentStatusEmptyUpcoming" class="empty-state empty-state-controlled">
-          <div class="empty-state-icon appointment-empty-icon">
-            <i id="appointmentStatusEmptyUpcomingIcon" class="fa-regular fa-calendar-xmark"></i>
-          </div>
-
-          <p id="appointmentStatusEmptyUpcomingTitle" class="empty-state-title">
-            No upcoming appointments
-          </p>
-
-          <p id="appointmentStatusEmptyUpcomingSub" class="empty-state-sub">
-            New appointments will appear here once scheduled.
-          </p>
-
-          <button type="button" onclick="resetAppointmentFilters()"
-            class="empty-state-btn appointment-panel-empty-clear hidden">
-            <i class="fa-solid fa-xmark"></i>
-            Clear filter
-          </button>
-        </div>
-
-        <div id="appointmentFilterEmptyUpcoming" class="empty-state empty-state-controlled">
-          <div class="empty-state-icon appointment-empty-icon">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </div>
-
-          <p id="appointmentFilterEmptyUpcomingTitle" class="empty-state-title">
-            No results found
-          </p>
-
-          <p class="empty-state-sub">
-            Try a different patient name, ID, or status.
-          </p>
-
-          <button type="button" onclick="clearAppointmentSearch()" class="empty-state-btn">
-            <i class="fa-solid fa-xmark"></i>
-            Clear search
-          </button>
-        </div>
-      </section>
-
-      <section id="pastSection" class="pb-16 hidden">
-        @forelse($pastGrouped as $month => $items)
-        <div class="appt-month-group mb-10 sm:mb-14">
-          <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5 pl-2">
-            <div class="timeline-dot-past"></div>
-            <h2 class="text-lg sm:text-xl font-bold text-gray-400">{{ $month }}</h2>
-            <span class="bg-gray-100 text-gray-400 text-xs font-semibold px-3 py-1 rounded-full">
-              {{ $items->count() }} {{ Str::plural('appointment', $items->count()) }}
-            </span>
-          </div>
-
-          <div class="desktop-appointments-table relative pl-10">
-            <div class="absolute left-[8px] top-0 bottom-0 w-[2px] bg-gray-200 rounded-full"></div>
-
-            <div
-              class="appt-table-head grid gap-4 text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400 py-3 px-5 bg-[#FAFAFA] border border-gray-200 rounded-t-2xl mb-3"
-              style="grid-template-columns: 130px 100px 160px minmax(160px,1fr) 100px 150px 100px;">
-              <div class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-[10px]"></i>Date</div>
-              <div class="flex items-center gap-1.5"><i class="fa-regular fa-clock text-[10px]"></i>Time
-              </div>
-              <div class="appt-program-cell text-left">Service</div>
-              <div class="appt-program-cell text-left">Patient</div>
-              <div class="appt-program-cell text-left">Program</div>
-              <div class="appt-program-cell text-left">Status</div>
-              <div class="text-right">Actions</div>
+          <div
+            class="appt-table-head grid gap-4 text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400 py-3 px-5 bg-[#FAFAFA] border border-gray-200 rounded-t-2xl mb-3"
+            style="grid-template-columns: 130px 100px 160px minmax(160px,1fr) 100px 150px 100px;">
+            <div class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-[10px]"></i>Date</div>
+            <div class="flex items-center gap-1.5"><i class="fa-regular fa-clock text-[10px]"></i>Time
             </div>
-
-            <div class="space-y-2.5">
-              @foreach ($items as $i => $appt)
-              @php
-              $patientName = optional($appt->patient)->name ?? 'Unknown Patient';
-              $program = optional($appt->patient)->program ?? optional($appt->patient)->course ?? '—';
-              $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('F j, Y');
-              $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
-              $timeLabel = $appt->appointment_time
-              ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
-              : '—';
-              $serviceLabel =
-              ($appt->service_type ?? '') === 'Others'
-              ? ($appt->other_services ?? '' ?:
-              'Others')
-              : $appt->service_type ?? '—';
-              $serviceLower = strtolower($serviceLabel);
-              $badgeClass = 'service-badge-default';
-              if (str_contains($serviceLower, 'surgery')) {
-              $badgeClass = 'service-badge-surgery';
-              } elseif (str_contains($serviceLower, 'check')) {
-              $badgeClass = 'service-badge-checkup';
-              } elseif (str_contains($serviceLower, 'whiten')) {
-              $badgeClass = 'service-badge-whitening';
-              } elseif (str_contains($serviceLower, 'extrac')) {
-              $badgeClass = 'service-badge-extraction';
-              }
-              $modalDatetime =
-              \Carbon\Carbon::parse($appt->appointment_date)->format('l, F j, Y') .
-              ' • ' .
-              $timeLabel;
-              $statusRaw = strtolower((string) ($appt->status ?? 'completed'));
-              $isCancelledPast = in_array($statusRaw, ['cancelled', 'canceled']);
-              $cancelReason =
-              $appt->cancellation_reason ??
-              ($appt->cancel_reason ??
-              ($appt->cancelled_reason ?? ($appt->reason ?? '')));
-              $cancelReasonLabel = trim(
-              str_ireplace('Patient no-show', 'No-show', (string) $cancelReason),
-              );
-              $pastStatusBase = $isCancelledPast ? 'Cancelled' : 'Completed';
-              $pastStatusLabel = $isCancelledPast
-              ? 'Cancelled' . ($cancelReasonLabel ? ' - ' . $cancelReasonLabel : '')
-              : 'Completed';
-              $pastStatusClass = $isCancelledPast ? 'status-cancelled' : 'status-completed';
-              $recordDuration =
-              $appt->duration ??
-              ($appt->procedure_duration ?? ($appt->treatment_duration ?? ''));
-              $recordRemarks =
-              $appt->remarks ?? ($appt->treatment_notes ?? ($appt->notes ?? ''));
-              $recordOral = $appt->oral_examination ?? ($appt->oral ?? '');
-              $recordDiagnosis = $appt->diagnosis ?? '';
-              $recordPrescription = $appt->prescription ?? '';
-              @endphp
-
-              <div class="appt-card opacity-70" data-appt-id="{{ $appt->id }}" data-period="past"
-                data-date="{{ $appt->appointment_date }}" data-patient="{{ strtolower($patientName) }}"
-                data-service="{{ strtolower($serviceLabel) }}"
-                data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
-                data-status="{{ $isCancelledPast ? 'cancelled' : 'completed' }}"
-                style="animation-delay:{{ $i * 0.04 }}s">
-
-                <div class="grid gap-4 items-center px-5 py-3.5"
-                  style="grid-template-columns: 130px 100px 160px minmax(160px,1fr) 100px 150px 100px;">
-
-                  <div>
-                    <p class="text-[13px] font-semibold text-gray-500">{{ $dateLabel }}</p>
-                    <p class="text-[11px] text-gray-400 mt-0.5">{{ $weekday }}</p>
-                  </div>
-
-                  <div><span class="time-chip text-gray-400"><i class="fa-regular fa-clock text-xs"></i>{{ $timeLabel
-                      }}</span>
-                  </div>
-
-                  <div class="flex items-center justify-start"><span
-                      class="service-badge {{ $badgeClass }} opacity-70">{{
-                      $serviceLabel }}</span>
-                  </div>
-
-                  <div class="appt-patient-cell flex items-center justify-start gap-3">
-                    <img
-                      src="{{ optional($appt->patient)->profile_image ? asset('storage/' . $appt->patient->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($patientName) . '&background=9ca3af&color=ffffff&bold=true' }}"
-                      alt="{{ $patientName }}"
-                      class="w-8 h-8 rounded-full object-cover border border-gray-200 flex-shrink-0 opacity-80">
-                    <div class="text-left min-w-0">
-                      <p class="past-patient-name text-[13px] font-bold text-gray-500 leading-tight"
-                        title="{{ $patientName }}">
-                        {{ $patientName }}</p>
-                      <p class="text-[10px] text-gray-400 font-medium mt-0.5">ID
-                        #{{ $appt->patient_id ?? 'N/A' }}</p>
-                    </div>
-                  </div>
-
-                  <div class="appt-program-cell text-left">
-                    @if ($program === '—')
-                    <span class="text-[12px] text-gray-400">—</span>
-                    @else
-                    <span
-                      class="inline-block bg-gray-100 text-gray-400 text-[11px] font-medium px-2.5 py-1 rounded-full border border-gray-200">{{
-                      $program }}</span>
-                    @endif
-                  </div>
-
-                  <div class="appt-status-cell text-left">
-                    <span class="status-pill {{ $pastStatusClass }} past-status-pill" data-appt-id="{{ $appt->id }}"
-                      data-status-base="{{ $pastStatusBase }}" data-cancel-reason="{{ $cancelReasonLabel }}"><span
-                        class="status-dot"></span><span class="past-status-text">{{ $pastStatusLabel }}</span></span>
-                  </div>
-
-                  <div class="appt-actions-wrap">
-                    <button type="button" class="action-btn action-btn-record" data-tooltip="View details"
-                      onclick="openRecordModal(this)" data-appt-id="{{ $appt->id }}" data-service="{{ $serviceLabel }}"
-                      data-date="{{ $dateLabel }}" data-time="{{ $timeLabel }}" data-status="{{ $pastStatusLabel }}"
-                      data-duration="{{ $recordDuration }}" data-remarks="{{ $recordRemarks }}"
-                      data-oral="{{ $recordOral }}" data-diagnosis="{{ $recordDiagnosis }}"
-                      data-prescription="{{ $recordPrescription }}">
-                      <i class="fa-regular fa-eye"></i>
-                    </button>
-
-                    <a href="{{ route('admin.admin.patient.profile', ['patient' => $appt->patient_id]) }}?from=appointments"
-                      class="action-btn action-btn-view" data-tooltip="View profile">
-                      <i class="fa-regular fa-user"></i>
-                    </a>
-                  </div>
-
-                </div>
-              </div>
-              @endforeach
-            </div>
+            <div class="appt-program-cell text-left">Service</div>
+            <div class="appt-program-cell text-left">Patient</div>
+            <div class="appt-program-cell text-left">Program</div>
+            <div class="appt-program-cell text-left">Status</div>
+            <div class="text-right">Actions</div>
           </div>
 
-          <div class="mobile-appointments-list">
+          <div class="space-y-2.5">
             @foreach ($items as $i => $appt)
             @php
             $patientName = optional($appt->patient)->name ?? 'Unknown Patient';
             $program = optional($appt->patient)->program ?? optional($appt->patient)->course ?? '—';
-            $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('M j, Y');
+            $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('F j, Y');
             $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
             $timeLabel = $appt->appointment_time
             ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
@@ -861,7 +735,8 @@ $notifCount = $notifications->count();
             $isCancelledPast = in_array($statusRaw, ['cancelled', 'canceled']);
             $cancelReason =
             $appt->cancellation_reason ??
-            ($appt->cancel_reason ?? ($appt->cancelled_reason ?? ($appt->reason ?? '')));
+            ($appt->cancel_reason ??
+            ($appt->cancelled_reason ?? ($appt->reason ?? '')));
             $cancelReasonLabel = trim(
             str_ireplace('Patient no-show', 'No-show', (string) $cancelReason),
             );
@@ -873,117 +748,244 @@ $notifCount = $notifications->count();
             $recordDuration =
             $appt->duration ??
             ($appt->procedure_duration ?? ($appt->treatment_duration ?? ''));
-            $recordRemarks = $appt->remarks ?? ($appt->treatment_notes ?? ($appt->notes ?? ''));
+            $recordRemarks =
+            $appt->remarks ?? ($appt->treatment_notes ?? ($appt->notes ?? ''));
             $recordOral = $appt->oral_examination ?? ($appt->oral ?? '');
             $recordDiagnosis = $appt->diagnosis ?? '';
             $recordPrescription = $appt->prescription ?? '';
             @endphp
 
-            <div class="mobile-appt-card opacity-75 border-gray-200" data-appt-id="{{ $appt->id }}" data-period="past"
+            <div class="appt-card opacity-70" data-appt-id="{{ $appt->id }}" data-period="past"
               data-date="{{ $appt->appointment_date }}" data-patient="{{ strtolower($patientName) }}"
               data-service="{{ strtolower($serviceLabel) }}"
               data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
               data-status="{{ $isCancelledPast ? 'cancelled' : 'completed' }}" style="animation-delay:{{ $i * 0.04 }}s">
-              <div class="pl-1">
-                <div class="flex items-start justify-between gap-2 mb-3">
-                  <div class="min-w-0">
-                    <p class="past-grid-name text-[14px] font-extrabold text-gray-500" title="{{ $patientName }}">{{
-                      $patientName }}</p>
-                    <p class="text-[11px] font-medium text-gray-400 mt-0.5">
-                      {{ $weekday }},
-                      {{ $dateLabel }}</p>
+
+              <div class="grid gap-4 items-center px-5 py-3.5"
+                style="grid-template-columns: 130px 100px 160px minmax(160px,1fr) 100px 150px 100px;">
+
+                <div>
+                  <p class="text-[13px] font-semibold text-gray-500">{{ $dateLabel }}</p>
+                  <p class="text-[11px] text-gray-400 mt-0.5">{{ $weekday }}</p>
+                </div>
+
+                <div><span class="time-chip text-gray-400"><i class="fa-regular fa-clock text-xs"></i>{{ $timeLabel
+                    }}</span>
+                </div>
+
+                <div class="flex items-center justify-start"><span class="service-badge {{ $badgeClass }} opacity-70">{{
+                    $serviceLabel }}</span>
+                </div>
+
+                <div class="appt-patient-cell flex items-center justify-start gap-3">
+                  <img
+                    src="{{ optional($appt->patient)->profile_image ? asset('storage/' . $appt->patient->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($patientName) . '&background=9ca3af&color=ffffff&bold=true' }}"
+                    alt="{{ $patientName }}"
+                    class="w-8 h-8 rounded-full object-cover border border-gray-200 flex-shrink-0 opacity-80">
+                  <div class="text-left min-w-0">
+                    <p class="past-patient-name text-[13px] font-bold text-gray-500 leading-tight"
+                      title="{{ $patientName }}">
+                      {{ $patientName }}</p>
+                    <p class="text-[10px] text-gray-400 font-medium mt-0.5">ID
+                      #{{ $appt->patient_id ?? 'N/A' }}</p>
                   </div>
-                  <span class="status-pill {{ $pastStatusClass }} past-status-pill flex-shrink-0"
-                    data-appt-id="{{ $appt->id }}" data-status-base="{{ $pastStatusBase }}"
-                    data-cancel-reason="{{ $cancelReasonLabel }}"><span class="status-dot"></span><span
-                      class="past-status-text">{{ $pastStatusLabel }}</span></span>
                 </div>
 
-                <div class="bg-gray-50 rounded-xl p-2.5 grid grid-cols-2 gap-2 border border-gray-100 mb-3">
+                <div class="appt-program-cell text-left">
+                  @if ($program === '—')
+                  <span class="text-[12px] text-gray-400">—</span>
+                  @else
                   <span
-                    class="time-chip text-[11px] text-gray-400 bg-white w-full justify-center shadow-sm py-1.5 border-gray-100">
-                    <i class="fa-regular fa-clock"></i> {{ $timeLabel }}
-                  </span>
-                  <span
-                    class="service-badge {{ $badgeClass }} opacity-70 text-[11px] w-full justify-center py-1.5 truncate border border-gray-100/50">
-                    {{ $serviceLabel }}
-                  </span>
+                    class="inline-block bg-gray-100 text-gray-400 text-[11px] font-medium px-2.5 py-1 rounded-full border border-gray-200">{{
+                    $program }}</span>
+                  @endif
                 </div>
 
-                <div class="mobile-appt-actions grid grid-cols-2 gap-3">
-                  <button type="button" class="action-btn action-btn-record" onclick="openRecordModal(this)"
-                    data-appt-id="{{ $appt->id }}" data-service="{{ $serviceLabel }}" data-date="{{ $dateLabel }}"
-                    data-time="{{ $timeLabel }}" data-status="{{ $pastStatusLabel }}"
+                <div class="appt-status-cell text-left">
+                  <span class="status-pill {{ $pastStatusClass }} past-status-pill" data-appt-id="{{ $appt->id }}"
+                    data-status-base="{{ $pastStatusBase }}" data-cancel-reason="{{ $cancelReasonLabel }}"><span
+                      class="status-dot"></span><span class="past-status-text">{{ $pastStatusLabel }}</span></span>
+                </div>
+
+                <div class="appt-actions-wrap">
+                  <button type="button" class="action-btn action-btn-record" data-tooltip="View details"
+                    onclick="openRecordModal(this)" data-appt-id="{{ $appt->id }}" data-service="{{ $serviceLabel }}"
+                    data-date="{{ $dateLabel }}" data-time="{{ $timeLabel }}" data-status="{{ $pastStatusLabel }}"
                     data-duration="{{ $recordDuration }}" data-remarks="{{ $recordRemarks }}"
                     data-oral="{{ $recordOral }}" data-diagnosis="{{ $recordDiagnosis }}"
                     data-prescription="{{ $recordPrescription }}">
-                    <i class="fa-regular fa-eye text-[10px]"></i> Details
+                    <i class="fa-regular fa-eye"></i>
                   </button>
 
                   <a href="{{ route('admin.admin.patient.profile', ['patient' => $appt->patient_id]) }}?from=appointments"
-                    class="action-btn action-btn-view">
-                    <i class="fa-regular fa-user text-[10px]"></i> Profile
+                    class="action-btn action-btn-view" data-tooltip="View profile">
+                    <i class="fa-regular fa-user"></i>
                   </a>
                 </div>
+
               </div>
             </div>
             @endforeach
           </div>
-
         </div>
-        @empty
-        <div id="appointmentStaticEmptyPast" class="empty-state">
-          <div class="empty-state-icon appointment-empty-icon">
-            <i class="fa-regular fa-calendar-xmark"></i>
+
+        <div class="mobile-appointments-list">
+          @foreach ($items as $i => $appt)
+          @php
+          $patientName = optional($appt->patient)->name ?? 'Unknown Patient';
+          $program = optional($appt->patient)->program ?? optional($appt->patient)->course ?? '—';
+          $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('M j, Y');
+          $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
+          $timeLabel = $appt->appointment_time
+          ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
+          : '—';
+          $serviceLabel =
+          ($appt->service_type ?? '') === 'Others'
+          ? ($appt->other_services ?? '' ?:
+          'Others')
+          : $appt->service_type ?? '—';
+          $serviceLower = strtolower($serviceLabel);
+          $badgeClass = 'service-badge-default';
+          if (str_contains($serviceLower, 'surgery')) {
+          $badgeClass = 'service-badge-surgery';
+          } elseif (str_contains($serviceLower, 'check')) {
+          $badgeClass = 'service-badge-checkup';
+          } elseif (str_contains($serviceLower, 'whiten')) {
+          $badgeClass = 'service-badge-whitening';
+          } elseif (str_contains($serviceLower, 'extrac')) {
+          $badgeClass = 'service-badge-extraction';
+          }
+          $modalDatetime =
+          \Carbon\Carbon::parse($appt->appointment_date)->format('l, F j, Y') .
+          ' • ' .
+          $timeLabel;
+          $statusRaw = strtolower((string) ($appt->status ?? 'completed'));
+          $isCancelledPast = in_array($statusRaw, ['cancelled', 'canceled']);
+          $cancelReason =
+          $appt->cancellation_reason ??
+          ($appt->cancel_reason ?? ($appt->cancelled_reason ?? ($appt->reason ?? '')));
+          $cancelReasonLabel = trim(
+          str_ireplace('Patient no-show', 'No-show', (string) $cancelReason),
+          );
+          $pastStatusBase = $isCancelledPast ? 'Cancelled' : 'Completed';
+          $pastStatusLabel = $isCancelledPast
+          ? 'Cancelled' . ($cancelReasonLabel ? ' - ' . $cancelReasonLabel : '')
+          : 'Completed';
+          $pastStatusClass = $isCancelledPast ? 'status-cancelled' : 'status-completed';
+          $recordDuration =
+          $appt->duration ??
+          ($appt->procedure_duration ?? ($appt->treatment_duration ?? ''));
+          $recordRemarks = $appt->remarks ?? ($appt->treatment_notes ?? ($appt->notes ?? ''));
+          $recordOral = $appt->oral_examination ?? ($appt->oral ?? '');
+          $recordDiagnosis = $appt->diagnosis ?? '';
+          $recordPrescription = $appt->prescription ?? '';
+          @endphp
+
+          <div class="mobile-appt-card opacity-75 border-gray-200" data-appt-id="{{ $appt->id }}" data-period="past"
+            data-date="{{ $appt->appointment_date }}" data-patient="{{ strtolower($patientName) }}"
+            data-service="{{ strtolower($serviceLabel) }}"
+            data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
+            data-status="{{ $isCancelledPast ? 'cancelled' : 'completed' }}" style="animation-delay:{{ $i * 0.04 }}s">
+            <div class="pl-1">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div class="min-w-0">
+                  <p class="past-grid-name text-[14px] font-extrabold text-gray-500" title="{{ $patientName }}">{{
+                    $patientName }}</p>
+                  <p class="text-[11px] font-medium text-gray-400 mt-0.5">
+                    {{ $weekday }},
+                    {{ $dateLabel }}</p>
+                </div>
+                <span class="status-pill {{ $pastStatusClass }} past-status-pill flex-shrink-0"
+                  data-appt-id="{{ $appt->id }}" data-status-base="{{ $pastStatusBase }}"
+                  data-cancel-reason="{{ $cancelReasonLabel }}"><span class="status-dot"></span><span
+                    class="past-status-text">{{ $pastStatusLabel }}</span></span>
+              </div>
+
+              <div class="bg-gray-50 rounded-xl p-2.5 grid grid-cols-2 gap-2 border border-gray-100 mb-3">
+                <span
+                  class="time-chip text-[11px] text-gray-400 bg-white w-full justify-center shadow-sm py-1.5 border-gray-100">
+                  <i class="fa-regular fa-clock"></i> {{ $timeLabel }}
+                </span>
+                <span
+                  class="service-badge {{ $badgeClass }} opacity-70 text-[11px] w-full justify-center py-1.5 truncate border border-gray-100/50">
+                  {{ $serviceLabel }}
+                </span>
+              </div>
+
+              <div class="mobile-appt-actions grid grid-cols-2 gap-3">
+                <button type="button" class="action-btn action-btn-record" onclick="openRecordModal(this)"
+                  data-appt-id="{{ $appt->id }}" data-service="{{ $serviceLabel }}" data-date="{{ $dateLabel }}"
+                  data-time="{{ $timeLabel }}" data-status="{{ $pastStatusLabel }}"
+                  data-duration="{{ $recordDuration }}" data-remarks="{{ $recordRemarks }}"
+                  data-oral="{{ $recordOral }}" data-diagnosis="{{ $recordDiagnosis }}"
+                  data-prescription="{{ $recordPrescription }}">
+                  <i class="fa-regular fa-eye text-[10px]"></i> Details
+                </button>
+
+                <a href="{{ route('admin.admin.patient.profile', ['patient' => $appt->patient_id]) }}?from=appointments"
+                  class="action-btn action-btn-view">
+                  <i class="fa-regular fa-user text-[10px]"></i> Profile
+                </a>
+              </div>
+            </div>
           </div>
-
-          <p class="empty-state-title">No past appointments</p>
-          <p class="empty-state-sub">Completed appointments will appear here.</p>
-        </div>
-        @endforelse
-
-        <div id="appointmentStatusEmptyPast" class="empty-state empty-state-controlled">
-          <div class="empty-state-icon appointment-empty-icon">
-            <i id="appointmentStatusEmptyPastIcon" class="fa-regular fa-calendar-xmark"></i>
-          </div>
-
-          <p id="appointmentStatusEmptyPastTitle" class="empty-state-title">
-            No past appointments
-          </p>
-
-          <p id="appointmentStatusEmptyPastSub" class="empty-state-sub">
-            Completed appointments will appear here.
-          </p>
-
-          <button type="button" onclick="resetAppointmentFilters()"
-            class="empty-state-btn appointment-panel-empty-clear hidden">
-            <i class="fa-solid fa-xmark"></i>
-            Clear filter
-          </button>
+          @endforeach
         </div>
 
-        <div id="appointmentFilterEmptyPast" class="empty-state empty-state-controlled">
-          <div class="empty-state-icon appointment-empty-icon">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </div>
-
-          <p id="appointmentFilterEmptyPastTitle" class="empty-state-title">
-            No results found
-          </p>
-
-          <p class="empty-state-sub">
-            Try a different patient name, ID, or status.
-          </p>
-
-          <button type="button" onclick="clearAppointmentSearch()" class="empty-state-btn">
-            <i class="fa-solid fa-xmark"></i>
-            Clear search
-          </button>
+      </div>
+      @empty
+      <div id="appointmentStaticEmptyPast" class="empty-state">
+        <div class="empty-state-icon appointment-empty-icon">
+          <i class="fa-regular fa-calendar-xmark"></i>
         </div>
-      </section>
 
-      <div class="pb-16"></div>
-    </div>
+        <p class="empty-state-title">No past appointments</p>
+        <p class="empty-state-sub">Completed appointments will appear here.</p>
+      </div>
+      @endforelse
+
+      <div id="appointmentStatusEmptyPast" class="empty-state empty-state-controlled">
+        <div class="empty-state-icon appointment-empty-icon">
+          <i id="appointmentStatusEmptyPastIcon" class="fa-regular fa-calendar-xmark"></i>
+        </div>
+
+        <p id="appointmentStatusEmptyPastTitle" class="empty-state-title">
+          No past appointments
+        </p>
+
+        <p id="appointmentStatusEmptyPastSub" class="empty-state-sub">
+          Completed appointments will appear here.
+        </p>
+
+        <button type="button" onclick="resetAppointmentFilters()"
+          class="empty-state-btn appointment-panel-empty-clear hidden">
+          <i class="fa-solid fa-xmark"></i>
+          Clear filter
+        </button>
+      </div>
+
+      <div id="appointmentFilterEmptyPast" class="empty-state empty-state-controlled">
+        <div class="empty-state-icon appointment-empty-icon">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+
+        <p id="appointmentFilterEmptyPastTitle" class="empty-state-title">
+          No results found
+        </p>
+
+        <p class="empty-state-sub">
+          Try a different patient name, ID, or status.
+        </p>
+
+        <button type="button" onclick="clearAppointmentSearch()" class="empty-state-btn">
+          <i class="fa-solid fa-xmark"></i>
+          Clear search
+        </button>
+      </div>
+    </section>
+
+    <div class="pb-16"></div>
+  </div>
 </main>
 
 <div id="filterModal" class="filter-drawer-wrapper" aria-hidden="true">
@@ -1038,19 +1040,6 @@ $notifCount = $notifications->count();
             <input type="radio" name="appointment_period" value="all" class="filter-input radio-red chip-radio" />
             <span>All appointments</span>
           </label>
-        </div>
-      </div>
-
-      <div>
-        <h3 class="filter-section-title">Status</h3>
-        <div class="filter-chip-row" id="apptStatusChipGroup">
-          @foreach ($statusOptions as $value => $meta)
-          <label class="choice-chip">
-            <input type="radio" name="appointment_status" value="{{ $value }}" class="filter-input radio-red chip-radio"
-              {{ $value==='all' ? 'checked' : '' }} />
-            <span>{{ $meta['label'] }}</span>
-          </label>
-          @endforeach
         </div>
       </div>
 
@@ -1318,12 +1307,20 @@ $notifCount = $notifications->count();
 
   function closeAppointmentFilterPanel() {
     const modal = getAppointmentFilterModal();
-    if (!modal) return;
+    if (!modal || modal.classList.contains('closing')) return;
 
     modal.classList.remove('open');
+    modal.classList.add('closing');
     modal.setAttribute('aria-hidden', 'true');
-    document.documentElement.classList.remove('filter-lock');
-    document.body.classList.remove('filter-lock');
+
+    setTimeout(() => {
+      modal.classList.remove('closing');
+
+      if (!document.querySelector('#filterModal.open, #filterModal.closing')) {
+        document.documentElement.classList.remove('filter-lock');
+        document.body.classList.remove('filter-lock');
+      }
+    }, 300);
   }
 
   function setAppointmentPeriodFilter(period = 'upcoming') {
@@ -1551,12 +1548,11 @@ $notifCount = $notifications->count();
   function getDraftAppointmentFilters() {
     const activeSort = document.querySelector('#apptSortGroup .ftag.ftag-active');
     const selectedPeriod = document.querySelector('input[name="appointment_period"]:checked');
-    const selectedStatus = document.querySelector('input[name="appointment_status"]:checked');
 
     return {
       sort: activeSort?.dataset.sort || 'newest',
       period: selectedPeriod?.value || 'upcoming',
-      status: selectedStatus?.value || 'all',
+      status: appointmentStatusFilter || 'all',
       fromDate: document.getElementById('fromDate')?.value || '',
       toDate: document.getElementById('toDate')?.value || '',
     };
@@ -1580,7 +1576,6 @@ $notifCount = $notifications->count();
     const clearBtn = document.getElementById('appointmentClearFilterBtn');
     const activeCount = [
       appointmentPeriodFilter !== 'upcoming',
-      appointmentStatusFilterSource === 'panel' && appointmentStatusFilter !== 'all',
       !!appointmentFromDate || !!appointmentToDate,
       appointmentSortFilter !== 'newest',
     ].filter(Boolean).length;
@@ -1634,15 +1629,6 @@ $notifCount = $notifications->count();
       });
     }
 
-    if (draft.status !== 'all') {
-      const statusLabel = document.querySelector(`input[name="appointment_status"][value="${draft.status}"]`)?.closest('label')?.textContent.trim() || draft.status;
-
-      addChip(`Status: ${statusLabel}`, function () {
-        const input = document.querySelector('input[name="appointment_status"][value="all"]');
-        if (input) input.checked = true;
-      });
-    }
-
     if (draft.fromDate || draft.toDate) {
       addChip(`Date: ${draft.fromDate || 'Any'} to ${draft.toDate || 'Any'}`, function () {
         const from = document.getElementById('fromDate');
@@ -1663,13 +1649,6 @@ $notifCount = $notifications->count();
 
     const periodInput = document.querySelector(`input[name="appointment_period"][value="${appointmentPeriodFilter}"]`);
     if (periodInput) periodInput.checked = true;
-
-    const panelStatusValue = appointmentStatusFilterSource === 'panel'
-      ? appointmentStatusFilter
-      : 'all';
-
-    const statusInput = document.querySelector(`input[name="appointment_status"][value="${panelStatusValue}"]`);
-    if (statusInput) statusInput.checked = true;
 
     const from = document.getElementById('fromDate');
     const to = document.getElementById('toDate');
@@ -1757,12 +1736,6 @@ $notifCount = $notifications->count();
       appointmentPeriodFilter = draft.period;
       appointmentFromDate = draft.fromDate;
       appointmentToDate = draft.toDate;
-
-      if (draft.status !== 'all') {
-        setAppointmentStatusFilter(draft.status, false, 'panel');
-      } else if (appointmentStatusFilterSource === 'panel') {
-        setAppointmentStatusFilter('all', false, 'dropdown');
-      }
 
       applyAppointmentFilters();
       closeAppointmentFilterPanel();

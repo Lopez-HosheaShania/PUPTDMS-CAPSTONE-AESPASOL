@@ -267,8 +267,6 @@
     border-color: #21262d !important;
 }
 
-
-
 [data-theme="dark"] .detail-value {
     color: #f3f4f6 !important;
 }
@@ -458,4 +456,150 @@
     #patientViewToggle {
         display: none !important;
     }
+}
+
+#mainContent.admin-patient-page .patient-stat-option {
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+
+    --patient-option-bg: #F8FAFC;
+    --patient-option-text: #64748B;
+    --patient-option-border: #E5E7EB;
+    --patient-option-soft: rgba(15, 23, 42, .08);
+}
+
+#mainContent.admin-patient-page .patient-stat-option[data-filter="today"] {
+    --patient-option-bg: #EFF6FF;
+    --patient-option-text: #2563EB;
+    --patient-option-border: #BFDBFE;
+    --patient-option-soft: rgba(37, 99, 235, .16);
+}
+
+#mainContent.admin-patient-page .patient-stat-option[data-filter="upcoming"] {
+    --patient-option-bg: #FFF7ED;
+    --patient-option-text: #EA580C;
+    --patient-option-border: #FED7AA;
+    --patient-option-soft: rgba(234, 88, 12, .16);
+}
+
+#mainContent.admin-patient-page .patient-stat-option[data-filter="rescheduled"] {
+    --patient-option-bg: #FEFCE8;
+    --patient-option-text: #CA8A04;
+    --patient-option-border: #FEF08A;
+    --patient-option-soft: rgba(202, 138, 4, .16);
+}
+
+#mainContent.admin-patient-page .patient-stat-option[data-filter="completed"] {
+    --patient-option-bg: #F0FDF4;
+    --patient-option-text: #16A34A;
+    --patient-option-border: #BBF7D0;
+    --patient-option-soft: rgba(22, 163, 74, .18);
+}
+
+#mainContent.admin-patient-page .patient-stat-option[data-filter="cancelled"] {
+    --patient-option-bg: #FEF2F2;
+    --patient-option-text: #DC2626;
+    --patient-option-border: #FECACA;
+    --patient-option-soft: rgba(220, 38, 38, .16);
+}
+
+#mainContent.admin-patient-page .patient-stat-option[data-filter="all"] {
+    --patient-option-bg: #EFF6FF;
+    --patient-option-text: #2563EB;
+    --patient-option-border: #BFDBFE;
+    --patient-option-soft: rgba(37, 99, 235, .16);
+}
+
+#mainContent.admin-patient-page #tabsGrid .patient-stat-option > .patient-stat-option-count {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    z-index: 5 !important;
+
+    min-width: 24px !important;
+    height: 24px !important;
+    padding: 0 7px !important;
+    border-radius: 999px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+
+    background: #FFFFFF !important;
+    border: 1px solid var(--patient-option-border) !important;
+    color: var(--patient-option-text) !important;
+
+    font-size: 11px !important;
+    font-weight: 950 !important;
+    line-height: 1 !important;
+
+    box-shadow: 0 8px 16px rgba(15, 23, 42, .08) !important;
+    pointer-events: none !important;
+}
+
+#mainContent.admin-patient-page #tabsGrid .patient-stat-option.tab-active > .patient-stat-option-count {
+    background: #FFFFFF !important;
+    border-color: var(--patient-option-border) !important;
+    color: var(--patient-option-text) !important;
+    box-shadow:
+        0 8px 16px rgba(15, 23, 42, .10),
+        0 0 0 3px rgba(255, 255, 255, .72) !important;
+}
+
+/* Dark mode */
+[data-theme="dark"] #mainContent.admin-patient-page .patient-stat-option[data-filter="today"],
+.dark #mainContent.admin-patient-page .patient-stat-option[data-filter="today"],
+[data-theme="dark"] #mainContent.admin-patient-page .patient-stat-option[data-filter="all"],
+.dark #mainContent.admin-patient-page .patient-stat-option[data-filter="all"] {
+    --patient-option-bg: rgba(37, 99, 235, .24);
+    --patient-option-text: #93C5FD;
+    --patient-option-border: rgba(147, 197, 253, .34);
+    --patient-option-soft: rgba(37, 99, 235, .18);
+}
+
+[data-theme="dark"] #mainContent.admin-patient-page .patient-stat-option[data-filter="upcoming"],
+.dark #mainContent.admin-patient-page .patient-stat-option[data-filter="upcoming"] {
+    --patient-option-bg: rgba(249, 115, 22, .22);
+    --patient-option-text: #FDBA74;
+    --patient-option-border: rgba(253, 186, 116, .34);
+    --patient-option-soft: rgba(249, 115, 22, .18);
+}
+
+[data-theme="dark"] #mainContent.admin-patient-page .patient-stat-option[data-filter="rescheduled"],
+.dark #mainContent.admin-patient-page .patient-stat-option[data-filter="rescheduled"] {
+    --patient-option-bg: rgba(202, 138, 4, .22);
+    --patient-option-text: #FDE047;
+    --patient-option-border: rgba(250, 204, 21, .34);
+    --patient-option-soft: rgba(202, 138, 4, .18);
+}
+
+[data-theme="dark"] #mainContent.admin-patient-page .patient-stat-option[data-filter="completed"],
+.dark #mainContent.admin-patient-page .patient-stat-option[data-filter="completed"] {
+    --patient-option-bg: rgba(22, 163, 74, .22);
+    --patient-option-text: #86EFAC;
+    --patient-option-border: rgba(134, 239, 172, .34);
+    --patient-option-soft: rgba(22, 163, 74, .18);
+}
+
+[data-theme="dark"] #mainContent.admin-patient-page .patient-stat-option[data-filter="cancelled"],
+.dark #mainContent.admin-patient-page .patient-stat-option[data-filter="cancelled"] {
+    --patient-option-bg: rgba(220, 38, 38, .22);
+    --patient-option-text: #FCA5A5;
+    --patient-option-border: rgba(252, 165, 165, .34);
+    --patient-option-soft: rgba(220, 38, 38, .18);
+}
+
+[data-theme="dark"] #mainContent.admin-patient-page #tabsGrid .patient-stat-option > .patient-stat-option-count,
+.dark #mainContent.admin-patient-page #tabsGrid .patient-stat-option > .patient-stat-option-count {
+    background: rgba(13, 17, 23, .88) !important;
+    border-color: var(--patient-option-border) !important;
+    color: var(--patient-option-text) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .06),
+        0 8px 18px rgba(0, 0, 0, .22) !important;
 }
