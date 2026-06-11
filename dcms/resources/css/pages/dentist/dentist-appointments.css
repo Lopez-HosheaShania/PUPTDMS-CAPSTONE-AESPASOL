@@ -905,46 +905,6 @@
     border-color: transparent transparent transparent #111827;
 }
 
-.reschedule-modal-panel {
-    animation: modalUp .3s cubic-bezier(.34, 1.56, .64, 1) forwards;
-}
-
-.reschedule-icon-ring {
-    position: relative;
-    width: 72px;
-    height: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.reschedule-icon-ring::before,
-.reschedule-icon-ring::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid rgba(245, 158, 11, .35);
-    animation: ringPulse 2s ease-out infinite;
-}
-
-.reschedule-icon-ring::after {
-    animation-delay: .7s;
-}
-
-.reschedule-icon-core {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #fffbeb, #fef3c7);
-    border: 2px solid #fcd34d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 16px rgba(245, 158, 11, .18);
-    z-index: 1;
-}
-
 .appointment-header-wrap {
     display: flex;
     flex-direction: column;
@@ -2365,6 +2325,7 @@
 }
 
 @media (max-width: 767px) {
+
     .dentist-appointments-page .appointment-filter-wrap,
     .dentist-appointments-page .appointment-controls-actions {
         flex-direction: column !important;

@@ -39,10 +39,6 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    @include('partials.patient.styles')
-    @include('partials.terms-styles')
-    @include('partials.global-toast-styles')
-
     @yield('styles')
 </head>
 
@@ -67,7 +63,6 @@
     @include('partials.terms-modal')
 
     @include('partials.patient.script')
-    @include('partials.terms-scripts')
 
     <script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
         data-position="bottom-right" data-offset="18,118" defer></script>

@@ -63,9 +63,6 @@
     @include('components.discard-changes')
     @include('components.patient-record-modal')
 
-    @include('components.reschedule-modal')
-    @include('components.cancel-modal')
-
     {{-- Sienna Accessibility Widget --}}
     <script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
         data-position="bottom-right" data-offset="18,24" defer></script>
@@ -74,9 +71,6 @@
 
     {{-- GLOBAL TERMS MODAL --}}
     @include('partials.terms-modal')
-
-    @include('components.reschedule-modal-script')
-    @include('components.cancel-modal-script')
     
     @stack('scripts')
     @yield('scripts')

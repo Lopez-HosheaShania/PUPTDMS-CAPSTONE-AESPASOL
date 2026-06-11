@@ -402,7 +402,36 @@
     }
 }
 
+@keyframes appointmentAccordionExpand {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+        max-height: 0;
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 1600px;
+    }
+}
+
+@keyframes appointmentAccordionCollapse {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 1600px;
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-8px);
+        max-height: 0;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
+
     .role-modal,
     .role-modal::backdrop,
     #vaOverlay,
