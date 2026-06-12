@@ -82,7 +82,7 @@ $notifCount = $notifications->count();
 <main id="mainContent" class="dentist-page-shell dentist-appointments-page page-enter mode-list">
   <div class="w-full">
 
-    <div class="appointment-header-wrap mb-8">
+    <div class="appointment-header-wrap">
       <div class="dentist-hero">
         <div class="dentist-hero-content">
           <div class="dentist-hero-icon">

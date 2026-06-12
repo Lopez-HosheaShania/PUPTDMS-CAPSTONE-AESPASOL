@@ -1,4 +1,4 @@
-@extends('layouts.dentist')
+@extends($profileLayout ?? 'layouts.dentist')
 
 @section('title', 'Patient Profile | PUP Taguig Dental Clinic')
 
@@ -6,39 +6,53 @@
 
 @section('content')
 @php
-    use Carbon\Carbon;
+use Carbon\Carbon;
 
-    $patientName = $patient->name ?? 'Unknown Patient';
-    $displayName = ucwords(strtolower($patient->name ?? 'Guest'));
-    $age = $patient->birthdate ? Carbon::parse($patient->birthdate)->age : null;
-    $birthdateFormatted = $patient->birthdate ? Carbon::parse($patient->birthdate)->format('M d, Y') : 'N/A';
+$profileMode = $profileMode ?? 'dentist';
+$isDentistProfile = $profileMode === 'dentist';
 
-    $futureCount = isset($futureVisits) ? $futureVisits->count() : 0;
-    $pastCount = isset($pastVisits) ? $pastVisits->count() : 0;
+$patientName = $patient->name ?? 'Unknown Patient';
+$displayName = ucwords(strtolower($patient->name ?? 'Guest'));
+$age = $patient->birthdate ? Carbon::parse($patient->birthdate)->age : null;
+$birthdateFormatted = $patient->birthdate ? Carbon::parse($patient->birthdate)->format('M d, Y') : 'N/A';
 
-    $medicalAnswers = optional($patient->medicalHistory)->answers ?? collect();
-    $dentalDates = optional($patient->dentalHistoryDates);
+$futureCount = isset($futureVisits) ? $futureVisits->count() : 0;
+$pastCount = isset($pastVisits) ? $pastVisits->count() : 0;
 
-    $from = request('from');
-    $backUrl = $from === 'dashboard'
-        ? route('dentist.dentist.dashboard')
-        : route('dentist.dentist.appointments');
-    $backLabel = $from === 'dashboard' ? 'Dashboard' : 'Appointments';
+$medicalAnswers = optional($patient->medicalHistory)->answers ?? collect();
+$dentalDates = optional($patient->dentalHistoryDates);
 
-    $patientAvatar = $patient->profile_image ?? null;
-    $userAvatar = optional($patient->user)->profile_image ?? null;
+$from = request('from');
 
-    if (!empty($patientAvatar)) {
-        $avatarUrl = asset('storage/' . $patientAvatar);
-    } elseif (!empty($userAvatar)) {
-        $avatarUrl = asset('storage/' . $userAvatar);
-    } else {
-        $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($displayName) . '&background=8B0000&color=ffffff&bold=true';
-    }
+if ($profileMode === 'admin') {
+$backUrl = $from === 'patients'
+? route('admin.admin.patients')
+: route('admin.admin.appointments');
 
-    $patientType = $patient->faculty_code
-        ? 'Faculty'
-        : ($patient->student_no ? 'Student' : 'Patient');
+$backLabel = $from === 'patients' ? 'Patients' : 'Appointments';
+} else {
+$backUrl = $from === 'dashboard'
+? route('dentist.dentist.dashboard')
+: route('dentist.dentist.appointments');
+
+$backLabel = $from === 'dashboard' ? 'Dashboard' : 'Appointments';
+}
+
+$patientAvatar = $patient->profile_image ?? null;
+$userAvatar = optional($patient->user)->profile_image ?? null;
+
+if (!empty($patientAvatar)) {
+$avatarUrl = asset('storage/' . $patientAvatar);
+} elseif (!empty($userAvatar)) {
+$avatarUrl = asset('storage/' . $userAvatar);
+} else {
+$avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($displayName) .
+'&background=8B0000&color=ffffff&bold=true';
+}
+
+$patientType = $patient->faculty_code
+? 'Faculty'
+: ($patient->student_no ? 'Student' : 'Patient');
 @endphp
 
 <main id="mainContent" class="patient-profile-page pt-[100px] px-3 md:px-6 py-6 min-h-screen flex-1">
@@ -60,12 +74,14 @@
                 </div>
             </div>
 
+            @if ($isDentistProfile)
             <div class="flex items-center gap-2">
                 <button onclick="openStartModal()"
                     class="flex items-center gap-2 px-5 py-2.5 bg-[#8B0000] text-white rounded-lg text-sm font-bold shadow-md hover:bg-[#6b0000] transition">
                     <i class="fa-solid fa-play text-xs"></i> Start Procedure
                 </button>
             </div>
+            @endif
         </div>
 
         <div class="flex flex-col lg:flex-row gap-6 items-start">
@@ -89,15 +105,17 @@
                             </p>
 
                             @if($patient->faculty_code)
-                                <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-bold tracking-wide">
-                                    <i class="fa-regular fa-id-badge text-[10px]"></i>
-                                    Faculty Code: {{ $patient->faculty_code }}
-                                </div>
+                            <div
+                                class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-bold tracking-wide">
+                                <i class="fa-regular fa-id-badge text-[10px]"></i>
+                                Faculty Code: {{ $patient->faculty_code }}
+                            </div>
                             @elseif($patient->student_no)
-                                <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-bold tracking-wide">
-                                    <i class="fa-regular fa-id-badge text-[10px]"></i>
-                                    Student No: {{ $patient->student_no }}
-                                </div>
+                            <div
+                                class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-bold tracking-wide">
+                                <i class="fa-regular fa-id-badge text-[10px]"></i>
+                                Student No: {{ $patient->student_no }}
+                            </div>
                             @endif
                         </div>
 
@@ -141,45 +159,48 @@
                             </div>
 
                             <div class="flex justify-between items-start gap-3">
-                                <span class="text-gray-400 font-semibold text-xs flex items-center gap-2 mt-0.5 flex-shrink-0 w-[92px]">
+                                <span
+                                    class="text-gray-400 font-semibold text-xs flex items-center gap-2 mt-0.5 flex-shrink-0 w-[92px]">
                                     <i class="fa-solid fa-envelope w-3"></i>
                                     Email
                                 </span>
 
-                                <span class="text-gray-800 font-medium text-right break-words leading-snug flex-1 min-w-0">
+                                <span
+                                    class="text-gray-800 font-medium text-right break-words leading-snug flex-1 min-w-0">
                                     {{ $patient->email ?? 'N/A' }}
                                 </span>
                             </div>
                         </div>
 
                         <div class="bg-red-50/50 px-5 py-4 border-t border-red-100">
-                            <p class="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                            <p
+                                class="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-2 flex items-center gap-1.5">
                                 <i class="fa-solid fa-heart-pulse"></i>
                                 Emergency Contact
                             </p>
 
                             @if(optional($patient->medicalHistory)->emergency_person)
-                                <p class="text-sm font-bold text-gray-900">
-                                    {{ optional($patient->medicalHistory)->emergency_person }}
-                                </p>
+                            <p class="text-sm font-bold text-gray-900">
+                                {{ optional($patient->medicalHistory)->emergency_person }}
+                            </p>
 
-                                <p class="text-xs font-medium text-gray-600 mt-0.5">
-                                    <i class="fa-solid fa-phone text-[10px] mr-1"></i>
-                                    {{ optional($patient->medicalHistory)->emergency_number ?? 'N/A' }}
+                            <p class="text-xs font-medium text-gray-600 mt-0.5">
+                                <i class="fa-solid fa-phone text-[10px] mr-1"></i>
+                                {{ optional($patient->medicalHistory)->emergency_number ?? 'N/A' }}
 
-                                    @if(optional($patient->medicalHistory)->emergency_relation)
-                                        <span class="ml-1 text-gray-400">
-                                            ({{ optional($patient->medicalHistory)->emergency_relation }})
-                                        </span>
-                                    @endif
-                                </p>
+                                @if(optional($patient->medicalHistory)->emergency_relation)
+                                <span class="ml-1 text-gray-400">
+                                    ({{ optional($patient->medicalHistory)->emergency_relation }})
+                                </span>
+                                @endif
+                            </p>
                             @else
-                                <div class="text-center py-2">
-                                    <i class="fa-solid fa-user-plus text-red-300 text-lg mb-1"></i>
-                                    <p class="text-xs text-gray-400 font-medium mb-2">
-                                        No emergency contact added
-                                    </p>
-                                </div>
+                            <div class="text-center py-2">
+                                <i class="fa-solid fa-user-plus text-red-300 text-lg mb-1"></i>
+                                <p class="text-xs text-gray-400 font-medium mb-2">
+                                    No emergency contact added
+                                </p>
+                            </div>
                             @endif
                         </div>
                     </div>
@@ -189,7 +210,8 @@
             <div class="flex-1 min-w-0 flex flex-col gap-6 max-w-[1100px]">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="glass-card p-4 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
+                        <div
+                            class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
                             <i class="fa-regular fa-calendar-check text-xl"></i>
                         </div>
 
@@ -204,13 +226,15 @@
                     </div>
 
                     <div class="glass-card p-4 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 flex-shrink-0">
+                        <div
+                            class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 flex-shrink-0">
                             <i class="fa-solid fa-clock-rotate-left text-xl"></i>
                         </div>
 
                         <div>
                             <p class="text-sm font-bold text-gray-900 truncate max-w-[120px]">
-                                {{ $lastVisit?->appointment_date ? Carbon::parse($lastVisit->appointment_date)->format('M d, Y') : 'No past visits' }}
+                                {{ $lastVisit?->appointment_date ?
+                                Carbon::parse($lastVisit->appointment_date)->format('M d, Y') : 'No past visits' }}
                             </p>
                             <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mt-1">
                                 Last Visit
@@ -219,13 +243,15 @@
                     </div>
 
                     <div class="glass-card p-4 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 flex-shrink-0">
+                        <div
+                            class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 flex-shrink-0">
                             <i class="fa-regular fa-calendar-plus text-xl"></i>
                         </div>
 
                         <div>
                             <p class="text-sm font-bold text-gray-900 truncate max-w-[120px]">
-                                {{ $nextAppointment?->appointment_date ? Carbon::parse($nextAppointment->appointment_date)->format('M d, Y') : 'No schedule' }}
+                                {{ $nextAppointment?->appointment_date ?
+                                Carbon::parse($nextAppointment->appointment_date)->format('M d, Y') : 'No schedule' }}
                             </p>
                             <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mt-1">
                                 Next Appointment
@@ -256,97 +282,101 @@
 
                     <div id="futureContent" class="space-y-3">
                         @forelse($futureVisits ?? [] as $visit)
-                            @php
-                                $visitDate = $visit->appointment_date ? Carbon::parse($visit->appointment_date)->format('d M Y') : 'N/A';
-                                $visitTime = $visit->appointment_time ? Carbon::parse($visit->appointment_time)->format('g:i A') : 'N/A';
-                                $visitService = $visit->service_type ?? 'Appointment';
-                                $visitStatus = $visit->status ?? 'upcoming';
-                            @endphp
+                        @php
+                        $visitDate = $visit->appointment_date ? Carbon::parse($visit->appointment_date)->format('d M Y')
+                        : 'N/A';
+                        $visitTime = $visit->appointment_time ? Carbon::parse($visit->appointment_time)->format('g:i A')
+                        : 'N/A';
+                        $visitService = $visit->service_type ?? 'Appointment';
+                        $visitStatus = $visit->status ?? 'upcoming';
+                        @endphp
 
-                            <div
-                                class="group border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center gap-4 hover:border-[#8B0000]/30 hover:shadow-md transition-all bg-white relative overflow-hidden">
-                                <div class="status-accent accent-gray js-status-accent"
-                                    data-status="{{ strtolower($visitStatus) }}"></div>
+                        <div
+                            class="group border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center gap-4 hover:border-[#8B0000]/30 hover:shadow-md transition-all bg-white relative overflow-hidden">
+                            <div class="status-accent accent-gray js-status-accent"
+                                data-status="{{ strtolower($visitStatus) }}"></div>
 
-                                <div class="flex-shrink-0 w-[140px] pl-2">
-                                    <p class="font-extrabold text-gray-900 text-sm">{{ $visitDate }}</p>
-                                    <p class="text-[12px] font-medium text-gray-500 mt-0.5">
-                                        <i class="fa-regular fa-clock mr-1"></i>
-                                        {{ $visitTime }}
-                                    </p>
-                                </div>
+                            <div class="flex-shrink-0 w-[140px] pl-2">
+                                <p class="font-extrabold text-gray-900 text-sm">{{ $visitDate }}</p>
+                                <p class="text-[12px] font-medium text-gray-500 mt-0.5">
+                                    <i class="fa-regular fa-clock mr-1"></i>
+                                    {{ $visitTime }}
+                                </p>
+                            </div>
 
-                                <div class="flex-1">
-                                    <span class="status-badge js-status-badge"
-                                        data-status="{{ strtolower($visitStatus) }}">
-                                        {{ $visitStatus }}
+                            <div class="flex-1">
+                                <span class="status-badge js-status-badge" data-status="{{ strtolower($visitStatus) }}">
+                                    {{ $visitStatus }}
+                                </span>
+
+                                <p class="text-sm font-bold text-gray-800">{{ $visitService }}</p>
+                                <p class="text-[11px] font-semibold text-gray-400 mt-0.5">
+                                    Dentist:
+                                    <span class="text-gray-600">
+                                        {{ $visit->dentist->name ?? 'Dr. Angeles' }}
                                     </span>
-
-                                    <p class="text-sm font-bold text-gray-800">{{ $visitService }}</p>
-                                    <p class="text-[11px] font-semibold text-gray-400 mt-0.5">
-                                        Dentist:
-                                        <span class="text-gray-600">
-                                            {{ $visit->dentist->name ?? 'Dr. Angeles' }}
-                                        </span>
-                                    </p>
-                                </div>
-
-                                <div class="flex-shrink-0">
-                                    <button onclick="openDetailsDrawer({{ $visit->id }}, @js($visitDate), @js($visitTime), @js($visitService), @js($visitStatus))"
-                                        class="w-full md:w-auto px-4 py-2 bg-gray-50 hover:bg-[#8B0000] text-gray-600 hover:text-white border border-gray-200 hover:border-[#8B0000] rounded-lg text-xs font-bold transition-colors">
-                                        View Details
-                                    </button>
-                                </div>
+                                </p>
                             </div>
+
+                            <div class="flex-shrink-0">
+                                <button
+                                    onclick="openDetailsDrawer({{ $visit->id }}, @js($visitDate), @js($visitTime), @js($visitService), @js($visitStatus))"
+                                    class="w-full md:w-auto px-4 py-2 bg-gray-50 hover:bg-[#8B0000] text-gray-600 hover:text-white border border-gray-200 hover:border-[#8B0000] rounded-lg text-xs font-bold transition-colors">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
                         @empty
-                            <div class="py-8 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-                                <p class="text-gray-600 font-bold text-sm">No upcoming appointments</p>
-                            </div>
+                        <div class="py-8 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                            <p class="text-gray-600 font-bold text-sm">No upcoming appointments</p>
+                        </div>
                         @endforelse
                     </div>
 
                     <div id="pastContent" class="hidden space-y-3">
                         @forelse($pastVisits ?? [] as $visit)
-                            @php
-                                $visitDate = $visit->appointment_date ? Carbon::parse($visit->appointment_date)->format('d M Y') : 'N/A';
-                                $visitTime = $visit->appointment_time ? Carbon::parse($visit->appointment_time)->format('g:i A') : 'N/A';
-                                $visitService = $visit->service_type ?? 'Appointment';
-                                $visitStatus = $visit->status ?? 'completed';
-                            @endphp
+                        @php
+                        $visitDate = $visit->appointment_date ? Carbon::parse($visit->appointment_date)->format('d M Y')
+                        : 'N/A';
+                        $visitTime = $visit->appointment_time ? Carbon::parse($visit->appointment_time)->format('g:i A')
+                        : 'N/A';
+                        $visitService = $visit->service_type ?? 'Appointment';
+                        $visitStatus = $visit->status ?? 'completed';
+                        @endphp
 
-                            <div
-                                class="group border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center gap-4 hover:border-gray-300 hover:shadow-sm transition-all bg-white relative overflow-hidden">
-                                <div class="status-accent accent-gray js-status-accent"
-                                    data-status="{{ strtolower($visitStatus) }}"></div>
+                        <div
+                            class="group border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center gap-4 hover:border-gray-300 hover:shadow-sm transition-all bg-white relative overflow-hidden">
+                            <div class="status-accent accent-gray js-status-accent"
+                                data-status="{{ strtolower($visitStatus) }}"></div>
 
-                                <div class="flex-shrink-0 w-[140px] pl-2">
-                                    <p class="font-extrabold text-gray-600 text-sm">{{ $visitDate }}</p>
-                                    <p class="text-[12px] font-medium text-gray-400 mt-0.5">
-                                        <i class="fa-regular fa-clock mr-1"></i>
-                                        {{ $visitTime }}
-                                    </p>
-                                </div>
-
-                                <div class="flex-1">
-                                    <span class="status-badge js-status-badge"
-                                        data-status="{{ strtolower($visitStatus) }}">
-                                        {{ $visitStatus }}
-                                    </span>
-
-                                    <p class="text-sm font-bold text-gray-700">{{ $visitService }}</p>
-                                </div>
-
-                                <div class="flex-shrink-0">
-                                    <button onclick="openDetailsDrawer({{ $visit->id }}, @js($visitDate), @js($visitTime), @js($visitService), @js($visitStatus))"
-                                        class="w-full md:w-auto px-4 py-2 bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 rounded-lg text-xs font-bold transition-colors">
-                                        View Record
-                                    </button>
-                                </div>
+                            <div class="flex-shrink-0 w-[140px] pl-2">
+                                <p class="font-extrabold text-gray-600 text-sm">{{ $visitDate }}</p>
+                                <p class="text-[12px] font-medium text-gray-400 mt-0.5">
+                                    <i class="fa-regular fa-clock mr-1"></i>
+                                    {{ $visitTime }}
+                                </p>
                             </div>
+
+                            <div class="flex-1">
+                                <span class="status-badge js-status-badge" data-status="{{ strtolower($visitStatus) }}">
+                                    {{ $visitStatus }}
+                                </span>
+
+                                <p class="text-sm font-bold text-gray-700">{{ $visitService }}</p>
+                            </div>
+
+                            <div class="flex-shrink-0">
+                                <button
+                                    onclick="openDetailsDrawer({{ $visit->id }}, @js($visitDate), @js($visitTime), @js($visitService), @js($visitStatus))"
+                                    class="w-full md:w-auto px-4 py-2 bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 rounded-lg text-xs font-bold transition-colors">
+                                    View Record
+                                </button>
+                            </div>
+                        </div>
                         @empty
-                            <div class="py-8 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-                                <p class="text-gray-600 font-bold text-sm">No past records</p>
-                            </div>
+                        <div class="py-8 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                            <p class="text-gray-600 font-bold text-sm">No past records</p>
+                        </div>
                         @endforelse
                     </div>
                 </div>
@@ -393,18 +423,21 @@
                                     @php $hasDentalAnswer = false; @endphp
 
                                     @foreach($patient->dentalHistoryAnswers ?? [] as $dentAnswer)
-                                        @if($dentAnswer->answer)
-                                            @php $hasDentalAnswer = true; @endphp
-                                            <span class="bg-teal-50 text-teal-700 text-[11px] font-bold px-2.5 py-1 rounded border border-teal-100">
-                                                {{ str_replace('_', ' ', Str::title(optional($dentAnswer->condition)->code ?? 'Symptom')) }}
-                                            </span>
-                                        @endif
+                                    @if($dentAnswer->answer)
+                                    @php $hasDentalAnswer = true; @endphp
+                                    <span
+                                        class="bg-teal-50 text-teal-700 text-[11px] font-bold px-2.5 py-1 rounded border border-teal-100">
+                                        {{ str_replace('_', ' ', Str::title(optional($dentAnswer->condition)->code ??
+                                        'Symptom')) }}
+                                    </span>
+                                    @endif
                                     @endforeach
 
                                     @if(!$hasDentalAnswer)
-                                        <span class="text-xs text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded border border-gray-100">
-                                            No symptoms reported
-                                        </span>
+                                    <span
+                                        class="text-xs text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded border border-gray-100">
+                                        No symptoms reported
+                                    </span>
                                     @endif
                                 </div>
                             </div>
@@ -418,18 +451,20 @@
 
                                 <div class="space-y-2 text-sm">
                                     @forelse($medicalAnswers as $mAns)
-                                        @if($mAns->answer_bool === true || !empty($mAns->answer_text) || !empty($mAns->answer_date))
-                                            <p>
-                                                <span class="font-semibold text-gray-600">
-                                                    {{ str_replace('_', ' ', Str::title(optional($mAns->question)->code ?? 'Question')) }}:
-                                                </span>
-                                                @if($mAns->answer_bool === true) YES @endif
-                                                @if(!empty($mAns->answer_text)) {{ $mAns->answer_text }} @endif
-                                                @if(!empty($mAns->answer_date)) {{ $mAns->answer_date }} @endif
-                                            </p>
-                                        @endif
+                                    @if($mAns->answer_bool === true || !empty($mAns->answer_text) ||
+                                    !empty($mAns->answer_date))
+                                    <p>
+                                        <span class="font-semibold text-gray-600">
+                                            {{ str_replace('_', ' ', Str::title(optional($mAns->question)->code ??
+                                            'Question')) }}:
+                                        </span>
+                                        @if($mAns->answer_bool === true) YES @endif
+                                        @if(!empty($mAns->answer_text)) {{ $mAns->answer_text }} @endif
+                                        @if(!empty($mAns->answer_date)) {{ $mAns->answer_date }} @endif
+                                    </p>
+                                    @endif
                                     @empty
-                                        <p class="text-xs text-gray-400">No medical records found.</p>
+                                    <p class="text-xs text-gray-400">No medical records found.</p>
                                     @endforelse
                                 </div>
                             </div>
@@ -440,16 +475,19 @@
                                 </p>
 
                                 <div class="flex flex-wrap gap-1.5">
-                                    @if(isset($patient->medicalHistory->diseaseAnswers) && $patient->medicalHistory->diseaseAnswers->count() > 0)
-                                        @foreach($patient->medicalHistory->diseaseAnswers as $diseaseAnswer)
-                                            <span class="bg-purple-50 text-purple-700 text-[11px] font-bold px-2.5 py-1 rounded border border-purple-100">
-                                                {{ $diseaseAnswer->disease->label ?? 'Condition' }}
-                                            </span>
-                                        @endforeach
+                                    @if(isset($patient->medicalHistory->diseaseAnswers) &&
+                                    $patient->medicalHistory->diseaseAnswers->count() > 0)
+                                    @foreach($patient->medicalHistory->diseaseAnswers as $diseaseAnswer)
+                                    <span
+                                        class="bg-purple-50 text-purple-700 text-[11px] font-bold px-2.5 py-1 rounded border border-purple-100">
+                                        {{ $diseaseAnswer->disease->label ?? 'Condition' }}
+                                    </span>
+                                    @endforeach
                                     @else
-                                        <span class="text-xs text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded border border-gray-100">
-                                            None reported
-                                        </span>
+                                    <span
+                                        class="text-xs text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded border border-gray-100">
+                                        None reported
+                                    </span>
                                     @endif
                                 </div>
                             </div>
@@ -462,15 +500,16 @@
                         </p>
 
                         @php
-                            $concerns = optional($patient->dentalHistoryConcerns)->additional_concerns ?? null;
+                        $concerns = optional($patient->dentalHistoryConcerns)->additional_concerns ?? null;
                         @endphp
 
                         @if($concerns)
-                            <div class="text-[13px] text-gray-700 leading-relaxed bg-yellow-50/50 p-4 rounded-lg border border-yellow-100">
-                                {{ $concerns }}
-                            </div>
+                        <div
+                            class="text-[13px] text-gray-700 leading-relaxed bg-yellow-50/50 p-4 rounded-lg border border-yellow-100">
+                            {{ $concerns }}
+                        </div>
                         @else
-                            <p class="text-xs text-gray-400 italic">No additional concerns added.</p>
+                        <p class="text-xs text-gray-400 italic">No additional concerns added.</p>
                         @endif
                     </div>
                 </div>
@@ -479,37 +518,39 @@
     </div>
 </main>
 
+@if ($isDentistProfile)
 <div id="startModal"
     class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm items-center justify-center hidden z-50 transition-opacity">
-    <div
-        class="bg-white w-full max-w-md rounded-2xl p-6 md:p-8 relative shadow-2xl mx-4 transform transition-transform scale-95"
-        id="startModalContent">
-        <div class="w-12 h-12 bg-red-50 text-[#8B0000] rounded-full flex items-center justify-center mb-5">
-            <i class="fa-solid fa-play text-xl"></i>
-        </div>
+    <div id="startModal"
+        class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm items-center justify-center hidden z-50 transition-opacity">
+        <div class="bg-white w-full max-w-md rounded-2xl p-6 md:p-8 relative shadow-2xl mx-4 transform transition-transform scale-95"
+            id="startModalContent">
+            <div class="w-12 h-12 bg-red-50 text-[#8B0000] rounded-full flex items-center justify-center mb-5">
+                <i class="fa-solid fa-play text-xl"></i>
+            </div>
 
-        <h2 class="text-xl font-extrabold text-gray-900 mb-2">Start Procedure?</h2>
-        <p class="text-sm text-gray-500 mb-6">
-            You are about to start a new dental procedure session for this patient. Do you want to continue?
-        </p>
+            <h2 class="text-xl font-extrabold text-gray-900 mb-2">Start Procedure?</h2>
+            <p class="text-sm text-gray-500 mb-6">
+                You are about to start a new dental procedure session for this patient. Do you want to continue?
+            </p>
 
-        <div class="flex gap-3">
-            <button onclick="closeStartModal()"
-                class="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold px-4 py-2.5 rounded-xl transition text-sm">
-                Cancel
-            </button>
+            <div class="flex gap-3">
+                <button onclick="closeStartModal()"
+                    class="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold px-4 py-2.5 rounded-xl transition text-sm">
+                    Cancel
+                </button>
 
-            <button onclick="confirmStart()"
-                class="flex-1 bg-[#8B0000] hover:bg-[#6b0000] text-white shadow-md shadow-red-900/20 font-bold px-4 py-2.5 rounded-xl transition text-sm">
-                Yes, Start
-            </button>
+                <button onclick="confirmStart()"
+                    class="flex-1 bg-[#8B0000] hover:bg-[#6b0000] text-white shadow-md shadow-red-900/20 font-bold px-4 py-2.5 rounded-xl transition text-sm">
+                    Yes, Start
+                </button>
+            </div>
         </div>
     </div>
 </div>
+@endif
 
-<div id="drawerOverlay"
-    class="drawer-overlay fixed left-0 right-0 bottom-0 z-[110]"
-    style="top: var(--header-h);"
+<div id="drawerOverlay" class="drawer-overlay fixed left-0 right-0 bottom-0 z-[110]" style="top: var(--header-h);"
     onclick="closeDetailsDrawer()"></div>
 
 <div id="detailsDrawer"
@@ -523,9 +564,11 @@
             </p>
             <h2 id="drawerService" class="text-xl font-extrabold leading-tight">Service Type</h2>
             <div class="flex items-center gap-3 mt-2 text-sm font-medium text-white/90">
-                <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar"></i> <span id="drawerDate">Date</span></span>
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar"></i> <span
+                        id="drawerDate">Date</span></span>
                 <span>|</span>
-                <span class="flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> <span id="drawerTime">Time</span></span>
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> <span
+                        id="drawerTime">Time</span></span>
             </div>
         </div>
 
@@ -545,7 +588,8 @@
 
     <div id="drawerBody" class="flex-1 overflow-y-auto p-6 space-y-6 bg-[#F9FAFB]">
         <section id="statusMetaSection" class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hidden">
-            <h3 class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+            <h3
+                class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
                 <i class="fa-solid fa-circle-info"></i> Status Details
             </h3>
 
@@ -558,20 +602,25 @@
         </section>
 
         <section class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <h3 class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+            <h3
+                class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
                 <i class="fa-regular fa-calendar"></i> Appointment Information
             </h3>
 
             <div class="space-y-2 text-sm">
-                <p><span class="font-semibold text-gray-600">Appointment Date:</span> <span id="detailAppointmentDate">N/A</span></p>
-                <p><span class="font-semibold text-gray-600">Appointment Time:</span> <span id="detailAppointmentTime">N/A</span></p>
-                <p><span class="font-semibold text-gray-600">Service Type:</span> <span id="detailServiceType">N/A</span></p>
+                <p><span class="font-semibold text-gray-600">Appointment Date:</span> <span
+                        id="detailAppointmentDate">N/A</span></p>
+                <p><span class="font-semibold text-gray-600">Appointment Time:</span> <span
+                        id="detailAppointmentTime">N/A</span></p>
+                <p><span class="font-semibold text-gray-600">Service Type:</span> <span
+                        id="detailServiceType">N/A</span></p>
                 <p><span class="font-semibold text-gray-600">Status:</span> <span id="detailStatusText">N/A</span></p>
             </div>
         </section>
 
         <section class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <h3 class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+            <h3
+                class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
                 <i class="fa-solid fa-notes-medical"></i> Clinical Notes
             </h3>
 
@@ -599,7 +648,8 @@
         </section>
 
         <section class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <h3 class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+            <h3
+                class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
                 <i class="fa-solid fa-calendar-plus"></i> Follow-up Appointment
             </h3>
 
@@ -607,7 +657,8 @@
         </section>
 
         <section class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <h3 class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+            <h3
+                class="flex items-center gap-2 text-sm font-bold text-[#8B0000] uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
                 <i class="fa-solid fa-tooth"></i> Odontogram
             </h3>
 
@@ -685,6 +736,8 @@
         const modal = document.getElementById('startModal');
         const content = document.getElementById('startModalContent');
 
+        if (!modal || !content) return;
+
         modal.classList.remove('hidden');
         modal.classList.add('flex');
 
@@ -699,6 +752,8 @@
     function closeStartModal() {
         const modal = document.getElementById('startModal');
         const content = document.getElementById('startModalContent');
+
+        if (!modal || !content) return;
 
         content.classList.remove('scale-100');
         content.classList.add('scale-95');

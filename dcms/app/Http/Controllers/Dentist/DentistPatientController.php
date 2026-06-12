@@ -116,17 +116,19 @@ class DentistPatientController extends Controller
             "Dentist viewed patient details"
         );
 
-        return view('dentist.dentist-patientprofile', compact(
-            'patient',
-            'futureVisits',
-            'pastVisits',
-            'totalVisits',
-            'lastVisit',
-            'nextAppointment',
-            'notifications',
-            'philippineHolidays',
-            'appointmentCountsPerDay',
-            'unavailableDates'
-        ));
+        return view('patient.shared-profile', [
+            'patient' => $patient,
+            'futureVisits' => $futureVisits,
+            'pastVisits' => $pastVisits,
+            'totalVisits' => $totalVisits,
+            'lastVisit' => $lastVisit,
+            'nextAppointment' => $nextAppointment,
+            'notifications' => $notifications,
+            'philippineHolidays' => $philippineHolidays,
+            'appointmentCountsPerDay' => $appointmentCountsPerDay,
+            'unavailableDates' => $unavailableDates,
+            'profileLayout' => 'layouts.dentist',
+            'profileMode' => 'dentist',
+        ]);
     }
 }
