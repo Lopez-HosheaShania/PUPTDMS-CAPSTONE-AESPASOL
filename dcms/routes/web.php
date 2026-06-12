@@ -1026,6 +1026,10 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
         ->middleware('permission:manage_reports')
         ->name('dentist.dentist.reports.daily-treatment-record.list');
 
+    Route::get('/report/templates/{template}/print', [\App\Http\Controllers\Dentist\DentistReportController::class, 'printTemplate'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.templates.print');
+
     // Document Requests
     //     if (session('role') !== 'dentist') {
     //         return redirect('/login');

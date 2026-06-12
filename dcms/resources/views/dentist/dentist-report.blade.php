@@ -1931,6 +1931,60 @@
                     </a>
                 </div>
             </div>
+
+            <div class="section-card p-5 md:p-6 mb-8">
+                <div class="chart-card-header mb-5">
+                    <div class="chart-title text-base">
+                        <i class="fa-solid fa-file-signature"></i> Printable Forms
+                    </div>
+                    <span class="text-[11px] font-bold text-[#8B0000] bg-red-50 px-3 py-1.5 rounded-lg">
+                        {{ $documentTemplates->count() }} active templates
+                    </span>
+                </div>
+
+                @if ($documentTemplates->count() > 0)
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        @foreach ($documentTemplates as $template)
+                            <div class="action-card group cursor-default items-start">
+                                <div class="action-icon mt-0.5"><i class="fa-solid fa-file-medical"></i></div>
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="text-sm font-bold text-gray-800 group-hover:text-[#8B0000] transition-colors truncate">
+                                        {{ $template->name }}
+                                    </h4>
+                                    <p class="text-[11px] text-gray-400 mt-0.5">
+                                        {{ $template->code ?: 'Template Code N/A' }}
+                                    </p>
+                                    <div class="mt-3 flex flex-wrap gap-2 text-[10px] font-bold">
+                                        <span class="px-2 py-1 rounded-full bg-red-50 text-[#8B0000]">
+                                            {{ \Illuminate\Support\Str::headline($template->document_type) }}
+                                        </span>
+                                        <span class="px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                                            {{ $template->category ?: 'General' }}
+                                        </span>
+                                        <span class="px-2 py-1 rounded-full bg-blue-50 text-blue-700">
+                                            {{ $template->paper_size ?: 'A4' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <a href="{{ route('dentist.dentist.report.templates.print', $template->id) }}"
+                                    target="_blank" rel="noopener"
+                                    class="ml-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#8B0000] text-white text-xs font-bold shadow-sm hover:bg-[#6b0000] transition-colors whitespace-nowrap">
+                                    <i class="fa-solid fa-print"></i>
+                                    Print
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="flex flex-col items-center justify-center py-10 text-center border border-dashed border-red-200 rounded-2xl bg-red-50/40">
+                        <i class="fa-solid fa-file-circle-xmark text-3xl text-red-300 mb-3"></i>
+                        <p class="text-sm font-bold text-gray-700">No active document templates yet</p>
+                        <p class="text-xs text-gray-500 mt-1 max-w-md">
+                            Once a template is created and activated, it will appear here for printing reports or certificates.
+                        </p>
+                    </div>
+                @endif
+            </div>
             <div class="inventory-shell p-5 md:p-6 mb-8">
                 <div class="chart-card-header mb-6">
                     <span class="chart-title text-base"><i class="fa-solid fa-boxes-stacked"></i> Inventory

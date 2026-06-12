@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dentist;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\DocumentTemplate;
+use App\Services\DocumentTemplateRenderer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -117,6 +119,10 @@ class DentistReportController extends Controller
         }
 
         $notifications = collect([]);
+        $documentTemplates = DocumentTemplate::query()
+            ->active()
+            ->orderBy('name')
+            ->get();
 
         AuditLogger::log(
             'view',
@@ -149,8 +155,31 @@ class DentistReportController extends Controller
             'returningPatients',
             'newPatients',
             'topServices',
-            'notifications'
+            'notifications',
+            'documentTemplates'
         ));
+    }
+
+    public function printTemplate(DocumentTemplate $template)
+    {
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if ($activeRole !== 'dentist') {
+            return redirect('/login');
+        }
+
+        abort_unless($template->status === 'active', 404);
+
+        $renderer = app(DocumentTemplateRenderer::class);
+        $renderedContent = $renderer->renderForPreview($template);
+
+        AuditLogger::log(
+            'view',
+            'dentist_reports',
+            "Dentist opened printable template: {$template->name}"
+        );
+
+        return view('dentist.document-template-print', compact('template', 'renderedContent'));
     }
 
     public function gadData(Request $request)
