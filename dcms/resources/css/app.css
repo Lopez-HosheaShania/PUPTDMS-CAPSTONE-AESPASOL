@@ -36,12 +36,12 @@
 @import './pages/dentist/dentist-inventory.css';
 @import './pages/dentist/patient-directory.css';
 @import './pages/dentist/dentist-reports.css';
-@import './pages/dentist/patient-profile.css';
 @import './pages/dentist/odontogram.css';
 
 /* Patient pages */
 @import './pages/patient/dashboard.css';
 @import './pages/patient/book-appointment.css';
+@import './pages/patient/patient-profile.css';
 @import './pages/patient/records.css';
 @import './pages/patient/about-us.css';
 

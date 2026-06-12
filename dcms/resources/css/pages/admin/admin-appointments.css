@@ -338,12 +338,6 @@
     background: #16a34a;
 }
 
-.cancel-modal-panel,
-.reschedule-modal-panel,
-.start-modal-panel {
-    animation: modalUp .3s cubic-bezier(.34, 1.56, .64, 1) forwards;
-}
-
 .reason-chip input[type="radio"] {
     display: none;
 }
@@ -1150,63 +1144,26 @@ body:has(#mainContent.admin-appointments-page) #actionTooltip {
     transform: none !important;
 }
 
-#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::after,
-#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::before {
-    position: absolute !important;
-    left: 50% !important;
-    right: auto !important;
-    top: auto !important;
-
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    z-index: 9999 !important;
-
-    transition:
-        opacity .16s ease,
-        visibility .16s ease,
-        transform .16s ease !important;
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn:nth-last-child(-n+2)[data-tooltip]::after {
+    left: auto !important;
+    right: 0 !important;
+    transform: translateY(4px) !important;
 }
 
-#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::after {
-    content: attr(data-tooltip) !important;
-    bottom: calc(100% + 9px) !important;
-
-    width: max-content !important;
-    max-width: 180px !important;
-    padding: .42rem .58rem !important;
-    border-radius: 9px !important;
-
-    background: var(--admin-appt-action-hover-bg, #8B0000) !important;
-    color: #FFFFFF !important;
-
-    font-size: .68rem !important;
-    font-weight: 800 !important;
-    line-height: 1 !important;
-    white-space: nowrap !important;
-    letter-spacing: 0 !important;
-
-    box-shadow: 0 10px 22px var(--admin-appt-action-shadow, rgba(139, 0, 0, .22)) !important;
-    transform: translateX(-50%) translateY(4px) !important;
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn:nth-last-child(-n+2)[data-tooltip]::before {
+    left: auto !important;
+    right: 12px !important;
+    transform: translateY(4px) !important;
 }
 
-#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::before {
-    content: '' !important;
-    bottom: calc(100% + 4px) !important;
-
-    border: 5px solid transparent !important;
-    border-top-color: var(--admin-appt-action-hover-bg, #8B0000) !important;
-
-    transform: translateX(-50%) translateY(4px) !important;
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn:nth-last-child(-n+2)[data-tooltip]:hover::after,
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn:nth-last-child(-n+2)[data-tooltip]:focus-visible::after {
+    transform: translateY(0) !important;
 }
 
-#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]:hover::after,
-#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]:hover::before,
-#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]:focus-visible::after,
-#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]:focus-visible::before {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: translateX(-50%) translateY(0) !important;
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn:nth-last-child(-n+2)[data-tooltip]:hover::before,
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn:nth-last-child(-n+2)[data-tooltip]:focus-visible::before {
+    transform: translateY(0) !important;
 }
 
 body[data-theme="dark"] #mainContent.admin-appointments-page .action-btn-view,
@@ -1741,4 +1698,314 @@ body.dark #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-st
     background: rgba(13, 17, 23, .82) !important;
     border-color: rgba(255, 255, 255, .10) !important;
     box-shadow: 0 14px 28px rgba(0, 0, 0, .22) !important;
+}
+
+#mainContent.admin-appointments-page .action-btn-admin-locked {
+    cursor: not-allowed !important;
+    opacity: .72 !important;
+    filter: grayscale(.25) !important;
+    transform: none !important;
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn-admin-locked:hover,
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn-admin-locked:focus-visible,
+#mainContent.admin-appointments-page .mobile-appt-actions .action-btn-admin-locked:hover,
+#mainContent.admin-appointments-page .mobile-appt-actions .action-btn-admin-locked:focus-visible {
+    color: var(--admin-appt-action-color) !important;
+    background: var(--admin-appt-action-bg) !important;
+    border-color: var(--admin-appt-action-border) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#mainContent.admin-appointments-page .action-btn-admin-locked i {
+    color: currentColor !important;
+}
+
+#mainContent.admin-appointments-page .mobile-appt-actions .action-btn-admin-locked {
+    opacity: .68 !important;
+    cursor: not-allowed !important;
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .action-btn-admin-locked,
+.dark #mainContent.admin-appointments-page .action-btn-admin-locked {
+    opacity: .62 !important;
+    filter: grayscale(.15) !important;
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-admin-locked[data-tooltip]::after,
+.dark #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-admin-locked[data-tooltip]::after {
+    background: #111827 !important;
+    color: #E5E7EB !important;
+    border: 1px solid rgba(255, 255, 255, .12) !important;
+}
+
+#mainContent.admin-appointments-page .appt-card,
+#mainContent.admin-appointments-page .mobile-appt-card,
+#mainContent.admin-appointments-page .desktop-appointments-table,
+#mainContent.admin-appointments-page .appt-month-group,
+#mainContent.admin-appointments-page .appt-month-group>div,
+#mainContent.admin-appointments-page #upcomingSection,
+#mainContent.admin-appointments-page #pastSection {
+    overflow: visible !important;
+}
+
+#mainContent.admin-appointments-page .appt-card:hover,
+#mainContent.admin-appointments-page .mobile-appt-card:hover {
+    z-index: 250 !important;
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap {
+    position: relative !important;
+    z-index: 500 !important;
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn-admin-locked[data-tooltip]::after {
+    bottom: calc(100% + 12px) !important;
+    max-width: 280px !important;
+    width: max-content !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+    padding: .55rem .7rem !important;
+}
+
+#mainContent.admin-appointments-page .appointment-container-skeleton,
+#mainContent.admin-appointments-page .appointment-container-content {
+    display: block;
+    width: 100%;
+    margin-top: 1.15rem;
+}
+
+#mainContent.admin-appointments-page .appointment-container-skeleton.is-hidden {
+    display: none !important;
+}
+
+#mainContent.admin-appointments-page .appointment-container-content.is-skeleton-hidden {
+    display: none !important;
+}
+
+#mainContent.admin-appointments-page .appointment-container-content.is-ready {
+    display: block !important;
+    animation: dashboardCardFloatIn .32s ease-out both;
+}
+
+#mainContent.admin-appointments-page .appointment-list-skeleton-card {
+    padding: 1rem 1.15rem !important;
+    border-radius: 22px !important;
+}
+
+#mainContent.admin-appointments-page .appt-skeleton-month {
+    display: flex !important;
+    align-items: center !important;
+    gap: .75rem !important;
+    min-height: 54px !important;
+    padding-bottom: .9rem !important;
+    margin-bottom: .9rem !important;
+    border-bottom: 1px solid rgba(229, 231, 235, .9) !important;
+}
+
+#mainContent.admin-appointments-page .appt-skeleton-table-head,
+#mainContent.admin-appointments-page .appt-skeleton-row {
+    display: grid !important;
+    grid-template-columns: 140px 110px 170px minmax(180px, 1.15fr) 90px 115px 170px !important;
+    gap: 1rem !important;
+    align-items: center !important;
+}
+
+#mainContent.admin-appointments-page .appt-skeleton-table-head {
+    min-height: 42px !important;
+    padding: 0 .8rem !important;
+    margin-bottom: .65rem !important;
+    border-radius: 16px !important;
+    background: rgba(248, 250, 252, .86) !important;
+}
+
+#mainContent.admin-appointments-page .appt-skeleton-rows {
+    display: grid !important;
+    gap: .7rem !important;
+}
+
+#mainContent.admin-appointments-page .appt-skeleton-row {
+    min-height: 78px !important;
+    padding: .85rem 1rem !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(229, 231, 235, .9) !important;
+    background: rgba(255, 255, 255, .86) !important;
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .appt-skeleton-month,
+.dark #mainContent.admin-appointments-page .appt-skeleton-month {
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .appt-skeleton-table-head,
+.dark #mainContent.admin-appointments-page .appt-skeleton-table-head {
+    background: rgba(255, 255, 255, .045) !important;
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .appt-skeleton-row,
+.dark #mainContent.admin-appointments-page .appt-skeleton-row {
+    background: rgba(13, 17, 23, .72) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+@media (max-width: 1024px) {
+    #mainContent.admin-appointments-page .appt-skeleton-table-head {
+        display: none !important;
+    }
+
+    #mainContent.admin-appointments-page .appt-skeleton-row {
+        grid-template-columns: 1fr !important;
+        gap: .75rem !important;
+    }
+}
+
+#mainContent.admin-appointments-page .action-btn-admin-locked,
+#mainContent.admin-appointments-page .action-btn-admin-locked *,
+#mainContent.admin-appointments-page [data-locked-action],
+#mainContent.admin-appointments-page [data-locked-action] * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23374151' d='M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V6Zm3 9.73V18h-2v-2.27a2 2 0 1 1 2 0Z'/%3E%3C/svg%3E") 12 12, not-allowed !important;
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn-admin-locked[data-tooltip]::after {
+    content: attr(data-tooltip) !important;
+    width: max-content !important;
+    max-width: 120px !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    line-height: 1 !important;
+    padding: .45rem .6rem !important;
+    border-radius: 9px !important;
+    font-size: .68rem !important;
+    font-weight: 900 !important;
+    background: #374151 !important;
+    color: #ffffff !important;
+    bottom: calc(100% + 10px) !important;
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .action-btn-admin-locked,
+[data-theme="dark"] #mainContent.admin-appointments-page .action-btn-admin-locked *,
+.dark #mainContent.admin-appointments-page .action-btn-admin-locked,
+.dark #mainContent.admin-appointments-page .action-btn-admin-locked * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23E5E7EB' d='M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V6Zm3 9.73V18h-2v-2.27a2 2 0 1 1 2 0Z'/%3E%3C/svg%3E") 12 12, not-allowed !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-body {
+    overflow: hidden !important;
+    transform-origin: top !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-group[open]:not(.is-closing) .appt-month-body {
+    animation: appointmentAccordionExpand .28s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+#mainContent.admin-appointments-page .appt-month-group.is-closing .appt-month-body {
+    animation: appointmentAccordionCollapse .22s ease both;
+}
+
+#mainContent.admin-appointments-page .appt-month-summary {
+    user-select: none !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-chevron {
+    transition: transform .22s ease !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-group:not([open]) .appt-month-chevron,
+#mainContent.admin-appointments-page .appt-month-group.is-closing .appt-month-chevron {
+    transform: rotate(0deg) !important;
+}
+
+#mainContent.admin-appointments-page .appt-month-group[open]:not(.is-closing) .appt-month-chevron {
+    transform: rotate(180deg) !important;
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip] {
+    --admin-appt-tooltip-bg: #374151;
+    --admin-appt-tooltip-color: #ffffff;
+    --admin-appt-tooltip-shadow: rgba(15, 23, 42, .22);
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn-view[data-tooltip] {
+    --admin-appt-tooltip-bg: #2563EB;
+    --admin-appt-tooltip-color: #ffffff;
+    --admin-appt-tooltip-shadow: rgba(37, 99, 235, .26);
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn-admin-locked[data-tooltip] {
+    --admin-appt-tooltip-bg: #DC2626;
+    --admin-appt-tooltip-color: #ffffff;
+    --admin-appt-tooltip-shadow: rgba(220, 38, 38, .26);
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::before {
+    content: none !important;
+    display: none !important;
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::after {
+    content: attr(data-tooltip) !important;
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: calc(100% + 10px) !important;
+    transform: translateX(-50%) translateY(4px) !important;
+
+    width: max-content !important;
+    max-width: 170px !important;
+    padding: .45rem .62rem !important;
+    border-radius: 10px !important;
+
+    background: var(--admin-appt-tooltip-bg) !important;
+    color: var(--admin-appt-tooltip-color) !important;
+    box-shadow: 0 12px 24px var(--admin-appt-tooltip-shadow) !important;
+
+    font-size: .68rem !important;
+    font-weight: 900 !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    letter-spacing: 0 !important;
+
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: 999999 !important;
+
+    transition:
+        opacity .16s ease,
+        visibility .16s ease,
+        transform .16s ease !important;
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn:nth-last-child(-n+2)[data-tooltip]::after {
+    left: auto !important;
+    right: 0 !important;
+    transform: translateY(4px) !important;
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]:hover::after,
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]:focus-visible::after {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-50%) translateY(0) !important;
+}
+
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn:nth-last-child(-n+2)[data-tooltip]:hover::after,
+#mainContent.admin-appointments-page .appt-actions-wrap .action-btn:nth-last-child(-n+2)[data-tooltip]:focus-visible::after {
+    transform: translateY(0) !important;
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-view[data-tooltip],
+.dark #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-view[data-tooltip] {
+    --admin-appt-tooltip-bg: #2563EB;
+    --admin-appt-tooltip-color: #ffffff;
+    --admin-appt-tooltip-shadow: rgba(37, 99, 235, .30);
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-admin-locked[data-tooltip],
+.dark #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-admin-locked[data-tooltip] {
+    --admin-appt-tooltip-bg: #DC2626;
+    --admin-appt-tooltip-color: #ffffff;
+    --admin-appt-tooltip-shadow: rgba(220, 38, 38, .30);
 }

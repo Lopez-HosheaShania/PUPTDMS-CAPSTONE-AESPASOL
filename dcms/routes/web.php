@@ -290,6 +290,9 @@ Route::prefix('admin')
         */
         Route::get('/reports', [AdminReportController::class, 'index'])
             ->name('admin.reports');
+        
+        Route::get('/reports/ai-generated', [AdminReportController::class, 'aiGenerated'])
+            ->name('admin.reports.ai-generated');
 
         /*
         |--------------------------------------------------------------------------

@@ -464,7 +464,8 @@ body.modal-lock {
 }
 
 .cancel-modal-panel,
-.reschedule-modal-panel {
+.reschedule-modal-panel,
+.start-modal-panel {
     animation: modalUp .3s cubic-bezier(.34, 1.56, .64, 1) forwards;
 }
 
@@ -507,6 +508,20 @@ body.modal-lock {
 .reschedule-icon-ring,
 .reschedule-icon-core {
     all: unset;
+}
+
+.reschedule-icon-ring::before,
+.reschedule-icon-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(245, 158, 11, .35);
+    animation: ringPulse 2s ease-out infinite;
+}
+
+.reschedule-icon-ring::after {
+    animation-delay: .7s;
 }
 
 .reason-chip input[type="radio"] {

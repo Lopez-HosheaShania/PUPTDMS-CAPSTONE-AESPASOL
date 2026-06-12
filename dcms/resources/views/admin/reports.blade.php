@@ -6,13 +6,20 @@
 <main id="mainContent" class="admin-page-shell page-enter mode-list">
     <div class="w-full">
 
-        <div class="page-banner">
-            <div class="page-banner-inner">
-                <div>
-                    <h1 class="page-title">Reports & Analytics</h1>
+            <div class="page-banner">
+                <div class="page-banner-inner"
+                    style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                    <div>
+                        <h1 class="page-title">Reports & Analytics</h1>
+                    </div>
+
+                    <a href="{{ route('admin.reports.ai-generated') }}"
+                        style="display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1rem;border-radius:12px;background:#8B0000;color:#fff;text-decoration:none;font-size:.85rem;font-weight:700;box-shadow:0 8px 20px rgba(139,0,0,.18);">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        AI Generated Report
+                    </a>
                 </div>
             </div>
-        </div>
 
         <div class="section-label">
             <i class="fa-solid fa-users" style="font-size:11px;color:#8B0000;"></i>
@@ -172,44 +179,52 @@
             </div>
         </div>
 
-        {{-- ===== INVENTORY USAGE ===== --}}
-        @if (isset($inventory))
-        @php
-        $inventoryItems = collect($inventory['items'] ?? []);
-        $inventoryDaysElapsed = max(1, now()->day);
+            {{-- ===== INVENTORY USAGE ===== --}}
+            @if (isset($inventory))
+                @php
+                    $inventoryItems = collect($inventory['items'] ?? []);
+                    $inventoryDaysElapsed = max(1, now()->day);
 
-        $inventoryLowStockCount = (int) ($inventory['low_stock_count'] ?? $inventoryItems->filter(function ($item) {
-        $inStock = (int) ($item['in_stock'] ?? 0);
-        $minLevel = (int) ($item['min_level'] ?? 0);
+                    $inventoryLowStockCount =
+                        (int) ($inventory['low_stock_count'] ??
+                            $inventoryItems
+                                ->filter(function ($item) {
+                                    $inStock = (int) ($item['in_stock'] ?? 0);
+                                    $minLevel = (int) ($item['min_level'] ?? 0);
 
-        return $minLevel > 0 && $inStock < $minLevel; })->count());
+                                    return $minLevel > 0 && $inStock < $minLevel;
+                                })
+                                ->count());
 
-            $inventoryTotalUsed = $inventoryItems->sum(fn ($item) => (int) ($item['used'] ?? 0));
-            $inventoryTotalStock = $inventoryItems->sum(fn ($item) => (int) ($item['in_stock'] ?? 0));
+                    $inventoryTotalUsed = $inventoryItems->sum(fn($item) => (int) ($item['used'] ?? 0));
+                    $inventoryTotalStock = $inventoryItems->sum(fn($item) => (int) ($item['in_stock'] ?? 0));
 
-            $inventoryCriticalCount = $inventoryItems->filter(function ($item) {
-            $inStock = (int) ($item['in_stock'] ?? 0);
-            $minLevel = (int) ($item['min_level'] ?? 0);
+                    $inventoryCriticalCount = $inventoryItems
+                        ->filter(function ($item) {
+                            $inStock = (int) ($item['in_stock'] ?? 0);
+                            $minLevel = (int) ($item['min_level'] ?? 0);
 
-            return $inStock <= 0 || ($minLevel> 0 && $inStock < ($minLevel * 0.5)); })->count();
+                            return $inStock <= 0 || ($minLevel > 0 && $inStock < $minLevel * 0.5);
+                        })
+                        ->count();
 
                     $inventoryReorderUnits = $inventoryItems->sum(function ($item) {
-                    $used = (int) ($item['used'] ?? 0);
-                    $inStock = (int) ($item['in_stock'] ?? 0);
-                    $minLevel = (int) ($item['min_level'] ?? 0);
-                    $targetStock = max($minLevel * 2, $used);
+                        $used = (int) ($item['used'] ?? 0);
+                        $inStock = (int) ($item['in_stock'] ?? 0);
+                        $minLevel = (int) ($item['min_level'] ?? 0);
+                        $targetStock = max($minLevel * 2, $used);
 
-                    return max(0, $targetStock - $inStock);
+                        return max(0, $targetStock - $inStock);
                     });
-                    @endphp
+                @endphp
 
-                    <hr class="section-divider">
-                    <div class="section-label">
-                        <i class="fa-solid fa-boxes-stacked" style="font-size:11px;color:#8B0000;"></i>
-                        Inventory usage
-                    </div>
+                <hr class="section-divider">
+                <div class="section-label">
+                    <i class="fa-solid fa-boxes-stacked" style="font-size:11px;color:#8B0000;"></i>
+                    Inventory usage
+                </div>
 
-                    @if ($inventoryLowStockCount > 0)
+                @if ($inventoryLowStockCount > 0)
                     <div class="alert-warning">
                         <i class="fa-solid fa-triangle-exclamation"
                             style="color:#BA7517;font-size:13px;flex-shrink:0;"></i>
@@ -232,7 +247,7 @@
                             </div>
                         </div>
 
-                        @if ($inventoryItems->count())
+                    @if ($inventoryItems->count())
                         <div class="report-inventory-table-wrap">
                             <table class="inv-table report-inventory-table">
                                 <thead>
@@ -246,20 +261,20 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($inventoryItems as $item)
-                                    <tr>
-                                        <td class="item-cell">{{ $item['name'] }}</td>
-                                        <td>{{ $item['used'] }}</td>
-                                        <td>{{ $item['in_stock'] }}</td>
-                                        <td>{{ $item['min_level'] }}</td>
-                                        <td>
-                                            @if ($item['in_stock'] <= 0) <span
-                                                class="status-pill report-stock-pill pill-out">Out of
-                                                stock</span>
-                                                @elseif($item['in_stock'] < $item['min_level'] * 0.5) <span
-                                                    class="status-pill report-stock-pill pill-critical">Critical
-                                                    level</span>
-                                                    @elseif($item['in_stock'] < $item['min_level']) <span
-                                                        class="status-pill report-stock-pill pill-low">Below minimum
+                                        <tr>
+                                            <td class="item-cell">{{ $item['name'] }}</td>
+                                            <td>{{ $item['used'] }}</td>
+                                            <td>{{ $item['in_stock'] }}</td>
+                                            <td>{{ $item['min_level'] }}</td>
+                                            <td>
+                                                @if ($item['in_stock'] <= 0)
+                                                    <span class="status-pill report-stock-pill pill-out">Out of
+                                                        stock</span>
+                                                @elseif($item['in_stock'] < $item['min_level'] * 0.5)
+                                                    <span class="status-pill report-stock-pill pill-critical">Critical
+                                                        level</span>
+                                                @elseif($item['in_stock'] < $item['min_level'])
+                                                    <span class="status-pill report-stock-pill pill-low">Below minimum
                                                         level</span>
                                                         @else
                                                         <span class="status-pill report-stock-pill pill-ok">Sufficient
@@ -279,22 +294,22 @@
                             <div class="empty-state-title">No dental supply records available</div>
                             <div class="empty-state-text">There are no inventory usage records to display yet.</div>
                         </div>
-                        @endif
-                    </div>
+                    @endif
+                </div>
 
-                    <div class="card report-inventory-card report-movement-card">
-                        <div class="card-header">
-                            <div class="card-header-left">
-                                <div class="card-header-icon"><i class="fa-solid fa-truck-ramp-box"></i></div>
-                                <div>
-                                    <div class="card-title">Stock movement & reorder forecast</div>
-                                    <div class="card-subtitle">Estimated movement, daily consumption, days remaining,
-                                        and suggested reorder quantity</div>
-                                </div>
+                <div class="card report-inventory-card report-movement-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <div class="card-header-icon"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                            <div>
+                                <div class="card-title">Stock movement & reorder forecast</div>
+                                <div class="card-subtitle">Estimated movement, daily consumption, days remaining,
+                                    and suggested reorder quantity</div>
                             </div>
                         </div>
+                    </div>
 
-                        @if ($inventoryItems->count())
+                    @if ($inventoryItems->count())
                         <div class="inventory-kpi-grid">
                             <div class="inventory-kpi-card kpi-used">
                                 <span class="inventory-kpi-label">Total used</span>
@@ -344,59 +359,70 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($inventoryItems as $item)
-                                    @php
-                                    $used = (int) ($item['used'] ?? 0);
-                                    $inStock = (int) ($item['in_stock'] ?? 0);
-                                    $minLevel = (int) ($item['min_level'] ?? 0);
-                                    $stockIn = (int) ($item['stock_in'] ?? ($item['restocked'] ?? ($item['received'] ??
-                                    0)));
-                                    $openingStock = (int) ($item['opening_stock'] ?? max(0, $inStock + $used -
-                                    $stockIn));
-                                    $averageDailyUsage = $used > 0 ? $used / $inventoryDaysElapsed : 0;
-                                    $daysRemaining = $averageDailyUsage > 0 ? (int) floor($inStock / $averageDailyUsage)
-                                    : null;
-                                    $targetStock = max($minLevel * 2, $used);
-                                    $suggestedReorder = max(0, $targetStock - $inStock);
-                                    $reorderClass = 'pill-ok';
-                                    $reorderLabel = 'Stable';
+                                        @php
+                                            $used = (int) ($item['used'] ?? 0);
+                                            $inStock = (int) ($item['in_stock'] ?? 0);
+                                            $minLevel = (int) ($item['min_level'] ?? 0);
+                                            $stockIn =
+                                                (int) ($item['stock_in'] ??
+                                                    ($item['restocked'] ?? ($item['received'] ?? 0)));
+                                            $openingStock =
+                                                (int) ($item['opening_stock'] ?? max(0, $inStock + $used - $stockIn));
+                                            $averageDailyUsage = $used > 0 ? $used / $inventoryDaysElapsed : 0;
+                                            $daysRemaining =
+                                                $averageDailyUsage > 0
+                                                    ? (int) floor($inStock / $averageDailyUsage)
+                                                    : null;
+                                            $targetStock = max($minLevel * 2, $used);
+                                            $suggestedReorder = max(0, $targetStock - $inStock);
+                                            $reorderClass = 'pill-ok';
+                                            $reorderLabel = 'Stable';
 
-                                    if ($inStock <= 0) { $reorderClass='pill-out' ; $reorderLabel='Out of stock' ; }
-                                        elseif ($minLevel> 0 && $inStock < ($minLevel * 0.5)) {
-                                            $reorderClass='pill-critical' ; $reorderLabel='Critical reorder' ; } elseif
-                                            (($minLevel> 0 && $inStock < $minLevel) || (! is_null($daysRemaining) &&
-                                                $daysRemaining <=7)) { $reorderClass='pill-low' ;
-                                                $reorderLabel='Reorder soon' ; } elseif (! is_null($daysRemaining) &&
-                                                $daysRemaining <=14) { $reorderClass='pill-watch' ;
-                                                $reorderLabel='Monitor stock' ; } @endphp <tr>
-                                                <td class="item-cell" data-label="Item">{{ $item['name'] }}</td>
-                                                <td class="forecast-num forecast-opening" data-label="Opening stock">{{
-                                                    number_format($openingStock) }}</td>
-                                                <td class="forecast-num forecast-stock-in" data-label="Stock in">{{
-                                                    $stockIn > 0 ? number_format($stockIn) : '—' }}</td>
-                                                <td class="forecast-num forecast-used" data-label="Used">{{
-                                                    number_format($used) }}</td>
-                                                <td class="forecast-num forecast-ending" data-label="Ending stock">{{
-                                                    number_format($inStock) }}</td>
-                                                <td class="forecast-num forecast-average" data-label="Avg/day">{{
-                                                    number_format($averageDailyUsage, 1) }}</td>
-                                                <td class="forecast-days" data-label="Days left">
-                                                    {{ is_null($daysRemaining) ? 'No usage yet' :
-                                                    number_format($daysRemaining) . ' ' . Str::plural('day',
-                                                    $daysRemaining) }}
-                                                </td>
-                                                <td class="forecast-num forecast-reorder"
-                                                    data-label="Suggested reorder">{{ number_format($suggestedReorder)
-                                                    }}</td>
-                                                <td data-label="Reorder status">
-                                                    <span class="status-pill report-stock-pill {{ $reorderClass }}">{{
-                                                        $reorderLabel }}</span>
-                                                </td>
-                                                </tr>
-                                                @endforeach
+                                            if ($inStock <= 0) {
+                                                $reorderClass = 'pill-out';
+                                                $reorderLabel = 'Out of stock';
+                                            } elseif ($minLevel > 0 && $inStock < $minLevel * 0.5) {
+                                                $reorderClass = 'pill-critical';
+                                                $reorderLabel = 'Critical reorder';
+                                            } elseif (
+                                                ($minLevel > 0 && $inStock < $minLevel) ||
+                                                (!is_null($daysRemaining) && $daysRemaining <= 7)
+                                            ) {
+                                                $reorderClass = 'pill-low';
+                                                $reorderLabel = 'Reorder soon';
+                                            } elseif (!is_null($daysRemaining) && $daysRemaining <= 14) {
+                                                $reorderClass = 'pill-watch';
+                                                $reorderLabel = 'Monitor stock';
+                                            }
+                                        @endphp <tr>
+                                            <td class="item-cell" data-label="Item">{{ $item['name'] }}</td>
+                                            <td class="forecast-num forecast-opening" data-label="Opening stock">
+                                                {{ number_format($openingStock) }}</td>
+                                            <td class="forecast-num forecast-stock-in" data-label="Stock in">
+                                                {{ $stockIn > 0 ? number_format($stockIn) : '—' }}</td>
+                                            <td class="forecast-num forecast-used" data-label="Used">
+                                                {{ number_format($used) }}</td>
+                                            <td class="forecast-num forecast-ending" data-label="Ending stock">
+                                                {{ number_format($inStock) }}</td>
+                                            <td class="forecast-num forecast-average" data-label="Avg/day">
+                                                {{ number_format($averageDailyUsage, 1) }}</td>
+                                            <td class="forecast-days" data-label="Days left">
+                                                {{ is_null($daysRemaining)
+                                                    ? 'No usage yet'
+                                                    : number_format($daysRemaining) . ' ' . Str::plural('day', $daysRemaining) }}
+                                            </td>
+                                            <td class="forecast-num forecast-reorder" data-label="Suggested reorder">
+                                                {{ number_format($suggestedReorder) }}</td>
+                                            <td data-label="Reorder status">
+                                                <span
+                                                    class="status-pill report-stock-pill {{ $reorderClass }}">{{ $reorderLabel }}</span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
-                        @else
+                    @else
                         <div class="empty-state">
                             <div class="empty-state-icon">
                                 <i class="fa-solid fa-truck-ramp-box"></i>
@@ -405,9 +431,9 @@
                             <div class="empty-state-text">There are no inventory records available for reorder
                                 forecasting yet.</div>
                         </div>
-                        @endif
-                    </div>
                     @endif
+                </div>
+            @endif
 
                     {{-- ===== CHARTS ===== --}}
                     <hr class="section-divider">
@@ -438,46 +464,53 @@
                             </div>
                         </div>
 
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-header-left">
-                                    <div class="card-header-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                                    <div>
-                                        <div class="card-title">Procedure types</div>
-                                        <div class="card-subtitle">Distribution of procedures this month</div>
-                                    </div>
-                                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <div class="card-header-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                            <div>
+                                <div class="card-title">Procedure types</div>
+                                <div class="card-subtitle">Distribution of procedures this month</div>
                             </div>
-                            <div class="card-body">
-                                @if (collect($treatments['breakdown'])->count())
-                                <div class="chart-legend">
-                                    @foreach ($treatments['breakdown'] as $i => $proc)
-                                    @php $colors = ['#378ADD','#1D9E75','#D85A30','#BA7517','#7F77DD','#9ca3af'];
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (collect($treatments['breakdown'])->count())
+                            <div class="chart-legend">
+                                @foreach ($treatments['breakdown'] as $i => $proc)
+                                    @php$colors = [
+                                            '#378ADD',
+                                            '#1D9E75',
+                                            '#D85A30',
+                                            '#BA7517',
+                                            '#7F77DD',
+                                            '#9ca3af',
+                                        ];
                                     @endphp
                                     <span>
                                         <span class="legend-dot"
                                             style="background:{{ $colors[$i] ?? '#9ca3af' }};border-radius:50%;"></span>
                                         {{ $proc['name'] }} {{ $proc['pct'] }}%
                                     </span>
-                                    @endforeach
-                                </div>
-                                <div class="chart-wrap" style="height:220px;">
-                                    <canvas id="pieChart" role="img"
-                                        aria-label="Pie chart of procedure type distribution"></canvas>
-                                </div>
-                                @else
-                                <div class="empty-state">
-                                    <div class="empty-state-icon">
-                                        <i class="fa-solid fa-chart-pie"></i>
-                                    </div>
-                                    <div class="empty-state-title">No procedure data available</div>
-                                    <div class="empty-state-text">There are no recorded procedure types to display yet.
-                                    </div>
-                                </div>
-                                @endif
+                                @endforeach
                             </div>
-                        </div>
+                            <div class="chart-wrap" style="height:220px;">
+                                <canvas id="pieChart" role="img"
+                                    aria-label="Pie chart of procedure type distribution"></canvas>
+                            </div>
+                        @else
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i class="fa-solid fa-chart-pie"></i>
+                                </div>
+                                <div class="empty-state-title">No procedure data available</div>
+                                <div class="empty-state-text">There are no recorded procedure types to display yet.
+                                </div>
+                            </div>
+                        @endif
                     </div>
+                </div>
+            </div>
 
                     <div class="card" style="margin-bottom:2rem;">
                         <div class="card-header">

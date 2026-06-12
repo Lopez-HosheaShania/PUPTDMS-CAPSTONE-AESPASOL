@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Patient;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -67,20 +68,47 @@ class AdminPatientController extends Controller
         ));
     }
 
-    public function show($patientId)
+    public function show(Patient $patient)
     {
-        $appointments = Appointment::with('patient')
-            ->where('patient_id', $patientId)
+        $today = Carbon::today()->toDateString();
+
+        $appointments = Appointment::where('patient_id', $patient->id)
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc')
             ->get();
 
-        $patient = optional($appointments->first())->patient;
+        $futureVisits = Appointment::where('patient_id', $patient->id)
+            ->whereDate('appointment_date', '>=', $today)
+            ->whereIn('status', ['upcoming', 'rescheduled'])
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
+            ->get();
 
-        if (!$patient) {
-            abort(404, 'Patient not found.');
-        }
+        $pastVisits = Appointment::where('patient_id', $patient->id)
+            ->where(function ($query) use ($today) {
+                $query->whereDate('appointment_date', '<', $today)
+                    ->orWhereIn('status', ['completed', 'cancelled']);
+            })
+            ->orderBy('appointment_date', 'desc')
+            ->orderBy('appointment_time', 'desc')
+            ->get();
 
-        return view('admin.patient-profile', compact('patient', 'appointments'));
+        $totalVisits = $appointments->count();
+        $lastVisit = $pastVisits->first();
+        $nextAppointment = $futureVisits->first();
+        $notifications = collect([]);
+
+        return view('patient.shared-profile', [
+            'patient' => $patient,
+            'appointments' => $appointments,
+            'futureVisits' => $futureVisits,
+            'pastVisits' => $pastVisits,
+            'totalVisits' => $totalVisits,
+            'lastVisit' => $lastVisit,
+            'nextAppointment' => $nextAppointment,
+            'notifications' => $notifications,
+            'profileLayout' => 'layouts.admin',
+            'profileMode' => 'admin',
+        ]);
     }
 }
