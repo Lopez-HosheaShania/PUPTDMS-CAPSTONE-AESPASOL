@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Backup;
 use App\Models\SystemSetting;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -63,17 +64,24 @@ class DataBackupController extends Controller
 
         $lastBackup = Backup::where('status', 'completed')->latest()->first();
 
-        $autoBackupEnabled = filter_var(
-            SystemSetting::getSetting('auto_backup_enabled', '1'),
-            FILTER_VALIDATE_BOOLEAN
-        );
+        /*
+         * Hostinger automated backups are managed outside the Laravel system.
+         * This section only reflects/admin-maintains the coverage status inside PUPTDMS.
+         */
+        $hostingerBackup = $this->getHostingerBackupCoverage();
+
+        /*
+         * Kept for backward compatibility with the old Blade/JS variables.
+         * You can remove this later once the Blade no longer uses Auto-Backup Schedule.
+         */
+        $autoBackupEnabled = $hostingerBackup['enabled'];
 
         $backupSchedule = [
-            'daily_enabled' => filter_var(SystemSetting::getSetting('backup_schedule_daily_enabled', '1'), FILTER_VALIDATE_BOOLEAN),
+            'daily_enabled' => $hostingerBackup['enabled'],
             'daily_time' => SystemSetting::getSetting('backup_schedule_daily_time', '02:00'),
-            'weekly_enabled' => filter_var(SystemSetting::getSetting('backup_schedule_weekly_enabled', '1'), FILTER_VALIDATE_BOOLEAN),
+            'weekly_enabled' => $hostingerBackup['enabled'],
             'weekly_time' => SystemSetting::getSetting('backup_schedule_weekly_time', '00:00'),
-            'monthly_enabled' => filter_var(SystemSetting::getSetting('backup_schedule_monthly_enabled', '0'), FILTER_VALIDATE_BOOLEAN),
+            'monthly_enabled' => false,
             'monthly_time' => SystemSetting::getSetting('backup_schedule_monthly_time', '23:59'),
         ];
 
@@ -107,6 +115,10 @@ class DataBackupController extends Controller
                     'total_backups' => $totalBackups,
                     'this_month_backups' => $thisMonthBackups,
                     'last_backup' => $lastBackup?->created_at?->format('M d') ?? '—',
+                    'hostinger_backup_status' => $hostingerBackup['status'],
+                    'hostinger_backup_status_label' => $hostingerBackup['status_label'],
+                    'hostinger_backup_enabled' => $hostingerBackup['enabled'],
+                    'hostinger_backup_last_verified_at' => $hostingerBackup['last_verified_at'],
                 ],
             ]);
         }
@@ -121,7 +133,8 @@ class DataBackupController extends Controller
             'lastBackup',
             'autoBackupEnabled',
             'totalAllocatedBytes',
-            'backupSchedule'
+            'backupSchedule',
+            'hostingerBackup'
         ));
     }
 
@@ -158,9 +171,10 @@ class DataBackupController extends Controller
         try {
             Storage::disk('local')->makeDirectory('backups');
 
-            // Note:
-            // "incremental" is currently stored as a regular DB dump as well.
-            // The type is preserved for UI/history, while true incremental logic can be added later.
+            /*
+             * "incremental" is currently stored as a regular DB dump as well.
+             * The type is preserved for UI/history, while true incremental logic can be added later.
+             */
             $this->dumpDatabase($tmpSqlPath);
             $this->gzipFile($tmpSqlPath, $tmpGzPath);
 
@@ -348,6 +362,71 @@ class DataBackupController extends Controller
         ]);
     }
 
+    /*
+     * Redirects admin to Hostinger hPanel.
+     * Add a route for this method, then use it for your "Open Hostinger hPanel" button.
+     */
+    public function openHpanel(): RedirectResponse|JsonResponse
+    {
+        if (!session('admin_logged_in')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        AuditLogger::log(
+            'open',
+            'data_backup',
+            'Admin opened Hostinger hPanel from the data backup page'
+        );
+
+        return redirect()->away($this->getHpanelUrl());
+    }
+
+    public function verifyHostingerBackup(Request $request): JsonResponse
+    {
+        if (!session('admin_logged_in')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        SystemSetting::setSetting('hostinger_backup_enabled', '1', 'backup');
+        SystemSetting::setSetting('hostinger_backup_status', 'active', 'backup');
+        SystemSetting::setSetting('hostinger_backup_last_verified_at', now()->toDateTimeString(), 'backup');
+        SystemSetting::setSetting(
+            'hostinger_backup_notes',
+            'Daily automatic hosting-level backups are active based on the current Hostinger plan and are managed externally through Hostinger hPanel.',
+            'backup'
+        );
+
+        /*
+         * Legacy setting kept so existing UI/JS that still checks auto_backup_enabled will not break.
+         */
+        SystemSetting::setSetting('auto_backup_enabled', '1', 'backup');
+
+        AuditLogger::log(
+            'verify',
+            'data_backup',
+            'Admin verified Hostinger daily automatic backup status'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Hostinger backup status has been marked as verified.',
+            'status' => 'active',
+            'status_label' => 'Active',
+            'verified_label' => 'Verified',
+            'last_verified_at' => now()->format('M d, Y h:i A'),
+        ]);
+    }
+
+    /*
+     * This now marks the Hostinger backup coverage status inside the system.
+     * It does not enable/disable Hostinger backups directly.
+     */
     public function toggleAuto(Request $request): JsonResponse
     {
         if (!session('admin_logged_in')) {
@@ -363,21 +442,36 @@ class DataBackupController extends Controller
 
         $enabled = $request->boolean('enabled');
 
+        SystemSetting::setSetting('hostinger_backup_enabled', $enabled ? '1' : '0', 'backup');
+        SystemSetting::setSetting('hostinger_backup_status', $enabled ? 'active' : 'inactive', 'backup');
+        SystemSetting::setSetting('hostinger_backup_last_verified_at', now()->toDateTimeString(), 'backup');
+
+        /*
+         * Legacy setting kept so existing UI/JS that still checks auto_backup_enabled will not break.
+         */
         SystemSetting::setSetting('auto_backup_enabled', $enabled ? '1' : '0', 'backup');
 
         AuditLogger::log(
             'update',
             'data_backup',
-            'Admin ' . ($enabled ? 'enabled' : 'disabled') . ' auto backup'
+            'Admin marked Hostinger backup coverage as ' . ($enabled ? 'active' : 'inactive')
         );
 
         return response()->json([
             'success' => true,
             'enabled' => $enabled,
-            'message' => 'Auto-backup has been ' . ($enabled ? 'enabled' : 'disabled') . '.',
+            'status' => $enabled ? 'active' : 'inactive',
+            'message' => $enabled
+                ? 'Hostinger backup coverage has been marked as active.'
+                : 'Hostinger backup coverage has been marked as inactive.',
         ]);
     }
 
+    /*
+     * Updated purpose:
+     * This saves backup coverage/status information for Hostinger-managed backups.
+     * It still accepts the old schedule fields so your current JS will not immediately break.
+     */
     public function updateSchedule(Request $request): JsonResponse
     {
         if (!session('admin_logged_in')) {
@@ -388,38 +482,132 @@ class DataBackupController extends Controller
         }
 
         $data = $request->validate([
-            'daily_enabled' => 'required|boolean',
-            'daily_time' => 'required|date_format:H:i',
-            'weekly_enabled' => 'required|boolean',
-            'weekly_time' => 'required|date_format:H:i',
-            'monthly_enabled' => 'required|boolean',
-            'monthly_time' => 'required|date_format:H:i',
+            'hostinger_backup_enabled' => 'nullable|boolean',
+            'hostinger_backup_status' => 'nullable|in:active,inactive,not_verified',
+            'hostinger_backup_frequency' => 'nullable|string|max:100',
+            'hostinger_backup_notes' => 'nullable|string|max:255',
+
+            /*
+             * Legacy schedule fields from the old Auto-Backup Schedule UI.
+             */
+            'daily_enabled' => 'nullable|boolean',
+            'daily_time' => 'nullable|date_format:H:i',
+            'weekly_enabled' => 'nullable|boolean',
+            'weekly_time' => 'nullable|date_format:H:i',
+            'monthly_enabled' => 'nullable|boolean',
+            'monthly_time' => 'nullable|date_format:H:i',
         ]);
 
-        SystemSetting::setSetting('backup_schedule_daily_enabled', $data['daily_enabled'] ? '1' : '0', 'backup');
-        SystemSetting::setSetting('backup_schedule_daily_time', $data['daily_time'], 'backup');
+        $enabled = array_key_exists('hostinger_backup_enabled', $data)
+            ? filter_var($data['hostinger_backup_enabled'], FILTER_VALIDATE_BOOLEAN)
+            : (
+                filter_var($data['daily_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN) ||
+                filter_var($data['weekly_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN) ||
+                filter_var($data['monthly_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN)
+            );
 
-        SystemSetting::setSetting('backup_schedule_weekly_enabled', $data['weekly_enabled'] ? '1' : '0', 'backup');
-        SystemSetting::setSetting('backup_schedule_weekly_time', $data['weekly_time'], 'backup');
+        $status = $data['hostinger_backup_status'] ?? ($enabled ? 'active' : 'inactive');
+        $frequency = $data['hostinger_backup_frequency'] ?? SystemSetting::getSetting(
+            'hostinger_backup_frequency',
+            'Daily or weekly depending on the active Hostinger plan'
+        );
 
-        SystemSetting::setSetting('backup_schedule_monthly_enabled', $data['monthly_enabled'] ? '1' : '0', 'backup');
-        SystemSetting::setSetting('backup_schedule_monthly_time', $data['monthly_time'], 'backup');
+        SystemSetting::setSetting('hostinger_backup_enabled', $enabled ? '1' : '0', 'backup');
+        SystemSetting::setSetting('hostinger_backup_status', $status, 'backup');
+        SystemSetting::setSetting('hostinger_backup_frequency', $frequency, 'backup');
+        SystemSetting::setSetting('hostinger_backup_last_verified_at', now()->toDateTimeString(), 'backup');
 
-        $hasAnyEnabledSchedule = $data['daily_enabled'] || $data['weekly_enabled'] || $data['monthly_enabled'];
-        SystemSetting::setSetting('auto_backup_enabled', $hasAnyEnabledSchedule ? '1' : '0', 'backup');
+        if (isset($data['hostinger_backup_notes'])) {
+            SystemSetting::setSetting('hostinger_backup_notes', $data['hostinger_backup_notes'], 'backup');
+        }
+
+        /*
+         * Legacy settings kept for current Blade/JS compatibility.
+         */
+        if (array_key_exists('daily_enabled', $data)) {
+            SystemSetting::setSetting('backup_schedule_daily_enabled', $data['daily_enabled'] ? '1' : '0', 'backup');
+        }
+
+        if (isset($data['daily_time'])) {
+            SystemSetting::setSetting('backup_schedule_daily_time', $data['daily_time'], 'backup');
+        }
+
+        if (array_key_exists('weekly_enabled', $data)) {
+            SystemSetting::setSetting('backup_schedule_weekly_enabled', $data['weekly_enabled'] ? '1' : '0', 'backup');
+        }
+
+        if (isset($data['weekly_time'])) {
+            SystemSetting::setSetting('backup_schedule_weekly_time', $data['weekly_time'], 'backup');
+        }
+
+        if (array_key_exists('monthly_enabled', $data)) {
+            SystemSetting::setSetting('backup_schedule_monthly_enabled', $data['monthly_enabled'] ? '1' : '0', 'backup');
+        }
+
+        if (isset($data['monthly_time'])) {
+            SystemSetting::setSetting('backup_schedule_monthly_time', $data['monthly_time'], 'backup');
+        }
+
+        SystemSetting::setSetting('auto_backup_enabled', $enabled ? '1' : '0', 'backup');
 
         AuditLogger::log(
             'update',
             'data_backup',
-            'Admin updated backup schedule settings'
+            'Admin updated Hostinger backup coverage settings'
         );
 
         return response()->json([
             'success' => true,
-            'message' => 'Backup schedule updated successfully.',
-            'schedule' => $data,
-            'auto_backup_enabled' => $hasAnyEnabledSchedule,
+            'message' => 'Hostinger backup coverage updated successfully.',
+            'hostinger_backup' => $this->getHostingerBackupCoverage(),
+            'auto_backup_enabled' => $enabled,
         ]);
+    }
+
+    private function getHostingerBackupCoverage(): array
+    {
+        $enabled = filter_var(
+            SystemSetting::getSetting('hostinger_backup_enabled', SystemSetting::getSetting('auto_backup_enabled', '1')),
+            FILTER_VALIDATE_BOOLEAN
+        );
+
+        $status = SystemSetting::getSetting(
+            'hostinger_backup_status',
+            $enabled ? 'active' : 'not_verified'
+        );
+
+        if (!in_array($status, ['active', 'inactive', 'not_verified'], true)) {
+            $status = $enabled ? 'active' : 'not_verified';
+        }
+
+        return [
+            'enabled' => $enabled,
+            'status' => $status,
+            'status_label' => match ($status) {
+                'active' => 'Active',
+                'inactive' => 'Inactive',
+                default => 'Not Verified',
+            },
+            'frequency' => SystemSetting::getSetting(
+                'hostinger_backup_frequency',
+                'Daily or weekly depending on the active Hostinger plan'
+            ),
+            'managed_by' => 'Hostinger hPanel',
+            'last_verified_at' => SystemSetting::getSetting('hostinger_backup_last_verified_at', null),
+            'notes' => SystemSetting::getSetting(
+                'hostinger_backup_notes',
+                'Daily automatic hosting-level backups are active based on the current Hostinger plan and are managed externally through Hostinger hPanel.'
+            ),
+            'hpanel_url' => $this->getHpanelUrl(),
+        ];
+    }
+
+    private function getHpanelUrl(): string
+    {
+        return rtrim(
+            config('services.hostinger.hpanel_url') ?: env('HOSTINGER_HPANEL_URL', 'https://hpanel.hostinger.com'),
+            '/'
+        );
     }
 
     private function dumpDatabase(string $outputPath): void
@@ -454,14 +642,22 @@ class DataBackupController extends Controller
         file_put_contents($cnfPath, "[client]\npassword=\"{$pass}\"\n");
         chmod($cnfPath, 0600);
 
+        $mysqldumpPath = env('MYSQLDUMP_PATH', 'mysqldump');
+
+        if ($mysqldumpPath !== 'mysqldump' && !file_exists($mysqldumpPath)) {
+            @unlink($cnfPath);
+            throw new \RuntimeException('mysqldump executable not found at: ' . $mysqldumpPath);
+        }
+
         $cmd = sprintf(
-            'mysqldump --defaults-extra-file=%s --host=%s --port=%s --user=%s %s > %s 2>&1',
+            '%s --defaults-extra-file=%s --host=%s --port=%s --user=%s --result-file=%s %s 2>&1',
+            escapeshellarg($mysqldumpPath),
             escapeshellarg($cnfPath),
             escapeshellarg($host),
             escapeshellarg((string) $port),
             escapeshellarg($user),
-            escapeshellarg($name),
-            escapeshellarg($outputPath)
+            escapeshellarg($outputPath),
+            escapeshellarg($name)
         );
 
         exec($cmd, $output, $code);
@@ -537,8 +733,16 @@ class DataBackupController extends Controller
         file_put_contents($cnfPath, "[client]\npassword=\"{$pass}\"\n");
         chmod($cnfPath, 0600);
 
+        $mysqlPath = env('MYSQL_PATH', 'mysql');
+
+        if ($mysqlPath !== 'mysql' && !file_exists($mysqlPath)) {
+            @unlink($cnfPath);
+            throw new \RuntimeException('mysql executable not found at: ' . $mysqlPath);
+        }
+
         $cmd = sprintf(
-            'mysql --defaults-extra-file=%s --host=%s --port=%s --user=%s %s < %s 2>&1',
+            '%s --defaults-extra-file=%s --host=%s --port=%s --user=%s %s < %s 2>&1',
+            escapeshellarg($mysqlPath),
             escapeshellarg($cnfPath),
             escapeshellarg($host),
             escapeshellarg((string) $port),
