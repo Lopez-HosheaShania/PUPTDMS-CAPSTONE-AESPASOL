@@ -6,7 +6,7 @@
 <main id="mainContent" class="admin-page-shell page-enter mode-list">
     <div class="w-full">
 
-            <div class="page-banner">
+            <div class="page-banner" style="margin-bottom:1.75rem;">
                 <div class="page-banner-inner"
                     style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
                     <div>

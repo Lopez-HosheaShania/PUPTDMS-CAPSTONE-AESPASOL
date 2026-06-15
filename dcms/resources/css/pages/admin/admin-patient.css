@@ -603,3 +603,94 @@
         inset 0 1px 0 rgba(255, 255, 255, .06),
         0 8px 18px rgba(0, 0, 0, .22) !important;
 }
+
+@media (max-width: 767px) {
+    #mainContent.admin-patient-page .patient-table-toolbar {
+        padding: .85rem !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-toolbar-actions {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: .65rem !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-sort-row,
+    #mainContent.admin-patient-page .patient-search-row,
+    #mainContent.admin-patient-page .patient-filter-actions {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-sort-row {
+        order: 1 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row {
+        order: 2 !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: .5rem !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions {
+        order: 3 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row .search-wrap,
+    #mainContent.admin-patient-page .patient-search-row .global-search {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row .search-input {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .voice-input-toggle {
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: static !important;
+        transform: none !important;
+        flex-shrink: 0 !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .voice-search-mic.external {
+        position: static !important;
+        transform: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        border-radius: 999px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-stats-dropdown,
+    #mainContent.admin-patient-page .patient-stats-trigger,
+    #mainContent.admin-patient-page .global-filter-btn {
+        width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .view-toggle-container {
+        display: none !important;
+    }
+}

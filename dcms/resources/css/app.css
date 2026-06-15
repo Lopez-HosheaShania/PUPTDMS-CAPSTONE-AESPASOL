@@ -64,6 +64,7 @@
 @import './pages/admin/system-logs.css';
 @import './pages/admin/system-settings.css';
 @import './pages/admin/user-management.css';
+@import './pages/admin/ai-generated-report.css';
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @plugin "daisyui";

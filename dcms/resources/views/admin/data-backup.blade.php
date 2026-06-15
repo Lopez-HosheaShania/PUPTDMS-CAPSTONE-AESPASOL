@@ -41,6 +41,8 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
             </div>
         </div>
 
+        <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
+
         <div class="backup-stats admin-dashboard-stat-grid" id="backupStats">
             <div class="backup-stat stat-card s-all">
                 <span class="stat-icon-wrapper">

@@ -1283,47 +1283,6 @@
     }
 }
 
-@media (max-width: 767px) {
-
-
-    .content-lift {
-        padding: 0 1rem 2rem;
-    }
-
-    .period-pill {
-        gap: .75rem;
-    }
-
-    .log-stats-row {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .bottom-grid {
-        grid-template-columns: 1fr;
-    }
-
-    #dashboardLogsViewToggle {
-        display: none !important;
-    }
-
-    #dashboardLogsListView {
-        display: none !important;
-    }
-
-    #dashboardLogsGridView {
-        display: block !important;
-    }
-
-    .logs-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .card-header-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
-}
-
 .dashboard-backup-card .status-pill.status-active,
 .card .card-header .status-pill.status-active {
     color: var(--status-active-text, #15803D) !important;
@@ -1352,4 +1311,264 @@
         0 8px 18px rgba(22, 163, 74, .14) !important;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
+}
+
+@media (max-width: 767px) {
+    #mainContent {
+        overflow-x: hidden;
+    }
+
+    #mainContent .page-banner {
+        min-height: auto !important;
+        padding: 1.05rem 1rem 1.35rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    #mainContent .page-banner-inner {
+        gap: .75rem !important;
+    }
+
+    #mainContent .page-greeting {
+        font-size: .68rem !important;
+        margin-bottom: .35rem !important;
+    }
+
+    #mainContent .page-title {
+        font-size: 1.55rem !important;
+        line-height: 1.1 !important;
+        margin-bottom: .4rem !important;
+    }
+
+    #mainContent .page-subtitle {
+        font-size: .78rem !important;
+        line-height: 1.35 !important;
+        margin-bottom: .75rem !important;
+    }
+
+    #mainContent .period-pill {
+        padding: .65rem .75rem !important;
+        gap: .65rem .85rem !important;
+        border-radius: 14px !important;
+    }
+
+    #mainContent .period-item {
+        min-width: 118px !important;
+    }
+
+    #mainContent .period-label {
+        font-size: .52rem !important;
+    }
+
+    #mainContent .period-value {
+        font-size: .82rem !important;
+        line-height: 1.15 !important;
+    }
+
+    #mainContent .period-divider {
+        height: 28px !important;
+    }
+
+    #mainContent .period-pill .manage-btn {
+        min-height: 38px !important;
+        padding: .55rem .8rem !important;
+        border-radius: 11px !important;
+    }
+
+    .admin-dashboard-stat-grid {
+        grid-template-columns: 1fr !important;
+        gap: .85rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-card {
+        min-height: 112px !important;
+        padding: .95rem !important;
+        border-radius: 18px !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-value {
+        font-size: 1.55rem !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-label {
+        font-size: .7rem !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-footer {
+        font-size: .68rem !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-icon {
+        width: 46px !important;
+        height: 46px !important;
+        min-width: 46px !important;
+        font-size: 1rem !important;
+    }
+
+    .card-header {
+        min-height: 54px !important;
+        padding: .65rem .85rem !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .65rem !important;
+    }
+
+    .card-header-left {
+        width: auto !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: .55rem !important;
+        text-align: left !important;
+    }
+
+    .card-header-icon {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 12px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .card-header-left > div:not(.card-header-icon) {
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: .08rem !important;
+        line-height: 1.1 !important;
+        text-align: left !important;
+    }
+
+    .card-title {
+        display: block !important;
+        font-size: .78rem !important;
+        line-height: 1.1 !important;
+        text-align: left !important;
+        margin: 0 !important;
+    }
+
+    .card-subtitle {
+        display: block !important;
+        margin: 0 !important;
+        font-size: .58rem !important;
+        line-height: 1.15 !important;
+        text-align: left !important;
+    }
+
+    .card-header-right {
+        width: auto !important;
+        min-width: max-content !important;
+        margin-left: auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .4rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .card-header > .card-link,
+    .card-header-right .card-link {
+        width: auto !important;
+        min-width: max-content !important;
+        margin-left: auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: .3rem !important;
+        font-size: .65rem !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        text-align: right !important;
+    }
+
+    #dashboardLogsViewToggle {
+        display: none !important;
+    }
+
+    #dashboardLogsListView {
+        display: none !important;
+    }
+
+    #dashboardLogsGridView {
+        display: block !important;
+    }
+
+    .log-stats-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+        padding: .85rem !important;
+    }
+
+    .logs-grid {
+        grid-template-columns: 1fr !important;
+        gap: .75rem !important;
+        padding: .85rem !important;
+    }
+
+    .dashboard-quick-actions-card .card-header {
+        min-height: 54px !important;
+        justify-content: flex-start !important;
+    }
+
+    .dashboard-quick-actions-card .card-header-left {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        text-align: left !important;
+    }
+
+    .dashboard-quick-actions-card .card-title,
+    .dashboard-quick-actions-card .card-subtitle {
+        margin: 0 !important;
+    }
+
+    .dashboard-quick-actions-card .quick-actions-list {
+        padding: .85rem !important;
+        gap: .65rem !important;
+    }
+
+    .dashboard-backup-card .card-header {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    .dashboard-backup-card .status-pill {
+        margin-left: auto !important;
+        align-self: center !important;
+        flex-shrink: 0 !important;
+    }
+}
+
+@media (max-width: 420px) {
+    .log-stats-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .card-header-right {
+        width: auto !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+    }
+
+    .card-link {
+        width: auto !important;
+        justify-content: flex-end !important;
+        text-align: right !important;
+    }
+
+    .dashboard-backup-card .card-header {
+        flex-direction: row !important;
+        align-items: center !important;
+    }
+
+    .dashboard-backup-card .status-pill {
+        align-self: center !important;
+    }
 }

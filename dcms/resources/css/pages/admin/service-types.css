@@ -2588,3 +2588,43 @@ body.modal-lock {
         padding: 18px !important;
     }
 }
+
+@media (max-width: 767px) {
+    #addServiceForm .st-label-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: center !important;
+        gap: .65rem !important;
+        width: 100% !important;
+        margin-bottom: .55rem !important;
+    }
+
+    #addServiceForm .st-label-row .st-label {
+        margin: 0 !important;
+        font-size: .68rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: .04em !important;
+        max-width: 120px !important;
+    }
+
+    #addServiceForm .st-label-row .st-copy-bullet-box {
+        justify-self: end !important;
+        min-height: 30px !important;
+        padding: 0 .75rem !important;
+        border-radius: 999px !important;
+        gap: .4rem !important;
+        white-space: nowrap !important;
+        transform: none !important;
+    }
+
+    #addServiceForm .st-label-row .st-copy-bullet-label {
+        font-size: .66rem !important;
+        line-height: 1 !important;
+    }
+
+    #addServiceForm .st-label-row .st-copy-bullet-symbol {
+        width: 6px !important;
+        height: 6px !important;
+        min-width: 6px !important;
+    }
+}

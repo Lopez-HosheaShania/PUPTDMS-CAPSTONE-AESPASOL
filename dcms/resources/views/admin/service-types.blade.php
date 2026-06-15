@@ -19,6 +19,8 @@
         </div>
     </div>
 
+    <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
+
     <div class="content-lift">
         <div class="main-grid">
 

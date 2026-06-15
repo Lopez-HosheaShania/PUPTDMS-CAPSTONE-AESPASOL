@@ -2009,3 +2009,306 @@ body.dark #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-st
     --admin-appt-tooltip-color: #ffffff;
     --admin-appt-tooltip-shadow: rgba(220, 38, 38, .30);
 }
+
+@media (max-width: 767px) {
+    #mainContent.admin-appointments-page {
+        overflow-x: hidden !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-header-wrap,
+    #mainContent.admin-appointments-page .appointment-controls-bar,
+    #mainContent.admin-appointments-page .appointment-filter-wrap,
+    #mainContent.admin-appointments-page .appointment-controls-actions {
+        width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-bar {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        grid-template-columns: none !important;
+        gap: .75rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-wrap {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: .65rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-actions {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: .65rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-dropdown {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: none !important;
+        z-index: 1000 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-trigger {
+        width: 100% !important;
+        min-height: 46px !important;
+        height: 46px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 4001 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .55rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-option {
+        min-height: 76px !important;
+        padding: .55rem .45rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-option-label {
+        font-size: .68rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row.voice-search-row {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: none !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: .5rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .search-wrap.global-search {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .search-input {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .voice-input-toggle {
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
+        position: static !important;
+        transform: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .voice-search-mic.external {
+        position: static !important;
+        transform: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        margin: 0 !important;
+        border-radius: 999px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: .5rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions .global-filter-btn {
+        width: 100% !important;
+        min-height: 44px !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions .global-filter-reset-btn {
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 42px !important;
+    }
+
+    #mainContent.admin-appointments-page .desktop-appointments-table,
+    #mainContent.admin-appointments-page.mode-list .desktop-appointments-table {
+        display: none !important;
+    }
+
+    #mainContent.admin-appointments-page .appointments-list-view,
+    #mainContent.admin-appointments-page .appointments-grid-view,
+    #mainContent.admin-appointments-page .appointment-controls-actions .tab-toggle-wrap {
+        display: none !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appointments-list,
+    #mainContent.admin-appointments-page.mode-list .mobile-appointments-list,
+    #mainContent.admin-appointments-page.mode-grid .mobile-appointments-list {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .85rem !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        width: 100% !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: .9rem !important;
+        border-radius: 16px !important;
+        gap: .75rem !important;
+    }
+
+
+    #mainContent.admin-appointments-page .mobile-appt-top {
+        padding-left: .25rem !important;
+        gap: .65rem !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-name {
+        font-size: .86rem !important;
+        line-height: 1.2 !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-sub {
+        font-size: .68rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-meta {
+        padding-left: .25rem !important;
+        gap: .55rem !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-label {
+        font-size: .58rem !important;
+        margin-bottom: .2rem !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-value {
+        font-size: .76rem !important;
+        line-height: 1.3 !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-badges {
+        gap: .4rem !important;
+    }
+
+    #mainContent.admin-appointments-page .service-badge,
+    #mainContent.admin-appointments-page .time-chip {
+        font-size: .68rem !important;
+        padding: .28rem .55rem !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .5rem !important;
+        padding-left: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions .action-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 38px !important;
+        height: 38px !important;
+        padding: 0 .65rem !important;
+        border-radius: 12px !important;
+        font-size: .68rem !important;
+        font-weight: 850 !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions .action-btn i {
+        font-size: .7rem !important;
+        width: auto !important;
+        min-width: auto !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .summary-bar {
+        padding: .8rem .9rem !important;
+        gap: .45rem !important;
+        margin-bottom: .9rem !important;
+    }
+
+    #mainContent.admin-appointments-page .summary-chip {
+        font-size: .68rem !important;
+        padding: .28rem .6rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appt-month-summary {
+        padding: .7rem .8rem !important;
+        border-radius: 16px !important;
+        margin-bottom: .75rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appt-month-title {
+        font-size: .9rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-container-skeleton,
+    #mainContent.admin-appointments-page .appointment-container-content {
+        margin-top: .85rem !important;
+    }
+
+    #mainContent.admin-appointments-page #appointmentStatusEmptyUpcoming,
+    #mainContent.admin-appointments-page #appointmentStatusEmptyPast,
+    #mainContent.admin-appointments-page #appointmentFilterEmptyUpcoming,
+    #mainContent.admin-appointments-page #appointmentFilterEmptyPast {
+        display: none !important;
+    }
+
+    #mainContent.admin-appointments-page:has(#apptSearchInput:not(:placeholder-shown)) #appointmentFilterEmptyUpcoming.show,
+    #mainContent.admin-appointments-page:has(#apptSearchInput:not(:placeholder-shown)) #appointmentFilterEmptyUpcoming.is-visible,
+    #mainContent.admin-appointments-page:has(#apptSearchInput:not(:placeholder-shown)) #appointmentFilterEmptyPast.show,
+    #mainContent.admin-appointments-page:has(#apptSearchInput:not(:placeholder-shown)) #appointmentFilterEmptyPast.is-visible {
+        display: flex !important;
+    }
+
+    #mainContent.admin-appointments-page:not(:has(#apptSearchInput:not(:placeholder-shown))):has(#appointmentFilterBtn.has-filters) #appointmentStatusEmptyUpcoming.show,
+    #mainContent.admin-appointments-page:not(:has(#apptSearchInput:not(:placeholder-shown))):has(#appointmentFilterBtn.has-filters) #appointmentStatusEmptyUpcoming.is-visible,
+    #mainContent.admin-appointments-page:not(:has(#apptSearchInput:not(:placeholder-shown))):has(#appointmentFilterBtn.has-filters) #appointmentStatusEmptyPast.show,
+    #mainContent.admin-appointments-page:not(:has(#apptSearchInput:not(:placeholder-shown))):has(#appointmentFilterBtn.has-filters) #appointmentStatusEmptyPast.is-visible,
+    #mainContent.admin-appointments-page:not(:has(#apptSearchInput:not(:placeholder-shown))):has(.appointment-status-option.is-active:not([data-status-value="all"])) #appointmentStatusEmptyUpcoming.show,
+    #mainContent.admin-appointments-page:not(:has(#apptSearchInput:not(:placeholder-shown))):has(.appointment-status-option.is-active:not([data-status-value="all"])) #appointmentStatusEmptyUpcoming.is-visible,
+    #mainContent.admin-appointments-page:not(:has(#apptSearchInput:not(:placeholder-shown))):has(.appointment-status-option.is-active:not([data-status-value="all"])) #appointmentStatusEmptyPast.show,
+    #mainContent.admin-appointments-page:not(:has(#apptSearchInput:not(:placeholder-shown))):has(.appointment-status-option.is-active:not([data-status-value="all"])) #appointmentStatusEmptyPast.is-visible {
+        display: flex !important;
+    }
+}
+
+@media (max-width: 420px) {
+    #mainContent.admin-appointments-page .appointment-status-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions {
+        grid-template-columns: 1fr !important;
+    }
+}

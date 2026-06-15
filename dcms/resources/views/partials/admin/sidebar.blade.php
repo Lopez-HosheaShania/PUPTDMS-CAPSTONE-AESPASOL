@@ -27,8 +27,10 @@
                     class="nav-link {{ request()->routeIs('admin.patient_directory') ? 'active' : '' }}">
                     <i class="fa-solid fa-users"></i> Patients
                 </a>
-                <a href="{{ route('admin.dental-records.index') }}" class="nav-link {{ request()->routeIs('admin.dental-records*') ? 'active' : '' }}"><i class="fa-solid fa-tooth"></i> Dental
-                    Records</a>
+                <a href="{{ route('admin.dental-records.index') }}""
+                    class="nav-link {{ request()->routeIs('admin.dental-records*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-tooth"></i> Dental Records
+                </a>
                 <a href="{{ route('admin.admin.appointments') }}"
                     class="nav-link {{ request()->routeIs('admin.admin.appointments') ? 'active' : '' }}">
                     <i class="fa-solid fa-calendar-check"></i> Appointments

@@ -1455,3 +1455,18 @@ body[data-theme="dark"] #mainContent .report-inventory-card .report-inventory-ta
         border-bottom-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
     }
 }
+
+@media (max-width: 767px) {
+    #mainContent .page-banner .page-banner-inner > div:first-child {
+        width: 100% !important;
+        text-align: left !important;
+        align-items: flex-start !important;
+    }
+
+    #mainContent .page-banner .page-title {
+        width: 100% !important;
+        text-align: left !important;
+        margin-left: 0 !important;
+        margin-right: auto !important;
+    }
+}
