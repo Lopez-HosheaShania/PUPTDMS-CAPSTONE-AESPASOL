@@ -18,12 +18,32 @@
                 document.documentElement.style.backgroundColor = '#F4F4F4';
             }
         })();
+
+        (function() {
+            var path = window.location.pathname || '';
+
+            var role = path.indexOf('/admin') === 0 ?
+                'admin' :
+                (path.indexOf('/dentist') === 0 ? 'dentist' : 'patient');
+
+            var keys = {
+                admin: 'adminSidebarCollapsed',
+                dentist: 'dentistSidebarCollapsed',
+                patient: 'patientSidebarCollapsed'
+            };
+
+            try {
+                if (localStorage.getItem(keys[role]) === '1') {
+                    document.body.classList.add('sidebar-collapsed');
+                }
+            } catch (e) {}
+        })();
     </script>
     <title>@yield('title', 'PUP Taguig Dental Clinic')</title>
-    @vite(['resources/css/app.css', 'resources/css/patient.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" type="image/png" href="{{ asset('images/PUPT-DMS-Logo.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -36,12 +56,6 @@
 
 <body class="role-patient @yield('body-class', 'bg-[#F4F4F4]')">
 
-    <script>
-        if (localStorage.getItem('sidebar-collapsed-patient') === 'true') {
-            document.body.classList.add('sidebar-collapsed');
-        }
-    </script>
-
     @include('partials.header', [
         'role' => 'patient',
         'patient' => $patient ?? null,
@@ -50,8 +64,9 @@
         'showSettings' => false,
     ])
 
-    @include('partials.patient.sidebar')
+    @include('components.global-sidebar', ['role' => 'patient'])
     @include('partials.patient.mobile-nav')
+
     @include('components.patient-document-modals')
     @include('components.patient-record-modal')
     @include('partials.impersonation-banner')
@@ -59,9 +74,6 @@
     @yield('content')
 
     @include('partials.footer')
-
-    {{-- Sitewide scripts --}}
-    @include('partials.patient.script')
 
     {{-- Add the global voice logic here --}}
     @include('partials.voice-logic')
@@ -79,7 +91,6 @@
     @yield('scripts')
 
     @include('partials.chatbot')
-    <script src="{{ asset('js/header.js') }}"></script>
 
     <script>
         function openQuickAction(type) {

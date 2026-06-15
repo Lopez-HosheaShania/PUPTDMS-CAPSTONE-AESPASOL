@@ -1,3 +1,240 @@
+@keyframes shine {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 120%;
+    }
+}
+
+.book-appointment-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+    animation: shine 2.8s infinite;
+}
+
+@keyframes checkDatesArrowBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(3px);
+    }
+}
+
+.check-dates-btn i {
+    animation: checkDatesArrowBounce 1.45s ease-in-out infinite;
+}
+
+@keyframes btnRipple {
+    to {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.check-dates-btn .btn-ripple {
+    position: absolute;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .28);
+    transform: scale(0);
+    animation: btnRipple .55s ease-out;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes greetingGradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.greeting-banner {
+    background:
+        radial-gradient(circle at top left, rgba(255, 215, 0, 0.10), transparent 28%),
+        linear-gradient(270deg, #8B0000, #660000, #9f1d1d, #5A0000) !important;
+    background-size: 260% 260% !important;
+    animation: greetingGradientFlow 13s ease infinite;
+}
+
+@keyframes upcomingGlowPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.22);
+        transform: scale(1);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+        transform: scale(1.08);
+    }
+}
+
+.upcoming-live-dot {
+    animation: upcomingGlowPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes cardReveal {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card-reveal {
+    animation: cardReveal 0.45s ease-out both;
+}
+
+@keyframes iconFloatSoft {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes statSoftRise {
+    0% {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-soft-rise {
+    animation: statSoftRise 0.45s ease-out both;
+}
+
+@keyframes requestRipple {
+    to {
+        transform: scale(3.2);
+        opacity: 0;
+    }
+}
+
+.request-doc-card .request-ripple {
+    position: absolute;
+    border-radius: 999px;
+    transform: scale(0);
+    background: rgba(139, 0, 0, 0.18);
+    pointer-events: none;
+    animation: requestRipple 0.55s ease-out forwards;
+    z-index: 1;
+}
+
+@keyframes shimmerBtn {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.shimmer-btn {
+    background: linear-gradient(110deg, #660000 25%, rgba(255, 80, 80, .87) 37%, #660000 63%);
+    background-size: 200% 100%;
+    animation: shimmerBtn 10s linear infinite;
+}
+
+@keyframes wave {
+    0% {
+        transform: rotate(0);
+    }
+
+    20% {
+        transform: rotate(14deg);
+    }
+
+    40% {
+        transform: rotate(-8deg);
+    }
+
+    60% {
+        transform: rotate(14deg);
+    }
+
+    80% {
+        transform: rotate(-4deg);
+    }
+
+    100% {
+        transform: rotate(0);
+    }
+}
+
+.wave-hand {
+    transform-origin: 70% 70%;
+    animation: wave 2.5s ease-in-out infinite;
+}
+
+@keyframes spinSlow {
+    from {
+        transform: rotate(0);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes floatMoon {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes driftCloud {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(3px);
+    }
+}
+
 @keyframes spin {
     to {
         transform: rotate(360deg);
@@ -238,7 +475,25 @@
 }
 
 .fade-up {
-    animation: fadeUp .45s ease both;
+    animation: fadeUp 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
 }
 
 @keyframes popIn {

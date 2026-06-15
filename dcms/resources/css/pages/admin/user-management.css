@@ -415,7 +415,7 @@ footer {
 }
 
 [data-theme="dark"] #mainContent.user-management-page {
-    background-color: #000D1A;
+    background-color: #0d0f12;
     color: #E5E7EB;
 }
 
@@ -711,7 +711,7 @@ body.modal-open {
 }
 
 [data-theme="dark"] #mainContent.user-management-page .bg-\[\#f5f5f5\] {
-    background-color: #000D1A !important;
+    background-color: #0d0f12 !important;
 }
 
 [data-theme="dark"] #mainContent.user-management-page .user-table-row:hover {

@@ -2,1254 +2,6 @@
 
 @section('title', 'Patient Dashboard | PUP Taguig Dental Clinic')
 
-@section('styles')
-<style>
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(6px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .fade-in {
-        animation: fadeIn 0.6s ease-out forwards;
-    }
-
-    @keyframes fadeUp {
-        0% {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        100% {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .fade-up {
-        animation: fadeUp 0.6s ease-out forwards;
-    }
-
-    @keyframes shimmerBtn {
-        0% {
-            background-position: -200% 0;
-        }
-
-        100% {
-            background-position: 200% 0;
-        }
-    }
-
-    .shimmer-btn {
-        background: linear-gradient(110deg, #660000 25%, rgba(255, 80, 80, .87) 37%, #660000 63%);
-        background-size: 200% 100%;
-        animation: shimmerBtn 10s linear infinite;
-    }
-
-    @keyframes wave {
-        0% {
-            transform: rotate(0);
-        }
-
-        20% {
-            transform: rotate(14deg);
-        }
-
-        40% {
-            transform: rotate(-8deg);
-        }
-
-        60% {
-            transform: rotate(14deg);
-        }
-
-        80% {
-            transform: rotate(-4deg);
-        }
-
-        100% {
-            transform: rotate(0);
-        }
-    }
-
-    .wave-hand {
-        transform-origin: 70% 70%;
-        animation: wave 2.5s ease-in-out infinite;
-    }
-
-    @keyframes spinSlow {
-        from {
-            transform: rotate(0);
-        }
-
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    @keyframes floatMoon {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-3px);
-        }
-    }
-
-    @keyframes driftCloud {
-
-        0%,
-        100% {
-            transform: translateX(0);
-        }
-
-        50% {
-            transform: translateX(3px);
-        }
-    }
-
-    .request-doc-card {
-        will-change: transform;
-        transform-style: preserve-3d;
-    }
-
-    .request-doc-card .request-ripple {
-        position: absolute;
-        border-radius: 999px;
-        transform: scale(0);
-        background: rgba(139, 0, 0, 0.18);
-        pointer-events: none;
-        animation: requestRipple 0.55s ease-out forwards;
-        z-index: 1;
-    }
-
-    .request-doc-card>* {
-        position: relative;
-        z-index: 2;
-    }
-
-    .upcoming-card-polished {
-        position: relative;
-        overflow: hidden;
-        background:
-            radial-gradient(circle at top left, rgba(139, 0, 0, 0.10), transparent 30%),
-            radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.08), transparent 26%),
-            linear-gradient(145deg, #ffffff, #fff7f7) !important;
-    }
-
-    .upcoming-card-polished::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(110deg, transparent, rgba(255, 255, 255, .28), transparent);
-        transform: translateX(-120%) skewX(-18deg);
-        pointer-events: none;
-    }
-
-    .check-dates-btn {
-        position: relative;
-        overflow: hidden;
-        isolation: isolate;
-        background:
-            linear-gradient(135deg, rgba(139, 0, 0, 0.95), rgba(179, 0, 0, 0.88)) !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, .18);
-        box-shadow: 0 10px 24px rgba(139, 0, 0, .18);
-        transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
-    }
-
-    .check-dates-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 16px 32px rgba(139, 0, 0, .28);
-        filter: brightness(1.05);
-    }
-
-    .check-dates-btn:active {
-        transform: scale(.97);
-    }
-
-    .check-dates-btn i {
-        animation: checkDatesArrowBounce 1.45s ease-in-out infinite;
-    }
-
-    @keyframes checkDatesArrowBounce {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(3px);
-        }
-    }
-
-    .check-dates-btn .btn-ripple {
-        position: absolute;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, .28);
-        transform: scale(0);
-        animation: btnRipple .55s ease-out;
-        pointer-events: none;
-        z-index: -1;
-    }
-
-    @keyframes btnRipple {
-        to {
-            transform: scale(3);
-            opacity: 0;
-        }
-    }
-
-    [data-theme="dark"] #mainContent .upcoming-card-polished {
-        background:
-            radial-gradient(circle at top left, rgba(139, 0, 0, 0.22), transparent 34%),
-            radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.08), transparent 28%),
-            linear-gradient(145deg, #0D1117, #111827) !important;
-        border-color: rgba(255, 255, 255, .10) !important;
-    }
-
-    [data-theme="dark"] #mainContent .check-dates-btn {
-        background:
-            linear-gradient(135deg, #5A0000, #8B0000, #A31212) !important;
-        box-shadow: 0 14px 30px rgba(0, 0, 0, .38);
-    }
-
-    @keyframes pulseGlow {
-        0% {
-            box-shadow: 0 0 0 0 rgba(139, 0, 0, .3);
-        }
-
-        100% {
-            box-shadow: 0 0 0 12px rgba(139, 0, 0, 0);
-        }
-    }
-
-    @keyframes requestRipple {
-        to {
-            transform: scale(3.2);
-            opacity: 0;
-        }
-    }
-
-    [data-theme="dark"] .request-doc-card .request-ripple {
-        background: rgba(252, 165, 165, 0.16);
-    }
-
-    /* tablet */
-    @media only screen and (min-width: 768px) and (max-width: 1199px) {
-        #mainContent {
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-        }
-
-        .dashboard-grid-tight {
-            gap: 1rem !important;
-        }
-
-        .greeting-banner-inner {
-            flex-direction: column !important;
-            align-items: stretch !important;
-        }
-
-        .greeting-banner-actions {
-            width: 100%;
-        }
-
-        .greeting-banner-actions a {
-            flex: 1;
-        }
-    }
-
-    /* mobile 320px and up */
-    @media only screen and (min-width: 320px) and (max-width: 600px) {
-        #mainContent {
-            padding-left: 0.75rem !important;
-            padding-right: 0.75rem !important;
-            padding-bottom: 1rem !important;
-        }
-
-        .dashboard-grid-tight {
-            gap: 0.85rem !important;
-        }
-
-        .request-doc-card {
-            padding: 0.85rem !important;
-            border-radius: 0.85rem !important;
-        }
-
-        .request-doc-card>div {
-            gap: 0.75rem !important;
-        }
-
-        .request-doc-card .icon-box {
-            width: 3rem !important;
-            height: 3rem !important;
-            border-radius: 0.8rem !important;
-        }
-
-        .request-doc-card h3 {
-            font-size: 0.92rem !important;
-            line-height: 1.2 !important;
-        }
-
-        .request-doc-card p {
-            font-size: 0.76rem !important;
-            line-height: 1.45 !important;
-        }
-
-        .request-doc-card .doc-arrow {
-            font-size: 0.9rem !important;
-        }
-
-        #requestDocsContainer .p-4,
-        #requestDocsContainer .sm\:p-5 {
-            padding: 0.9rem !important;
-        }
-
-        .greeting-name-line {
-            font-size: clamp(1.25rem, 8vw, 1.55rem) !important;
-        }
-
-        #greetingText {
-            font-size: 0.9rem !important;
-        }
-
-        .greeting-banner-copy p {
-            font-size: 0.72rem !important;
-        }
-    }
-
-    @media (hover: none) {
-        .request-doc-card:hover {
-            transform: none;
-        }
-    }
-
-    .request-doc-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at top right, rgba(139, 0, 0, 0.08), transparent 60%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: none;
-    }
-
-    .request-doc-card:hover {
-        transform: translateY(-4px) scale(1.01);
-        box-shadow: 0 20px 40px rgba(139, 0, 0, 0.12);
-        border-color: rgba(139, 0, 0, 0.25);
-    }
-
-    .request-doc-card:hover::before {
-        opacity: 1;
-    }
-
-    .request-doc-card:hover .icon-box {
-        transform: scale(1.08);
-        box-shadow: 0 10px 25px rgba(139, 0, 0, 0.25);
-    }
-
-    .request-doc-card:hover .doc-arrow {
-        transform: translateX(3px);
-        opacity: 1;
-    }
-
-    .greet-spin {
-        animation: spinSlow 8s linear infinite;
-        display: inline-block;
-    }
-
-    .greet-float {
-        animation: floatMoon 3s ease-in-out infinite;
-        display: inline-block;
-    }
-
-    .greet-drift {
-        animation: driftCloud 3s ease-in-out infinite;
-        display: inline-block;
-    }
-
-    .greeting-row {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: 1.25rem;
-        flex-wrap: nowrap;
-    }
-
-    .greeting-banner {
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-        border-radius: 24px;
-        padding: 22px 24px;
-        background: linear-gradient(135deg,
-                rgba(139, 0, 0, 0.96) 0%,
-                rgba(102, 0, 0, 0.93) 48%,
-                rgba(179, 52, 18, 0.92) 100%);
-        box-shadow: 0 14px 40px rgba(14, 116, 144, 0.10);
-        border: 1px solid rgba(255, 255, 255, .20);
-    }
-
-    .greeting-banner::before,
-    .greeting-banner::after {
-        content: '';
-        position: absolute;
-        border-radius: 999px;
-        background: rgba(255, 215, 0, 0.07);
-        pointer-events: none;
-    }
-
-    .greeting-banner::before {
-        width: 240px;
-        height: 240px;
-        top: -145px;
-        left: -40px;
-    }
-
-    .greeting-banner::after {
-        width: 220px;
-        height: 220px;
-        right: -55px;
-        bottom: -150px;
-    }
-
-    .greeting-banner-inner {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-    }
-
-    .greeting-banner-copy {
-        min-width: 0;
-    }
-
-    .greeting-heading {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        margin: 0;
-        color: #fff;
-    }
-
-    .greeting-line {
-        display: block;
-    }
-
-    #greetingText {
-        font-size: 1.45rem;
-        font-weight: 500;
-        line-height: 1.15;
-    }
-
-    .greeting-name-line {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-        font-size: clamp(1.55rem, 3vw, 2.35rem);
-        font-weight: 800;
-        line-height: 1.15;
-    }
-
-    .greeting-banner-copy p {
-        color: rgba(255, 255, 255, .92);
-        font-size: 0.95rem;
-        margin-top: 0.45rem;
-        font-weight: 500;
-    }
-
-    .greeting-banner-actions {
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-        gap: 12px;
-    }
-
-    .book-appointment-btn {
-        position: relative;
-        overflow: hidden;
-        padding: 10px 18px;
-        min-width: 182px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        white-space: nowrap;
-        border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.449);
-        box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
-        background: linear-gradient(110deg, #660000 25%, #8B0000 45%, #660000 65%);
-        background-size: 200% 100%;
-        animation: shimmerBtn 4s linear infinite;
-    }
-
-    .book-appointment-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 60%;
-        height: 100%;
-        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-        transform: skewX(-20deg);
-        animation: shine 2.8s infinite;
-    }
-
-    @keyframes shine {
-        0% {
-            left: -100%;
-        }
-
-        100% {
-            left: 120%;
-        }
-    }
-
-    .book-appointment-btn i,
-    .book-appointment-btn span {
-        position: relative;
-        z-index: 1;
-    }
-
-    .book-appointment-btn:hover {
-        background: linear-gradient(110deg, #4d0000 25%, #7a0000 45%, #4d0000 65%);
-        background-size: 200% 100%;
-        transform: translateY(-1px);
-    }
-
-    @media only screen and (max-width: 600px) {
-        .greeting-row {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            gap: 0.75rem !important;
-            margin-bottom: 1rem !important;
-        }
-
-        .greeting-banner {
-            width: 100%;
-            padding: 14px 12px;
-            border-radius: 18px;
-        }
-
-        .greeting-banner-inner {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.85rem;
-        }
-
-        .greeting-banner-actions {
-            width: 100%;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-        }
-
-        #greetingText {
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
-
-        .greeting-name-line {
-            font-size: 1.45rem;
-            line-height: 1.1;
-        }
-
-        .greeting-banner-copy p {
-            font-size: 0.74rem;
-            margin-top: 6px;
-            opacity: 0.9;
-        }
-
-        .book-appointment-btn {
-            width: 100%;
-            min-width: 0;
-            padding: 10px 14px;
-            font-size: 0.84rem;
-        }
-
-        .upcoming-card-mobile {
-            border-radius: 18px !important;
-            margin-bottom: 1rem !important;
-        }
-
-        .upcoming-card-mobile .upcoming-card-header {
-            padding: 0.8rem 0.9rem !important;
-            gap: 0.5rem !important;
-        }
-
-        .upcoming-card-mobile .upcoming-card-header-icon {
-            width: 1.95rem !important;
-            height: 1.95rem !important;
-            font-size: 0.88rem !important;
-        }
-
-        .upcoming-card-mobile .upcoming-card-title {
-            font-size: 0.9rem !important;
-            line-height: 1.2 !important;
-        }
-
-        .upcoming-card-mobile .upcoming-status-pill {
-            font-size: 0.62rem !important;
-            padding: 0.28rem 0.48rem !important;
-            border-radius: 999px !important;
-        }
-
-        .upcoming-card-mobile .upcoming-card-body {
-            padding: 0.8rem 0.9rem 0.9rem !important;
-        }
-    }
-
-    @media only screen and (min-width: 600px) and (max-width: 767px) {
-
-        .greeting-row {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.9rem;
-        }
-
-        .greeting-banner {
-            padding: 18px 16px;
-            border-radius: 20px;
-        }
-
-        .greeting-banner-inner {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.9rem;
-        }
-
-        .greeting-banner-actions {
-            width: 100%;
-        }
-
-        .book-appointment-btn {
-            width: 100%;
-            min-width: 0;
-        }
-    }
-
-    @media only screen and (min-width: 768px) and (max-width: 991px) {
-
-        .greeting-row {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .greeting-banner {
-            padding: 20px 20px;
-            border-radius: 22px;
-        }
-
-        .greeting-banner-inner {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .greeting-banner-actions {
-            width: auto;
-        }
-
-        .book-appointment-btn {
-            width: auto;
-            min-width: 170px;
-        }
-    }
-
-    @media only screen and (max-width: 600px) {
-        #upcomingAppointmentWrapper .upcoming-card-mobile {
-            margin-bottom: 0.9rem !important;
-        }
-
-        #upcomingAppointmentWrapper {
-            gap: 0.55rem !important;
-        }
-
-        #upcomingAppointmentWrapper {
-            padding: 0.7rem 0.75rem !important;
-        }
-    }
-
-    @media only screen and (min-width: 1200px) {
-        #mainContent {
-            padding-top: 78px !important;
-        }
-
-        .greeting-row {
-            margin-bottom: 0.75rem !important;
-        }
-
-        .greeting-banner {
-            border-radius: 20px !important;
-            padding: 18px 20px !important;
-        }
-
-        #greetingText {
-            font-size: 1.2rem !important;
-        }
-
-        .greeting-name-line {
-            font-size: clamp(1.9rem, 2.4vw, 2.5rem) !important;
-        }
-
-        .greeting-banner-copy p {
-            font-size: 0.88rem !important;
-            margin-top: 0.35rem !important;
-        }
-
-        .greeting-banner-actions {
-            gap: 10px !important;
-        }
-
-        .book-appointment-btn {
-            min-width: 164px !important;
-            padding: 9px 16px !important;
-            font-size: 0.88rem !important;
-        }
-
-        .dashboard-card-compact {
-            border-radius: 16px !important;
-        }
-
-        .dashboard-card-header-compact {
-            padding: 14px 18px !important;
-        }
-
-        .dashboard-card-body-compact {
-            padding: 16px 18px !important;
-        }
-
-        .dashboard-section-tight {
-            gap: 1rem !important;
-        }
-
-        .dashboard-grid-tight {
-            gap: 1.25rem !important;
-        }
-    }
-
-    @media only screen and (min-width: 1200px) {
-
-        #requestDocsContainer>div,
-        #dentalOverviewContainer>div {
-            min-height: 100%;
-        }
-    }
-
-    @keyframes cardReveal {
-        from {
-            opacity: 0;
-            transform: translateY(12px) scale(0.985);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-
-    @keyframes iconFloatSoft {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-3px);
-        }
-    }
-
-    @keyframes statSoftRise {
-        0% {
-            opacity: 0;
-            transform: translateY(8px);
-        }
-
-        100% {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .greeting-time-line {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.55rem;
-    }
-
-    .greeting-time-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        color: rgba(255, 255, 255, 0.82);
-    }
-
-    .greeting-time-icon.is-sun {
-        color: #fde68a;
-        animation: spinSlow 8s linear infinite;
-    }
-
-    .greeting-time-icon.is-moon {
-        color: rgba(255, 255, 255, 0.78);
-        animation: floatMoon 3s ease-in-out infinite;
-    }
-
-    .profile-toggle-btn {
-        transition: all 0.2s ease;
-    }
-
-    .profile-toggle-btn:hover {
-        transform: translateY(-1px);
-    }
-
-    .card-reveal {
-        animation: cardReveal 0.45s ease-out both;
-    }
-
-    .card-lift {
-        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    }
-
-    .card-lift:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 16px 36px rgba(139, 0, 0, 0.08);
-    }
-
-    .stat-soft-rise {
-        animation: statSoftRise 0.45s ease-out both;
-    }
-
-    .stat-soft-rise:nth-child(2) {
-        animation-delay: 0.06s;
-    }
-
-    .stat-soft-rise:nth-child(3) {
-        animation-delay: 0.12s;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-
-        .card-reveal,
-        .card-lift,
-        .stat-soft-rise,
-        .wave-hand,
-        .fade-in,
-        .fade-up {
-            animation: none !important;
-            transition: none !important;
-            transform: none !important;
-        }
-    }
-
-    @media only screen and (min-width: 1200px) {
-
-        #profileSkeletonContainer,
-        #calendarSkeletonContainer {
-            min-height: 100%;
-        }
-    }
-
-    @media only screen and (min-width: 1200px) {
-        #profileSkeletonContainer>div {
-            min-height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-    }
-
-    .upcoming-timeline-dot {
-        box-shadow: 0 0 0 3px #fff;
-    }
-
-    @keyframes upcomingGlowPulse {
-
-        0%,
-        100% {
-            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.22);
-            transform: scale(1);
-        }
-
-        50% {
-            box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-            transform: scale(1.08);
-        }
-    }
-
-    .upcoming-live-dot {
-        animation: upcomingGlowPulse 2.2s ease-in-out infinite;
-    }
-
-    .upcoming-tooth-glass {
-        position: relative;
-        overflow: hidden;
-        background:
-            linear-gradient(135deg, rgba(139, 0, 0, 0.92) 0%, rgba(102, 0, 0, 0.82) 55%, rgba(179, 52, 18, 0.72) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.26);
-        box-shadow:
-            0 10px 24px rgba(139, 0, 0, 0.18),
-            inset 0 1px 0 rgba(255, 255, 255, 0.22);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-    }
-
-    .upcoming-tooth-glass::before {
-        content: '';
-        position: absolute;
-        inset: 1px;
-        border-radius: inherit;
-        background: linear-gradient(145deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.04));
-        pointer-events: none;
-    }
-
-    .upcoming-tooth-glass::after {
-        content: '';
-        position: absolute;
-        top: 7px;
-        left: 8px;
-        width: 52%;
-        height: 34%;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.18);
-        filter: blur(1px);
-        pointer-events: none;
-    }
-
-    .glass-icon-red {
-        position: relative;
-        overflow: hidden;
-        background:
-            linear-gradient(135deg, rgba(139, 0, 0, 0.92) 0%, rgba(102, 0, 0, 0.82) 55%, rgba(179, 52, 18, 0.72) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        box-shadow:
-            0 8px 20px rgba(139, 0, 0, 0.18),
-            inset 0 1px 0 rgba(255, 255, 255, 0.22);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-    }
-
-    .glass-icon-red::before {
-        content: '';
-        position: absolute;
-        inset: 1px;
-        border-radius: inherit;
-        background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-    }
-
-    .glass-icon-red::after {
-        content: '';
-        position: absolute;
-        top: 6px;
-        left: 7px;
-        width: 55%;
-        height: 35%;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.18);
-        filter: blur(1px);
-    }
-
-    .glass-icon-red i {
-        position: relative;
-        z-index: 2;
-        color: #fff;
-    }
-
-    .upcoming-reminder-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.65rem;
-        min-height: 42px;
-        padding: 0.65rem 0.9rem;
-        border-radius: 0.9rem;
-        background: linear-gradient(135deg, rgba(255, 247, 247, 0.98) 0%, rgba(255, 252, 252, 1) 100%);
-        border: 1px solid rgba(139, 0, 0, 0.10);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-    }
-
-    .upcoming-reminder-icon {
-        width: 1.9rem;
-        height: 1.9rem;
-        border-radius: 999px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(139, 0, 0, 0.08);
-        color: #8B0000;
-        flex-shrink: 0;
-    }
-
-    .upcoming-reminder-copy {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        line-height: 1.15;
-    }
-
-    .upcoming-reminder-label {
-        font-size: 0.62rem;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #9a3412;
-    }
-
-    .upcoming-reminder-text {
-        font-size: 0.76rem;
-        font-weight: 700;
-        color: #7f1d1d;
-    }
-
-    @media only screen and (max-width: 640px) {
-        .upcoming-reminder-chip {
-            width: 100%;
-            justify-content: flex-start;
-        }
-    }
-
-    :root {
-        --bg-main: #000D1A;
-        --bg-card: #0D1117;
-        --bg-card-soft: #111827;
-        --bg-panel: #161B22;
-        --bg-panel-soft: #1C2128;
-
-        --border-dark: rgba(255, 255, 255, 0.10);
-
-        --text-primary: #F3F4F6;
-        --text-secondary: #C9D1D9;
-        --text-muted: #8B949E;
-
-        --brand-red: #8B0000;
-        --brand-red-soft: rgba(139, 0, 0, 0.18);
-
-        --theme-speed: 180ms;
-        --theme-curve: cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .upcoming-ready-line {
-        background: linear-gradient(90deg, #8B0000, #FCA5A5);
-        box-shadow: 0 0 10px rgba(139, 0, 0, 0.25);
-    }
-
-    [data-theme="dark"] #mainContent .upcoming-ready-line {
-        background: linear-gradient(90deg, #FCA5A5, rgba(252, 165, 165, 0.15));
-        box-shadow: 0 0 12px rgba(252, 165, 165, 0.25);
-    }
-
-    [data-theme="dark"] body {
-        background-color: var(--bg-main) !important;
-        color: var(--text-primary);
-    }
-
-    [data-theme="dark"] #mainContent {
-        background: var(--bg-main) !important;
-        color: var(--text-primary);
-    }
-
-    [data-theme="dark"] #mainContent .bg-white,
-    [data-theme="dark"] #mainContent .skeleton-card,
-    [data-theme="dark"] #mainContent #profileSkeletonContainer,
-    [data-theme="dark"] #mainContent #requestDocsContainer>div,
-    [data-theme="dark"] #mainContent .dental-overview-card,
-    [data-theme="dark"] #mainContent .bg-gradient-to-br.from-\[\#ffffff\] {
-        background: linear-gradient(145deg, var(--bg-card), var(--bg-card-soft)) !important;
-        border-color: var(--border-dark) !important;
-        box-shadow: 0 18px 38px rgba(0, 0, 0, 0.35) !important;
-    }
-
-    [data-theme="dark"] #mainContent .bg-gradient-to-br,
-    [data-theme="dark"] #mainContent .bg-gradient-to-b,
-    [data-theme="dark"] #mainContent .bg-gradient-to-r,
-    [data-theme="dark"] #mainContent .bg-gray-50,
-    [data-theme="dark"] #mainContent .bg-gray-100,
-    [data-theme="dark"] #mainContent .bg-red-50,
-    [data-theme="dark"] #mainContent .bg-amber-50,
-    [data-theme="dark"] #mainContent .bg-emerald-50 {
-        background: var(--bg-panel) !important;
-    }
-
-    [data-theme="dark"] #mainContent .border-gray-200,
-    [data-theme="dark"] #mainContent .border-gray-100,
-    [data-theme="dark"] #mainContent .border-red-100,
-    [data-theme="dark"] #mainContent .border-amber-100,
-    [data-theme="dark"] #mainContent .border-emerald-100,
-    [data-theme="dark"] #mainContent .border-\[\#eadede\],
-    [data-theme="dark"] #mainContent .border-\[\#efe3e3\] {
-        border-color: var(--border-dark) !important;
-    }
-
-    [data-theme="dark"] #mainContent .text-gray-900,
-    [data-theme="dark"] #mainContent .text-gray-800,
-    [data-theme="dark"] #mainContent .text-gray-700 {
-        color: var(--text-primary) !important;
-    }
-
-    [data-theme="dark"] #mainContent .text-gray-600,
-    [data-theme="dark"] #mainContent .text-gray-500 {
-        color: var(--text-secondary) !important;
-    }
-
-    [data-theme="dark"] #mainContent .text-gray-400,
-    [data-theme="dark"] #mainContent .text-gray-300 {
-        color: var(--text-muted) !important;
-    }
-
-    [data-theme="dark"] #mainContent .text-\[\#8B0000\],
-    [data-theme="dark"] #mainContent .text-red-800 {
-        color: #FCA5A5 !important;
-    }
-
-    [data-theme="dark"] #mainContent .text-\[\#c96a00\] {
-        color: #FCD34D !important;
-    }
-
-    [data-theme="dark"] #mainContent .text-emerald-700 {
-        color: #86EFAC !important;
-    }
-
-    [data-theme="dark"] #mainContent .rounded-full.bg-white\/10 {
-        background: rgba(255, 255, 255, 0.08) !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
-    }
-
-    [data-theme="dark"] #mainContent .upcoming-reminder-chip {
-        background: var(--bg-panel-soft) !important;
-        border-color: var(--border-dark) !important;
-        box-shadow: none !important;
-    }
-
-    [data-theme="dark"] #mainContent .upcoming-reminder-icon {
-        background: var(--brand-red-soft) !important;
-        color: #FCA5A5 !important;
-    }
-
-    [data-theme="dark"] #mainContent .greeting-banner {
-        background:
-            radial-gradient(circle at top left, rgba(139, 0, 0, 0.30), transparent 34%),
-            linear-gradient(135deg, rgba(13, 17, 23, 0.96), rgba(22, 27, 34, 0.92)) !important;
-        border: 1px solid rgba(255, 255, 255, 0.10) !important;
-        box-shadow:
-            0 18px 38px rgba(0, 0, 0, 0.38),
-            inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
-    }
-
-    [data-theme="dark"] #mainContent dialog .modal-box {
-        background: var(--bg-card) !important;
-        color: var(--text-primary) !important;
-        border: 1px solid var(--border-dark) !important;
-    }
-
-    [data-theme="dark"] #mainContent .profile-emergency-panel {
-        background: #161B22 !important;
-        border-top-color: rgba(255, 255, 255, 0.10) !important;
-    }
-
-    [data-theme="dark"] #mainContent .profile-emergency-panel p,
-    [data-theme="dark"] #mainContent .profile-emergency-panel span {
-        color: #C9D1D9 !important;
-    }
-
-    [data-theme="dark"] #mainContent .profile-emergency-panel .text-red-800 {
-        color: #FCA5A5 !important;
-    }
-
-    [data-theme="dark"] #mainContent .overview-status-text {
-        color: #D98A8A !important;
-    }
-
-    [data-theme="dark"] .request-doc-card {
-        background: linear-gradient(145deg, #0D1117, #161B22);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    [data-theme="dark"] .request-doc-card:hover {
-        box-shadow: 0 22px 50px rgba(0, 0, 0, 0.6);
-        border-color: rgba(139, 0, 0, 0.45);
-    }
-
-    [data-theme="dark"] .request-doc-card::before {
-        background: radial-gradient(circle at top right, rgba(139, 0, 0, 0.18), transparent 60%);
-    }
-
-    @keyframes greetingGradientFlow {
-        0% {
-            background-position: 0% 50%;
-        }
-
-        50% {
-            background-position: 100% 50%;
-        }
-
-        100% {
-            background-position: 0% 50%;
-        }
-    }
-
-    .greeting-banner {
-        background:
-            radial-gradient(circle at top left, rgba(255, 215, 0, 0.10), transparent 28%),
-            linear-gradient(270deg, #8B0000, #660000, #9f1d1d, #5A0000) !important;
-        background-size: 260% 260% !important;
-        animation: greetingGradientFlow 13s ease infinite;
-    }
-
-    .greeting-insight-chip {
-        transition: transform .2s ease, background .2s ease, border-color .2s ease;
-    }
-
-    .greeting-insight-chip:hover {
-        transform: translateY(-2px);
-        background: rgba(255, 255, 255, .16);
-        border-color: rgba(255, 255, 255, .28);
-    }
-
-    .greeting-scroll-cue {
-        color: rgba(255, 255, 255, .72);
-        transition: all .2s ease;
-    }
-
-    .greeting-scroll-cue:hover {
-        color: #fff;
-        transform: translateY(2px);
-    }
-
-    .greeting-name-line:hover {
-        letter-spacing: .3px;
-        transition: letter-spacing .25s ease;
-    }
-
-    .book-appointment-btn:hover {
-        box-shadow: 0 0 24px rgba(255, 255, 255, .16), 0 14px 30px rgba(139, 0, 0, .35);
-    }
-
-    [data-theme="dark"] #mainContent .greeting-banner {
-        background:
-            radial-gradient(circle at top left, rgba(139, 0, 0, .34), transparent 34%),
-            radial-gradient(circle at bottom right, rgba(245, 158, 11, .10), transparent 28%),
-            linear-gradient(270deg, #0D1117, #161B22, #111827, #1C2128) !important;
-        background-size: 260% 260% !important;
-    }
-</style>
-@endsection
-
 @section('content')
 @php
 $notifications = collect($notifications ?? []);
@@ -1333,9 +85,8 @@ isset($upcomingAppointment) && $upcomingAppointment
 : 'No appointment yet';
 @endphp
 
-<main id="mainContent"
-    class="pt-[78px] px-3 md:px-5 xl:px-6 pb-5 page-enter min-h-screen flex-1 bg-gray-50 dark:bg-[#000D1A] text-gray-900 dark:text-[#F3F4F6]">
-    <div class="w-full fade-in space-y-4 xl:space-y-5">
+<main id="mainContent" class="patient-page-shell patient-dashboard-page page-enter">
+    <div class="w-full">
 
         <x-dashboard-loading-status />
 
@@ -1727,25 +478,7 @@ isset($upcomingAppointment) && $upcomingAppointment
     @endif
 
     document.addEventListener('DOMContentLoaded', function () {
-        const termsModal = document.getElementById('termsModal');
-        const termsCheckbox = document.getElementById('termsCheckbox');
-        const termsContinueBtn = document.getElementById('termsContinueBtn');
         const quickAction = new URLSearchParams(window.location.search).get('quick_action');
-
-        if (termsCheckbox && termsContinueBtn) {
-            termsCheckbox.checked = false;
-            termsContinueBtn.disabled = true;
-
-            termsCheckbox.addEventListener('change', function () {
-                termsContinueBtn.disabled = !this.checked;
-            });
-        }
-
-        @if (session('show_terms_modal'))
-            if (termsModal) {
-                termsModal.showModal();
-            }
-        @endif
 
         renderGreeting();
         initRecordModal();
@@ -1768,12 +501,11 @@ isset($upcomingAppointment) && $upcomingAppointment
             window.history.replaceState({}, '', cleanUrl.toString());
         }
 
-        runEnterpriseLoading([
+        window.runEnterpriseLoading([
             {
                 label: 'Loading calendar and appointment details',
                 tasks: [
                     () => {
-                        window.setDashboardLoadingStatus('Loading calendar and appointment details', 30);
                         if (typeof renderCalendar === 'function') renderCalendar();
                     },
                     renderUpcomingAppointment
@@ -1782,17 +514,13 @@ isset($upcomingAppointment) && $upcomingAppointment
             {
                 label: 'Loading profile information',
                 tasks: [
-                    () => {
-                        window.setDashboardLoadingStatus('Loading profile information', 58);
-                        renderProfile();
-                    }
+                    renderProfile
                 ]
             },
             {
                 label: 'Loading records and document services',
                 tasks: [
                     () => {
-                        window.setDashboardLoadingStatus('Loading records and document services', 82);
                         renderRequestDocs();
                         setTimeout(initRequestDocInteractions, 80);
                     },
@@ -1805,18 +533,6 @@ isset($upcomingAppointment) && $upcomingAppointment
             taskGap: 130
         });
     });
-
-    function acceptTerms() {
-        const termsModal = document.getElementById('termsModal');
-        if (termsModal) {
-            termsModal.close();
-        }
-    }
-
-    function escapeHtml(str) {
-        return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g,
-            '&quot;').replace(/'/g, '&#039;');
-    }
 
     function formatTime(raw) {
         if (!raw) return '—';
@@ -1913,12 +629,12 @@ isset($upcomingAppointment) && $upcomingAppointment
                 'bg-green-100 text-green-800 border-green-200';
 
             var statusDotCls = d.isRescheduled ? 'bg-yellow-500' : 'bg-green-500';
-            
-            var statusDarkPill = d.isRescheduled ? 
-                'dark:bg-yellow-400/20 dark:text-yellow-100 dark:border-yellow-400/30' : 
+
+            var statusDarkPill = d.isRescheduled ?
+                'dark:bg-yellow-400/20 dark:text-yellow-100 dark:border-yellow-400/30' :
                 'dark:bg-emerald-500/20 dark:text-emerald-100 dark:border-emerald-500/30';
 
-            swapSkeletonContent('upcomingAppointmentWrapper',
+            window.swapSkeletonContent('upcomingAppointmentWrapper',
                 '<div class="upcoming-card-polished bg-white dark:bg-[#161B22] rounded-[1rem] border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">' +
 
                 '<div class="px-4 sm:px-5 py-4 sm:py-4.5">' +
@@ -1936,27 +652,27 @@ isset($upcomingAppointment) && $upcomingAppointment
 
                 '<div class="min-w-0 flex-1">' +
                 '<div class="flex flex-wrap items-center gap-2">' +
-                '<h3 class="text-lg sm:text-[1.15rem] font-extrabold text-gray-900 dark:text-[#F3F4F6] leading-tight truncate">' + escapeHtml(d.service) + '</h3>' +
+                '<h3 class="text-lg sm:text-[1.15rem] font-extrabold text-gray-900 dark:text-[#F3F4F6] leading-tight truncate">' + window.escapeHtml(d.service) + '</h3>' +
                 '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ' + statusPillCls + ' ' + statusDarkPill + '">' +
                 '<span class="w-1.5 h-1.5 rounded-full ' + statusDotCls + '"></span>' +
-                escapeHtml(d.status) +
+                window.escapeHtml(d.status) +
                 '</span>' +
                 '</div>' +
 
                 '<div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-400">' +
                 '<span class="inline-flex items-center gap-2">' +
                 '<i class="fa-regular fa-calendar text-gray-400 dark:text-gray-500"></i>' +
-                '<span class="font-medium">' + escapeHtml(d.date) + '</span>' +
+                '<span class="font-medium">' + window.escapeHtml(d.date) + '</span>' +
                 '</span>' +
 
                 '<span class="inline-flex items-center gap-2">' +
                 '<i class="fa-regular fa-clock text-gray-400 dark:text-gray-500"></i>' +
-                '<span class="font-medium">' + escapeHtml(d.time_fmt) + '</span>' +
+                '<span class="font-medium">' + window.escapeHtml(d.time_fmt) + '</span>' +
                 '</span>' +
 
                 '<span class="inline-flex items-center gap-2 min-w-0">' +
                 '<i class="fa-solid fa-user-doctor text-gray-400 dark:text-gray-500"></i>' +
-                '<span class="font-medium truncate">' + escapeHtml(d.dentist) + '</span>' +
+                '<span class="font-medium truncate">' + window.escapeHtml(d.dentist) + '</span>' +
                 '</span>' +
                 '</div>' +
 
@@ -1977,7 +693,7 @@ isset($upcomingAppointment) && $upcomingAppointment
                 '<span class="text-[0.76rem] font-bold text-[#7f1d1d] dark:text-[#FCA5A5]">Please arrive 10 minutes early</span>' +
                 '</div>' +
 
-                '<a href="' + escapeHtml(d.indexUrl) +
+                '<a href="' + window.escapeHtml(d.indexUrl) +
                 '" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[0.85rem] bg-[#8B0000] hover:bg-[#660000] text-white text-sm font-bold transition-all duration-300 shadow-sm hover:-translate-y-0.5">' +
                 '<span>Manage Appointment</span>' +
                 '<i class="fa-solid fa-arrow-right text-[11px]"></i>' +
@@ -1993,7 +709,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             return;
         }
 
-        swapSkeletonContent('upcomingAppointmentWrapper',
+        window.swapSkeletonContent('upcomingAppointmentWrapper',
             '<div class="upcoming-card-polished bg-white dark:bg-[#161B22] rounded-[1rem] border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">' +
             '<div class="px-4 sm:px-5 py-4">' +
             '<div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">' +
@@ -2085,24 +801,24 @@ isset($upcomingAppointment) && $upcomingAppointment
         var identityRow = identityLabel ?
             '<div class="flex justify-between items-start gap-3">' +
             '<span class="text-gray-400 font-semibold text-xs flex items-center gap-2 mt-0.5 flex-shrink-0 w-[92px]">' +
-            '<i class="fa-regular fa-id-badge w-3"></i> ' + escapeHtml(identityLabel) +
+            '<i class="fa-regular fa-id-badge w-3"></i> ' + window.escapeHtml(identityLabel) +
             '</span>' +
             '<span id="maskedIdentityValue" data-masked="true" class="text-gray-800 font-medium text-right break-words leading-snug flex-1 min-w-0">' +
-            escapeHtml(identityMasked) +
+            window.escapeHtml(identityMasked) +
             '</span>' +
             '</div>' :
             '';
 
         var emergencySection = hasEmergency ?
             '<div class="space-y-1">' +
-            '<p class="text-sm font-bold text-gray-900">' + escapeHtml(pData.emergencyName) + '</p>' +
+            '<p class="text-sm font-bold text-gray-900">' + window.escapeHtml(pData.emergencyName) + '</p>' +
             '<div class="flex items-center justify-between gap-3">' +
             '<p class="text-xs font-medium text-gray-600">' +
-            (pData.emergencyRelation ? '<span class="text-gray-400">(' + escapeHtml(pData.emergencyRelation) +
+            (pData.emergencyRelation ? '<span class="text-gray-400">(' + window.escapeHtml(pData.emergencyRelation) +
                 ')</span>' : '') +
             '</p>' +
             '<span id="maskedEmergencyNumber" data-masked="true" class="text-xs font-medium text-gray-700 text-right">' +
-            escapeHtml(maskedEmergency) + '</span>' +
+            window.escapeHtml(maskedEmergency) + '</span>' +
             '</div>' +
             '</div>' :
             '<div class="text-center py-2">' +
@@ -2110,7 +826,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             '<p class="text-xs text-gray-400 font-medium">No emergency contact added</p>' +
             '</div>';
 
-        swapSkeletonContent('profileSkeletonContainer',
+        window.swapSkeletonContent('profileSkeletonContainer',
             '<div class="dashboard-card-polished dashboard-glass overflow-hidden h-full flex flex-col rounded-[1rem]">' +
             '<div class="h-20 bg-gradient-to-r from-[#8B0000] to-[#b30000] relative"></div>' +
 
@@ -2122,7 +838,7 @@ isset($upcomingAppointment) && $upcomingAppointment
 
             '<div class="mt-1 flex items-center justify-center gap-2 max-w-full">' +
             '<h2 class="text-[17px] font-extrabold text-gray-900 text-center leading-tight break-words">' +
-            escapeHtml(pData.name) +
+            window.escapeHtml(pData.name) +
             '</h2>' +
             globalToggle +
             '</div>' +
@@ -2144,9 +860,9 @@ isset($upcomingAppointment) && $upcomingAppointment
             '<i class="fa-solid fa-cake-candles w-3"></i> Age <br> Date of Birth' +
             '</span>' +
             '<span class="text-gray-800 font-medium text-right">' +
-            escapeHtml(pData.age ? pData.age + " yrs" : "N/A") +
+            window.escapeHtml(pData.age ? pData.age + " yrs" : "N/A") +
             '<span class="text-gray-400 text-xs font-normal block">' +
-            escapeHtml(pData.birthdate) +
+            window.escapeHtml(pData.birthdate) +
             '</span>' +
             '</span>' +
             '</div>' +
@@ -2156,7 +872,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             '<i class="fa-solid fa-venus-mars w-3"></i> Gender' +
             '</span>' +
             '<span class="text-gray-800 font-medium text-right">' +
-            escapeHtml(pData.gender) +
+            window.escapeHtml(pData.gender) +
             '</span>' +
             '</div>' +
 
@@ -2167,7 +883,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             '<i class="fa-solid fa-phone w-3"></i> Contact' +
             '</span>' +
             '<span id="maskedContactValue" data-masked="true" class="text-gray-800 font-medium text-right break-words leading-snug flex-1 min-w-0">' +
-            escapeHtml(maskedContact) +
+            window.escapeHtml(maskedContact) +
             '</span>' +
             '</div>' +
 
@@ -2176,7 +892,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             '<i class="fa-solid fa-envelope w-3"></i> Email' +
             '</span>' +
             '<span id="maskedEmailValue" data-masked="true" class="text-gray-800 font-medium text-right break-words leading-snug flex-1 min-w-0">' +
-            escapeHtml(maskedEmail) +
+            window.escapeHtml(maskedEmail) +
             '</span>' +
             '</div>' +
 
@@ -2196,7 +912,7 @@ isset($upcomingAppointment) && $upcomingAppointment
         var container = document.getElementById("requestDocsContainer");
         if (!container) return;
 
-        swapSkeletonContent('requestDocsContainer',
+        window.swapSkeletonContent('requestDocsContainer',
             '<div class="dashboard-card-polished dental-overview-card bg-gradient-to-br from-[#ffffff] via-[#fff3f3] to-[#ffeaea] border border-[#eadede] shadow-sm rounded-[1rem] overflow-hidden h-full flex flex-col">' +
 
             '<div class="px-5 sm:px-6 py-4 border-b border-[#efe3e3] dark:border-white/10 bg-gradient-to-r from-[#fff6f6] via-[#fffdfd] to-[#fff1f1] dark:from-[#161B22] dark:via-[#161B22] dark:to-[#161B22]">' +
@@ -2294,7 +1010,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             (count === 1 ? "1 completed visit recorded" : count + " completed visits recorded");
 
         if (!HOME_RECORDS || HOME_RECORDS.length === 0) {
-            swapSkeletonContent('dentalOverviewContainer',
+            window.swapSkeletonContent('dentalOverviewContainer',
                 '<div class="dashboard-card-polished dental-overview-card bg-gradient-to-br from-[#ffffff] via-[#fff3f3] to-[#ffeaea] border border-[#eadede] shadow-sm rounded-[1rem] overflow-hidden h-full flex flex-col">' +
                 '<div class="px-5 sm:px-6 py-4 border-b border-[#efe3e3] bg-gradient-to-r from-[#fff6f6] via-[#fffdfd] to-[#fff1f1]">' +
                 '<div class="flex items-start justify-between gap-4">' +
@@ -2358,36 +1074,36 @@ isset($upcomingAppointment) && $upcomingAppointment
             var dispDate = r.date;
 
             html +=
-            '<div class="dashboard-card-polished rounded-[1rem] border border-gray-200 bg-white p-4 hover:border-red-200 hover:shadow-sm transition-all duration-300 hover:-translate-y-0.5">' +
-            '<div class="flex items-start justify-between gap-3">' +
-            '<div class="flex items-start gap-3 min-w-0">' +
-            '<div class="w-10 h-10 rounded-[0.85rem] ' + (idx === 0 ? 'bg-red-50 text-[#8B0000]' : 'bg-gray-50 text-gray-600') + ' flex items-center justify-center flex-shrink-0">' +
-            '<i class="fa-solid fa-tooth text-sm"></i>' +
-            '</div>' +
-            '<div class="min-w-0">' +
-            '<div class="flex flex-wrap items-center gap-2">' +
-            '<p class="text-sm font-extrabold text-gray-900 truncate">' + escapeHtml(r.service) + '</p>' +
-            '<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border ' +
-            ((r.status || '').toLowerCase() === 'completed' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100') + '">' +
-            escapeHtml((r.status || '').toLowerCase() === 'completed' ? 'Completed' : 'Cancelled') +
-            '</span>' +
-            '</div>' +
-            '<div class="mt-2 flex flex-wrap items-center gap-2">' +
-            '<span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 px-2.5 py-1 text-[11px] font-bold">' +
-            '<i class="fa-regular fa-calendar opacity-70"></i>' + escapeHtml(dispDate) +
-            '</span>' +
-            '<span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 px-2.5 py-1 text-[11px] font-bold">' +
-            '<i class="fa-regular fa-clock opacity-70"></i>' + escapeHtml(dispTime) +
-            '</span>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            '<button type="button" class="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-[#8B0000] hover:text-white text-gray-700 text-[11px] font-bold border border-gray-200 hover:border-transparent transition-all duration-300 flex-shrink-0" onclick="openRecordModalFromData(\'' + encoded + '\')">' +
-            '<i class="fa-solid fa-eye text-[10px]"></i>' +
-            '<span>View Details</span>' +
-            '</button>' +
-            '</div>' +
-            '</div>';
+                '<div class="dashboard-card-polished rounded-[1rem] border border-gray-200 bg-white p-4 hover:border-red-200 hover:shadow-sm transition-all duration-300 hover:-translate-y-0.5">' +
+                '<div class="flex items-start justify-between gap-3">' +
+                '<div class="flex items-start gap-3 min-w-0">' +
+                '<div class="w-10 h-10 rounded-[0.85rem] ' + (idx === 0 ? 'bg-red-50 text-[#8B0000]' : 'bg-gray-50 text-gray-600') + ' flex items-center justify-center flex-shrink-0">' +
+                '<i class="fa-solid fa-tooth text-sm"></i>' +
+                '</div>' +
+                '<div class="min-w-0">' +
+                '<div class="flex flex-wrap items-center gap-2">' +
+                '<p class="text-sm font-extrabold text-gray-900 truncate">' + window.escapeHtml(r.service) + '</p>' +
+                '<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border ' +
+                ((r.status || '').toLowerCase() === 'completed' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100') + '">' +
+                window.escapeHtml((r.status || '').toLowerCase() === 'completed' ? 'Completed' : 'Cancelled') +
+                '</span>' +
+                '</div>' +
+                '<div class="mt-2 flex flex-wrap items-center gap-2">' +
+                '<span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 px-2.5 py-1 text-[11px] font-bold">' +
+                '<i class="fa-regular fa-calendar opacity-70"></i>' + window.escapeHtml(dispDate) +
+                '</span>' +
+                '<span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 px-2.5 py-1 text-[11px] font-bold">' +
+                '<i class="fa-regular fa-clock opacity-70"></i>' + window.escapeHtml(dispTime) +
+                '</span>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '<button type="button" class="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-[#8B0000] hover:text-white text-gray-700 text-[11px] font-bold border border-gray-200 hover:border-transparent transition-all duration-300 flex-shrink-0" onclick="openRecordModalFromData(\'' + encoded + '\')">' +
+                '<i class="fa-solid fa-eye text-[10px]"></i>' +
+                '<span>View Details</span>' +
+                '</button>' +
+                '</div>' +
+                '</div>';
         });
 
         html +=
@@ -2400,7 +1116,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             '</div>' +
             '</div>';
 
-        swapSkeletonContent('dentalOverviewContainer',
+        window.swapSkeletonContent('dentalOverviewContainer',
             '<div class="dashboard-card-polished dental-overview-card bg-gradient-to-br from-[#ffffff] via-[#fff3f3] to-[#ffeaea] border border-[#eadede] shadow-sm rounded-[1rem] overflow-hidden h-full flex flex-col">' +
             '<div class="px-5 sm:px-6 py-4 border-b border-[#efe3e3] bg-gradient-to-r from-[#fff6f6] via-[#fffdfd] to-[#fff1f1]">' +
             '<div class="flex items-start justify-between gap-4">' +
@@ -2424,12 +1140,12 @@ isset($upcomingAppointment) && $upcomingAppointment
 
             '<div class="rounded-[0.85rem] bg-white border border-gray-200 px-3 py-3">' +
             '<p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Latest Record</p>' +
-            '<p class="mt-1 text-sm font-extrabold text-gray-900">' + escapeHtml(dispLatestDate) + '</p>' +
+            '<p class="mt-1 text-sm font-extrabold text-gray-900">' + window.escapeHtml(dispLatestDate) + '</p>' +
             '</div>' +
 
             '<div class="rounded-[0.85rem] bg-white border border-gray-200 px-3 py-3 col-span-2 xl:col-span-1">' +
             '<p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Status</p>' +
-            '<p class="overview-status-text mt-1 text-sm font-extrabold text-[#8B0000]">' + escapeHtml(dispOverviewStatus) + '</p>' +
+            '<p class="overview-status-text mt-1 text-sm font-extrabold text-[#8B0000]">' + window.escapeHtml(dispOverviewStatus) + '</p>' +
             '</div>' +
             '</div>' +
             '</div>' +

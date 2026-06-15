@@ -11,8 +11,8 @@
     --chatbot-bottom: var(--widget-bottom);
     --back-top-bottom: calc(var(--widget-bottom) + var(--fab-size) + var(--fab-gap));
     --menu-bottom: calc(var(--widget-bottom) + var(--fab-size) + 12px);
-    --bg-main: #000D1A;
-    --bg-card: #0D1117;
+    --bg-main: #0d0f12;
+    --bg-card: #0d0f12;
     --bg-card-soft: #111827;
     --bg-panel: #161B22;
     --bg-panel-soft: #1C2128;
@@ -212,7 +212,7 @@
     --chatbot-bottom-final: calc(var(--accessibility-bottom-final) + var(--fab-final-size) + var(--fab-final-gap));
     --back-top-bottom-final: calc(var(--chatbot-bottom-final) + var(--fab-final-size) + var(--fab-final-gap));
 
-    --sidebar-w: 220px;
+    --sidebar-w: 230px;
     --sidebar-collapsed-w: 64px;
     --header-h: 64px;
 
@@ -256,7 +256,7 @@
     --filter-chip-active-text: #FCA5A5;
     --filter-chip-active-border: rgba(252, 165, 165, 0.28);
 
-    --filter-input-bg: #0D1117;
+    --filter-input-bg: #0d0f12;
     --filter-input-text: #F8FAFC;
     --filter-input-border: #30363D;
     --filter-input-icon: #C9D1D9;
@@ -393,7 +393,7 @@
     --status-denied-border: rgba(203, 213, 225, 0.22);
     --status-denied-solid: #CBD5E1;
 
-    --page-bg: #000D1A;
+    --page-bg: #0d0f12;
     --page-text: #E5E7EB;
 
     --sidebar-bg: #07111F;

@@ -2127,7 +2127,7 @@
 
 [data-theme="dark"] #mainContent.academic-period-page,
 .dark #mainContent.academic-period-page {
-    background: #000D1A !important;
+    background: #0d0f12 !important;
     color: #E5E7EB !important;
 }
 
@@ -2778,7 +2778,6 @@
 #mainContent.academic-period-page .bg-white.rounded-xl.shadow.border.border-gray-100,
 #mainContent.academic-period-page .active-banner,
 #mainContent.academic-period-page .cal-card {
-    border-color: rgb(113 5 5) !important;
     box-shadow: 0 8px 24px rgba(16, 17, 20, 0.094) !important;
 }
 
@@ -3513,7 +3512,7 @@
 
 [data-theme="dark"] #mainContent.academic-period-page,
 .dark #mainContent.academic-period-page {
-    background: #000D1A !important;
+    background: #0d0f12 !important;
     color: #E5E7EB !important;
 }
 
@@ -3528,7 +3527,6 @@
     background:
         radial-gradient(circle at top left, rgba(247, 227, 227, 0.101), transparent 40%),
         linear-gradient(180deg, #0D1117 0%, #0D1117 100%) !important;
-    border-color: rgb(113 5 5) !important;
     box-shadow:
         0 14px 30px rgba(0, 0, 0, .30),
         inset 0 1px 0 rgba(255, 255, 255, .055) !important;

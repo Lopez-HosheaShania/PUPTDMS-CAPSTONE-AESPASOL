@@ -24,6 +24,8 @@
 @import './components/stat-cards.css';
 @import './components/tables.css';
 @import './components/forms.css';
+@import './components/sidebar.css';
+@import './components/footer.css';
 
 /* Shared page styles */
 @import './pages/dentist/dentist-shared.css';
@@ -31,6 +33,7 @@
 @import './pages/admin/admin-shared.css';
 
 /* Dentist pages */
+@import './pages/dentist/dentist-dashboard.css';
 @import './pages/dentist/dentist-document-requests.css';
 @import './pages/dentist/dentist-appointments.css';
 @import './pages/dentist/dentist-inventory.css';

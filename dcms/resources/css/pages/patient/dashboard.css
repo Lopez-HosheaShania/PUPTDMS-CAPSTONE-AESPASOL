@@ -1,4 +1,4 @@
-.dashboard-glass {
+body.role-patient #mainContent.patient-dashboard-page .dashboard-glass {
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(229, 231, 235, 0.85);
     box-shadow:
@@ -8,7 +8,7 @@
     -webkit-backdrop-filter: blur(18px);
 }
 
-[data-theme="dark"] #mainContent .dashboard-glass {
+[data-theme="dark"] body.role-patient #mainContent.patient-dashboard-page .dashboard-glass {
     background:
         linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
         rgba(13, 17, 23, 0.76) !important;
@@ -20,7 +20,806 @@
     -webkit-backdrop-filter: blur(18px);
 }
 
-[data-theme="dark"] #mainContent .dashboard-glass-panel {
+[data-theme="dark"] body.role-patient #mainContent.patient-dashboard-page .dashboard-glass-panel {
     background: rgba(22, 27, 34, 0.62) !important;
     border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .upcoming-card-polished {
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.10), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.08), transparent 26%),
+        linear-gradient(145deg, #ffffff, #fff7f7) !important;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .upcoming-card-polished::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent, rgba(255, 255, 255, .28), transparent);
+    transform: translateX(-120%) skewX(-18deg);
+    pointer-events: none;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .check-dates-btn {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        linear-gradient(135deg, rgba(139, 0, 0, 0.95), rgba(179, 0, 0, 0.88)) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, .18);
+    box-shadow: 0 10px 24px rgba(139, 0, 0, .18);
+    transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .check-dates-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(139, 0, 0, .28);
+    filter: brightness(1.05);
+}
+
+body.role-patient #mainContent.patient-dashboard-page .check-dates-btn:active {
+    transform: scale(.97);
+}
+
+[data-theme="dark"] body.role-patient #mainContent.patient-dashboard-page .upcoming-card-polished {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.22), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.08), transparent 28%),
+        linear-gradient(145deg, #0d0f12, #111827) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] body.role-patient #mainContent.patient-dashboard-page .check-dates-btn,
+.dark body.role-patient #mainContent.patient-dashboard-page .check-dates-btn {
+    background:
+        linear-gradient(135deg, #5A0000, #8B0000, #A31212) !important;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .38);
+}
+
+body.role-patient #mainContent.patient-dashboard-page .request-doc-card {
+    will-change: transform;
+    transform-style: preserve-3d;
+}
+
+[data-theme="dark"] .request-doc-card .request-ripple {
+    background: rgba(252, 165, 165, 0.16);
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1199px) {
+    #mainContent {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .dashboard-grid-tight {
+        gap: 1rem !important;
+    }
+}
+
+@media only screen and (min-width: 320px) and (max-width: 600px) {
+    #mainContent {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        padding-bottom: 1rem !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .dashboard-grid-tight {
+        gap: 0.85rem !important;
+    }
+
+    .request-doc-card {
+        padding: 0.85rem !important;
+        border-radius: 0.85rem !important;
+    }
+
+    .request-doc-card>div {
+        gap: 0.75rem !important;
+    }
+
+    .request-doc-card .icon-box {
+        width: 3rem !important;
+        height: 3rem !important;
+        border-radius: 0.8rem !important;
+    }
+
+    .request-doc-card h3 {
+        font-size: 0.92rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .request-doc-card p {
+        font-size: 0.76rem !important;
+        line-height: 1.45 !important;
+    }
+
+    .request-doc-card .doc-arrow {
+        font-size: 0.9rem !important;
+    }
+
+    #requestDocsContainer .p-4,
+    #requestDocsContainer .sm\:p-5 {
+        padding: 0.9rem !important;
+    }
+}
+
+@media (hover: none) {
+    .request-doc-card:hover {
+        transform: none;
+    }
+}
+
+.request-doc-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(139, 0, 0, 0.08), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.request-doc-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(139, 0, 0, 0.12);
+    border-color: rgba(139, 0, 0, 0.25);
+}
+
+.request-doc-card:hover::before {
+    opacity: 1;
+}
+
+.request-doc-card:hover .icon-box {
+    transform: scale(1.08);
+    box-shadow: 0 10px 25px rgba(139, 0, 0, 0.25);
+}
+
+.request-doc-card:hover .doc-arrow {
+    transform: translateX(3px);
+    opacity: 1;
+}
+
+.greet-spin {
+    animation: spinSlow 8s linear infinite;
+    display: inline-block;
+}
+
+.greet-float {
+    animation: floatMoon 3s ease-in-out infinite;
+    display: inline-block;
+}
+
+.greet-drift {
+    animation: driftCloud 3s ease-in-out infinite;
+    display: inline-block;
+}
+
+.greeting-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: nowrap;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .book-appointment-btn {
+    position: relative;
+    overflow: hidden;
+    padding: 10px 18px;
+    min-width: 182px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.449);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
+    background: linear-gradient(110deg, #660000 25%, #8B0000 45%, #660000 65%);
+    background-size: 200% 100%;
+    animation: shimmerBtn 4s linear infinite;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .book-appointment-btn i,
+body.role-patient #mainContent.patient-dashboard-page .book-appointment-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .book-appointment-btn:hover {
+    background: linear-gradient(110deg, #4d0000 25%, #7a0000 45%, #4d0000 65%);
+    background-size: 200% 100%;
+    transform: translateY(-1px);
+}
+
+@media only screen and (max-width: 600px) {
+    body.role-patient #mainContent.patient-dashboard-page .greeting-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.75rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .book-appointment-btn {
+        width: 100%;
+        min-width: 0;
+        padding: 10px 14px;
+        font-size: 0.84rem;
+    }
+
+    .upcoming-card-mobile {
+        border-radius: 18px !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .upcoming-card-mobile .upcoming-card-header {
+        padding: 0.8rem 0.9rem !important;
+        gap: 0.5rem !important;
+    }
+
+    .upcoming-card-mobile .upcoming-card-header-icon {
+        width: 1.95rem !important;
+        height: 1.95rem !important;
+        font-size: 0.88rem !important;
+    }
+
+    .upcoming-card-mobile .upcoming-card-title {
+        font-size: 0.9rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .upcoming-card-mobile .upcoming-status-pill {
+        font-size: 0.62rem !important;
+        padding: 0.28rem 0.48rem !important;
+        border-radius: 999px !important;
+    }
+
+    .upcoming-card-mobile .upcoming-card-body {
+        padding: 0.8rem 0.9rem 0.9rem !important;
+    }
+}
+
+@media only screen and (min-width: 600px) and (max-width: 767px) {
+
+    body.role-patient #mainContent.patient-dashboard-page .greeting-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.9rem;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .book-appointment-btn {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+
+    body.role-patient #mainContent.patient-dashboard-page .greeting-row {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .book-appointment-btn {
+        width: auto;
+        min-width: 170px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    #upcomingAppointmentWrapper .upcoming-card-mobile {
+        margin-bottom: 0.9rem !important;
+    }
+
+    #upcomingAppointmentWrapper {
+        gap: 0.55rem !important;
+    }
+
+    #upcomingAppointmentWrapper {
+        padding: 0.7rem 0.75rem !important;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    #mainContent {
+        padding-top: 78px !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .greeting-row {
+        margin-bottom: 0.75rem !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .book-appointment-btn {
+        min-width: 164px !important;
+        padding: 9px 16px !important;
+        font-size: 0.88rem !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .dashboard-card-compact {
+        border-radius: 16px !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .dashboard-card-header-compact {
+        padding: 14px 18px !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .dashboard-card-body-compact {
+        padding: 16px 18px !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .dashboard-section-tight {
+        gap: 1rem !important;
+    }
+
+    body.role-patient #mainContent.patient-dashboard-page .dashboard-grid-tight {
+        gap: 1.25rem !important;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+
+    #requestDocsContainer>div,
+    #dentalOverviewContainer>div {
+        min-height: 100%;
+    }
+}
+
+body.role-patient #mainContent.patient-dashboard-page .greeting-time-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .greeting-time-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+body.role-patient #mainContent.patient-dashboard-page .greeting-time-icon.is-sun {
+    color: #fde68a;
+    animation: spinSlow 8s linear infinite;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .greeting-time-icon.is-moon {
+    color: rgba(255, 255, 255, 0.78);
+    animation: floatMoon 3s ease-in-out infinite;
+}
+
+.profile-toggle-btn {
+    transition: all 0.2s ease;
+}
+
+.profile-toggle-btn:hover {
+    transform: translateY(-1px);
+}
+
+.card-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 36px rgba(139, 0, 0, 0.08);
+}
+
+.stat-soft-rise:nth-child(2) {
+    animation-delay: 0.06s;
+}
+
+.stat-soft-rise:nth-child(3) {
+    animation-delay: 0.12s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .card-reveal,
+    .card-lift,
+    .stat-soft-rise,
+    .fade-in,
+    .fade-up {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+
+    #profileSkeletonContainer,
+    #calendarSkeletonContainer {
+        min-height: 100%;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    #profileSkeletonContainer>div {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.upcoming-timeline-dot {
+    box-shadow: 0 0 0 3px #fff;
+}
+
+.upcoming-tooth-glass {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(135deg, rgba(139, 0, 0, 0.92) 0%, rgba(102, 0, 0, 0.82) 55%, rgba(179, 52, 18, 0.72) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    box-shadow:
+        0 10px 24px rgba(139, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.upcoming-tooth-glass::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.04));
+    pointer-events: none;
+}
+
+.upcoming-tooth-glass::after {
+    content: '';
+    position: absolute;
+    top: 7px;
+    left: 8px;
+    width: 52%;
+    height: 34%;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    filter: blur(1px);
+    pointer-events: none;
+}
+
+.glass-icon-red {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(135deg, rgba(139, 0, 0, 0.92) 0%, rgba(102, 0, 0, 0.82) 55%, rgba(179, 52, 18, 0.72) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow:
+        0 8px 20px rgba(139, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-icon-red::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+}
+
+.glass-icon-red::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 7px;
+    width: 55%;
+    height: 35%;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    filter: blur(1px);
+}
+
+.glass-icon-red i {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+}
+
+.upcoming-reminder-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-height: 42px;
+    padding: 0.65rem 0.9rem;
+    border-radius: 0.9rem;
+    background: linear-gradient(135deg, rgba(255, 247, 247, 0.98) 0%, rgba(255, 252, 252, 1) 100%);
+    border: 1px solid rgba(139, 0, 0, 0.10);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.upcoming-reminder-icon {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 0, 0, 0.08);
+    color: #8B0000;
+    flex-shrink: 0;
+}
+
+.upcoming-reminder-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.15;
+}
+
+.upcoming-reminder-label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9a3412;
+}
+
+.upcoming-reminder-text {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #7f1d1d;
+}
+
+@media only screen and (max-width: 640px) {
+    .upcoming-reminder-chip {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+:root {
+    --bg-main: #0d0f12;
+    --bg-card: #0d0f12;
+    --bg-card-soft: #111827;
+    --bg-panel: #161B22;
+    --bg-panel-soft: #1C2128;
+
+    --border-dark: rgba(255, 255, 255, 0.10);
+
+    --text-primary: #F3F4F6;
+    --text-secondary: #C9D1D9;
+    --text-muted: #8B949E;
+
+    --brand-red: #8B0000;
+    --brand-red-soft: rgba(139, 0, 0, 0.18);
+
+    --theme-speed: 180ms;
+    --theme-curve: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.upcoming-ready-line {
+    background: linear-gradient(90deg, #8B0000, #FCA5A5);
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.25);
+}
+
+[data-theme="dark"] #mainContent .upcoming-ready-line {
+    background: linear-gradient(90deg, #FCA5A5, rgba(252, 165, 165, 0.15));
+    box-shadow: 0 0 12px rgba(252, 165, 165, 0.25);
+}
+
+[data-theme="dark"] #mainContent .bg-white,
+[data-theme="dark"] #mainContent .skeleton-card,
+[data-theme="dark"] #mainContent #profileSkeletonContainer,
+[data-theme="dark"] #mainContent #requestDocsContainer>div,
+[data-theme="dark"] #mainContent .dental-overview-card,
+[data-theme="dark"] #mainContent .bg-gradient-to-br.from-\[\#ffffff\] {
+    background: linear-gradient(145deg, var(--bg-card), var(--bg-card-soft)) !important;
+    border-color: var(--border-dark) !important;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] #mainContent .bg-gradient-to-br,
+[data-theme="dark"] #mainContent .bg-gradient-to-b,
+[data-theme="dark"] #mainContent .bg-gradient-to-r,
+[data-theme="dark"] #mainContent .bg-gray-50,
+[data-theme="dark"] #mainContent .bg-gray-100,
+[data-theme="dark"] #mainContent .bg-red-50,
+[data-theme="dark"] #mainContent .bg-amber-50,
+[data-theme="dark"] #mainContent .bg-emerald-50 {
+    background: var(--bg-panel) !important;
+}
+
+[data-theme="dark"] #mainContent .border-gray-200,
+[data-theme="dark"] #mainContent .border-gray-100,
+[data-theme="dark"] #mainContent .border-red-100,
+[data-theme="dark"] #mainContent .border-amber-100,
+[data-theme="dark"] #mainContent .border-emerald-100,
+[data-theme="dark"] #mainContent .border-\[\#eadede\],
+[data-theme="dark"] #mainContent .border-\[\#efe3e3\] {
+    border-color: var(--border-dark) !important;
+}
+
+[data-theme="dark"] #mainContent .text-gray-900,
+[data-theme="dark"] #mainContent .text-gray-800,
+[data-theme="dark"] #mainContent .text-gray-700 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] #mainContent .text-gray-600,
+[data-theme="dark"] #mainContent .text-gray-500 {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] #mainContent .text-gray-400,
+[data-theme="dark"] #mainContent .text-gray-300 {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] #mainContent .text-\[\#8B0000\],
+[data-theme="dark"] #mainContent .text-red-800 {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent .text-\[\#c96a00\] {
+    color: #FCD34D !important;
+}
+
+[data-theme="dark"] #mainContent .text-emerald-700 {
+    color: #86EFAC !important;
+}
+
+[data-theme="dark"] #mainContent .rounded-full.bg-white\/10 {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] #mainContent .upcoming-reminder-chip {
+    background: var(--bg-panel-soft) !important;
+    border-color: var(--border-dark) !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] #mainContent .upcoming-reminder-icon {
+    background: var(--brand-red-soft) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent dialog .modal-box {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-dark) !important;
+}
+
+[data-theme="dark"] #mainContent .profile-emergency-panel {
+    background: #161B22 !important;
+    border-top-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] #mainContent .profile-emergency-panel p,
+[data-theme="dark"] #mainContent .profile-emergency-panel span {
+    color: #C9D1D9 !important;
+}
+
+[data-theme="dark"] #mainContent .profile-emergency-panel .text-red-800 {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent .overview-status-text {
+    color: #D98A8A !important;
+}
+
+[data-theme="dark"] .request-doc-card {
+    background: linear-gradient(145deg, #0d0f12, #161B22);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .request-doc-card:hover {
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.6);
+    border-color: rgba(139, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .request-doc-card::before {
+    background: radial-gradient(circle at top right, rgba(139, 0, 0, 0.18), transparent 60%);
+}
+
+body.role-patient #mainContent.patient-dashboard-page .greeting-insight-chip {
+    transition: transform .2s ease, background .2s ease, border-color .2s ease;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .greeting-insight-chip:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, .16);
+    border-color: rgba(255, 255, 255, .28);
+}
+
+body.role-patient #mainContent.patient-dashboard-page .greeting-scroll-cue {
+    color: rgba(255, 255, 255, .72);
+    transition: all .2s ease;
+}
+
+body.role-patient #mainContent.patient-dashboard-page .greeting-scroll-cue:hover {
+    color: #fff;
+    transform: translateY(2px);
+}
+
+body.role-patient #mainContent.patient-dashboard-page .book-appointment-btn:hover {
+    box-shadow: 0 0 24px rgba(255, 255, 255, .16), 0 14px 30px rgba(139, 0, 0, .35);
+}
+
+.dashboard-greeting-row,
+.greeting-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: var(--dashboard-greeting-row-mb, 1.25rem);
+    flex-wrap: nowrap;
+}
+
+.dashboard-greeting-copyy {
+    min-width: 0;
+}
+
+.dashboard-greeting-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    color: #fff;
+}
+
+.dashboard-greeting-line {
+    display: block;
+}
+
+.dashboard-greeting-name-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: clamp(1.55rem, 3vw, 2.35rem);
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.dashboard-greeting-copy p {
+    color: rgba(255, 255, 255, .92);
+    font-size: 0.95rem;
+    margin-top: 0.45rem;
+    font-weight: 500;
+}
+
+.dashboard-greeting-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 12px;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1199px) {
+
+    .dashboard-greeting-inner {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .dashboard-greeting-actions {
+        width: 100%;
+    }
+
+    .dashboard-greeting-actions a {
+        flex: 1;
+    }
+}
+
+@media only screen and (min-width: 320px) and (max-width: 600px) {
+
+    .dashboard-greeting-name-line {
+        font-size: clamp(1.25rem, 8vw, 1.55rem) !important;
+    }
+
+    .dashboard-greeting-copy p {
+        font-size: 0.72rem !important;
+    }
 }
