@@ -3,7 +3,7 @@
 @section('title', 'About Us | PUP Taguig Dental Clinic')
 
 @section('content')
-<main id="mainContent" class="page-enter pt-[90px] px-3 md:px-6 py-6 min-h-screen flex-1">
+<main id="mainContent" class="about-us-page page-enter pt-[90px] px-3 md:px-6 py-6 min-h-screen flex-1">
     <div class="w-full">
         
         <div class="mb-4">
@@ -11,13 +11,11 @@
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Information, policies, and the development team behind PUPTDMS.</p>
         </div>
 
-        <!-- Top Grid: Guidelines and Clinic Info -->
         <div class="about-top-grid">
             
-            <!-- LEFT COLUMN: Policies -->
             <div class="about-card fade-up delay-1">
-                <i class="fa-solid fa-clipboard-check card-icon-bg"></i>
-                <h2 class="card-title"><i class="fa-solid fa-list-check"></i> Patient Guidelines</h2>
+                <i class="fa-solid fa-clipboard-check about-card-icon-bg"></i>
+                <h2 class="about-card-title"><i class="fa-solid fa-list-check"></i> Patient Guidelines</h2>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 relative z-10">To ensure smooth operations and accommodate as many patients as possible, please observe the following clinic rules:</p>
                 
                 <ul class="guideline-list">
@@ -52,10 +50,9 @@
                 </ul>
             </div>
 
-            <!-- RIGHT COLUMN: Clinic Info & Dentist -->
             <div class="about-card fade-up delay-2">
-                <i class="fa-solid fa-map-location-dot card-icon-bg"></i>
-                <h2 class="card-title"><i class="fa-solid fa-building"></i> Clinic Information</h2>
+                <i class="fa-solid fa-map-location-dot about-card-icon-bg"></i>
+                <h2 class="about-card-title"><i class="fa-solid fa-building"></i> Clinic Information</h2>
                 
                 <div class="info-row">
                     <i class="fa-regular fa-clock"></i>
@@ -81,7 +78,6 @@
                     </div>
                 </div>
 
-                <!-- Dentist Profile Included inside Clinic Info -->
                 <div class="dentist-mini mt-6">
                     <div class="dentist-img">
                         <img src="{{ asset('images/Nelson-Angeles.jpg') }}" alt="Dr. Nelson P. Angeles"
@@ -96,10 +92,9 @@
 
         </div>
 
-        <!-- Bottom Full Width: About PUPTDMS -->
         <div class="about-card fade-up delay-3 mb-6">
-            <i class="fa-solid fa-code card-icon-bg"></i>
-            <h2 class="card-title"><i class="fa-solid fa-laptop-code"></i> About PUPTDMS</h2>
+            <i class="fa-solid fa-code about-card-icon-bg"></i>
+            <h2 class="about-card-title"><i class="fa-solid fa-laptop-code"></i> About PUPTDMS</h2>
             <p class="text-sm text-gray-600 dark:text-gray-400 relative z-10 max-w-4xl">
                 The <strong>PUP Taguig Dental Management System (PUPTDMS)</strong> is a capstone project developed to digitize records, streamline appointment scheduling, and improve the overall efficiency of the campus dental clinic.
             </p>

@@ -461,14 +461,11 @@ function initAccessibilitySheetGesture() {
 document.addEventListener('DOMContentLoaded', initAccessibilitySheetGesture);
 
 function fixSiennaPosition() {
-    const rootStyle = getComputedStyle(document.documentElement);
-    const bodyStyle = getComputedStyle(document.body);
-
-    const isMobile = window.matchMedia('(max-width: 480px)').matches;
+    const isMobile = window.matchMedia('(max-width: 640px)').matches;
     const isPatient = document.body.classList.contains('role-patient');
 
     const nav = document.querySelector(
-        '.patient-mobile-nav, .mobile-bottom-nav, .bottom-nav, nav[class*="mobile"]'
+        '.patient-mobile-nav, .mobile-bottom-nav, .bottom-nav, nav[class*="mobile"], #mobileBottomNav'
     );
 
     let navHeight = 0;
@@ -482,13 +479,25 @@ function fixSiennaPosition() {
     }
 
     const right = isMobile ? 18 : 22;
-    const accessibilityBottom = isPatient && isMobile ? navHeight + 16 : 24;
-    const backTopBottom = accessibilityBottom + 56 + 14;
+    const fabSize = isMobile ? 48 : 46;
+    const gap = 14;
+
+    const accessibilityBottom = isPatient && isMobile
+        ? navHeight + 16
+        : 24;
+
+    const chatbotBottom = accessibilityBottom + fabSize + gap;
+    const backTopBottom = chatbotBottom + fabSize + gap;
 
     document.documentElement.style.setProperty('--float-right', `${right}px`);
+    document.documentElement.style.setProperty('--float-right-final', `${right}px`);
     document.documentElement.style.setProperty('--patient-nav-height', `${navHeight}px`);
+    document.documentElement.style.setProperty('--fab-final-size', `${fabSize}px`);
     document.documentElement.style.setProperty('--accessibility-bottom', `${accessibilityBottom}px`);
+    document.documentElement.style.setProperty('--accessibility-bottom-final', `${accessibilityBottom}px`);
+    document.documentElement.style.setProperty('--chatbot-bottom-final', `${chatbotBottom}px`);
     document.documentElement.style.setProperty('--back-top-bottom', `${backTopBottom}px`);
+    document.documentElement.style.setProperty('--back-top-bottom-final', `${backTopBottom}px`);
 
     document.querySelectorAll('.asw-widget, .asw-menu-btn').forEach((el) => {
         el.style.setProperty('--asw-off-x', `${right}px`);
@@ -499,6 +508,11 @@ function fixSiennaPosition() {
         el.style.bottom = `${accessibilityBottom}px`;
     });
 }
+
+document.addEventListener('DOMContentLoaded', fixSiennaPosition);
+window.addEventListener('load', fixSiennaPosition);
+window.addEventListener('resize', fixSiennaPosition);
+window.addEventListener('orientationchange', fixSiennaPosition);
 
 function clearSearchInput(input, options = {}) {
     if (!input) return;
@@ -830,6 +844,557 @@ function dismissToast(toast) {
 
 window.showToast = showToast;
 window.dismissToast = dismissToast;
+
+function getCurrentRole() {
+    if (document.body.classList.contains('role-admin')) return 'admin';
+    if (document.body.classList.contains('role-dentist')) return 'dentist';
+    if (document.body.classList.contains('role-patient')) return 'patient';
+    return 'global';
+}
+
+function getSidebarStorageKey() {
+    const role = getCurrentRole();
+
+    return {
+        admin: 'adminSidebarCollapsed',
+        dentist: 'dentistSidebarCollapsed',
+        patient: 'patientSidebarCollapsed',
+        global: 'sidebarCollapsed',
+    }[role] || 'sidebarCollapsed';
+}
+
+function applyGlobalTheme(theme = 'light') {
+    const nextTheme = theme === 'dark' ? 'dark' : 'light';
+
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    document.documentElement.style.backgroundColor = nextTheme === 'dark' ? '#000D1A' : '#F4F4F4';
+
+    localStorage.setItem('theme', nextTheme);
+
+    document.querySelectorAll('.theme-option[data-theme]').forEach(option => {
+        option.classList.toggle('active', option.dataset.theme === nextTheme);
+    });
+
+    document.querySelectorAll('.theme-indicator').forEach(indicator => {
+        indicator.classList.toggle('dark-mode', nextTheme === 'dark');
+    });
+
+    document.querySelectorAll('#themeSwitchCheckbox').forEach(checkbox => {
+        checkbox.checked = nextTheme === 'dark';
+    });
+
+    document.querySelectorAll('#themeIcon').forEach(icon => {
+        icon.className = nextTheme === 'dark'
+            ? 'fa-regular fa-moon text-gray-400 text-base'
+            : 'fa-regular fa-sun text-gray-400 text-base';
+    });
+
+    window.dispatchEvent(new CustomEvent('global-theme-change', {
+        detail: { theme: nextTheme }
+    }));
+}
+
+function initGlobalThemeControls(root = document) {
+    const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+    const savedTheme = localStorage.getItem('theme') || 'light';
+
+    applyGlobalTheme(savedTheme);
+
+    scope.querySelectorAll('.theme-option[data-theme]').forEach(option => {
+        if (option.dataset.themeInitialized === 'true') return;
+
+        option.dataset.themeInitialized = 'true';
+
+        option.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            applyGlobalTheme(option.dataset.theme || 'light');
+        });
+    });
+
+    scope.querySelectorAll('#themeSwitchCheckbox').forEach(checkbox => {
+        if (checkbox.dataset.themeInitialized === 'true') return;
+
+        checkbox.dataset.themeInitialized = 'true';
+        checkbox.checked = savedTheme === 'dark';
+
+        checkbox.addEventListener('click', event => {
+            event.stopPropagation();
+        });
+
+        checkbox.addEventListener('change', () => {
+            applyGlobalTheme(checkbox.checked ? 'dark' : 'light');
+        });
+    });
+
+    scope.querySelectorAll('#darkModeToggleItem').forEach(item => {
+        if (item.dataset.themeItemInitialized === 'true') return;
+
+        item.dataset.themeItemInitialized = 'true';
+
+        item.addEventListener('click', event => {
+            const clickedSwitch = event.target.closest('#themeSwitchCheckbox, .modern-switch');
+
+            if (clickedSwitch) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const checkbox = item.querySelector('#themeSwitchCheckbox');
+
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    });
+}
+
+function initSidebarThemeDropdowns() {
+    const dropdowns = document.querySelectorAll('[data-sidebar-theme-dropdown]');
+
+    const syncThemeIcons = () => {
+        const theme = localStorage.getItem('theme') || 'light';
+
+        document.querySelectorAll('[data-sidebar-theme-icon]').forEach(icon => {
+            icon.className = theme === 'dark'
+                ? 'fa-regular fa-moon'
+                : 'fa-solid fa-sun';
+        });
+    };
+
+    dropdowns.forEach(dropdown => {
+        if (dropdown.dataset.themeDropdownInitialized === 'true') return;
+
+        dropdown.dataset.themeDropdownInitialized = 'true';
+
+        const trigger = dropdown.querySelector('[data-sidebar-theme-trigger]');
+
+        trigger?.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            dropdowns.forEach(item => {
+                if (item !== dropdown) item.classList.remove('open');
+            });
+
+            dropdown.classList.toggle('open');
+        });
+
+        dropdown.querySelectorAll('[data-theme]').forEach(option => {
+            option.addEventListener('click', () => {
+                dropdown.classList.remove('open');
+                setTimeout(syncThemeIcons, 0);
+            });
+        });
+    });
+
+    document.addEventListener('click', () => {
+        dropdowns.forEach(dropdown => dropdown.classList.remove('open'));
+    });
+
+    window.addEventListener('global-theme-change', syncThemeIcons);
+    syncThemeIcons();
+}
+
+function closeHeaderMenus() {
+    document.getElementById('notifMenu')?.classList.remove('open', 'show');
+    document.getElementById('userMenu')?.classList.remove('open', 'show');
+
+    document.getElementById('notifBtn')?.classList.remove('active');
+    document.getElementById('userBtn')?.classList.remove('active');
+}
+
+function initHeaderMenus() {
+    const notifBtn = document.getElementById('notifBtn');
+    const notifMenu = document.getElementById('notifMenu');
+    const userBtn = document.getElementById('userBtn');
+    const userMenu = document.getElementById('userMenu');
+
+    notifBtn?.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const willOpen = !notifMenu?.classList.contains('show');
+
+        closeHeaderMenus();
+
+        if (willOpen) {
+            notifMenu?.classList.add('open', 'show');
+            notifBtn.classList.add('active');
+        }
+    });
+
+    userBtn?.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const willOpen = !userMenu?.classList.contains('show');
+
+        closeHeaderMenus();
+
+        if (willOpen) {
+            userMenu?.classList.add('open', 'show');
+            userBtn.classList.add('active');
+        }
+    });
+
+    notifMenu?.addEventListener('click', event => event.stopPropagation());
+    userMenu?.addEventListener('click', event => event.stopPropagation());
+}
+
+function openDrawer() {
+    const drawer = document.getElementById('mobileDrawer');
+    const overlay = document.getElementById('mobileDrawerOverlay');
+
+    if (!drawer || !overlay) return;
+
+    overlay.classList.add('open');
+    drawer.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+    const drawer = document.getElementById('mobileDrawer');
+    const overlay = document.getElementById('mobileDrawerOverlay');
+
+    if (!drawer || !overlay) return;
+
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function applySidebarState(isCollapsed) {
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+
+    if (!sidebar || !mainContent) return;
+
+    if (window.innerWidth <= 767 && !document.body.classList.contains('role-patient')) {
+        sidebar.classList.remove('collapsed');
+        document.body.classList.remove('sidebar-collapsed');
+        return;
+    }
+
+    sidebar.classList.toggle('collapsed', isCollapsed);
+    document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+
+    document.querySelectorAll('#sidebarIcon, #sidebarToggleIcon').forEach(icon => {
+        icon.className = isCollapsed ? 'fa-solid fa-bars' : 'fa-solid fa-xmark';
+    });
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    const nextState = !sidebar.classList.contains('collapsed');
+
+    applySidebarState(nextState);
+    localStorage.setItem(getSidebarStorageKey(), nextState ? '1' : '0');
+}
+
+function initGlobalSidebar() {
+    const savedState = localStorage.getItem(getSidebarStorageKey()) === '1';
+
+    applySidebarState(savedState);
+
+    document.querySelectorAll('#sidebarToggleBtn, #desktopSidebarToggle, [data-sidebar-toggle]').forEach(button => {
+        if (button.dataset.sidebarInitialized === 'true') return;
+
+        button.dataset.sidebarInitialized = 'true';
+
+        if (!button.getAttribute('onclick')) {
+            button.addEventListener('click', event => {
+                event.preventDefault();
+                toggleSidebar();
+            });
+        }
+    });
+
+    document.documentElement.classList.remove('sidebar-preload', 'sidebar-collapsed-init');
+}
+
+function initAdminSidebarGroupClick() {
+    const sidebar = document.querySelector('#sidebar.sidebar-admin');
+    if (!sidebar) return;
+
+    const groups = Array.from(sidebar.querySelectorAll('.nav-group'));
+
+    const isCollapsed = () =>
+        sidebar.classList.contains('collapsed') ||
+        document.body.classList.contains('sidebar-collapsed');
+
+    const closeGroups = () => {
+        sidebar.classList.remove('has-flyout-open');
+
+        groups.forEach(group => {
+            group.classList.remove('is-flyout-open');
+            group.querySelector('[data-admin-group-toggle]')?.setAttribute('aria-expanded', 'false');
+        });
+    };
+
+    const openGroup = (targetGroup) => {
+        sidebar.classList.add('has-flyout-open');
+
+        groups.forEach(group => {
+            const isOpen = group === targetGroup;
+
+            group.classList.toggle('is-flyout-open', isOpen);
+            group.querySelector('[data-admin-group-toggle]')?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    };
+
+    groups.forEach(group => {
+        const trigger = group.querySelector('[data-admin-group-toggle]');
+        const panel = group.querySelector('.group-body');
+
+        if (!trigger || trigger.dataset.groupClickInitialized === 'true') return;
+
+        trigger.dataset.groupClickInitialized = 'true';
+
+        trigger.addEventListener('click', event => {
+            if (!isCollapsed()) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const alreadyOpen = group.classList.contains('is-flyout-open');
+
+            closeGroups();
+
+            if (!alreadyOpen) {
+                openGroup(group);
+            }
+        });
+
+        panel?.addEventListener('click', event => {
+            event.stopPropagation();
+        });
+    });
+
+    document.addEventListener('click', event => {
+        if (!sidebar.contains(event.target)) {
+            closeGroups();
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            closeGroups();
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        if (!isCollapsed()) {
+            closeGroups();
+        }
+    });
+
+    window.closeAdminSidebarGroups = closeGroups;
+}
+
+function initMobileDrawerControls() {
+    const drawerButtons = document.querySelectorAll(
+        '#mobileMenuBtn, [data-mobile-menu-toggle], [data-drawer-toggle]'
+    );
+
+    drawerButtons.forEach(button => {
+        if (button.dataset.drawerToggleInitialized === 'true') return;
+
+        button.dataset.drawerToggleInitialized = 'true';
+
+        button.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const drawer = document.getElementById('mobileDrawer');
+
+            if (drawer?.classList.contains('open')) {
+                closeDrawer();
+            } else {
+                openDrawer();
+            }
+        });
+    });
+
+    document.getElementById('mobileDrawerOverlay')?.addEventListener('click', closeDrawer);
+
+    document.querySelectorAll('[data-drawer-close]').forEach(button => {
+        if (button.dataset.drawerCloseInitialized === 'true') return;
+
+        button.dataset.drawerCloseInitialized = 'true';
+
+        button.addEventListener('click', event => {
+            event.preventDefault();
+            closeDrawer();
+        });
+    });
+}
+
+function initGlobalDateTime() {
+    const dateEl = document.getElementById('currentDate');
+    const dateIconEl = document.getElementById('currentDateIcon');
+
+    if (!dateEl) return;
+
+    function updateDateTime() {
+        const now = new Date();
+
+        const dateText = now.toLocaleDateString('en-US', {
+            timeZone: 'Asia/Manila',
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        const timeText = now.toLocaleTimeString('en-US', {
+            timeZone: 'Asia/Manila',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        dateEl.textContent = `${dateText} | ${timeText}`;
+
+        if (!dateIconEl) return;
+
+        const hourInManila = Number(new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Manila',
+            hour: 'numeric',
+            hour12: false
+        }).format(now));
+
+        if (hourInManila >= 5 && hourInManila < 18) {
+            dateIconEl.className = 'fa-solid fa-sun';
+            dateIconEl.style.color = hourInManila < 12 ? '#fcd34d' : '#fb923c';
+        } else {
+            dateIconEl.className = 'fa-solid fa-moon';
+            dateIconEl.style.color = '#c4b5fd';
+        }
+    }
+
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+}
+
+function initPatientMobileFab() {
+    const mobFab = document.getElementById('mobFab');
+    const mobFabMenu = document.getElementById('mobFabMenu');
+
+    if (!mobFab || !mobFabMenu) return;
+
+    mobFab.addEventListener('click', event => {
+        event.stopPropagation();
+
+        closeHeaderMenus();
+
+        mobFabMenu.classList.toggle('open');
+        mobFab.classList.toggle('open');
+    });
+
+    mobFabMenu.addEventListener('click', event => {
+        event.stopPropagation();
+    });
+
+    document.addEventListener('click', event => {
+        const clickedInsideMenu = mobFabMenu.contains(event.target);
+        const clickedFab = mobFab.contains(event.target);
+
+        if (!clickedInsideMenu && !clickedFab) {
+            mobFabMenu.classList.remove('open');
+            mobFab.classList.remove('open');
+        }
+    });
+
+    document.querySelectorAll('[data-quick-action]').forEach(button => {
+        if (button.dataset.quickActionInitialized === 'true') return;
+
+        button.dataset.quickActionInitialized = 'true';
+
+        button.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            mobFabMenu.classList.remove('open');
+            mobFab.classList.remove('open');
+
+            if (typeof window.openQuickAction === 'function') {
+                window.openQuickAction(button.dataset.quickAction);
+            }
+        });
+    });
+}
+
+function initSessionStorageToasts() {
+    const keys = ['dentistToast', 'adminToast', 'patientToast', 'globalToast'];
+
+    keys.forEach(key => {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return;
+
+        try {
+            const toast = JSON.parse(raw);
+
+            showToast({
+                type: toast.type || (toast.tone === 'danger' ? 'error' : toast.tone) || 'success',
+                title: toast.title || 'Notification',
+                message: toast.message || '',
+                duration: toast.duration || 4000,
+            });
+        } catch (_) {
+            // Ignore invalid toast payloads
+        }
+
+        sessionStorage.removeItem(key);
+    });
+}
+
+document.documentElement.classList.add('sidebar-preload');
+
+try {
+    const savedSidebarState = localStorage.getItem(getSidebarStorageKey());
+    if (savedSidebarState === '1') {
+        document.documentElement.classList.add('sidebar-collapsed-init');
+    }
+} catch (_) {
+    // Ignore storage errors
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initGlobalThemeControls();
+    initSidebarThemeDropdowns();
+    initHeaderMenus();
+    initMobileDrawerControls();
+    initGlobalSidebar();
+    initAdminSidebarGroupClick();
+    initGlobalDateTime();
+    initPatientMobileFab();
+    initSessionStorageToasts();
+});
+
+document.addEventListener('click', closeHeaderMenus);
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        closeDrawer();
+        closeHeaderMenus();
+    }
+});
+
+window.addEventListener('storage', event => {
+    if (event.key === 'theme') {
+        applyGlobalTheme(event.newValue || 'light');
+    }
+});
+
+window.applyTheme = applyGlobalTheme;
+window.openDrawer = openDrawer;
+window.closeDrawer = closeDrawer;
+window.toggleSidebar = toggleSidebar;
+window.applySidebarState = applySidebarState;
 
 function readJsonPayload(id) {
     const el = document.getElementById(id);

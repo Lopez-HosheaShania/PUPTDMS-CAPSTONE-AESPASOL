@@ -18,12 +18,32 @@
                 document.documentElement.style.backgroundColor = '#F4F4F4';
             }
         })();
+
+        (function() {
+            var path = window.location.pathname || '';
+
+            var role = path.indexOf('/admin') === 0 ?
+                'admin' :
+                (path.indexOf('/dentist') === 0 ? 'dentist' : 'patient');
+
+            var keys = {
+                admin: 'adminSidebarCollapsed',
+                dentist: 'dentistSidebarCollapsed',
+                patient: 'patientSidebarCollapsed'
+            };
+
+            try {
+                if (localStorage.getItem(keys[role]) === '1') {
+                    document.body.classList.add('sidebar-collapsed');
+                }
+            } catch (e) {}
+        })();
     </script>
     <title>@yield('title', 'PUP Taguig Dental Clinic')</title>
-    @vite(['resources/css/app.css', 'resources/css/dentist.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" type="image/png" href="{{ asset('images/PUPT-DMS-Logo.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
@@ -44,8 +64,7 @@
         'showSettings' => false,
     ])
 
-    @include('partials.dentist.sidebar')
-    @include('partials.dentist.drawer')
+    @include('components.global-sidebar', ['role' => 'dentist'])
 
     @include('partials.impersonation-banner')
 
@@ -55,8 +74,6 @@
     @yield('content')
 
     @include('partials.footer')
-
-    @include('partials.dentist.scripts')
 
     @include('partials.voice-logic')
     @include('components.discard-changes')
@@ -114,7 +131,6 @@
     @yield('scripts')
 
     @include('partials.chatbot')
-    <script src="{{ asset('js/header.js') }}"></script>
 </body>
 
 </html>

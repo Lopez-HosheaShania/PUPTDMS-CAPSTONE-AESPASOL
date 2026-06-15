@@ -59,7 +59,7 @@ body {
 
 [data-theme="dark"] body,
 .dark body {
-    background-color: #0D1117 !important;
+    background-color: #0d0f12 !important;
     color: #E5E7EB !important;
 }
 
@@ -99,16 +99,16 @@ body {
 
 [data-theme="dark"] #mainContent,
 .dark #mainContent {
-    background: #0D1117 !important;
+    background: #0f1012 !important;
     color: #F8FAFC !important;
 }
 
 [data-theme="dark"] #sidebar {
-    background-color: #111827;
+    background-color: #0d0f12 !important;
 }
 
 [data-theme="dark"] .bg-white {
-    background-color: #111827 !important;
+    background-color: #0d0f12 !important;
 }
 
 [data-theme="dark"] .theme-toggle-container {

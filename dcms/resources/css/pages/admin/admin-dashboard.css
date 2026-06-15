@@ -213,7 +213,7 @@
 }
 
 [data-theme="dark"] .log-stats-row {
-    background: #0d1117 !important;
+    background: #0d0f12 !important;
     border-color: #21262d !important;
 }
 
@@ -1190,8 +1190,6 @@
     display: none !important;
 }
 
-
-
 [data-theme="dark"] .next-backup,
 [data-theme="dark"] .qa-btn {
     background: #1c2128;
@@ -1235,7 +1233,6 @@
 [data-theme="dark"] .gad-placeholder-text {
     color: #9ca3af;
 }
-
 
 [data-theme="dark"] .backup-status {
     background: linear-gradient(135deg, rgba(34, 197, 94, 0.10), rgba(22, 163, 74, 0.06));

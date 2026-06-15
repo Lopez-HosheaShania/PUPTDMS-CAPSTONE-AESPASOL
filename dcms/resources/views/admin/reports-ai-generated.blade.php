@@ -219,13 +219,10 @@
                         </div>
                     </div>
                 </div>
-
             </section>
-
         </div>
     </main>
 
-    {{-- PRINTED DOCU --}}
     @php
         $printFindings = $aiReport['key_findings'] ?? [];
         $printFindingsText = trim(implode(' ', array_filter($printFindings)));
@@ -341,7 +338,6 @@
 
     <section id="aiFullPrintDocument" class="air-print-doc">
 
-        {{-- Page 1 --}}
         <div class="air-print-page" data-print-page="1">
             <div class="air-print-fixed-header">
                 <strong>AI Generated Overall Report</strong>
@@ -402,7 +398,6 @@
                 </div>
             </div>
 
-            {{-- Page 2 --}}
             <div class="air-print-page" data-print-page="2">
                 <div class="air-print-fixed-header">
                     <strong>AI Generated Overall Report</strong>
@@ -485,7 +480,6 @@
                 </div>
             </div>
 
-            {{-- Page 3 --}}
             <div class="air-print-page" data-print-page="3">
                 <div class="air-print-fixed-header">
                     <strong>AI Generated Overall Report</strong>
@@ -529,14 +523,11 @@
 
     </section>
 
-
     <div id="printReportModal" class="air-modal-overlay" aria-hidden="true">
         <div class="air-modal" role="dialog" aria-modal="true" aria-labelledby="printReportTitle">
 
-
             <div class="air-modal-preview">
                 <div class="air-modal-preview-pages">
-
 
                     <div class="air-modal-print-sheet" data-modal-preview-page="1">
                         <div class="air-modal-print-top-rule"></div>
@@ -600,7 +591,6 @@
                             <em>This is system-generated, signature is not required.</em>
                         </div>
                     </div>
-
 
                     <div class="air-modal-print-sheet" data-modal-preview-page="2">
                         <div class="air-modal-print-page-heading">
@@ -684,7 +674,6 @@
                         </div>
                     </div>
 
- 
                     <div class="air-modal-print-sheet" data-modal-preview-page="3">
                         <div class="air-modal-print-page-heading">
                             <strong>AI Generated Overall Report</strong>
@@ -732,7 +721,6 @@
                 </div>
             </div>
 
-
             <div class="air-modal-panel">
                 <div class="air-modal-header">
                     <div>
@@ -748,7 +736,6 @@
                     <input type="hidden" id="printPages" value="all">
                     <input type="hidden" id="printLayout" value="portrait">
 
-
                     <div class="air-option-row">
                         <label>Destination</label>
                         <div class="air-option-static">
@@ -760,7 +747,6 @@
                         </div>
                     </div>
 
-                    {{-- Pages --}}
                     <div class="air-option-row">
                         <label>Pages</label>
                         <div class="air-dropdown" data-print-dropdown>
@@ -800,7 +786,6 @@
                         </div>
                     </div>
 
-                    {{-- Layout --}}
                     <div class="air-option-row">
                         <label>Layout</label>
                         <div class="air-dropdown" data-print-dropdown>

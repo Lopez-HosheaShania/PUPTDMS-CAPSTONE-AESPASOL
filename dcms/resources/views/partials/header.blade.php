@@ -30,7 +30,9 @@
                     'created_at' => $notification->created_at,
                     'created_at_label' => optional($notification->created_at)->diffForHumans(),
                     'icon' => data_get($payload, 'icon') ?? 'fa-bell',
-                    'mark_read_url' => route('notifications.mark-read', ['notificationId' => $notification->id]),
+                    'mark_read_url' => Route::has('notifications.mark-read')
+                        ? route('notifications.mark-read', ['notificationId' => $notification->id])
+                        : null,
                 ];
             });
     }
@@ -118,8 +120,7 @@
 <header class="header">
     <div class="header-left">
         @if ($showMobileMenu)
-            <button id="mobileMenuBtn" class="hdr-icon-btn" type="button"
-                @if ($role === 'dentist') onclick="openDrawer()" @endif>
+            <button id="mobileMenuBtn" class="hdr-icon-btn" type="button" data-drawer-toggle aria-label="Open menu">
                 <i class="fa-solid fa-bars"></i>
             </button>
         @endif
@@ -157,7 +158,7 @@
                         </div>
                     </div>
 
-                    @if ($notifCount > 0)
+                    @if ($notifCount > 0 && Route::has('notifications.mark-all-read'))
                         <form method="POST" action="{{ route('notifications.mark-all-read') }}"
                             class="header-notif-actions" data-notif-mark-all-form>
                             @csrf

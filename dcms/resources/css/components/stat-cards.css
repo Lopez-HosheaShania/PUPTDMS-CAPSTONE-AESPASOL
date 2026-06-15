@@ -55,6 +55,25 @@
     --stat-active-border: var(--stat-border, var(--status-default-border));
 }
 
+#mainContent #statCards {
+    gap: 14px !important;
+    align-items: stretch !important;
+}
+
+@media (max-width:380px) {
+    #statCards {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: .5rem !important;
+    }
+}
+
+@media (max-width:1023px) and (min-width:768px) {
+
+    #statCards {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
 @media (max-width: 767px) {
     #mainContent #statCards {
         gap: 10px !important;
@@ -388,11 +407,9 @@
 }
 
 #mainContent #statCards.admin-dashboard-stat-grid .stat-card::before {
-    background: linear-gradient(
-        90deg,
-        var(--stat-accent),
-        color-mix(in srgb, var(--stat-accent) 62%, #ffffff)
-    ) !important;
+    background: linear-gradient(90deg,
+            var(--stat-accent),
+            color-mix(in srgb, var(--stat-accent) 62%, #ffffff)) !important;
 }
 
 #mainContent #statCards.admin-dashboard-stat-grid .stat-value,

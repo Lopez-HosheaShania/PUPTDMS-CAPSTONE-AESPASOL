@@ -62,13 +62,10 @@
     @include('partials.global-toast')
     @include('partials.terms-modal')
 
-    @include('partials.patient.script')
-
     <script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
         data-position="bottom-right" data-offset="18,118" defer></script>
 
     @include('partials.chatbot')
-    <script src="{{ asset('js/header.js') }}"></script>
 
     <script>
         function openQuickAction(type) {

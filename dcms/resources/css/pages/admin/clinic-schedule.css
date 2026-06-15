@@ -1614,7 +1614,7 @@
 
 [data-theme="dark"] #mainContent.clinic-schedule-page,
 .dark #mainContent.clinic-schedule-page {
-    background: #000D1A !important;
+    background: #0d0f12 !important;
     color: #E5E7EB !important;
 }
 
@@ -2227,7 +2227,7 @@
 
 [data-theme="dark"] .clinic-schedule-page,
 .dark .clinic-schedule-page {
-    background: #000D1A !important;
+    background: #0d0f12 !important;
     color: #E5E7EB !important;
 }
 

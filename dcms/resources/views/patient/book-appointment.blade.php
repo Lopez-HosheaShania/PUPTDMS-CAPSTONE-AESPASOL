@@ -1103,12 +1103,6 @@
             }
         }
 
-        html[data-theme="dark"] body,
-        [data-theme="dark"] body {
-            background: #020b14 !important;
-            color: #e5e7eb !important;
-        }
-
         [data-theme="dark"] #mainContent {
             background:
                 radial-gradient(circle at top, rgba(139, 0, 0, 0.18), transparent 34%),
