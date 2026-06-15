@@ -68,4 +68,8 @@ return [
         'secret' => env('FLSS_HMAC_SECRET'),
     ],
 
+    'hostinger' => [
+    'hpanel_url' => env('HOSTINGER_HPANEL_URL', 'https://hpanel.hostinger.com'),
+    ],  
+
 ];

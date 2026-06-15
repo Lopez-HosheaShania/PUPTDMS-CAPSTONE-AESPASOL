@@ -21,6 +21,42 @@ return $bytes . ' B';
 };
 
 $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : true;
+
+$hostingerBackup = $hostingerBackup ?? [
+    'enabled' => $autoBackupEnabled,
+    'status' => $autoBackupEnabled ? 'active' : 'not_verified',
+    'status_label' => $autoBackupEnabled ? 'Active' : 'Not Verified',
+    'managed_by' => 'Hostinger hPanel',
+    'last_verified_at' => null,
+    'notes' => 'Daily automatic hosting-level backups are active based on the current Hostinger plan and are managed externally through Hostinger hPanel.',
+];
+
+$hostingerStatus = $hostingerBackup['status'] ?? ($autoBackupEnabled ? 'active' : 'not_verified');
+$hostingerStatusLabel = $hostingerBackup['status_label'] ?? match ($hostingerStatus) {
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    default => 'Not Verified',
+};
+
+$hostingerStatusClass = match ($hostingerStatus) {
+    'active' => 'active',
+    'inactive' => 'paused',
+    default => 'paused',
+};
+
+$hostingerLastVerifiedRaw = $hostingerBackup['last_verified_at'] ?? null;
+
+try {
+    $hostingerLastVerified = $hostingerLastVerifiedRaw
+        ? \Carbon\Carbon::parse($hostingerLastVerifiedRaw)->format('M d, Y h:i A')
+        : 'Not verified yet';
+} catch (\Throwable $e) {
+    $hostingerLastVerified = 'Not verified yet';
+}
+
+$hostingerVerified = !empty($hostingerLastVerifiedRaw);
+$hostingerVerifiedClass = $hostingerVerified ? 'active' : 'paused';
+$hostingerVerifiedLabel = $hostingerVerified ? 'Verified' : 'Pending';
 @endphp
 
 <main id="mainContent" class="admin-page-shell backup-page page-enter mode-list">
@@ -82,14 +118,14 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
 
             <div class="backup-stat stat-card s-auto">
                 <span class="stat-icon-wrapper">
-                    <i class="fa-solid fa-rotate"></i>
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
                 </span>
 
                 <span class="stat-card-info">
                     <span class="backup-stat-value stat-num" id="autoScheduleStatValue">
-                        {{ $autoBackupEnabled ? 'Active' : 'Paused' }}
+                        {{ $hostingerStatusLabel }}
                     </span>
-                    <span class="backup-stat-label stat-label">Auto-Schedule</span>
+                    <span class="backup-stat-label stat-label">Hostinger Backup</span>
                 </span>
             </div>
         </div>
@@ -344,77 +380,87 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card hostinger-backup-card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <div class="card-icon"><i class="fa-solid fa-clock"></i></div>
+                            <div class="card-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                             <div>
-                                <div class="card-title">Auto-Backup Schedule</div>
-                                <div class="card-subtitle">Configure recurring backups</div>
+                                <div class="card-title">Hostinger Backup Coverage</div>
+                                <div class="card-subtitle">Managed externally through hPanel</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mini-card-body" id="scheduleCard">
+                    <div class="mini-card-body" id="hostingerCoverageCard">
                         <div class="schedule-item">
                             <div>
-                                <div class="schedule-title">Daily Incremental</div>
-                                <div class="schedule-time" data-time-label="daily">
-                                    Every day at {{ \Carbon\Carbon::createFromFormat('H:i',
-                                    $backupSchedule['daily_time'])->format('g:i A') }}
+                                <div class="schedule-title">Hosting Backup Status</div>
+                                <div class="schedule-time">
+                                    {{ $hostingerBackup['notes'] ?? 'Daily automatic hosting-level backups are active based on the current Hostinger plan and are managed externally through Hostinger hPanel.' }}
                                 </div>
                             </div>
-                            <span class="schedule-pill {{ $backupSchedule['daily_enabled'] ? 'active' : 'paused' }}">
-                                {{ $backupSchedule['daily_enabled'] ? 'Active' : 'Paused' }}
+
+                            <span class="schedule-pill {{ $hostingerStatusClass }}" id="hostingerBackupStatusPill">
+                                {{ $hostingerStatusLabel }}
                             </span>
-                            <div class="schedule-toggle" onclick="toggleSchedule('daily')"
-                                style="background:{{ $backupSchedule['daily_enabled'] ? '#8B0000' : '#d1d5db' }};">
-                                <div class="schedule-thumb"
-                                    style="left:{{ $backupSchedule['daily_enabled'] ? '16px' : '2px' }};"></div>
-                            </div>
                         </div>
 
                         <div class="schedule-item">
                             <div>
-                                <div class="schedule-title">Weekly Full Backup</div>
-                                <div class="schedule-time" data-time-label="weekly">
-                                    Every Sunday at {{ \Carbon\Carbon::createFromFormat('H:i',
-                                    $backupSchedule['weekly_time'])->format('g:i A') }}
+                                <div class="schedule-title">Provider</div>
+                                <div class="schedule-time">
+                                    {{ $hostingerBackup['managed_by'] ?? 'Hostinger hPanel' }}
                                 </div>
                             </div>
-                            <span class="schedule-pill {{ $backupSchedule['weekly_enabled'] ? 'active' : 'paused' }}">
-                                {{ $backupSchedule['weekly_enabled'] ? 'Active' : 'Paused' }}
+
+                            <span class="schedule-pill active">
+                                External
                             </span>
-                            <div class="schedule-toggle" onclick="toggleSchedule('weekly')"
-                                style="background:{{ $backupSchedule['weekly_enabled'] ? '#8B0000' : '#d1d5db' }};">
-                                <div class="schedule-thumb"
-                                    style="left:{{ $backupSchedule['weekly_enabled'] ? '16px' : '2px' }};"></div>
-                            </div>
                         </div>
 
                         <div class="schedule-item">
                             <div>
-                                <div class="schedule-title">Monthly Archive</div>
-                                <div class="schedule-time" data-time-label="monthly">
-                                    1st of every month at {{ \Carbon\Carbon::createFromFormat('H:i',
-                                    $backupSchedule['monthly_time'])->format('g:i A') }}
+                                <div class="schedule-title">System Manual Backup</div>
+                                <div class="schedule-time">
+                                    Admins can still use Backup Now before deployments, restores, or maintenance.
                                 </div>
                             </div>
-                            <span class="schedule-pill {{ $backupSchedule['monthly_enabled'] ? 'active' : 'paused' }}">
-                                {{ $backupSchedule['monthly_enabled'] ? 'Active' : 'Paused' }}
+
+                            <span class="schedule-pill active">
+                                Available
                             </span>
-                            <div class="schedule-toggle" onclick="toggleSchedule('monthly')"
-                                style="background:{{ $backupSchedule['monthly_enabled'] ? '#8B0000' : '#d1d5db' }};">
-                                <div class="schedule-thumb"
-                                    style="left:{{ $backupSchedule['monthly_enabled'] ? '16px' : '2px' }};"></div>
-                            </div>
                         </div>
 
-                        <button class="schedule-edit-btn" type="button" onclick="openScheduleModal()">
-                            <i class="fa-solid fa-pen backup-edit-icon"></i> Edit Schedule
-                            Settings
+                        <div class="schedule-item">
+                            <div>
+                                <div class="schedule-title">Last Verified</div>
+                                <div class="schedule-time" id="hostingerBackupVerifiedAt">
+                                    {{ $hostingerLastVerified }}
+                                </div>
+                            </div>
+
+                            <span class="schedule-pill {{ $hostingerVerifiedClass }}" id="hostingerVerifiedPill">
+                                {{ $hostingerVerifiedLabel }}
+                            </span>
+                        </div>
+
+                        <a href="{{ route('admin.data_backup.hpanel') }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="schedule-edit-btn backup-hpanel-link">
+                            <i class="fa-solid fa-arrow-up-right-from-square backup-edit-icon"></i>
+                            Open Hostinger hPanel
+                        </a>
+
+                        <button type="button"
+                                id="verifyHostingerBackupBtn"
+                                class="schedule-edit-btn hostinger-verify-btn"
+                                onclick="verifyHostingerBackupStatus()">
+                            <i class="fa-solid fa-circle-check backup-edit-icon"></i>
+                            Mark as Verified
                         </button>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -717,10 +763,12 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     let scheduleOn = @json($autoBackupEnabled);
     let backupSchedule = @json($backupSchedule);
+    let hostingerBackup = @json($hostingerBackup);
 
     const restoreUrlTemplate = @json(route('admin.data_backup.restore', ['id' => '__ID__']));
     const deleteUrlTemplate = @json(route('admin.data_backup.delete', ['id' => '__ID__']));
     const dataBackupUrl = @json(route('admin.data_backup'));
+    const verifyHostingerBackupUrl = @json(route('admin.data_backup.verify_hostinger'));
 
     let currentFilters = {
         sort: @json(request('sort', 'newest')),
@@ -747,13 +795,83 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
         const statValue = document.getElementById('autoScheduleStatValue');
         if (!statValue) return;
 
-        const hasEnabled =
-            !!backupSchedule.daily_enabled ||
-            !!backupSchedule.weekly_enabled ||
-            !!backupSchedule.monthly_enabled;
+        const status = hostingerBackup?.status || (scheduleOn ? 'active' : 'not_verified');
 
-        scheduleOn = hasEnabled;
-        statValue.textContent = hasEnabled ? 'Active' : 'Paused';
+        const labels = {
+            active: 'Active',
+            inactive: 'Inactive',
+            not_verified: 'Not Verified',
+        };
+
+        statValue.textContent = hostingerBackup?.status_label || labels[status] || 'Not Verified';
+    }
+
+    async function verifyHostingerBackupStatus() {
+        const btn = document.getElementById('verifyHostingerBackupBtn');
+        const lastVerifiedText = document.getElementById('hostingerBackupVerifiedAt');
+        const verifiedPill = document.getElementById('hostingerVerifiedPill');
+        const statusPill = document.getElementById('hostingerBackupStatusPill');
+        const statValue = document.getElementById('autoScheduleStatValue');
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner spin backup-edit-icon"></i> Verifying`;
+        }
+
+        try {
+            const response = await fetch(verifyHostingerBackupUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({ verified: true }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Failed to verify Hostinger backup status.');
+            }
+
+            hostingerBackup = {
+                ...hostingerBackup,
+                status: result.status || 'active',
+                status_label: result.status_label || 'Active',
+                last_verified_at: result.last_verified_at || null,
+            };
+
+            scheduleOn = true;
+
+            if (lastVerifiedText) {
+                lastVerifiedText.textContent = result.last_verified_at || 'Verified just now';
+            }
+
+            if (verifiedPill) {
+                verifiedPill.textContent = result.verified_label || 'Verified';
+                verifiedPill.className = 'schedule-pill active';
+            }
+
+            if (statusPill) {
+                statusPill.textContent = hostingerBackup.status_label;
+                statusPill.className = 'schedule-pill active';
+            }
+
+            if (statValue) {
+                statValue.textContent = hostingerBackup.status_label;
+            }
+
+            showToast('Backup Status Verified', result.message, 'success');
+        } catch (error) {
+            showToast('Verification Failed', error.message, 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-circle-check backup-edit-icon"></i> Mark as Verified`;
+            }
+        }
     }
 
     function updateScheduleUI() {
@@ -1246,6 +1364,31 @@ $autoBackupEnabled = isset($autoBackupEnabled) ? (bool) $autoBackupEnabled : tru
 
         if (freeSpaceStat && stats.free_space_formatted !== undefined) {
             freeSpaceStat.textContent = `Free Space: ${stats.free_space_formatted}`;
+        }
+
+        if (stats.hostinger_backup_status !== undefined || stats.hostinger_backup_enabled !== undefined) {
+            const status = stats.hostinger_backup_status || (stats.hostinger_backup_enabled ? 'active' : 'not_verified');
+
+            hostingerBackup = {
+                ...hostingerBackup,
+                status,
+                status_label: stats.hostinger_backup_status_label || (
+                    status === 'active'
+                        ? 'Active'
+                        : status === 'inactive'
+                            ? 'Inactive'
+                            : 'Not Verified'
+                ),
+                last_verified_at: stats.hostinger_backup_last_verified_at || hostingerBackup?.last_verified_at || null,
+            };
+
+            refreshAutoScheduleStat();
+
+            const hostingerPill = document.getElementById('hostingerBackupStatusPill');
+            if (hostingerPill) {
+                hostingerPill.textContent = hostingerBackup.status_label;
+                hostingerPill.className = `schedule-pill ${status === 'active' ? 'active' : 'paused'}`;
+            }
         }
     }
 
