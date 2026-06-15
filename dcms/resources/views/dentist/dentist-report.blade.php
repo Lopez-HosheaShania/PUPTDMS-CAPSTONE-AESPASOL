@@ -1166,8 +1166,8 @@
             color: #FFFFFF !important;
         }
 
-        [data-theme="dark"] #mainContent .chart-empty > i,
-        .dark #mainContent .chart-empty > i {
+        [data-theme="dark"] #mainContent .chart-empty>i,
+        .dark #mainContent .chart-empty>i {
             color: #FCA5A5 !important;
         }
 
@@ -1249,7 +1249,7 @@
                 width: 100%;
             }
         }
-    
+
         #mainContent.dentist-page-shell {
             background: #F9FAFB !important;
         }
@@ -1297,7 +1297,7 @@
             border-radius: 16px !important;
         }
 
-        #mainContent .chart-empty > i {
+        #mainContent .chart-empty>i {
             width: 74px !important;
             height: 74px !important;
             border-radius: 22px !important;
@@ -1399,8 +1399,8 @@
             color: #C9D1D9 !important;
         }
 
-        [data-theme="dark"] #mainContent .chart-empty > i,
-        .dark #mainContent .chart-empty > i {
+        [data-theme="dark"] #mainContent .chart-empty>i,
+        .dark #mainContent .chart-empty>i {
             background:
                 radial-gradient(circle at top left, rgba(139, 0, 0, 0.28), transparent 42%),
                 linear-gradient(145deg, rgba(22, 27, 34, 0.95), rgba(13, 17, 23, 0.92)) !important;
@@ -1481,153 +1481,152 @@
             }
         }
 
-    #mainContent .report-hero-actions {
-        position: relative !important;
-        z-index: 4 !important;
-        margin-left: auto !important;
-        margin-top: 0 !important;
-        align-self: center !important;
-        flex: 0 0 auto !important;
-        width: auto !important;
-        padding-right: 128px !important;
-        display: flex !important;
-        justify-content: flex-end !important;
-    }
-
-    #mainContent .report-hero-btn {
-        width: auto !important;
-        min-width: 158px !important;
-        white-space: nowrap !important;
-    }
-
-    @media (max-width: 1024px) {
         #mainContent .report-hero-actions {
-            padding-right: 92px !important;
-        }
-    }
-
-    @media (max-width: 767px) {
-        #mainContent.dentist-page-shell {
-            padding-left: 14px !important;
-            padding-right: 14px !important;
-            padding-bottom: 28px !important;
-        }
-
-        #mainContent .report-hero-meta {
-            margin-top: 12px !important;
+            position: relative !important;
+            z-index: 4 !important;
+            margin-left: auto !important;
+            margin-top: 0 !important;
+            align-self: center !important;
+            flex: 0 0 auto !important;
+            width: auto !important;
+            padding-right: 128px !important;
             display: flex !important;
-            gap: 7px !important;
-            width: 100% !important;
-        }
-
-        #mainContent .summary-tag {
-            max-width: 100% !important;
-            font-size: 10px !important;
-            padding: 6px 9px !important;
-            line-height: 1.15 !important;
-        }
-
-        #mainContent .report-hero-actions {
-            width: 100% !important;
-            padding-right: 0 !important;
-            margin: 0 !important;
-            align-self: stretch !important;
-            justify-content: stretch !important;
+            justify-content: flex-end !important;
         }
 
         #mainContent .report-hero-btn {
-            width: 100% !important;
-            min-width: 0 !important;
-            min-height: 46px !important;
-            border-radius: 14px !important;
+            width: auto !important;
+            min-width: 158px !important;
+            white-space: nowrap !important;
         }
 
-        #mainContent .analytics-section-label {
-            font-size: 0.72rem !important;
-            line-height: 1.3 !important;
-            margin-bottom: 12px !important;
+        @media (max-width: 1024px) {
+            #mainContent .report-hero-actions {
+                padding-right: 92px !important;
+            }
         }
 
-        #mainContent .kpi-grid-layout,
-        #mainContent .analytics-subgrid,
-        #mainContent .analytics-main-grid,
-        #mainContent .analytics-secondary-grid {
-            grid-template-columns: 1fr !important;
-            gap: 14px !important;
-            margin-bottom: 22px !important;
+        @media (max-width: 767px) {
+            #mainContent.dentist-page-shell {
+                padding-left: 14px !important;
+                padding-right: 14px !important;
+                padding-bottom: 28px !important;
+            }
+
+            #mainContent .report-hero-meta {
+                margin-top: 12px !important;
+                display: flex !important;
+                gap: 7px !important;
+                width: 100% !important;
+            }
+
+            #mainContent .summary-tag {
+                max-width: 100% !important;
+                font-size: 10px !important;
+                padding: 6px 9px !important;
+                line-height: 1.15 !important;
+            }
+
+            #mainContent .report-hero-actions {
+                width: 100% !important;
+                padding-right: 0 !important;
+                margin: 0 !important;
+                align-self: stretch !important;
+                justify-content: stretch !important;
+            }
+
+            #mainContent .report-hero-btn {
+                width: 100% !important;
+                min-width: 0 !important;
+                min-height: 46px !important;
+                border-radius: 14px !important;
+            }
+
+            #mainContent .analytics-section-label {
+                font-size: 0.72rem !important;
+                line-height: 1.3 !important;
+                margin-bottom: 12px !important;
+            }
+
+            #mainContent .kpi-grid-layout,
+            #mainContent .analytics-subgrid,
+            #mainContent .analytics-main-grid,
+            #mainContent .analytics-secondary-grid {
+                grid-template-columns: 1fr !important;
+                gap: 14px !important;
+                margin-bottom: 22px !important;
+            }
+
+            #mainContent .kpi-card,
+            #mainContent .mini-kpi,
+            #mainContent .chart-card,
+            #mainContent .pro-card,
+            #mainContent .inventory-shell,
+            #mainContent .action-card {
+                border-radius: 18px !important;
+            }
+
+            #mainContent .kpi-card {
+                min-height: 104px !important;
+                padding: 14px !important;
+            }
+
+            #mainContent .mini-kpi {
+                min-height: 92px !important;
+            }
+
+            #mainContent .chart-card-header {
+                gap: 10px !important;
+                align-items: flex-start !important;
+            }
+
+            #mainContent .period-select {
+                max-width: 150px !important;
+                font-size: 0.7rem !important;
+            }
+
+            #mainContent #gadChartWrap,
+            #mainContent #weeklyChartWrap {
+                min-height: 230px !important;
+            }
+
+            #mainContent .relative.h-\[280px\] {
+                height: 240px !important;
+            }
+
+            #mainContent .inventory-shell {
+                padding: 16px !important;
+            }
+
+            #mainContent .inventory-shell .grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
         }
 
-        #mainContent .kpi-card,
-        #mainContent .mini-kpi,
-        #mainContent .chart-card,
-        #mainContent .pro-card,
-        #mainContent .inventory-shell,
-        #mainContent .action-card {
-            border-radius: 18px !important;
-        }
+        @media (max-width: 420px) {
+            #mainContent.dentist-page-shell {
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+            }
 
-        #mainContent .kpi-card {
-            min-height: 104px !important;
-            padding: 14px !important;
-        }
+            #mainContent .report-hero-meta {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
 
-        #mainContent .mini-kpi {
-            min-height: 92px !important;
-        }
+            #mainContent .summary-tag {
+                width: 100% !important;
+                justify-content: flex-start !important;
+            }
 
-        #mainContent .chart-card-header {
-            gap: 10px !important;
-            align-items: flex-start !important;
+            #mainContent .chart-card,
+            #mainContent .pro-card,
+            #mainContent .inventory-shell {
+                padding: 14px !important;
+            }
         }
-
-        #mainContent .period-select {
-            max-width: 150px !important;
-            font-size: 0.7rem !important;
-        }
-
-        #mainContent #gadChartWrap,
-        #mainContent #weeklyChartWrap {
-            min-height: 230px !important;
-        }
-
-        #mainContent .relative.h-\[280px\] {
-            height: 240px !important;
-        }
-
-        #mainContent .inventory-shell {
-            padding: 16px !important;
-        }
-
-        #mainContent .inventory-shell .grid {
-            grid-template-columns: 1fr !important;
-            gap: 20px !important;
-        }
-    }
-
-    @media (max-width: 420px) {
-        #mainContent.dentist-page-shell {
-            padding-left: 10px !important;
-            padding-right: 10px !important;
-        }
-
-        #mainContent .report-hero-meta {
-            flex-direction: column !important;
-            align-items: stretch !important;
-        }
-
-        #mainContent .summary-tag {
-            width: 100% !important;
-            justify-content: flex-start !important;
-        }
-
-        #mainContent .chart-card,
-        #mainContent .pro-card,
-        #mainContent .inventory-shell {
-            padding: 14px !important;
-        }
-    }
-
-</style>
+    </style>
 @endsection
 
 @section('content')
@@ -1948,7 +1947,8 @@
                             <div class="action-card group cursor-default items-start">
                                 <div class="action-icon mt-0.5"><i class="fa-solid fa-file-medical"></i></div>
                                 <div class="min-w-0 flex-1">
-                                    <h4 class="text-sm font-bold text-gray-800 group-hover:text-[#8B0000] transition-colors truncate">
+                                    <h4
+                                        class="text-sm font-bold text-gray-800 group-hover:text-[#8B0000] transition-colors truncate">
                                         {{ $template->name }}
                                     </h4>
                                     <p class="text-[11px] text-gray-400 mt-0.5">
@@ -1976,11 +1976,13 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="flex flex-col items-center justify-center py-10 text-center border border-dashed border-red-200 rounded-2xl bg-red-50/40">
+                    <div
+                        class="flex flex-col items-center justify-center py-10 text-center border border-dashed border-red-200 rounded-2xl bg-red-50/40">
                         <i class="fa-solid fa-file-circle-xmark text-3xl text-red-300 mb-3"></i>
                         <p class="text-sm font-bold text-gray-700">No active document templates yet</p>
                         <p class="text-xs text-gray-500 mt-1 max-w-md">
-                            Once a template is created and activated, it will appear here for printing reports or certificates.
+                            Once a template is created and activated, it will appear here for printing reports or
+                            certificates.
                         </p>
                     </div>
                 @endif
@@ -2173,7 +2175,7 @@
                                 <span class="text-red-500">*</span></label>
                             <span id="reportNameCounter" class="text-[11px] font-semibold text-gray-400">0 / 100</span>
                         </div>
-                        <input id="reportName" type="text" maxlength="100"
+                        <input id="reportName" name="report_name" type="text" maxlength="100"
                             placeholder="e.g. GAD Monthly Report — Dec 2025"
                             class="w-full px-3.5 py-2 rounded-xl border border-gray-300 bg-white text-sm focus:outline-none focus:border-[#8B0000] transition-colors placeholder-gray-400" />
                         <p id="reportNameErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
@@ -2184,14 +2186,18 @@
                         <label class="block text-[11px] font-bold text-[#8B0000] uppercase tracking-wider mb-1">Report Type
                             <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <select id="reportType"
+                            <select id="reportType" name="document_template_id"
                                 class="w-full px-3.5 py-2 rounded-xl border border-gray-300 bg-white text-sm focus:outline-none focus:border-[#8B0000] transition-colors appearance-none pr-10 text-gray-700">
                                 <option value="" disabled selected>Select a report type...</option>
-                                <option class="text-gray-800">GAD Report</option>
-                                <option class="text-gray-800">Medicine Supply Report</option>
-                                <option class="text-gray-800">Medical Supplies Report</option>
-                                <option class="text-gray-800">Daily Treatment Record</option>
-                                <option class="text-gray-800">Dental Services Report</option>
+
+                                @forelse ($customReportTemplates as $template)
+                                    <option value="{{ $template->id }}"
+                                        data-document-type="{{ $template->document_type }}" class="text-gray-800">
+                                        {{ $template->name }}
+                                    </option>
+                                @empty
+                                    <option value="" disabled>No active custom report forms available</option>
+                                @endforelse
                             </select>
                             <i
                                 class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
@@ -2209,7 +2215,7 @@
                                         class="text-red-400">*</span>
                                 </p>
                                 <div class="fp-date-input-wrap">
-                                    <input id="dateFrom" type="text"
+                                    <input id="dateFrom" name="date_from" type="text"
                                         class="w-full px-3.5 py-2 pr-10 rounded-xl border border-gray-300 bg-white text-sm focus:outline-none focus:border-[#8B0000] transition-colors js-flatpickr-date-max-today"
                                         placeholder="Select start date" readonly />
                                     <i class="fa-regular fa-calendar fp-date-icon"></i>
@@ -2219,7 +2225,7 @@
                                 <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">To <span
                                         class="text-gray-400 normal-case font-normal">(optional)</span></p>
                                 <div class="fp-date-input-wrap">
-                                    <input id="dateTo" type="text"
+                                    <input id="dateTo" name="date_to" type="text"
                                         class="w-full px-3.5 py-2 pr-10 rounded-xl border border-gray-300 bg-white text-sm focus:outline-none focus:border-[#8B0000] transition-colors js-flatpickr-date-max-today"
                                         placeholder="Select end date" readonly />
                                     <i class="fa-regular fa-calendar fp-date-icon"></i>
@@ -2239,8 +2245,8 @@
                     <div>
                         <label class="block text-[11px] font-bold text-[#8B0000] uppercase tracking-wider mb-1">Quantity
                             <span class="text-red-500">*</span></label>
-                        <input id="reportQty" type="number" min="1" max="100" step="1"
-                            placeholder="1 – 100"
+                        <input id="reportQty" name="quantity" type="number" min="1" max="100"
+                            step="1" placeholder="1 – 100"
                             class="w-36 px-3.5 py-2 rounded-xl border border-gray-300 bg-white text-sm focus:outline-none focus:border-[#8B0000] transition-colors" />
                         <span class="text-[11px] text-gray-400 ml-2">Whole numbers only</span>
                         <p id="reportQtyErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
@@ -2305,10 +2311,46 @@
         const SUPPLIES_ITEMS = @json($suppliesItems);
         const AJAX_GAD_URL = "{{ route('dentist.dentist.report.gad-data') }}";
         const AJAX_WEEKLY_URL = "{{ route('dentist.dentist.report.weekly-data') }}";
-        const PIE_COLORS = ['#8B0000', '#b30000', '#cc3333', '#e06666', '#f4cccc', '#d9534f', '#c0392b', '#922b21',
-            '#641e16', '#f1948a'
+
+        const GAD_REPORT_DOWNLOAD_URL = "{{ route('dentist.dentist.report.gad-download') }}";
+        const ANNUAL_CLEARANCE_DOWNLOAD_URL = "{{ route('dentist.dentist.report.annual-clearance-download') }}";
+        const DENTAL_CLEARANCE_DOWNLOAD_URL = "{{ route('dentist.dentist.report.dental-clearance-download') }}";
+        const DENTAL_SERVICES_DOWNLOAD_URL = "{{ route('dentist.dentist.report.dental-services-download') }}";
+        const MEDICINE_INVENTORY_DOWNLOAD_URL = "{{ route('dentist.dentist.report.medicine-inventory-download') }}";
+        const DAILY_TREATMENT_RECORD_DOWNLOAD_URL =
+            "{{ route('dentist.dentist.report.daily-treatment-record-download') }}";
+        const DENTAL_HEALTH_RECORD_DOWNLOAD_URL = "{{ route('dentist.dentist.report.dental-health-record-download') }}";
+        const DENTAL_SUPPLIES_INVENTORY_DOWNLOAD_URL =
+            "{{ route('dentist.dentist.report.dental-supplies-inventory-download') }}";
+        const DENTAL_CASES_DOWNLOAD_URL = "{{ route('dentist.dentist.report.dental-cases-download') }}";
+        const MONTHLY_REPORT_DOWNLOAD_URL = "{{ route('dentist.dentist.report.monthly-report-download') }}";
+
+        function getCookieValue(name) {
+            return document.cookie
+                .split('; ')
+                .find(row => row.startsWith(name + '='))
+                ?.split('=')[1] || '';
+        }
+
+        const CSRF_TOKEN =
+            document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+            decodeURIComponent(getCookieValue('XSRF-TOKEN')) ||
+            "{{ csrf_token() }}";
+
+        const PIE_COLORS = [
+            '#8B0000',
+            '#b30000',
+            '#cc3333',
+            '#e06666',
+            '#f4cccc',
+            '#d9534f',
+            '#c0392b',
+            '#922b21',
+            '#641e16',
+            '#f1948a'
         ];
-        const isReportDark = () => document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark');
+        const isReportDark = () => document.documentElement.getAttribute('data-theme') === 'dark' || document
+            .documentElement.classList.contains('dark');
         const reportChartTextColor = () => isReportDark() ? '#C9D1D9' : '#374151';
         const reportChartGridColor = () => isReportDark() ? 'rgba(255,255,255,0.10)' : 'rgba(148,163,184,0.22)';
         const reportChartBorderColor = () => isReportDark() ? '#161B22' : '#ffffff';
@@ -2704,28 +2746,50 @@
             }
             const clearError = (a, b) => setError(a, b, false);
 
-            document.getElementById('downloadReportBtn').addEventListener('click', function() {
+            document.getElementById('downloadReportBtn').addEventListener('click', async function() {
+                const btn = document.getElementById('downloadReportBtn');
                 const name = document.getElementById('reportName').value.trim();
                 const type = document.getElementById('reportType').value;
+                const selectedOption = document.getElementById('reportType').selectedOptions[0];
+                const documentType = selectedOption ? selectedOption.dataset.documentType : '';
                 const from = document.getElementById('dateFrom').value;
                 const to = document.getElementById('dateTo').value;
                 const qty = parseInt(document.getElementById('reportQty').value, 10);
+                const banner = document.getElementById('formErrorBanner');
+
                 let valid = true;
+
+                function showBanner(message =
+                    'Please complete all required fields before downloading.') {
+                    banner.innerHTML = `
+            <i class="fa-solid fa-triangle-exclamation text-red-500 flex-shrink-0"></i>
+            <span>${message}</span>
+        `;
+                    banner.classList.remove('hidden');
+                    banner.classList.add('flex');
+                }
+
+                function hideBanner() {
+                    banner.classList.add('hidden');
+                    banner.classList.remove('flex');
+                }
 
                 setError('reportName', 'reportNameErr', !name);
                 if (!name) valid = false;
+
                 setError('reportType', 'reportTypeErr', !type);
                 if (!type) valid = false;
 
                 ['dateFromErr', 'dateFutureErr', 'dateRangeErr'].forEach(id => {
-                    let el = document.getElementById(id);
+                    const el = document.getElementById(id);
                     if (el) {
                         el.classList.add('hidden');
                         el.classList.remove('flex');
                     }
                 });
+
                 ['dateFrom', 'dateTo'].forEach(id => {
-                    let el = document.getElementById(id);
+                    const el = document.getElementById(id);
                     if (el) {
                         el.classList.remove('border-red-400');
                         el.classList.add('border-gray-300');
@@ -2739,19 +2803,23 @@
                     document.getElementById('dateFrom').classList.remove('border-gray-300');
                     valid = false;
                 } else {
-                    const fromFuture = from > todayStr,
-                        toFuture = to && to > todayStr;
+                    const fromFuture = from > todayStr;
+                    const toFuture = to && to > todayStr;
+
                     if (fromFuture || toFuture) {
                         document.getElementById('dateFutureErr').classList.remove('hidden');
                         document.getElementById('dateFutureErr').classList.add('flex');
+
                         if (fromFuture) {
                             document.getElementById('dateFrom').classList.add('border-red-400');
                             document.getElementById('dateFrom').classList.remove('border-gray-300');
                         }
+
                         if (toFuture) {
                             document.getElementById('dateTo').classList.add('border-red-400');
                             document.getElementById('dateTo').classList.remove('border-gray-300');
                         }
+
                         valid = false;
                     } else if (to && new Date(to) < new Date(from)) {
                         document.getElementById('dateRangeErr').classList.remove('hidden');
@@ -2762,41 +2830,188 @@
                     }
                 }
 
-                const qtyInvalid = isNaN(qty) || qty < 1 || qty > 100;
-                document.getElementById('reportQtyErrMsg').textContent = (isNaN(qty) || qty < 1) ?
-                    'Quantity must be between 1 and 100.' : 'Quantity cannot exceed 100.';
-                setError('reportQty', 'reportQtyErr', qtyInvalid);
-                if (qtyInvalid) valid = false;
+                const isCertificateRequest = ['annual_dental_clearance', 'dental_clearance'].includes(
+                    documentType);
 
-                const banner = document.getElementById('formErrorBanner');
+                let qtyInvalid = false;
+
+                if (!isCertificateRequest) {
+                    qtyInvalid = isNaN(qty) || qty < 1 || qty > 100;
+
+                    document.getElementById('reportQtyErrMsg').textContent = (isNaN(qty) || qty < 1) ?
+                        'Quantity must be between 1 and 100.' :
+                        'Quantity cannot exceed 100.';
+
+                    setError('reportQty', 'reportQtyErr', qtyInvalid);
+
+                    if (qtyInvalid) valid = false;
+                } else {
+                    clearError('reportQty', 'reportQtyErr');
+                }
+
                 if (!valid) {
-                    banner.classList.remove('hidden');
-                    banner.classList.add('flex');
-                    const btn = document.getElementById('downloadReportBtn');
+                    showBanner();
                     btn.classList.add('animate-bounce');
                     setTimeout(() => btn.classList.remove('animate-bounce'), 600);
+                    return;
+                }
+
+                let downloadEndpoint = null;
+
+                if (documentType === 'gad_report') {
+                    downloadEndpoint = GAD_REPORT_DOWNLOAD_URL;
+                } else if (documentType === 'annual_dental_clearance') {
+                    downloadEndpoint = ANNUAL_CLEARANCE_DOWNLOAD_URL;
+                } else if (documentType === 'dental_clearance') {
+                    downloadEndpoint = DENTAL_CLEARANCE_DOWNLOAD_URL;
+                } else if (documentType === 'dental_services') {
+                    downloadEndpoint = DENTAL_SERVICES_DOWNLOAD_URL;
+                } else if (documentType === 'medicine_inventory') {
+                    downloadEndpoint = MEDICINE_INVENTORY_DOWNLOAD_URL;
+                } else if (documentType === 'daily_treatment_record') {
+                    downloadEndpoint = DAILY_TREATMENT_RECORD_DOWNLOAD_URL;
+                } else if (documentType === 'dental_health_record') {
+                    downloadEndpoint = DENTAL_HEALTH_RECORD_DOWNLOAD_URL;
+                } else if (documentType === 'dental_supplies_inventory') {
+                    downloadEndpoint = DENTAL_SUPPLIES_INVENTORY_DOWNLOAD_URL;
+                } else if (documentType === 'dental_cases') {
+                    downloadEndpoint = DENTAL_CASES_DOWNLOAD_URL;
+                } else if (documentType === 'monthly_report') {
+                    downloadEndpoint = MONTHLY_REPORT_DOWNLOAD_URL;
                 } else {
-                    banner.classList.add('hidden');
-                    banner.classList.remove('flex');
+                    showBanner('This selected form is not yet connected to official PDF download.');
+                    btn.classList.add('animate-bounce');
+                    setTimeout(() => btn.classList.remove('animate-bounce'), 600);
+                    return;
+                }
+
+                hideBanner();
+
+                const originalBtnHtml = btn.innerHTML;
+
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+                try {
+                    const formData = new FormData();
+                    formData.append('_token', CSRF_TOKEN);
+                    formData.append('report_name', name);
+                    formData.append('document_template_id', type);
+                    formData.append('date_from', from);
+                    formData.append('quantity', isCertificateRequest ? '1' : String(qty));
+
+                    if (to) {
+                        formData.append('date_to', to);
+                    }
+
+                    const response = await fetch(downloadEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': CSRF_TOKEN,
+                            'X-XSRF-TOKEN': CSRF_TOKEN,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/pdf, application/json'
+                        },
+                        body: formData,
+                        credentials: 'same-origin'
+                    });
+
+                    if (!response.ok) {
+                        let message =
+                            `Unable to generate the report. Server returned ${response.status}.`;
+
+                        if (response.status === 403) {
+                            message =
+                                'You are not authorized to download this report. Please check the dentist account permissions.';
+                        }
+
+                        if (response.status === 404) {
+                            message = 'The selected report template or PDF file was not found.';
+                        }
+
+                        if (response.status === 422) {
+                            message =
+                                'Some report fields are invalid. Please review the form and try again.';
+                        }
+
+                        const contentType = response.headers.get('content-type') || '';
+
+                        if (contentType.includes('application/json')) {
+                            const errorData = await response.json();
+
+                            if (errorData.message) {
+                                message = errorData.message;
+                            }
+
+                            if (errorData.errors) {
+                                const firstError = Object.values(errorData.errors)[0];
+                                if (Array.isArray(firstError) && firstError.length > 0) {
+                                    message = firstError[0];
+                                }
+                            }
+                        }
+
+                        throw new Error(message);
+                    }
+
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+
+                    let fileName = `${name.replace(/[^A-Za-z0-9_-]/g, '_')}.pdf`;
+                    const disposition = response.headers.get('Content-Disposition') || response.headers
+                        .get('content-disposition') || '';
+                    const fileNameMatch = disposition.match(/filename="?([^"]+)"?/i);
+
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = fileNameMatch[1];
+                    }
+
+                    const link = document.createElement('a');
+                    link.href = downloadUrl;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+
+                    window.URL.revokeObjectURL(downloadUrl);
+
                     closeModal('createReportModal');
                     openModal('downloadCompleteModal');
+
                     document.getElementById('reportForm').reset();
                     document.getElementById('reportNameCounter').textContent = '0 / 100';
                     document.getElementById('reportNameCounter').classList.remove('text-red-500');
                     document.getElementById('reportNameCounter').classList.add('text-gray-400');
+
                     ['reportNameErr', 'reportTypeErr', 'dateFromErr', 'dateFutureErr', 'dateRangeErr',
                         'reportQtyErr'
                     ]
                     .forEach(id => {
-                        let el = document.getElementById(id);
+                        const el = document.getElementById(id);
                         if (el) {
                             el.classList.add('hidden');
                             el.classList.remove('flex');
                         }
                     });
+
+                    ['reportName', 'reportType', 'dateFrom', 'dateTo', 'reportQty']
+                    .forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.classList.remove('border-red-400');
+                            el.classList.add('border-gray-300');
+                        }
+                    });
+
+                } catch (error) {
+                    showBanner(error.message || 'Unable to generate the report. Please try again.');
+                } finally {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                    btn.innerHTML = originalBtnHtml;
                 }
             });
-
             document.getElementById('reportName').addEventListener('input', function() {
                 const len = this.value.length,
                     counter = document.getElementById('reportNameCounter');
@@ -2808,7 +3023,41 @@
             });
             document.getElementById('reportType').addEventListener('change', function() {
                 if (this.value) clearError('reportType', 'reportTypeErr');
-                document.getElementById('formErrorBanner').classList.add('hidden');
+
+                const selectedOption = this.selectedOptions[0];
+                const documentType = selectedOption ? selectedOption.dataset.documentType : '';
+                const qtyInput = document.getElementById('reportQty');
+                const qtyErr = document.getElementById('reportQtyErr');
+                const banner = document.getElementById('formErrorBanner');
+
+                if (documentType === 'annual_dental_clearance') {
+                    qtyInput.value = '';
+                    qtyInput.placeholder = 'Auto';
+                    qtyInput.disabled = true;
+                    qtyInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+
+                    if (qtyErr) {
+                        qtyErr.classList.add('hidden');
+                        qtyErr.classList.remove('flex');
+                    }
+
+                    banner.innerHTML = `
+            <i class="fa-solid fa-circle-info text-blue-500 flex-shrink-0"></i>
+            <span>Annual Dental Clearance will generate one page per approved request in the selected date range.</span>
+        `;
+                    banner.classList.remove('hidden');
+                    banner.classList.add('flex');
+                    banner.classList.remove('bg-red-50', 'border-red-200', 'text-red-700');
+                    banner.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-700');
+                } else {
+                    qtyInput.disabled = false;
+                    qtyInput.placeholder = '1 – 100';
+                    qtyInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+
+                    banner.classList.add('hidden');
+                    banner.classList.remove('flex', 'bg-blue-50', 'border-blue-200', 'text-blue-700');
+                    banner.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
+                }
             });
 
             function checkDates() {

@@ -290,7 +290,7 @@ Route::prefix('admin')
         */
         Route::get('/reports', [AdminReportController::class, 'index'])
             ->name('admin.reports');
-        
+
         Route::get('/reports/ai-generated', [AdminReportController::class, 'aiGenerated'])
             ->name('admin.reports.ai-generated');
 
@@ -499,23 +499,6 @@ Route::prefix('admin')
             ->name('document-template');
 
         // PREVIEW (AJAX)
-        // Special default template preview for Dental Health Form
-        Route::get('/document-template/default/dental-health', function () {
-            $html = view('admin.document-templates-defaults.dental-health-form')->render();
-
-            return response()->json([
-                'id' => 'default-dental',
-                'name' => 'Dental Health Record',
-                'document_type' => 'record',
-                'category' => 'record',
-                'content' => $html,
-                'status' => 'active',
-                'is_default' => true,
-                'paper_size' => 'A4',
-                'orientation' => 'portrait',
-            ]);
-        })->name('document-template.default.dental');
-
         Route::get('/document-template/{id}', [DocumentTemplateController::class, 'show'])
             ->name('document-template.show');
 
@@ -1008,6 +991,46 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
         ->middleware('permission:manage_reports')
         ->name('dentist.dentist.report.gad-data');
 
+    Route::post('/report/gad-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadGadReport'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.gad-download');
+
+    Route::post('/report/annual-dental-clearance-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadAnnualDentalClearance'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.annual-clearance-download');
+
+    Route::post('/report/dental-clearance-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalClearance'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.dental-clearance-download');
+
+    Route::post('/report/dental-services-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalServicesReport'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.dental-services-download');
+
+    Route::post('/report/medicine-inventory-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadMedicineInventoryReport'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.medicine-inventory-download');
+
+    Route::post('/report/daily-treatment-record-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDailyTreatmentRecordReport'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.daily-treatment-record-download');
+
+    Route::post('/report/dental-health-record-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalHealthRecord'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.dental-health-record-download');
+
+    Route::post('/report/dental-supplies-inventory-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalSuppliesInventoryReport'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.dental-supplies-inventory-download');
+
+    Route::post('/report/dental-cases-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalCasesReport'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.dental-cases-download');
+
+    Route::post('/report/monthly-report-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadMonthlyReport'])
+        ->middleware('permission:manage_reports')
+        ->name('dentist.dentist.report.monthly-report-download');
+
     Route::get('/report/weekly-data', [\App\Http\Controllers\Dentist\DentistReportController::class, 'weeklyData'])
         ->middleware('permission:manage_reports')
         ->name('dentist.dentist.report.weekly-data');
@@ -1059,6 +1082,10 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
 
 
     // Odontogram
+    Route::get('/odontogram/patient/{patient}/start', [OdontogramController::class, 'startForPatient'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.odontogram.start');
+
     Route::get('/odontogram/appointment/{appointment}', [OdontogramController::class, 'show'])
         ->middleware('permission:manage_appointments')
         ->name('dentist.odontogram');

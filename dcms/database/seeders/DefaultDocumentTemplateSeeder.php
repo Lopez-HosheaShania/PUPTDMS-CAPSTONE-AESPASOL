@@ -12,6 +12,16 @@ class DefaultDocumentTemplateSeeder extends Seeder
     {
         $templates = [
             [
+                'name' => 'Dental Health Record',
+                'code' => 'DHREC-DEFAULT',
+                'document_type' => 'dental_health_record',
+                'category' => 'Record',
+                'file_path' => resource_path('views/admin/document-templates-defaults/dental-health-form.blade.php'),
+                'paper_size' => 'A4',
+                'orientation' => 'portrait',
+                'notes' => 'Default template imported from dental-health-form.blade.php',
+            ],
+            [
                 'name' => 'Dental Certificate - Dental Clearance',
                 'code' => 'DCLR-DEFAULT',
                 'document_type' => 'dental_clearance',
@@ -91,6 +101,16 @@ class DefaultDocumentTemplateSeeder extends Seeder
                 'orientation' => 'landscape',
                 'notes' => 'Default template imported from dental-services.blade.php',
             ],
+            [
+                'name' => 'Monthly Clinic Report',
+                'code' => 'MREP-DEFAULT',
+                'document_type' => 'monthly_report',
+                'category' => 'Report',
+                'file_path' => resource_path('views/admin/document-templates-defaults/monthly-report.blade.php'),
+                'paper_size' => 'A4',
+                'orientation' => 'portrait',
+                'notes' => 'Default template imported from monthly-report.blade.php',
+            ],
         ];
 
         foreach ($templates as $template) {
@@ -101,27 +121,33 @@ class DefaultDocumentTemplateSeeder extends Seeder
 
             $content = File::get($template['file_path']);
 
-            DocumentTemplate::updateOrCreate(
-                ['code' => $template['code']],
-                [
-                    'name' => $template['name'],
-                    'document_type' => $template['document_type'],
-                    'category' => $template['category'],
-                    'engine' => 'html',
-                    'output_format' => 'pdf',
-                    'header_content' => null,
-                    'content' => $content,
-                    'footer_content' => null,
-                    'paper_size' => $template['paper_size'],
-                    'orientation' => $template['orientation'],
-                    'status' => 'active',
-                    'is_default' => true,
-                    'version' => 1,
-                    'notes' => $template['notes'],
-                    'created_by' => null,
-                    'updated_by' => null,
-                ]
-            );
+            $documentTemplate = DocumentTemplate::firstOrNew([
+                'code' => $template['code'],
+            ]);
+
+            $isNewTemplate = ! $documentTemplate->exists;
+
+            $documentTemplate->name = $template['name'];
+            $documentTemplate->document_type = $template['document_type'];
+            $documentTemplate->category = $template['category'];
+            $documentTemplate->engine = 'html';
+            $documentTemplate->output_format = 'pdf';
+            $documentTemplate->header_content = null;
+            $documentTemplate->content = $content;
+            $documentTemplate->footer_content = null;
+            $documentTemplate->paper_size = $template['paper_size'];
+            $documentTemplate->orientation = $template['orientation'];
+            $documentTemplate->notes = $template['notes'];
+
+            if ($isNewTemplate) {
+                $documentTemplate->status = 'active';
+                $documentTemplate->is_default = true;
+                $documentTemplate->version = 1;
+                $documentTemplate->created_by = null;
+                $documentTemplate->updated_by = null;
+            }
+
+            $documentTemplate->save();
         }
     }
 }
