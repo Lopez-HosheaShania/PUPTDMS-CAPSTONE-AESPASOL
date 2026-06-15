@@ -15,8 +15,9 @@ class ServiceTypeSeeder extends Seeder
                 'description' => 'Routine exam • Consultation',
             ],
             [
-                'name' => 'Dental Cleaning',
-                'description' => 'Oral hygiene • Surface buildup',
+                'old_name' => 'Dental Cleaning',
+                'name' => 'Oral Prophylaxis',
+                'description' => 'Preventive cleaning • Plaque and calculus removal',
             ],
             [
                 'name' => 'Restoration & Prosthesis',
@@ -29,14 +30,22 @@ class ServiceTypeSeeder extends Seeder
         ];
 
         foreach ($defaults as $service) {
-            ServiceType::firstOrCreate(
-                ['name' => $service['name']], 
-                [
-                    'description' => $service['description'],
-                    'is_active_for_booking' => true,
-                    'is_default' => true,
-                ]
-            );
+            $matchingNames = array_values(array_filter([
+                $service['old_name'] ?? null,
+                $service['name'],
+            ]));
+
+            $serviceType = ServiceType::whereIn('name', $matchingNames)->first();
+
+            if (!$serviceType) {
+                $serviceType = new ServiceType();
+            }
+
+            $serviceType->name = $service['name'];
+            $serviceType->description = $service['description'];
+            $serviceType->is_active_for_booking = true;
+            $serviceType->is_default = true;
+            $serviceType->save();
         }
     }
 }

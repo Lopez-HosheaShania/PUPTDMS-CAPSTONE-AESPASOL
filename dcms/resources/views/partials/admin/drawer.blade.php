@@ -37,8 +37,9 @@
                 <i class="fa-solid fa-users"></i> Patients
             </a>
 
-            <a href="{{ route('admin.admin.dashboard') }}" class="drawer-link"><i class="fa-solid fa-tooth"></i> Dental
-                Records
+            <a href="{{ route('admin.dental-records.index') }}""
+                class="nav-link {{ request()->routeIs('admin.dental-records*') ? 'active' : '' }}">
+                <i class="fa-solid fa-tooth"></i> Dental Records
             </a>
 
             <a href="{{ route('admin.admin.appointments') }}"

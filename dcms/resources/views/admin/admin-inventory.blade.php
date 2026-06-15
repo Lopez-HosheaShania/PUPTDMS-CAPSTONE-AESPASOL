@@ -21,6 +21,8 @@
             </div>
         </div>
 
+        <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
+
         <div class="stat-grid inventory-stat-grid" id="statCards">
             <div class="stat-card s-total">
                 <div class="stat-card-info">
@@ -55,7 +57,7 @@
                 <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             </div>
         </div>
-
+        
         <div class="inventory-table-card bg-white rounded-xl shadow-sm border border-[#EDE9E4] overflow-hidden">
 
             <div class="px-4 sm:px-5 py-4 border-b border-[#EDE9E4] flex flex-col gap-4">

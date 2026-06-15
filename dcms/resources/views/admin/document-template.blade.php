@@ -112,6 +112,7 @@
         </div>
         @else
         <div>
+            
             <div class="templates-grid" id="templatesGrid">
 
                 <!-- Default Dental Health Form card -->

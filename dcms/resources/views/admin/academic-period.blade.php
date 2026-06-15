@@ -88,6 +88,8 @@ $activePeriodPayload = $activePeriod
             </div>
         </div>
 
+        <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
+            
         <div class="active-banner mb-6" id="activeBannerWrap">
             <div class="active-banner-inner">
                 <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-5">

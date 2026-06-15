@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <div class="relative z-10 -mt-8 px-4 sm:px-6 lg:px-7 pb-8">
+    <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
 
         <div class="stat-grid admin-dashboard-stat-grid" id="statCards">
             <div class="stat-card s-all">

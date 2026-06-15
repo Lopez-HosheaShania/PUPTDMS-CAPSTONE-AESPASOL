@@ -4094,3 +4094,247 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
     background: rgba(255, 255, 255, .045) !important;
     border-color: rgba(255, 255, 255, .085) !important;
 }
+
+@media (max-width: 767px) {
+    #addModal.modal-overlay {
+        align-items: flex-end !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    #addModal .um-user-modal,
+    #addModal .um-user-modal-lg,
+    #addModal .modal-box-inner {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 88dvh !important;
+        max-height: 88dvh !important;
+        border-radius: 20px 20px 0 0 !important;
+        overflow: hidden !important;
+    }
+
+    #addModal .um-user-modal-header {
+        flex-shrink: 0 !important;
+        padding: .75rem .9rem !important;
+        gap: .65rem !important;
+    }
+
+    #addModal .um-user-modal-header h3,
+    #addModal .um-user-modal-header .text-gray-800 {
+        font-size: .95rem !important;
+        line-height: 1.1 !important;
+    }
+
+    #addModal .um-user-modal-header p,
+    #addModal .um-user-modal-header .text-gray-500 {
+        font-size: .7rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #addModal .um-user-modal-header .w-11,
+    #addModal .um-user-modal-header .h-11 {
+        width: 2.35rem !important;
+        height: 2.35rem !important;
+        min-width: 2.35rem !important;
+    }
+
+    #addModal .um-user-modal-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        padding: .75rem .8rem 5rem !important;
+    }
+
+    #addModal .um-user-modal-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .7rem !important;
+    }
+
+    #addModal .um-user-main-card,
+    #addModal .um-user-side-card {
+        padding: .75rem !important;
+        border-radius: 16px !important;
+    }
+
+    #addModal .um-section-title {
+        align-items: center !important;
+        gap: .55rem !important;
+        margin-bottom: .7rem !important;
+    }
+
+    #addModal .um-section-icon {
+        width: 2rem !important;
+        height: 2rem !important;
+        min-width: 2rem !important;
+        border-radius: .75rem !important;
+        font-size: .82rem !important;
+    }
+
+    #addModal .um-section-title h4,
+    #addModal .um-section-title .text-gray-800 {
+        font-size: .86rem !important;
+        line-height: 1.1 !important;
+    }
+
+    #addModal .um-section-title p,
+    #addModal .um-section-title .text-gray-500 {
+        font-size: .68rem !important;
+        line-height: 1.2 !important;
+    }
+
+    #addModal .um-field-grid {
+        grid-template-columns: 1fr !important;
+        gap: .65rem !important;
+    }
+
+    #addModal label {
+        font-size: .64rem !important;
+        line-height: 1.1 !important;
+        margin-bottom: .28rem !important;
+    }
+
+    #addModal input,
+    #addModal select,
+    #addModal .field-input {
+        width: 100% !important;
+        min-height: 43px !important;
+        height: 43px !important;
+        border-radius: 12px !important;
+        font-size: .8rem !important;
+    }
+
+    #addModal .field-input i,
+    #addModal input + i,
+    #addModal .fa-lock,
+    #addModal .fa-envelope {
+        font-size: .78rem !important;
+    }
+
+    #addModal .voice-search-row {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .45rem !important;
+        width: 100% !important;
+        align-items: stretch !important;
+    }
+
+    #addModal .voice-search-row > input,
+    #addModal .voice-search-row > .relative {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #addModal .voice-search-row > .voice-input-toggle {
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+        margin-top: .1rem !important;
+    }
+
+    #addModal .voice-search-row > .voice-input-toggle > .voice-search-mic.external,
+    #addModal .voice-search-mic.external {
+        display: inline-flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 999px !important;
+        position: static !important;
+        transform: none !important;
+        margin: 0 !important;
+        z-index: 1 !important;
+    }
+
+    #addModal .voice-search-mic.external i {
+        font-size: .78rem !important;
+    }
+
+    #addModal .um-password-note {
+        margin-top: .6rem !important;
+        padding: .65rem .75rem !important;
+        border-radius: 12px !important;
+        font-size: .68rem !important;
+        line-height: 1.35 !important;
+    }
+
+    #addModal .um-divider {
+        margin: .7rem 0 .8rem !important;
+    }
+
+    #addModal .um-status-grid {
+        grid-template-columns: 1fr !important;
+        gap: .55rem !important;
+    }
+
+    #addModal .um-status-card {
+        min-height: 56px !important;
+        padding: .6rem .7rem !important;
+        border-radius: 14px !important;
+        gap: .6rem !important;
+    }
+
+    #addModal .um-status-card .w-10,
+    #addModal .um-status-card .h-10,
+    #addModal .um-status-card .w-11,
+    #addModal .um-status-card .h-11 {
+        width: 1.55rem !important;
+        height: 1.55rem !important;
+        min-width: 1.55rem !important;
+        min-height: 1.55rem !important;
+    }
+
+    #addModal .um-status-card .rounded-full {
+        width: 1.55rem !important;
+        height: 1.55rem !important;
+        min-width: 1.55rem !important;
+        min-height: 1.55rem !important;
+    }
+
+    #addModal .um-status-card strong,
+    #addModal .um-status-card .font-bold {
+        font-size: .78rem !important;
+        line-height: 1.05 !important;
+    }
+
+    #addModal .um-status-card p,
+    #addModal .um-status-card .text-sm,
+    #addModal .um-status-card .text-xs {
+        font-size: .64rem !important;
+        line-height: 1.12 !important;
+    }
+
+    #addModal .um-user-modal-footer {
+        position: sticky !important;
+        bottom: 0 !important;
+        z-index: 20 !important;
+        flex-shrink: 0 !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: .55rem !important;
+        padding: .7rem .8rem calc(.75rem + env(safe-area-inset-bottom)) !important;
+    }
+
+    #addModal .um-user-modal-footer button,
+    #addModal .modal-btn-ghost,
+    #addModal .um-save-user-btn {
+        width: 100% !important;
+        min-height: 40px !important;
+        padding: 0 .75rem !important;
+        border-radius: 12px !important;
+        font-size: .78rem !important;
+        white-space: nowrap !important;
+    }
+
+    #addModal .um-save-user-btn .btn-confirm-icon {
+        width: 22px !important;
+        height: 22px !important;
+        min-width: 22px !important;
+    }
+}

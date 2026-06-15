@@ -112,6 +112,8 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
             </div>
         </div>
 
+        <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
+
         <div id="statCards" class="stat-grid cs-stat-grid">
             @php
             $statCards = [
