@@ -18,6 +18,8 @@
         "laravel/socialite": "^5.25",
         "laravel/tinker": "^2.10.1",
         "pusher/pusher-php-server": "*",
+        "setasign/fpdf": "^1.8",
+        "setasign/fpdi": "^2.6",
         "tymon/jwt-auth": "^2.3"
     },
     "require-dev": {

@@ -11,12 +11,39 @@ use App\Models\ToothSurface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Patient;
 
 class OdontogramController extends Controller
 {
+
+    public function startForPatient(Patient $patient)
+    {
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if ($activeRole !== 'dentist') {
+            return redirect('/login');
+        }
+
+        $appointment = Appointment::where('patient_id', $patient->id)
+            ->whereIn('status', ['upcoming', 'rescheduled'])
+            ->whereDate('appointment_date', '>=', now()->toDateString())
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
+            ->first();
+
+        if (!$appointment) {
+            return redirect()
+                ->route('dentist.dentist.patient.profile', ['patient' => $patient->id])
+                ->with('error', 'No upcoming appointment found for this patient.');
+        }
+
+        return redirect()->route('dentist.odontogram', [
+            'appointment' => $appointment->id,
+        ]);
+    }
     public function show(Appointment $appointment)
     {
-       $activeRole = session('impersonated_role') ?: session('role');
+        $activeRole = session('impersonated_role') ?: session('role');
 
         if ($activeRole !== 'dentist') {
             return redirect('/login');
@@ -42,7 +69,7 @@ class OdontogramController extends Controller
         ));
     }
 
-    
+
     public function save(Request $request, Appointment $appointment)
     {
         $activeRole = session('impersonated_role') ?: session('role');

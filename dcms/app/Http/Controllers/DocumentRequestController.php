@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Helpers\AuditLogger;
+use Illuminate\Support\Facades\Auth;
 use App\Notifications\DocumentRequestSubmittedNotification;
 use App\Notifications\DocumentRequestApprovedNotification;
 use App\Notifications\DocumentRequestRejectedNotification;
@@ -22,7 +23,7 @@ class DocumentRequestController extends Controller
             'purpose' => 'required|string|max:150',
         ]);
 
-        $patient = Patient::where('user_id', auth()->id())->first();
+        $patient = Patient::where('user_id', Auth::id())->first();
 
         if (!$patient) {
             return response()->json([
@@ -48,7 +49,7 @@ class DocumentRequestController extends Controller
                 ]);
             });
 
-           $recipients = User::whereHas('role', function ($query) {
+            $recipients = User::whereHas('role', function ($query) {
                 $query->whereIn('slug', ['dentist', 'admin']);
             })->get()->unique('id');
 
@@ -93,8 +94,11 @@ class DocumentRequestController extends Controller
             return redirect('/login');
         }
 
-        $notifications = auth()->user()
-            ? auth()->user()->notifications()->latest()->take(10)->get()
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        $notifications = $user
+            ? $user->notifications()->latest()->take(10)->get()
             : collect([]);
 
         return view('dentist.dentist-documentrequests', compact('notifications'));
@@ -213,9 +217,14 @@ class DocumentRequestController extends Controller
         if ($activeRole !== 'dentist') {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-
         $docRequest = DocumentRequest::with('patient.user')->findOrFail($id);
-        $docRequest->update(['status' => 'approved']);
+
+        $docRequest->update([
+            'status' => 'approved',
+            'approved_at' => now(),
+            'approved_by' => Auth::id(),
+            'rejection_reason' => null,
+        ]);
 
         if ($docRequest->patient && $docRequest->patient->user) {
             $docRequest->patient->user->notify(
@@ -246,6 +255,8 @@ class DocumentRequestController extends Controller
         $docRequest->update([
             'status' => 'rejected',
             'rejection_reason' => $request->reason,
+            'approved_at' => null,
+            'approved_by' => null,
         ]);
 
         if ($docRequest->patient && $docRequest->patient->user) {
@@ -266,9 +277,24 @@ class DocumentRequestController extends Controller
             'status' => 'required|in:approved,rejected,ready,released',
         ]);
 
-        DocumentRequest::findOrFail($id)->update([
-            'status' => $request->status
-        ]);
+        $docRequest = DocumentRequest::findOrFail($id);
+
+        $updates = [
+            'status' => $request->status,
+        ];
+
+        if ($request->status === 'approved') {
+            $updates['approved_at'] = now();
+            $updates['approved_by'] = Auth::id();
+            $updates['rejection_reason'] = null;
+        }
+
+        if ($request->status === 'rejected') {
+            $updates['approved_at'] = null;
+            $updates['approved_by'] = null;
+        }
+
+        $docRequest->update($updates);
 
         return back()->with('success', 'Request updated.');
     }
