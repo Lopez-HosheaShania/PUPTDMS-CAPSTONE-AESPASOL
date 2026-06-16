@@ -3742,3 +3742,515 @@ html.dark .cs-modal .modal-close-btn i,
         margin: 0 !important;
     }
 }
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.clinic-schedule-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .admin-page-container,
+    #mainContent.clinic-schedule-page .content-lift {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner {
+        border-radius: 22px !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner-inner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner-inner > div:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        text-align: left !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-title,
+    #mainContent.clinic-schedule-page .page-banner h1 {
+        text-align: left !important;
+        line-height: 1.08 !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-subtitle,
+    #mainContent.clinic-schedule-page .page-banner p {
+        max-width: 720px !important;
+        font-size: .86rem !important;
+        line-height: 1.45 !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-actions {
+        flex: 0 0 auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .65rem !important;
+        flex-wrap: wrap !important;
+        margin-left: auto !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn,
+    #mainContent.clinic-schedule-page .cs-banner-action-btn {
+        min-height: 40px !important;
+        height: 40px !important;
+        padding: 0 .9rem !important;
+        font-size: .74rem !important;
+        border-radius: 999px !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-card {
+        min-height: 94px !important;
+        padding: 1rem !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-icon-wrapper {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 12px !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-num,
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid p.text-gray-800 {
+        font-size: 1.55rem !important;
+        line-height: 1 !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-label,
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid p.text-gray-500 {
+        font-size: .64rem !important;
+        line-height: 1.15 !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-footer,
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid p.text-gray-400 {
+        font-size: .68rem !important;
+        line-height: 1.2 !important;
+    }
+
+    #mainContent.clinic-schedule-page .grid.grid-cols-1.lg\:grid-cols-3,
+    #mainContent.clinic-schedule-page .grid.grid-cols-1.lg\:grid-cols-3.gap-6 {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .lg\:col-span-2,
+    #mainContent.clinic-schedule-page .space-y-6 {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .week-grid {
+        min-width: 880px !important;
+        width: 880px !important;
+    }
+
+    #mainContent.clinic-schedule-page .overflow-x-auto:has(.week-grid),
+    #mainContent.clinic-schedule-page .bg-white.rounded-xl:has(.week-grid) .overflow-x-auto {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #mainContent.clinic-schedule-page .wk-hdr {
+        padding: .55rem .35rem !important;
+        font-size: .66rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .time-lbl {
+        font-size: .6rem !important;
+        padding: .45rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .cal-slot {
+        min-height: 48px !important;
+    }
+
+    #mainContent.clinic-schedule-page #prevWeek,
+    #mainContent.clinic-schedule-page #nextWeek {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 12px !important;
+    }
+
+    #mainContent.clinic-schedule-page #weekRangeLabel {
+        font-size: .78rem !important;
+        line-height: 1.2 !important;
+        text-align: center !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page #todayBtn {
+        min-height: 38px !important;
+        padding: 0 .85rem !important;
+        font-size: .7rem !important;
+        border-radius: 999px !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-card-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .85rem !important;
+        flex-wrap: wrap !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-header-actions {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .55rem !important;
+        margin-left: auto !important;
+        flex-wrap: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-count {
+        height: 32px !important;
+        padding: 0 .7rem !important;
+        font-size: .66rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesViewToggle.view-toggle-container {
+        transform: scale(.92) !important;
+        transform-origin: right center !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesListView,
+    #mainContent.clinic-schedule-page #scheduleRulesListView .overflow-x-auto {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table {
+        min-width: 850px !important;
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table thead th {
+        padding: .65rem .7rem !important;
+        font-size: .66rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table tbody td {
+        padding: .7rem .7rem !important;
+        font-size: .74rem !important;
+        vertical-align: middle !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table .badge-open,
+    #mainContent.clinic-schedule-page .sched-table .badge-closed,
+    #mainContent.clinic-schedule-page .sched-table .badge-limited,
+    #mainContent.clinic-schedule-page .sched-table .badge-holiday {
+        font-size: .62rem !important;
+        padding: 2px 8px !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page .cap-bar.w-16 {
+        width: 3.6rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-action-btn {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 11px !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-action-btn i {
+        font-size: .72rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rules-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        padding: .85rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card {
+        padding: .85rem !important;
+        border-radius: 16px !important;
+        gap: .6rem !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-top {
+        min-width: 0 !important;
+        gap: .55rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-title {
+        font-size: .8rem !important;
+        line-height: 1.2 !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .55rem .65rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-label {
+        font-size: .56rem !important;
+        margin-bottom: .12rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-value {
+        font-size: .7rem !important;
+        line-height: 1.25 !important;
+        word-break: break-word !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-actions {
+        justify-content: flex-end !important;
+        gap: .35rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .holiday-item,
+    #mainContent.clinic-schedule-page .blocked-list-item {
+        gap: .7rem !important;
+        padding: .7rem 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .holiday-title,
+    #mainContent.clinic-schedule-page .blocked-title {
+        font-size: .78rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #mainContent.clinic-schedule-page .holiday-meta,
+    #mainContent.clinic-schedule-page .blocked-note {
+        font-size: .66rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal-card,
+    .clinic-schedule-page .cs-modal-card {
+        width: min(94vw, 820px) !important;
+        max-height: calc(100dvh - 2rem) !important;
+        border-radius: 22px !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rule-modal-card,
+    .clinic-schedule-page .cs-rule-modal-card {
+        width: min(94vw, 860px) !important;
+        max-height: calc(100dvh - 2rem) !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-block-modal-card,
+    .clinic-schedule-page .cs-block-modal-card {
+        width: min(94vw, 560px) !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-detail-modal-card,
+    .clinic-schedule-page .cs-detail-modal-card {
+        width: min(94vw, 480px) !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .modal-hdr,
+    .clinic-schedule-page .cs-modal .modal-hdr {
+        padding: 1rem 1.15rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .modal-body,
+    #mainContent.clinic-schedule-page .cs-modal .modal-form-body,
+    .clinic-schedule-page .cs-modal .modal-body,
+    .clinic-schedule-page .cs-modal .modal-form-body {
+        padding: 1rem !important;
+        max-height: calc(100dvh - 190px) !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .modal-footer,
+    #mainContent.clinic-schedule-page .cs-modal .rule-modal-footer,
+    .clinic-schedule-page .cs-modal .modal-footer,
+    .clinic-schedule-page .cs-modal .rule-modal-footer {
+        padding: .9rem 1rem 1rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .rule-modal-layout,
+    .clinic-schedule-page .rule-modal-layout {
+        grid-template-columns: 1fr !important;
+        gap: .9rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .modal-section,
+    .clinic-schedule-page .modal-section {
+        padding: .85rem !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.clinic-schedule-page .day-toggle-group,
+    .clinic-schedule-page .day-toggle-group {
+        grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+        gap: .35rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .day-toggle,
+    .clinic-schedule-page .day-toggle {
+        min-height: 40px !important;
+        height: 40px !important;
+        border-radius: 12px !important;
+        font-size: .68rem !important;
+        padding: 0 .25rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .break-chip-group,
+    .clinic-schedule-page .break-chip-group {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .5rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .break-chip,
+    .clinic-schedule-page .break-chip {
+        min-height: 40px !important;
+        border-radius: 12px !important;
+        font-size: .68rem !important;
+        padding: .55rem .45rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .slot-stepper,
+    .clinic-schedule-page .slot-stepper {
+        width: max-content !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.clinic-schedule-page .slot-stepper-btn,
+    .clinic-schedule-page .slot-stepper-btn {
+        width: 38px !important;
+        height: 38px !important;
+    }
+
+    #mainContent.clinic-schedule-page .slot-stepper-input,
+    .clinic-schedule-page .slot-stepper-input {
+        width: 74px !important;
+        min-width: 74px !important;
+        height: 40px !important;
+        font-size: .95rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .rule-notes-textarea,
+    .clinic-schedule-page .rule-notes-textarea {
+        min-height: 120px !important;
+        height: 120px !important;
+    }
+
+    #scheduleDeleteModal .cs-delete-modal-card {
+        width: min(94vw, 460px) !important;
+        max-width: 94vw !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    #mainContent.clinic-schedule-page .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        margin-left: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn,
+    #mainContent.clinic-schedule-page .cs-banner-action-btn {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .75rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-card {
+        min-height: 104px !important;
+        padding: .9rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rules-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-card-header {
+        align-items: flex-start !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-header-actions {
+        width: 100% !important;
+        justify-content: space-between !important;
+        margin-left: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesViewToggle.view-toggle-container {
+        transform: scale(.9) !important;
+        transform-origin: right center !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table {
+        min-width: 900px !important;
+    }
+
+    #mainContent.clinic-schedule-page .day-toggle-group {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+
+    #mainContent.clinic-schedule-page .break-chip-group {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .modal-footer,
+    #mainContent.clinic-schedule-page .cs-modal .rule-modal-footer,
+    .clinic-schedule-page .cs-modal .modal-footer,
+    .clinic-schedule-page .cs-modal .rule-modal-footer {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .btn-soft,
+    #mainContent.clinic-schedule-page .cs-modal .btn-primary,
+    #mainContent.clinic-schedule-page .cs-modal .rule-save-btn,
+    .clinic-schedule-page .cs-modal .btn-soft,
+    .clinic-schedule-page .cs-modal .btn-primary,
+    .clinic-schedule-page .cs-modal .rule-save-btn {
+        width: 100% !important;
+    }
+}

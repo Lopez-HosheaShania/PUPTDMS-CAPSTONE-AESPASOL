@@ -1328,3 +1328,463 @@
     min-width: 0 !important;
 }
 
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.cms-page,
+    .cms-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 100px !important;
+    }
+
+    .cms-shell {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 auto !important;
+    }
+
+    .cms-page .page-banner {
+        padding: 1.35rem 1.4rem !important;
+        border-radius: 20px !important;
+        margin-bottom: 1rem !important;
+        overflow: hidden !important;
+    }
+
+    .cms-page .page-banner-inner {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .cms-page .page-banner-inner > div:first-child {
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    .cms-page .page-title {
+        font-size: 1.8rem !important;
+        line-height: 1.08 !important;
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .cms-page .page-subtitle,
+    .cms-page .page-banner p {
+        font-size: .8rem !important;
+        line-height: 1.35 !important;
+        max-width: 650px !important;
+    }
+
+    .cms-layout {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .cms-page .card,
+    .cms-page .info-card,
+    .cms-page .section-block {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        border-radius: 17px !important;
+    }
+
+    .cms-page .card-body {
+        padding: 1rem !important;
+    }
+
+    .cms-page .card-header {
+        min-height: 62px !important;
+        padding: .9rem 1rem .8rem !important;
+    }
+
+    .cms-page .card-header-left {
+        gap: .65rem !important;
+        min-width: 0 !important;
+    }
+
+    .cms-page .card-header-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 13px !important;
+    }
+
+    .cms-page .card-title {
+        font-size: .9rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .cms-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+    }
+
+    .cms-grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+    }
+
+    .cms-role-status {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+    }
+
+    .synced-row {
+        gap: .85rem !important;
+        align-items: end !important;
+    }
+
+    .synced-row + .synced-row {
+        margin-top: .85rem !important;
+    }
+
+    .synced-row-top {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 82px !important;
+    }
+
+    .synced-row-mid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .synced-row-bottom {
+        grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) minmax(0, .8fr) !important;
+    }
+
+    .cms-page .field-group {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .cms-page .field-label {
+        font-size: .68rem !important;
+        line-height: 1.2 !important;
+        margin-top: .75rem !important;
+    }
+
+    .cms-page .access-input,
+    .cms-page .access-select,
+    .cms-page .cms-custom-select-btn {
+        min-height: 40px !important;
+        height: 40px !important;
+        border-radius: 11px !important;
+        font-size: .78rem !important;
+        padding-left: .75rem !important;
+        padding-right: .75rem !important;
+    }
+
+    .synced-user-layout .access-input,
+    .synced-user-layout .access-select {
+        height: 42px !important;
+    }
+
+    .cms-page .search-combo {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .cms-page .user-search-row.voice-search-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: .55rem !important;
+        width: 100% !important;
+    }
+
+    .cms-page .search-input-wrap {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .cms-page .cms-search-input {
+        min-height: 42px !important;
+        height: 42px !important;
+        font-size: .78rem !important;
+        padding-left: 38px !important;
+        padding-right: 76px !important;
+    }
+
+    .cms-page .cms-search-leading-icon {
+        left: 13px !important;
+        font-size: .78rem !important;
+    }
+
+    .cms-page .cms-search-clear-btn {
+        right: 40px !important;
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    .cms-page .dropdown-toggle-btn {
+        right: 12px !important;
+    }
+
+    .cms-page .user-search-row .voice-input-toggle,
+    .cms-page .user-search-row .voice-search-mic.external {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        margin: 0 !important;
+        position: static !important;
+        transform: none !important;
+    }
+
+    .cms-page #searchResults.search-results {
+        right: calc(42px + .55rem) !important;
+    }
+
+    .cms-page #searchResults.search-results.is-open:not(:empty) {
+        max-height: min(320px, 42vh) !important;
+        border-radius: 15px !important;
+    }
+
+    .cms-page #searchResults .search-item {
+        min-height: 54px !important;
+        padding: .68rem .8rem !important;
+    }
+
+    .cms-page .search-name {
+        font-size: .8rem !important;
+    }
+
+    .cms-page .search-email,
+    .cms-page .search-empty {
+        font-size: .72rem !important;
+    }
+
+    .cms-page .cms-custom-select-menu {
+        top: calc(100% + 6px) !important;
+        padding: .4rem !important;
+        border-radius: 13px !important;
+        max-height: 230px !important;
+        overflow-y: auto !important;
+        z-index: 20000 !important;
+    }
+
+    .cms-page .cms-custom-select-option {
+        min-height: 36px !important;
+        padding: 0 .7rem !important;
+        border-radius: 10px !important;
+        font-size: .74rem !important;
+    }
+
+    .cms-page .section-block {
+        padding: .9rem !important;
+        gap: 1rem !important;
+    }
+
+    .cms-page .section-block .section-head:not(.quick-notes-head) {
+        margin-bottom: .75rem !important;
+    }
+
+    .cms-page .section-block .section-head:not(.quick-notes-head) .section-head-left {
+        gap: .65rem !important;
+    }
+
+    .cms-page .section-block .section-head:not(.quick-notes-head) .section-icon {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        border-radius: 12px !important;
+        font-size: .86rem !important;
+    }
+
+    .cms-page .section-block .section-head:not(.quick-notes-head) .section-title {
+        font-size: .9rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .cms-page .section-note {
+        font-size: .72rem !important;
+        line-height: 1.3 !important;
+        margin-top: .3rem !important;
+    }
+
+    .cms-page .preview-meta-item {
+        padding: .75rem !important;
+        border-radius: 13px !important;
+    }
+
+    .cms-page .preview-name {
+        font-size: .9rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .cms-page .preview-email {
+        font-size: .72rem !important;
+    }
+
+    .cms-page .preview-meta-label {
+        font-size: .62rem !important;
+    }
+
+    .cms-page .preview-meta-value {
+        font-size: .78rem !important;
+    }
+
+    .cms-page .quick-notes-card {
+        padding: .9rem !important;
+    }
+
+    .cms-page .quick-notes-card .quick-notes-head {
+        min-height: 64px !important;
+        padding: .8rem .9rem !important;
+        border-radius: 15px !important;
+        margin-bottom: .85rem !important;
+    }
+
+    .cms-page .quick-notes-card .section-head-left {
+        gap: .7rem !important;
+    }
+
+    .cms-page .quick-notes-card .section-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 13px !important;
+    }
+
+    .cms-page .quick-notes-card .quick-notes-title {
+        font-size: .88rem !important;
+    }
+
+    .cms-page .quick-notes-card .section-note {
+        font-size: .7rem !important;
+        margin-top: .2rem !important;
+    }
+
+    .cms-page .quick-notes-card .tip-list {
+        gap: .7rem !important;
+    }
+
+    .cms-page .quick-notes-card .tip-item {
+        grid-template-columns: 20px minmax(0, 1fr) !important;
+        gap: .65rem !important;
+        font-size: .78rem !important;
+        line-height: 1.4 !important;
+    }
+
+    .cms-page .quick-notes-card .tip-item i {
+        width: 20px !important;
+        height: 20px !important;
+        font-size: .76rem !important;
+    }
+
+    .access-card-footer {
+        padding: .85rem 1rem 1rem !important;
+        gap: .65rem !important;
+    }
+
+    .cms-page .btn-reset,
+    .cms-page .btn-save {
+        min-height: 40px !important;
+        height: 40px !important;
+        padding: 0 .9rem !important;
+        font-size: .76rem !important;
+        white-space: nowrap !important;
+    }
+}
+
+@media (min-width: 1101px) and (max-width: 1280px) {
+
+    .cms-layout {
+        grid-template-columns: minmax(0, 1.35fr) minmax(280px, .85fr) !important;
+        gap: 1rem !important;
+    }
+
+    .cms-grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    .cms-page .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    .cms-grid,
+    .cms-grid-3,
+    .cms-role-status {
+        grid-template-columns: 1fr !important;
+    }
+
+    .synced-row-top,
+    .synced-row-mid,
+    .synced-row-full,
+    .synced-row-bottom {
+        grid-template-columns: 1fr !important;
+    }
+
+    .synced-row-top .field-group:last-child .access-input {
+        text-align: left !important;
+        padding-left: .75rem !important;
+        padding-right: .75rem !important;
+    }
+
+    .access-card-footer {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        align-items: center !important;
+    }
+
+    .cms-page .btn-reset,
+    .cms-page .btn-save {
+        width: 100% !important;
+    }
+}
+
+/* CMS BANNER TITLE - FORCE LEFT ALIGNMENT */
+.cms-page .cms-banner,
+.cms-page .cms-banner-inner,
+.cms-page .cms-banner-title-wrap,
+.cms-page .cms-banner-title {
+    text-align: left !important;
+}
+
+.cms-page .cms-banner-inner {
+    width: 100% !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+}
+
+.cms-page .cms-banner-title-wrap {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+}
+
+.cms-page .cms-banner-title {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-self: flex-start !important;
+    justify-self: flex-start !important;
+    text-align: left !important;
+}
+
+@media (max-width: 1280px) {
+    .cms-page .cms-banner-inner,
+    .cms-page .cms-banner-title-wrap,
+    .cms-page .cms-banner-title {
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+}

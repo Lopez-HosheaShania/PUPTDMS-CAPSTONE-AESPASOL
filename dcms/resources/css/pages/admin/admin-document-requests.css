@@ -1666,3 +1666,467 @@
     border-color: rgba(252, 165, 165, .24) !important;
     color: #FCA5A5 !important;
 }
+
+/* =========================================================
+   DOCUMENT REQUESTS - CLEAN FIXED TABLET / iPAD VIEW
+   Replacement block only.
+   Layout:
+   Row 1: Sort By + Filter + Clear
+   Row 2: Search + Mic
+   Content: Grid card view
+   ========================================================= */
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.docreq-page,
+    .document-requests-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    #mainContent.docreq-page .table-card,
+    .document-requests-page .table-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+        position: relative !important;
+        z-index: 20 !important;
+    }
+
+    /* Toolbar: sort + filter close together, search below */
+    #mainContent.docreq-page .docreq-toolbar-actions,
+    .document-requests-page .docreq-toolbar-actions {
+        display: grid !important;
+        grid-template-columns: minmax(175px, 230px) auto auto minmax(0, 1fr) !important;
+        grid-template-areas:
+            "sort filter clear spacer"
+            "search search search search" !important;
+        align-items: center !important;
+        justify-content: start !important;
+        gap: .55rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+        position: relative !important;
+        z-index: 40 !important;
+        flex-wrap: unset !important;
+    }
+
+    #mainContent.docreq-page .docreq-toolbar-actions > *,
+    .document-requests-page .docreq-toolbar-actions > * {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* Sort By */
+    #mainContent.docreq-page #docreqStatusSelect,
+    #mainContent.docreq-page .docreq-sort-dropdown,
+    .document-requests-page #docreqStatusSelect,
+    .document-requests-page .docreq-sort-dropdown {
+        grid-area: sort !important;
+        order: 1 !important;
+        width: 100% !important;
+        max-width: 230px !important;
+        min-width: 0 !important;
+        flex: none !important;
+        position: relative !important;
+        z-index: 1000 !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.docreq-page .docreq-sort-dropdown.open,
+    .document-requests-page .docreq-sort-dropdown.open {
+        z-index: 10000 !important;
+    }
+
+    #mainContent.docreq-page .docreq-sort-trigger,
+    .document-requests-page .docreq-sort-trigger {
+        width: 100% !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 5px 10px !important;
+        border-radius: 999px !important;
+    }
+
+    #mainContent.docreq-page .docreq-sort-icon,
+    .document-requests-page .docreq-sort-icon {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        border-radius: 10px !important;
+        font-size: 11px !important;
+    }
+
+    #mainContent.docreq-page .docreq-sort-copy,
+    .document-requests-page .docreq-sort-copy {
+        min-width: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-sort-label,
+    .document-requests-page .docreq-sort-label {
+        font-size: 8px !important;
+        line-height: 1 !important;
+    }
+
+    #mainContent.docreq-page .docreq-sort-value,
+    .document-requests-page .docreq-sort-value {
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        font-size: 11px !important;
+    }
+
+    #mainContent.docreq-page .docreq-sort-count,
+    .document-requests-page .docreq-sort-count {
+        min-width: 23px !important;
+        height: 23px !important;
+        padding: 0 7px !important;
+        font-size: 10px !important;
+    }
+
+    #mainContent.docreq-page .docreq-sort-panel,
+    .document-requests-page .docreq-sort-panel {
+        width: 320px !important;
+        max-width: calc(100vw - 32px) !important;
+        left: 0 !important;
+        right: auto !important;
+        z-index: 10001 !important;
+    }
+
+    /* Filter beside Sort By */
+    #mainContent.docreq-page #filterBtn,
+    .document-requests-page #filterBtn {
+        grid-area: filter !important;
+        order: 2 !important;
+        justify-self: start !important;
+        width: auto !important;
+        min-width: 88px !important;
+        max-width: max-content !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 .85rem !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        font-size: .74rem !important;
+        flex: none !important;
+    }
+
+    #mainContent.docreq-page #externalClearFilterBtn,
+    .document-requests-page #externalClearFilterBtn {
+        grid-area: clear !important;
+        order: 3 !important;
+        justify-self: start !important;
+        width: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        height: 42px !important;
+        flex: none !important;
+    }
+
+    #mainContent.docreq-page #externalClearFilterBtn.hidden,
+    .document-requests-page #externalClearFilterBtn.hidden {
+        display: none !important;
+    }
+
+    /* Search full row */
+    #mainContent.docreq-page .docreq-search-wrap,
+    .document-requests-page .docreq-search-wrap {
+        grid-area: search !important;
+        order: 4 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+    }
+
+    #mainContent.docreq-page .docreq-search-wrap .search-wrap,
+    #mainContent.docreq-page .docreq-search-wrap .global-search,
+    .document-requests-page .docreq-search-wrap .search-wrap,
+    .document-requests-page .docreq-search-wrap .global-search {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.docreq-page .docreq-search-wrap input,
+    .document-requests-page .docreq-search-wrap input {
+        width: 100% !important;
+        min-width: 0 !important;
+        font-size: .74rem !important;
+    }
+
+    #mainContent.docreq-page .voice-search-row,
+    #mainContent.docreq-page .docreq-search-row,
+    .document-requests-page .voice-search-row,
+    .document-requests-page .docreq-search-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: .5rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.docreq-page .voice-input-toggle,
+    #mainContent.docreq-page .voice-search-mic.external,
+    .document-requests-page .voice-input-toggle,
+    .document-requests-page .voice-search-mic.external {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        position: static !important;
+        transform: none !important;
+        margin: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Hide view toggle on tablet */
+    #mainContent.docreq-page #docreqViewToggle,
+    .document-requests-page #docreqViewToggle,
+    #mainContent.docreq-page #documentRequestViewToggle,
+    .document-requests-page #documentRequestViewToggle {
+        display: none !important;
+    }
+
+    /* Force card view on tablet/iPad */
+    #mainContent.docreq-page #documentRequestListView,
+    .document-requests-page #documentRequestListView {
+        display: none !important;
+    }
+
+    #mainContent.docreq-page #documentRequestGridView,
+    .document-requests-page #documentRequestGridView {
+        display: block !important;
+    }
+
+    #mainContent.docreq-page .requests-grid,
+    .document-requests-page .requests-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .85rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: .85rem !important;
+    }
+
+    #mainContent.docreq-page .request-card,
+    .document-requests-page .request-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: .9rem !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.docreq-page .request-card-top,
+    .document-requests-page .request-card-top {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: .65rem !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.docreq-page .request-card-patient,
+    .document-requests-page .request-card-patient {
+        display: flex !important;
+        align-items: center !important;
+        gap: .65rem !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.docreq-page .request-card-avatar,
+    .document-requests-page .request-card-avatar {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        font-size: .78rem !important;
+    }
+
+    #mainContent.docreq-page .request-card-patient-info,
+    #mainContent.docreq-page .request-card-meta,
+    #mainContent.docreq-page .request-card-field,
+    #mainContent.docreq-page .request-card-value,
+    .document-requests-page .request-card-patient-info,
+    .document-requests-page .request-card-meta,
+    .document-requests-page .request-card-field,
+    .document-requests-page .request-card-value {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.docreq-page .request-card-ref,
+    .document-requests-page .request-card-ref {
+        max-width: 100% !important;
+        font-size: .68rem !important;
+        line-height: 1.2 !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    #mainContent.docreq-page .request-card-name,
+    .document-requests-page .request-card-name {
+        max-width: 100% !important;
+        font-size: .8rem !important;
+        line-height: 1.2 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.docreq-page .request-card-id,
+    .document-requests-page .request-card-id {
+        max-width: 100% !important;
+        font-size: .66rem !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.docreq-page .request-card-meta,
+    .document-requests-page .request-card-meta {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .6rem !important;
+    }
+
+    #mainContent.docreq-page .request-card-label,
+    .document-requests-page .request-card-label {
+        font-size: .58rem !important;
+        margin-bottom: .2rem !important;
+    }
+
+    #mainContent.docreq-page .request-card-value,
+    .document-requests-page .request-card-value {
+        font-size: .74rem !important;
+        line-height: 1.3 !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    #mainContent.docreq-page .request-card-purpose,
+    .document-requests-page .request-card-purpose {
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        word-break: break-word !important;
+    }
+
+    #mainContent.docreq-page .document-badge,
+    #mainContent.docreq-page .status-badge,
+    .document-requests-page .document-badge,
+    .document-requests-page .status-badge {
+        max-width: 100% !important;
+        min-height: 24px !important;
+        padding: 0 .55rem !important;
+        font-size: .62rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    #mainContent.docreq-page .request-card-footer,
+    .document-requests-page .request-card-footer {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: center !important;
+        gap: .65rem !important;
+        margin-top: .1rem !important;
+    }
+
+    #mainContent.docreq-page .request-card-actions,
+    .document-requests-page .request-card-actions {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .4rem !important;
+        min-width: 92px !important;
+        flex-wrap: unset !important;
+    }
+
+    #mainContent.docreq-page .request-card-actions button,
+    #mainContent.docreq-page .request-card-actions a,
+    .document-requests-page .request-card-actions button,
+    .document-requests-page .request-card-actions a {
+        width: 100% !important;
+        min-height: 34px !important;
+        justify-content: center !important;
+        font-size: .68rem !important;
+        padding: 0 .65rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.docreq-page .docreq-refresh-notice,
+    .document-requests-page .docreq-refresh-notice {
+        align-items: flex-start !important;
+        gap: .75rem !important;
+        padding: .8rem .9rem !important;
+    }
+
+    #mainContent.docreq-page .docreq-refresh-copy small,
+    .document-requests-page .docreq-refresh-copy small {
+        font-size: .68rem !important;
+    }
+
+    #mainContent.docreq-page .docreq-refresh-btn,
+    .document-requests-page .docreq-refresh-btn {
+        min-height: 36px !important;
+        padding: 0 .8rem !important;
+        font-size: .68rem !important;
+    }
+
+    #mainContent.docreq-page .docreq-pagebar,
+    .document-requests-page .docreq-pagebar {
+        padding: .75rem .9rem !important;
+        gap: .6rem !important;
+    }
+
+    #mainContent.docreq-page .docreq-pagination-wrap,
+    .document-requests-page .docreq-pagination-wrap {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+    }
+}
+
+/* SORT BY + FILTER SPACING ONLY */
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.docreq-page .docreq-toolbar-actions,
+    .document-requests-page .docreq-toolbar-actions {
+        column-gap: 18px !important;
+    }
+
+    #mainContent.docreq-page #docreqStatusSelect,
+    #mainContent.docreq-page .docreq-sort-dropdown,
+    .document-requests-page #docreqStatusSelect,
+    .document-requests-page .docreq-sort-dropdown {
+        width: 245px !important;
+        min-width: 245px !important;
+        max-width: 245px !important;
+        flex: 0 0 245px !important;
+    }
+
+    #mainContent.docreq-page .docreq-sort-trigger,
+    .document-requests-page .docreq-sort-trigger {
+        width: 245px !important;
+        min-width: 245px !important;
+        max-width: 245px !important;
+    }
+
+    #mainContent.docreq-page #filterBtn,
+    .document-requests-page #filterBtn {
+        margin-left: 10px !important;
+        min-width: 92px !important;
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+    }
+}
+

@@ -5,10 +5,25 @@
 @section('content')
 <main id="mainContent" class="admin-page-shell faculty-page page-enter">
     <div class="faculty-shell">
-        <div class="page-banner">
-            <div class="page-banner-inner">
-                <div>
-                    <h1 class="page-title">Faculty Integration</h1>
+        <div class="page-banner faculty-banner"
+            style="display:flex!important; align-items:center!important;
+                    justify-content:flex-start!important; text-align:left!important;">
+            <div class="page-banner-inner faculty-banner-inner"
+                style="width:100%!important;max-width:none!important;
+                        margin:0!important;display:flex!important;
+                        align-items:center!important;justify-content:flex-start!important;
+                        text-align:left!important;">
+                <div class="faculty-banner-title-wrap"
+                    style="width:100%!important;margin:0!important;
+                            display:flex!important;align-items:center!important;
+                            justify-content:flex-start!important;text-align:left!important;">
+                    <h1 class="page-title faculty-banner-title"
+                        style="display:block!important;width:auto!important;
+                                margin:0!important;margin-left:0!important;
+                                margin-right:auto!important;text-align:left!important;
+                                justify-self:start!important;align-self:center!important;">
+                        Faculty Integration
+                    </h1>
                 </div>
             </div>
         </div>

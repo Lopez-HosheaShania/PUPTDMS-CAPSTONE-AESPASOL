@@ -61,7 +61,7 @@
         <div class="inventory-table-card bg-white rounded-xl shadow-sm border border-[#EDE9E4] overflow-hidden">
 
             <div class="px-4 sm:px-5 py-4 border-b border-[#EDE9E4] flex flex-col gap-4">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="inventory-toolbar-shell flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 
                     <div
                         class="inventory-category-row flex items-center justify-between sm:justify-start gap-3 w-full lg:w-auto">
