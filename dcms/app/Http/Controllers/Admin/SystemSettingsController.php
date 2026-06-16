@@ -23,7 +23,8 @@ class SystemSettingsController extends Controller
         'notif_document_rejected',
         'notif_reminder_24h',
         'notif_confirmation',
-        'notif_followup',
+        'notif_follow_up_reminder',
+        'notif_follow_up_today_reminder',
 
         'auto_backup_enabled',
         'backup_include_files',
@@ -57,7 +58,8 @@ class SystemSettingsController extends Controller
             'notif_document_rejected',
             'notif_reminder_24h',
             'notif_confirmation',
-            'notif_followup',
+            'notif_follow_up_reminder',
+            'notif_follow_up_today_reminder',
             'notif_channels',
         ],
 
@@ -163,7 +165,8 @@ class SystemSettingsController extends Controller
             'notif_document_rejected' => ['nullable', 'boolean'],
             'notif_reminder_24h' => ['nullable', 'boolean'],
             'notif_confirmation' => ['nullable', 'boolean'],
-            'notif_followup' => ['nullable', 'boolean'],
+            'notif_follow_up_reminder' => ['nullable', 'boolean'],
+            'notif_follow_up_today_reminder' => ['nullable', 'boolean'],
 
             'notif_channels' => ['nullable', 'array'],
             'notif_channels.*' => [Rule::in(['Email', 'SMS', 'WhatsApp', 'In-App'])],

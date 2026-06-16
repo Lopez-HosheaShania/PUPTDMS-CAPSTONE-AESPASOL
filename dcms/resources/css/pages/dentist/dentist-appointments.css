@@ -2445,3 +2445,194 @@
 .dentist-appointments-page .action-tooltip {
     z-index: 100000 !important;
 }
+
+/* FOLLOW-UP MODAL - SAME FORMATION AS RESCHEDULE, RED THEME */
+#followUpModal {
+    z-index: 99999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px !important;
+}
+
+#followUpModal .reschedule-modal-panel {
+    width: min(1180px, calc(100vw - 48px)) !important;
+    max-width: 1180px !important;
+    max-height: 86vh !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+#followUpModal .reschedule-modal-body {
+    max-height: calc(86vh - 112px) !important;
+    overflow-y: auto !important;
+    padding: 28px 32px 30px !important;
+    background: #fbfbfb !important;
+}
+
+#followUpModal .two-col {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr) !important;
+    gap: 22px !important;
+    align-items: stretch !important;
+}
+
+#followUpModal .cal-wrap,
+#followUpModal .slots-wrap {
+    background: #ffffff !important;
+    border: 1px solid #efcaca !important;
+    border-radius: 20px !important;
+    box-shadow: 0 6px 18px rgba(139, 0, 0, 0.04) !important;
+}
+
+#followUpModal .cal-wrap {
+    padding: 18px !important;
+}
+
+#followUpModal .slots-wrap {
+    padding: 22px !important;
+    min-height: 310px !important;
+}
+
+#followUpModal .cal-shell {
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+#followUpModal .cal-grid {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    row-gap: 10px !important;
+    column-gap: 10px !important;
+}
+
+#followUpModal .cal-cell-wrap {
+    min-height: 42px !important;
+}
+
+#followUpModal .cal-cell {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    border-radius: 14px !important;
+    font-size: 14px !important;
+    margin: 0 auto !important;
+}
+
+#followUpModal .section-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: #8B0000 !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.12em !important;
+    margin-bottom: 14px !important;
+}
+
+#followUpModal .section-label::after {
+    content: "" !important;
+    flex: 1 !important;
+    height: 1px !important;
+    background: #f0d6d6 !important;
+}
+
+#followUpModal .slots-placeholder {
+    min-height: 190px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    color: #9b7777 !important;
+    text-align: center !important;
+    border-radius: 18px !important;
+}
+
+#followUpModal .slot-grid-ui {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+}
+
+#followUpModal .slot-chip {
+    min-height: 44px !important;
+    justify-content: center !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+}
+
+#followUpModal .reason-textarea {
+    min-height: 96px !important;
+    border: 1px solid #efcaca !important;
+    border-radius: 18px !important;
+    padding: 14px 16px !important;
+    font-size: 14px !important;
+    background: #ffffff !important;
+}
+
+#followUpModal .btn-row {
+    justify-content: flex-end !important;
+    margin-top: 24px !important;
+}
+
+#followUpModal .btn {
+    min-height: 44px !important;
+    padding: 0 20px !important;
+    border-radius: 14px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+}
+
+#followUpModal .btn-cancel {
+    background: #ffffff !important;
+    color: #4b5563 !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+#followUpModal .btn-confirm,
+#followUpModal .follow-up-confirm-btn {
+    background: linear-gradient(135deg, #8B0000, #C1121F) !important;
+    color: #ffffff !important;
+    border: 1px solid #8B0000 !important;
+}
+
+#followUpModal .cal-cell.selected,
+#followUpModal .slot-chip.selected {
+    background: #8B0000 !important;
+    color: #ffffff !important;
+    border-color: #8B0000 !important;
+}
+
+@media (max-width: 900px) {
+    #followUpModal {
+        padding: 0 !important;
+        align-items: flex-end !important;
+    }
+
+    #followUpModal .reschedule-modal-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 92vh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #followUpModal .reschedule-modal-body {
+        max-height: calc(92vh - 105px) !important;
+        padding: 20px !important;
+    }
+
+    #followUpModal .two-col {
+        grid-template-columns: 1fr !important;
+    }
+}

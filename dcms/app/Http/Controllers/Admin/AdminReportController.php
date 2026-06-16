@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Services\OpenAIReportService;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminReportController extends Controller
 {
@@ -433,8 +434,40 @@ class AdminReportController extends Controller
             'generated_at' => $now->format('M d, Y h:i A'),
             'risk_level' => $riskLevel,
             'risk_explanation' => $riskExplanation,
+            'print_metrics' => [
+                'total_patients' => $totalPatients,
+                'new_patients' => $newThisMonth,
+                'total_appointments' => $appointmentsTotal,
+                'cancelled_appointments' => $cancelled,
+                'completion_rate' => $completionRate,
+                'cancellation_rate' => $cancelledRate,
+                'treatments_recorded' => $totalTreatments,
+                'dominant_treatment' => $topTreatmentName,
+                'low_stock_count' => $lowStockCount,
+                'critical_stock_count' => $criticalStockCount,
+            ],
         ], is_array($aiContent) ? $aiContent : $fallbackReport);
 
+        session(['admin_ai_generated_report' => $aiReport]);
+
         return view('admin.reports-ai-generated', compact('aiReport'));
+    }
+
+    public function downloadAiGenerated(OpenAIReportService $openAIReportService)
+    {
+        $aiReport = session('admin_ai_generated_report');
+
+        if (!$aiReport) {
+            return redirect()
+                ->route('admin.reports.ai-generated')
+                ->with('error', 'Please generate the AI report first before downloading.');
+        }
+
+        $filename = 'AI-Generated-Report-' . now()->format('Y-m-d-His') . '.pdf';
+
+        $pdf = Pdf::loadView('admin.reports-ai-generated-pdf', compact('aiReport'))
+            ->setPaper('letter', 'portrait');
+
+        return $pdf->download($filename);
     }
 }

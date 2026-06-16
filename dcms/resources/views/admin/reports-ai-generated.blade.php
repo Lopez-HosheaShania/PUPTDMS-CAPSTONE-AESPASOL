@@ -31,7 +31,7 @@
                                 <i class="fa-solid fa-arrow-left"></i> Back to reports
                             </a>
                             <button type="button" id="openPrintReportModal" class="air-banner-btn-white">
-                                <i class="fa-solid fa-print"></i> Print / Save as PDF
+                                <i class="fa-solid fa-file-arrow-down"></i> Save as PDF
                             </button>
                         </div>
                     </div>
@@ -724,8 +724,8 @@
             <div class="air-modal-panel">
                 <div class="air-modal-header">
                     <div>
-                        <h2 id="printReportTitle">Print report</h2>
-                        <p>Preview and configure before printing or saving as PDF.</p>
+                        <h2 id="printReportTitle">Save report as PDF</h2>
+                        <p>Preview the report before downloading it as PDF.</p>
                     </div>
                     <button type="button" class="air-modal-close" data-close-print-modal aria-label="Close print modal">
                         <i class="fa-solid fa-xmark"></i>
@@ -741,8 +741,8 @@
                         <div class="air-option-static">
                             <div class="air-option-icon"><i class="fa-regular fa-file-pdf"></i></div>
                             <div>
-                                <strong>Save as PDF / Printer</strong>
-                                <span>Selected inside the browser print dialog</span>
+                                <strong>PDF download</strong>
+                                <span>The report will be downloaded directly as a PDF file.</span>
                             </div>
                         </div>
                     </div>
@@ -813,7 +813,7 @@
 
                     <div class="air-modal-note">
                         <i class="fa-solid fa-circle-info"></i>
-                        <span>Select <strong>Save as PDF</strong> in the browser print dialog to download the report.</span>
+                        <span>Click <strong>Save as PDF</strong> to download the report directly.</span>
                     </div>
                 </div>
 
@@ -827,9 +827,9 @@
 
                     <button type="button" id="confirmPrintReport" class="air-action-btn air-action-btn--primary">
                         <span class="air-action-btn-icon">
-                            <i class="fa-solid fa-print"></i>
+                            <i class="fa-solid fa-file-arrow-down"></i>
                         </span>
-                        <span>Print / Save as PDF</span>
+                        <span>Save as PDF</span>
                     </button>
                 </div>
             </div>
@@ -840,6 +840,9 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('printReportModal');
@@ -854,23 +857,74 @@
             const customPageRangeWrap = document.getElementById('customPageRangeWrap');
             const customPageRange = document.getElementById('customPageRange');
             const customPageRangeError = document.getElementById('customPageRangeError');
-            const reportPrintPages = document.querySelectorAll('#aiFullPrintDocument .air-print-page');
 
-            let printPageStyle = document.getElementById('dynamicPrintPageStyle');
-            if (!printPageStyle) {
-                printPageStyle = document.createElement('style');
-                printPageStyle.id = 'dynamicPrintPageStyle';
-                document.head.appendChild(printPageStyle);
+            function getPreviewPages() {
+                return Array.from(document.querySelectorAll('.air-modal-preview-pages .air-modal-print-sheet'));
             }
 
-            function updatePrintSettings() {
+            function parsePageRange(value, maxPage) {
+                const selected = new Set();
+                const clean = String(value || '').replace(/\s+/g, '');
+
+                if (!clean) return null;
+
+                for (const part of clean.split(',')) {
+                    if (!part) return null;
+
+                    if (part.includes('-')) {
+                        const [startValue, endValue] = part.split('-');
+                        const start = Number(startValue);
+                        const end = Number(endValue);
+
+                        if (!Number.isInteger(start) || !Number.isInteger(end)) return null;
+                        if (start < 1 || end < 1 || start > end || end > maxPage) return null;
+
+                        for (let page = start; page <= end; page++) {
+                            selected.add(page);
+                        }
+                    } else {
+                        const page = Number(part);
+
+                        if (!Number.isInteger(page) || page < 1 || page > maxPage) return null;
+
+                        selected.add(page);
+                    }
+                }
+
+                return selected;
+            }
+
+            function getSelectedPreviewPages() {
+                const pages = getPreviewPages();
+
+                if (printPages?.value !== 'custom') {
+                    return pages;
+                }
+
+                const selected = parsePageRange(customPageRange?.value, pages.length);
+
+                if (!selected || selected.size === 0) {
+                    if (customPageRangeError) customPageRangeError.hidden = false;
+                    customPageRange?.focus();
+                    return null;
+                }
+
+                if (customPageRangeError) customPageRangeError.hidden = true;
+
+                return pages.filter((page, index) => selected.has(index + 1));
+            }
+
+            function updatePreviewSettings() {
                 const layout = printLayout?.value || 'portrait';
                 const pages = printPages?.value || 'all';
 
-                if (customPageRangeWrap) customPageRangeWrap.hidden = pages !== 'custom';
-                if (pages !== 'custom') clearCustomPageVisibility();
+                if (customPageRangeWrap) {
+                    customPageRangeWrap.hidden = pages !== 'custom';
+                }
 
-                printPageStyle.textContent = `@media print { @page { size: A4 ${layout}; margin: 0; } }`;
+                if (pages !== 'custom' && customPageRangeError) {
+                    customPageRangeError.hidden = true;
+                }
 
                 const modalBox = modal?.querySelector('.air-modal');
 
@@ -879,53 +933,129 @@
                 }
             }
 
-            function parsePageRange(value, maxPage) {
-                const selected = new Set();
-                const clean = String(value || '').replace(/\s+/g, '');
-                if (!clean) return null;
-                for (const part of clean.split(',')) {
-                    if (!part) return null;
-                    if (part.includes('-')) {
-                        const [a, b] = part.split('-');
-                        const start = Number(a),
-                            end = Number(b);
-                        if (!Number.isInteger(start) || !Number.isInteger(end)) return null;
-                        if (start < 1 || end < 1 || start > end || end > maxPage) return null;
-                        for (let p = start; p <= end; p++) selected.add(p);
-                    } else {
-                        const p = Number(part);
-                        if (!Number.isInteger(p) || p < 1 || p > maxPage) return null;
-                        selected.add(p);
-                    }
-                }
-                return selected;
-            }
+            async function savePreviewAsPdf() {
+                const canvasRenderer = window.html2canvas || window.html2canvasPro;
 
-            function clearCustomPageVisibility() {
-                document.body.classList.remove('print-custom-pages');
-                reportPrintPages.forEach(p => p.classList.remove('is-print-page-hidden'));
-                if (customPageRangeError) customPageRangeError.hidden = true;
-            }
-
-            function applyCustomPageVisibility() {
-                clearCustomPageVisibility();
-                if (printPages?.value !== 'custom') return true;
-                const selected = parsePageRange(customPageRange?.value, reportPrintPages.length);
-                if (!selected || selected.size === 0) {
-                    if (customPageRangeError) customPageRangeError.hidden = false;
-                    customPageRange?.focus();
-                    return false;
+                if (!canvasRenderer || !window.jspdf) {
+                    alert('PDF tool is still loading. Please try again.');
+                    return;
                 }
-                document.body.classList.add('print-custom-pages');
-                reportPrintPages.forEach(page => {
-                    if (!selected.has(Number(page.dataset.printPage)))
-                        page.classList.add('is-print-page-hidden');
+
+                const selectedPages = getSelectedPreviewPages();
+
+                if (!selectedPages || selectedPages.length === 0) {
+                    return;
+                }
+
+                const layout = printLayout?.value || 'portrait';
+                const isLandscape = layout === 'landscape';
+
+                const pdfWidthPt = isLandscape ? 792 : 612;
+                const pdfHeightPt = isLandscape ? 612 : 792;
+
+                const originalButtonContent = confirmButton.innerHTML;
+
+                confirmButton.disabled = true;
+                confirmButton.innerHTML = `
+        <span class="air-action-btn-icon">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+        </span>
+        <span>Saving...</span>
+    `;
+
+                const {
+                    jsPDF
+                } = window.jspdf;
+
+                const pdf = new jsPDF({
+                    orientation: layout,
+                    unit: 'pt',
+                    format: 'letter',
+                    compress: true
                 });
-                return true;
+
+                try {
+                    if (document.fonts && document.fonts.ready) {
+                        await document.fonts.ready;
+                    }
+
+                    const previewContainer = document.querySelector('.air-modal-preview');
+
+                    for (let index = 0; index < selectedPages.length; index++) {
+                        const page = selectedPages[index];
+
+                        page.scrollIntoView({
+                            block: 'center',
+                            inline: 'center'
+                        });
+
+                        await new Promise(resolve => setTimeout(resolve, 350));
+
+                        const canvas = await canvasRenderer(page, {
+                            scale: 3,
+                            useCORS: true,
+                            allowTaint: true,
+                            backgroundColor: '#ffffff',
+                            scrollX: 0,
+                            scrollY: 0,
+                            logging: true,
+                            removeContainer: true,
+                            onclone: function(clonedDocument) {
+                                const style = clonedDocument.createElement('style');
+
+                                style.textContent = `
+                        html,
+                        body {
+                            background: #ffffff !important;
+                        }
+
+                        .air-modal-print-sheet {
+                            box-shadow: none !important;
+                            transform: none !important;
+                            border-radius: 0 !important;
+                            background: #ffffff !important;
+                            overflow: hidden !important;
+                        }
+
+                        .air-modal-print-sheet *,
+                        .air-modal-print-sheet {
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                        }
+                    `;
+
+                                clonedDocument.head.appendChild(style);
+                            }
+                        });
+
+                        const imageData = canvas.toDataURL('image/jpeg', 1.0);
+
+                        if (index > 0) {
+                            pdf.addPage('letter', layout);
+                        }
+
+                        pdf.addImage(imageData, 'JPEG', 0, 0, pdfWidthPt, pdfHeightPt);
+                    }
+
+                    const fileDate = new Date().toISOString().slice(0, 10);
+                    pdf.save(`AI-Generated-Report-${fileDate}.pdf`);
+                } catch (error) {
+                    console.error('PDF save error:', error);
+
+                    alert(
+                        'Unable to save the report as PDF. Error: ' +
+                        (error?.message || error)
+                    );
+                } finally {
+                    confirmButton.disabled = false;
+                    confirmButton.innerHTML = originalButtonContent;
+                }
             }
 
             function openModal() {
                 if (!modal) return;
+
                 modal.classList.add('show');
                 modal.setAttribute('aria-hidden', 'false');
                 document.body.style.overflow = 'hidden';
@@ -933,10 +1063,12 @@
 
             function closeModal() {
                 if (!modal) return;
+
                 modal.classList.remove('show');
                 modal.setAttribute('aria-hidden', 'true');
                 document.body.style.overflow = '';
-                dropdowns.forEach(d => d.classList.remove('is-open'));
+
+                dropdowns.forEach(dropdown => dropdown.classList.remove('is-open'));
             }
 
             dropdowns.forEach(function(dropdown) {
@@ -946,48 +1078,74 @@
 
                 toggle?.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    dropdowns.forEach(d => {
-                        if (d !== dropdown) d.classList.remove('is-open');
+
+                    dropdowns.forEach(function(otherDropdown) {
+                        if (otherDropdown !== dropdown) {
+                            otherDropdown.classList.remove('is-open');
+                        }
                     });
+
                     dropdown.classList.toggle('is-open');
                 });
 
                 items.forEach(function(item) {
                     item.addEventListener('click', function(e) {
                         e.stopPropagation();
+
                         const targetInput = document.getElementById(item.dataset.target);
-                        if (targetInput) targetInput.value = item.dataset.value;
-                        if (label) label.textContent = item.dataset.label;
+
+                        if (targetInput) {
+                            targetInput.value = item.dataset.value;
+                        }
+
+                        if (label) {
+                            label.textContent = item.dataset.label;
+                        }
+
                         items.forEach(i => i.classList.remove('is-selected'));
                         item.classList.add('is-selected');
                         dropdown.classList.remove('is-open');
-                        updatePrintSettings();
+
+                        updatePreviewSettings();
                     });
                 });
             });
 
-            document.addEventListener('click', () => dropdowns.forEach(d => d.classList.remove('is-open')));
-            customPageRange?.addEventListener('input', () => {
-                if (customPageRangeError) customPageRangeError.hidden = true;
+            document.addEventListener('click', function() {
+                dropdowns.forEach(dropdown => dropdown.classList.remove('is-open'));
             });
+
+            customPageRange?.addEventListener('input', function() {
+                if (customPageRangeError) {
+                    customPageRangeError.hidden = true;
+                }
+            });
+
             openButton?.addEventListener('click', openModal);
-            closeButtons.forEach(b => b.addEventListener('click', closeModal));
-            modal?.addEventListener('click', e => {
-                if (e.target === modal) closeModal();
-            });
-            document.addEventListener('keydown', e => {
-                if (e.key === 'Escape' && modal?.classList.contains('show')) closeModal();
+
+            closeButtons.forEach(function(button) {
+                button.addEventListener('click', closeModal);
             });
 
-            confirmButton?.addEventListener('click', function() {
-                updatePrintSettings();
-                if (!applyCustomPageVisibility()) return;
-                closeModal();
-                setTimeout(() => window.print(), 180);
+            modal?.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
             });
 
-            window.addEventListener('afterprint', clearCustomPageVisibility);
-            updatePrintSettings();
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal?.classList.contains('show')) {
+                    closeModal();
+                }
+            });
+
+            confirmButton?.addEventListener('click', function(e) {
+                e.preventDefault();
+                updatePreviewSettings();
+                savePreviewAsPdf();
+            });
+
+            updatePreviewSettings();
         });
     </script>
 @endpush

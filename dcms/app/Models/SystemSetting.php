@@ -85,10 +85,24 @@ class SystemSetting extends Model
         $defaults = [
             'notif_new_appointment' => ['database', 'broadcast'],
             'notif_appointment_cancelled' => ['database', 'broadcast'],
+            'notif_rescheduled' => ['database', 'broadcast'],
+            'notif_appointment_completed' => ['database', 'broadcast'],
+
             'notif_document_request' => ['database', 'broadcast'],
+            'notif_document_approved' => ['database', 'broadcast'],
+            'notif_document_rejected' => ['database', 'broadcast'],
 
             'notif_dentist_emergency_out' => ['database', 'broadcast'],
+
+            // New follow-up notification toggles
+            'notif_follow_up_scheduled' => ['database', 'broadcast'],
+            'notif_follow_up_reminder' => ['database', 'broadcast'],
+            'notif_follow_up_today_reminder' => ['database', 'broadcast'],
         ];
+
+        if (! static::isEnabled($key, true)) {
+            return [];
+        }
 
         return $defaults[$key] ?? ['database'];
     }

@@ -294,6 +294,9 @@ Route::prefix('admin')
         Route::get('/reports/ai-generated', [AdminReportController::class, 'aiGenerated'])
             ->name('admin.reports.ai-generated');
 
+        Route::get('/reports/ai-generated/download', [AdminReportController::class, 'downloadAiGenerated'])
+            ->name('admin.reports.ai-generated.download');
+
         /*
         |--------------------------------------------------------------------------
         | ROLE & PERMISSIONS
@@ -979,6 +982,10 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
     Route::put('/appointments/{id}/reschedule', [DentistAppointmentController::class, 'updateReschedule'])
         ->middleware('permission:manage_appointments')
         ->name('dentist.dentist.appointments.reschedule.update');
+
+    Route::post('/appointments/{id}/follow-up', [DentistAppointmentController::class, 'storeFollowUp'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.appointments.follow-up.store');
 
     Route::get('/dentist/appointment-slots', [AppointmentController::class, 'slotsForDate'])
         ->middleware(['role:dentist'])

@@ -12,6 +12,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Patient;
+use Carbon\Carbon;
+use App\Models\ClinicSchedule;
+use App\Models\BlockedDate;
+use App\Helpers\PhilippineHolidays;
 
 class OdontogramController extends Controller
 {
@@ -61,11 +65,64 @@ class OdontogramController extends Controller
 
         $savedOdontogramData = $procedure?->odontogram_data ?? [];
 
+        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+            ->selectRaw('appointment_date, COUNT(*) as count')
+            ->groupBy('appointment_date')
+            ->pluck('count', 'appointment_date')
+            ->toArray();
+
+        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+            ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
+            ->groupBy('appointment_date', 'appointment_time')
+            ->get()
+            ->groupBy('appointment_date')
+            ->map(function ($rows) {
+                return $rows->pluck('count', 'appointment_time')->toArray();
+            })
+            ->toArray();
+
+        $calendarAppointmentDetails = Appointment::with('patient')
+            ->whereIn('status', ['upcoming', 'rescheduled'])
+            ->get()
+            ->groupBy(function ($appointment) {
+                return Carbon::parse($appointment->appointment_date)->format('Y-m-d');
+            })
+            ->map(function ($items) {
+                return $items->map(function ($appointment) {
+                    return [
+                        'name' => $appointment->patient->name ?? 'Unknown',
+                        'time' => Carbon::parse($appointment->appointment_time)->format('h:i A'),
+                        'service' => $appointment->service_type,
+                    ];
+                })->toArray();
+            })
+            ->toArray();
+
+        $schedules = ClinicSchedule::active()
+            ->orderBy('id')
+            ->get()
+            ->map(function ($s) {
+                $s->days = is_string($s->days) ? json_decode($s->days, true) : $s->days;
+                return $s;
+            });
+
+        $blockedDates = BlockedDate::pluck('date')
+            ->map(fn($d) => Carbon::parse($d)->toDateString())
+            ->toArray();
+
+        $philippineHolidays = PhilippineHolidays::range(0, 1);
+
         return view('dentist.dentist-odontogram', compact(
             'patient',
             'appointment',
             'procedure',
-            'savedOdontogramData'
+            'savedOdontogramData',
+            'appointmentCountsPerDay',
+            'appointmentCountsPerSlot',
+            'calendarAppointmentDetails',
+            'schedules',
+            'blockedDates',
+            'philippineHolidays'
         ));
     }
 
