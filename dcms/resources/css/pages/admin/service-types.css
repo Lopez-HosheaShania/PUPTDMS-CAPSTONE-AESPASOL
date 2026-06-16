@@ -2535,10 +2535,6 @@ body>#deleteServiceModal.st-delete-confirm-modal .st-delete-user-modal {
     transform: none !important;
 }
 
-body.modal-lock {
-    overflow: hidden !important;
-}
-
 .st-btn:disabled,
 .st-delete-confirm-btn:disabled,
 .st-save-service-btn:disabled {

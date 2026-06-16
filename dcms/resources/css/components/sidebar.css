@@ -1,10 +1,15 @@
+html.sidebar-preload #sidebar,
+html.sidebar-preload #sidebar * {
+    transition: none !important;
+}
+
 #sidebar {
     position: fixed;
     left: 0;
     top: var(--header-h, 64px);
     width: var(--sidebar-w, 220px);
     height: calc(100vh - var(--header-h, 64px));
-    background: var(--sidebar-bg, #ffffff);
+    background: var(--sidebar-bg, #F4F4F4);
     border-right: 1px solid var(--sidebar-border, #eff0f2);
     box-shadow: var(--sidebar-shadow, 4px 0 24px rgba(0, 0, 0, .04));
     z-index: 40;
@@ -75,6 +80,7 @@
     padding: 8px 10px;
     border-radius: 10px;
     cursor: default;
+    transition: background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 
 #sidebar .group-icon-wrap {
@@ -88,7 +94,7 @@
     font-size: 13px;
     color: var(--crimson, #8B0000);
     flex-shrink: 0;
-    transition: all .2s;
+    transition: background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 
 #sidebar .active-group .group-icon-wrap {
@@ -148,9 +154,19 @@
     overflow: visible;
 }
 
-#sidebar .nav-link:hover {
-    background: var(--sidebar-link-hover-bg, #fef2f2);
+#sidebar:not(.collapsed) .nav-link:hover,
+body:not(.sidebar-collapsed) #sidebar:not(.collapsed) .nav-link:hover {
+    background: rgba(139, 0, 0, .08);
     color: var(--crimson, #8B0000);
+    transform: translateX(2px);
+    box-shadow: inset 3px 0 0 var(--crimson, #8B0000);
+}
+
+#sidebar:not(.collapsed) .nav-link:hover .nav-icon-wrap,
+body:not(.sidebar-collapsed) #sidebar:not(.collapsed) .nav-link:hover .nav-icon-wrap {
+    background: linear-gradient(135deg, var(--crimson, #8B0000), var(--crimson-dark, #6b0000));
+    color: #F4F4F4;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, .22);
 }
 
 #sidebar .nav-link.active {
@@ -180,6 +196,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
 }
 
 #sidebar .nav-link.active .nav-icon-wrap {
@@ -197,16 +214,26 @@
     color: var(--sidebar-link-text, #4a5568);
     font-size: .78rem;
     font-weight: 600;
-    transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
+    transition: background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
     white-space: nowrap;
     overflow: visible;
     position: relative;
     text-decoration: none;
 }
 
-#sidebar .sidebar-nav-item:hover {
-    background: var(--sidebar-link-hover-bg, #fef2f2);
+#sidebar:not(.collapsed) .sidebar-nav-item:hover,
+body:not(.sidebar-collapsed) #sidebar:not(.collapsed) .sidebar-nav-item:hover {
+    background: rgba(139, 0, 0, .08);
     color: var(--crimson, #8B0000);
+    transform: translateX(2px);
+    box-shadow: inset 3px 0 0 var(--crimson, #8B0000);
+}
+
+#sidebar:not(.collapsed) .sidebar-nav-item:hover .sidebar-nav-icon,
+body:not(.sidebar-collapsed) #sidebar:not(.collapsed) .sidebar-nav-item:hover .sidebar-nav-icon {
+    background: linear-gradient(135deg, var(--crimson, #8B0000), var(--crimson-dark, #6b0000));
+    color: #F4F4F4;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, .22);
 }
 
 #sidebar .sidebar-nav-item.active {
@@ -225,6 +252,7 @@
     justify-content: center;
     color: var(--crimson, #8B0000);
     flex-shrink: 0;
+    transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
 }
 
 #sidebar .sidebar-nav-item.active .sidebar-nav-icon {
@@ -238,7 +266,7 @@
     top: 50%;
     transform: translateY(-50%);
     background: linear-gradient(135deg, var(--crimson, #8B0000), var(--crimson-dark, #6b0000));
-    color: #ffffff;
+    color: #F4F4F4;
     font-size: 12px;
     font-weight: 700;
     padding: 6px 10px;
@@ -301,7 +329,23 @@ body.role-admin #mainContent,
 body.role-dentist #mainContent,
 body.role-patient #mainContent {
     margin-left: var(--sidebar-w, 220px);
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
     transition: margin-left .3s ease;
+}
+
+body.role-admin.sidebar-collapsed #mainContent,
+body.role-dentist.sidebar-collapsed #mainContent,
+body.role-patient.sidebar-collapsed #mainContent,
+html.sidebar-collapsed-init body.role-admin #mainContent,
+html.sidebar-collapsed-init body.role-dentist #mainContent,
+html.sidebar-collapsed-init body.role-patient #mainContent,
+body.role-admin:has(#sidebar.collapsed) #mainContent,
+body.role-dentist:has(#sidebar.collapsed) #mainContent,
+body.role-patient:has(#sidebar.collapsed) #mainContent {
+    margin-left: var(--sidebar-collapsed-w, 64px) !important;
 }
 
 #sidebar.collapsed,
@@ -373,10 +417,28 @@ body.role-patient.sidebar-collapsed #sidebar .logout-icon {
     margin: 0;
 }
 
-body.sidebar-collapsed #mainContent,
-body.role-patient.sidebar-collapsed #mainContent,
-html.sidebar-collapsed-init #mainContent {
-    margin-left: var(--sidebar-collapsed-w, 64px) !important;
+#sidebar.collapsed .nav-link:hover,
+body.sidebar-collapsed #sidebar .nav-link:hover,
+#sidebar.collapsed .sidebar-nav-item:hover,
+body.sidebar-collapsed #sidebar .sidebar-nav-item:hover,
+#sidebar.sidebar-admin.collapsed .group-trigger:hover,
+body.sidebar-collapsed #sidebar.sidebar-admin .group-trigger:hover {
+    background: transparent !important;
+    color: var(--crimson, #8B0000) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#sidebar.collapsed .nav-link:not(.active):hover .nav-icon-wrap,
+body.sidebar-collapsed #sidebar .nav-link:not(.active):hover .nav-icon-wrap,
+#sidebar.collapsed .sidebar-nav-item:not(.active):hover .sidebar-nav-icon,
+body.sidebar-collapsed #sidebar .sidebar-nav-item:not(.active):hover .sidebar-nav-icon,
+#sidebar.sidebar-admin.collapsed .group-trigger:not(.active-group):hover .group-icon-wrap,
+body.sidebar-collapsed #sidebar.sidebar-admin .group-trigger:not(.active-group):hover .group-icon-wrap {
+    background: rgba(139, 0, 0, .14) !important;
+    color: var(--crimson, #8B0000) !important;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, .14) !important;
+    transform: translateY(-1px);
 }
 
 #mobileMenuBtn {
@@ -421,7 +483,7 @@ html.sidebar-collapsed-init #mainContent {
     left: 0;
     width: 280px;
     height: 100vh;
-    background: var(--drawer-bg, #ffffff);
+    background: var(--drawer-bg, #F4F4F4);
     z-index: 999;
     display: flex;
     flex-direction: column;
@@ -584,9 +646,15 @@ html.sidebar-collapsed-init #mainContent {
 
 .drawer-link:hover,
 .drawer-nav-link:hover {
-    background: var(--sidebar-link-hover-bg, #fef2f2);
+    background: rgba(139, 0, 0, .08);
     color: var(--crimson, #8B0000);
-    transform: translateX(3px);
+    transform: translateX(2px);
+    box-shadow: inset 3px 0 0 var(--crimson, #8B0000);
+}
+
+.drawer-nav-link:hover .dnav-icon {
+    background: linear-gradient(135deg, var(--crimson, #8B0000), var(--crimson-dark, #6b0000));
+    color: #F4F4F4;
 }
 
 .drawer-link.active,
@@ -695,9 +763,12 @@ html.sidebar-collapsed-init #mainContent {
 [data-theme="dark"] #sidebar .nav-link:hover,
 .dark #sidebar .nav-link:hover,
 [data-theme="dark"] #sidebar .sidebar-nav-item:hover,
-.dark #sidebar .sidebar-nav-item:hover {
-    background: rgba(139, 0, 0, .20);
-    color: #fff;
+.dark #sidebar .sidebar-nav-item:hover,
+[data-theme="dark"] #sidebar.sidebar-admin .group-trigger:hover,
+.dark #sidebar.sidebar-admin .group-trigger:hover {
+    background: rgba(139, 0, 0, .26);
+    color: #F4F4F4;
+    box-shadow: inset 3px 0 0 #fca5a5;
 }
 
 [data-theme="dark"] #sidebar .nav-link.active,
@@ -708,10 +779,13 @@ html.sidebar-collapsed-init #mainContent {
 }
 
 [data-theme="dark"] #sidebar .nav-sep,
-.dark #sidebar .nav-sep,
+.dark #sidebar .nav-sep {
+    background: #21262d !important;
+}
+
 [data-theme="dark"] #sidebar .sidebar-bottom,
 .dark #sidebar .sidebar-bottom {
-    border-color: #21262d !important;
+    border-top-color: #21262d !important;
 }
 
 [data-theme="dark"] #sidebar .logout-btn,
@@ -756,17 +830,57 @@ html.sidebar-collapsed-init #mainContent {
 .dark .drawer-link:hover,
 [data-theme="dark"] .drawer-nav-link:hover,
 .dark .drawer-nav-link:hover {
-    background: rgba(139, 0, 0, .20);
-    color: #fff;
+    background: rgba(139, 0, 0, .26);
+    color: #F4F4F4;
+    box-shadow: inset 3px 0 0 #fca5a5;
 }
 
 [data-theme="dark"] .drawer-sep,
-.dark .drawer-sep,
+.dark .drawer-sep {
+    background: #21262d !important;
+}
+
 [data-theme="dark"] .drawer-footer,
 .dark .drawer-footer,
 [data-theme="dark"] .drawer-bottom,
 .dark .drawer-bottom {
-    border-color: #21262d !important;
+    border-top-color: #21262d !important;
+}
+
+[data-theme="dark"] #sidebar.collapsed .nav-link:hover,
+.dark #sidebar.collapsed .nav-link:hover,
+[data-theme="dark"] body.sidebar-collapsed #sidebar .nav-link:hover,
+.dark body.sidebar-collapsed #sidebar .nav-link:hover,
+[data-theme="dark"] #sidebar.collapsed .sidebar-nav-item:hover,
+.dark #sidebar.collapsed .sidebar-nav-item:hover,
+[data-theme="dark"] body.sidebar-collapsed #sidebar .sidebar-nav-item:hover,
+.dark body.sidebar-collapsed #sidebar .sidebar-nav-item:hover,
+[data-theme="dark"] #sidebar.sidebar-admin.collapsed .group-trigger:hover,
+.dark #sidebar.sidebar-admin.collapsed .group-trigger:hover,
+[data-theme="dark"] body.sidebar-collapsed #sidebar.sidebar-admin .group-trigger:hover,
+.dark body.sidebar-collapsed #sidebar.sidebar-admin .group-trigger:hover {
+    background: transparent !important;
+    color: #F4F4F4 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] #sidebar.collapsed .nav-link:not(.active):hover .nav-icon-wrap,
+.dark #sidebar.collapsed .nav-link:not(.active):hover .nav-icon-wrap,
+[data-theme="dark"] body.sidebar-collapsed #sidebar .nav-link:not(.active):hover .nav-icon-wrap,
+.dark body.sidebar-collapsed #sidebar .nav-link:not(.active):hover .nav-icon-wrap,
+[data-theme="dark"] #sidebar.collapsed .sidebar-nav-item:not(.active):hover .sidebar-nav-icon,
+.dark #sidebar.collapsed .sidebar-nav-item:not(.active):hover .sidebar-nav-icon,
+[data-theme="dark"] body.sidebar-collapsed #sidebar .sidebar-nav-item:not(.active):hover .sidebar-nav-icon,
+.dark body.sidebar-collapsed #sidebar .sidebar-nav-item:not(.active):hover .sidebar-nav-icon,
+[data-theme="dark"] #sidebar.sidebar-admin.collapsed .group-trigger:not(.active-group):hover .group-icon-wrap,
+.dark #sidebar.sidebar-admin.collapsed .group-trigger:not(.active-group):hover .group-icon-wrap,
+[data-theme="dark"] body.sidebar-collapsed #sidebar.sidebar-admin .group-trigger:not(.active-group):hover .group-icon-wrap,
+.dark body.sidebar-collapsed #sidebar.sidebar-admin .group-trigger:not(.active-group):hover .group-icon-wrap {
+    background: rgba(139, 0, 0, .30) !important;
+    color: #FCA5A5 !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .24) !important;
+    transform: translateY(-1px);
 }
 
 @media (max-width: 767px) {
@@ -779,6 +893,8 @@ html.sidebar-collapsed-init #mainContent {
     body.role-admin #mainContent,
     body.role-dentist #mainContent {
         margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
     body.role-admin #mobileMenuBtn,
@@ -823,10 +939,6 @@ html.sidebar-collapsed-init #mainContent {
 
     body.role-patient #mainContent {
         margin-left: var(--sidebar-w, 220px);
-    }
-
-    body.role-patient.sidebar-collapsed #mainContent {
-        margin-left: var(--sidebar-collapsed-w, 64px) !important;
     }
 }
 
@@ -966,8 +1078,19 @@ html.sidebar-collapsed-init #mainContent {
     text-align: left;
 }
 
-#sidebar.sidebar-admin .group-trigger:hover {
-    background: rgba(139, 0, 0, .06);
+#sidebar.sidebar-admin:not(.collapsed) .group-trigger:hover,
+body:not(.sidebar-collapsed) #sidebar.sidebar-admin:not(.collapsed) .group-trigger:hover {
+    background: rgba(139, 0, 0, .08);
+    color: var(--crimson, #8B0000);
+    transform: translateX(2px);
+    box-shadow: inset 3px 0 0 var(--crimson, #8B0000);
+}
+
+#sidebar.sidebar-admin:not(.collapsed) .group-trigger:hover .group-icon-wrap,
+body:not(.sidebar-collapsed) #sidebar.sidebar-admin:not(.collapsed) .group-trigger:hover .group-icon-wrap {
+    background: linear-gradient(135deg, var(--crimson, #8B0000), var(--crimson-dark, #6b0000));
+    color: #F4F4F4;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, .22);
 }
 
 #sidebar.sidebar-admin.collapsed .group-trigger,
@@ -1006,7 +1129,7 @@ body.sidebar-collapsed #sidebar.sidebar-admin .nav-group.is-flyout-open .group-b
 }
 
 #sidebar.sidebar-admin.has-flyout-open .nav-group:not(.is-flyout-open) {
-    pointer-events: none !important;
+    pointer-events: auto !important;
 }
 
 #sidebar.sidebar-admin.collapsed .nav-group.is-flyout-open,
@@ -1022,7 +1145,7 @@ body.sidebar-collapsed #sidebar.sidebar-admin .group-body {
     min-width: 245px !important;
     padding: 12px !important;
     border-radius: 16px;
-    background: #ffffff;
+    background: #F4F4F4;
     border: 1px solid #f0e1e1;
     box-shadow: 0 18px 44px rgba(15, 23, 42, .18);
     opacity: 0;
@@ -1031,12 +1154,16 @@ body.sidebar-collapsed #sidebar.sidebar-admin .group-body {
     transform: translateX(-8px);
     transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
     z-index: 10060 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 #sidebar.sidebar-admin.collapsed .group-body::before,
 body.sidebar-collapsed #sidebar.sidebar-admin .group-body::before {
     content: attr(data-group-label);
     display: block;
+    order: 0;
     color: var(--crimson, #8B0000);
     font-size: .72rem;
     font-weight: 900;
@@ -1049,10 +1176,16 @@ body.sidebar-collapsed #sidebar.sidebar-admin .group-body::before {
 body.sidebar-collapsed #sidebar.sidebar-admin .group-body::after {
     content: attr(data-group-sublabel);
     display: block;
+    order: 1;
     color: #9ca3af;
     font-size: .66rem;
     font-weight: 600;
     margin: 0 4px 8px;
+}
+
+#sidebar.sidebar-admin.collapsed .group-body .nav-link,
+body.sidebar-collapsed #sidebar.sidebar-admin .group-body .nav-link {
+    order: 2;
 }
 
 #sidebar.sidebar-admin.collapsed .group-body .nav-link,
@@ -1102,17 +1235,20 @@ body.sidebar-collapsed #sidebar.sidebar-admin .group-body .sidebar-tooltip {
 #sidebar.sidebar-admin.collapsed .group-body .nav-link:hover,
 body.sidebar-collapsed #sidebar.sidebar-admin .group-body .nav-link:hover {
     color: var(--crimson, #8B0000) !important;
-    background: #fef2f2 !important;
+    background: rgba(139, 0, 0, .08) !important;
+    box-shadow: inset 3px 0 0 var(--crimson, #8B0000);
 }
 
 #sidebar.sidebar-admin.collapsed .group-body .nav-link.active,
 body.sidebar-collapsed #sidebar.sidebar-admin .group-body .nav-link.active {
-    color: #ffffff !important;
+    color: #F4F4F4 !important;
 }
 
 [data-theme="dark"] #sidebar.sidebar-admin .group-trigger:hover,
 .dark #sidebar.sidebar-admin .group-trigger:hover {
-    background: rgba(139, 0, 0, .22);
+    background: rgba(139, 0, 0, .26);
+    color: #F4F4F4;
+    box-shadow: inset 3px 0 0 #fca5a5;
 }
 
 [data-theme="dark"] #sidebar.sidebar-admin.collapsed .group-body,
@@ -1149,8 +1285,9 @@ body.sidebar-collapsed #sidebar.sidebar-admin .group-body .nav-link.active {
 .dark #sidebar.sidebar-admin.collapsed .group-body .nav-link:hover,
 [data-theme="dark"] body.sidebar-collapsed #sidebar.sidebar-admin .group-body .nav-link:hover,
 .dark body.sidebar-collapsed #sidebar.sidebar-admin .group-body .nav-link:hover {
-    color: #FFFFFF !important;
-    background: rgba(139, 0, 0, .25) !important;
+    color: #F4F4F4 !important;
+    background: rgba(139, 0, 0, .26) !important;
+    box-shadow: inset 3px 0 0 #fca5a5;
 }
 
 .sidebar-theme-block {
@@ -1191,7 +1328,7 @@ body.sidebar-collapsed #sidebar.sidebar-admin .group-body .nav-link.active {
     min-width: 150px;
     padding: 8px;
     border-radius: 16px;
-    background: #ffffff;
+    background: #F4F4F4;
     border: 1px solid #f0e1e1;
     box-shadow: 0 18px 44px rgba(15, 23, 42, .18);
     opacity: 0;
@@ -1232,7 +1369,7 @@ body.sidebar-collapsed #sidebar.sidebar-admin .group-body .nav-link.active {
 
 .sidebar-theme-popover-option.active {
     background: linear-gradient(135deg, var(--crimson, #8B0000), var(--crimson-dark, #6b0000));
-    color: #ffffff;
+    color: #F4F4F4;
 }
 
 #sidebar.collapsed .sidebar-theme-expanded,
@@ -1260,7 +1397,7 @@ body.sidebar-collapsed #sidebar .sidebar-theme-collapsed {
 [data-theme="dark"] .sidebar-theme-mini-btn:hover,
 .dark .sidebar-theme-mini-btn:hover {
     background: rgba(139, 0, 0, .32);
-    color: #ffffff;
+    color: #F4F4F4;
 }
 
 [data-theme="dark"] .sidebar-theme-popover,
@@ -1278,7 +1415,7 @@ body.sidebar-collapsed #sidebar .sidebar-theme-collapsed {
 [data-theme="dark"] .sidebar-theme-popover-option:hover,
 .dark .sidebar-theme-popover-option:hover {
     background: rgba(139, 0, 0, .25);
-    color: #ffffff;
+    color: #F4F4F4;
 }
 
 #sidebar.collapsed .toggle-row,
@@ -1291,12 +1428,13 @@ body.sidebar-collapsed #sidebar .toggle-row {
 
 #sidebar.collapsed .sidebar-toggle-btn,
 body.sidebar-collapsed #sidebar .sidebar-toggle-btn {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    border-radius: 14px !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    border-radius: 8px !important;
     margin: 0 auto !important;
-    background: rgba(139, 0, 0, .10) !important;
+    font-size: 13px !important;
+    background: var(--danger-soft-bg, #fdf5f5) !important;
 }
 
 #sidebar .logout-btn,
@@ -1343,7 +1481,7 @@ body.sidebar-collapsed #sidebar .sidebar-theme-mini-btn:hover {
 [data-theme="dark"] body.sidebar-collapsed #sidebar .sidebar-toggle-btn:hover,
 .dark body.sidebar-collapsed #sidebar .sidebar-toggle-btn:hover {
     background: rgba(139, 0, 0, .36) !important;
-    color: #ffffff !important;
+    color: #F4F4F4 !important;
 }
 
 [data-theme="dark"] #sidebar.collapsed .logout-btn:hover,
@@ -1351,4 +1489,20 @@ body.sidebar-collapsed #sidebar .sidebar-theme-mini-btn:hover {
 [data-theme="dark"] body.sidebar-collapsed #sidebar .logout-btn:hover,
 .dark body.sidebar-collapsed #sidebar .logout-btn:hover {
     background: rgba(239, 68, 68, .12) !important;
+}
+
+body.role-patient.sidebar-collapsed #mainContent,
+body.role-patient:has(#sidebar.collapsed) #mainContent {
+    margin-left: var(--sidebar-collapsed-w, 64px) !important;
+}
+
+@media (max-width: 1199px) {
+
+    body.role-patient #mainContent,
+    body.role-patient.sidebar-collapsed #mainContent,
+    body.role-patient:has(#sidebar.collapsed) #mainContent {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
 }

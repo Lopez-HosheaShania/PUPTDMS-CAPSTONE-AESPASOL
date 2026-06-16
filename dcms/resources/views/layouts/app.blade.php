@@ -17,7 +17,7 @@
 
             if (theme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
-                document.documentElement.style.backgroundColor = '#000D1A';
+                document.documentElement.style.backgroundColor = '#0d0f12';
             } else {
                 document.documentElement.setAttribute('data-theme', 'light');
                 document.documentElement.style.backgroundColor = '#F4F4F4';

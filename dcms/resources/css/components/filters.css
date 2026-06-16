@@ -1800,7 +1800,6 @@ body:has(#filterModal.closing) .ai-help-popover {
     width: 100% !important;
 }
 
-/* Native/Custom selects and inputs containment blueprint */
 #filterModal .filter-date-input-wrap {
     position: relative !important;
     width: 100% !important;

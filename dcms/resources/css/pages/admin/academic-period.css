@@ -5897,7 +5897,6 @@
         border-radius: 12px !important;
     }
 
-    /* Quick actions and calendar cards */
     #mainContent.academic-period-page .academic-quick-actions-panel,
     #mainContent.academic-period-page .cal-card,
     #mainContent.academic-period-page .bg-white.rounded-xl {
@@ -5942,7 +5941,6 @@
         bottom: -1.4rem !important;
     }
 
-    /* Add/Edit modal */
     #addModal,
     #editModal {
         align-items: flex-end !important;
@@ -6077,11 +6075,6 @@
         padding: 0 .6rem !important;
     }
 }
-
-/* =====================================================
-   ACADEMIC PERIOD - INCLUSIVE MOBILE VIEW
-   One clean mobile override only
-===================================================== */
 
 @media (max-width: 767px) {
     #mainContent.academic-period-page,
@@ -6228,7 +6221,6 @@
         text-overflow: ellipsis !important;
     }
 
-    /* inclusive part: stack details instead of forcing two columns */
     #mainContent.academic-period-page .academic-card-meta {
         display: grid !important;
         gap: .8rem !important;

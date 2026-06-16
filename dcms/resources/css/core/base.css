@@ -83,10 +83,6 @@ body {
     #mainContent h1 {
         font-size: 1.4rem !important;
     }
-
-    #mainContent>div>div:first-child {
-        margin-bottom: 1.2rem !important;
-    }
 }
 
 @media (max-width:1023px) and (min-width:768px) {

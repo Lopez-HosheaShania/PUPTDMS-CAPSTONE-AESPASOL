@@ -1121,7 +1121,6 @@
     display: inline-flex;
 }
 
-/* Custom range */
 .air-custom-range {
     display: grid;
     gap: .4rem;
@@ -1302,7 +1301,6 @@
     border-color: rgba(255, 255, 255, .22);
 }
 
-/* Mobile */
 @media (max-width: 520px) {
     .air-modal-actions {
         flex-direction: column-reverse;
@@ -1463,7 +1461,6 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Landscape preview */
 .air-modal.is-preview-landscape {
     width: min(1320px, calc(100vw - 3rem));
     grid-template-columns: minmax(660px, 1.25fr) minmax(360px, .75fr);

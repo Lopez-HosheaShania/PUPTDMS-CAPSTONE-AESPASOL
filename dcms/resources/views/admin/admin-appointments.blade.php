@@ -64,11 +64,16 @@ $allAppointments = $upcomingAppointments->merge($pastAppointments);
 
 $statusCounts = [
 'all' => $allAppointments->count(),
-'upcoming' => $allAppointments->filter(fn($a) => strtolower($a->status ?? 'upcoming') === 'upcoming')->count(),
-'rescheduled' => $allAppointments->filter(fn($a) => strtolower($a->status ?? '') === 'rescheduled')->count(),
+'upcoming' => $allAppointments
+->filter(fn($a) => strtolower($a->status ?? 'upcoming') === 'upcoming')
+->count(),
+'rescheduled' => $allAppointments
+->filter(fn($a) => strtolower($a->status ?? '') === 'rescheduled')
+->count(),
 'completed' => $allAppointments->filter(fn($a) => strtolower($a->status ?? '') === 'completed')->count(),
-'cancelled' => $allAppointments->filter(fn($a) => in_array(strtolower($a->status ?? ''), ['cancelled',
-'canceled']))->count(),
+'cancelled' => $allAppointments
+->filter(fn($a) => in_array(strtolower($a->status ?? ''), ['cancelled', 'canceled']))
+->count(),
 ];
 
 $statusOptions = [
@@ -99,229 +104,232 @@ $notifCount = $notifications->count();
       </div>
     </div>
 
-      <div class="today-snapshot-card compact-snapshot-card mt-4 md:mt-5">
-        <div class="today-snapshot-header">
-          <div>
-            <span class="today-snapshot-kicker">Today’s Snapshot</span>
+    <div class="today-snapshot-card compact-snapshot-card mt-4 md:mt-5">
+      <div class="today-snapshot-header">
+        <div>
+          <span class="today-snapshot-kicker">Today’s Snapshot</span>
+        </div>
+      </div>
+
+      <div class="snapshot-focus-grid">
+        <div class="snapshot-focus-item {{ $firstTodayAppt ? 'has-appointment' : 'is-clear' }}">
+          <div class="snapshot-focus-icon">
+            <i class="fa-solid {{ $firstTodayAppt ? 'fa-calendar-check' : 'fa-mug-hot' }}"></i>
+          </div>
+
+          <div class="snapshot-focus-content">
+            <span class="snapshot-focus-label">Today</span>
+
+            @if ($firstTodayAppt)
+            <h4>{{ $todayCount }} appointment{{ $todayCount > 1 ? 's' : '' }} today</h4>
+            <p>
+              First visit: <strong>{{ $firstTodayName }}</strong>
+              @if ($firstTodayTime)
+              at <strong>{{ $firstTodayTime }}</strong>
+              @endif
+            </p>
+            <span class="snapshot-mini-chip">
+              <i class="fa-solid fa-tooth"></i>
+              {{ $firstTodayService }}
+            </span>
+            @else
+            <h4>No appointments today</h4>
+            @endif
           </div>
         </div>
 
-        <div class="snapshot-focus-grid">
-          <div class="snapshot-focus-item {{ $firstTodayAppt ? 'has-appointment' : 'is-clear' }}">
-            <div class="snapshot-focus-icon">
-              <i class="fa-solid {{ $firstTodayAppt ? 'fa-calendar-check' : 'fa-mug-hot' }}"></i>
-            </div>
+        <div class="snapshot-focus-item next-appointment">
+          <div class="snapshot-focus-icon">
+            <i class="fa-solid fa-clock"></i>
+          </div>
 
-            <div class="snapshot-focus-content">
-              <span class="snapshot-focus-label">Today</span>
+          <div class="snapshot-focus-content">
+            <span class="snapshot-focus-label">Next Appointment</span>
 
-              @if ($firstTodayAppt)
-              <h4>{{ $todayCount }} appointment{{ $todayCount > 1 ? 's' : '' }} today</h4>
-              <p>
-                First visit: <strong>{{ $firstTodayName }}</strong>
-                @if ($firstTodayTime)
-                at <strong>{{ $firstTodayTime }}</strong>
-                @endif
-              </p>
+            @if ($nextAppt)
+            <h4>{{ $nextName }}</h4>
+            <p>
+              {{ $nextDate }}
+              @if ($nextTime)
+              at <strong>{{ $nextTime }}</strong>
+              @endif
+            </p>
+            <div class="snapshot-chip-row">
               <span class="snapshot-mini-chip">
                 <i class="fa-solid fa-tooth"></i>
-                {{ $firstTodayService }}
+                {{ $nextService }}
               </span>
-              @else
-              <h4>No appointments today</h4>
+
+              @if ($nextIsToday)
+              <span class="snapshot-mini-chip today-chip">
+                Today
+              </span>
               @endif
             </div>
+            @else
+            <h4>No upcoming appointments</h4>
+            @endif
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="appointment-controls-bar">
+      <div class="appointment-control-copy">
+        <span class="appointment-control-kicker">Manage view</span>
+        <span class="appointment-control-text">Switch layout or review appointment history.</span>
+      </div>
+
+      <div class="appointment-filter-wrap">
+        <div class="appointment-search-row voice-search-row">
+          <div class="search-wrap global-search" data-search-wrapper>
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+
+            <input id="apptSearchInput" type="text" placeholder="Search patient" class="search-input" data-search-input
+              autocomplete="off">
+
+            <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
           </div>
 
-          <div class="snapshot-focus-item next-appointment">
-            <div class="snapshot-focus-icon">
-              <i class="fa-solid fa-clock"></i>
-            </div>
+          <div class="voice-input-toggle">
+            <button type="button" class="voice-search-mic external" data-voice-trigger
+              data-voice-target="#apptSearchInput" data-voice-status="#apptVoiceStatus"
+              aria-label="Voice search appointments">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
 
-            <div class="snapshot-focus-content">
-              <span class="snapshot-focus-label">Next Appointment</span>
+            <span id="apptVoiceStatus" class="voice-status hidden" data-voice-status aria-live="polite"></span>
+          </div>
+        </div>
 
-              @if ($nextAppt)
-              <h4>{{ $nextName }}</h4>
-              <p>
-                {{ $nextDate }}
-                @if ($nextTime)
-                at <strong>{{ $nextTime }}</strong>
-                @endif
-              </p>
-              <div class="snapshot-chip-row">
-                <span class="snapshot-mini-chip">
-                  <i class="fa-solid fa-tooth"></i>
-                  {{ $nextService }}
+        <input type="hidden" id="apptStatusFilter" value="all">
+
+        <div class="appointment-status-dropdown" id="apptStatusDropdown">
+          <button type="button" class="appointment-status-trigger" id="apptStatusToggle" aria-expanded="false">
+            <span class="appointment-status-trigger-left">
+              <span class="appointment-status-trigger-icon tone-all" id="apptStatusIcon">
+                <i class="fa-solid fa-layer-group"></i>
+              </span>
+
+              <span class="appointment-status-trigger-text">
+                <span class="appointment-status-trigger-label">Status</span>
+                <strong id="apptStatusSelectedLabel">All statuses</strong>
+              </span>
+            </span>
+
+            <span class="appointment-status-trigger-right">
+              <span class="appointment-status-count-badge" id="apptStatusSelectedCount">
+                {{ $statusCounts['all'] ?? 0 }}
+              </span>
+              <i class="fa-solid fa-chevron-down appointment-status-chevron"></i>
+            </span>
+          </button>
+
+          <div class="appointment-status-panel" id="apptStatusPanel">
+            <div class="appointment-status-grid">
+              @foreach ($statusOptions as $value => $meta)
+              <button type="button"
+                class="appointment-status-option {{ $value === 'all' ? 'is-active' : '' }} tone-{{ $meta['tone'] }}"
+                data-status-value="{{ $value }}" data-status-label="{{ $meta['label'] }}"
+                data-status-icon="{{ $meta['icon'] }}" data-status-tone="{{ $meta['tone'] }}"
+                data-status-count="{{ $statusCounts[$value] ?? 0 }}">
+                <span class="appointment-status-option-icon">
+                  <i class="fa-solid {{ $meta['icon'] }}"></i>
                 </span>
 
-                @if ($nextIsToday)
-                <span class="snapshot-mini-chip today-chip">
-                  Today
-                </span>
-                @endif
-              </div>
-              @else
-              <h4>No upcoming appointments</h4>
-              @endif
+                <span class="appointment-status-option-label">{{ $meta['label'] }}</span>
+                <span class="appointment-status-option-count">{{ $statusCounts[$value] ?? 0 }}</span>
+              </button>
+              @endforeach
             </div>
           </div>
         </div>
       </div>
 
-      <div class="appointment-controls-bar">
-        <div class="appointment-control-copy">
-          <span class="appointment-control-kicker">Manage view</span>
-          <span class="appointment-control-text">Switch layout or review appointment history.</span>
-        </div>
-
-        <div class="appointment-filter-wrap">
-          <div class="appointment-search-row voice-search-row">
-            <div class="search-wrap global-search" data-search-wrapper>
-              <i class="fa-solid fa-magnifying-glass search-icon"></i>
-
-              <input id="apptSearchInput" type="text" placeholder="Search patient" class="search-input"
-                data-search-input autocomplete="off">
-
-              <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
-                <i class="fa-solid fa-xmark text-xs"></i>
-              </button>
-            </div>
-
-            <div class="voice-input-toggle">
-              <button type="button" class="voice-search-mic external" data-voice-trigger
-                data-voice-target="#apptSearchInput" data-voice-status="#apptVoiceStatus"
-                aria-label="Voice search appointments">
-                <i class="fa-solid fa-microphone"></i>
-              </button>
-
-              <span id="apptVoiceStatus" class="voice-status hidden" data-voice-status aria-live="polite"></span>
-            </div>
-          </div>
-
-          <input type="hidden" id="apptStatusFilter" value="all">
-
-          <div class="appointment-status-dropdown" id="apptStatusDropdown">
-            <button type="button" class="appointment-status-trigger" id="apptStatusToggle" aria-expanded="false">
-              <span class="appointment-status-trigger-left">
-                <span class="appointment-status-trigger-icon tone-all" id="apptStatusIcon">
-                  <i class="fa-solid fa-layer-group"></i>
-                </span>
-
-                <span class="appointment-status-trigger-text">
-                  <span class="appointment-status-trigger-label">Status</span>
-                  <strong id="apptStatusSelectedLabel">All statuses</strong>
-                </span>
-              </span>
-
-              <span class="appointment-status-trigger-right">
-                <span class="appointment-status-count-badge" id="apptStatusSelectedCount">
-                  {{ $statusCounts['all'] ?? 0 }}
-                </span>
-                <i class="fa-solid fa-chevron-down appointment-status-chevron"></i>
-              </span>
-            </button>
-
-            <div class="appointment-status-panel" id="apptStatusPanel">
-              <div class="appointment-status-grid">
-                @foreach ($statusOptions as $value => $meta)
-                <button type="button"
-                  class="appointment-status-option {{ $value === 'all' ? 'is-active' : '' }} tone-{{ $meta['tone'] }}"
-                  data-status-value="{{ $value }}" data-status-label="{{ $meta['label'] }}"
-                  data-status-icon="{{ $meta['icon'] }}" data-status-tone="{{ $meta['tone'] }}"
-                  data-status-count="{{ $statusCounts[$value] ?? 0 }}">
-                  <span class="appointment-status-option-icon">
-                    <i class="fa-solid {{ $meta['icon'] }}"></i>
-                  </span>
-
-                  <span class="appointment-status-option-label">{{ $meta['label'] }}</span>
-                  <span class="appointment-status-option-count">{{ $statusCounts[$value] ?? 0 }}</span>
-                </button>
-                @endforeach
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="appointment-controls-actions">
-          <div class="appointment-filter-actions">
-            <button id="appointmentFilterBtn" type="button" onclick="openAppointmentFilterPanel()"
-              class="global-filter-btn">
-              <i class="fa-solid fa-sliders"></i>
-              <span>Filter</span>
-              <span id="appointmentFilterBadge" class="filter-badge" style="display:none;"></span>
-            </button>
-          </div>
-
-          <div class="view-toggle-container hidden md:flex">
-            <div class="view-slider"></div>
-
-            <button id="btnListView" onclick="switchView('list')" class="btn-view-mode active" title="List View">
-              <i class="fa-solid fa-list text-sm"></i>
-            </button>
-
-            <button id="btnGridView" onclick="switchView('grid')" class="btn-view-mode" title="Grid View">
-              <i class="fa-solid fa-grip"></i>
-            </button>
-          </div>
-
-          <button id="appointmentClearFilterBtn" type="button" onclick="resetAppointmentFilters()"
-            class="global-filter-reset-btn hidden" title="Reset filters">
-            <i class="fa-solid fa-rotate-left"></i>
+      <div class="appointment-controls-actions">
+        <div class="appointment-filter-actions">
+          <button id="appointmentFilterBtn" type="button" onclick="openAppointmentFilterPanel()"
+            class="global-filter-btn">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Filter</span>
+            <span id="appointmentFilterBadge" class="filter-badge" style="display:none;"></span>
           </button>
         </div>
+
+        <div class="view-toggle-container" data-global-view-toggle data-view-root="#mainContent"
+          data-storage-key="ViewToggleMode" aria-label="View options">
+          <span class="view-slider" aria-hidden="true"></span>
+
+          <button type="button" class="btn-view-mode active" title="List view" aria-label="List view"
+            aria-pressed="true" data-view-mode="list">
+            <i class="fa-solid fa-list"></i>
+          </button>
+
+          <button type="button" class="btn-view-mode" title="Grid view" aria-label="Grid view" aria-pressed="false"
+            data-view-mode="grid">
+            <i class="fa-solid fa-grip"></i>
+          </button>
+        </div>
+
+        <button id="appointmentClearFilterBtn" type="button" onclick="resetAppointmentFilters()"
+          class="global-filter-reset-btn hidden" title="Reset filters">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
       </div>
     </div>
+  </div>
 
-    <div id="appointmentContainerSkeleton" class="appointment-container-skeleton">
-      <div class="skeleton-shell appointment-list-skeleton-card">
-        <div class="appt-skeleton-month">
-          <div class="skeleton-circle h-7 w-7"></div>
-          <div class="skeleton-line h-6 w-28"></div>
-          <div class="skeleton-pill h-8 w-32"></div>
-          <div class="skeleton-circle h-5 w-5 ml-auto"></div>
-        </div>
-
-        <div class="appt-skeleton-table-head">
-          <div class="skeleton-line h-4 w-20"></div>
-          <div class="skeleton-line h-4 w-20"></div>
-          <div class="skeleton-line h-4 w-24"></div>
-          <div class="skeleton-line h-4 w-28"></div>
-          <div class="skeleton-line h-4 w-20"></div>
-          <div class="skeleton-line h-4 w-20"></div>
-          <div class="skeleton-line h-4 w-20"></div>
-        </div>
-
-        <div class="appt-skeleton-rows">
-          @for ($i = 0; $i < 4; $i++) <div class="appt-skeleton-row">
-            <div>
-              <div class="skeleton-line h-4 w-28 mb-2"></div>
-              <div class="skeleton-line h-3 w-16"></div>
-            </div>
-
-            <div class="skeleton-pill h-10 w-28"></div>
-            <div class="skeleton-pill h-10 w-32"></div>
-
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="skeleton-circle h-10 w-10"></div>
-              <div class="space-y-2 flex-1">
-                <div class="skeleton-line h-4 w-40 max-w-full"></div>
-                <div class="skeleton-line h-3 w-14"></div>
-              </div>
-            </div>
-
-            <div class="skeleton-line h-4 w-20"></div>
-            <div class="skeleton-pill h-9 w-28"></div>
-
-            <div class="flex items-center justify-end gap-2">
-              <div class="skeleton-circle h-9 w-9"></div>
-              <div class="skeleton-circle h-9 w-9"></div>
-              <div class="skeleton-circle h-9 w-9"></div>
-            </div>
-        </div>
-        @endfor
+  <div id="appointmentContainerSkeleton" class="appointment-container-skeleton">
+    <div class="skeleton-shell appointment-list-skeleton-card">
+      <div class="appt-skeleton-month">
+        <div class="skeleton-circle h-7 w-7"></div>
+        <div class="skeleton-line h-6 w-28"></div>
+        <div class="skeleton-pill h-8 w-32"></div>
+        <div class="skeleton-circle h-5 w-5 ml-auto"></div>
       </div>
+
+      <div class="appt-skeleton-table-head">
+        <div class="skeleton-line h-4 w-20"></div>
+        <div class="skeleton-line h-4 w-20"></div>
+        <div class="skeleton-line h-4 w-24"></div>
+        <div class="skeleton-line h-4 w-28"></div>
+        <div class="skeleton-line h-4 w-20"></div>
+        <div class="skeleton-line h-4 w-20"></div>
+        <div class="skeleton-line h-4 w-20"></div>
+      </div>
+
+      <div class="appt-skeleton-rows">
+        @for ($i = 0; $i < 4; $i++) <div class="appt-skeleton-row">
+          <div>
+            <div class="skeleton-line h-4 w-28 mb-2"></div>
+            <div class="skeleton-line h-3 w-16"></div>
+          </div>
+
+          <div class="skeleton-pill h-10 w-28"></div>
+          <div class="skeleton-pill h-10 w-32"></div>
+
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="skeleton-circle h-10 w-10"></div>
+            <div class="space-y-2 flex-1">
+              <div class="skeleton-line h-4 w-40 max-w-full"></div>
+              <div class="skeleton-line h-3 w-14"></div>
+            </div>
+          </div>
+
+          <div class="skeleton-line h-4 w-20"></div>
+          <div class="skeleton-pill h-9 w-28"></div>
+
+          <div class="flex items-center justify-end gap-2">
+            <div class="skeleton-circle h-9 w-9"></div>
+            <div class="skeleton-circle h-9 w-9"></div>
+            <div class="skeleton-circle h-9 w-9"></div>
+          </div>
+      </div>
+      @endfor
     </div>
+  </div>
   </div>
 
   <div id="appointmentContainerContent" class="appointment-container-content is-skeleton-hidden">
@@ -364,12 +372,17 @@ $notifCount = $notifications->count();
               @foreach ($items as $i => $appt)
               @php
               $patientName = optional($appt->patient)->name ?? 'Unknown Patient';
-              $profilePatientId = optional($appt->patient)->id ?? $appt->patient_id ?? null;
+              $profilePatientId =
+              optional($appt->patient)->id ?? ($appt->patient_id ?? null);
               $profileUrl = $profilePatientId
               ? route('admin.admin.patient.profile', ['patient' => $profilePatientId])
               : null;
-              $program = optional($appt->patient)->program ?? optional($appt->patient)->course ?? '—';
-              $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('F j, Y');
+              $program =
+              optional($appt->patient)->program ??
+              (optional($appt->patient)->course ?? '—');
+              $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format(
+              'F j, Y',
+              );
               $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
               $timeLabel = $appt->appointment_time
               ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
@@ -408,7 +421,9 @@ $notifCount = $notifications->count();
               $pastStatusLabel = $isCancelledPast
               ? 'Cancelled' . ($cancelReasonLabel ? ' - ' . $cancelReasonLabel : '')
               : 'Completed';
-              $pastStatusClass = $isCancelledPast ? 'status-cancelled' : 'status-completed';
+              $pastStatusClass = $isCancelledPast
+              ? 'status-cancelled'
+              : 'status-completed';
               $recordDuration =
               $appt->duration ??
               ($appt->procedure_duration ?? ($appt->treatment_duration ?? ''));
@@ -492,7 +507,8 @@ $notifCount = $notifications->count();
                   ],
                   ];
 
-                  $statusMeta = $statusMap[$appointmentStatus] ?? $statusMap['upcoming'];
+                  $statusMeta =
+                  $statusMap[$appointmentStatus] ?? $statusMap['upcoming'];
                   @endphp
 
                   <div class="appt-status-cell text-left">
@@ -537,11 +553,13 @@ $notifCount = $notifications->count();
             @foreach ($items as $i => $appt)
             @php
             $patientName = optional($appt->patient)->name ?? 'Unknown Patient';
-            $profilePatientId = optional($appt->patient)->id ?? $appt->patient_id ?? null;
+            $profilePatientId = optional($appt->patient)->id ?? ($appt->patient_id ?? null);
             $profileUrl = $profilePatientId
             ? route('admin.admin.patient.profile', ['patient' => $profilePatientId])
             : null;
-            $program = optional($appt->patient)->program ?? optional($appt->patient)->course ?? '—';
+            $program =
+            optional($appt->patient)->program ??
+            (optional($appt->patient)->course ?? '—');
             $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('M j, Y');
             $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
             $timeLabel = $appt->appointment_time
@@ -572,7 +590,8 @@ $notifCount = $notifications->count();
             $isCancelledPast = in_array($statusRaw, ['cancelled', 'canceled']);
             $cancelReason =
             $appt->cancellation_reason ??
-            ($appt->cancel_reason ?? ($appt->cancelled_reason ?? ($appt->reason ?? '')));
+            ($appt->cancel_reason ??
+            ($appt->cancelled_reason ?? ($appt->reason ?? '')));
             $cancelReasonLabel = trim(
             str_ireplace('Patient no-show', 'No-show', (string) $cancelReason),
             );
@@ -584,7 +603,8 @@ $notifCount = $notifications->count();
             $recordDuration =
             $appt->duration ??
             ($appt->procedure_duration ?? ($appt->treatment_duration ?? ''));
-            $recordRemarks = $appt->remarks ?? ($appt->treatment_notes ?? ($appt->notes ?? ''));
+            $recordRemarks =
+            $appt->remarks ?? ($appt->treatment_notes ?? ($appt->notes ?? ''));
             $recordOral = $appt->oral_examination ?? ($appt->oral ?? '');
             $recordDiagnosis = $appt->diagnosis ?? '';
             $recordPrescription = $appt->prescription ?? '';
@@ -660,11 +680,11 @@ $notifCount = $notifications->count();
               <div class="mobile-appt-actions grid grid-cols-2 gap-3">
                 @if ($profileUrl)
                 <a href="{{ $profileUrl }}" class="action-btn action-btn-view">
-                  <i class="fa-regular fa-user text-[10px]"></i> Profile
+                  <i class="fa-regular fa-user text-[10px]"></i> View
                 </a>
                 @else
                 <button type="button" class="action-btn action-btn-view" disabled title="No profile">
-                  <i class="fa-regular fa-user text-[10px]"></i> Profile
+                  <i class="fa-regular fa-user text-[10px]"></i> View
                 </button>
                 @endif
 
@@ -771,11 +791,13 @@ $notifCount = $notifications->count();
             @foreach ($items as $i => $appt)
             @php
             $patientName = optional($appt->patient)->name ?? 'Unknown Patient';
-            $profilePatientId = optional($appt->patient)->id ?? $appt->patient_id ?? null;
+            $profilePatientId = optional($appt->patient)->id ?? ($appt->patient_id ?? null);
             $profileUrl = $profilePatientId
             ? route('admin.admin.patient.profile', ['patient' => $profilePatientId])
             : null;
-            $program = optional($appt->patient)->program ?? optional($appt->patient)->course ?? '—';
+            $program =
+            optional($appt->patient)->program ??
+            (optional($appt->patient)->course ?? '—');
             $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('F j, Y');
             $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
             $timeLabel = $appt->appointment_time
@@ -908,11 +930,12 @@ $notifCount = $notifications->count();
           @foreach ($items as $i => $appt)
           @php
           $patientName = optional($appt->patient)->name ?? 'Unknown Patient';
-          $profilePatientId = optional($appt->patient)->id ?? $appt->patient_id ?? null;
+          $profilePatientId = optional($appt->patient)->id ?? ($appt->patient_id ?? null);
           $profileUrl = $profilePatientId
           ? route('admin.admin.patient.profile', ['patient' => $profilePatientId])
           : null;
-          $program = optional($appt->patient)->program ?? optional($appt->patient)->course ?? '—';
+          $program =
+          optional($appt->patient)->program ?? (optional($appt->patient)->course ?? '—');
           $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('M j, Y');
           $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
           $timeLabel = $appt->appointment_time
@@ -1003,11 +1026,11 @@ $notifCount = $notifications->count();
 
                 @if ($profileUrl)
                 <a href="{{ $profileUrl }}" class="action-btn action-btn-view">
-                  <i class="fa-regular fa-user text-[10px]"></i> Profile
+                  <i class="fa-regular fa-user text-[10px]"></i> View
                 </a>
                 @else
                 <button type="button" class="action-btn action-btn-view" disabled title="No profile">
-                  <i class="fa-regular fa-user text-[10px]"></i> Profile
+                  <i class="fa-regular fa-user text-[10px]"></i> View
                 </button>
                 @endif
               </div>
@@ -1174,11 +1197,31 @@ $notifCount = $notifications->count();
   let appointmentToDate = '';
 
   const apptStatusMeta = {
-    all: { label: 'All statuses', icon: 'fa-layer-group', tone: 'all' },
-    upcoming: { label: 'Upcoming', icon: 'fa-calendar-check', tone: 'upcoming' },
-    rescheduled: { label: 'Rescheduled', icon: 'fa-rotate-right', tone: 'rescheduled' },
-    completed: { label: 'Completed', icon: 'fa-circle-check', tone: 'completed' },
-    cancelled: { label: 'Cancelled', icon: 'fa-circle-xmark', tone: 'cancelled' }
+    all: {
+      label: 'All statuses',
+      icon: 'fa-layer-group',
+      tone: 'all'
+    },
+    upcoming: {
+      label: 'Upcoming',
+      icon: 'fa-calendar-check',
+      tone: 'upcoming'
+    },
+    rescheduled: {
+      label: 'Rescheduled',
+      icon: 'fa-rotate-right',
+      tone: 'rescheduled'
+    },
+    completed: {
+      label: 'Completed',
+      icon: 'fa-circle-check',
+      tone: 'completed'
+    },
+    cancelled: {
+      label: 'Cancelled',
+      icon: 'fa-circle-xmark',
+      tone: 'cancelled'
+    }
   };
 
   function normalizeCancelReasonLabel(reason) {
@@ -1196,7 +1239,8 @@ $notifCount = $notifications->count();
   function hydratePastCancellationReasons() {
     document.querySelectorAll('.past-status-pill[data-status-base="Cancelled"]').forEach((pill) => {
       const apptId = pill.dataset.apptId || '';
-      const reason = normalizeCancelReasonLabel(pill.dataset.cancelReason || getStoredCancelReason(apptId));
+      const reason = normalizeCancelReasonLabel(pill.dataset.cancelReason || getStoredCancelReason(
+        apptId));
       const label = reason ? `Cancelled - ${reason}` : 'Cancelled';
       const text = pill.querySelector('.past-status-text');
 
@@ -1421,7 +1465,8 @@ $notifCount = $notifications->count();
         const holder = group.querySelector(selector);
         if (!holder) return;
 
-        const cards = Array.from(holder.querySelectorAll(':scope > .appt-card, :scope > .mobile-appt-card'));
+        const cards = Array.from(holder.querySelectorAll(
+          ':scope > .appt-card, :scope > .mobile-appt-card'));
         cards.sort((a, b) => {
           const aName = a.dataset.patient || '';
           const bName = b.dataset.patient || '';
@@ -1442,8 +1487,12 @@ $notifCount = $notifications->count();
   function clearAppointmentSearch() {
     if (apptSearchInput) {
       apptSearchInput.value = '';
-      apptSearchInput.dispatchEvent(new Event('input', { bubbles: true }));
-      apptSearchInput.dispatchEvent(new Event('change', { bubbles: true }));
+      apptSearchInput.dispatchEvent(new Event('input', {
+        bubbles: true
+      }));
+      apptSearchInput.dispatchEvent(new Event('change', {
+        bubbles: true
+      }));
       apptSearchInput.focus();
     }
     applyAppointmentFilters();
@@ -1481,8 +1530,10 @@ $notifCount = $notifications->count();
       !!appointmentFromDate ||
       !!appointmentToDate;
 
-    const upcomingCards = Array.from(document.querySelectorAll('#upcomingSection .appt-card, #upcomingSection .mobile-appt-card'));
-    const pastCards = Array.from(document.querySelectorAll('#pastSection .appt-card, #pastSection .mobile-appt-card'));
+    const upcomingCards = Array.from(document.querySelectorAll(
+      '#upcomingSection .appt-card, #upcomingSection .mobile-appt-card'));
+    const pastCards = Array.from(document.querySelectorAll(
+      '#pastSection .appt-card, #pastSection .mobile-appt-card'));
 
     const upcomingVisible = upcomingCards.some(card => !card.classList.contains('hidden'));
     const pastVisible = pastCards.some(card => !card.classList.contains('hidden'));
@@ -1533,9 +1584,9 @@ $notifCount = $notifications->count();
       }
     };
 
-    const meta = hasPanelFilters
-      ? statusEmptyCopy.all
-      : (statusEmptyCopy[appointmentStatusFilter] || statusEmptyCopy.all);
+    const meta = hasPanelFilters ?
+      statusEmptyCopy.all :
+      (statusEmptyCopy[appointmentStatusFilter] || statusEmptyCopy.all);
 
     function setStatusEmptyContent(prefix) {
       const icon = document.getElementById(`appointmentStatusEmpty${prefix}Icon`);
@@ -1548,20 +1599,25 @@ $notifCount = $notifications->count();
     }
 
     function toggleControlled(el, show) {
-      el?.classList.toggle('show', show);
-      el?.classList.toggle('is-visible', show);
+      if (!el) return;
+
+      el.classList.toggle('show', show);
+      el.classList.toggle('is-visible', show);
+      el.classList.toggle('hidden', !show);
+      el.classList.toggle('is-hidden', !show);
+      el.setAttribute('aria-hidden', show ? 'false' : 'true');
+    }
+
+    function toggleStaticEmpty(el, show) {
+      if (!el) return;
+
+      el.classList.toggle('hidden', !show);
+      el.classList.toggle('is-hidden', !show);
+      el.setAttribute('aria-hidden', show ? 'false' : 'true');
     }
 
     setStatusEmptyContent('Upcoming');
     setStatusEmptyContent('Past');
-
-    toggleControlled(upcomingSearchEmpty, false);
-    toggleControlled(pastSearchEmpty, false);
-    toggleControlled(upcomingStatusEmpty, false);
-    toggleControlled(pastStatusEmpty, false);
-
-    upcomingStaticEmpty?.classList.add('hidden');
-    pastStaticEmpty?.classList.add('hidden');
 
     const showUpcomingSearchEmpty = upcomingAllowed && hasSearch && !upcomingVisible;
     const showPastSearchEmpty = pastAllowed && hasSearch && !pastVisible;
@@ -1578,8 +1634,7 @@ $notifCount = $notifications->count();
       (hasPanelFilters || hasDropdownStatusFilter) &&
       !pastVisible;
 
-    const isDefaultState =
-      !hasSearch &&
+    const isDefaultState = !hasSearch &&
       !hasPanelFilters &&
       !hasDropdownStatusFilter &&
       appointmentStatusFilter === 'all';
@@ -1594,16 +1649,17 @@ $notifCount = $notifications->count();
       isDefaultState &&
       pastCards.length === 0;
 
+    toggleStaticEmpty(upcomingStaticEmpty, showUpcomingStaticEmpty);
+    toggleStaticEmpty(pastStaticEmpty, showPastStaticEmpty);
+
     toggleControlled(upcomingSearchEmpty, showUpcomingSearchEmpty);
     toggleControlled(pastSearchEmpty, showPastSearchEmpty);
     toggleControlled(upcomingStatusEmpty, showUpcomingStatusEmpty);
     toggleControlled(pastStatusEmpty, showPastStatusEmpty);
 
-    upcomingStaticEmpty?.classList.toggle('hidden', !showUpcomingStaticEmpty);
-    pastStaticEmpty?.classList.toggle('hidden', !showPastStaticEmpty);
-
     document.querySelectorAll('.appointment-panel-empty-clear').forEach(btn => {
       btn.classList.toggle('hidden', !hasPanelFilters);
+      btn.classList.toggle('is-hidden', !hasPanelFilters);
     });
   }
 
@@ -1662,7 +1718,8 @@ $notifCount = $notifications->count();
       hasChips = true;
       const chip = document.createElement('div');
       chip.className = 'filter-chip';
-      chip.innerHTML = `<span>${label}</span><span class="filter-chip-remove"><i class="fa-solid fa-xmark"></i></span>`;
+      chip.innerHTML =
+        `<span>${label}</span><span class="filter-chip-remove"><i class="fa-solid fa-xmark"></i></span>`;
       chip.querySelector('.filter-chip-remove').onclick = function () {
         callback();
         renderAppointmentFilterChips();
@@ -1674,10 +1731,13 @@ $notifCount = $notifications->count();
     const draft = getDraftAppointmentFilters();
 
     if (draft.sort !== 'newest') {
-      const sortLabel = document.querySelector(`#apptSortGroup .ftag[data-sort="${draft.sort}"]`)?.textContent.trim() || draft.sort;
+      const sortLabel = document.querySelector(`#apptSortGroup .ftag[data-sort="${draft.sort}"]`)?.textContent
+        .trim() || draft.sort;
       addChip(`Sort: ${sortLabel}`, function () {
-        document.querySelectorAll('#apptSortGroup .ftag').forEach(btn => btn.classList.remove('ftag-active'));
-        document.querySelector('#apptSortGroup .ftag[data-sort="newest"]')?.classList.add('ftag-active');
+        document.querySelectorAll('#apptSortGroup .ftag').forEach(btn => btn.classList.remove(
+          'ftag-active'));
+        document.querySelector('#apptSortGroup .ftag[data-sort="newest"]')?.classList.add(
+          'ftag-active');
       });
     }
 
@@ -1687,7 +1747,8 @@ $notifCount = $notifications->count();
         const to = document.getElementById('toDate');
         if (from) from.value = '';
         if (to) to.value = '';
-        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => btn.classList
+          .remove('active'));
       });
     }
 
@@ -1736,7 +1797,8 @@ $notifCount = $notifications->count();
 
     document.querySelectorAll('#apptSortGroup .ftag').forEach(btn => {
       btn.addEventListener('click', function () {
-        document.querySelectorAll('#apptSortGroup .ftag').forEach(item => item.classList.remove('ftag-active'));
+        document.querySelectorAll('#apptSortGroup .ftag').forEach(item => item.classList.remove(
+          'ftag-active'));
         btn.classList.add('ftag-active');
         renderAppointmentFilterChips();
         updateAppointmentShowResultsButton();
@@ -1759,7 +1821,8 @@ $notifCount = $notifications->count();
 
     document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(btn => {
       btn.addEventListener('click', function () {
-        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(item => item.classList.remove('active'));
+        document.querySelectorAll('#datePresetGroup .quick-date-chip').forEach(item => item
+          .classList.remove('active'));
         btn.classList.add('active');
 
         const days = parseInt(btn.dataset.range || '0', 10);
@@ -1876,24 +1939,30 @@ $notifCount = $notifications->count();
 
   if (typeof window.openRescheduleModal !== 'function') {
     window.openRescheduleModal = function (payload) {
-      const targetUrl = payload?.updateUrl || (payload?.id ? `/admin/appointments/${payload.id}/reschedule` : null);
+      const targetUrl = payload?.updateUrl || (payload?.id ? `/admin/appointments/${payload.id}/reschedule` :
+        null);
       if (targetUrl) window.location.href = targetUrl;
     };
   }
 
   if (typeof window.cancelAppointmentFromModal !== 'function') {
     window.cancelAppointmentFromModal = function (cancelUrl, patientName, datetimeLabel) {
-      const confirmed = window.confirm(`Cancel ${patientName || 'this patient'}'s appointment${datetimeLabel ? ` (${datetimeLabel})` : ''}?`);
+      const confirmed = window.confirm(
+        `Cancel ${patientName || 'this patient'}'s appointment${datetimeLabel ? ` (${datetimeLabel})` : ''}?`
+      );
       if (!confirmed || !cancelUrl) return;
 
       fetch(cancelUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute(
+            'content') || '',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ reason: 'Cancelled by admin' })
+        body: JSON.stringify({
+          reason: 'Cancelled by admin'
+        })
       })
         .then((res) => res.json())
         .then((data) => {

@@ -47,7 +47,6 @@
     color: var(--pp-text) !important;
 }
 
-/* Text utilities inside patient profile */
 [data-theme="dark"] .patient-profile-page .text-gray-900,
 [data-theme="dark"] .patient-profile-page .text-gray-800,
 [data-theme="dark"] .patient-profile-page .text-gray-700,
@@ -86,7 +85,6 @@
     border-color: var(--pp-border) !important;
 }
 
-/* Dark mode color chips/icons */
 [data-theme="dark"] .patient-profile-page .bg-blue-50,
 .dark .patient-profile-page .bg-blue-50 {
     background: rgba(37, 99, 235, 0.16) !important;
@@ -138,7 +136,6 @@
     color: #fde047 !important;
 }
 
-/* Profile image */
 [data-theme="dark"] .patient-profile-page #profileContainer img,
 .dark .patient-profile-page #profileContainer img {
     border-color: #0d1117 !important;
@@ -146,7 +143,6 @@
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34) !important;
 }
 
-/* Treatment tabs */
 [data-theme="dark"] .patient-profile-page .visit-tab,
 .dark .patient-profile-page .visit-tab {
     color: var(--pp-muted) !important;
@@ -159,7 +155,6 @@
     box-shadow: 0 10px 24px rgba(139, 0, 0, 0.35) !important;
 }
 
-/* Visit rows */
 [data-theme="dark"] .patient-profile-page #futureContent > .group,
 [data-theme="dark"] .patient-profile-page #pastContent > .group,
 .dark .patient-profile-page #futureContent > .group,
@@ -197,7 +192,6 @@
     border-color: rgba(252, 165, 165, 0.35) !important;
 }
 
-/* Status badge base */
 .status-badge {
     display: inline-flex;
     padding: 2px 8px;
@@ -273,7 +267,6 @@
     border-color: rgba(203, 213, 225, 0.18) !important;
 }
 
-/* Drawer behavior */
 .drawer-overlay {
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(2px);
@@ -296,7 +289,6 @@
     transform: translateX(0);
 }
 
-/* Start modal dark mode */
 [data-theme="dark"] body:has(#mainContent.patient-profile-page) #startModalContent,
 .dark body:has(#mainContent.patient-profile-page) #startModalContent {
     background:
@@ -322,7 +314,6 @@
     border-color: rgba(203, 213, 225, 0.22) !important;
 }
 
-/* Details drawer dark mode */
 [data-theme="dark"] body:has(#mainContent.patient-profile-page) #detailsDrawer,
 .dark body:has(#mainContent.patient-profile-page) #detailsDrawer {
     background: linear-gradient(145deg, rgba(13, 17, 23, 0.96), rgba(22, 27, 34, 0.92)) !important;

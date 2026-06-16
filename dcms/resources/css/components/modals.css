@@ -273,8 +273,19 @@
         transform 140ms ease !important;
 }
 
-body.modal-lock {
+html.modal-lock,
+body.modal-lock,
+html:has(.modal-overlay.open),
+body:has(.modal-overlay.open),
+html:has(.ui-modal.open),
+body:has(.ui-modal.open),
+html:has(dialog[open]),
+body:has(dialog[open]),
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)),
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) {
     overflow: hidden !important;
+    overscroll-behavior: none !important;
+    scrollbar-gutter: stable;
 }
 
 .modal-header-custom {

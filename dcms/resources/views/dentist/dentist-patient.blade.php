@@ -8,7 +8,7 @@ $notifications = collect($notifications ?? []);
 $notifCount = $notifications->count();
 @endphp
 
-<main id="mainContent" class="mode-list dentist-page-shell page-enter">
+<main id="mainContent" class="admin-page-shell admin-patient-page dentist-page-shell page-enter mode-list">
   <div class="w-full">
 
     @php
@@ -83,8 +83,28 @@ $notifCount = $notifications->count();
               <div
                 class="patient-toolbar-actions flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-end">
 
-                <div class="patient-sort-row">
+                <div class="patient-search-row relative flex-1 md:flex-none flex items-center gap-2">
+                  <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
 
+                    <input id="searchInput" type="text" placeholder="Search patient" data-search-input
+                      class="search-input" />
+
+                    <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
+                      <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                  </div>
+
+                  <div class="voice-input-toggle">
+                    <span class="voice-status hidden" data-voice-status></span>
+                    <button type="button" class="voice-search-mic external" data-global-voice-trigger
+                      data-voice-target="#searchInput" aria-label="Use voice search" title="Voice search">
+                      <i class="fa-solid fa-microphone"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="patient-sort-row">
                   <div class="patient-stats-dropdown" id="patientStatsDropdown">
                     <button type="button" class="patient-stats-trigger" id="patientStatsToggle" aria-expanded="false">
                       <span class="patient-stats-trigger-left">
@@ -113,7 +133,7 @@ $notifCount = $notifications->count();
                             <i class="fa-solid fa-clock"></i>
                           </span>
                           <span class="patient-stat-option-label">Today</span>
-                          <span class="patient-stat-option-count" id="statUpcoming">{{ $todayCount ?? 0 }}</span>
+                          <span class="patient-stat-option-count" id="statToday">{{ $todayCount ?? 0 }}</span>
                         </button>
 
                         <button type="button" class="patient-stat-option filter-btn s-upcoming" data-filter="upcoming">
@@ -121,7 +141,7 @@ $notifCount = $notifications->count();
                             <i class="fa-solid fa-calendar-check"></i>
                           </span>
                           <span class="patient-stat-option-label">Upcoming</span>
-                          <span class="patient-stat-option-count" id="statScheduled">{{ $upcomingCount ?? 0 }}</span>
+                          <span class="patient-stat-option-count" id="statUpcoming">{{ $upcomingCount ?? 0 }}</span>
                         </button>
 
                         <button type="button" class="patient-stat-option filter-btn s-rescheduled"
@@ -164,40 +184,33 @@ $notifCount = $notifications->count();
                   </div>
                 </div>
 
-                <div class="patient-search-row relative flex-1 md:flex-none flex items-center gap-2">
-                  <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-
-                    <input id="searchInput" type="text" placeholder="Search patient name…" data-search-input
-                      class="search-input" />
-
-                    <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
-                      <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="view-toggle-container hidden md:flex mr-2">
-                  <div class="view-slider"></div>
-
-                  <button id="btnListView" onclick="switchView('list')" class="btn-view-mode active"
-                    title="List View"><i class="fa-solid fa-list text-sm"></i></button>
-                  <button id="btnGridView" onclick="switchView('grid')" class="btn-view-mode" title="Grid View"><i
-                      class="fa-solid fa-grip"></i></button>
-                </div>
-
                 <div class="patient-filter-actions">
                   <button id="filterBtn" type="button" onclick="openFilterModal()" class="global-filter-btn">
                     <i class="fa-solid fa-sliders"></i>
                     <span>Filter</span>
                     <span id="filterBadge" class="filter-badge" style="display:none;"></span>
                   </button>
+                </div>
 
-                  <button id="externalClearFilterBtn" type="button" onclick="resetAllFilters()"
-                    class="global-filter-reset-btn hidden" title="Reset filters">
-                    <i class="fa-solid fa-rotate-left"></i>
+                <div class="view-toggle-container" data-global-view-toggle data-view-root="#mainContent"
+                  data-storage-key="ViewToggleMode" aria-label="View options">
+                  <span class="view-slider" aria-hidden="true"></span>
+
+                  <button type="button" class="btn-view-mode active" title="List view" aria-label="List view"
+                    aria-pressed="true" data-view-mode="list">
+                    <i class="fa-solid fa-list"></i>
+                  </button>
+
+                  <button type="button" class="btn-view-mode" title="Grid view" aria-label="Grid view"
+                    aria-pressed="false" data-view-mode="grid">
+                    <i class="fa-solid fa-grip"></i>
                   </button>
                 </div>
+
+                <button id="externalClearFilterBtn" type="button" onclick="resetAllFilters()"
+                  class="global-filter-reset-btn hidden" title="Reset filters">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -763,45 +776,33 @@ $notifCount = $notifications->count();
     const mainContent = document.getElementById('mainContent');
     const btnList = document.getElementById('btnListView');
     const btnGrid = document.getElementById('btnGridView');
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
     if (!mainContent) return;
 
-    if (isMobile) {
-      mode = 'grid';
+    const nextMode = mode === 'grid' ? 'grid' : 'list';
+    const isGrid = nextMode === 'grid';
+
+    mainContent.classList.toggle('mode-grid', isGrid);
+    mainContent.classList.toggle('mode-list', !isGrid);
+
+    if (btnList) {
+      btnList.classList.toggle('active', !isGrid);
+      btnList.setAttribute('aria-pressed', !isGrid ? 'true' : 'false');
     }
 
-    if (mode === 'grid') {
-      mainContent.classList.remove('mode-list');
-      mainContent.classList.add('mode-grid');
-
-      if (btnList) btnList.classList.remove('active');
-      if (btnGrid) btnGrid.classList.add('active');
-
-      if (!isMobile) {
-        localStorage.setItem('patientViewMode', 'grid');
-      }
-    } else {
-      mainContent.classList.remove('mode-grid');
-      mainContent.classList.add('mode-list');
-
-      if (btnGrid) btnGrid.classList.remove('active');
-      if (btnList) btnList.classList.add('active');
-
-      localStorage.setItem('patientViewMode', 'list');
+    if (btnGrid) {
+      btnGrid.classList.toggle('active', isGrid);
+      btnGrid.setAttribute('aria-pressed', isGrid ? 'true' : 'false');
     }
+
+    localStorage.setItem('patientViewMode', nextMode);
   }
 
   function syncResponsivePatientView() {
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    const savedMode = localStorage.getItem('patientViewMode');
 
-    if (isMobile) {
-      switchView('grid');
-      return;
-    }
-
-    const savedMode = localStorage.getItem('patientViewMode') || 'list';
-    switchView(savedMode);
+    switchView(savedMode || (isMobile ? 'grid' : 'list'));
   }
 
   document.addEventListener('DOMContentLoaded', syncResponsivePatientView);
@@ -813,13 +814,13 @@ $notifCount = $notifications->count();
         label: 'Today',
         icon: 'fa-clock',
         tone: 's-today',
-        countId: 'statUpcoming'
+        countId: 'statToday'
       },
       upcoming: {
         label: 'Upcoming',
         icon: 'fa-calendar-check',
         tone: 's-upcoming',
-        countId: 'statScheduled'
+        countId: 'statUpcoming'
       },
       rescheduled: {
         label: 'Rescheduled',
@@ -1172,13 +1173,6 @@ $notifCount = $notifications->count();
             return matchesSearch(p, searchKeyword);
           });
         } else {
-          /*
-            IMPORTANT:
-            Filter count should preview ALL matching patients,
-            not only the current tab like today/upcoming/completed.
-            Kaya hindi natin ginagamit activeTab dito.
-          */
-
           if (draft.program) {
             data = data.filter(function (p) {
               return ilike(getInfo(p).program, draft.program);

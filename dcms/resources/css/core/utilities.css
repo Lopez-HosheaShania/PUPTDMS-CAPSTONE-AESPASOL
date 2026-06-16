@@ -556,7 +556,6 @@
     flex-shrink: 0 !important;
 }
 
-/* Appointment / request statuses */
 .status-all,
 .pill-all,
 .badge-all {
@@ -653,7 +652,6 @@
     --status-soft: var(--status-rejected-soft);
 }
 
-/* Admin/system statuses */
 .status-active,
 .pill-active,
 .badge-active {
@@ -985,7 +983,6 @@
     --stat-border: var(--status-denied-border);
 }
 
-/* Bridge for existing stat cards */
 .s-all::before,
 .s-today::before,
 .s-upcoming::before,
