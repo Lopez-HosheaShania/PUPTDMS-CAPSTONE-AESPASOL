@@ -1113,7 +1113,9 @@ function initGlobalSidebar() {
         }
     });
 
-    document.documentElement.classList.remove('sidebar-preload', 'sidebar-collapsed-init');
+    requestAnimationFrame(() => {
+        document.documentElement.classList.remove('sidebar-preload', 'sidebar-collapsed-init');
+    });
 }
 
 function initAdminSidebarGroupClick() {
@@ -1350,17 +1352,6 @@ function initSessionStorageToasts() {
 
         sessionStorage.removeItem(key);
     });
-}
-
-document.documentElement.classList.add('sidebar-preload');
-
-try {
-    const savedSidebarState = localStorage.getItem(getSidebarStorageKey());
-    if (savedSidebarState === '1') {
-        document.documentElement.classList.add('sidebar-collapsed-init');
-    }
-} catch (_) {
-    // Ignore storage errors
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1901,6 +1892,88 @@ function initGlobalViewToggles(root = document) {
     const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
     const toggles = scope.querySelectorAll('[data-global-view-toggle]');
 
+    const closeAllViewMenus = (except = null) => {
+        document.querySelectorAll('[data-global-view-toggle].open').forEach(toggle => {
+            if (toggle === except) return;
+
+            toggle.classList.remove('open');
+            toggle.querySelector('[data-view-mobile-trigger]')?.setAttribute('aria-expanded', 'false');
+        });
+    };
+
+    const getModeLabel = (mode, buttons) => {
+        const button = buttons.find(btn => btn.dataset.viewMode === mode);
+
+        return button?.querySelector('.view-mode-label')?.textContent?.trim()
+            || button?.getAttribute('title')
+            || (mode === 'grid' ? 'Grid View' : 'List View');
+    };
+
+    const getModeIcon = (mode) => {
+        return mode === 'grid' ? 'fa-solid fa-grip' : 'fa-solid fa-list';
+    };
+
+    const setMobileTriggerContent = (trigger, mode, buttons) => {
+        if (!trigger) return;
+
+        trigger.innerHTML = `
+            <span class="global-view-mobile-main">
+                <i class="${getModeIcon(mode)}"></i>
+                <span class="global-view-mobile-label">${getModeLabel(mode, buttons)}</span>
+            </span>
+            <i class="fa-solid fa-chevron-down global-view-mobile-chevron"></i>
+        `;
+
+        trigger.setAttribute('aria-label', `Current view: ${getModeLabel(mode, buttons)}`);
+        trigger.setAttribute('title', getModeLabel(mode, buttons));
+    };
+
+    const ensureMobileDropdown = (toggle, buttons) => {
+        if (toggle.querySelector('[data-view-mobile-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'global-view-mobile-trigger';
+        trigger.dataset.viewMobileTrigger = 'true';
+        trigger.setAttribute('aria-label', 'Change view');
+        trigger.setAttribute('aria-expanded', 'false');
+
+        const menu = document.createElement('div');
+        menu.className = 'global-view-mobile-menu';
+        menu.dataset.viewMobileMenu = 'true';
+
+        buttons.forEach(button => {
+            const mode = button.dataset.viewMode;
+            const option = document.createElement('button');
+
+            option.type = 'button';
+            option.className = 'global-view-mobile-option';
+            option.dataset.viewMobileOption = mode;
+
+            option.innerHTML = `
+                <i class="${getModeIcon(mode)}"></i>
+                <span>${getModeLabel(mode, buttons)}</span>
+            `;
+
+            menu.appendChild(option);
+        });
+
+        toggle.appendChild(trigger);
+        toggle.appendChild(menu);
+
+        trigger.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const willOpen = !toggle.classList.contains('open');
+
+            closeAllViewMenus(toggle);
+
+            toggle.classList.toggle('open', willOpen);
+            trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        });
+    };
+
     toggles.forEach((toggle) => {
         if (toggle.dataset.globalViewInitialized === 'true') return;
 
@@ -1909,7 +1982,7 @@ function initGlobalViewToggles(root = document) {
         const rootSelector = toggle.dataset.viewRoot || '#mainContent';
         const listSelector = toggle.dataset.listView;
         const gridSelector = toggle.dataset.gridView;
-        const storageKey = toggle.dataset.storageKey || `${toggle.id || 'global'}_view_mode`;
+        const storageKey = toggle.dataset.storageKey || 'ViewToggleMode';
 
         const pageRoot = document.querySelector(rootSelector);
         const listView = listSelector ? document.querySelector(listSelector) : null;
@@ -1917,6 +1990,11 @@ function initGlobalViewToggles(root = document) {
         const buttons = Array.from(toggle.querySelectorAll('[data-view-mode]'));
 
         if (!buttons.length) return;
+
+        ensureMobileDropdown(toggle, buttons);
+
+        const mobileTrigger = toggle.querySelector('[data-view-mobile-trigger]');
+        const mobileOptions = Array.from(toggle.querySelectorAll('[data-view-mobile-option]'));
 
         const setMode = (mode, options = {}) => {
             const nextMode = mode === 'grid' ? 'grid' : 'list';
@@ -1935,6 +2013,16 @@ function initGlobalViewToggles(root = document) {
                 button.classList.toggle('is-active', active);
                 button.setAttribute('aria-pressed', active ? 'true' : 'false');
             });
+
+            mobileOptions.forEach((option) => {
+                const active = option.dataset.viewMobileOption === nextMode;
+
+                option.classList.toggle('active', active);
+                option.classList.toggle('is-active', active);
+                option.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+
+            setMobileTriggerContent(mobileTrigger, nextMode, buttons);
 
             toggle.dataset.currentView = nextMode;
 
@@ -1957,11 +2045,33 @@ function initGlobalViewToggles(root = document) {
             });
         });
 
-        const mobile = window.matchMedia('(max-width: 767px)').matches;
-        const savedMode = localStorage.getItem(storageKey);
+        mobileOptions.forEach((option) => {
+            option.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
 
-        setMode(mobile ? 'grid' : savedMode || 'list', { persist: false });
+                setMode(option.dataset.viewMobileOption);
+
+                toggle.classList.remove('open');
+                mobileTrigger?.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        const savedMode = localStorage.getItem(storageKey);
+        setMode(savedMode || 'list', { persist: false });
     });
+
+    if (document.documentElement.dataset.globalViewCloseBound !== 'true') {
+        document.documentElement.dataset.globalViewCloseBound = 'true';
+
+        document.addEventListener('click', () => closeAllViewMenus());
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                closeAllViewMenus();
+            }
+        });
+    }
 }
 
 function setGlobalViewMode(toggleOrId, mode, options = {}) {
@@ -2225,6 +2335,36 @@ function initGlobalVoiceInputs(root = document) {
 
 document.addEventListener('DOMContentLoaded', () => {
     initGlobalVoiceInputs();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const openModalSelector = [
+        '.modal-overlay.open',
+        '.ui-modal.open',
+        'dialog[open]',
+        '[id$="Modal"].opacity-100:not(.pointer-events-none)'
+    ].join(',');
+
+    const syncModalLock = () => {
+        const hasOpenModal = !!document.querySelector(openModalSelector);
+
+        document.documentElement.classList.toggle('modal-lock', hasOpenModal);
+        document.body.classList.toggle('modal-lock', hasOpenModal);
+    };
+
+    const modalObserver = new MutationObserver(syncModalLock);
+
+    modalObserver.observe(document.body, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['class', 'open', 'style', 'aria-hidden']
+    });
+
+    document.addEventListener('click', () => requestAnimationFrame(syncModalLock), true);
+    document.addEventListener('keydown', () => requestAnimationFrame(syncModalLock), true);
+
+    syncModalLock();
 });
 
 window.initGlobalVoiceInputs = initGlobalVoiceInputs;

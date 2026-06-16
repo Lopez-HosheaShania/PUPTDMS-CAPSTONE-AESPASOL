@@ -31,7 +31,6 @@ body.role-patient .patient-page-shell {
     color: #F3F4F6 !important;
 }
 
-/* Patient mobile bottom nav */
 body.role-patient #mobileBottomNav {
     position: fixed;
     left: 50%;

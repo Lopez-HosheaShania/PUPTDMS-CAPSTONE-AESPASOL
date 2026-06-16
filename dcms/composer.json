@@ -18,8 +18,9 @@
         "laravel/reverb": "^1.0",
         "laravel/socialite": "^5.25",
         "laravel/tinker": "^2.10.1",
+        "phpoffice/phpspreadsheet": "^5.8",
         "pusher/pusher-php-server": "*",
-        "setasign/fpdf": "^1.8",
+        "setasign/fpdf": "^1.9",
         "setasign/fpdi": "^2.6",
         "tymon/jwt-auth": "^2.3"
     },

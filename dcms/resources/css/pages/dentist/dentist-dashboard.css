@@ -105,6 +105,23 @@
     white-space: nowrap;
 }
 
+.dentist-dashboard-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.dentist-dashboard-page>.w-full,
+.row2-grid,
+.row3-grid,
+.inventory-grid,
+.dashboard-side-stack {
+    min-width: 0;
+    width: 100%;
+}
+
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -138,7 +155,7 @@
 #gadAnalyticsContainer,
 #gadAnalyticsContainer>div,
 .row3-grid>.flex {
-    height: 100%;
+    height: auto;
 }
 
 #gadAnalyticsContainer>div {
@@ -146,18 +163,22 @@
 }
 
 .row3-grid>.flex>div {
-    flex: 1;
+    flex: initial;
 }
 
 #medicalSuppliesContainer>div,
 #medicineSuppliesContainer>div {
-    height: 100%;
+    height: auto;
 }
 
 .inventory-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    overflow: visible !important;
 }
 
 @media (min-width: 1024px) {
@@ -172,16 +193,40 @@
 
     .row3-grid {
         display: grid;
-        grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr);
-        gap: 1rem;
-        align-items: stretch;
+        grid-template-columns: minmax(0, 7fr) minmax(360px, 5fr);
+        gap: 1.25rem;
+        align-items: start;
+        margin-top: 1rem;
     }
 
-    .inventory-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        height: 100%;
+    .row3-grid>.inventory-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+        height: auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .row3-grid>.inventory-grid>#medicalSuppliesContainer,
+    .row3-grid>.inventory-grid>#medicineSuppliesContainer {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 0 0 auto !important;
+    }
+
+    #medicalSuppliesContainer {
+        order: 1 !important;
+    }
+
+    #medicineSuppliesContainer {
+        order: 2 !important;
+    }
+
+    #medicalSuppliesContainer>div,
+    #medicineSuppliesContainer>div {
+        height: auto;
+        min-height: 220px;
     }
 }
 
@@ -253,12 +298,151 @@
 }
 
 @media (max-width: 1023px) {
+    .dentist-dashboard-page {
+        padding-left: clamp(14px, 3vw, 24px) !important;
+        padding-right: clamp(14px, 3vw, 24px) !important;
+    }
+
+    .greeting-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+    }
+
+    .greeting-banner-copy {
+        width: 100%;
+    }
+
+    .greeting-heading,
+    .greeting-title {
+        font-size: clamp(1.35rem, 4vw, 1.85rem) !important;
+        line-height: 1.15 !important;
+    }
+
+    .greeting-banner-actions {
+        width: 100%;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 0.85rem !important;
+    }
+
+    .greeting-status-meta {
+        text-align: left !important;
+    }
+
+    .greeting-status-text {
+        white-space: normal !important;
+    }
+
+    .status-btn-wrap {
+        flex-shrink: 0;
+    }
+
+    .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.85rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .kpi-card {
+        height: auto !important;
+        min-height: 118px !important;
+        padding: 0.9rem !important;
+    }
+
+    .row2-grid,
+    .row3-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
     #dentistCalendarContainer {
+        min-height: 360px !important;
+        height: auto !important;
+    }
+
+    #dentistCalendarContainer .cal-shell {
+        min-height: 360px !important;
+        height: auto !important;
+        padding: 1rem !important;
+        border-radius: 1.1rem !important;
+    }
+
+    .dashboard-side-stack {
+        height: auto !important;
+    }
+
+    #upcomingAppointmentsContainer {
+        height: auto !important;
+    }
+
+    .upcoming-card {
+        height: auto !important;
+        min-height: 340px !important;
+    }
+
+    .upcoming-date-strip {
+        justify-content: flex-start !important;
+        padding-left: 0.15rem !important;
+        padding-right: 0.15rem !important;
+        scrollbar-width: thin;
+    }
+
+    .upcoming-date-btn {
+        min-width: 52px !important;
+    }
+
+    .upcoming-empty-state {
+        transform: none !important;
+        min-height: 150px !important;
+    }
+
+    #gadAnalyticsContainer,
+    #gadAnalyticsContainer>div,
+    #medicalSuppliesContainer>div,
+    #medicineSuppliesContainer>div {
+        height: auto !important;
+    }
+
+    #gadAnalyticsContainer>div,
+    .gad-analytics-card {
         min-height: 360px !important;
     }
 
+    .gad-chart-shell {
+        min-height: 230px !important;
+    }
+
+    .gad-empty-panel {
+        padding: 1rem !important;
+    }
+
+    .inventory-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.85rem !important;
+        height: auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .inventory-grid>#medicalSuppliesContainer,
+    .inventory-grid>#medicineSuppliesContainer {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 0 0 auto !important;
+    }
+
+    .inventory-grid>#medicalSuppliesContainer {
+        order: 1 !important;
+    }
+
+    .inventory-grid>#medicineSuppliesContainer {
+        order: 2 !important;
+    }
+
     .dashboard-quick-actions {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 
     .inventory-scroll-wrap {
@@ -275,15 +459,11 @@
         pointer-events: none;
         margin-top: -24px;
     }
+}
 
-    .kpi-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-
-    .kpi-card {
-        height: 125px;
-        min-height: 125px;
-    }
+[data-theme="dark"] .inventory-scroll-wrap::after,
+.dark .inventory-scroll-wrap::after {
+    background: linear-gradient(to bottom, transparent, rgba(13, 17, 23, .9));
 }
 
 .day-hover-card {
@@ -356,6 +536,40 @@
     padding: 0.55rem 0.4rem;
     text-align: center;
     transition: all .18s ease;
+    position: relative !important;
+    overflow: visible !important;
+}
+
+.upcoming-date-btn.has-appointments {
+    border-color: var(--status-upcoming-border, #bfdbfe) !important;
+    background: var(--status-upcoming-bg, #eff6ff) !important;
+    color: var(--status-upcoming-text, #1d4ed8) !important;
+}
+
+.upcoming-date-badge {
+    position: absolute !important;
+    top: -7px !important;
+    right: -7px !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 5px !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--status-upcoming-solid, #2563eb) !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff !important;
+    font-size: 0.58rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.24) !important;
+}
+
+.upcoming-date-btn.active .upcoming-date-badge {
+    background: #ffffff !important;
+    color: #8B0000 !important;
+    border-color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .upcoming-date-btn.active {
@@ -434,110 +648,327 @@
 }
 
 .upcoming-time-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 999px;
-    background: #8B0000;
-    box-shadow: 0 0 0 4px #fff1f1;
-    flex-shrink: 0;
+    position: relative !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    border: 3px solid var(--status-upcoming-solid, #2563eb) !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10) !important;
+    flex-shrink: 0 !important;
+}
+
+.upcoming-time-dot::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 50% auto auto 50% !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 999px !important;
+    transform: translate(-50%, -50%) !important;
+    background: var(--status-upcoming-solid, #2563eb) !important;
+}
+
+.upcoming-time-dot.upcoming-status-upcoming {
+    border-color: var(--status-upcoming-solid, #2563eb) !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10) !important;
+}
+
+.upcoming-time-dot.upcoming-status-upcoming::after {
+    background: var(--status-upcoming-solid, #2563eb) !important;
+}
+
+.upcoming-time-dot.upcoming-status-rescheduled {
+    border-color: var(--status-rescheduled-solid, #f59e0b) !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12) !important;
+}
+
+.upcoming-time-dot.upcoming-status-rescheduled::after {
+    background: var(--status-rescheduled-solid, #f59e0b) !important;
+}
+
+.upcoming-time-dot.upcoming-status-completed {
+    border-color: var(--status-completed-solid, #16a34a) !important;
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12) !important;
+}
+
+.upcoming-time-dot.upcoming-status-completed::after {
+    background: var(--status-completed-solid, #16a34a) !important;
+}
+
+.upcoming-time-dot.upcoming-status-cancelled {
+    border-color: var(--status-cancelled-solid, #dc2626) !important;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12) !important;
+}
+
+.upcoming-time-dot.upcoming-status-cancelled::after {
+    background: var(--status-cancelled-solid, #dc2626) !important;
+}
+
+.avatar-upcoming {
+    border-color: var(--status-upcoming-solid, #2563eb) !important;
+}
+
+.avatar-rescheduled {
+    border-color: var(--status-rescheduled-solid, #f59e0b) !important;
+}
+
+.avatar-completed {
+    border-color: var(--status-completed-solid, #16a34a) !important;
+}
+
+.avatar-cancelled {
+    border-color: var(--status-cancelled-solid, #dc2626) !important;
 }
 
 @media (max-width: 767px) {
 
-    .status-card {
+    .row2-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.85rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .row3-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        grid-template-columns: none !important;
+        gap: 0.85rem !important;
+        margin-top: 0 !important;
         width: 100% !important;
-        justify-content: space-between !important;
-        padding: 8px 8px 8px 16px !important;
+        max-width: 100% !important;
     }
 
-    .status-card-labels {
-        align-items: flex-start !important;
+    .row3-grid>*,
+    #gadAnalyticsContainer,
+    .inventory-grid,
+    #medicalSuppliesContainer,
+    #medicineSuppliesContainer {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        align-self: stretch !important;
+        box-sizing: border-box !important;
     }
 
-    .kpi-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 8px !important;
+    #gadAnalyticsContainer>div,
+    #medicalSuppliesContainer>div,
+    #medicineSuppliesContainer>div {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
     }
 
-    .kpi-grid>div {
-        padding: 12px !important;
-        border-radius: 14px !important;
+    #gadAnalyticsContainer {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
     }
 
-    .kpi-grid>div .w-10.h-10 {
+    .inventory-grid {
+        gap: 0.55rem !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        overflow: visible !important;
+    }
+
+    #medicalSuppliesContainer,
+    #medicineSuppliesContainer {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        overflow: visible !important;
+    }
+
+    #medicalSuppliesContainer>div,
+    #medicineSuppliesContainer>div {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        padding: 0.72rem 0.78rem !important;
+        border-radius: 15px !important;
+        overflow: hidden !important;
+    }
+
+    #medicalSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4,
+    #medicineSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4 {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: center !important;
+        gap: 0.42rem !important;
+        margin-bottom: 0.55rem !important;
+        min-width: 0 !important;
+    }
+
+    #medicalSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4>.flex,
+    #medicineSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4>.flex {
+        min-width: 0 !important;
+        gap: 0.42rem !important;
+    }
+
+    #medicalSuppliesContainer .w-9.h-9,
+    #medicineSuppliesContainer .w-9.h-9 {
         width: 28px !important;
         height: 28px !important;
-        border-radius: 8px !important;
+        min-width: 28px !important;
+        border-radius: 10px !important;
     }
 
-    .kpi-grid>div .w-10.h-10 i {
-        font-size: 12px !important;
+    #medicalSuppliesContainer .w-9.h-9 i,
+    #medicineSuppliesContainer .w-9.h-9 i {
+        font-size: 0.68rem !important;
     }
 
-    .kpi-grid>div .text-\[10px\] {
-        font-size: 8px !important;
-        padding: 2px 6px !important;
+    #medicalSuppliesContainer h3,
+    #medicineSuppliesContainer h3 {
+        font-size: clamp(0.72rem, 3.8vw, 0.84rem) !important;
+        line-height: 1 !important;
+        letter-spacing: -0.065em !important;
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
     }
 
-    .kpi-grid>div p.text-3xl {
-        font-size: 1.5rem !important;
-        margin-top: 4px !important;
-        margin-bottom: 2px !important;
-    }
-
-    .kpi-grid>div p.text-xs {
-        font-size: 0.55rem !important;
-        line-height: 1.2 !important;
-        white-space: normal !important;
-        letter-spacing: 0px !important;
-    }
-
-    .kpi-grid>div p.text-\[10px\] {
+    #medicalSuppliesContainer h3+p,
+    #medicineSuppliesContainer h3+p {
         font-size: 0.5rem !important;
-        line-height: 1.2 !important;
+        line-height: 1 !important;
+        letter-spacing: 0.075em !important;
+        margin-top: 0.15rem !important;
+        white-space: nowrap !important;
     }
 
-    #kpi-clock-hhmm {
-        font-size: 1.35rem !important;
+    #medicalSuppliesContainer a,
+    #medicineSuppliesContainer a {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: 62px !important;
+        height: 30px !important;
+        padding: 0 0.42rem !important;
+        border-radius: 999px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.25rem !important;
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+        line-height: 1 !important;
+        font-size: 0.58rem !important;
     }
 
-    #kpi-clock-ss {
-        font-size: 0.75rem !important;
+    #medicalSuppliesContainer a span,
+    #medicineSuppliesContainer a span {
+        white-space: nowrap !important;
     }
 
-    #statusKpiLabel {
-        font-size: 1.35rem !important;
+    #medicalSuppliesContainer a i,
+    #medicineSuppliesContainer a i {
+        flex-shrink: 0 !important;
+        font-size: 0.58rem !important;
     }
 
-    .kpi-grid>div .absolute.w-24.h-24 {
+    #medicalSuppliesContainer .border-dashed,
+    #medicineSuppliesContainer .border-dashed {
+        min-height: 72px !important;
+        padding: 0.62rem !important;
+        border-radius: 13px !important;
+    }
+
+    #medicalSuppliesContainer .border-dashed i,
+    #medicineSuppliesContainer .border-dashed i {
+        font-size: 1.25rem !important;
+        margin-bottom: 0.32rem !important;
+    }
+
+    #medicalSuppliesContainer .border-dashed p,
+    #medicineSuppliesContainer .border-dashed p {
+        font-size: 0.64rem !important;
+        line-height: 1.15 !important;
+        white-space: normal !important;
+    }
+
+    #medicalSuppliesContainer .relative.z-10.overflow-y-auto,
+    #medicineSuppliesContainer .relative.z-10.overflow-y-auto {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        padding-right: 0 !important;
+    }
+
+    #medicalSuppliesContainer .relative.z-10.overflow-y-auto::after,
+    #medicineSuppliesContainer .relative.z-10.overflow-y-auto::after {
         display: none !important;
     }
 
-    .greeting-status-meta {
-        text-align: left;
+    #medicalSuppliesContainer .inventory-scroll-wrap::after,
+    #medicineSuppliesContainer .inventory-scroll-wrap::after {
+        display: none !important;
     }
 
-    .greeting-status-text {
-        white-space: normal;
+    #medicalSuppliesContainer table,
+    #medicineSuppliesContainer table {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
     }
 
-    .status-btn-wrap {
-        width: 100%;
-        justify-content: space-between;
+    #medicalSuppliesContainer th,
+    #medicineSuppliesContainer th {
+        font-size: 0.49rem !important;
+        letter-spacing: 0.045em !important;
+        white-space: nowrap !important;
+        padding: 0.32rem 0.18rem !important;
     }
 
-    #statusBtn.banner-status-btn {
-        flex: 1 1 auto;
+    #medicalSuppliesContainer td,
+    #medicineSuppliesContainer td {
+        font-size: 0.62rem !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
+        padding: 0.42rem 0.18rem !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
-}
 
-[data-theme="dark"] #mainContent,
-.dark #mainContent {
-    background:
-        radial-gradient(circle at 12% 4%, rgba(139, 0, 0, 0.18), transparent 30%),
-        radial-gradient(circle at 88% 12%, rgba(252, 165, 165, 0.08), transparent 28%),
-        var(--bg-main, #0D1117) !important;
-    color: var(--text-primary, #F8FAFC) !important;
+    #medicalSuppliesContainer th:nth-child(1),
+    #medicineSuppliesContainer th:nth-child(1),
+    #medicalSuppliesContainer td:nth-child(1),
+    #medicineSuppliesContainer td:nth-child(1) {
+        width: 30% !important;
+    }
+
+    #medicalSuppliesContainer th:nth-child(2),
+    #medicineSuppliesContainer th:nth-child(2),
+    #medicalSuppliesContainer td:nth-child(2),
+    #medicineSuppliesContainer td:nth-child(2) {
+        width: 18% !important;
+        text-align: center !important;
+    }
+
+    #medicalSuppliesContainer th:nth-child(3),
+    #medicineSuppliesContainer th:nth-child(3),
+    #medicalSuppliesContainer td:nth-child(3),
+    #medicineSuppliesContainer td:nth-child(3) {
+        width: 22% !important;
+        text-align: center !important;
+    }
+
+    #medicalSuppliesContainer th:nth-child(4),
+    #medicineSuppliesContainer th:nth-child(4),
+    #medicalSuppliesContainer td:nth-child(4),
+    #medicineSuppliesContainer td:nth-child(4) {
+        width: 30% !important;
+        text-align: center !important;
+    }
 }
 
 [data-theme="dark"] #mainContent .kpi-card,
@@ -1133,6 +1564,71 @@
     transition: all .22s ease;
 }
 
+[data-theme="dark"] #dayAppointmentsModalBox,
+.dark #dayAppointmentsModalBox {
+    background: #0D1117 !important;
+    color: #F8FAFC !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] #dayAppointmentsModalList>div,
+.dark #dayAppointmentsModalList>div {
+    background: rgba(17, 24, 39, 0.88) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] .scheduled-patient-name,
+.dark .scheduled-patient-name {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .scheduled-patient-meta,
+.dark .scheduled-patient-meta {
+    color: #C9D1D9 !important;
+}
+
+[data-theme="dark"] .scheduled-patient-service,
+.dark .scheduled-patient-service {
+    color: #D1D5DB !important;
+}
+
+[data-theme="dark"] .scheduled-patient-schedule,
+.dark .scheduled-patient-schedule {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .scheduled-patient-avatar,
+[data-theme="dark"] .upcoming-avatar,
+.dark .scheduled-patient-avatar,
+.dark .upcoming-avatar {
+    background: rgba(139, 0, 0, 0.28) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, 0.42) !important;
+}
+
+[data-theme="dark"] #dayAppointmentsModalBox>div:last-child button,
+.dark #dayAppointmentsModalBox>div:last-child button {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] .upcoming-date-btn.has-appointments,
+.dark .upcoming-date-btn.has-appointments {
+    background: rgba(37, 99, 235, 0.14) !important;
+    border-color: rgba(147, 197, 253, 0.38) !important;
+    color: #BFDBFE !important;
+}
+
+[data-theme="dark"] .upcoming-date-badge,
+.dark .upcoming-date-badge {
+    border-color: #0D1117 !important;
+}
+
+[data-theme="dark"] .upcoming-time-dot,
+.dark .upcoming-time-dot {
+    background: #0D1117 !important;
+}
+
 [data-theme="dark"] #mainContent #medicalSuppliesContainer a:hover,
 .dark #mainContent #medicalSuppliesContainer a:hover {
     transform: translateY(-2px);
@@ -1350,4 +1846,911 @@
 .dark #mainContent #medicalSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4 p,
 .dark #mainContent #medicineSuppliesContainer .relative.z-10.flex.items-center.justify-between.mb-4 p {
     color: var(--text-secondary, #C9D1D9) !important;
+}
+
+@media (max-width: 480px) {
+    .dentist-dashboard-page {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    .greeting-row {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .greeting-banner {
+        border-radius: 16px !important;
+    }
+
+    .greeting-banner-inner {
+        min-height: auto !important;
+        padding: 0.62rem !important;
+        gap: 0.48rem !important;
+    }
+
+    .greeting-banner-copy {
+        width: 100% !important;
+    }
+
+    .greeting-heading,
+    .greeting-title {
+        font-size: 0.86rem !important;
+        line-height: 1.08 !important;
+        letter-spacing: -0.02em !important;
+        max-width: 100% !important;
+    }
+
+    #greetingText {
+        font-size: 0.86rem !important;
+        line-height: 1.08 !important;
+        font-weight: 650 !important;
+    }
+
+    .greeting-line {
+        line-height: 1.08 !important;
+    }
+
+    .greeting-name-line {
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+        gap: 0.22rem !important;
+        font-size: clamp(1rem, 5vw, 1.16rem) !important;
+        line-height: 1.04 !important;
+        font-weight: 900 !important;
+        letter-spacing: -0.06em !important;
+    }
+
+    .greeting-name-prefix,
+    #dentistName {
+        font-size: inherit !important;
+        line-height: inherit !important;
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+    }
+
+    .greeting-name-line i {
+        font-size: 0.78rem !important;
+        margin-top: 0 !important;
+        margin-left: 0.08rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .greeting-subtitle {
+        font-size: 0.72rem !important;
+        line-height: 1.28 !important;
+        margin-top: 0.55rem !important;
+        max-width: 14rem !important;
+    }
+
+    .greeting-banner-actions {
+        gap: 0.55rem !important;
+    }
+
+    .greeting-status-eyebrow {
+        font-size: 6.5px !important;
+        letter-spacing: 0.08em !important;
+        margin-bottom: 1px !important;
+    }
+
+    .greeting-status-text {
+        font-size: 9px !important;
+        line-height: 1.18 !important;
+    }
+
+    .status-btn-wrap {
+        gap: 4px !important;
+        padding: 4px !important;
+        width: 100% !important;
+        max-width: 170px !important;
+        display: grid !important;
+        grid-template-columns: 26px minmax(88px, 1fr) !important;
+        align-items: center !important;
+    }
+
+    .status-icon-badge {
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    .status-icon-badge i {
+        font-size: 9px !important;
+    }
+
+    #statusBtn.banner-status-btn {
+        width: 100% !important;
+        min-width: 88px !important;
+        height: 28px !important;
+        padding: 5px 12px !important;
+        font-size: 9px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #statusLabel {
+        gap: 6px !important;
+        white-space: nowrap !important;
+    }
+
+    .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+
+    .kpi-card,
+    .kpi-grid>div {
+        min-height: 98px !important;
+        height: auto !important;
+        padding: 10px !important;
+        border-radius: 14px !important;
+    }
+
+    .kpi-grid>div .w-9.h-9,
+    .kpi-grid>div .w-10.h-10 {
+        width: 26px !important;
+        height: 26px !important;
+        border-radius: 8px !important;
+    }
+
+    .kpi-grid>div .w-9.h-9 i,
+    .kpi-grid>div .w-10.h-10 i {
+        font-size: 11px !important;
+    }
+
+    .kpi-grid>div p.text-3xl,
+    .kpi-grid>div .text-3xl {
+        font-size: 1.25rem !important;
+        line-height: 1 !important;
+    }
+
+    .kpi-grid>div p.text-2xl,
+    #statusKpiLabel {
+        font-size: 1.15rem !important;
+        line-height: 1 !important;
+    }
+
+    #kpi-clock-hhmm {
+        font-size: 1.05rem !important;
+        line-height: 1 !important;
+    }
+
+    #kpi-clock-ampm {
+        font-size: 7px !important;
+    }
+
+    .kpi-grid>div p.text-\[10px\],
+    .kpi-grid>div .text-\[10px\] {
+        font-size: 7px !important;
+        line-height: 1.15 !important;
+        letter-spacing: 0.04em !important;
+    }
+
+    .kpi-grid>div .text-\[9px\] {
+        font-size: 7px !important;
+        line-height: 1.1 !important;
+    }
+
+    .kpi-grid>div .z-10.mt-4,
+    .kpi-grid>div .z-10.mt-3 {
+        margin-top: 0.55rem !important;
+    }
+
+    .kpi-grid>div .flex.flex-col.text-right {
+        gap: 1px !important;
+        max-width: 54px !important;
+    }
+
+    .status-change-btn {
+        padding: 4px 7px !important;
+        font-size: 8px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        border-radius: 7px !important;
+        min-width: max-content !important;
+    }
+
+    .dashboard-quick-btn {
+        min-height: 38px !important;
+        padding: 0.55rem 0.65rem !important;
+        font-size: 0.66rem !important;
+        line-height: 1.15 !important;
+        white-space: normal !important;
+        text-align: center !important;
+    }
+
+    .dashboard-quick-btn i {
+        font-size: 0.72rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    #gadAnalyticsContainer>div,
+    .gad-analytics-card {
+        min-height: auto !important;
+        padding: 0.85rem !important;
+        border-radius: 16px !important;
+    }
+
+    .gad-analytics-card .relative.z-10.flex.items-start.justify-between {
+        flex-direction: column !important;
+        gap: 0.65rem !important;
+        margin-bottom: 0.85rem !important;
+    }
+
+    .gad-header-badge {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 11px !important;
+    }
+
+    .gad-header-badge i {
+        font-size: 0.78rem !important;
+    }
+
+    .gad-analytics-card h3 {
+        font-size: 0.82rem !important;
+        line-height: 1.1 !important;
+    }
+
+    .gad-analytics-card h3+span {
+        font-size: 7px !important;
+        padding: 2px 6px !important;
+    }
+
+    .gad-analytics-card p.text-sm {
+        font-size: 0.68rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .gad-analytics-card p.text-xs {
+        font-size: 0.6rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .gad-metric-chip {
+        padding: 0.35rem 0.48rem !important;
+        font-size: 0.58rem !important;
+        gap: 0.3rem !important;
+    }
+
+    .gad-metric-chip .w-2\.5.h-2\.5 {
+        width: 0.45rem !important;
+        height: 0.45rem !important;
+    }
+
+    .gad-chart-shell {
+        min-height: 175px !important;
+        padding: 0.6rem !important;
+        border-radius: 14px !important;
+    }
+
+    #gadChart {
+        min-height: 170px !important;
+        max-height: 190px !important;
+    }
+
+    .gad-empty-panel {
+        padding: 0.75rem !important;
+        border-radius: 15px !important;
+    }
+
+    .gad-empty-icon-wrap {
+        width: 54px !important;
+        height: 54px !important;
+        border-radius: 16px !important;
+        margin-bottom: 0.55rem !important;
+    }
+
+    .gad-empty-icon-wrap i {
+        font-size: 1.55rem !important;
+    }
+
+    .gad-empty-panel p.font-extrabold {
+        font-size: 0.78rem !important;
+    }
+
+    .gad-empty-panel p.text-sm {
+        font-size: 0.65rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .gad-empty-actions {
+        gap: 0.35rem !important;
+        margin-top: 0.7rem !important;
+    }
+
+    .gad-empty-pill {
+        font-size: 0.54rem !important;
+        padding: 0.35rem 0.45rem !important;
+        gap: 0.25rem !important;
+    }
+
+    #statusModal {
+        padding: 1rem !important;
+        align-items: center !important;
+    }
+
+    #statusModalBox {
+        width: min(100%, 310px) !important;
+        max-width: 310px !important;
+        border-radius: 18px !important;
+    }
+
+    #modalBanner {
+        padding: 1rem 1rem 0.85rem !important;
+    }
+
+    #modalIcon {
+        width: 48px !important;
+        height: 48px !important;
+        margin-bottom: 0.65rem !important;
+        font-size: 1.05rem !important;
+    }
+
+    #modalTitle {
+        font-size: 1.05rem !important;
+        line-height: 1.15 !important;
+    }
+
+    #modalSubtitle {
+        font-size: 0.78rem !important;
+        line-height: 1.25 !important;
+        margin-top: 0.3rem !important;
+    }
+
+    #modalBody {
+        font-size: 0.78rem !important;
+        line-height: 1.45 !important;
+    }
+
+    #statusModalBox>div:last-child {
+        padding: 1rem !important;
+    }
+
+    #statusModalBox .flex.gap-3.mt-5 {
+        gap: 0.55rem !important;
+        margin-top: 0.85rem !important;
+    }
+
+    #statusModalBox button {
+        min-height: 40px !important;
+        height: 40px !important;
+        padding: 0 0.75rem !important;
+        border-radius: 12px !important;
+        font-size: 0.82rem !important;
+        line-height: 1 !important;
+    }
+}
+
+@media (max-width: 340px) {
+    #statusModalBox {
+        width: min(100%, 292px) !important;
+        max-width: 292px !important;
+    }
+
+    #modalBanner {
+        padding: 0.9rem 0.9rem 0.75rem !important;
+    }
+
+    #modalIcon {
+        width: 44px !important;
+        height: 44px !important;
+    }
+
+    #modalTitle {
+        font-size: 0.98rem !important;
+    }
+
+    #modalSubtitle,
+    #modalBody {
+        font-size: 0.74rem !important;
+    }
+
+    #statusModalBox button {
+        height: 38px !important;
+        min-height: 38px !important;
+        font-size: 0.78rem !important;
+    }
+}
+
+@media (max-width: 320px) {
+    .dentist-dashboard-page {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    .greeting-banner-inner {
+        padding: 0.22rem !important;
+    }
+
+    .greeting-heading,
+    .greeting-title {
+        font-size: 0.78rem !important;
+        line-height: 1.08 !important;
+    }
+
+    #greetingText {
+        font-size: 0.78rem !important;
+        line-height: 1.08 !important;
+    }
+
+    .greeting-name-line {
+        font-size: 0.96rem !important;
+        line-height: 1.04 !important;
+        gap: 0.18rem !important;
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+        letter-spacing: -0.065em !important;
+    }
+
+    .greeting-name-line i {
+        font-size: 0.68rem !important;
+        margin-left: 0.05rem !important;
+    }
+
+    .greeting-subtitle {
+        font-size: 0.64rem !important;
+        max-width: 12rem !important;
+    }
+
+    .status-btn-wrap {
+        max-width: 150px !important;
+        padding: 3px !important;
+        grid-template-columns: 26px minmax(78px, 1fr) !important;
+    }
+
+    #statusBtn.banner-status-btn {
+        width: 100% !important;
+        min-width: 78px !important;
+        height: 26px !important;
+        padding: 4px 10px !important;
+        font-size: 8px !important;
+    }
+
+    .kpi-grid {
+        gap: 7px !important;
+    }
+
+    .kpi-card,
+    .kpi-grid>div {
+        min-height: 94px !important;
+        padding: 9px !important;
+    }
+
+    .kpi-grid>div p.text-3xl,
+    .kpi-grid>div .text-3xl {
+        font-size: 1.12rem !important;
+    }
+
+    .kpi-grid>div p.text-\[10px\],
+    .kpi-grid>div .text-\[10px\] {
+        font-size: 6.5px !important;
+        letter-spacing: 0.02em !important;
+    }
+
+    .status-change-btn {
+        padding: 4px 6px !important;
+        font-size: 7px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    body.role-dentist #dentistCalendarContainer {
+        min-height: auto !important;
+        height: auto !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-shell {
+        min-height: auto !important;
+        padding: 0.72rem !important;
+        border-radius: 15px !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-grid {
+        gap: 5px 3px !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-cell-wrap {
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 2px 0 !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-cell {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 12px !important;
+        font-size: 0.82rem !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-day-label {
+        font-size: 0.66rem !important;
+        letter-spacing: 0.04em !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-month-label {
+        font-size: 1.05rem !important;
+        line-height: 1.1 !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-nav-btn {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-legend {
+        gap: 0.35rem !important;
+        margin-top: 0.6rem !important;
+        padding-top: 0.55rem !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-pill {
+        padding: 0.32rem 0.58rem !important;
+        font-size: 0.64rem !important;
+        gap: 0.32rem !important;
+    }
+}
+
+@media (max-width: 380px) {
+    body.role-dentist #dentistCalendarContainer .cal-shell {
+        padding: 0.6rem !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-grid {
+        gap: 4px 2px !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-cell-wrap {
+        height: 39px !important;
+        min-height: 39px !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-cell {
+        width: 29px !important;
+        height: 29px !important;
+        border-radius: 10px !important;
+        font-size: 0.76rem !important;
+    }
+
+    body.role-dentist #dentistCalendarContainer .cal-pill {
+        font-size: 0.6rem !important;
+        padding: 0.3rem 0.5rem !important;
+    }
+}
+
+#dayAppointmentsModal {
+    overscroll-behavior: contain;
+}
+
+#dayAppointmentsModalBox {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: min(86dvh, 620px) !important;
+}
+
+#dayAppointmentsModalBox>div:nth-child(2) {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+}
+
+#dayAppointmentsModalBox>div:last-child {
+    padding: 0 0.85rem 0.85rem !important;
+}
+
+#dayAppointmentsModalBox>div:last-child button {
+    min-height: 34px !important;
+    height: 34px !important;
+    border-radius: 0.75rem !important;
+    font-size: 0.76rem !important;
+    line-height: 1 !important;
+}
+
+.scheduled-patient-card {
+    border: 1px solid #f1e3e3 !important;
+    border-radius: 14px !important;
+    padding: 0.62rem !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+}
+
+.scheduled-patient-head {
+    display: grid !important;
+    grid-template-columns: 28px minmax(0, 1fr) auto !important;
+    align-items: start !important;
+    gap: 0.42rem !important;
+    min-width: 0 !important;
+}
+
+.patient-avatar,
+.scheduled-patient-avatar,
+.upcoming-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    background: #fff5f5 !important;
+    color: #8B0000 !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    border: 2px solid rgba(139, 0, 0, 0.18) !important;
+    flex-shrink: 0 !important;
+}
+
+.patient-avatar img,
+.scheduled-patient-avatar img,
+.upcoming-avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+.patient-avatar-sm,
+.scheduled-patient-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    font-size: 0.6rem !important;
+}
+
+.scheduled-patient-info {
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+.scheduled-patient-name {
+    display: block !important;
+    max-width: 100% !important;
+    font-size: clamp(0.62rem, 2.9vw, 0.74rem) !important;
+    font-weight: 850 !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.045em !important;
+    color: #1f2937 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+}
+
+.scheduled-patient-name:hover {
+    color: #8B0000 !important;
+}
+
+.scheduled-patient-meta {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.24rem !important;
+    margin-top: 0.12rem !important;
+    font-size: 0.58rem !important;
+    line-height: 1.12 !important;
+    color: #374151 !important;
+    min-width: 0 !important;
+}
+
+.scheduled-patient-meta i {
+    flex-shrink: 0 !important;
+    margin-top: 0.08rem !important;
+    font-size: 0.54rem !important;
+    color: #6b7280 !important;
+}
+
+.scheduled-patient-meta-lines {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    gap: 0.03rem !important;
+}
+
+.scheduled-patient-service,
+.scheduled-patient-schedule {
+    display: block !important;
+    line-height: 1.12 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+
+.scheduled-patient-service {
+    font-weight: 650 !important;
+    color: #4b5563 !important;
+}
+
+.scheduled-patient-schedule {
+    font-weight: 650 !important;
+    color: #8B0000 !important;
+}
+
+.scheduled-patient-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.32rem !important;
+    margin-top: 0.58rem !important;
+    width: 100% !important;
+}
+
+.scheduled-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 29px !important;
+    min-height: 29px !important;
+    padding: 0 0.25rem !important;
+    border-radius: 0.55rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.18rem !important;
+    white-space: nowrap !important;
+    font-size: 0.49rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+}
+
+.scheduled-action-btn i {
+    font-size: 0.48rem !important;
+    flex-shrink: 0 !important;
+}
+
+.scheduled-profile-btn {
+    background: #8B0000 !important;
+    color: #ffffff !important;
+}
+
+.scheduled-reschedule-btn {
+    background: #FEF3C7 !important;
+    color: #B45309 !important;
+}
+
+.scheduled-cancel-btn {
+    background: #FEE2E2 !important;
+    color: #B91C1C !important;
+}
+
+@media (max-width: 480px) {
+    #dayAppointmentsModal {
+        padding: 0.75rem !important;
+        align-items: center !important;
+    }
+
+    #dayAppointmentsModalBox {
+        width: min(100%, 304px) !important;
+        max-width: 304px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        border-radius: 17px !important;
+    }
+
+    #dayAppointmentsModalBox>div:first-child {
+        padding: 0.88rem 1rem !important;
+    }
+
+    #dayAppointmentsModalBox>div:first-child h3 {
+        font-size: 0.98rem !important;
+        line-height: 1.1 !important;
+    }
+
+    #dayAppointmentsModalDate {
+        font-size: 0.76rem !important;
+        line-height: 1.15 !important;
+    }
+
+    #dayAppointmentsModalBox>div:nth-child(2) {
+        padding: 0.72rem 0.78rem !important;
+        max-height: 54dvh !important;
+    }
+
+    #dayAppointmentsModalBox>div:last-child {
+        padding: 0 0.78rem 0.78rem !important;
+    }
+
+    #dayAppointmentsModalBox>div:last-child button {
+        min-height: 32px !important;
+        height: 32px !important;
+        border-radius: 0.7rem !important;
+        font-size: 0.72rem !important;
+    }
+
+    .scheduled-patient-card {
+        padding: 0.58rem !important;
+        border-radius: 13px !important;
+    }
+
+    .scheduled-patient-head {
+        grid-template-columns: 28px minmax(0, 1fr) auto !important;
+        gap: 0.36rem !important;
+    }
+
+    .appointment-status-badge {
+        padding: 0.25rem 0.42rem !important;
+        font-size: 0.5rem !important;
+    }
+
+    .scheduled-patient-name {
+        font-size: 0.68rem !important;
+        line-height: 1.05 !important;
+        letter-spacing: -0.055em !important;
+    }
+
+    .scheduled-patient-meta {
+        font-size: 0.55rem !important;
+        line-height: 1.1 !important;
+    }
+
+    .scheduled-patient-actions {
+        gap: 0.28rem !important;
+        margin-top: 0.54rem !important;
+    }
+
+    .scheduled-action-btn {
+        height: 28px !important;
+        min-height: 28px !important;
+        padding: 0 0.18rem !important;
+        font-size: 0.46rem !important;
+        border-radius: 0.5rem !important;
+        gap: 0.15rem !important;
+    }
+
+    .scheduled-action-btn i {
+        font-size: 0.45rem !important;
+    }
+}
+
+.appointment-status-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: max-content !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    border-radius: 999px !important;
+    border: 1px solid var(--status-default-border) !important;
+    background: var(--status-default-bg) !important;
+    color: var(--status-default-text) !important;
+    padding: 0.26rem 0.45rem !important;
+    font-size: 0.52rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    text-transform: capitalize !important;
+}
+
+.appointment-status-upcoming {
+    background: var(--status-upcoming-bg) !important;
+    color: var(--status-upcoming-text) !important;
+    border-color: var(--status-upcoming-border) !important;
+}
+
+.appointment-status-rescheduled {
+    background: var(--status-rescheduled-bg) !important;
+    color: var(--status-rescheduled-text) !important;
+    border-color: var(--status-rescheduled-border) !important;
+}
+
+.appointment-status-completed {
+    background: var(--status-completed-bg) !important;
+    color: var(--status-completed-text) !important;
+    border-color: var(--status-completed-border) !important;
+}
+
+.appointment-status-cancelled {
+    background: var(--status-cancelled-bg) !important;
+    color: var(--status-cancelled-text) !important;
+    border-color: var(--status-cancelled-border) !important;
+}
+
+@media (max-width: 480px) {
+    .appointment-status-badge {
+        max-width: none !important;
+        padding: 0.24rem 0.4rem !important;
+        font-size: 0.48rem !important;
+    }
 }

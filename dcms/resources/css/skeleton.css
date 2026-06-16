@@ -99,7 +99,6 @@
     border-color: rgba(139, 0, 0, 0.12);
 }
 
-/* DARK MODE SKELETON */
 [data-theme="dark"] .skeleton-shell,
 .dark .skeleton-shell {
     background: linear-gradient(145deg, #0D1117, #111827) !important;

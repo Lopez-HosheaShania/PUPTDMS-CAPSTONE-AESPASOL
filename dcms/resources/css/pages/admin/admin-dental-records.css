@@ -1845,7 +1845,6 @@
     gap: 10px !important;
 }
 
-/* Option cards same as admin-patient */
 .admin-dental-records-page .record-sort-option {
     position: relative !important;
     min-height: 102px !important;
@@ -1938,7 +1937,6 @@
     line-height: 1 !important;
 }
 
-/* Light tones */
 .admin-dental-records-page .record-sort-option[data-filter="all"],
 .admin-dental-records-page #recordStatusField[data-status-filter="all"] {
     --dr-option-bg: #EFF6FF;
@@ -1987,7 +1985,6 @@
     --dr-option-soft: rgba(220, 38, 38, .16);
 }
 
-/* Dark mode same as admin-patient screenshot */
 [data-theme="dark"] .admin-dental-records-page .record-sort-option[data-filter="all"],
 [data-theme="dark"] .admin-dental-records-page .record-sort-option[data-filter="today"],
 [data-theme="dark"] .admin-dental-records-page #recordStatusField[data-status-filter="all"],

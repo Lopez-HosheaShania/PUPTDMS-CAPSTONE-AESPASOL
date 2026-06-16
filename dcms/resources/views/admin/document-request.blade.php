@@ -159,8 +159,8 @@ $docRequestPagination = [
                             <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
                                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
 
-                                <input id="searchInput" type="text" placeholder="Search name, ID, reference, document…"
-                                    data-search-input class="search-input" oninput="onSearch(this)" />
+                                <input id="searchInput" type="text" placeholder="Search document…" data-search-input
+                                    class="search-input" oninput="onSearch(this)" />
 
                                 <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
                                     <i class="fa-solid fa-xmark text-xs"></i>
@@ -268,16 +268,17 @@ $docRequestPagination = [
                             <span id="filterBadge" class="filter-badge" style="display:none;"></span>
                         </button>
 
-                        <div class="view-toggle-container hidden md:flex" id="docreqViewToggle">
-                            <div class="view-slider"></div>
+                        <div class="view-toggle-container" data-global-view-toggle data-view-root="#mainContent"
+                            data-storage-key="ViewToggleMode" aria-label="View options">
+                            <span class="view-slider" aria-hidden="true"></span>
 
-                            <button id="btnListView" type="button" onclick="setViewMode('list', this)"
-                                class="btn-view-mode active" data-view="list" title="List View">
-                                <i class="fa-solid fa-list text-sm"></i>
+                            <button type="button" class="btn-view-mode active" title="List view" aria-label="List view"
+                                aria-pressed="true" data-view-mode="list">
+                                <i class="fa-solid fa-list"></i>
                             </button>
 
-                            <button id="btnGridView" type="button" onclick="setViewMode('grid', this)"
-                                class="btn-view-mode" data-view="grid" title="Grid View">
+                            <button type="button" class="btn-view-mode" title="Grid view" aria-label="Grid view"
+                                aria-pressed="false" data-view-mode="grid">
                                 <i class="fa-solid fa-grip"></i>
                             </button>
                         </div>
@@ -739,32 +740,39 @@ $docRequestPagination = [
     let filterSort = 'newest';
     let documentTypeOptions = [];
 
-    let currentViewMode = window.innerWidth <= 767 ? 'grid' : 'list';
+    let currentViewMode = localStorage.getItem('ViewToggleMode') === 'grid' ? 'grid' : 'list';
 
-    function setViewMode(mode, btn) {
+    function switchView(mode) {
         const mainContent = document.getElementById('mainContent');
-        currentViewMode = mode;
+        const btnList = document.getElementById('btnListView');
+        const btnGrid = document.getElementById('btnGridView');
 
-        if (mainContent) {
-            mainContent.classList.toggle('mode-grid', mode === 'grid');
-            mainContent.classList.toggle('mode-list', mode !== 'grid');
+        if (!mainContent) return;
+
+        const nextMode = mode === 'grid' ? 'grid' : 'list';
+        const isGrid = nextMode === 'grid';
+
+        mainContent.classList.toggle('mode-grid', isGrid);
+        mainContent.classList.toggle('mode-list', !isGrid);
+
+        if (btnList) {
+            btnList.classList.toggle('active', !isGrid);
+            btnList.setAttribute('aria-pressed', !isGrid ? 'true' : 'false');
         }
 
-        document.querySelectorAll('.btn-view-mode').forEach(function (b) {
-            b.classList.remove('active');
-        });
-
-        document.querySelectorAll('.btn-view-mode').forEach(function (b) {
-            b.classList.remove('active');
-        });
-
-        const targetBtn = btn || document.querySelector('.btn-view-mode[data-view="' + mode + '"]');
-        if (targetBtn) targetBtn.classList.add('active');
-
-        if (window.innerWidth > 767) {
-            localStorage.setItem('docreqViewMode', mode);
+        if (btnGrid) {
+            btnGrid.classList.toggle('active', isGrid);
+            btnGrid.setAttribute('aria-pressed', isGrid ? 'true' : 'false');
         }
-        renderList();
+
+        localStorage.setItem('patientViewMode', nextMode);
+    }
+
+    function syncResponsivePatientView() {
+        const isMobile = window.matchMedia('(max-width: 767px)').matches;
+        const savedMode = localStorage.getItem('patientViewMode');
+
+        switchView(savedMode || (isMobile ? 'grid' : 'list'));
     }
 
     function docreqToast(type, title, message) {
@@ -2474,27 +2482,26 @@ $docRequestPagination = [
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        const savedViewMode = localStorage.getItem('docreqViewMode');
-        currentViewMode = window.innerWidth <= 767 ? 'grid' : (savedViewMode || 'list');
-        setViewMode(currentViewMode, document.querySelector('.btn-view-mode[data-view="' + currentViewMode +
-            '"]'));
+        const docreqViewToggle = document.querySelector('#mainContent [data-global-view-toggle]');
 
-        if (window.innerWidth <= 767) {
-            document.getElementById('docreqViewToggle')?.classList.add('hidden');
-        }
+        window.initGlobalViewToggles?.(document);
 
-        window.addEventListener('resize', function () {
-            const toggle = document.getElementById('docreqViewToggle');
-            if (window.innerWidth <= 767) {
-                toggle?.classList.add('hidden');
-                if (currentViewMode !== 'grid') {
-                    setViewMode('grid', document.querySelector('.btn-view-mode[data-view="grid"]'));
-                }
-            } else {
-                toggle?.classList.remove('hidden');
-            }
+        const savedViewMode = window.getGlobalViewMode?.(docreqViewToggle)
+            || localStorage.getItem('ViewToggleMode')
+            || 'list';
+
+        currentViewMode = savedViewMode === 'grid' ? 'grid' : 'list';
+
+        window.setGlobalViewMode?.(docreqViewToggle, currentViewMode, {
+            persist: false
+        });
+
+        docreqViewToggle?.addEventListener('global-view-change', (event) => {
+            currentViewMode = event.detail?.mode === 'grid' ? 'grid' : 'list';
             renderList();
         });
+
+        window.addEventListener('resize', renderList);
 
         updateStatusDropdownUI(activeFilter);
         setCustomSelectValue('docTypeSelect', filterDocType);

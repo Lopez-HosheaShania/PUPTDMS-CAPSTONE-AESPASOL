@@ -3004,7 +3004,6 @@ body .floating-save-bar .btn-save-float:disabled {
         border-radius: 999px !important;
     }
 
-    /* Active roles: clean 2-column mobile cards, no horizontal cut */
     .role-permissions-page #roleListContainer {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -3062,7 +3061,6 @@ body .floating-save-bar .btn-save-float:disabled {
         font-size: .58rem !important;
     }
 
-    /* Selected role summary */
     .role-permissions-page .accent-card {
         margin-top: 1rem !important;
         margin-bottom: 1rem !important;
@@ -3083,7 +3081,6 @@ body .floating-save-bar .btn-save-float:disabled {
         margin-top: .85rem !important;
     }
 
-    /* Permission card header */
     .role-permissions-page .card {
         width: 100% !important;
         min-width: 0 !important;
@@ -3144,7 +3141,6 @@ body .floating-save-bar .btn-save-float:disabled {
         justify-content: center !important;
     }
 
-    /* Permission groups */
     .role-permissions-page .group-card,
     .role-permissions-page .group-card.perm-group {
         border-radius: 16px !important;

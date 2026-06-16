@@ -1040,16 +1040,6 @@
             box-shadow: 0 16px 32px rgba(139, 0, 0, 0.26);
         }
 
-        /* Dashboard-matched dark mode for report content */
-        [data-theme="dark"] #mainContent,
-        .dark #mainContent {
-            background:
-                radial-gradient(circle at 12% 4%, rgba(139, 0, 0, 0.18), transparent 30%),
-                radial-gradient(circle at 88% 12%, rgba(252, 165, 165, 0.08), transparent 28%),
-                #0D1117 !important;
-            color: #F8FAFC !important;
-        }
-
         [data-theme="dark"] #mainContent .kpi-card,
         [data-theme="dark"] #mainContent .mini-kpi,
         [data-theme="dark"] #mainContent .chart-card,

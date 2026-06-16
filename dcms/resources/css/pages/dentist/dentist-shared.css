@@ -1,6 +1,6 @@
 .dentist-page-shell {
-    padding: 90px 0.75rem 1.25rem;
-    min-height: 100vh;
+    padding: 78px 0.75rem 1.25rem;
+    min-height: 100dvh;
     flex: 1 1 auto;
     background: #F9FAFB;
     color: #111827;
