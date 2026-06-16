@@ -85,16 +85,21 @@ $notifCount = $notifications->count();
 <main id="mainContent" class="admin-page-shell admin-appointments-page page-enter mode-list">
   <div class="w-full">
 
-    <div class="appointment-header-wrap">
-      <div class="page-banner">
-        <div class="page-banner-inner">
-          <div class="appointment-banner-title-wrap">
-            <h1 class="page-title">Appointment Management</h1>
-          </div>
+    <div class="page-banner admin-appointment-banner"
+      style="display:flex !important; align-items:center !important; justify-content:flex-start !important; text-align:left !important;">
+      <div class="page-banner-inner admin-appointment-banner-inner"
+        style="display:flex !important; align-items:center !important; justify-content:flex-start !important; width:100% !important; text-align:left !important;">
+        <div class="appointment-banner-title-wrap admin-appointment-title-wrap"
+          style="display:flex !important; align-items:center !important; justify-content:flex-start !important; width:100% !important; margin:0 !important; text-align:left !important;">
+          <h1 class="page-title admin-appointment-title"
+            style="margin:0 !important; text-align:left !important; width:100% !important;">
+            Appointment Management
+          </h1>
         </div>
       </div>
+    </div>
 
-      <div class="today-snapshot-card compact-snapshot-card">
+      <div class="today-snapshot-card compact-snapshot-card mt-4 md:mt-5">
         <div class="today-snapshot-header">
           <div>
             <span class="today-snapshot-kicker">Today’s Snapshot</span>

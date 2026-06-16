@@ -6303,3 +6303,566 @@
         border-radius: 12px !important;
     }
 }
+
+
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.academic-period-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    #mainContent.academic-period-page .admin-page-container,
+    #mainContent.academic-period-page .content-lift {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    #mainContent.academic-period-page .page-banner {
+        border-radius: 22px !important;
+        overflow: hidden !important;
+        margin-bottom: 1rem !important;
+    }
+
+    #mainContent.academic-period-page .page-banner-inner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        text-align: left !important;
+    }
+
+    #mainContent.academic-period-page .page-title {
+        text-align: left !important;
+        line-height: 1.08 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    #mainContent.academic-period-page .page-actions {
+        flex: 0 0 auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .65rem !important;
+        margin-left: auto !important;
+        flex-wrap: wrap !important;
+    }
+
+    #mainContent.academic-period-page .ap-banner-add-btn,
+    #mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn,
+    #mainContent.academic-period-page .ap-add-period-btn {
+        min-height: 40px !important;
+        height: 40px !important;
+        padding: 0 .95rem !important;
+        border-radius: 999px !important;
+        font-size: .74rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap.active-banner {
+        border-radius: 20px !important;
+        margin-bottom: 1rem !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .85rem !important;
+        padding: 1rem !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .75rem !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 > div,
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > div:last-child {
+        min-height: 104px !important;
+        padding: .95rem !important;
+        border-radius: 16px !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap #bannerSem,
+    #mainContent.academic-period-page #activeBannerWrap #bannerYear,
+    #mainContent.academic-period-page #activeBannerWrap #bannerEnd {
+        font-size: .92rem !important;
+        line-height: 1.15 !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    #mainContent.academic-period-page .ap-content-layout,
+    #mainContent.academic-period-page .grid.grid-cols-1.lg\:grid-cols-3 {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 360px) !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.academic-period-page .ap-periods-column,
+    #mainContent.academic-period-page .lg\:col-span-2,
+    #mainContent.academic-period-page .cal-card,
+    #mainContent.academic-period-page .academic-quick-actions-panel {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.academic-period-page .ap-toolbar {
+        display: grid !important;
+        grid-template-columns: max-content minmax(0, 1fr) !important;
+        align-items: center !important;
+        gap: .8rem !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.academic-period-page .ap-toolbar-left {
+        min-width: max-content !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.academic-period-page .ap-toolbar-left h2 {
+        font-size: .95rem !important;
+        line-height: 1.15 !important;
+    }
+
+    #mainContent.academic-period-page .ap-toolbar-right {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .55rem !important;
+        flex-wrap: nowrap !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    #mainContent.academic-period-page .ap-search-row {
+        flex: 1 1 auto !important;
+        width: auto !important;
+        max-width: 360px !important;
+        min-width: 220px !important;
+    }
+
+    #mainContent.academic-period-page .ap-search-row .search-wrap.global-search {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.academic-period-page .global-filter-btn {
+        min-height: 40px !important;
+        height: 40px !important;
+        padding: 0 .85rem !important;
+        font-size: .72rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.academic-period-page .global-filter-reset-btn {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+    }
+
+    #mainContent.academic-period-page #academicViewToggle.view-toggle-container {
+        flex: 0 0 auto !important;
+        transform: scale(.92) !important;
+        transform-origin: right center !important;
+    }
+
+    #mainContent.academic-period-page .ap-table-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #mainContent.academic-period-page .ap-table {
+        min-width: 860px !important;
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    #mainContent.academic-period-page .ap-table th,
+    #mainContent.academic-period-page .ap-table td {
+        padding-left: .6rem !important;
+        padding-right: .6rem !important;
+        font-size: .72rem !important;
+        vertical-align: middle !important;
+    }
+
+    #mainContent.academic-period-page .ap-table thead th {
+        height: 44px !important;
+        font-size: .6rem !important;
+        letter-spacing: .07em !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.academic-period-page .ap-table tbody td {
+        height: 54px !important;
+    }
+
+    #mainContent.academic-period-page .ap-table td.col-year .ap-year-text,
+    #mainContent.academic-period-page .ap-table td.col-year .font-bold {
+        font-size: .72rem !important;
+        line-height: 1.15 !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.academic-period-page .status-badge,
+    #mainContent.academic-period-page .sem-pill {
+        min-height: 24px !important;
+        padding: 3px 8px !important;
+        font-size: .58rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.academic-period-page .ap-actions {
+        gap: .35rem !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.academic-period-page .ap-action-btn {
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        border-radius: 10px !important;
+    }
+
+    #mainContent.academic-period-page .ap-action-btn i {
+        font-size: .68rem !important;
+    }
+
+    #mainContent.academic-period-page .academic-grid-view {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .8rem !important;
+        padding: .85rem !important;
+    }
+
+    #mainContent.academic-period-page .academic-card {
+        min-height: 210px !important;
+        padding: .9rem !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.academic-period-page .academic-card-year-text {
+        font-size: .78rem !important;
+        line-height: 1.15 !important;
+    }
+
+    #mainContent.academic-period-page .academic-card-label {
+        font-size: .56rem !important;
+    }
+
+    #mainContent.academic-period-page .academic-card-value {
+        font-size: .7rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #mainContent.academic-period-page .academic-quick-actions-header {
+        padding: .85rem .95rem !important;
+    }
+
+    #mainContent.academic-period-page .academic-quick-actions-head-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 12px !important;
+    }
+
+    #mainContent.academic-period-page .quick-actions-list {
+        gap: .65rem !important;
+        padding: .75rem !important;
+    }
+
+    #mainContent.academic-period-page .quick-action-card {
+        min-height: 68px !important;
+        padding: .8rem .85rem !important;
+        gap: .75rem !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.academic-period-page .quick-action-icon {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 13px !important;
+    }
+
+    #mainContent.academic-period-page .quick-action-title {
+        font-size: .8rem !important;
+        line-height: 1.15 !important;
+    }
+
+    #mainContent.academic-period-page .quick-action-sub {
+        font-size: .64rem !important;
+        line-height: 1.25 !important;
+        -webkit-line-clamp: 2 !important;
+    }
+
+    #mainContent.academic-period-page .quick-action-bg-icon {
+        font-size: 4rem !important;
+        right: .65rem !important;
+        bottom: -1.35rem !important;
+    }
+
+    #mainContent.academic-period-page .cal-card {
+        border-radius: 18px !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.academic-period-page .ap-calendar-title-icon {
+        width: 26px !important;
+        height: 26px !important;
+        min-width: 26px !important;
+    }
+
+    #addModal .ap-academic-modal,
+    #editModal .ap-academic-modal {
+        width: min(94vw, 900px) !important;
+        max-width: 900px !important;
+        max-height: calc(100dvh - 2rem) !important;
+        border-radius: 22px !important;
+    }
+
+    #addModal .ap-add-header,
+    #editModal .ap-add-header {
+        min-height: 82px !important;
+        padding: 1rem 5rem 1rem 1.15rem !important;
+    }
+
+    #addModal .ap-add-header-icon,
+    #editModal .ap-add-header-icon {
+        width: 46px !important;
+        height: 46px !important;
+        min-width: 46px !important;
+        border-radius: 14px !important;
+    }
+
+    #addModal .ap-add-header-title,
+    #editModal .ap-add-header-title {
+        font-size: 1.15rem !important;
+        line-height: 1.1 !important;
+    }
+
+    #addModal .ap-add-header-subtitle,
+    #editModal .ap-add-header-subtitle {
+        font-size: .72rem !important;
+        line-height: 1.3 !important;
+    }
+
+    #addModal .ap-add-close,
+    #editModal .ap-add-close {
+        right: 1.15rem !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        border-radius: 12px !important;
+    }
+
+    #addModal .ap-add-body,
+    #editModal .ap-add-body {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        padding: .9rem !important;
+        max-height: calc(100dvh - 180px) !important;
+    }
+
+    #addModal .ap-panel,
+    #editModal .ap-panel,
+    #addModal .ap-panel-soft,
+    #editModal .ap-panel-soft {
+        padding: .85rem !important;
+        border-radius: 16px !important;
+    }
+
+    #addModal .ap-semester-grid-redesign,
+    #editModal .ap-semester-grid-redesign {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .6rem !important;
+    }
+
+    #addModal .ap-semester-card,
+    #editModal .ap-semester-card {
+        min-height: 74px !important;
+        padding: .7rem .55rem !important;
+        border-radius: 14px !important;
+    }
+
+    #addModal .ap-semester-card span,
+    #editModal .ap-semester-card span {
+        font-size: .7rem !important;
+    }
+
+    #addModal .ap-date-grid-redesign,
+    #editModal .ap-date-grid-redesign {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .7rem !important;
+    }
+
+    #addModal .ap-input,
+    #editModal .ap-input {
+        height: 46px !important;
+        border-radius: 12px !important;
+        font-size: .78rem !important;
+    }
+
+    #addModal .ap-textarea,
+    #editModal .ap-textarea {
+        height: 130px !important;
+        min-height: 130px !important;
+        max-height: 130px !important;
+        font-size: .78rem !important;
+    }
+
+    #addModal .ap-active-card,
+    #editModal .ap-active-card {
+        padding: .85rem !important;
+        border-radius: 16px !important;
+    }
+
+    #addModal .ap-add-footer,
+    #editModal .ap-add-footer {
+        padding: .85rem 1rem 1rem !important;
+    }
+
+    #addModal .ap-add-btn,
+    #editModal .ap-add-btn {
+        height: 42px !important;
+        min-height: 42px !important;
+        font-size: .76rem !important;
+        border-radius: 12px !important;
+    }
+
+    #deleteModal .ap-delete-shell,
+    #syncFlssModal .ap-sync-shell {
+        width: min(94vw, 520px) !important;
+        max-width: 94vw !important;
+        border-radius: 22px !important;
+    }
+
+    #deleteModal .ap-delete-head,
+    #syncFlssModal .ap-sync-head {
+        padding: .95rem 1rem !important;
+    }
+
+    #deleteModal .ap-delete-content,
+    #syncFlssModal .ap-sync-body {
+        padding: 1rem !important;
+    }
+
+    #deleteModal .ap-delete-footer,
+    #syncFlssModal .ap-sync-footer {
+        padding: 1rem !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    #mainContent.academic-period-page .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    #mainContent.academic-period-page .page-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        margin-left: 0 !important;
+    }
+
+    #mainContent.academic-period-page .ap-banner-add-btn,
+    #mainContent.academic-period-page .um-hero-btn.ap-banner-add-btn,
+    #mainContent.academic-period-page .ap-add-period-btn {
+        width: auto !important;
+        flex: 0 0 auto !important;
+    }
+
+    #mainContent.academic-period-page #activeBannerWrap .active-banner-inner > .flex-1 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #mainContent.academic-period-page .ap-content-layout,
+    #mainContent.academic-period-page .grid.grid-cols-1.lg\:grid-cols-3 {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.academic-period-page .ap-toolbar {
+        grid-template-columns: 1fr !important;
+        gap: .7rem !important;
+    }
+
+    #mainContent.academic-period-page .ap-toolbar-right {
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: .55rem !important;
+    }
+
+    #mainContent.academic-period-page .ap-search-row {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 100% !important;
+    }
+
+    #mainContent.academic-period-page .academic-grid-view {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.academic-period-page .ap-table {
+        min-width: 880px !important;
+    }
+
+    #addModal .ap-add-body,
+    #editModal .ap-add-body {
+        grid-template-columns: 1fr !important;
+    }
+
+    #addModal .ap-col-span-2,
+    #editModal .ap-col-span-2 {
+        grid-column: span 1 !important;
+    }
+
+    #addModal .ap-semester-grid-redesign,
+    #editModal .ap-semester-grid-redesign {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    #addModal .ap-add-footer,
+    #editModal .ap-add-footer {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    #addModal .ap-add-btn,
+    #editModal .ap-add-btn {
+        width: 100% !important;
+    }
+
+    #deleteModal .ap-delete-footer,
+    #syncFlssModal .ap-sync-footer {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    #deleteModal .modal-btn-ghost,
+    #deleteModal .ap-delete-confirm-btn,
+    #syncFlssModal .modal-btn-ghost,
+    #syncFlssModal .ap-sync-confirm-btn {
+        width: 100% !important;
+    }
+}
+

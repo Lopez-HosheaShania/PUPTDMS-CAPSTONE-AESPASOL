@@ -1569,3 +1569,446 @@
         align-self: center !important;
     }
 }
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent {
+        overflow-x: hidden !important;
+    }
+
+    #mainContent .page-banner {
+        min-height: auto !important;
+        padding: 1.4rem 1.35rem 2.6rem !important;
+        margin-bottom: 1rem !important;
+        border-radius: 22px !important;
+    }
+
+    #mainContent .page-banner-inner {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent .page-banner-inner > div:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent .page-greeting {
+        font-size: .76rem !important;
+        margin-bottom: .4rem !important;
+    }
+
+    #mainContent .page-title {
+        font-size: 2rem !important;
+        line-height: 1.08 !important;
+        margin-bottom: .55rem !important;
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    #mainContent .page-subtitle {
+        font-size: .86rem !important;
+        line-height: 1.42 !important;
+        max-width: 680px !important;
+    }
+
+    #mainContent .period-pill {
+        padding: .75rem .9rem !important;
+        gap: .8rem 1rem !important;
+        border-radius: 16px !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent .period-item {
+        min-width: 110px !important;
+    }
+
+    #mainContent .period-label {
+        font-size: .54rem !important;
+    }
+
+    #mainContent .period-value {
+        font-size: .84rem !important;
+        line-height: 1.15 !important;
+    }
+
+    #mainContent .period-divider {
+        height: 30px !important;
+    }
+
+    .content-lift {
+        margin-top: -1.65rem !important;
+        padding: 0 1rem 1.5rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    .admin-dashboard-stat-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-card {
+        min-width: 0 !important;
+        min-height: 108px !important;
+        padding: .95rem !important;
+        border-radius: 18px !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-value {
+        font-size: 1.55rem !important;
+        line-height: 1 !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-label {
+        font-size: .66rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-footer {
+        font-size: .64rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .admin-dashboard-stat-grid .stat-icon {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        border-radius: 14px !important;
+        font-size: .92rem !important;
+    }
+
+    .main-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .bottom-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 1rem !important;
+        margin-top: 1rem !important;
+    }
+
+    .card,
+    .dashboard-backup-card,
+    .dashboard-quick-actions-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .card-header {
+        min-height: 64px !important;
+        padding: .8rem 1rem !important;
+        gap: .75rem !important;
+    }
+
+    .card-header-left {
+        min-width: 0 !important;
+        gap: .65rem !important;
+    }
+
+    .card-header-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 13px !important;
+    }
+
+    .card-title {
+        font-size: .86rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .card-subtitle {
+        font-size: .64rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .card-header-right {
+        flex-shrink: 0 !important;
+        gap: .5rem !important;
+    }
+
+    .log-stats-row {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+        padding: .85rem 1rem !important;
+    }
+
+    .log-stat {
+        padding: .65rem .45rem !important;
+        border-radius: 12px !important;
+    }
+
+    .log-stat-value {
+        font-size: 1.25rem !important;
+    }
+
+    .log-stat-label {
+        font-size: .52rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .logs-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .8rem !important;
+        padding: .85rem !important;
+    }
+
+    .log-card {
+        padding: .9rem !important;
+        border-radius: 16px !important;
+        gap: .7rem !important;
+    }
+
+    .log-card-id {
+        font-size: .68rem !important;
+    }
+
+    .log-card-date {
+        font-size: .62rem !important;
+    }
+
+    .log-card-desc {
+        font-size: .74rem !important;
+        line-height: 1.35 !important;
+    }
+
+    .log-card-avatar {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        font-size: .72rem !important;
+    }
+
+    .log-card-user-name {
+        font-size: .76rem !important;
+    }
+
+    .log-card-user-role {
+        font-size: .62rem !important;
+    }
+
+    .inventory-chart-card-body {
+        padding: .9rem !important;
+    }
+
+    .inventory-top-layout {
+        grid-template-columns: 112px minmax(0, 1fr) !important;
+        gap: .85rem !important;
+        align-items: center !important;
+    }
+
+    .inventory-donut-wrap {
+        height: 112px !important;
+    }
+
+    .inventory-donut-box {
+        width: 102px !important;
+        height: 102px !important;
+    }
+
+    #inventoryDonutChart {
+        width: 102px !important;
+        height: 102px !important;
+        max-width: 102px !important;
+        max-height: 102px !important;
+    }
+
+    .inventory-donut-center span {
+        font-size: 1rem !important;
+    }
+
+    .inventory-donut-center small {
+        font-size: .52rem !important;
+    }
+
+    .inventory-legend {
+        gap: .5rem !important;
+    }
+
+    .inventory-legend-item {
+        padding: .62rem .75rem !important;
+        border-radius: 14px !important;
+    }
+
+    .inventory-legend-label {
+        font-size: .74rem !important;
+    }
+
+    .inventory-legend-sub {
+        font-size: .6rem !important;
+    }
+
+    .inventory-legend-value {
+        font-size: 1rem !important;
+    }
+
+    .inventory-mini-stats-row {
+        gap: .5rem !important;
+        margin-top: .7rem !important;
+    }
+
+    .inventory-mini-pill {
+        padding: .62rem .4rem !important;
+        border-radius: 13px !important;
+    }
+
+    .inventory-mini-pill-label {
+        font-size: .54rem !important;
+        line-height: 1.1 !important;
+    }
+
+    .inventory-mini-pill-value {
+        font-size: .98rem !important;
+    }
+
+    .dashboard-quick-actions-card .quick-actions-list {
+        padding: .75rem !important;
+        gap: .65rem !important;
+    }
+
+    .dashboard-quick-actions-card .quick-action-card {
+        min-height: 64px !important;
+        padding: .72rem .8rem !important;
+        border-radius: 16px !important;
+    }
+
+    .dashboard-quick-actions-card .quick-action-icon {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        border-radius: 13px !important;
+    }
+
+    .dashboard-quick-actions-card .quick-action-title {
+        font-size: .74rem !important;
+    }
+
+    .dashboard-quick-actions-card .quick-action-sub {
+        font-size: .6rem !important;
+    }
+
+    .dashboard-quick-actions-card .quick-action-bg-icon {
+        font-size: 4rem !important;
+        right: .65rem !important;
+        bottom: -1.2rem !important;
+    }
+
+    .dashboard-backup-card-body {
+        padding: .95rem !important;
+        gap: .75rem !important;
+    }
+
+    .dashboard-backup-card .backup-status,
+    .dashboard-backup-card .next-backup {
+        min-height: 76px !important;
+        padding: .8rem .9rem !important;
+        border-radius: 14px !important;
+    }
+
+    .backup-check {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 11px !important;
+    }
+
+    .backup-date {
+        font-size: .78rem !important;
+    }
+
+    .backup-sub,
+    .next-date {
+        font-size: .66rem !important;
+    }
+
+    .dashboard-backup-card .ui-btn,
+    .run-backup-btn {
+        min-height: 40px !important;
+        font-size: .74rem !important;
+        border-radius: 12px !important;
+    }
+
+    .gad-placeholder {
+        min-height: 200px !important;
+        border-radius: 14px !important;
+        padding: 1rem !important;
+    }
+
+    .gad-empty-icon {
+        width: 48px !important;
+        height: 48px !important;
+        border-radius: 16px !important;
+        font-size: 1.15rem !important;
+    }
+
+    .gad-empty-title {
+        font-size: .78rem !important;
+    }
+
+    .gad-empty-sub {
+        font-size: .66rem !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    #mainContent .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    #mainContent .period-pill {
+        width: 100% !important;
+    }
+
+    .admin-dashboard-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .bottom-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .log-stats-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    .logs-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .inventory-top-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    .inventory-donut-wrap {
+        height: 104px !important;
+    }
+
+    .inventory-donut-box {
+        width: 96px !important;
+        height: 96px !important;
+    }
+
+    #inventoryDonutChart {
+        width: 96px !important;
+        height: 96px !important;
+        max-width: 96px !important;
+        max-height: 96px !important;
+    }
+}

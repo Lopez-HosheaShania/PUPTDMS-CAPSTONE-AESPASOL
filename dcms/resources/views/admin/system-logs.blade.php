@@ -536,6 +536,8 @@ $perPage = $perPage ?? 10;
     </div>
 </div>
 
+@endsection
+
 @section('scripts')
 <script>
     var slState = {
