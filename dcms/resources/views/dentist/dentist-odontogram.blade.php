@@ -483,7 +483,7 @@
         class="fixed inset-0 bg-black/50 hidden items-end sm:items-center justify-center backdrop-blur-sm z-[9999] p-0 sm:p-4">
 
         <div
-            class="reschedule-modal-panel bg-white w-full sm:max-w-5xl rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            class="reschedule-modal-panel follow-up-modal-panel bg-white w-full rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col">
 
             <div class="relative bg-gradient-to-r from-[#8B0000] via-[#A00000] to-[#C1121F] px-5 sm:px-6 py-4">
                 <button type="button" onclick="closeFollowUpModal()"
@@ -511,7 +511,7 @@
                 </div>
             </div>
 
-            <div class="reschedule-modal-body px-5 sm:px-6 py-4 sm:py-5 bg-gray-50 overflow-y-auto">
+            <div class="reschedule-modal-body follow-up-modal-body px-5 sm:px-6 py-4 sm:py-5 bg-gray-50 overflow-y-auto">
                 <div
                     class="bg-white border border-[#f1ece7] rounded-2xl px-4 sm:px-5 py-4 mb-4 shadow-[0_4px_18px_rgba(0,0,0,0.04)]">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -565,37 +565,34 @@
                         </div>
 
                         <div class="slots-wrap follow-up-slots-wrap">
-                            <div class="section-label" style="margin-bottom:.6rem;">
-                                <i class="fa-regular fa-clock fa-xs"></i> Follow-up Time Slot
+                            <div class="section-label follow-up-slot-title">
+                                <i class="fa-regular fa-clock fa-xs"></i> Pick a Time Slot
                             </div>
+                            <p class="follow-up-slot-helper">
+                                Choose your preferred schedule for the selected date.
+                            </p>
 
                             <div class="slots-date-pill" id="followUpDatePill"></div>
 
-                            <div id="followUpSlotPlaceholder" class="slots-placeholder">
-                                <i class="fa-regular fa-calendar-xmark"></i>
-                                <span>Select a date to see available slots</span>
+                            <div id="followUpSlotPlaceholder" class="slots-placeholder follow-up-empty-slot-placeholder">
+                                <div class="follow-up-empty-icon">
+                                    <i class="fa-regular fa-calendar"></i>
+                                </div>
+                                <h4>Choose a date</h4>
+                                <p>Select an available day to see time slots.</p>
                             </div>
 
                             <div id="followUpSlotContainer" class="hidden">
                                 <div id="followUpSlotGrid" class="slots-grid" style="display:none;"></div>
+                                <button type="button" id="followUpClearTimeBtn" class="follow-up-clear-time-btn hidden">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    Clear selection
+                                </button>
                             </div>
 
-                            <div id="followUpSelectedTimePill"
-                                class="hidden mt-4 w-full rounded-2xl border border-red-100 bg-red-50 px-4 py-3 shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-[#8B0000] text-white shadow-sm">
-                                        <i class="fa-solid fa-circle-check text-sm"></i>
-                                    </div>
-
-                                    <div class="min-w-0">
-                                        <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8B0000]">
-                                            Selected Follow-up Time
-                                        </p>
-                                        <p id="followUpSelectedTimeText"
-                                            class="text-[15px] font-bold text-[#8B0000] leading-tight"></p>
-                                    </div>
-                                </div>
+                            <div id="followUpSelectedTimePill" class="hidden follow-up-selected-time-pill">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>Selected: <strong id="followUpSelectedTimeText"></strong></span>
                             </div>
                         </div>
                     </div>
@@ -630,6 +627,570 @@
         </div>
     </div>
 
+
+    <style>
+        /* Compact follow-up modal: keeps the calendar and form inside the viewport. */
+        #followUpModal {
+            align-items: center;
+            padding: 1rem;
+        }
+
+        #followUpModal .follow-up-modal-panel {
+            width: min(100%, 980px);
+            max-height: min(92vh, 760px);
+        }
+
+        #followUpModal .follow-up-modal-body {
+            max-height: calc(min(92vh, 760px) - 84px);
+            padding: 1rem 1.25rem !important;
+        }
+
+        #followUpModal .follow-up-modal-body > .bg-white:first-child {
+            padding: .85rem 1rem !important;
+            margin-bottom: .85rem !important;
+            border-radius: 1rem !important;
+        }
+
+        #followUpModal .section-label {
+            margin-bottom: .55rem !important;
+            font-size: .72rem !important;
+            line-height: 1.1 !important;
+        }
+
+        #followUpModal .two-col {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1.15fr) minmax(250px, .85fr) !important;
+            gap: 1rem !important;
+            align-items: stretch !important;
+        }
+
+        #followUpModal .follow-up-cal-wrap,
+        #followUpModal .follow-up-slots-wrap {
+            min-width: 0 !important;
+            padding: .85rem !important;
+            border-radius: 1rem !important;
+        }
+
+        #followUpCalendarWrap {
+            transform: scale(.88);
+            transform-origin: top center;
+            width: 113.65%;
+            margin-left: -6.8%;
+            margin-bottom: -3.75rem;
+        }
+
+        #followUpCalendarWrap button {
+            min-height: 34px !important;
+        }
+
+        #followUpCalendarWrap [id="followUpCalGrid"],
+        #followUpCalendarWrap .cal-grid,
+        #followUpCalendarWrap .calendar-grid {
+            row-gap: .35rem !important;
+            column-gap: .35rem !important;
+        }
+
+        #followUpModal .slots-placeholder {
+            min-height: 135px !important;
+            padding: 1rem !important;
+            font-size: .9rem !important;
+            border-radius: 1rem !important;
+        }
+
+        #followUpModal .slots-grid {
+            max-height: 260px;
+            overflow-y: auto;
+            padding-right: .25rem;
+        }
+
+        #followUpModal .reason-textarea {
+            min-height: 72px !important;
+            padding: .85rem 1rem !important;
+            border-radius: 1rem !important;
+        }
+
+        #followUpModal .btn-row {
+            position: sticky;
+            bottom: -1rem;
+            z-index: 5;
+            display: flex !important;
+            justify-content: flex-end !important;
+            align-items: center !important;
+            gap: .75rem !important;
+            margin: 1rem -1.25rem -1rem !important;
+            padding: .9rem 1.25rem 1rem !important;
+            border-top: 1px solid #e5e7eb;
+            background: linear-gradient(180deg, rgba(249, 250, 251, .92), #ffffff);
+            box-shadow: 0 -10px 24px rgba(15, 23, 42, .06);
+        }
+
+        #followUpModal .btn {
+            min-height: 44px !important;
+            padding: .72rem 1.1rem !important;
+            border-radius: 1rem !important;
+            font-weight: 800 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: .5rem !important;
+            transition: all .2s ease !important;
+        }
+
+        #followUpModal .btn-cancel {
+            background: #f3f4f6 !important;
+            color: #374151 !important;
+            border: 1px solid #d1d5db !important;
+        }
+
+        #followUpModal .btn-cancel:hover {
+            background: #fee2e2 !important;
+            color: #991b1b !important;
+            border-color: #fecaca !important;
+        }
+
+        #followUpModal .follow-up-confirm-btn {
+            background: #8B0000 !important;
+            color: #ffffff !important;
+            border: 1px solid #8B0000 !important;
+            box-shadow: 0 10px 22px rgba(139, 0, 0, .20) !important;
+        }
+
+        #followUpModal .follow-up-confirm-btn:hover {
+            background: #660000 !important;
+            border-color: #660000 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(139, 0, 0, .26) !important;
+        }
+
+
+
+        /* Follow-up form alignment fixes */
+        #followUpModal .two-col {
+            grid-template-columns: minmax(0, 1.06fr) minmax(285px, .94fr) !important;
+            gap: 1.15rem !important;
+            align-items: stretch !important;
+            margin-bottom: 1rem !important;
+        }
+
+        #followUpModal .follow-up-cal-wrap,
+        #followUpModal .follow-up-slots-wrap {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, .05) !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap {
+            min-height: 374px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap > .section-label {
+            margin-top: .05rem !important;
+            margin-bottom: .75rem !important;
+        }
+
+        #followUpModal .slots-date-pill {
+            margin-bottom: .75rem !important;
+        }
+
+        #followUpModal .slots-placeholder {
+            flex: 1 1 auto !important;
+            width: 100% !important;
+            min-height: 230px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            gap: .55rem !important;
+            background: #ffffff !important;
+            border: 1px dashed #d1d5db !important;
+            color: #6b7280 !important;
+        }
+
+        #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder {
+            min-height: 258px !important;
+            padding: 2.2rem 1.5rem !important;
+            flex-direction: column !important;
+            gap: .45rem !important;
+            border: 1px dashed #f0cfc8 !important;
+            border-radius: 1.15rem !important;
+            background: #fffafa !important;
+            color: #8a817c !important;
+        }
+
+        #followUpModal .follow-up-empty-icon {
+            width: 3.25rem !important;
+            height: 3.25rem !important;
+            margin-bottom: .45rem !important;
+            border-radius: 999px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: #fde9e9 !important;
+            color: #8B0000 !important;
+        }
+
+        #followUpModal .follow-up-empty-icon i {
+            font-size: 1.15rem !important;
+            color: #8B0000 !important;
+        }
+
+        #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder h4 {
+            margin: 0 !important;
+            color: #5f5753 !important;
+            font-size: .98rem !important;
+            font-weight: 900 !important;
+            line-height: 1.2 !important;
+        }
+
+        #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder p {
+            margin: 0 !important;
+            color: #9b918c !important;
+            font-size: .86rem !important;
+            font-weight: 500 !important;
+            line-height: 1.35 !important;
+        }
+
+
+        /* When slots are loaded, the empty-state card must disappear completely. */
+        #followUpModal #followUpSlotPlaceholder.hidden,
+        #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder.hidden {
+            display: none !important;
+        }
+
+        #followUpModal #followUpSlotContainer {
+            flex: 1 1 auto !important;
+            width: 100% !important;
+        }
+
+        #followUpModal .reason-wrap {
+            width: 100% !important;
+            margin-top: .65rem !important;
+            margin-bottom: 1rem !important;
+            padding: .85rem !important;
+            border-radius: 1.15rem !important;
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, .05) !important;
+            transition: border-color .2s ease, box-shadow .2s ease !important;
+        }
+
+        #followUpModal .reason-wrap:focus-within {
+            border-color: #8B0000 !important;
+            box-shadow: 0 0 0 4px rgba(139, 0, 0, .08), 0 10px 26px rgba(15, 23, 42, .05) !important;
+        }
+
+        #followUpModal .reason-textarea {
+            width: 100% !important;
+            min-height: 88px !important;
+            padding: .75rem .85rem !important;
+            background: #f9fafb !important;
+            border: 1px solid #eef0f3 !important;
+            border-radius: .9rem !important;
+            color: #374151 !important;
+            line-height: 1.45 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        #followUpModal .reason-textarea:focus {
+            background: #ffffff !important;
+            border-color: #8B0000 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+
+
+        /* Follow-up time slot picker: matches the large appointment slot style. */
+        #followUpModal .follow-up-slot-title {
+            margin-bottom: .35rem !important;
+            color: #8B0000 !important;
+            letter-spacing: .32em !important;
+            font-weight: 900 !important;
+        }
+
+        #followUpModal .follow-up-slot-helper {
+            margin: 0 0 1.05rem !important;
+            color: #8a817c !important;
+            font-size: .92rem !important;
+            line-height: 1.35 !important;
+        }
+
+        /* Hide the red selected-date pill while no date is selected. */
+        #followUpModal #followUpDatePill {
+            display: none !important;
+            align-items: center !important;
+            gap: .55rem !important;
+            width: 100% !important;
+            margin: 0 0 1.15rem !important;
+            padding: .95rem 1.15rem !important;
+            border-radius: 1.15rem !important;
+            background: #8B0000 !important;
+            color: #ffffff !important;
+            font-weight: 900 !important;
+            font-size: 1rem !important;
+            box-shadow: 0 12px 24px rgba(139, 0, 0, .24) !important;
+        }
+
+        #followUpModal #followUpDatePill.show:not(:empty) {
+            display: flex !important;
+        }
+
+        #followUpModal #followUpDatePill i {
+            color: #ffffff !important;
+            font-size: .95rem !important;
+        }
+
+        #followUpModal #followUpDatePill span {
+            color: #86efac !important;
+            opacity: 1 !important;
+            font-size: .86rem !important;
+            font-weight: 900 !important;
+        }
+
+        #followUpModal #followUpSlotGrid.slot-grid-ui,
+        #followUpModal #followUpSlotGrid.slots-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: .85rem 1rem !important;
+            max-height: 310px !important;
+            overflow-y: auto !important;
+            padding: .05rem .2rem .15rem 0 !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip {
+            min-height: 58px !important;
+            width: 100% !important;
+            padding: .85rem 1rem !important;
+            border-radius: 1.05rem !important;
+            border: 1px solid #ead7d1 !important;
+            background: #ffffff !important;
+            color: #2f3033 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: .65rem !important;
+            font-size: 1rem !important;
+            font-weight: 900 !important;
+            line-height: 1 !important;
+            transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, color .18s ease !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip:not(.disabled):hover {
+            transform: translateY(-1px) !important;
+            border-color: #8B0000 !important;
+            color: #8B0000 !important;
+            box-shadow: 0 10px 22px rgba(139, 0, 0, .10) !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip i {
+            color: #c34b4b !important;
+            font-size: .95rem !important;
+            opacity: 1 !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip.selected,
+        #followUpModal #followUpSlotGrid .slot-chip.bg-\[\#8B0000\] {
+            background: #8B0000 !important;
+            border-color: #8B0000 !important;
+            color: #ffffff !important;
+            box-shadow: 0 16px 28px rgba(139, 0, 0, .20) !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip.selected i,
+        #followUpModal #followUpSlotGrid .slot-chip.bg-\[\#8B0000\] i {
+            color: #ffffff !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip.disabled {
+            border-color: #e5e7eb !important;
+            background: #f3f4f6 !important;
+            color: #9ca3af !important;
+            cursor: not-allowed !important;
+            opacity: .68 !important;
+        }
+
+        #followUpModal .follow-up-clear-time-btn {
+            width: 100% !important;
+            min-height: 42px !important;
+            margin-top: .85rem !important;
+            border-radius: .9rem !important;
+            border: 1px solid #efcaca !important;
+            background: #ffffff !important;
+            color: #8B0000 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: .55rem !important;
+            font-size: .88rem !important;
+            font-weight: 900 !important;
+            transition: all .18s ease !important;
+        }
+
+        #followUpModal .follow-up-clear-time-btn:hover {
+            background: #fff1f1 !important;
+            border-color: #8B0000 !important;
+        }
+
+        #followUpModal .follow-up-clear-time-btn.hidden {
+            display: none !important;
+        }
+
+        #followUpModal .follow-up-selected-time-pill {
+            width: 100% !important;
+            margin-top: .7rem !important;
+            padding: .9rem 1rem !important;
+            border-radius: 1rem !important;
+            border: 1px solid #efcaca !important;
+            background: #fff7f7 !important;
+            color: #8B0000 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: .7rem !important;
+            font-size: .95rem !important;
+            font-weight: 900 !important;
+            box-shadow: 0 8px 18px rgba(139, 0, 0, .08) !important;
+        }
+
+        #followUpModal .follow-up-selected-time-pill.hidden {
+            display: none !important;
+        }
+
+        #followUpModal .follow-up-selected-time-pill i {
+            color: #8B0000 !important;
+        }
+
+
+
+        /* FINAL FOLLOW-UP SLOT STATE FIX
+           - no red date bar before selecting a date
+           - hide Choose-a-date placeholder once a date/slots are loaded
+           - keep the Book Appointment style scoped only inside the follow-up modal */
+        #followUpModal #followUpDatePill.hidden,
+        #followUpModal #followUpDatePill:empty {
+            display: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            box-shadow: none !important;
+        }
+
+        #followUpModal #followUpDatePill:not(.hidden):not(:empty),
+        #followUpModal #followUpDatePill.show:not(:empty) {
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        #followUpModal #followUpSlotPlaceholder.hidden,
+        #followUpModal .follow-up-slots-wrap.has-date #followUpSlotPlaceholder,
+        #followUpModal .follow-up-slots-wrap.has-slots #followUpSlotPlaceholder {
+            display: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap.is-empty #followUpSlotPlaceholder:not(.hidden) {
+            display: flex !important;
+            height: 258px !important;
+            min-height: 258px !important;
+            margin-top: 0 !important;
+            padding: 2.2rem 1.5rem !important;
+            overflow: visible !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap.is-empty #followUpSlotContainer,
+        #followUpModal .follow-up-slots-wrap.is-empty #followUpSelectedTimePill,
+        #followUpModal .follow-up-slots-wrap.is-empty #followUpClearTimeBtn {
+            display: none !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap.has-date #followUpSlotContainer:not(.hidden),
+        #followUpModal .follow-up-slots-wrap.has-slots #followUpSlotContainer:not(.hidden) {
+            display: block !important;
+        }
+
+        @media (max-width: 900px) {
+            #followUpModal {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            #followUpModal .follow-up-modal-panel {
+                width: 100%;
+                max-height: 92vh;
+            }
+
+            #followUpModal .follow-up-modal-body {
+                max-height: calc(92vh - 84px);
+                padding: .9rem !important;
+            }
+
+            #followUpModal .two-col {
+                grid-template-columns: 1fr !important;
+                gap: .85rem !important;
+            }
+
+            #followUpCalendarWrap {
+                transform: none;
+                width: 100%;
+                margin-left: 0;
+                margin-bottom: 0;
+            }
+
+
+
+            #followUpModal .follow-up-slots-wrap {
+                min-height: auto !important;
+            }
+
+            #followUpModal .slots-placeholder {
+                min-height: 125px !important;
+            }
+
+            #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder {
+                min-height: 190px !important;
+                padding: 1.6rem 1rem !important;
+            }
+
+            #followUpModal .reason-wrap {
+                padding: .7rem !important;
+                border-radius: 1rem !important;
+            }
+
+            #followUpModal .btn-row {
+                flex-direction: column-reverse !important;
+                align-items: stretch !important;
+                margin-left: -.9rem !important;
+                margin-right: -.9rem !important;
+                padding: .85rem .9rem 1rem !important;
+            }
+
+            #followUpModal .btn {
+                width: 100% !important;
+            }
+
+            #followUpModal #followUpSlotGrid.slot-grid-ui,
+            #followUpModal #followUpSlotGrid.slots-grid {
+                grid-template-columns: 1fr !important;
+                max-height: 280px !important;
+            }
+
+            #followUpModal #followUpDatePill,
+            #followUpModal #followUpDatePill.show {
+                padding: .85rem 1rem !important;
+                font-size: .92rem !important;
+            }
+        }
+    </style>
+
 @endsection
 
 @section('scripts')
@@ -645,7 +1206,7 @@
         'dateInputId' => 'followup_appointment_date',
         'timeInputId' => 'followup_appointment_time',
     
-        'dateBannerId' => null,
+        'dateBannerId' => 'followUpDatePill',
         'slotPlaceholderId' => 'followUpSlotPlaceholder',
         'slotContainerId' => 'followUpSlotContainer',
         'slotGridId' => 'followUpSlotGrid',
@@ -655,7 +1216,7 @@
         'selectedTimePillId' => 'followUpSelectedTimePill',
         'selectedTimeTextId' => 'followUpSelectedTimeText',
     
-        'datePillId' => 'followUpDatePill',
+        'datePillId' => null,
         'dateErrorId' => 'followUpDateError',
         'timeErrorId' => 'followUpTimeError',
     
@@ -2112,11 +2673,6 @@
                 fillLight.position.set(0, 8, 12);
                 scene.add(fillLight);
 
-                const toothGeometry = new THREE.CylinderGeometry(0.38, 0.22, 1.0, 32, 1);
-            const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
-            fillLight.position.set(0, 8, 12);
-            scene.add(fillLight);
-
             const enamelMaterialProps = {
                 color: 0xFFFFF8,
                 metalness: 0.02,
@@ -2911,18 +3467,137 @@
                 }, 3500);
             }
 
-            function resetFollowUpForm() {
-                const form = document.getElementById('followUpForm');
+            function setFollowUpEmptySlotPlaceholder() {
+                const slotPlaceholder = document.getElementById('followUpSlotPlaceholder');
+
+                if (!slotPlaceholder) return;
+
+                slotPlaceholder.classList.add('follow-up-empty-slot-placeholder');
+                slotPlaceholder.innerHTML = `
+                    <div class="follow-up-empty-icon">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                    <h4>Choose a date</h4>
+                    <p>Select an available day to see time slots.</p>
+                `;
+            }
+
+            function hideFollowUpSelectedTime() {
+                const selectedTimePill = document.getElementById('followUpSelectedTimePill');
+                const selectedTimeText = document.getElementById('followUpSelectedTimeText');
+
+                if (selectedTimeText) {
+                    selectedTimeText.textContent = '';
+                }
+
+                if (selectedTimePill) {
+                    selectedTimePill.classList.add('hidden');
+                    selectedTimePill.classList.remove('show');
+                    selectedTimePill.style.display = 'none';
+                }
+            }
+
+            function syncFollowUpSlotState() {
+                const slotsWrap = document.querySelector('.follow-up-slots-wrap');
                 const dateInput = document.getElementById('followup_appointment_date');
                 const timeInput = document.getElementById('followup_appointment_time');
-                const reasonInput = document.getElementById('followup_reason');
-
                 const datePill = document.getElementById('followUpDatePill');
                 const slotPlaceholder = document.getElementById('followUpSlotPlaceholder');
                 const slotContainer = document.getElementById('followUpSlotContainer');
                 const slotGrid = document.getElementById('followUpSlotGrid');
                 const selectedTimePill = document.getElementById('followUpSelectedTimePill');
                 const selectedTimeText = document.getElementById('followUpSelectedTimeText');
+                const clearTimeBtn = document.getElementById('followUpClearTimeBtn');
+
+                const hasDate = Boolean(dateInput?.value);
+                const hasSlotMarkup = Boolean(slotGrid?.children?.length);
+                const hasAvailableSlots = Boolean(slotGrid?.querySelector('.slot-chip:not(.disabled)'));
+                const selectedValue = timeInput?.value || '';
+
+                slotsWrap?.classList.toggle('is-empty', !hasDate);
+                slotsWrap?.classList.toggle('has-date', hasDate);
+                slotsWrap?.classList.toggle('has-slots', hasDate && hasSlotMarkup);
+
+                if (!hasDate) {
+                    if (datePill) {
+                        datePill.innerHTML = '';
+                        datePill.classList.add('hidden');
+                        datePill.classList.remove('show');
+                        datePill.style.display = 'none';
+                    }
+
+                    if (slotContainer) {
+                        slotContainer.classList.add('hidden');
+                        slotContainer.style.display = 'none';
+                    }
+
+                    if (slotGrid) {
+                        slotGrid.innerHTML = '';
+                        slotGrid.style.display = 'none';
+                    }
+
+                    if (slotPlaceholder) {
+                        setFollowUpEmptySlotPlaceholder();
+                        slotPlaceholder.classList.remove('hidden');
+                        slotPlaceholder.style.display = 'flex';
+                    }
+
+                    if (clearTimeBtn) {
+                        clearTimeBtn.classList.add('hidden');
+                    }
+
+                    hideFollowUpSelectedTime();
+                    return;
+                }
+
+                if (datePill) {
+                    if (datePill.textContent.trim().length > 0) {
+                        datePill.classList.remove('hidden');
+                        datePill.classList.add('show');
+                        datePill.style.display = 'flex';
+                    } else {
+                        datePill.classList.add('hidden');
+                        datePill.classList.remove('show');
+                        datePill.style.display = 'none';
+                    }
+                }
+
+                if (slotPlaceholder) {
+                    slotPlaceholder.classList.add('hidden');
+                    slotPlaceholder.style.display = 'none';
+                }
+
+                if (slotContainer) {
+                    slotContainer.classList.remove('hidden');
+                    slotContainer.style.display = 'block';
+                }
+
+                if (clearTimeBtn) {
+                    clearTimeBtn.classList.toggle('hidden', !hasAvailableSlots);
+                }
+
+                if (selectedTimePill && selectedTimeText) {
+                    if (selectedValue) {
+                        selectedTimeText.textContent = selectedValue;
+                        selectedTimePill.classList.remove('hidden');
+                        selectedTimePill.classList.add('show');
+                        selectedTimePill.style.display = 'flex';
+                    } else {
+                        hideFollowUpSelectedTime();
+                    }
+                }
+            }
+
+            function resetFollowUpForm() {
+                const form = document.getElementById('followUpForm');
+                const dateInput = document.getElementById('followup_appointment_date');
+                const timeInput = document.getElementById('followup_appointment_time');
+                const reasonInput = document.getElementById('followup_reason');
+                const datePill = document.getElementById('followUpDatePill');
+                const slotPlaceholder = document.getElementById('followUpSlotPlaceholder');
+                const slotContainer = document.getElementById('followUpSlotContainer');
+                const slotGrid = document.getElementById('followUpSlotGrid');
+                const clearTimeBtn = document.getElementById('followUpClearTimeBtn');
 
                 if (form) form.reset();
                 if (dateInput) dateInput.value = '';
@@ -2940,16 +3615,15 @@
 
                 if (datePill) {
                     datePill.innerHTML = '';
+                    datePill.classList.add('hidden');
                     datePill.classList.remove('show');
+                    datePill.style.display = 'none';
                 }
 
                 if (slotPlaceholder) {
+                    setFollowUpEmptySlotPlaceholder();
                     slotPlaceholder.classList.remove('hidden');
                     slotPlaceholder.style.display = 'flex';
-                    slotPlaceholder.innerHTML = `
-            <i class="fa-regular fa-calendar-xmark"></i>
-            <span>Select a date to see available slots</span>
-        `;
                 }
 
                 if (slotContainer) {
@@ -2962,16 +3636,94 @@
                     slotGrid.style.display = 'none';
                 }
 
-                if (selectedTimePill) {
-                    selectedTimePill.classList.add('hidden');
-                    selectedTimePill.classList.remove('show');
-                    selectedTimePill.style.display = 'none';
+                if (clearTimeBtn) {
+                    clearTimeBtn.classList.add('hidden');
                 }
 
-                if (selectedTimeText) {
-                    selectedTimeText.textContent = '';
-                }
+                hideFollowUpSelectedTime();
+                syncFollowUpSlotState();
             }
+
+            const followUpClearTimeBtn = document.getElementById('followUpClearTimeBtn');
+
+            function clearFollowUpTimeSelection() {
+                const slotGrid = document.getElementById('followUpSlotGrid');
+                const timeInput = document.getElementById('followup_appointment_time');
+
+                if (typeof selectedTime !== 'undefined') {
+                    selectedTime = null;
+                }
+
+                if (timeInput) {
+                    timeInput.value = '';
+                    timeInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                slotGrid?.querySelectorAll('.slot-chip').forEach(chip => {
+                    chip.classList.remove(
+                        'selected',
+                        'bg-[#8B0000]',
+                        'text-white',
+                        'border-[#8B0000]',
+                        'shadow-[0_2px_12px_rgba(139,0,0,0.25)]'
+                    );
+                    chip.classList.add('border-[#e8e2dd]', 'bg-[#fafaf8]', 'text-[#1a1410]');
+                    chip.setAttribute('aria-pressed', 'false');
+                });
+
+                syncFollowUpSlotState();
+            }
+
+            if (followUpClearTimeBtn) {
+                followUpClearTimeBtn.addEventListener('click', clearFollowUpTimeSelection);
+            }
+
+            if (typeof renderSlotLoading === 'function') {
+                const originalRenderSlotLoading = renderSlotLoading;
+                renderSlotLoading = function(iso) {
+                    originalRenderSlotLoading(iso);
+                    setTimeout(syncFollowUpSlotState, 0);
+                };
+            }
+
+            if (typeof renderSlots === 'function') {
+                const originalRenderSlots = renderSlots;
+                renderSlots = function(payload, iso) {
+                    originalRenderSlots(payload, iso);
+                    setTimeout(syncFollowUpSlotState, 0);
+                };
+            }
+
+            if (typeof clearSlotSelectionUI === 'function') {
+                const originalClearSlotSelectionUI = clearSlotSelectionUI;
+                clearSlotSelectionUI = function() {
+                    originalClearSlotSelectionUI();
+                    setFollowUpEmptySlotPlaceholder();
+                    setTimeout(syncFollowUpSlotState, 0);
+                };
+            }
+
+            document.getElementById('followUpSlotGrid')?.addEventListener('click', function() {
+                setTimeout(syncFollowUpSlotState, 0);
+            });
+
+            document.getElementById('followup_appointment_date')?.addEventListener('change', function() {
+                setTimeout(syncFollowUpSlotState, 0);
+            });
+
+            document.getElementById('followup_appointment_time')?.addEventListener('change', syncFollowUpSlotState);
+
+            ['followUpDatePill', 'followUpSlotGrid'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (!el) return;
+
+                new MutationObserver(function() {
+                    setTimeout(syncFollowUpSlotState, 0);
+                }).observe(el, {
+                    childList: true,
+                    subtree: true
+                });
+            });
 
             window.openFollowUpModal = function() {
                 resetFollowUpForm();
