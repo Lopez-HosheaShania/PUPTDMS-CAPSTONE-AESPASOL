@@ -45,6 +45,7 @@ use App\Services\FacultyApiService;
 use App\Http\Controllers\Admin\DentalRecordController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\Dentist\OdontogramController;
+use App\Http\Controllers\Dentist\DentistClinicScheduleController;
 
 //api nila albert
 
@@ -998,6 +999,43 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
     Route::get('/appointments/{id}/start', [DentistAppointmentController::class, 'start'])
         ->middleware('permission:manage_appointments')
         ->name('dentist.dentist.appointments.start');
+
+    /*
+|--------------------------------------------------------------------------
+| DENTIST CLINIC SCHEDULE
+|--------------------------------------------------------------------------
+*/
+    Route::get('/clinic-schedule', [DentistClinicScheduleController::class, 'index'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.clinic_schedule');
+
+    Route::post('/clinic-schedule', [DentistClinicScheduleController::class, 'store'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.clinic_schedule.store');
+
+    Route::put('/clinic-schedule/rules/{clinicSchedule}', [DentistClinicScheduleController::class, 'update'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.clinic_schedule.update');
+
+    Route::delete('/clinic-schedule/rules/{clinicSchedule}', [DentistClinicScheduleController::class, 'destroy'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.clinic_schedule.destroy');
+
+    Route::post('/clinic-schedule/block-date', [DentistClinicScheduleController::class, 'blockDate'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.clinic_schedule.block');
+
+    Route::delete('/clinic-schedule/block-date/{blockedDate}', [DentistClinicScheduleController::class, 'unblockDate'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.clinic_schedule.unblock');
+
+    Route::get('/clinic-schedule/unavailable-dates', [DentistClinicScheduleController::class, 'unavailableDates'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.clinic_schedule.unavailable_dates');
+
+    Route::get('/clinic-schedule/slots', [DentistClinicScheduleController::class, 'slotsForDate'])
+        ->middleware('permission:manage_appointments')
+        ->name('dentist.dentist.clinic_schedule.slots');
 
     // Patients
     Route::get('/patients', [DentistPatientController::class, 'index'])

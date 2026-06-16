@@ -1,0 +1,4256 @@
+.day-toggle-group.is-invalid,
+.break-chip-group.is-invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .08) !important;
+}
+
+.day-toggle-group.is-invalid {
+    padding: .5rem;
+    border: 1.5px solid #dc2626;
+    border-radius: 10px;
+    background: #fff7f7;
+}
+
+.break-chip-group.is-invalid {
+    padding: .5rem;
+    border: 1.5px solid #dc2626;
+    border-radius: 10px;
+    background: #fff7f7;
+}
+
+.sched-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sched-table thead tr {
+    background: linear-gradient(135deg, #6b0000, #8B0000);
+}
+
+.sched-table thead th {
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.sched-table tbody tr {
+    border-bottom: 1px solid #f8f4f4;
+    transition: background .12s;
+}
+
+.sched-table tbody tr:hover {
+    background: #fef5f5;
+}
+
+.sched-table tbody td {
+    padding: 11px 14px;
+    font-size: .8rem;
+    color: #374151;
+    vertical-align: middle;
+}
+
+.badge-open {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 700;
+}
+
+.badge-closed {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 700;
+}
+
+.badge-limited {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 700;
+}
+
+.badge-holiday {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 700;
+}
+
+.cap-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: #f0e8e8;
+    overflow: hidden;
+}
+
+.cap-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #8B0000, #c9a84c);
+    transition: width .4s ease;
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #f0e8e8;
+}
+
+.wk-hdr {
+    padding: 10px 6px;
+    text-align: center;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #6b0000, #8B0000);
+    border-right: 1px solid rgba(255, 255, 255, .15);
+}
+
+.wk-hdr.empty {
+    background: #fafafa;
+    border-right: 1px solid #f0e8e8;
+}
+
+.wk-hdr.weekend-hdr {
+    background: linear-gradient(135deg, #4a0000, #6b0000);
+}
+
+.wk-hdr.today-hdr {
+    background: linear-gradient(135deg, #8B0000, #c9a84c);
+}
+
+.time-lbl {
+    font-size: .65rem;
+    font-weight: 600;
+    color: #9ca3af;
+    padding: 8px;
+    border-bottom: 1px solid #f8f4f4;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid #f0e8e8;
+    background: #fafafa;
+}
+
+.cal-slot {
+    border-bottom: 1px solid #f8f4f4;
+    border-right: 1px solid #f8f4f4;
+    min-height: 54px;
+    position: relative;
+    transition: background .15s;
+    cursor: pointer;
+    padding: 2px;
+    overflow: hidden;
+}
+
+.cal-slot:hover {
+    background: #fef5f5;
+}
+
+.cal-slot.wk-closed {
+    background: #f8f8f8;
+    cursor: not-allowed;
+    opacity: .6;
+}
+
+.cal-slot.wk-break {
+    background: repeating-linear-gradient(45deg, #f8f8f8, #f8f8f8 6px, #fff 6px, #fff 12px);
+    cursor: not-allowed;
+}
+
+.cal-slot.wk-weekend {
+    background: #fcfcfc;
+    cursor: not-allowed;
+}
+
+.slot-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .6rem;
+    color: #d1d5db;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.schedule-rules-view[hidden] {
+    display: none !important;
+}
+
+.schedule-rules-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.schedule-rule-card {
+    background: #fff;
+    border: 1px solid #f1e7e4;
+    border-radius: 16px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+    min-width: 0;
+    transition: all .15s ease;
+}
+
+.schedule-rule-card:hover {
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .05);
+    border-color: #ead4d4;
+}
+
+.schedule-rule-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+}
+
+.schedule-rule-card-title {
+    font-size: .88rem;
+    font-weight: 800;
+    color: #1f2937;
+    line-height: 1.3;
+}
+
+.schedule-rule-card-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .7rem;
+}
+
+.schedule-rule-card-label {
+    font-size: .64rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: .25rem;
+}
+
+.schedule-rule-card-value {
+    font-size: .78rem;
+    color: #374151;
+    line-height: 1.35;
+}
+
+.schedule-rule-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .4rem;
+    margin-top: .2rem;
+}
+
+@media (max-width: 1024px) {
+    .schedule-rules-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rule-modal-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .rule-modal-side {
+        position: static;
+    }
+
+    .rule-notes-textarea {
+        min-height: 180px;
+        height: 180px;
+    }
+}
+
+.modal-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.modal-title-block h3 {
+    margin: 0;
+}
+
+.modal-title-sub {
+    font-size: .82rem;
+    color: rgba(255, 255, 255, .78);
+    margin-top: .3rem;
+    line-height: 1.45;
+}
+
+.modal-close-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .18s ease;
+    flex-shrink: 0;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, .2);
+    transform: translateY(-1px);
+}
+
+.modal-section {
+    background: #fff;
+    border: 1px solid #f1e7e4;
+    border-radius: 18px;
+    padding: .8rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .03);
+}
+
+.modal-section+.modal-section {
+    margin-top: 1rem;
+}
+
+.modal-section-head {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    margin-bottom: .9rem;
+}
+
+.modal-section-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #8B0000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.modal-section-title {
+    font-size: .88rem;
+    font-weight: 800;
+    color: #2f1b1b;
+    line-height: 1.2;
+}
+
+.modal-section-sub {
+    font-size: .72rem;
+    color: #9a8f8c;
+    margin-top: .15rem;
+}
+
+.day-toggle-group {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: .4rem;
+    width: 100%;
+}
+
+.day-toggle-group>* {
+    min-width: 0;
+}
+
+.day-toggle {
+    width: 100%;
+    height: 46px;
+    border-radius: 14px;
+    border: 1.5px solid #eadfd9;
+    background: #fffdfc;
+    font-size: .78rem;
+    font-weight: 800;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1;
+    cursor: pointer;
+    transition: all .15s ease;
+    user-select: none;
+    overflow: hidden;
+    padding: 0 .35rem;
+    white-space: nowrap;
+}
+
+.day-toggle.active {
+    background: linear-gradient(135deg, #8B0000, #b91c1c);
+    border-color: #8B0000;
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, .18);
+}
+
+.break-chip-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+}
+
+.break-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 46px;
+    border-radius: 14px;
+    font-size: .76rem;
+    font-weight: 700;
+    text-align: center;
+    padding: .7rem .8rem;
+    border: 1.5px solid #e8e2dd;
+    background: #fafaf8;
+    color: #5c5550;
+    cursor: pointer;
+    transition: all .15s ease;
+    user-select: none;
+}
+
+.break-chip.selected {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    border-color: #f59e0b;
+    color: #fff;
+    box-shadow: 0 10px 18px rgba(245, 158, 11, .18);
+}
+
+.slot-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: .75rem;
+    background: #fffaf8;
+    border: 1px solid #efe3dd;
+    border-radius: 16px;
+    padding: .45rem;
+}
+
+.slot-stepper-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid #e5d6d0;
+    background: #fff;
+    color: #6b5d57;
+    font-size: 1.05rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s ease;
+}
+
+.slot-stepper-btn:hover {
+    border-color: #8B0000;
+    color: #8B0000;
+    background: #fef2f2;
+}
+
+.slot-stepper-input {
+    width: 82px !important;
+    min-width: 82px;
+    text-align: center;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    border-radius: 12px;
+}
+
+.btn-soft {
+    min-height: 44px;
+    padding: 0 1rem;
+    border-radius: 12px;
+    border: 1px solid #e5deda;
+    background: #fff;
+    color: #6b635f;
+    font-size: .84rem;
+    font-weight: 700;
+    transition: all .15s ease;
+}
+
+.btn-soft:hover {
+    background: #faf7f5;
+    border-color: #d9cdc7;
+}
+
+.rule-save-btn {
+    min-height: 44px;
+    padding: 0 1rem;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff;
+    font-size: .84rem;
+    font-weight: 800;
+    box-shadow: 0 10px 22px rgba(22, 163, 74, .18);
+    transition: all .18s ease;
+}
+
+.rule-save-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 26px rgba(22, 163, 74, .24);
+    background: linear-gradient(135deg, #15803d, #166534);
+}
+
+[data-theme="dark"] .modal-section {
+    background: #0d1117;
+    border-color: #2a2f36;
+}
+
+[data-theme="dark"] .modal-section-title {
+    color: #f3f4f6;
+}
+
+[data-theme="dark"] .modal-section-sub {
+    color: #8b949e;
+}
+
+[data-theme="dark"] .day-toggle {
+    background: #0d1117;
+    border-color: #30363d;
+    color: #c9d1d9;
+}
+
+[data-theme="dark"] .break-chip {
+    background: #0d1117;
+    border-color: #30363d;
+    color: #c9d1d9;
+}
+
+[data-theme="dark"] .slot-stepper {
+    background: #11161c;
+    border-color: #2a2f36;
+}
+
+[data-theme="dark"] .slot-stepper-btn {
+    background: #0d1117;
+    border-color: #30363d;
+    color: #c9d1d9;
+}
+
+[data-theme="dark"] .btn-soft {
+    background: #0d1117;
+    border-color: #30363d;
+    color: #c9d1d9;
+}
+
+[data-theme="dark"] .rule-save-btn {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    box-shadow: 0 10px 22px rgba(22, 163, 74, .2);
+}
+
+[data-theme="dark"] .rule-save-btn:hover {
+    background: linear-gradient(135deg, #15803d, #166534);
+}
+
+[data-theme="dark"] .notes-counter {
+    color: #c9d1d9;
+}
+
+[data-theme="dark"] .notes-counter.is-warning {
+    color: #fbbf24;
+}
+
+[data-theme="dark"] .notes-counter.is-danger {
+    color: #f87171;
+}
+
+[data-theme="dark"] .bg-gray-50 {
+    background: rgba(13, 17, 23, .82) !important;
+    border-color: rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] h2.text-gray-800 {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .text-gray-800 {
+    color: #d1d5db !important;
+}
+
+[data-theme="dark"] .text-gray-400,
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-gray-600 {
+    color: #9ca3af !important;
+}
+
+[data-theme="dark"] .sched-table tbody tr {
+    background: transparent !important;
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] .sched-table tbody tr:hover {
+    background: rgba(255, 255, 255, .04) !important;
+}
+
+[data-theme="dark"] .sched-table tbody td {
+    color: #d1d5db !important;
+}
+
+[data-theme="dark"] .sched-table .badge-open {
+    background: rgba(34, 197, 94, .10) !important;
+    color: #86efac !important;
+    border-color: rgba(134, 239, 172, .18) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+[data-theme="dark"] .sched-table .badge-closed {
+    background: rgba(148, 163, 184, .10) !important;
+    color: #cbd5e1 !important;
+    border-color: rgba(203, 213, 225, .16) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+[data-theme="dark"] .sched-table .badge-limited {
+    background: rgba(245, 158, 11, .10) !important;
+    color: #fcd34d !important;
+    border-color: rgba(252, 211, 77, .18) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+[data-theme="dark"] .sched-table button.bg-blue-50 {
+    background: rgba(59, 130, 246, .12) !important;
+    border-color: rgba(147, 197, 253, .18) !important;
+    color: #93c5fd !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .sched-table button.bg-red-50 {
+    background: rgba(239, 68, 68, .12) !important;
+    border-color: rgba(252, 165, 165, .18) !important;
+    color: #FCA5A5 !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .schedule-rule-card {
+    background:
+        radial-gradient(circle at bottom right, rgba(255, 255, 255, .07), transparent 42%),
+        linear-gradient(135deg, rgba(22, 27, 34, .68), rgba(13, 17, 23, .58)) !important;
+    border: 1px solid rgba(255, 255, 255, .10) !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .30) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+[data-theme="dark"] .schedule-rule-card-title {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .schedule-rule-card-value {
+    color: #d1d5db !important;
+}
+
+[data-theme="dark"] #todayBtn {
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, .10),
+            rgba(255, 255, 255, .04)) !important;
+
+    border: 1px solid rgba(252, 165, 165, .22) !important;
+
+    color: #FCA5A5 !important;
+
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 8px 20px rgba(0, 0, 0, .28);
+
+    transition: all .18s ease;
+}
+
+[data-theme="dark"] #todayBtn:hover {
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, .16),
+            rgba(255, 255, 255, .06)) !important;
+
+    border-color: rgba(252, 165, 165, .35) !important;
+
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .week-grid {
+    border-color: rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .wk-hdr.empty {
+    background: linear-gradient(180deg, #161b22 0%, #111827 100%) !important;
+    border-right: 1px solid rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .time-lbl {
+    background: #0d1117 !important;
+    color: #9ca3af !important;
+    border-color: #21262d !important;
+}
+
+[data-theme="dark"] .cal-slot {
+    border-color: #1c2128 !important;
+    background: rgba(255, 255, 255, .015);
+}
+
+[data-theme="dark"] .cal-slot:hover {
+    background: rgba(252, 165, 165, .08) !important;
+}
+
+[data-theme="dark"] .cal-slot.wk-closed,
+[data-theme="dark"] .cal-slot.wk-weekend {
+    background: rgba(255, 255, 255, .025) !important;
+    opacity: .55;
+}
+
+[data-theme="dark"] .cal-slot.wk-break {
+    background: repeating-linear-gradient(45deg,
+            rgba(255, 255, 255, .025),
+            rgba(255, 255, 255, .025) 6px,
+            rgba(255, 255, 255, .045) 6px,
+            rgba(255, 255, 255, .045) 12px) !important;
+}
+
+[data-theme="dark"] .border-gray-50,
+[data-theme="dark"] .border-gray-100 {
+    border-color: rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .holiday-title {
+    color: #f3f4f6 !important;
+}
+
+[data-theme="dark"] .holiday-badge.badge-holiday {
+    background: rgba(96, 165, 250, .14) !important;
+
+    border: 1px solid rgba(191, 219, 254, .22) !important;
+
+    color: #dbeafe !important;
+
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 2px 8px rgba(0, 0, 0, .18);
+
+    border-radius: 999px;
+}
+
+[data-theme="dark"] .blocked-title {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .holiday-date-box .day,
+[data-theme="dark"] .day.text-xl {
+    color: #f3f4f6 !important;
+}
+
+[data-theme="dark"] .month {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .blocked-date-pill {
+    background: rgba(252, 165, 165, .10) !important;
+    border-color: rgba(252, 165, 165, .16) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .lg\:col-span-2+.space-y-6>.bg-white:first-child .p-4 span {
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .lg\:col-span-2+.space-y-6>.bg-white:first-child .p-4 span.text-gray-400 {
+    color: #9ca3af !important;
+}
+
+[data-theme="dark"] .schedule-rule-card .font-bold.text-\[\#8B0000\] {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .cap-bar {
+    background: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] .cap-fill {
+    background: linear-gradient(90deg,
+            rgba(252, 165, 165, .95),
+            rgba(251, 191, 36, .88)) !important;
+}
+
+[data-theme="dark"] .schedule-rule-card button.bg-blue-50 {
+    background: rgba(59, 130, 246, .12) !important;
+    border-color: rgba(147, 197, 253, .18) !important;
+    color: #93c5fd !important;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 4px 10px rgba(0, 0, 0, .18);
+}
+
+[data-theme="dark"] .schedule-rule-card button.bg-red-50 {
+    background: rgba(239, 68, 68, .12) !important;
+    border-color: rgba(252, 165, 165, .18) !important;
+    color: #FCA5A5 !important;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 4px 10px rgba(0, 0, 0, .18);
+}
+
+[data-theme="dark"] .schedule-rule-card .badge-open,
+[data-theme="dark"] .schedule-rule-card .badge-closed,
+[data-theme="dark"] .schedule-rule-card .badge-limited {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 4px 10px rgba(0, 0, 0, .16);
+}
+
+.sched-table .badge-open,
+.sched-table .badge-closed,
+.sched-table .badge-limited,
+.sched-table button.bg-blue-50,
+.sched-table button.bg-red-50,
+.schedule-rule-card button.bg-blue-50,
+.schedule-rule-card button.bg-red-50 {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .sched-table tbody td[data-label="Day(s)"] {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] td[data-label="Max Slots"] .text-\[\#8B0000\],
+[data-theme="dark"] .schedule-rule-card .text-\[\#8B0000\] {
+    color: #FCA5A5 !important;
+}
+
+.rule-modal-layout {
+    display: grid;
+    grid-template-columns: 380px minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+.rule-modal-main,
+.rule-modal-side {
+    min-width: 0;
+}
+
+.rule-modal-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rule-modal-main .modal-section+.modal-section {
+    margin-top: 0;
+}
+
+.rule-modal-side {
+    width: 100%;
+    min-width: 0;
+}
+
+.rule-modal-side .modal-section {
+    width: 100%;
+}
+
+.rule-notes-section {
+    width: 100%;
+    min-width: 0;
+}
+
+.rule-notes-textarea {
+    display: block;
+    width: 100%;
+    flex: 1;
+    min-height: 120px;
+    max-width: 100%;
+    overflow-y: auto;
+    resize: none;
+}
+
+.notes-counter {
+    font-weight: 800;
+    transition: color .18s ease;
+}
+
+.notes-counter.is-warning {
+    color: #d97706;
+}
+
+.notes-counter.is-danger {
+    color: #dc2626;
+}
+
+.rule-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: .75rem;
+    padding-top: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid #efe8e4;
+    background: transparent;
+    box-shadow: none;
+}
+
+@media (max-width: 767px) {
+
+    #scheduleRulesViewToggle {
+        display: none !important;
+    }
+
+    #scheduleRulesGridView {
+        display: none !important;
+    }
+
+    #scheduleRulesListView {
+        display: block !important;
+    }
+
+    .mb-6 .flex.items-center.gap-3,
+    .mb-6 .flex.flex-col.sm\:flex-row.sm\:items-center.sm\:justify-between.gap-3>div:last-child {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .mb-6 .flex.items-center.gap-3 button,
+    .mb-6 .flex.flex-col.sm\:flex-row.sm\:items-center.sm\:justify-between.gap-3>div:last-child button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .p-4 .flex.flex-wrap.gap-3.mt-3.justify-end {
+        justify-content: flex-start !important;
+        gap: .5rem .75rem !important;
+    }
+
+    .week-grid {
+        min-width: 720px;
+    }
+
+    #prevWeek,
+    #nextWeek {
+        width: 2.1rem !important;
+        height: 2.1rem !important;
+        flex-shrink: 0;
+        border-radius: 10px !important;
+    }
+
+    #weekRangeLabel {
+        min-width: 0 !important;
+        max-width: none !important;
+        font-size: .72rem !important;
+        line-height: 1.15 !important;
+        white-space: normal !important;
+        text-align: center !important;
+        padding: 0 .25rem !important;
+        color: inherit !important;
+        font-weight: 700 !important;
+    }
+
+    #todayBtn {
+        padding: .34rem .58rem !important;
+        font-size: .62rem !important;
+        border-radius: 999px !important;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-width: 52px;
+    }
+
+    .bg-white.rounded-xl.shadow.border.border-gray-100.overflow-hidden>.px-4.py-4.border-b.bg-gray-50.flex.flex-col.gap-3.sm\:flex-row.sm\:items-center.sm\:justify-between {
+        gap: .55rem !important;
+        padding: .8rem .85rem !important;
+    }
+
+    .bg-white.rounded-xl.shadow.border.border-gray-100.overflow-hidden>.px-4.py-4.border-b.bg-gray-50.flex.flex-col.gap-3.sm\:flex-row.sm\:items-center.sm\:justify-between>div:first-child {
+        width: 100%;
+    }
+
+    .bg-white.rounded-xl.shadow.border.border-gray-100.overflow-hidden>.px-4.py-4.border-b.bg-gray-50.flex.flex-col.gap-3.sm\:flex-row.sm\:items-center.sm\:justify-between>div:first-child h2 {
+        font-size: .9rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .bg-white.rounded-xl.shadow.border.border-gray-100.overflow-hidden>.px-4.py-4.border-b.bg-gray-50.flex.flex-col.gap-3.sm\:flex-row.sm\:items-center.sm\:justify-between>div:last-child {
+        display: grid !important;
+        grid-template-columns: 34px minmax(0, 1fr) 34px;
+        grid-template-areas:
+            "prev range next"
+            "today today today";
+        align-items: center;
+        gap: .45rem .5rem !important;
+        width: 100%;
+    }
+
+    #prevWeek {
+        grid-area: prev;
+    }
+
+    #weekRangeLabel {
+        grid-area: range;
+    }
+
+    #nextWeek {
+        grid-area: next;
+    }
+
+    #todayBtn {
+        grid-area: today;
+        width: fit-content;
+        justify-self: center;
+    }
+
+    .sched-table tbody tr {
+        margin: .75rem 0;
+        padding: .9rem;
+        border: 1px solid #ece5e1;
+        border-radius: 16px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
+        background: #fff;
+    }
+
+    .sched-table tbody td[data-label="Opens"],
+    .sched-table tbody td[data-label="Closes"] {
+        margin-top: .3rem;
+    }
+
+    .sched-table tbody td[data-label="Day(s)"],
+    .sched-table tbody td[data-label="Lunch Break"] {
+        margin-bottom: .3rem;
+    }
+
+    .sched-table tbody td:last-child {
+        padding-top: .75rem;
+    }
+
+    .sched-table tbody td[data-label="Actions"] {
+        padding-top: .65rem;
+    }
+
+    .sched-table tbody td[data-label="Actions"] .flex {
+        gap: .6rem;
+    }
+
+    .sched-table tbody td[data-label="Actions"] .w-7.h-7 {
+        width: 2.4rem !important;
+        height: 2.4rem !important;
+    }
+
+    .cap-bar.w-16 {
+        width: 4.25rem !important;
+    }
+
+    .badge-open,
+    .badge-closed,
+    .badge-limited {
+        font-size: .68rem;
+        padding: 3px 10px;
+    }
+
+    .sched-table tbody td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: .58rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: #9ca3af;
+        margin-bottom: .18rem;
+    }
+
+    .sched-table tbody td[data-label="Max Slots"] .flex {
+        align-items: center;
+        flex-wrap: wrap;
+        gap: .45rem;
+    }
+
+    .sched-table tbody td[data-label="Day(s)"] {
+        font-size: .9rem;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .sched-table tbody td[data-label="Status"] {
+        padding-top: .5rem;
+    }
+
+    .sched-table tbody td[data-label="Actions"] form {
+        margin: 0;
+    }
+
+    .sched-table tbody td[data-label="Actions"] button {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+    }
+
+    .sched-table thead {
+        display: none;
+    }
+
+    .sched-table,
+    .sched-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .sched-table tr {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .sched-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .sched-table tbody td[data-label="Day(s)"],
+    .sched-table tbody td[data-label="Lunch Break"],
+    .sched-table tbody td[data-label="Opens"],
+    .sched-table tbody td[data-label="Closes"] {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .sched-table tbody td[data-label="Day(s)"],
+    .sched-table tbody td[data-label="Lunch Break"],
+    .sched-table tbody td[data-label="Opens"],
+    .sched-table tbody td[data-label="Closes"] {
+        width: 50%;
+    }
+
+    .sched-table tbody td[data-label="Day(s)"] {
+        order: 1;
+    }
+
+    .sched-table tbody td[data-label="Lunch Break"] {
+        order: 2;
+    }
+
+    .sched-table tbody td[data-label="Opens"] {
+        order: 3;
+    }
+
+    .sched-table tbody td[data-label="Closes"] {
+        order: 4;
+    }
+
+    .sched-table tbody td[data-label="Max Slots"] {
+        order: 5;
+        width: 100%;
+    }
+
+    .sched-table tbody td[data-label="Status"] {
+        order: 6;
+        width: 100%;
+    }
+
+    .sched-table tbody td[data-label="Actions"] {
+        order: 7;
+        width: 100%;
+    }
+
+    .space-y-6>.bg-white {
+        border-radius: 14px;
+    }
+
+    .day-toggle-group,
+    .break-chip-group {
+        gap: .5rem;
+    }
+
+    .break-chip {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .holiday-item {
+        gap: .65rem;
+        padding: .6rem 0;
+    }
+
+    .holiday-date-box {
+        width: 34px;
+    }
+
+    .holiday-date-box .month {
+        font-size: .56rem;
+    }
+
+    .holiday-date-box .day {
+        font-size: 1rem;
+    }
+
+    .holiday-title {
+        font-size: .72rem;
+        line-height: 1.25;
+    }
+
+    .holiday-meta {
+        font-size: .62rem;
+    }
+
+    .holiday-badge {
+        font-size: .58rem;
+        padding: 2px 7px;
+    }
+
+    .blocked-list-item {
+        gap: .65rem;
+        padding: .65rem 0;
+    }
+
+    .blocked-date-pill {
+        width: 34px;
+        height: 34px;
+        font-size: .7rem;
+        border-radius: 10px;
+    }
+
+    .blocked-title {
+        font-size: .72rem;
+        line-height: 1.25;
+    }
+
+    .blocked-note {
+        font-size: .62rem;
+        margin-top: .15rem;
+    }
+
+    .blocked-remove-btn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .modal-title-sub {
+        font-size: .76rem;
+        line-height: 1.35;
+    }
+
+    .modal-section {
+        padding: .8rem;
+        border-radius: 14px;
+    }
+
+    .modal-section+.modal-section {
+        margin-top: .75rem;
+    }
+
+    .modal-section-head {
+        margin-bottom: .7rem;
+    }
+
+    .modal-section-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+    }
+
+    .day-toggle-group {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .4rem;
+    }
+
+    .rule-modal-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem;
+    }
+
+    .rule-modal-main,
+    .rule-modal-side {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .day-toggle {
+        height: 40px;
+        border-radius: 12px;
+        font-size: .74rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        padding: 0;
+    }
+
+    .break-chip-group {
+        grid-template-columns: 1fr;
+        gap: .5rem;
+    }
+
+    .break-chip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: .6rem .75rem;
+        font-size: .74rem;
+        width: 100%;
+    }
+
+    .slot-stepper {
+        width: 100%;
+        gap: .5rem;
+        padding: .35rem;
+        border-radius: 14px;
+    }
+
+    .slot-stepper-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .slot-stepper-input {
+        width: 72px !important;
+        min-width: 72px;
+        font-size: .95rem !important;
+    }
+
+    .blocked-remove-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #b8b8b8;
+        background: #fff;
+        border: 1px solid #f1e5e5;
+        transition: all .15s ease;
+    }
+
+    .blocked-remove-btn:hover {
+        color: #dc2626;
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+}
+
+#mainContent.clinic-schedule-page {
+    background: var(--admin-page-bg, #f6f7f9);
+}
+
+#mainContent.clinic-schedule-page .admin-page-container {
+    max-width: 100%;
+}
+
+.clinic-schedule-page .page-actions>button,
+.clinic-schedule-page .page-banner button:not(.btn-view-mode) {
+    min-height: 44px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, .18) !important;
+    background: rgba(255, 255, 255, .92) !important;
+    color: #8B0000 !important;
+    font-size: .84rem !important;
+    font-weight: 900 !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .12) !important;
+}
+
+.clinic-schedule-page .page-actions>button:hover,
+.clinic-schedule-page .page-banner button:not(.btn-view-mode):hover {
+    transform: translateY(-1px);
+    background: #fff8f8 !important;
+}
+
+#scheduleRulesViewToggle.view-toggle-container {
+    flex: 0 0 auto !important;
+}
+
+#scheduleRulesViewToggle .btn-view-mode i {
+    color: currentColor !important;
+}
+
+.clinic-schedule-page .bg-white.rounded-xl,
+.clinic-schedule-page .stat-card,
+.clinic-schedule-page .schedule-rule-card {
+    background: #FFFFFF !important;
+    border: 1px solid #F0EAEA !important;
+    border-radius: 18px !important;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .05) !important;
+}
+
+.clinic-schedule-page .bg-gray-50 {
+    background: #FAFAFA !important;
+    border-color: #F1ECE7 !important;
+}
+
+.clinic-schedule-page .stat-card {
+    min-height: 112px;
+}
+
+.clinic-schedule-page .stat-card p {
+    margin: 0;
+}
+
+.clinic-schedule-page .sched-table button[title="Edit"],
+.clinic-schedule-page .schedule-rule-card button[title="Edit"],
+.clinic-schedule-page .sched-table button[title="Delete"],
+.clinic-schedule-page .schedule-rule-card button[title="Delete"],
+.clinic-schedule-page .blocked-remove-btn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    transition: all .18s ease !important;
+}
+
+.clinic-schedule-page .sched-table button[title="Edit"],
+.clinic-schedule-page .schedule-rule-card button[title="Edit"] {
+    background: #EFF6FF !important;
+    color: #2563EB !important;
+}
+
+.clinic-schedule-page .sched-table button[title="Delete"],
+.clinic-schedule-page .schedule-rule-card button[title="Delete"],
+.clinic-schedule-page .blocked-remove-btn {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+}
+
+.clinic-schedule-page .sched-table button:hover,
+.clinic-schedule-page .schedule-rule-card button:hover,
+.clinic-schedule-page .blocked-remove-btn:hover {
+    transform: translateY(-1px);
+}
+
+.clinic-schedule-page .form-ctrl,
+.clinic-schedule-page .form-sel,
+.clinic-schedule-page .slot-stepper-input {
+    min-height: 46px;
+    border-radius: 14px !important;
+    border: 1.5px solid #E5E7EB !important;
+    background: #FFFFFF !important;
+    color: #111827 !important;
+    outline: none !important;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease !important;
+}
+
+.clinic-schedule-page .form-ctrl:focus,
+.clinic-schedule-page .form-sel:focus,
+.clinic-schedule-page .slot-stepper-input:focus {
+    border-color: #8B0000 !important;
+    box-shadow: 0 0 0 4px rgba(139, 0, 0, .10) !important;
+}
+
+.clinic-schedule-page .form-ctrl.is-invalid,
+.clinic-schedule-page .form-sel.is-invalid {
+    border-color: #DC2626 !important;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, .10) !important;
+}
+
+.clinic-schedule-page .field-error {
+    display: none;
+    margin-top: .45rem;
+    font-size: .72rem;
+    font-weight: 850;
+    color: #DC2626;
+}
+
+.clinic-schedule-page .field-error.show:not(:empty) {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+.clinic-schedule-page .fp-date-input-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.clinic-schedule-page .fp-date-input {
+    width: 100%;
+    padding-right: 42px !important;
+    cursor: pointer;
+}
+
+.clinic-schedule-page .fp-date-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    pointer-events: none;
+}
+
+.cs-modal {
+    z-index: 99990 !important;
+}
+
+.cs-modal-card {
+    width: min(94vw, 720px) !important;
+    max-height: calc(100dvh - 2rem) !important;
+    overflow: hidden !important;
+    border-radius: 24px !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, .30) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.cs-rule-modal-card {
+    width: min(96vw, 1120px) !important;
+}
+
+.cs-block-modal-card {
+    width: min(94vw, 620px) !important;
+}
+
+.cs-detail-modal-card {
+    width: min(94vw, 520px) !important;
+}
+
+.cs-modal .modal-hdr {
+    padding: 1.35rem 1.5rem !important;
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, .16), transparent 36%),
+        linear-gradient(135deg, #6B0000, #8B0000) !important;
+    color: #FFFFFF !important;
+    flex-shrink: 0 !important;
+}
+
+.cs-modal .modal-body,
+.cs-modal .modal-form-body {
+    padding: 1.35rem !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    background: #FFFFFF !important;
+}
+
+.cs-modal .modal-footer {
+    padding: 1rem 1.35rem 1.25rem !important;
+    border-top: 1px solid #EEF2F7 !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: .75rem !important;
+    background: #FFFFFF !important;
+}
+
+.cs-modal .modal-close-btn {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+}
+
+.cs-modal .modal-section {
+    background: #FFFFFF !important;
+    border: 1px solid #EEF2F7 !important;
+    border-radius: 18px !important;
+}
+
+.clinic-schedule-page .btn-primary,
+.cs-modal .btn-primary,
+.cs-modal .rule-save-btn {
+    min-height: 44px !important;
+    padding: 0 1.2rem !important;
+    border-radius: 12px !important;
+    border: 0 !important;
+    background: linear-gradient(135deg, #8B0000, #B91C1C) !important;
+    color: #FFFFFF !important;
+    font-size: .84rem !important;
+    font-weight: 900 !important;
+    box-shadow: 0 12px 24px rgba(139, 0, 0, .22) !important;
+}
+
+.cs-modal .btn-soft {
+    min-height: 44px !important;
+    padding: 0 1.2rem !important;
+    border-radius: 12px !important;
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    color: #4B5563 !important;
+    font-size: .84rem !important;
+    font-weight: 850 !important;
+}
+
+.cs-modal .btn-soft:hover {
+    background: #F9FAFB !important;
+}
+
+.flatpickr-calendar {
+    z-index: 100100 !important;
+}
+
+[data-theme="dark"] #mainContent.clinic-schedule-page,
+.dark #mainContent.clinic-schedule-page {
+    background: #0d0f12 !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .bg-white.rounded-xl,
+[data-theme="dark"] .clinic-schedule-page .stat-card,
+[data-theme="dark"] .clinic-schedule-page .schedule-rule-card,
+.dark .clinic-schedule-page .bg-white.rounded-xl,
+.dark .clinic-schedule-page .stat-card,
+.dark .clinic-schedule-page .schedule-rule-card {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, .14), transparent 38%),
+        linear-gradient(145deg, rgba(13, 17, 23, .94), rgba(22, 27, 34, .88)) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, .34),
+        inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .bg-gray-50,
+.dark .clinic-schedule-page .bg-gray-50 {
+    background: rgba(13, 17, 23, .78) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .text-gray-800,
+[data-theme="dark"] .clinic-schedule-page .font-bold.text-gray-800,
+[data-theme="dark"] .clinic-schedule-page .schedule-rule-card-title,
+[data-theme="dark"] .clinic-schedule-page .holiday-title,
+[data-theme="dark"] .clinic-schedule-page .blocked-title,
+.dark .clinic-schedule-page .text-gray-800,
+.dark .clinic-schedule-page .font-bold.text-gray-800,
+.dark .clinic-schedule-page .schedule-rule-card-title,
+.dark .clinic-schedule-page .holiday-title,
+.dark .clinic-schedule-page .blocked-title {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .text-gray-400,
+[data-theme="dark"] .clinic-schedule-page .text-gray-500,
+[data-theme="dark"] .clinic-schedule-page .text-gray-600,
+[data-theme="dark"] .clinic-schedule-page .schedule-rule-card-label,
+[data-theme="dark"] .clinic-schedule-page .schedule-rule-card-value,
+[data-theme="dark"] .clinic-schedule-page .holiday-meta,
+[data-theme="dark"] .clinic-schedule-page .blocked-note,
+.dark .clinic-schedule-page .text-gray-400,
+.dark .clinic-schedule-page .text-gray-500,
+.dark .clinic-schedule-page .text-gray-600,
+.dark .clinic-schedule-page .schedule-rule-card-label,
+.dark .clinic-schedule-page .schedule-rule-card-value,
+.dark .clinic-schedule-page .holiday-meta,
+.dark .clinic-schedule-page .blocked-note {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .text-\[\#8B0000\],
+.dark .clinic-schedule-page .text-\[\#8B0000\] {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table thead tr,
+.dark .clinic-schedule-page .sched-table thead tr {
+    background: rgba(13, 17, 23, .88) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table thead th,
+.dark .clinic-schedule-page .sched-table thead th {
+    color: #FCA5A5 !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table tbody tr,
+.dark .clinic-schedule-page .sched-table tbody tr {
+    border-color: rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table tbody tr:hover,
+.dark .clinic-schedule-page .sched-table tbody tr:hover {
+    background: rgba(252, 165, 165, .06) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table tbody td,
+.dark .clinic-schedule-page .sched-table tbody td {
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .form-ctrl,
+[data-theme="dark"] .clinic-schedule-page .form-sel,
+[data-theme="dark"] .clinic-schedule-page .slot-stepper-input,
+.dark .clinic-schedule-page .form-ctrl,
+.dark .clinic-schedule-page .form-sel,
+.dark .clinic-schedule-page .slot-stepper-input {
+    background: #0D1117 !important;
+    border-color: #30363D !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .form-ctrl::placeholder,
+.dark .clinic-schedule-page .form-ctrl::placeholder {
+    color: #64748B !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .day-toggle,
+[data-theme="dark"] .clinic-schedule-page .break-chip,
+[data-theme="dark"] .clinic-schedule-page .slot-stepper,
+[data-theme="dark"] .clinic-schedule-page .slot-stepper-btn,
+.dark .clinic-schedule-page .day-toggle,
+.dark .clinic-schedule-page .break-chip,
+.dark .clinic-schedule-page .slot-stepper,
+.dark .clinic-schedule-page .slot-stepper-btn {
+    background: rgba(255, 255, 255, .055) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .day-toggle.active,
+.dark .clinic-schedule-page .day-toggle.active {
+    background: linear-gradient(135deg, #8B0000, #B91C1C) !important;
+    border-color: rgba(252, 165, 165, .30) !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .break-chip.selected,
+.dark .clinic-schedule-page .break-chip.selected {
+    background: linear-gradient(135deg, #F59E0B, #D97706) !important;
+    border-color: rgba(251, 191, 36, .35) !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .cs-modal-card,
+.dark .cs-modal-card {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+    color: #E5E7EB !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] .cs-modal .modal-body,
+[data-theme="dark"] .cs-modal .modal-form-body,
+[data-theme="dark"] .cs-modal .modal-footer,
+.dark .cs-modal .modal-body,
+.dark .cs-modal .modal-form-body,
+.dark .cs-modal .modal-footer {
+    background: #0b0f18 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] .cs-modal .modal-section,
+.dark .cs-modal .modal-section {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .055), transparent 45%),
+        #161B22 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] .cs-modal .modal-section-title,
+[data-theme="dark"] .cs-modal h3,
+.dark .cs-modal .modal-section-title,
+.dark .cs-modal h3 {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .cs-modal .modal-section-sub,
+[data-theme="dark"] .cs-modal .form-help,
+[data-theme="dark"] .cs-modal .form-label,
+.dark .cs-modal .modal-section-sub,
+.dark .cs-modal .form-help,
+.dark .cs-modal .form-label {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .cs-modal .btn-soft,
+.dark .cs-modal .btn-soft {
+    background: rgba(255, 255, 255, .06) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #CBD5E1 !important;
+}
+
+@media (max-width: 767px) {
+    .cs-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    .cs-modal-card {
+        width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 26px 26px 0 0 !important;
+    }
+
+    .cs-modal .modal-body,
+    .cs-modal .modal-form-body {
+        padding: 1rem !important;
+    }
+
+    .cs-modal .modal-footer,
+    .cs-modal .rule-modal-footer {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .cs-modal .btn-soft,
+    .cs-modal .btn-primary,
+    .cs-modal .rule-save-btn {
+        width: 100% !important;
+    }
+
+    #scheduleRulesViewToggle {
+        display: none !important;
+    }
+}
+
+.clinic-schedule-page .cs-action-group,
+.clinic-schedule-page .schedule-rule-card-actions.cs-action-group {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .45rem !important;
+    overflow: visible !important;
+}
+
+.clinic-schedule-page td[data-label="Actions"],
+.clinic-schedule-page .schedule-rule-card-actions,
+.clinic-schedule-page .sched-table tbody tr,
+.clinic-schedule-page .sched-table tbody td {
+    overflow: visible !important;
+}
+
+@media (min-width: 768px) {
+    .clinic-schedule-page #scheduleRulesListView .overflow-x-auto {
+        overflow: visible !important;
+    }
+
+    .clinic-schedule-page .bg-white.rounded-xl.overflow-hidden:has(#scheduleRulesListView) {
+        overflow: visible !important;
+    }
+}
+
+.clinic-schedule-page .cs-action-btn {
+    --cs-action-bg: #F3F4F6;
+    --cs-action-color: #4B5563;
+    --cs-action-hover-bg: #E5E7EB;
+    --cs-action-hover-color: #111827;
+    --cs-tooltip-bg: #374151;
+
+    position: relative !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--cs-action-bg) !important;
+    color: var(--cs-action-color) !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    cursor: pointer !important;
+    isolation: isolate !important;
+
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        color .18s ease,
+        box-shadow .18s ease !important;
+}
+
+.clinic-schedule-page .cs-action-btn i {
+    color: currentColor !important;
+    font-size: 13px !important;
+}
+
+.clinic-schedule-page .cs-action-btn:hover,
+.clinic-schedule-page .cs-action-btn:focus-visible {
+    background: var(--cs-action-hover-bg) !important;
+    color: var(--cs-action-hover-color) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 10px 18px color-mix(in srgb, var(--cs-action-hover-color) 18%, transparent) !important;
+    outline: none !important;
+}
+
+.clinic-schedule-page .cs-action-edit {
+    --cs-action-bg: #EFF6FF;
+    --cs-action-color: #2563EB;
+    --cs-action-hover-bg: #DBEAFE;
+    --cs-action-hover-color: #1D4ED8;
+    --cs-tooltip-bg: #2563EB;
+}
+
+.clinic-schedule-page .cs-action-delete {
+    --cs-action-bg: #FEE2E2;
+    --cs-action-color: #DC2626;
+    --cs-action-hover-bg: #FECACA;
+    --cs-action-hover-color: #B91C1C;
+    --cs-tooltip-bg: #DC2626;
+}
+
+.clinic-schedule-page .cs-action-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 9px);
+    transform: translateX(-50%) translateY(4px);
+
+    padding: .42rem .58rem;
+    border-radius: 9px;
+    background: var(--cs-tooltip-bg);
+    color: #FFFFFF;
+
+    font-size: .68rem;
+    font-weight: 850;
+    line-height: 1;
+    white-space: nowrap;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 90;
+
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--cs-tooltip-bg) 24%, transparent);
+    transition: opacity .16s ease, visibility .16s ease, transform .16s ease;
+}
+
+.clinic-schedule-page .cs-action-btn::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    transform: translateX(-50%) translateY(4px);
+
+    border: 5px solid transparent;
+    border-top-color: var(--cs-tooltip-bg);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 91;
+
+    transition: opacity .16s ease, visibility .16s ease, transform .16s ease;
+}
+
+.clinic-schedule-page .cs-action-btn:hover::after,
+.clinic-schedule-page .cs-action-btn:hover::before,
+.clinic-schedule-page .cs-action-btn:focus-visible::after,
+.clinic-schedule-page .cs-action-btn:focus-visible::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.clinic-schedule-page .cs-modal-card {
+    max-height: 84dvh !important;
+    border-radius: 22px !important;
+}
+
+.clinic-schedule-page .cs-rule-modal-card {
+    width: min(92vw, 820px) !important;
+}
+
+.clinic-schedule-page .cs-block-modal-card {
+    width: min(92vw, 480px) !important;
+}
+
+.clinic-schedule-page .cs-detail-modal-card {
+    width: min(92vw, 440px) !important;
+}
+
+.clinic-schedule-page .cs-modal .modal-hdr {
+    padding: 1rem 1.15rem !important;
+}
+
+.clinic-schedule-page .cs-modal .modal-body,
+.clinic-schedule-page .cs-modal .modal-form-body {
+    padding: 1rem !important;
+}
+
+.clinic-schedule-page .cs-modal .modal-footer,
+.clinic-schedule-page .cs-modal .rule-modal-footer {
+    padding: .85rem 1rem 1rem !important;
+}
+
+.clinic-schedule-page .rule-modal-layout {
+    grid-template-columns: 280px minmax(0, 1fr) !important;
+    gap: 1rem !important;
+}
+
+.clinic-schedule-page .modal-section {
+    padding: .75rem !important;
+    border-radius: 16px !important;
+}
+
+.clinic-schedule-page .modal-section-head {
+    margin-bottom: .7rem !important;
+}
+
+.clinic-schedule-page .day-toggle {
+    height: 40px !important;
+    border-radius: 12px !important;
+    font-size: .72rem !important;
+}
+
+.clinic-schedule-page .break-chip {
+    min-height: 40px !important;
+    border-radius: 12px !important;
+    font-size: .72rem !important;
+    padding: .55rem .65rem !important;
+}
+
+.clinic-schedule-page .rule-notes-textarea {
+    min-height: 112px !important;
+    height: 112px !important;
+}
+
+.clinic-schedule-page .slot-stepper-btn {
+    width: 36px !important;
+    height: 36px !important;
+}
+
+.clinic-schedule-page .slot-stepper-input {
+    height: 40px !important;
+}
+
+#scheduleDeleteModal {
+    z-index: 99999 !important;
+}
+
+#scheduleDeleteModal.open {
+    display: flex !important;
+}
+
+#scheduleDeleteModal .cs-delete-modal-card {
+    width: min(92vw, 450px) !important;
+    max-width: 480px !important;
+    max-height: calc(100dvh - 2rem) !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+
+    background: #FFFFFF !important;
+    border: 1px solid #EEF2F7 !important;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, .28) !important;
+}
+
+#scheduleDeleteModal .cs-delete-head {
+    padding: 1rem 1.15rem !important;
+    border-bottom: 1px solid #EEF2F7 !important;
+    background:
+        radial-gradient(circle at top right, rgba(239, 68, 68, .10), transparent 38%),
+        #FFFFFF !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: .85rem !important;
+}
+
+#scheduleDeleteModal .cs-delete-head-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: .8rem !important;
+    min-width: 0 !important;
+}
+
+#scheduleDeleteModal .cs-delete-icon {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 14px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    box-shadow: 0 10px 22px rgba(220, 38, 38, .14) !important;
+}
+
+#scheduleDeleteModal .cs-delete-icon i,
+#scheduleDeleteModal .cs-delete-x i,
+#scheduleDeleteModal .cs-delete-confirm i {
+    color: currentColor !important;
+}
+
+#scheduleDeleteModal h3 {
+    margin: 0 !important;
+    color: #1F2937 !important;
+    font-size: 1rem !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+}
+
+#scheduleDeleteModal .cs-delete-head p {
+    margin: .2rem 0 0 !important;
+    color: #8B95A7 !important;
+    font-size: .72rem !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+}
+
+#scheduleDeleteModal .cs-delete-x {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 12px !important;
+    background: #FFFFFF !important;
+    color: #94A3B8 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    transition: all .18s ease !important;
+}
+
+#scheduleDeleteModal .cs-delete-x:hover {
+    background: #FEF2F2 !important;
+    border-color: #FECACA !important;
+    color: #DC2626 !important;
+}
+
+#scheduleDeleteModal .cs-delete-body {
+    padding: 1.15rem !important;
+    background: #FFFFFF !important;
+}
+
+#scheduleDeleteModal .cs-delete-alert {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: .75rem !important;
+
+    padding: .9rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 16px !important;
+
+    background: #FEF2F2 !important;
+    border: 1px solid #FECACA !important;
+    color: #991B1B !important;
+}
+
+#scheduleDeleteModal .cs-delete-alert>i {
+    margin-top: .12rem !important;
+    color: #DC2626 !important;
+}
+
+#scheduleDeleteModal .cs-delete-alert p {
+    margin: 0 !important;
+    color: #7F1D1D !important;
+    font-size: .86rem !important;
+    line-height: 1.45 !important;
+    font-weight: 750 !important;
+}
+
+#scheduleDeleteModal .cs-delete-alert span {
+    display: block !important;
+    margin-top: .25rem !important;
+    color: #DC2626 !important;
+    font-size: .74rem !important;
+    font-weight: 800 !important;
+}
+
+#scheduleDeleteModal #scheduleDeleteName {
+    display: inline-flex !important;
+    padding: .16rem .42rem !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, .8) !important;
+    color: #111827 !important;
+    font-weight: 900 !important;
+}
+
+#scheduleDeleteModal .cs-delete-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: .7rem !important;
+}
+
+#scheduleDeleteModal form {
+    margin: 0 !important;
+}
+
+#scheduleDeleteModal .cs-delete-confirm {
+    min-height: 42px !important;
+    padding: 0 1.15rem !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .5rem !important;
+
+    background: linear-gradient(135deg, #DC2626, #EF4444) !important;
+    color: #FFFFFF !important;
+
+    font-size: .84rem !important;
+    font-weight: 900 !important;
+    cursor: pointer !important;
+
+    box-shadow: 0 10px 22px rgba(220, 38, 38, .24) !important;
+    transition: all .18s ease !important;
+}
+
+#scheduleDeleteModal .cs-delete-confirm:hover {
+    transform: translateY(-1px) !important;
+    background: linear-gradient(135deg, #B91C1C, #DC2626) !important;
+    box-shadow: 0 14px 28px rgba(220, 38, 38, .32) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page,
+.dark .clinic-schedule-page {
+    background: #0d0f12 !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .bg-white,
+[data-theme="dark"] .clinic-schedule-page .schedule-rule-card,
+[data-theme="dark"] .clinic-schedule-page .stat-card,
+.dark .clinic-schedule-page .bg-white,
+.dark .clinic-schedule-page .bg-gray-50,
+.dark .clinic-schedule-page .schedule-rule-card,
+.dark .clinic-schedule-page .stat-card {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, .14), transparent 38%),
+        linear-gradient(145deg, rgba(13, 17, 23, .94), rgba(22, 27, 34, .88)) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+    color: #E5E7EB !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, .34),
+        inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .text-gray-800,
+[data-theme="dark"] .clinic-schedule-page .font-bold,
+[data-theme="dark"] .clinic-schedule-page .schedule-rule-card-title,
+[data-theme="dark"] .clinic-schedule-page .holiday-title,
+[data-theme="dark"] .clinic-schedule-page .blocked-title,
+.dark .clinic-schedule-page .text-gray-800,
+.dark .clinic-schedule-page .font-bold,
+.dark .clinic-schedule-page .schedule-rule-card-title,
+.dark .clinic-schedule-page .holiday-title,
+.dark .clinic-schedule-page .blocked-title {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .text-gray-400,
+[data-theme="dark"] .clinic-schedule-page .text-gray-500,
+[data-theme="dark"] .clinic-schedule-page .text-gray-600,
+[data-theme="dark"] .clinic-schedule-page .schedule-rule-card-label,
+[data-theme="dark"] .clinic-schedule-page .schedule-rule-card-value,
+[data-theme="dark"] .clinic-schedule-page .holiday-meta,
+[data-theme="dark"] .clinic-schedule-page .blocked-note,
+.dark .clinic-schedule-page .text-gray-400,
+.dark .clinic-schedule-page .text-gray-500,
+.dark .clinic-schedule-page .text-gray-600,
+.dark .clinic-schedule-page .schedule-rule-card-label,
+.dark .clinic-schedule-page .schedule-rule-card-value,
+.dark .clinic-schedule-page .holiday-meta,
+.dark .clinic-schedule-page .blocked-note {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .text-\[\#8B0000\],
+[data-theme="dark"] .clinic-schedule-page .weekly-toolbar i,
+.dark .clinic-schedule-page .text-\[\#8B0000\],
+.dark .clinic-schedule-page .weekly-toolbar i {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table thead tr,
+.dark .clinic-schedule-page .sched-table thead tr {
+    background: rgba(13, 17, 23, .9) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table thead th,
+.dark .clinic-schedule-page .sched-table thead th {
+    color: #FCA5A5 !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table tbody tr,
+.dark .clinic-schedule-page .sched-table tbody tr {
+    border-color: rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table tbody tr:hover,
+.dark .clinic-schedule-page .sched-table tbody tr:hover {
+    background: rgba(252, 165, 165, .06) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .sched-table tbody td,
+.dark .clinic-schedule-page .sched-table tbody td {
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .badge-open,
+.dark .clinic-schedule-page .badge-open {
+    background: rgba(34, 197, 94, .13) !important;
+    border-color: rgba(134, 239, 172, .24) !important;
+    color: #86EFAC !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .badge-limited,
+.dark .clinic-schedule-page .badge-limited {
+    background: rgba(245, 158, 11, .14) !important;
+    border-color: rgba(251, 191, 36, .26) !important;
+    color: #FCD34D !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .badge-closed,
+.dark .clinic-schedule-page .badge-closed {
+    background: rgba(148, 163, 184, .12) !important;
+    border-color: rgba(203, 213, 225, .18) !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .badge-holiday,
+.dark .clinic-schedule-page .badge-holiday {
+    background: rgba(96, 165, 250, .14) !important;
+    border-color: rgba(191, 219, 254, .22) !important;
+    color: #DBEAFE !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .form-ctrl,
+[data-theme="dark"] .clinic-schedule-page .form-sel,
+[data-theme="dark"] .clinic-schedule-page .slot-stepper-input,
+.dark .clinic-schedule-page .form-ctrl,
+.dark .clinic-schedule-page .form-sel,
+.dark .clinic-schedule-page .slot-stepper-input {
+    background: #0D1117 !important;
+    border-color: #30363D !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .form-ctrl::placeholder,
+.dark .clinic-schedule-page .form-ctrl::placeholder {
+    color: #64748B !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .day-toggle,
+[data-theme="dark"] .clinic-schedule-page .break-chip,
+[data-theme="dark"] .clinic-schedule-page .slot-stepper,
+[data-theme="dark"] .clinic-schedule-page .slot-stepper-btn,
+.dark .clinic-schedule-page .day-toggle,
+.dark .clinic-schedule-page .break-chip,
+.dark .clinic-schedule-page .slot-stepper,
+.dark .clinic-schedule-page .slot-stepper-btn {
+    background: rgba(255, 255, 255, .055) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .day-toggle.active,
+.dark .clinic-schedule-page .day-toggle.active {
+    background: linear-gradient(135deg, #8B0000, #B91C1C) !important;
+    border-color: rgba(252, 165, 165, .30) !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .break-chip.selected,
+.dark .clinic-schedule-page .break-chip.selected {
+    background: linear-gradient(135deg, #F59E0B, #D97706) !important;
+    border-color: rgba(251, 191, 36, .35) !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-action-edit,
+.dark .clinic-schedule-page .cs-action-edit {
+    --cs-action-bg: rgba(37, 99, 235, .16);
+    --cs-action-color: #60A5FA;
+    --cs-action-hover-bg: rgba(37, 99, 235, .24);
+    --cs-action-hover-color: #93C5FD;
+    --cs-tooltip-bg: #2563EB;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-action-delete,
+.dark .clinic-schedule-page .cs-action-delete {
+    --cs-action-bg: rgba(220, 38, 38, .17);
+    --cs-action-color: #FCA5A5;
+    --cs-action-hover-bg: rgba(220, 38, 38, .26);
+    --cs-action-hover-color: #FECACA;
+    --cs-tooltip-bg: #DC2626;
+}
+
+[data-theme="dark"] .clinic-schedule-page .week-grid,
+.dark .clinic-schedule-page .week-grid {
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .wk-hdr.empty,
+.dark .clinic-schedule-page .wk-hdr.empty {
+    background: #0D1117 !important;
+    border-color: rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .time-lbl,
+.dark .clinic-schedule-page .time-lbl {
+    background: #0D1117 !important;
+    border-color: rgba(255, 255, 255, .08) !important;
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cal-slot,
+.dark .clinic-schedule-page .cal-slot {
+    background: rgba(255, 255, 255, .025) !important;
+    border-color: rgba(255, 255, 255, .08) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cal-slot:hover,
+.dark .clinic-schedule-page .cal-slot:hover {
+    background: rgba(252, 165, 165, .08) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-modal-card,
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-modal-card,
+.dark .clinic-schedule-page .cs-modal-card,
+.dark #scheduleDeleteModal .cs-delete-modal-card {
+    background: #0D1117 !important;
+    border-color: #21262D !important;
+    color: #E5E7EB !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, .62),
+        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-modal .modal-body,
+[data-theme="dark"] .clinic-schedule-page .cs-modal .modal-form-body,
+[data-theme="dark"] .clinic-schedule-page .cs-modal .modal-footer,
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-body,
+.dark .clinic-schedule-page .cs-modal .modal-body,
+.dark .clinic-schedule-page .cs-modal .modal-form-body,
+.dark .clinic-schedule-page .cs-modal .modal-footer,
+.dark #scheduleDeleteModal .cs-delete-body {
+    background: #111827 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-modal .modal-section,
+.dark .clinic-schedule-page .cs-modal .modal-section {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .055), transparent 45%),
+        #161B22 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-modal h3,
+[data-theme="dark"] .clinic-schedule-page .modal-section-title,
+[data-theme="dark"] #scheduleDeleteModal h3,
+.dark .clinic-schedule-page .cs-modal h3,
+.dark .clinic-schedule-page .modal-section-title,
+.dark #scheduleDeleteModal h3 {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .form-label,
+[data-theme="dark"] .clinic-schedule-page .form-help,
+[data-theme="dark"] .clinic-schedule-page .modal-section-sub,
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-head p,
+.dark .clinic-schedule-page .form-label,
+.dark .clinic-schedule-page .form-help,
+.dark .clinic-schedule-page .modal-section-sub,
+.dark #scheduleDeleteModal .cs-delete-head p {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-head,
+.dark #scheduleDeleteModal .cs-delete-head {
+    background:
+        radial-gradient(circle at top right, rgba(252, 165, 165, .10), transparent 38%),
+        #0D1117 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-icon,
+.dark #scheduleDeleteModal .cs-delete-icon {
+    background: rgba(220, 38, 38, .17) !important;
+    color: #FCA5A5 !important;
+    border: 1px solid rgba(252, 165, 165, .22) !important;
+}
+
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-x,
+.dark #scheduleDeleteModal .cs-delete-x {
+    background: rgba(255, 255, 255, .06) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-x:hover,
+.dark #scheduleDeleteModal .cs-delete-x:hover,
+[data-theme="dark"] #scheduleDeleteModal .modal-btn-ghost:hover,
+.dark #scheduleDeleteModal .modal-btn-ghost:hover {
+    background: rgba(252, 165, 165, .13) !important;
+    border-color: rgba(252, 165, 165, .25) !important;
+    color: #fca5a5 !important;
+}
+
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-alert,
+.dark #scheduleDeleteModal .cs-delete-alert {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .12), transparent 45%),
+        rgba(220, 38, 38, .12) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+}
+
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-alert p,
+.dark #scheduleDeleteModal .cs-delete-alert p {
+    color: #FECACA !important;
+}
+
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-alert span,
+[data-theme="dark"] #scheduleDeleteModal .cs-delete-alert>i,
+.dark #scheduleDeleteModal .cs-delete-alert span,
+.dark #scheduleDeleteModal .cs-delete-alert>i {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #scheduleDeleteModal #scheduleDeleteName,
+.dark #scheduleDeleteModal #scheduleDeleteName {
+    background: rgba(255, 255, 255, .08) !important;
+    color: #FFFFFF !important;
+}
+
+@media (max-width: 767px) {
+
+    .clinic-schedule-page .cs-rule-modal-card,
+    .clinic-schedule-page .cs-block-modal-card,
+    .clinic-schedule-page .cs-detail-modal-card,
+    #scheduleDeleteModal .cs-delete-modal-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 26px 26px 0 0 !important;
+    }
+
+    .clinic-schedule-page .rule-modal-layout {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #scheduleDeleteModal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    #scheduleDeleteModal .cs-delete-actions {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    #scheduleDeleteModal .modal-btn-ghost,
+    #scheduleDeleteModal .cs-delete-confirm,
+    #scheduleDeleteModal form {
+        width: 100% !important;
+    }
+}
+
+.clinic-schedule-page .cs-banner-action-btn {
+    min-height: 46px !important;
+    padding: 0 1.15rem !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(139, 0, 0, .14) !important;
+    background: #FFFFFF !important;
+    color: #8B0000 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .6rem !important;
+
+    font-size: .88rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+
+    box-shadow: 0 12px 24px rgba(139, 0, 0, .12) !important;
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        box-shadow .18s ease !important;
+}
+
+.clinic-schedule-page .cs-banner-action-btn i {
+    color: currentColor !important;
+    font-size: .9rem !important;
+}
+
+.clinic-schedule-page .cs-banner-action-btn:hover,
+.clinic-schedule-page .cs-banner-action-btn:focus-visible {
+    background: #FFF5F5 !important;
+    border-color: rgba(139, 0, 0, .22) !important;
+    color: #6B0000 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 16px 30px rgba(139, 0, 0, .18) !important;
+    outline: none !important;
+}
+
+.clinic-schedule-page .cs-banner-action-danger {
+    color: #B91C1C !important;
+}
+
+.clinic-schedule-page .cs-rules-card-header {
+    gap: 1rem !important;
+}
+
+.clinic-schedule-page .cs-rules-header-actions {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: .75rem !important;
+    margin-left: auto !important;
+    flex-wrap: nowrap !important;
+}
+
+.clinic-schedule-page .cs-rules-count {
+    height: 34px !important;
+    padding: 0 14px !important;
+    border-radius: 999px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: #F3F4F6 !important;
+    border: 1px solid #E5E7EB !important;
+    color: #6B7280 !important;
+
+    font-size: .72rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+.clinic-schedule-page #scheduleRulesViewToggle.view-toggle-container {
+    flex: 0 0 auto !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card,
+.dark .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, .13), transparent 42%),
+        linear-gradient(145deg, rgba(13, 17, 23, .96), rgba(10, 18, 28, .92)) !important;
+    border: 1px solid rgba(255, 255, 255, .10) !important;
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, .35),
+        inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card>.absolute,
+.dark .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card>.absolute {
+    background:
+        radial-gradient(circle, rgba(255, 255, 255, .16), rgba(255, 255, 255, .035) 48%, transparent 72%) !important;
+    opacity: .42 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card p.text-gray-500,
+.dark .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card p.text-gray-500 {
+    color: #A8B3C7 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card p.text-gray-800,
+.dark .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card p.text-gray-800 {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card p.text-gray-400,
+.dark .clinic-schedule-page .grid.grid-cols-2.md\:grid-cols-4>.stat-card p.text-gray-400 {
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn,
+.dark .clinic-schedule-page .cs-banner-action-btn {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, .09), transparent 42%),
+        rgba(13, 17, 23, .82) !important;
+    border-color: rgba(252, 165, 165, .18) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        0 12px 26px rgba(0, 0, 0, .30),
+        inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn:hover,
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn:focus-visible,
+.dark .clinic-schedule-page .cs-banner-action-btn:hover,
+.dark .clinic-schedule-page .cs-banner-action-btn:focus-visible {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .18), transparent 44%),
+        rgba(139, 0, 0, .24) !important;
+    border-color: rgba(252, 165, 165, .30) !important;
+    color: #FECACA !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-rules-count,
+.dark .clinic-schedule-page .cs-rules-count {
+    background: rgba(255, 255, 255, .07) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .day-toggle.active,
+.dark .clinic-schedule-page .day-toggle.active {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, .20), transparent 40%),
+        linear-gradient(135deg, #8B0000, #DC2626) !important;
+    border-color: rgba(252, 165, 165, .55) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(252, 165, 165, .14),
+        0 12px 24px rgba(139, 0, 0, .35) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .break-chip.selected,
+.dark .clinic-schedule-page .break-chip.selected {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, .20), transparent 40%),
+        linear-gradient(135deg, #F59E0B, #EA580C) !important;
+    border-color: rgba(251, 191, 36, .58) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(251, 191, 36, .14),
+        0 12px 24px rgba(245, 158, 11, .24) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .form-sel option:checked,
+.dark .clinic-schedule-page .form-sel option:checked {
+    background: #8B0000 !important;
+    color: #FFFFFF !important;
+}
+
+.clinic-schedule-page #ruleMaxSlots.no-native-spinner,
+.clinic-schedule-page #ruleMaxSlots.slot-stepper-input {
+    appearance: textfield !important;
+    -moz-appearance: textfield !important;
+}
+
+.clinic-schedule-page #ruleMaxSlots.no-native-spinner::-webkit-outer-spin-button,
+.clinic-schedule-page #ruleMaxSlots.no-native-spinner::-webkit-inner-spin-button,
+.clinic-schedule-page #ruleMaxSlots.slot-stepper-input::-webkit-outer-spin-button,
+.clinic-schedule-page #ruleMaxSlots.slot-stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+@media (max-width: 767px) {
+    .clinic-schedule-page .cs-rules-card-header {
+        align-items: flex-start !important;
+        gap: .85rem !important;
+    }
+
+    .clinic-schedule-page .cs-rules-header-actions {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+
+    .clinic-schedule-page #scheduleRulesViewToggle {
+        display: none !important;
+    }
+
+    .clinic-schedule-page .cs-banner-action-btn {
+        width: 100% !important;
+    }
+}
+
+.clinic-schedule-page #statCards.cs-stat-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.clinic-schedule-page #statCards.cs-stat-grid .stat-card {
+    min-height: 104px !important;
+    padding: 20px 26px !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    background:
+        radial-gradient(circle at 100% 100%, var(--stat-soft) 0%, transparent 34%),
+        linear-gradient(135deg, var(--stat-bg) 0%, #ffffff 72%) !important;
+    border-color: var(--stat-border) !important;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .05) !important;
+}
+
+.clinic-schedule-page #statCards.cs-stat-grid .stat-card::before {
+    background: linear-gradient(90deg,
+            var(--stat-accent),
+            color-mix(in srgb, var(--stat-accent) 62%, #ffffff)) !important;
+}
+
+.clinic-schedule-page #statCards.cs-stat-grid .stat-num {
+    color: var(--stat-accent) !important;
+}
+
+.clinic-schedule-page #statCards.cs-stat-grid .stat-footer {
+    color: color-mix(in srgb, var(--stat-accent) 48%, #6B7280) !important;
+    font-weight: 750 !important;
+}
+
+.clinic-schedule-page #statCards.cs-stat-grid .stat-icon-wrapper {
+    background: var(--stat-soft) !important;
+    color: var(--stat-accent) !important;
+    border-color: var(--stat-border) !important;
+}
+
+.clinic-schedule-page #statCards.cs-stat-grid .stat-icon-wrapper i {
+    color: currentColor !important;
+}
+
+.clinic-schedule-page .cs-banner-action-btn {
+    min-height: 46px !important;
+    padding: 0 1.25rem !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(139, 0, 0, .16) !important;
+    background: #FFFFFF !important;
+    color: #8B0000 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .6rem !important;
+
+    font-size: .88rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+
+    box-shadow: 0 12px 24px rgba(139, 0, 0, .12) !important;
+    transition: all .18s ease !important;
+}
+
+.clinic-schedule-page .cs-banner-action-btn:hover,
+.clinic-schedule-page .cs-banner-action-btn:focus-visible {
+    background: #FFF5F5 !important;
+    border-color: rgba(139, 0, 0, .28) !important;
+    color: #6B0000 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 16px 30px rgba(139, 0, 0, .18) !important;
+    outline: none !important;
+}
+
+.clinic-schedule-page .cs-banner-action-btn i {
+    color: currentColor !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn,
+.dark .clinic-schedule-page .cs-banner-action-btn {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, .09), transparent 42%),
+        rgba(13, 17, 23, .82) !important;
+    border-color: rgba(252, 165, 165, .18) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        0 12px 26px rgba(0, 0, 0, .30),
+        inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn:hover,
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn:focus-visible,
+.dark .clinic-schedule-page .cs-banner-action-btn:hover,
+.dark .clinic-schedule-page .cs-banner-action-btn:focus-visible {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .18), transparent 44%),
+        rgba(139, 0, 0, .24) !important;
+    border-color: rgba(252, 165, 165, .30) !important;
+    color: #FECACA !important;
+}
+
+.clinic-schedule-page .cs-rule-modal-card {
+    width: min(90vw, 980px) !important;
+    max-height: 82dvh !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+}
+
+.clinic-schedule-page .cs-rule-modal .modal-hdr {
+    padding: 1.25rem 1.45rem !important;
+}
+
+.clinic-schedule-page .cs-rule-modal .modal-form-body {
+    padding: 1.1rem 1.25rem !important;
+}
+
+.clinic-schedule-page .rule-modal-layout {
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) !important;
+    gap: 1.1rem !important;
+    align-items: start !important;
+}
+
+.clinic-schedule-page .cs-rule-modal .modal-section {
+    border-radius: 20px !important;
+    padding: 1rem !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .72),
+        0 10px 24px rgba(15, 23, 42, .04) !important;
+}
+
+.clinic-schedule-page .cs-rule-modal .modal-section-head {
+    margin-bottom: 1rem !important;
+}
+
+.clinic-schedule-page .cs-rule-modal .modal-section-icon {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+}
+
+.clinic-schedule-page .day-toggle {
+    position: relative !important;
+    min-height: 44px !important;
+    border-radius: 15px !important;
+    font-weight: 900 !important;
+}
+
+.clinic-schedule-page .day-toggle.active {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, .22), transparent 42%),
+        linear-gradient(135deg, #8B0000, #B91C1C) !important;
+    border-color: rgba(139, 0, 0, .44) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(139, 0, 0, .10),
+        0 12px 24px rgba(139, 0, 0, .20) !important;
+}
+
+.clinic-schedule-page .day-toggle.active::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 8px;
+    top: 7px;
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .18);
+    color: #FFFFFF;
+    font-size: 7px;
+}
+
+.clinic-schedule-page .break-chip {
+    position: relative !important;
+    min-height: 44px !important;
+    border-radius: 15px !important;
+    font-weight: 900 !important;
+}
+
+.clinic-schedule-page .break-chip.selected {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, .22), transparent 42%),
+        linear-gradient(135deg, #F59E0B, #EA580C) !important;
+    border-color: rgba(245, 158, 11, .55) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(245, 158, 11, .12),
+        0 12px 24px rgba(245, 158, 11, .22) !important;
+}
+
+.clinic-schedule-page .break-chip.selected i {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .day-toggle.active,
+.dark .clinic-schedule-page .day-toggle.active {
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, .24), transparent 42%),
+        linear-gradient(135deg, #8B0000, #DC2626) !important;
+    border-color: rgba(252, 165, 165, .58) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(252, 165, 165, .16),
+        0 14px 28px rgba(139, 0, 0, .42) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .break-chip.selected,
+.dark .clinic-schedule-page .break-chip.selected {
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, .24), transparent 42%),
+        linear-gradient(135deg, #F59E0B, #EA580C) !important;
+    border-color: rgba(251, 191, 36, .60) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(251, 191, 36, .16),
+        0 14px 28px rgba(245, 158, 11, .30) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .break-chip.selected i,
+.dark .clinic-schedule-page .break-chip.selected i,
+[data-theme="dark"] .clinic-schedule-page .day-toggle.active i,
+.dark .clinic-schedule-page .day-toggle.active i {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-rule-modal .form-ctrl,
+[data-theme="dark"] .clinic-schedule-page .cs-rule-modal .form-sel,
+[data-theme="dark"] .clinic-schedule-page .cs-rule-modal .slot-stepper-input,
+.dark .clinic-schedule-page .cs-rule-modal .form-ctrl,
+.dark .clinic-schedule-page .cs-rule-modal .form-sel,
+.dark .clinic-schedule-page .cs-rule-modal .slot-stepper-input {
+    background: rgba(13, 17, 23, .88) !important;
+    border-color: rgba(255, 255, 255, .14) !important;
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-rule-modal .form-sel option,
+.dark .clinic-schedule-page .cs-rule-modal .form-sel option {
+    background: #0D1117 !important;
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-rule-modal .form-sel option:checked,
+.dark .clinic-schedule-page .cs-rule-modal .form-sel option:checked {
+    background: #8B0000 !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page #statCards.cs-stat-grid .stat-card,
+.dark .clinic-schedule-page #statCards.cs-stat-grid .stat-card {
+    background:
+        radial-gradient(circle at 100% 100%, var(--stat-bg) 0%, transparent 38%),
+        linear-gradient(145deg, rgba(17, 24, 39, .96), rgba(13, 17, 23, .94)) !important;
+    border-color: var(--stat-border) !important;
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, .34),
+        inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page #statCards.cs-stat-grid .stat-card.s-crimson,
+.dark .clinic-schedule-page #statCards.cs-stat-grid .stat-card.s-crimson {
+    --stat-accent: #FCA5A5;
+    --stat-soft: rgba(139, 0, 0, .24);
+    --stat-bg: rgba(139, 0, 0, .16);
+    --stat-border: rgba(252, 165, 165, .28);
+}
+
+[data-theme="dark"] .clinic-schedule-page #statCards.cs-stat-grid .stat-card.s-blue,
+.dark .clinic-schedule-page #statCards.cs-stat-grid .stat-card.s-blue {
+    --stat-accent: #60A5FA;
+    --stat-soft: rgba(37, 99, 235, .22);
+    --stat-bg: rgba(37, 99, 235, .14);
+    --stat-border: rgba(147, 197, 253, .26);
+}
+
+[data-theme="dark"] .clinic-schedule-page #statCards.cs-stat-grid .stat-card.s-green,
+.dark .clinic-schedule-page #statCards.cs-stat-grid .stat-card.s-green {
+    --stat-accent: #86EFAC;
+    --stat-soft: rgba(22, 163, 74, .22);
+    --stat-bg: rgba(22, 163, 74, .14);
+    --stat-border: rgba(134, 239, 172, .26);
+}
+
+[data-theme="dark"] .clinic-schedule-page #statCards.cs-stat-grid .stat-card.s-amber,
+.dark .clinic-schedule-page #statCards.cs-stat-grid .stat-card.s-amber {
+    --stat-accent: #FCD34D;
+    --stat-soft: rgba(245, 158, 11, .22);
+    --stat-bg: rgba(245, 158, 11, .14);
+    --stat-border: rgba(251, 191, 36, .26);
+}
+
+[data-theme="dark"] .clinic-schedule-page #statCards.cs-stat-grid .stat-num,
+.dark .clinic-schedule-page #statCards.cs-stat-grid .stat-num {
+    color: var(--stat-accent) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page #statCards.cs-stat-grid .stat-icon-wrapper,
+.dark .clinic-schedule-page #statCards.cs-stat-grid .stat-icon-wrapper {
+    background: var(--stat-bg) !important;
+    color: var(--stat-accent) !important;
+    border-color: var(--stat-border) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page #statCards.cs-stat-grid .stat-footer,
+.dark .clinic-schedule-page #statCards.cs-stat-grid .stat-footer {
+    color: #94A3B8 !important;
+}
+
+@media (max-width: 1024px) {
+    .clinic-schedule-page #statCards.cs-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .clinic-schedule-page .rule-modal-layout {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .clinic-schedule-page #statCards.cs-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .75rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .clinic-schedule-page #statCards.cs-stat-grid .stat-card {
+        min-height: 118px !important;
+        padding: .85rem !important;
+        border-radius: 16px !important;
+    }
+
+    .clinic-schedule-page #statCards.cs-stat-grid .stat-icon-wrapper {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 11px !important;
+        margin-bottom: .65rem !important;
+    }
+
+    .clinic-schedule-page #statCards.cs-stat-grid .stat-icon-wrapper i {
+        font-size: .78rem !important;
+    }
+
+    .clinic-schedule-page #statCards.cs-stat-grid .stat-label,
+    .clinic-schedule-page #statCards.cs-stat-grid p.text-gray-500 {
+        font-size: .58rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: .04em !important;
+        text-align: right !important;
+    }
+
+    .clinic-schedule-page #statCards.cs-stat-grid .stat-num,
+    .clinic-schedule-page #statCards.cs-stat-grid p.text-gray-800 {
+        font-size: 1.45rem !important;
+        line-height: 1 !important;
+        text-align: right !important;
+    }
+
+    .clinic-schedule-page #statCards.cs-stat-grid .stat-footer,
+    .clinic-schedule-page #statCards.cs-stat-grid p.text-gray-400 {
+        font-size: .62rem !important;
+        line-height: 1.2 !important;
+        text-align: right !important;
+    }
+
+    .clinic-schedule-page .cs-rule-modal-card {
+        width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 26px 26px 0 0 !important;
+    }
+
+    .clinic-schedule-page .cs-rule-modal .modal-form-body {
+        padding: 1rem !important;
+    }
+}
+
+.cs-modal .day-toggle.active {
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, .22), transparent 42%),
+        linear-gradient(135deg, #8B0000, #B91C1C) !important;
+    border-color: rgba(139, 0, 0, .52) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(139, 0, 0, .14),
+        0 12px 24px rgba(139, 0, 0, .22) !important;
+}
+
+.cs-modal .day-toggle.active::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 8px;
+    top: 7px;
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .18);
+    color: #FFFFFF;
+    font-size: 7px;
+}
+
+.cs-modal .break-chip.selected {
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, .22), transparent 42%),
+        linear-gradient(135deg, #F59E0B, #EA580C) !important;
+    border-color: rgba(245, 158, 11, .58) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(245, 158, 11, .14),
+        0 12px 24px rgba(245, 158, 11, .24) !important;
+}
+
+.cs-modal .break-chip.selected i {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .cs-modal .day-toggle.active,
+.dark .cs-modal .day-toggle.active {
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, .24), transparent 42%),
+        linear-gradient(135deg, #8B0000, #DC2626) !important;
+    border-color: rgba(252, 165, 165, .62) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(252, 165, 165, .16),
+        0 14px 28px rgba(139, 0, 0, .42) !important;
+}
+
+[data-theme="dark"] .cs-modal .break-chip.selected,
+.dark .cs-modal .break-chip.selected {
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, .24), transparent 42%),
+        linear-gradient(135deg, #F59E0B, #EA580C) !important;
+    border-color: rgba(251, 191, 36, .62) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        0 0 0 3px rgba(251, 191, 36, .16),
+        0 14px 28px rgba(245, 158, 11, .30) !important;
+}
+
+.rule-notes-textarea-wrap {
+    position: relative !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.rule-notes-textarea-wrap .rule-notes-textarea {
+    padding-right: 44px !important;
+    padding-bottom: 38px !important;
+}
+
+.rule-notes-clear-btn {
+    position: absolute !important;
+    right: 12px !important;
+    top: 12px !important;
+    z-index: 8 !important;
+
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    padding: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    border: 1px solid transparent !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    color: #9CA3AF !important;
+
+    font-size: 0 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+
+    transition:
+        background .18s ease,
+        color .18s ease,
+        border-color .18s ease,
+        transform .18s ease !important;
+}
+
+.rule-notes-clear-btn.hidden {
+    display: none !important;
+}
+
+.rule-notes-clear-btn i {
+    color: currentColor !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+}
+
+.rule-notes-clear-btn:hover,
+.rule-notes-clear-btn:focus-visible {
+    background: rgba(139, 0, 0, .08) !important;
+    border-color: rgba(139, 0, 0, .14) !important;
+    color: #8B0000 !important;
+    transform: scale(1.04) !important;
+    outline: none !important;
+}
+
+[data-theme="dark"] .rule-notes-clear-btn,
+.dark .rule-notes-clear-btn {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .rule-notes-clear-btn:hover,
+[data-theme="dark"] .rule-notes-clear-btn:focus-visible,
+.dark .rule-notes-clear-btn:hover,
+.dark .rule-notes-clear-btn:focus-visible {
+    background: rgba(252, 165, 165, .12) !important;
+    border-color: rgba(252, 165, 165, .20) !important;
+    color: #FCA5A5 !important;
+}
+
+#ruleMaxSlots,
+#ruleMaxSlots.no-native-spinner,
+#ruleMaxSlots.slot-stepper-input {
+    appearance: textfield !important;
+    -moz-appearance: textfield !important;
+}
+
+#ruleMaxSlots::-webkit-outer-spin-button,
+#ruleMaxSlots::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    display: none !important;
+    margin: 0 !important;
+}
+
+#ruleMaxSlots {
+    text-align: center !important;
+    font-weight: 900 !important;
+}
+
+[data-theme="dark"] .cs-modal .day-toggle.active,
+[data-theme="dark"] .cs-modal .break-chip.selected,
+.dark .cs-modal .day-toggle.active,
+.dark .cs-modal .break-chip.selected {
+    opacity: 1 !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .schedule-rules-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: .85rem !important;
+    padding: .85rem !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card {
+    min-height: 0 !important;
+    padding: .85rem .95rem !important;
+    gap: .55rem !important;
+    border-radius: 16px !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-title {
+    font-size: .82rem !important;
+    line-height: 1.15 !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card .badge-open,
+.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card .badge-closed,
+.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card .badge-limited {
+    font-size: .62rem !important;
+    padding: 2px 9px !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: .55rem .7rem !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-label {
+    font-size: .58rem !important;
+    margin-bottom: .15rem !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-value {
+    font-size: .74rem !important;
+    line-height: 1.25 !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-actions {
+    margin-top: .15rem !important;
+    gap: .45rem !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .cs-action-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 11px !important;
+}
+
+.clinic-schedule-page #scheduleRulesGridView .cap-bar.w-16 {
+    width: 3.25rem !important;
+}
+
+@media (max-width: 1180px) and (min-width: 768px) {
+    .clinic-schedule-page #scheduleRulesGridView .schedule-rules-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .clinic-schedule-page #scheduleRulesGridView .schedule-rules-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn,
+.dark .clinic-schedule-page .cs-banner-action-btn {
+    border-color: rgba(255, 255, 255, .14) !important;
+    color: #fff5f5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 10px 22px rgba(0, 0, 0, .22) !important;
+    backdrop-filter: blur(12px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn:hover,
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn:focus-visible,
+.dark .clinic-schedule-page .cs-banner-action-btn:hover,
+.dark .clinic-schedule-page .cs-banner-action-btn:focus-visible {
+    background: rgba(255, 255, 255, .12) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+    color: #ffffff !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 14px 28px rgba(0, 0, 0, .30) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-banner-action-btn i,
+.dark .clinic-schedule-page .cs-banner-action-btn i {
+    color: currentColor !important;
+    background: transparent !important;
+}
+
+.clinic-schedule-page .cs-rule-modal-card {
+    width: min(96vw, 1120px) !important;
+}
+
+.clinic-schedule-page .rule-modal-layout {
+    grid-template-columns: minmax(380px, 430px) minmax(0, 1fr) !important;
+    gap: 1.2rem !important;
+}
+
+.clinic-schedule-page .rule-notes-section,
+.clinic-schedule-page .rule-notes-textarea-wrap,
+.clinic-schedule-page .rule-notes-textarea {
+    width: 100% !important;
+}
+
+.clinic-schedule-page .rule-notes-textarea {
+    min-height: 130px !important;
+    height: 130px !important;
+}
+
+.clinic-schedule-page .rule-notes-voice-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: .65rem !important;
+    width: 100% !important;
+}
+
+.clinic-schedule-page .rule-notes-voice-row .rule-notes-textarea-wrap {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+.clinic-schedule-page .rule-notes-voice-toggle {
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+    min-height: 46px !important;
+    display: inline-flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+}
+
+.clinic-schedule-page .rule-notes-voice-toggle .voice-search-mic.external,
+.clinic-schedule-page .rule-notes-voice-toggle button {
+    flex-shrink: 0 !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-modal .modal-section-icon,
+.dark .clinic-schedule-page .cs-modal .modal-section-icon {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .18), transparent 44%),
+        rgba(255, 255, 255, .08) !important;
+    border: 1px solid rgba(252, 165, 165, .18) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 10px 20px rgba(0, 0, 0, .22) !important;
+    backdrop-filter: blur(12px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-modal .modal-section-icon i,
+.dark .clinic-schedule-page .cs-modal .modal-section-icon i,
+[data-theme="dark"] .clinic-schedule-page .fp-date-icon,
+.dark .clinic-schedule-page .fp-date-icon {
+    color: currentColor !important;
+    background: transparent !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-block-modal .form-ctrl,
+[data-theme="dark"] .clinic-schedule-page .cs-block-modal .form-sel,
+.dark .clinic-schedule-page .cs-block-modal .form-ctrl,
+.dark .clinic-schedule-page .cs-block-modal .form-sel {
+    background: rgba(13, 17, 23, .88) !important;
+    border-color: rgba(255, 255, 255, .14) !important;
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .clinic-schedule-page .cs-block-modal .form-sel option,
+.dark .clinic-schedule-page .cs-block-modal .form-sel option {
+    background: #0D1117 !important;
+    color: #F8FAFC !important;
+}
+
+@media (max-width: 900px) {
+    .clinic-schedule-page .rule-modal-layout {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+#mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn {
+    min-height: 42px !important;
+    padding: 0 1rem !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, .96) !important;
+    border: 1px solid rgba(255, 255, 255, .18) !important;
+    color: var(--crimson, #8B0000) !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .5rem !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .12) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        box-shadow .18s ease !important;
+}
+
+#mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:hover,
+#mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:focus-visible {
+    background: #fff8f8 !important;
+    color: var(--crimson, #8B0000) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 14px 26px rgba(0, 0, 0, .16) !important;
+    outline: none !important;
+}
+
+#mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn i {
+    color: currentColor !important;
+    background: transparent !important;
+}
+
+html[data-theme="dark"] #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:hover,
+html[data-theme="dark"] #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:focus-visible,
+.dark #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:hover,
+.dark #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:focus-visible {
+    background: rgba(255, 255, 255, .12) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 14px 28px rgba(0, 0, 0, .30) !important;
+}
+
+#mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn {
+    min-height: 42px !important;
+    padding: 0 1rem !important;
+    border-radius: 999px !important;
+
+    background: rgba(255, 255, 255, .96) !important;
+    border: 1px solid rgba(255, 255, 255, .18) !important;
+    color: var(--crimson, #8B0000) !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: .5rem !important;
+
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .12) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        box-shadow .18s ease !important;
+}
+
+#mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:hover,
+#mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:focus-visible {
+    background: #fff8f8 !important;
+    color: var(--crimson, #8B0000) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 14px 26px rgba(0, 0, 0, .16) !important;
+    outline: none !important;
+}
+
+#mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn i {
+    color: currentColor !important;
+    background: transparent !important;
+}
+
+html[data-theme="dark"] #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn,
+.dark #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn {
+    background: rgba(255, 255, 255, .08) !important;
+    border-color: rgba(255, 255, 255, .14) !important;
+    color: #fff5f5 !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .08),
+        0 10px 22px rgba(0, 0, 0, .22) !important;
+
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+html[data-theme="dark"] #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:hover,
+html[data-theme="dark"] #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:focus-visible,
+.dark #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:hover,
+.dark #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn:focus-visible {
+    background: rgba(255, 255, 255, .12) !important;
+    border-color: rgba(252, 165, 165, .26) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 14px 28px rgba(0, 0, 0, .30) !important;
+}
+
+html[data-theme="dark"] .cs-modal .modal-section-icon,
+html.dark .cs-modal .modal-section-icon,
+.dark .cs-modal .modal-section-icon {
+    background:
+        radial-gradient(circle at top left, rgba(252, 165, 165, .18), transparent 45%),
+        linear-gradient(145deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .035)) !important;
+    border: 1px solid rgba(252, 165, 165, .22) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 10px 22px rgba(0, 0, 0, .26) !important;
+    backdrop-filter: blur(14px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+}
+
+html[data-theme="dark"] .cs-modal .modal-section-icon i,
+html.dark .cs-modal .modal-section-icon i,
+.dark .cs-modal .modal-section-icon i {
+    color: currentColor !important;
+    background: transparent !important;
+}
+
+html[data-theme="dark"] .cs-modal .fp-date-icon,
+html.dark .cs-modal .fp-date-icon,
+.dark .cs-modal .fp-date-icon {
+    color: #FCA5A5 !important;
+    background: transparent !important;
+}
+
+html[data-theme="dark"] .cs-modal .modal-close-btn,
+html.dark .cs-modal .modal-close-btn,
+.dark .cs-modal .modal-close-btn {
+    background: rgba(255, 255, 255, .08) !important;
+    border-color: rgba(255, 255, 255, .16) !important;
+    color: #FFFFFF !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 10px 22px rgba(0, 0, 0, .24) !important;
+}
+
+html[data-theme="dark"] .cs-modal .modal-close-btn:hover,
+html.dark .cs-modal .modal-close-btn:hover,
+.dark .cs-modal .modal-close-btn:hover {
+    background: rgba(255, 255, 255, .14) !important;
+    border-color: rgba(252, 165, 165, .28) !important;
+    color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .cs-modal .modal-close-btn i,
+html.dark .cs-modal .modal-close-btn i,
+.dark .cs-modal .modal-close-btn i {
+    color: currentColor !important;
+    background: transparent !important;
+}
+
+/* =====================================================
+   BLOCKED DATES HEADER - MOBILE ONLY
+   CSS only, no Blade changes
+===================================================== */
+
+@media (max-width: 767px) {
+    #mainContent.clinic-schedule-page .grid.grid-cols-1 > .space-y-6:nth-child(2) > .bg-white:nth-child(2) > div:first-child {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .75rem !important;
+        width: 100% !important;
+    }
+
+    #mainContent.clinic-schedule-page .grid.grid-cols-1 > .space-y-6:nth-child(2) > .bg-white:nth-child(2) > div:first-child > div:first-child {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: .5rem !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    #mainContent.clinic-schedule-page .grid.grid-cols-1 > .space-y-6:nth-child(2) > .bg-white:nth-child(2) > div:first-child > div:last-child {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        width: auto !important;
+        min-width: max-content !important;
+        flex: 0 0 auto !important;
+        margin-left: auto !important;
+    }
+
+    #mainContent.clinic-schedule-page .grid.grid-cols-1 > .space-y-6:nth-child(2) > .bg-white:nth-child(2) > div:first-child button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        width: auto !important;
+        min-width: max-content !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.clinic-schedule-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .admin-page-container,
+    #mainContent.clinic-schedule-page .content-lift {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner {
+        border-radius: 22px !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner-inner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner-inner > div:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        text-align: left !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-title,
+    #mainContent.clinic-schedule-page .page-banner h1 {
+        text-align: left !important;
+        line-height: 1.08 !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-subtitle,
+    #mainContent.clinic-schedule-page .page-banner p {
+        max-width: 720px !important;
+        font-size: .86rem !important;
+        line-height: 1.45 !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-actions {
+        flex: 0 0 auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .65rem !important;
+        flex-wrap: wrap !important;
+        margin-left: auto !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn,
+    #mainContent.clinic-schedule-page .cs-banner-action-btn {
+        min-height: 40px !important;
+        height: 40px !important;
+        padding: 0 .9rem !important;
+        font-size: .74rem !important;
+        border-radius: 999px !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-card {
+        min-height: 94px !important;
+        padding: 1rem !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-icon-wrapper {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 12px !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-num,
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid p.text-gray-800 {
+        font-size: 1.55rem !important;
+        line-height: 1 !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-label,
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid p.text-gray-500 {
+        font-size: .64rem !important;
+        line-height: 1.15 !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-footer,
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid p.text-gray-400 {
+        font-size: .68rem !important;
+        line-height: 1.2 !important;
+    }
+
+    #mainContent.clinic-schedule-page .grid.grid-cols-1.lg\:grid-cols-3,
+    #mainContent.clinic-schedule-page .grid.grid-cols-1.lg\:grid-cols-3.gap-6 {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .lg\:col-span-2,
+    #mainContent.clinic-schedule-page .space-y-6 {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .week-grid {
+        min-width: 880px !important;
+        width: 880px !important;
+    }
+
+    #mainContent.clinic-schedule-page .overflow-x-auto:has(.week-grid),
+    #mainContent.clinic-schedule-page .bg-white.rounded-xl:has(.week-grid) .overflow-x-auto {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #mainContent.clinic-schedule-page .wk-hdr {
+        padding: .55rem .35rem !important;
+        font-size: .66rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .time-lbl {
+        font-size: .6rem !important;
+        padding: .45rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .cal-slot {
+        min-height: 48px !important;
+    }
+
+    #mainContent.clinic-schedule-page #prevWeek,
+    #mainContent.clinic-schedule-page #nextWeek {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 12px !important;
+    }
+
+    #mainContent.clinic-schedule-page #weekRangeLabel {
+        font-size: .78rem !important;
+        line-height: 1.2 !important;
+        text-align: center !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page #todayBtn {
+        min-height: 38px !important;
+        padding: 0 .85rem !important;
+        font-size: .7rem !important;
+        border-radius: 999px !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-card-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .85rem !important;
+        flex-wrap: wrap !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-header-actions {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .55rem !important;
+        margin-left: auto !important;
+        flex-wrap: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-count {
+        height: 32px !important;
+        padding: 0 .7rem !important;
+        font-size: .66rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesViewToggle.view-toggle-container {
+        transform: scale(.92) !important;
+        transform-origin: right center !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesListView,
+    #mainContent.clinic-schedule-page #scheduleRulesListView .overflow-x-auto {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table {
+        min-width: 850px !important;
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table thead th {
+        padding: .65rem .7rem !important;
+        font-size: .66rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table tbody td {
+        padding: .7rem .7rem !important;
+        font-size: .74rem !important;
+        vertical-align: middle !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table .badge-open,
+    #mainContent.clinic-schedule-page .sched-table .badge-closed,
+    #mainContent.clinic-schedule-page .sched-table .badge-limited,
+    #mainContent.clinic-schedule-page .sched-table .badge-holiday {
+        font-size: .62rem !important;
+        padding: 2px 8px !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.clinic-schedule-page .cap-bar.w-16 {
+        width: 3.6rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-action-btn {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 11px !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-action-btn i {
+        font-size: .72rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rules-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        padding: .85rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card {
+        padding: .85rem !important;
+        border-radius: 16px !important;
+        gap: .6rem !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-top {
+        min-width: 0 !important;
+        gap: .55rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-title {
+        font-size: .8rem !important;
+        line-height: 1.2 !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .55rem .65rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-label {
+        font-size: .56rem !important;
+        margin-bottom: .12rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-value {
+        font-size: .7rem !important;
+        line-height: 1.25 !important;
+        word-break: break-word !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rule-card-actions {
+        justify-content: flex-end !important;
+        gap: .35rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .holiday-item,
+    #mainContent.clinic-schedule-page .blocked-list-item {
+        gap: .7rem !important;
+        padding: .7rem 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .holiday-title,
+    #mainContent.clinic-schedule-page .blocked-title {
+        font-size: .78rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #mainContent.clinic-schedule-page .holiday-meta,
+    #mainContent.clinic-schedule-page .blocked-note {
+        font-size: .66rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal-card,
+    .clinic-schedule-page .cs-modal-card {
+        width: min(94vw, 820px) !important;
+        max-height: calc(100dvh - 2rem) !important;
+        border-radius: 22px !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rule-modal-card,
+    .clinic-schedule-page .cs-rule-modal-card {
+        width: min(94vw, 860px) !important;
+        max-height: calc(100dvh - 2rem) !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-block-modal-card,
+    .clinic-schedule-page .cs-block-modal-card {
+        width: min(94vw, 560px) !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-detail-modal-card,
+    .clinic-schedule-page .cs-detail-modal-card {
+        width: min(94vw, 480px) !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .modal-hdr,
+    .clinic-schedule-page .cs-modal .modal-hdr {
+        padding: 1rem 1.15rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .modal-body,
+    #mainContent.clinic-schedule-page .cs-modal .modal-form-body,
+    .clinic-schedule-page .cs-modal .modal-body,
+    .clinic-schedule-page .cs-modal .modal-form-body {
+        padding: 1rem !important;
+        max-height: calc(100dvh - 190px) !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .modal-footer,
+    #mainContent.clinic-schedule-page .cs-modal .rule-modal-footer,
+    .clinic-schedule-page .cs-modal .modal-footer,
+    .clinic-schedule-page .cs-modal .rule-modal-footer {
+        padding: .9rem 1rem 1rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .rule-modal-layout,
+    .clinic-schedule-page .rule-modal-layout {
+        grid-template-columns: 1fr !important;
+        gap: .9rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .modal-section,
+    .clinic-schedule-page .modal-section {
+        padding: .85rem !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.clinic-schedule-page .day-toggle-group,
+    .clinic-schedule-page .day-toggle-group {
+        grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+        gap: .35rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .day-toggle,
+    .clinic-schedule-page .day-toggle {
+        min-height: 40px !important;
+        height: 40px !important;
+        border-radius: 12px !important;
+        font-size: .68rem !important;
+        padding: 0 .25rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .break-chip-group,
+    .clinic-schedule-page .break-chip-group {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .5rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .break-chip,
+    .clinic-schedule-page .break-chip {
+        min-height: 40px !important;
+        border-radius: 12px !important;
+        font-size: .68rem !important;
+        padding: .55rem .45rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .slot-stepper,
+    .clinic-schedule-page .slot-stepper {
+        width: max-content !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.clinic-schedule-page .slot-stepper-btn,
+    .clinic-schedule-page .slot-stepper-btn {
+        width: 38px !important;
+        height: 38px !important;
+    }
+
+    #mainContent.clinic-schedule-page .slot-stepper-input,
+    .clinic-schedule-page .slot-stepper-input {
+        width: 74px !important;
+        min-width: 74px !important;
+        height: 40px !important;
+        font-size: .95rem !important;
+    }
+
+    #mainContent.clinic-schedule-page .rule-notes-textarea,
+    .clinic-schedule-page .rule-notes-textarea {
+        min-height: 120px !important;
+        height: 120px !important;
+    }
+
+    #scheduleDeleteModal .cs-delete-modal-card {
+        width: min(94vw, 460px) !important;
+        max-width: 94vw !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    #mainContent.clinic-schedule-page .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        margin-left: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page .page-banner .page-actions button.cs-banner-action-btn,
+    #mainContent.clinic-schedule-page .cs-banner-action-btn {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .75rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #statCards.cs-stat-grid .stat-card {
+        min-height: 104px !important;
+        padding: .9rem !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesGridView .schedule-rules-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-card-header {
+        align-items: flex-start !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-rules-header-actions {
+        width: 100% !important;
+        justify-content: space-between !important;
+        margin-left: 0 !important;
+    }
+
+    #mainContent.clinic-schedule-page #scheduleRulesViewToggle.view-toggle-container {
+        transform: scale(.9) !important;
+        transform-origin: right center !important;
+    }
+
+    #mainContent.clinic-schedule-page .sched-table {
+        min-width: 900px !important;
+    }
+
+    #mainContent.clinic-schedule-page .day-toggle-group {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+
+    #mainContent.clinic-schedule-page .break-chip-group {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .modal-footer,
+    #mainContent.clinic-schedule-page .cs-modal .rule-modal-footer,
+    .clinic-schedule-page .cs-modal .modal-footer,
+    .clinic-schedule-page .cs-modal .rule-modal-footer {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    #mainContent.clinic-schedule-page .cs-modal .btn-soft,
+    #mainContent.clinic-schedule-page .cs-modal .btn-primary,
+    #mainContent.clinic-schedule-page .cs-modal .rule-save-btn,
+    .clinic-schedule-page .cs-modal .btn-soft,
+    .clinic-schedule-page .cs-modal .btn-primary,
+    .clinic-schedule-page .cs-modal .rule-save-btn {
+        width: 100% !important;
+    }
+}
