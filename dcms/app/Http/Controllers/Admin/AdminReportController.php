@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Services\OpenAIReportService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\DocumentRequest;
 
 class AdminReportController extends Controller
 {
@@ -200,10 +201,50 @@ class AdminReportController extends Controller
             ],
         ];
 
+        $docStart = now()->copy()->startOfMonth()->toDateString();
+        $docEnd = now()->copy()->endOfMonth()->toDateString();
+
+        $docBaseQuery = DocumentRequest::query()
+            ->whereBetween('request_date', [$docStart, $docEnd]);
+
+        $docTotal = (clone $docBaseQuery)->count();
+        $docPending = (clone $docBaseQuery)->where('status', 'pending')->count();
+        $docApproved = (clone $docBaseQuery)->where('status', 'approved')->count();
+        $docRejected = (clone $docBaseQuery)->where('status', 'rejected')->count();
+
+        $docApprovalRate = $docTotal > 0
+            ? round(($docApproved / $docTotal) * 100, 1)
+            : 0;
+
+        $docRejectionRate = $docTotal > 0
+            ? round(($docRejected / $docTotal) * 100, 1)
+            : 0;
+
+        $docMostRequested = (clone $docBaseQuery)
+            ->selectRaw('document_type, COUNT(*) as total')
+            ->whereNotNull('document_type')
+            ->groupBy('document_type')
+            ->orderByDesc('total')
+            ->first();
+
+        $documentRequests = [
+            'total' => $docTotal,
+            'pending' => $docPending,
+            'approved' => $docApproved,
+            'rejected' => $docRejected,
+            'approval_rate' => $docApprovalRate,
+            'rejection_rate' => $docRejectionRate,
+            'most_requested' => $docMostRequested && $docMostRequested->document_type
+                ? ucwords(str_replace(['_', '-'], ' ', $docMostRequested->document_type))
+                : 'No requests yet',
+            'most_requested_count' => $docMostRequested->total ?? 0,
+        ];
+
         return view('admin.reports', compact(
             'stats',
             'treatments',
             'appointments',
+            'documentRequests',
             'inventory',
             'charts'
         ));
@@ -320,18 +361,69 @@ class AdminReportController extends Controller
         })->count();
 
         // ---------------------------
+        // DOCUMENT REQUEST ANALYSIS
+        // ---------------------------
+        $docStart = $now->copy()->startOfMonth()->toDateString();
+        $docEnd = $now->copy()->endOfMonth()->toDateString();
+
+        $docBaseQuery = DocumentRequest::query()
+            ->whereBetween('request_date', [$docStart, $docEnd]);
+
+        $docTotal = (clone $docBaseQuery)->count();
+        $docPending = (clone $docBaseQuery)->where('status', 'pending')->count();
+        $docApproved = (clone $docBaseQuery)->where('status', 'approved')->count();
+        $docRejected = (clone $docBaseQuery)->where('status', 'rejected')->count();
+
+        $docApprovalRate = $docTotal > 0
+            ? round(($docApproved / $docTotal) * 100, 1)
+            : 0;
+
+        $docPendingRate = $docTotal > 0
+            ? round(($docPending / $docTotal) * 100, 1)
+            : 0;
+
+        $docRejectionRate = $docTotal > 0
+            ? round(($docRejected / $docTotal) * 100, 1)
+            : 0;
+
+        $docMostRequested = (clone $docBaseQuery)
+            ->selectRaw('document_type, COUNT(*) as total')
+            ->whereNotNull('document_type')
+            ->groupBy('document_type')
+            ->orderByDesc('total')
+            ->first();
+
+        $docMostRequestedName = $docMostRequested && $docMostRequested->document_type
+            ? ucwords(str_replace(['_', '-'], ' ', $docMostRequested->document_type))
+            : 'No dominant document type yet';
+
+        $docMostRequestedCount = $docMostRequested->total ?? 0;
+
+        // ---------------------------
         // AI-LIKE RISK CLASSIFICATION
         // ---------------------------
         $riskLevel = 'Low';
         $riskExplanation = 'The current statistics show stable system performance with no major operational concern detected.';
-
-        if ($criticalStockCount > 0 || $cancelledRate >= 30 || $noShowRate >= 20) {
+        if (
+            $criticalStockCount > 0 ||
+            $cancelledRate >= 30 ||
+            $noShowRate >= 20 ||
+            ($docTotal > 0 && $docPendingRate >= 50)
+        ) {
             $riskLevel = 'High';
-            $riskExplanation = 'The system detected high operational risk due to critical stock levels, high cancellation rate, or high no-show rate.';
-        } elseif ($lowStockCount > 0 || $cancelledRate >= 15 || $noShowRate >= 10 || $completionRate < 60) {
+            $riskExplanation = 'The system detected high operational risk due to critical stock levels, high cancellation or no-show rate, or a high volume of pending document requests.';
+        } elseif (
+            $lowStockCount > 0 ||
+            $cancelledRate >= 15 ||
+            $noShowRate >= 10 ||
+            $completionRate < 60 ||
+            ($docTotal > 0 && ($docPendingRate >= 25 || $docRejectionRate >= 20))
+        ) {
             $riskLevel = 'Moderate';
-            $riskExplanation = 'The system detected moderate operational risk. Some areas require monitoring, especially appointment completion and inventory availability.';
+            $riskExplanation = 'The system detected moderate operational risk. Some areas require monitoring, especially appointment completion, inventory availability, and document request processing.';
         }
+
+
 
         // ---------------------------
         // GENERATED REPORT CONTENT
@@ -373,6 +465,18 @@ class AdminReportController extends Controller
                 'low_stock_items' => $lowStockItems->values()->all(),
             ],
 
+            'document_requests' => [
+                'total' => $docTotal,
+                'pending' => $docPending,
+                'approved' => $docApproved,
+                'rejected' => $docRejected,
+                'approval_rate' => $docApprovalRate,
+                'pending_rate' => $docPendingRate,
+                'rejection_rate' => $docRejectionRate,
+                'most_requested' => $docMostRequestedName,
+                'most_requested_count' => $docMostRequestedCount,
+            ],
+
             'risk' => [
                 'risk_level' => $riskLevel,
                 'risk_explanation' => $riskExplanation,
@@ -390,6 +494,7 @@ class AdminReportController extends Controller
                 "{$completed} appointments were completed, resulting in a {$completionRate}% completion rate.",
                 "{$cancelled} appointments were cancelled, resulting in a {$cancelledRate}% cancellation rate.",
                 "{$noShow} appointments were marked as no-show, resulting in a {$noShowRate}% no-show rate.",
+                "Document request activity included {$docTotal} total request/s, with {$docPending} pending, {$docApproved} approved, and {$docRejected} rejected.",
             ],
 
             'treatment_analysis' => [
@@ -404,6 +509,14 @@ class AdminReportController extends Controller
                 $lowStockCount > 0
                     ? 'Inventory monitoring should be prioritized to prevent service delays during clinic operations.'
                     : 'Inventory levels appear sufficient based on the current stock threshold data.',
+            ],
+
+            'document_request_analysis' => [
+                "The system recorded {$docTotal} document request/s for {$period}.",
+                "{$docApproved} request/s were approved, resulting in a {$docApprovalRate}% approval rate.",
+                "{$docPending} request/s remain pending, representing {$docPendingRate}% of document request activity.",
+                "{$docRejected} request/s were rejected, resulting in a {$docRejectionRate}% rejection rate.",
+                "The most requested document type is {$docMostRequestedName} with {$docMostRequestedCount} request/s.",
             ],
 
             'recommendations' => [
@@ -423,6 +536,10 @@ class AdminReportController extends Controller
                     ? 'Restock low inventory items and review minimum stock thresholds.'
                     : 'Continue regular inventory audits to maintain sufficient stock levels.',
 
+                $docPendingRate >= 25
+                    ? 'Review pending document requests regularly to prevent processing delays and improve request turnaround time.'
+                    : 'Continue monitoring document request status to maintain timely approval and rejection workflows.',
+
                 'Use monthly report trends to support administrative planning, clinic scheduling, and resource allocation.',
             ],
         ];
@@ -434,6 +551,14 @@ class AdminReportController extends Controller
             'generated_at' => $now->format('M d, Y h:i A'),
             'risk_level' => $riskLevel,
             'risk_explanation' => $riskExplanation,
+            'document_request_analysis' => [
+                "The system recorded {$docTotal} document request/s for {$period}.",
+                "{$docApproved} request/s were approved, resulting in a {$docApprovalRate}% approval rate.",
+                "{$docPending} request/s remain pending, representing {$docPendingRate}% of document request activity.",
+                "{$docRejected} request/s were rejected, resulting in a {$docRejectionRate}% rejection rate.",
+                "The most requested document type is {$docMostRequestedName} with {$docMostRequestedCount} request/s.",
+            ],
+
             'print_metrics' => [
                 'total_patients' => $totalPatients,
                 'new_patients' => $newThisMonth,
@@ -445,6 +570,16 @@ class AdminReportController extends Controller
                 'dominant_treatment' => $topTreatmentName,
                 'low_stock_count' => $lowStockCount,
                 'critical_stock_count' => $criticalStockCount,
+
+                'document_requests_total' => $docTotal,
+                'document_requests_pending' => $docPending,
+                'document_requests_approved' => $docApproved,
+                'document_requests_rejected' => $docRejected,
+                'document_requests_approval_rate' => $docApprovalRate,
+                'document_requests_pending_rate' => $docPendingRate,
+                'document_requests_rejection_rate' => $docRejectionRate,
+                'document_requests_most_requested' => $docMostRequestedName,
+                'document_requests_most_requested_count' => $docMostRequestedCount,
             ],
         ], is_array($aiContent) ? $aiContent : $fallbackReport);
 
