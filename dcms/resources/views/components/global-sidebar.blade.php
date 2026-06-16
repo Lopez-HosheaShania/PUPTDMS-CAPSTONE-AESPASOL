@@ -182,6 +182,12 @@ $sidebarGroups = [
 'label' => 'Appointments',
 ],
 [
+'route' => 'dentist.dentist.clinic_schedule',
+'active' => ['dentist.dentist.clinic_schedule*'],
+'icon' => 'fa-calendar-days',
+'label' => 'Clinic Schedule',
+],
+[
 'route' => 'dentist.dentist.documentrequests',
 'active' => ['dentist.dentist.documentrequests'],
 'icon' => 'fa-file-circle-check',
