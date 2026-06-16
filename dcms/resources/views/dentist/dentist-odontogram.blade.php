@@ -106,13 +106,12 @@
                         </div>
                     </div>
 
-                    <div class="soft-card p-4 left-view-shell">
-                        <div class="w-full flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 px-2">
-                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                                <i class="fa-solid fa-tooth"></i>
-                                <span id="viewInstructionText">Click the tooth surfaces or status box to assign a
-                                    condition</span>
-                            </p>
+                <div class="soft-card p-4 left-view-shell">
+                    <div class="w-full flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 px-2">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            <i class="fa-solid fa-tooth"></i>
+                            <span id="viewInstructionText">Click a tooth surface to assign a treatment legend</span>
+                        </p>
 
                             <div
                                 class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 shadow-inner">
@@ -128,7 +127,7 @@
                         </div>
 
                         <div id="odontogram3DPanel" class="mode-panel">
-                            <div id="canvas-container">
+                            <div id="canvas-container" class="relative">
                                 <div id="loadingOverlay"
                                     class="absolute inset-0 bg-white flex flex-col gap-3 items-center justify-center z-10 rounded-xl transition-opacity duration-500">
                                     <i class="fa-solid fa-circle-notch fa-spin text-4xl text-[#8B0000]"></i>
@@ -138,7 +137,72 @@
                                 <div id="toothTooltip" class="tooth-tooltip">
                                     <div id="toothTooltipContent"></div>
                                 </div>
+
+                            <div id="surfacePicker3D"
+                                class="hidden absolute right-4 bottom-4 z-20 w-[320px] max-w-[calc(100%-2rem)] rounded-2xl border border-red-100 bg-white/95 backdrop-blur shadow-2xl p-4">
+                                <div class="flex items-start justify-between gap-3 mb-4">
+                                    <div class="min-w-0">
+                                        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-400">3D Surface Picker</p>
+                                        <h4 id="surfacePickerToothLabel" class="text-base font-extrabold text-[#8B0000] leading-tight">No tooth selected</h4>
+                                        <p id="surfacePickerHelperText" class="text-xs text-gray-500 mt-1 leading-relaxed">
+                                            Step 1: Click a tooth in the 3D model. The camera will zoom in automatically.
+                                        </p>
+                                        </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <span class="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-red-50 text-[#8B0000]">
+                                            <i class="fa-solid fa-cube text-lg"></i>
+                                        </span>
+                                        <button type="button" id="close3DSurfacePickerBtn"
+                                            class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 transition"
+                                            title="Hide surface picker" aria-label="Hide surface picker">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-2xl bg-gray-50 border border-gray-100 p-3 mb-3">
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div></div>
+                                        <button type="button" data-surface="top"
+                                            class="surface-picker-btn min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-xs font-extrabold transition hover:border-red-200 hover:bg-red-50">
+                                            Top
+                                        </button>
+                                        <div></div>
+
+                                        <button type="button" data-surface="left"
+                                            class="surface-picker-btn min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-xs font-extrabold transition hover:border-red-200 hover:bg-red-50">
+                                            Left
+                                        </button>
+                                        <button type="button" data-surface="center"
+                                            class="surface-picker-btn min-h-[50px] inline-flex items-center justify-center px-3 py-2 rounded-full border border-gray-200 bg-white text-gray-700 text-xs font-extrabold transition hover:border-red-200 hover:bg-red-50">
+                                            Center
+                                        </button>
+                                        <button type="button" data-surface="right"
+                                            class="surface-picker-btn min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-xs font-extrabold transition hover:border-red-200 hover:bg-red-50">
+                                            Right
+                                        </button>
+
+                                        <div></div>
+                                        <button type="button" data-surface="bottom"
+                                            class="surface-picker-btn min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-xs font-extrabold transition hover:border-red-200 hover:bg-red-50">
+                                            Bottom
+                                        </button>
+                                        <div></div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="text-[11px] text-gray-500 leading-snug">
+                                        Pick a large surface button, choose a legend, then click Apply Treatment.
+                                    </p>
+                                    <button type="button" id="reset3DViewBtn"
+                                        class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition">
+                                        <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                                        Full View
+                                    </button>
+                                </div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -419,7 +483,7 @@
         class="fixed inset-0 bg-black/50 hidden items-end sm:items-center justify-center backdrop-blur-sm z-[9999] p-0 sm:p-4">
 
         <div
-            class="reschedule-modal-panel bg-white w-full sm:max-w-5xl rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            class="reschedule-modal-panel follow-up-modal-panel bg-white w-full rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col">
 
             <div class="relative bg-gradient-to-r from-[#8B0000] via-[#A00000] to-[#C1121F] px-5 sm:px-6 py-4">
                 <button type="button" onclick="closeFollowUpModal()"
@@ -447,7 +511,7 @@
                 </div>
             </div>
 
-            <div class="reschedule-modal-body px-5 sm:px-6 py-4 sm:py-5 bg-gray-50 overflow-y-auto">
+            <div class="reschedule-modal-body follow-up-modal-body px-5 sm:px-6 py-4 sm:py-5 bg-gray-50 overflow-y-auto">
                 <div
                     class="bg-white border border-[#f1ece7] rounded-2xl px-4 sm:px-5 py-4 mb-4 shadow-[0_4px_18px_rgba(0,0,0,0.04)]">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -501,37 +565,34 @@
                         </div>
 
                         <div class="slots-wrap follow-up-slots-wrap">
-                            <div class="section-label" style="margin-bottom:.6rem;">
-                                <i class="fa-regular fa-clock fa-xs"></i> Follow-up Time Slot
+                            <div class="section-label follow-up-slot-title">
+                                <i class="fa-regular fa-clock fa-xs"></i> Pick a Time Slot
                             </div>
+                            <p class="follow-up-slot-helper">
+                                Choose your preferred schedule for the selected date.
+                            </p>
 
                             <div class="slots-date-pill" id="followUpDatePill"></div>
 
-                            <div id="followUpSlotPlaceholder" class="slots-placeholder">
-                                <i class="fa-regular fa-calendar-xmark"></i>
-                                <span>Select a date to see available slots</span>
+                            <div id="followUpSlotPlaceholder" class="slots-placeholder follow-up-empty-slot-placeholder">
+                                <div class="follow-up-empty-icon">
+                                    <i class="fa-regular fa-calendar"></i>
+                                </div>
+                                <h4>Choose a date</h4>
+                                <p>Select an available day to see time slots.</p>
                             </div>
 
                             <div id="followUpSlotContainer" class="hidden">
                                 <div id="followUpSlotGrid" class="slots-grid" style="display:none;"></div>
+                                <button type="button" id="followUpClearTimeBtn" class="follow-up-clear-time-btn hidden">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    Clear selection
+                                </button>
                             </div>
 
-                            <div id="followUpSelectedTimePill"
-                                class="hidden mt-4 w-full rounded-2xl border border-red-100 bg-red-50 px-4 py-3 shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-[#8B0000] text-white shadow-sm">
-                                        <i class="fa-solid fa-circle-check text-sm"></i>
-                                    </div>
-
-                                    <div class="min-w-0">
-                                        <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8B0000]">
-                                            Selected Follow-up Time
-                                        </p>
-                                        <p id="followUpSelectedTimeText"
-                                            class="text-[15px] font-bold text-[#8B0000] leading-tight"></p>
-                                    </div>
-                                </div>
+                            <div id="followUpSelectedTimePill" class="hidden follow-up-selected-time-pill">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>Selected: <strong id="followUpSelectedTimeText"></strong></span>
                             </div>
                         </div>
                     </div>
@@ -566,6 +627,570 @@
         </div>
     </div>
 
+
+    <style>
+        /* Compact follow-up modal: keeps the calendar and form inside the viewport. */
+        #followUpModal {
+            align-items: center;
+            padding: 1rem;
+        }
+
+        #followUpModal .follow-up-modal-panel {
+            width: min(100%, 980px);
+            max-height: min(92vh, 760px);
+        }
+
+        #followUpModal .follow-up-modal-body {
+            max-height: calc(min(92vh, 760px) - 84px);
+            padding: 1rem 1.25rem !important;
+        }
+
+        #followUpModal .follow-up-modal-body > .bg-white:first-child {
+            padding: .85rem 1rem !important;
+            margin-bottom: .85rem !important;
+            border-radius: 1rem !important;
+        }
+
+        #followUpModal .section-label {
+            margin-bottom: .55rem !important;
+            font-size: .72rem !important;
+            line-height: 1.1 !important;
+        }
+
+        #followUpModal .two-col {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1.15fr) minmax(250px, .85fr) !important;
+            gap: 1rem !important;
+            align-items: stretch !important;
+        }
+
+        #followUpModal .follow-up-cal-wrap,
+        #followUpModal .follow-up-slots-wrap {
+            min-width: 0 !important;
+            padding: .85rem !important;
+            border-radius: 1rem !important;
+        }
+
+        #followUpCalendarWrap {
+            transform: scale(.88);
+            transform-origin: top center;
+            width: 113.65%;
+            margin-left: -6.8%;
+            margin-bottom: -3.75rem;
+        }
+
+        #followUpCalendarWrap button {
+            min-height: 34px !important;
+        }
+
+        #followUpCalendarWrap [id="followUpCalGrid"],
+        #followUpCalendarWrap .cal-grid,
+        #followUpCalendarWrap .calendar-grid {
+            row-gap: .35rem !important;
+            column-gap: .35rem !important;
+        }
+
+        #followUpModal .slots-placeholder {
+            min-height: 135px !important;
+            padding: 1rem !important;
+            font-size: .9rem !important;
+            border-radius: 1rem !important;
+        }
+
+        #followUpModal .slots-grid {
+            max-height: 260px;
+            overflow-y: auto;
+            padding-right: .25rem;
+        }
+
+        #followUpModal .reason-textarea {
+            min-height: 72px !important;
+            padding: .85rem 1rem !important;
+            border-radius: 1rem !important;
+        }
+
+        #followUpModal .btn-row {
+            position: sticky;
+            bottom: -1rem;
+            z-index: 5;
+            display: flex !important;
+            justify-content: flex-end !important;
+            align-items: center !important;
+            gap: .75rem !important;
+            margin: 1rem -1.25rem -1rem !important;
+            padding: .9rem 1.25rem 1rem !important;
+            border-top: 1px solid #e5e7eb;
+            background: linear-gradient(180deg, rgba(249, 250, 251, .92), #ffffff);
+            box-shadow: 0 -10px 24px rgba(15, 23, 42, .06);
+        }
+
+        #followUpModal .btn {
+            min-height: 44px !important;
+            padding: .72rem 1.1rem !important;
+            border-radius: 1rem !important;
+            font-weight: 800 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: .5rem !important;
+            transition: all .2s ease !important;
+        }
+
+        #followUpModal .btn-cancel {
+            background: #f3f4f6 !important;
+            color: #374151 !important;
+            border: 1px solid #d1d5db !important;
+        }
+
+        #followUpModal .btn-cancel:hover {
+            background: #fee2e2 !important;
+            color: #991b1b !important;
+            border-color: #fecaca !important;
+        }
+
+        #followUpModal .follow-up-confirm-btn {
+            background: #8B0000 !important;
+            color: #ffffff !important;
+            border: 1px solid #8B0000 !important;
+            box-shadow: 0 10px 22px rgba(139, 0, 0, .20) !important;
+        }
+
+        #followUpModal .follow-up-confirm-btn:hover {
+            background: #660000 !important;
+            border-color: #660000 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(139, 0, 0, .26) !important;
+        }
+
+
+
+        /* Follow-up form alignment fixes */
+        #followUpModal .two-col {
+            grid-template-columns: minmax(0, 1.06fr) minmax(285px, .94fr) !important;
+            gap: 1.15rem !important;
+            align-items: stretch !important;
+            margin-bottom: 1rem !important;
+        }
+
+        #followUpModal .follow-up-cal-wrap,
+        #followUpModal .follow-up-slots-wrap {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, .05) !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap {
+            min-height: 374px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap > .section-label {
+            margin-top: .05rem !important;
+            margin-bottom: .75rem !important;
+        }
+
+        #followUpModal .slots-date-pill {
+            margin-bottom: .75rem !important;
+        }
+
+        #followUpModal .slots-placeholder {
+            flex: 1 1 auto !important;
+            width: 100% !important;
+            min-height: 230px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            gap: .55rem !important;
+            background: #ffffff !important;
+            border: 1px dashed #d1d5db !important;
+            color: #6b7280 !important;
+        }
+
+        #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder {
+            min-height: 258px !important;
+            padding: 2.2rem 1.5rem !important;
+            flex-direction: column !important;
+            gap: .45rem !important;
+            border: 1px dashed #f0cfc8 !important;
+            border-radius: 1.15rem !important;
+            background: #fffafa !important;
+            color: #8a817c !important;
+        }
+
+        #followUpModal .follow-up-empty-icon {
+            width: 3.25rem !important;
+            height: 3.25rem !important;
+            margin-bottom: .45rem !important;
+            border-radius: 999px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: #fde9e9 !important;
+            color: #8B0000 !important;
+        }
+
+        #followUpModal .follow-up-empty-icon i {
+            font-size: 1.15rem !important;
+            color: #8B0000 !important;
+        }
+
+        #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder h4 {
+            margin: 0 !important;
+            color: #5f5753 !important;
+            font-size: .98rem !important;
+            font-weight: 900 !important;
+            line-height: 1.2 !important;
+        }
+
+        #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder p {
+            margin: 0 !important;
+            color: #9b918c !important;
+            font-size: .86rem !important;
+            font-weight: 500 !important;
+            line-height: 1.35 !important;
+        }
+
+
+        /* When slots are loaded, the empty-state card must disappear completely. */
+        #followUpModal #followUpSlotPlaceholder.hidden,
+        #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder.hidden {
+            display: none !important;
+        }
+
+        #followUpModal #followUpSlotContainer {
+            flex: 1 1 auto !important;
+            width: 100% !important;
+        }
+
+        #followUpModal .reason-wrap {
+            width: 100% !important;
+            margin-top: .65rem !important;
+            margin-bottom: 1rem !important;
+            padding: .85rem !important;
+            border-radius: 1.15rem !important;
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, .05) !important;
+            transition: border-color .2s ease, box-shadow .2s ease !important;
+        }
+
+        #followUpModal .reason-wrap:focus-within {
+            border-color: #8B0000 !important;
+            box-shadow: 0 0 0 4px rgba(139, 0, 0, .08), 0 10px 26px rgba(15, 23, 42, .05) !important;
+        }
+
+        #followUpModal .reason-textarea {
+            width: 100% !important;
+            min-height: 88px !important;
+            padding: .75rem .85rem !important;
+            background: #f9fafb !important;
+            border: 1px solid #eef0f3 !important;
+            border-radius: .9rem !important;
+            color: #374151 !important;
+            line-height: 1.45 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        #followUpModal .reason-textarea:focus {
+            background: #ffffff !important;
+            border-color: #8B0000 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+
+
+        /* Follow-up time slot picker: matches the large appointment slot style. */
+        #followUpModal .follow-up-slot-title {
+            margin-bottom: .35rem !important;
+            color: #8B0000 !important;
+            letter-spacing: .32em !important;
+            font-weight: 900 !important;
+        }
+
+        #followUpModal .follow-up-slot-helper {
+            margin: 0 0 1.05rem !important;
+            color: #8a817c !important;
+            font-size: .92rem !important;
+            line-height: 1.35 !important;
+        }
+
+        /* Hide the red selected-date pill while no date is selected. */
+        #followUpModal #followUpDatePill {
+            display: none !important;
+            align-items: center !important;
+            gap: .55rem !important;
+            width: 100% !important;
+            margin: 0 0 1.15rem !important;
+            padding: .95rem 1.15rem !important;
+            border-radius: 1.15rem !important;
+            background: #8B0000 !important;
+            color: #ffffff !important;
+            font-weight: 900 !important;
+            font-size: 1rem !important;
+            box-shadow: 0 12px 24px rgba(139, 0, 0, .24) !important;
+        }
+
+        #followUpModal #followUpDatePill.show:not(:empty) {
+            display: flex !important;
+        }
+
+        #followUpModal #followUpDatePill i {
+            color: #ffffff !important;
+            font-size: .95rem !important;
+        }
+
+        #followUpModal #followUpDatePill span {
+            color: #86efac !important;
+            opacity: 1 !important;
+            font-size: .86rem !important;
+            font-weight: 900 !important;
+        }
+
+        #followUpModal #followUpSlotGrid.slot-grid-ui,
+        #followUpModal #followUpSlotGrid.slots-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: .85rem 1rem !important;
+            max-height: 310px !important;
+            overflow-y: auto !important;
+            padding: .05rem .2rem .15rem 0 !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip {
+            min-height: 58px !important;
+            width: 100% !important;
+            padding: .85rem 1rem !important;
+            border-radius: 1.05rem !important;
+            border: 1px solid #ead7d1 !important;
+            background: #ffffff !important;
+            color: #2f3033 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: .65rem !important;
+            font-size: 1rem !important;
+            font-weight: 900 !important;
+            line-height: 1 !important;
+            transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, color .18s ease !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip:not(.disabled):hover {
+            transform: translateY(-1px) !important;
+            border-color: #8B0000 !important;
+            color: #8B0000 !important;
+            box-shadow: 0 10px 22px rgba(139, 0, 0, .10) !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip i {
+            color: #c34b4b !important;
+            font-size: .95rem !important;
+            opacity: 1 !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip.selected,
+        #followUpModal #followUpSlotGrid .slot-chip.bg-\[\#8B0000\] {
+            background: #8B0000 !important;
+            border-color: #8B0000 !important;
+            color: #ffffff !important;
+            box-shadow: 0 16px 28px rgba(139, 0, 0, .20) !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip.selected i,
+        #followUpModal #followUpSlotGrid .slot-chip.bg-\[\#8B0000\] i {
+            color: #ffffff !important;
+        }
+
+        #followUpModal #followUpSlotGrid .slot-chip.disabled {
+            border-color: #e5e7eb !important;
+            background: #f3f4f6 !important;
+            color: #9ca3af !important;
+            cursor: not-allowed !important;
+            opacity: .68 !important;
+        }
+
+        #followUpModal .follow-up-clear-time-btn {
+            width: 100% !important;
+            min-height: 42px !important;
+            margin-top: .85rem !important;
+            border-radius: .9rem !important;
+            border: 1px solid #efcaca !important;
+            background: #ffffff !important;
+            color: #8B0000 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: .55rem !important;
+            font-size: .88rem !important;
+            font-weight: 900 !important;
+            transition: all .18s ease !important;
+        }
+
+        #followUpModal .follow-up-clear-time-btn:hover {
+            background: #fff1f1 !important;
+            border-color: #8B0000 !important;
+        }
+
+        #followUpModal .follow-up-clear-time-btn.hidden {
+            display: none !important;
+        }
+
+        #followUpModal .follow-up-selected-time-pill {
+            width: 100% !important;
+            margin-top: .7rem !important;
+            padding: .9rem 1rem !important;
+            border-radius: 1rem !important;
+            border: 1px solid #efcaca !important;
+            background: #fff7f7 !important;
+            color: #8B0000 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: .7rem !important;
+            font-size: .95rem !important;
+            font-weight: 900 !important;
+            box-shadow: 0 8px 18px rgba(139, 0, 0, .08) !important;
+        }
+
+        #followUpModal .follow-up-selected-time-pill.hidden {
+            display: none !important;
+        }
+
+        #followUpModal .follow-up-selected-time-pill i {
+            color: #8B0000 !important;
+        }
+
+
+
+        /* FINAL FOLLOW-UP SLOT STATE FIX
+           - no red date bar before selecting a date
+           - hide Choose-a-date placeholder once a date/slots are loaded
+           - keep the Book Appointment style scoped only inside the follow-up modal */
+        #followUpModal #followUpDatePill.hidden,
+        #followUpModal #followUpDatePill:empty {
+            display: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            box-shadow: none !important;
+        }
+
+        #followUpModal #followUpDatePill:not(.hidden):not(:empty),
+        #followUpModal #followUpDatePill.show:not(:empty) {
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        #followUpModal #followUpSlotPlaceholder.hidden,
+        #followUpModal .follow-up-slots-wrap.has-date #followUpSlotPlaceholder,
+        #followUpModal .follow-up-slots-wrap.has-slots #followUpSlotPlaceholder {
+            display: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap.is-empty #followUpSlotPlaceholder:not(.hidden) {
+            display: flex !important;
+            height: 258px !important;
+            min-height: 258px !important;
+            margin-top: 0 !important;
+            padding: 2.2rem 1.5rem !important;
+            overflow: visible !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap.is-empty #followUpSlotContainer,
+        #followUpModal .follow-up-slots-wrap.is-empty #followUpSelectedTimePill,
+        #followUpModal .follow-up-slots-wrap.is-empty #followUpClearTimeBtn {
+            display: none !important;
+        }
+
+        #followUpModal .follow-up-slots-wrap.has-date #followUpSlotContainer:not(.hidden),
+        #followUpModal .follow-up-slots-wrap.has-slots #followUpSlotContainer:not(.hidden) {
+            display: block !important;
+        }
+
+        @media (max-width: 900px) {
+            #followUpModal {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            #followUpModal .follow-up-modal-panel {
+                width: 100%;
+                max-height: 92vh;
+            }
+
+            #followUpModal .follow-up-modal-body {
+                max-height: calc(92vh - 84px);
+                padding: .9rem !important;
+            }
+
+            #followUpModal .two-col {
+                grid-template-columns: 1fr !important;
+                gap: .85rem !important;
+            }
+
+            #followUpCalendarWrap {
+                transform: none;
+                width: 100%;
+                margin-left: 0;
+                margin-bottom: 0;
+            }
+
+
+
+            #followUpModal .follow-up-slots-wrap {
+                min-height: auto !important;
+            }
+
+            #followUpModal .slots-placeholder {
+                min-height: 125px !important;
+            }
+
+            #followUpModal .slots-placeholder.follow-up-empty-slot-placeholder {
+                min-height: 190px !important;
+                padding: 1.6rem 1rem !important;
+            }
+
+            #followUpModal .reason-wrap {
+                padding: .7rem !important;
+                border-radius: 1rem !important;
+            }
+
+            #followUpModal .btn-row {
+                flex-direction: column-reverse !important;
+                align-items: stretch !important;
+                margin-left: -.9rem !important;
+                margin-right: -.9rem !important;
+                padding: .85rem .9rem 1rem !important;
+            }
+
+            #followUpModal .btn {
+                width: 100% !important;
+            }
+
+            #followUpModal #followUpSlotGrid.slot-grid-ui,
+            #followUpModal #followUpSlotGrid.slots-grid {
+                grid-template-columns: 1fr !important;
+                max-height: 280px !important;
+            }
+
+            #followUpModal #followUpDatePill,
+            #followUpModal #followUpDatePill.show {
+                padding: .85rem 1rem !important;
+                font-size: .92rem !important;
+            }
+        }
+    </style>
+
 @endsection
 
 @section('scripts')
@@ -581,7 +1206,7 @@
         'dateInputId' => 'followup_appointment_date',
         'timeInputId' => 'followup_appointment_time',
     
-        'dateBannerId' => null,
+        'dateBannerId' => 'followUpDatePill',
         'slotPlaceholderId' => 'followUpSlotPlaceholder',
         'slotContainerId' => 'followUpSlotContainer',
         'slotGridId' => 'followUpSlotGrid',
@@ -591,7 +1216,7 @@
         'selectedTimePillId' => 'followUpSelectedTimePill',
         'selectedTimeTextId' => 'followUpSelectedTimeText',
     
-        'datePillId' => 'followUpDatePill',
+        'datePillId' => null,
         'dateErrorId' => 'followUpDateError',
         'timeErrorId' => 'followUpTimeError',
     
@@ -658,6 +1283,12 @@
 
             const toothTooltip = document.getElementById('toothTooltip');
             const toothTooltipContent = document.getElementById('toothTooltipContent');
+        const surfacePicker3D = document.getElementById('surfacePicker3D');
+        const surfacePickerToothLabel = document.getElementById('surfacePickerToothLabel');
+        const surfacePickerHelperText = document.getElementById('surfacePickerHelperText');
+        const surfacePickerButtons = Array.from(document.querySelectorAll('.surface-picker-btn'));
+        const reset3DViewBtn = document.getElementById('reset3DViewBtn');
+        const close3DSurfacePickerBtn = document.getElementById('close3DSurfacePickerBtn');
 
             const resetTreatmentModal = document.getElementById('resetTreatmentModal');
             const resetTreatmentMessage = document.getElementById('resetTreatmentMessage');
@@ -686,6 +1317,9 @@
             let mouse = null;
             let teethMeshes = [];
             let threeSceneInitialized = false;
+        let cameraAnimationFrame = null;
+        let initialCameraPosition = null;
+        let initialControlsTarget = null;
 
             const legends = [{
                     code: 'D',
@@ -854,7 +1488,8 @@
                         right: null,
                         bottom: null
                     },
-                    threeD: null
+                    threeD: null,
+                lastSelectedSurface: null
                 };
             }
 
@@ -880,6 +1515,11 @@
                     toothName: entry.toothName || entry.tooth_name || defaultState.toothName,
                     status: entry.status || null,
                     threeD: entry.threeD || entry.three_d || null,
+                lastSelectedSurface: ['top', 'left', 'center', 'right', 'bottom'].includes(
+                    entry.lastSelectedSurface || entry.last_selected_surface
+                )
+                    ? (entry.lastSelectedSurface || entry.last_selected_surface)
+                    : null,
                     surfaces: {
                         ...defaultState.surfaces,
                         ...surfaces
@@ -998,6 +1638,158 @@
                 return map[surface] || surface;
             }
 
+        function update3DSurfacePicker() {
+            if (!surfacePicker3D) return;
+
+            const showPicker = currentView === '3d' && !!selectedTooth;
+            surfacePicker3D.classList.toggle('hidden', !showPicker);
+
+            if (!showPicker) {
+                return;
+            }
+
+            if (selectedTooth) {
+                surfacePickerToothLabel.textContent = `Tooth #${selectedTooth} · ${getToothName(selectedTooth)}`;
+                surfacePickerHelperText.textContent = selectedTargetType === 'surface'
+                    ? `${getSurfaceLabel(selectedSurfaceKey)} selected.`
+                    : 'Camera focused on the selected tooth. Now choose one large surface button below.';
+            } else {
+                surfacePickerToothLabel.textContent = 'No tooth selected';
+                surfacePickerHelperText.textContent = 'Step 1: Click a tooth in the 3D model. The camera will zoom in automatically.';
+            }
+
+            surfacePickerButtons.forEach(btn => {
+                const surfaceKey = btn.dataset.surface;
+                const disabled = !selectedTooth;
+                const isActive = selectedTooth && selectedTargetType === 'surface' && selectedSurfaceKey === surfaceKey;
+
+                btn.disabled = disabled;
+                btn.classList.toggle('opacity-50', disabled);
+                btn.classList.toggle('cursor-not-allowed', disabled);
+                btn.classList.toggle('scale-[0.98]', disabled);
+
+                btn.classList.remove('bg-red-600', 'text-white', 'border-red-600', 'shadow-md', 'ring-2', 'ring-red-100');
+                btn.classList.add('bg-white', 'text-gray-700', 'border-gray-200');
+
+                if (isActive) {
+                    btn.classList.remove('bg-white', 'text-gray-700', 'border-gray-200');
+                    btn.classList.add('bg-red-600', 'text-white', 'border-red-600', 'shadow-md', 'ring-2', 'ring-red-100');
+                }
+            });
+        }
+
+        function selectSurfaceFrom3DPicker(surfaceKey) {
+            if (!selectedTooth) {
+                alert('Please click a tooth in the 3D model first.');
+                return;
+            }
+
+            selectedTargetType = 'surface';
+            selectedSurfaceKey = surfaceKey;
+
+            const state = ensureToothState(selectedTooth);
+            state.lastSelectedSurface = surfaceKey;
+            const currentSurfaceRecord = state.surfaces[surfaceKey];
+            selectedLegend = currentSurfaceRecord ? currentSurfaceRecord.code : null;
+
+            updateSelectedToothUI();
+            renderThreeVisuals();
+        }
+
+        function easeInOutCubic(value) {
+            return value < 0.5
+                ? 4 * value * value * value
+                : 1 - Math.pow(-2 * value + 2, 3) / 2;
+        }
+
+        function animateCameraTo(targetPosition, targetLookAt, duration = 650) {
+            if (!camera || !controls) return;
+
+            if (cameraAnimationFrame) {
+                cancelAnimationFrame(cameraAnimationFrame);
+            }
+
+            const startPosition = camera.position.clone();
+            const startTarget = controls.target.clone();
+            const startTime = performance.now();
+
+            function step(now) {
+                const progress = Math.min((now - startTime) / duration, 1);
+                const eased = easeInOutCubic(progress);
+
+                camera.position.lerpVectors(startPosition, targetPosition, eased);
+                controls.target.lerpVectors(startTarget, targetLookAt, eased);
+                camera.updateProjectionMatrix();
+                controls.update();
+
+                if (progress < 1) {
+                    cameraAnimationFrame = requestAnimationFrame(step);
+                } else {
+                    cameraAnimationFrame = null;
+                }
+            }
+
+            cameraAnimationFrame = requestAnimationFrame(step);
+        }
+
+        function focusCameraOnTooth(mesh) {
+            if (!mesh || !camera || !controls) return;
+
+            const toothPosition = new THREE.Vector3();
+            mesh.getWorldPosition(toothPosition);
+
+            const toothNumber = Number(mesh.userData.tooth);
+            const isUpperArch = adultUpper.includes(toothNumber);
+
+            // Upper teeth are best viewed from below so the bottom/end of the cylinder is visible.
+            // Lower teeth are best viewed from above so the top/end of the cylinder is visible.
+            const cameraOffset = isUpperArch
+                ? new THREE.Vector3(0, -2.2, 4.2)
+                : new THREE.Vector3(0, 2.4, 4.2);
+
+            const lookAtOffset = isUpperArch
+                ? new THREE.Vector3(0, -0.15, 0)
+                : new THREE.Vector3(0, 0.15, 0);
+
+            animateCameraTo(
+                toothPosition.clone().add(cameraOffset),
+                toothPosition.clone().add(lookAtOffset),
+                700
+            );
+        }
+
+        function resetCameraToFull3DView() {
+            if (!camera || !controls) return;
+
+            animateCameraTo(
+                initialCameraPosition ? initialCameraPosition.clone() : new THREE.Vector3(0, 1.2, 14),
+                initialControlsTarget ? initialControlsTarget.clone() : new THREE.Vector3(0, 0, 0),
+                700
+            );
+        }
+
+        function clear3DSurfacePickerSelection(shouldResetCamera = false) {
+            selectedTooth = null;
+            selectedTargetType = null;
+            selectedSurfaceKey = null;
+            selectedMesh = null;
+            selectedLegend = null;
+
+            if (threeSceneInitialized) {
+                renderThreeVisuals();
+
+                if (shouldResetCamera) {
+                    resetCameraToFull3DView();
+                }
+            }
+
+            updateSelectedToothUI();
+            updateLegendActiveState();
+            updateActionButtons();
+            updateHistoryButtons();
+            update3DSurfacePicker();
+        }
+
             function ensureToothState(toothNumber) {
                 const numericToothNumber = Number(toothNumber);
 
@@ -1084,6 +1876,23 @@
                     updateLegendActiveState();
                     renderSelectedToothLegendList();
                     updateActionButtons();
+                update3DSurfacePicker();
+                return;
+            }
+
+            if (currentView === '3d' && !selectedTargetType) {
+                selectedToothDisplay.textContent = `Tooth #${selectedTooth} • Choose a surface below`;
+                selectedToothName.textContent = getToothName(selectedTooth);
+                toothHoverLabel.innerText = `Selected: #${selectedTooth}`;
+                selectedViewBadge.textContent = '3D View';
+                legendStatusNote.classList.remove('hidden');
+                legendStatusNote.textContent = 'Step 2: Choose one of the 5 surfaces from the 3D surface picker below, then select a legend and click Apply Treatment.';
+                selectedLegend = null;
+
+                updateLegendActiveState();
+                renderSelectedToothLegendList();
+                updateActionButtons();
+                update3DSurfacePicker();
                     return;
                 }
 
@@ -1093,19 +1902,21 @@
                     getSurfaceLabel('status') :
                     getSurfaceLabel('whole');
 
-                selectedToothDisplay.textContent = `Tooth #${selectedTooth} • ${surfaceText}`;
-                selectedToothName.textContent = getToothName(selectedTooth);
-                toothHoverLabel.innerText = `Selected: #${selectedTooth}`;
-                selectedViewBadge.textContent = currentView === '2d' ? '2D View' : '3D View';
-                legendStatusNote.classList.remove('hidden');
+            selectedToothDisplay.textContent = `Tooth #${selectedTooth} • ${surfaceText}`;
+            selectedToothName.textContent = getToothName(selectedTooth);
+            toothHoverLabel.innerText = `Selected: #${selectedTooth}`;
+            selectedViewBadge.textContent = currentView === '2d' ? '2D View' : '3D View';
+            legendStatusNote.classList.remove('hidden');
+            legendStatusNote.textContent = 'Choose a treatment legend below, then click Apply Treatment.';
 
                 const record = getSelectedRecord();
                 selectedLegend = record ? record.code : null;
 
-                updateLegendActiveState();
-                renderSelectedToothLegendList();
-                updateActionButtons();
-            }
+            updateLegendActiveState();
+            renderSelectedToothLegendList();
+            updateActionButtons();
+            update3DSurfacePicker();
+        }
 
             function openLegendDrawer() {
                 legendSearchInput.value = '';
@@ -1253,8 +2064,132 @@
                     if (state.surfaces[key]) return state.surfaces[key];
                 }
 
-                return null;
+            return null;
+        }
+
+        function getFirstTreatedSurfaceKey(state) {
+            if (!state || !state.surfaces) return null;
+
+            const surfacePriority = ['top', 'left', 'center', 'right', 'bottom'];
+
+            for (const key of surfacePriority) {
+                if (state.surfaces[key] && state.surfaces[key].code) {
+                    return key;
+                }
             }
+
+            return null;
+        }
+
+        function getPreferredSurfaceKey(state) {
+            if (!state || !state.surfaces) return null;
+
+            const lastSurface = state.lastSelectedSurface;
+
+            if (
+                lastSurface &&
+                state.surfaces[lastSurface] &&
+                state.surfaces[lastSurface].code
+            ) {
+                return lastSurface;
+            }
+
+            return getFirstTreatedSurfaceKey(state);
+        }
+
+        function getStatusBoxDisplayRecord(state) {
+            if (!state || !state.surfaces) return null;
+
+            /*
+             * The divided box is now display-only.
+             * It should reflect only the legend applied to an actual tooth surface,
+             * not a separate status-box marking.
+             */
+            const preferredSurfaceKey = getPreferredSurfaceKey(state);
+
+            if (
+                preferredSurfaceKey &&
+                state.surfaces[preferredSurfaceKey] &&
+                state.surfaces[preferredSurfaceKey].code
+            ) {
+                return state.surfaces[preferredSurfaceKey];
+            }
+
+            return null;
+        }
+
+        function getStatusBoxDisplaySurfaceKey(state) {
+            if (!state || !state.surfaces) return null;
+
+            return getPreferredSurfaceKey(state);
+        }
+
+        function applyDividedStatusBoxVisual(statusBox, record) {
+            const colorPart = document.createElement('span');
+            const codePart = document.createElement('span');
+            const colorHex = record ? record.colorHex : '#ffffff';
+            const code = record ? record.code : '';
+
+            statusBox.classList.add('status-box-divided');
+            statusBox.innerHTML = '';
+
+            statusBox.style.padding = '0';
+            statusBox.style.display = 'flex';
+            statusBox.style.flexDirection = 'column';
+            statusBox.style.alignItems = 'stretch';
+            statusBox.style.justifyContent = 'stretch';
+            statusBox.style.overflow = 'hidden';
+            statusBox.style.boxSizing = 'border-box';
+            statusBox.style.background = '#ffffff';
+            statusBox.style.borderColor = record ? colorHex : '';
+
+            colorPart.className = 'status-box-color-part';
+            colorPart.style.display = 'flex';
+            colorPart.style.alignItems = 'center';
+            colorPart.style.justifyContent = 'center';
+            colorPart.style.flex = '1 1 0';
+            colorPart.style.minHeight = '0';
+            colorPart.style.width = '100%';
+            colorPart.style.background = record ? colorHex : '#ffffff';
+
+            codePart.className = 'status-box-code-part';
+            codePart.textContent = code;
+            codePart.style.display = 'flex';
+            codePart.style.alignItems = 'center';
+            codePart.style.justifyContent = 'center';
+            codePart.style.flex = '1 1 0';
+            codePart.style.minHeight = '0';
+            codePart.style.width = '100%';
+            codePart.style.background = '#ffffff';
+            codePart.style.borderTop = '1px solid #8B0000';
+            codePart.style.color = record ? colorHex : 'transparent';
+            codePart.style.fontSize = code.length > 1 ? '8.5px' : '10px';
+            codePart.style.fontWeight = '900';
+            codePart.style.lineHeight = '1';
+            codePart.style.letterSpacing = '-0.03em';
+            codePart.style.whiteSpace = 'nowrap';
+
+            statusBox.appendChild(colorPart);
+            statusBox.appendChild(codePart);
+        }
+
+
+        function restoreSavedSurfaceSelectionForTooth(toothNumber) {
+            const state = ensureToothState(toothNumber);
+            const savedSurfaceKey = getPreferredSurfaceKey(state);
+
+            if (!savedSurfaceKey) {
+                selectedTargetType = null;
+                selectedSurfaceKey = null;
+                selectedLegend = null;
+                return;
+            }
+
+            selectedTargetType = 'surface';
+            selectedSurfaceKey = savedSurfaceKey;
+            selectedLegend = state.surfaces[savedSurfaceKey].code;
+            state.lastSelectedSurface = savedSurfaceKey;
+        }
 
             function sync3DFrom2D(toothNumber) {
                 const state = ensureToothState(toothNumber);
@@ -1326,12 +2261,17 @@
                 if (clearSelectionBtn) clearSelectionBtn.disabled = !(selectedTooth && selectedTargetType);
             }
 
-            function clearCurrentSelection() {
-                selectedTooth = null;
-                selectedTargetType = null;
-                selectedSurfaceKey = null;
-                selectedMesh = null;
-                selectedLegend = null;
+        function clearCurrentSelection() {
+            if (currentView === '3d') {
+                clear3DSurfacePickerSelection(true);
+                return;
+            }
+
+            selectedTooth = null;
+            selectedTargetType = null;
+            selectedSurfaceKey = null;
+            selectedMesh = null;
+            selectedLegend = null;
 
                 render2DOdontogram();
 
@@ -1361,9 +2301,15 @@
                 restoreStateFromSnapshot(next);
             }
 
-            function applyLegendToSelectedTarget(code) {
-                if (!selectedTooth || !selectedTargetType) return;
-                pushHistory();
+        function applyLegendToSelectedTarget(code) {
+            if (!selectedTooth || !selectedTargetType) return;
+
+            if (selectedTargetType === 'status') {
+                alert('Please apply treatments by clicking an actual tooth surface, not the divided indicator box.');
+                return;
+            }
+
+            pushHistory();
 
                 const state = ensureToothState(selectedTooth);
                 const payload = createLegendPayload(code);
@@ -1394,13 +2340,19 @@
                     renderThreeVisuals();
                 }
 
-                renderSelectedToothLegendList();
-                updateLegendActiveState();
-                updateActionButtons();
-                selectedLegendPreview.textContent = `${payload.code} - ${payload.label}`;
-                drawerSelectedLegendPreview.textContent = `${payload.code} - ${payload.label}`;
-                closeLegendDrawer();
+            renderSelectedToothLegendList();
+            updateLegendActiveState();
+            updateActionButtons();
+            selectedLegendPreview.textContent = `${payload.code} - ${payload.label}`;
+            drawerSelectedLegendPreview.textContent = `${payload.code} - ${payload.label}`;
+            closeLegendDrawer();
+
+            if (currentView === '3d') {
+                setTimeout(function () {
+                    clear3DSurfacePickerSelection(false);
+                }, 120);
             }
+        }
 
             function clearSelectedTargetTreatment() {
                 if (!pendingResetPayload) return;
@@ -1414,13 +2366,16 @@
                 const state = ensureToothState(tooth);
 
                 if (targetType === 'status') {
-                    state.status = null;
-                    sync3DFrom2D(tooth);
+                    pendingResetPayload = null;
+                    closeResetModal();
+                return;
                 } else if (targetType === 'surface' && surfaceKey) {
                     state.surfaces[surfaceKey] = null;
+                state.lastSelectedSurface = getFirstTreatedSurfaceKey(state);
                     sync3DFrom2D(tooth);
                 } else if (targetType === '3d') {
                     state.threeD = null;
+                state.lastSelectedSurface = null;
                     clearAll2DSurfaces(state);
 
                     if (selectedMesh && Number(selectedMesh.userData.tooth) === Number(tooth)) {
@@ -1484,27 +2439,23 @@
                 const wrap = document.createElement('div');
                 wrap.className = 'tooth-unit';
 
-                const statusBox = document.createElement('div');
-                statusBox.className = 'status-box';
-                statusBox.dataset.tooth = toothNumber;
-                statusBox.dataset.target = 'status';
+            const statusBox = document.createElement('div');
+            statusBox.className = 'status-box';
+            statusBox.dataset.tooth = toothNumber;
+            statusBox.setAttribute('aria-label', `Surface legend indicator for tooth #${toothNumber}`);
+            statusBox.title = 'Display only: this box updates after applying a legend to a tooth surface.';
+            statusBox.style.cursor = 'default';
 
-                if (state.status) {
-                    statusBox.style.background = state.status.colorHex;
-                    statusBox.style.borderColor = state.status.colorHex;
-                }
-                if (selectedTooth === toothNumber && selectedTargetType === 'status') {
-                    statusBox.classList.add('selected-target');
-                }
+            /*
+             * Divided surface indicator only:
+             * - Top half shows the color of the legend applied to a tooth surface.
+             * - Bottom half shows the legend code/initials.
+             * This box is NOT clickable anymore, so dentists cannot apply markings
+             * directly to it. Treatments must be applied only through the tooth surfaces.
+             */
+            const statusDisplayRecord = getStatusBoxDisplayRecord(state);
 
-                statusBox.addEventListener('click', function() {
-                    currentView = '2d';
-                    selectedTooth = toothNumber;
-                    selectedTargetType = 'status';
-                    selectedSurfaceKey = null;
-                    updateSelectedToothUI();
-                    render2DOdontogram();
-                });
+            applyDividedStatusBoxVisual(statusBox, statusDisplayRecord);
 
                 const toothNumberEl = document.createElement('div');
                 toothNumberEl.className = 'tooth-number';
@@ -1630,20 +2581,20 @@
             function switchView(view) {
                 currentView = view;
 
-                if (view === '2d') {
-                    selectedMesh = null;
-                    panel2d.classList.add('active');
-                    panel3d.classList.remove('active');
-                    view2dBtn.classList.add('active');
-                    view3dBtn.classList.remove('active');
-                    viewInstructionText.textContent =
-                        'Click the tooth surfaces or status box to assign a condition';
-                } else {
-                    panel2d.classList.remove('active');
-                    panel3d.classList.add('active');
-                    view2dBtn.classList.remove('active');
-                    view3dBtn.classList.add('active');
-                    viewInstructionText.textContent = 'Click a tooth in the 3D model to assign a condition';
+            if (view === '2d') {
+                selectedMesh = null;
+                panel2d.classList.add('active');
+                panel3d.classList.remove('active');
+                view2dBtn.classList.add('active');
+                view3dBtn.classList.remove('active');
+                viewInstructionText.textContent =
+                    'Click a tooth surface to assign a treatment legend';
+            } else {
+                panel2d.classList.remove('active');
+                panel3d.classList.add('active');
+                view2dBtn.classList.remove('active');
+                view3dBtn.classList.add('active');
+                viewInstructionText.textContent = 'Click a tooth in the 3D model, then choose a surface below';
 
                     if (!threeSceneInitialized) {
                         initThreeScene();
@@ -1659,8 +2610,9 @@
                     renderThreeVisuals();
                 }
 
-                updateSelectedToothUI();
-            }
+            updateSelectedToothUI();
+            update3DSurfacePicker();
+        }
 
             view2dBtn.addEventListener('click', () => switchView('2d'));
             view3dBtn.addEventListener('click', () => switchView('3d'));
@@ -1675,11 +2627,11 @@
                     document.documentElement.classList.contains('dark') ||
                     document.body.classList.contains('dark') ?
                     '#0D1117' :
-                    '#F1F5F9'
+                    '#D8E0EA'
                 );
 
-                camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
-                camera.position.set(0, 10, 14);
+            camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+            camera.position.set(0, 1.2, 14);
 
                 renderer = new THREE.WebGLRenderer({
                     antialias: true,
@@ -1694,9 +2646,14 @@
                 controls = new THREE.OrbitControls(camera, renderer.domElement);
                 controls.enableDamping = true;
                 controls.dampingFactor = 0.07;
-                controls.minDistance = 5;
+                controls.minDistance = 2.2;
                 controls.maxDistance = 30;
                 controls.maxPolarAngle = Math.PI / 1.8;
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            initialCameraPosition = camera.position.clone();
+            initialControlsTarget = controls.target.clone();
 
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
                 scene.add(ambientLight);
@@ -1716,65 +2673,463 @@
                 fillLight.position.set(0, 8, 12);
                 scene.add(fillLight);
 
-                const toothGeometry = new THREE.CylinderGeometry(0.38, 0.22, 1.0, 32, 1);
+            const enamelMaterialProps = {
+                color: 0xFFFFF8,
+                metalness: 0.02,
+                roughness: 0.26,
+                emissive: 0x090909,
+                emissiveIntensity: 0.04,
+                envMapIntensity: 0.95
+            };
 
-                const enamelMaterialProps = {
-                    color: 0xFFFFF0,
-                    metalness: 0.05,
-                    roughness: 0.28,
-                    emissive: 0x111111,
-                    envMapIntensity: 1.0
+            const gumMaterialProps = {
+                color: 0xF2A7A2,
+                roughness: 0.68,
+                metalness: 0.0,
+                emissive: 0x220808,
+                emissiveIntensity: 0.025
+            };
+
+            function createStandardMaterial(props) {
+                return new THREE.MeshStandardMaterial(props);
+            }
+
+            function getToothType(toothNum) {
+                const lastDigit = Number(String(toothNum).slice(-1));
+
+                if (lastDigit === 1 || lastDigit === 2) return 'incisor';
+                if (lastDigit === 3) return 'canine';
+                if (lastDigit === 4 || lastDigit === 5) return 'premolar';
+
+                return 'molar';
+            }
+
+            function getToothDimensions(type) {
+                const sizes = {
+                    incisor: {
+                        width: 0.34,
+                        height: 0.50,
+                        depth: 0.24,
+                        hitWidth: 0.50,
+                        hitHeight: 0.66,
+                        hitDepth: 0.38
+                    },
+                    canine: {
+                        width: 0.36,
+                        height: 0.54,
+                        depth: 0.26,
+                        hitWidth: 0.52,
+                        hitHeight: 0.70,
+                        hitDepth: 0.40
+                    },
+                    premolar: {
+                        width: 0.46,
+                        height: 0.48,
+                        depth: 0.34,
+                        hitWidth: 0.62,
+                        hitHeight: 0.64,
+                        hitDepth: 0.48
+                    },
+                    molar: {
+                        width: 0.62,
+                        height: 0.47,
+                        depth: 0.44,
+                        hitWidth: 0.78,
+                        hitHeight: 0.64,
+                        hitDepth: 0.60
+                    }
                 };
 
-                function createArch(teethArray, yPosition) {
-                    const group = new THREE.Group();
+                return sizes[type] || sizes.incisor;
+            }
 
-                    teethArray.forEach((toothNum, i) => {
-                        const material = new THREE.MeshStandardMaterial(enamelMaterialProps);
-                        const mesh = new THREE.Mesh(toothGeometry, material);
-                        mesh.castShadow = true;
-                        mesh.receiveShadow = true;
+            function addVisualPart(group, mesh, visualParts, colorableParts = null) {
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                group.add(mesh);
+                visualParts.push(mesh);
 
-                        const angle = Math.PI - (i / (teethArray.length - 1)) * Math.PI;
-                        const x = Math.cos(angle) * 4.0;
-                        const z = Math.sin(angle) * 3.5;
+                if (colorableParts) {
+                    mesh.userData.colorable = true;
+                    colorableParts.push(mesh);
+                }
 
-                        mesh.position.set(x, yPosition, z);
-                        mesh.lookAt(0, yPosition, 0);
+                return mesh;
+            }
 
-                        mesh.userData = {
-                            tooth: toothNum,
-                            originalColor: '#FFFFF0'
-                        };
+            function createSoftCusp(x, y, z, scale, material) {
+                const cusp = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.105 * scale, 18, 12),
+                    material.clone()
+                );
 
-                        group.add(mesh);
-                        teethMeshes.push(mesh);
+                cusp.scale.set(1.05, 0.50, 0.85);
+                cusp.position.set(x, y, z);
+
+                return cusp;
+            }
+
+            function createStylizedTooth(toothNum, isUpper = true) {
+                const type = getToothType(toothNum);
+                const size = getToothDimensions(type);
+                const toothGroup = new THREE.Group();
+
+                const visualParts = [];
+                const colorableParts = [];
+
+                const enamelMaterial = createStandardMaterial(enamelMaterialProps);
+                const crownDirection = isUpper ? -1 : 1;
+                const gumDirection = isUpper ? 1 : -1;
+
+                /*
+                 * The crown is intentionally built as a close, rounded tooth instead of
+                 * a separated cylinder. The hidden hit mesh is still the clickable target.
+                 */
+                const crown = new THREE.Mesh(
+                    new THREE.SphereGeometry(1, 32, 22),
+                    enamelMaterial.clone()
+                );
+
+                crown.scale.set(size.width, size.height, size.depth);
+                crown.position.set(0, crownDirection * 0.22, 0);
+                addVisualPart(toothGroup, crown, visualParts, colorableParts);
+
+                const neck = new THREE.Mesh(
+                    new THREE.CylinderGeometry(size.width * 0.74, size.width * 0.86, 0.12, 26, 1),
+                    enamelMaterial.clone()
+                );
+
+                neck.position.set(0, gumDirection * 0.08, 0);
+                addVisualPart(toothGroup, neck, visualParts, colorableParts);
+
+                if (type === 'incisor') {
+                    /*
+                     * Removed the extra rectangular cuttingEdge mesh.
+                     * It was the small rectangle/bar appearing at the tip of the
+                     * upper and lower front teeth.
+                     */
+                }
+
+                if (type === 'canine') {
+                    const point = new THREE.Mesh(
+                        new THREE.ConeGeometry(size.width * 0.35, 0.16, 28, 1),
+                        enamelMaterial.clone()
+                    );
+
+                    point.position.set(0, crownDirection * 0.70, 0);
+
+                    if (isUpper) {
+                        point.rotation.x = Math.PI;
+                    }
+
+                    addVisualPart(toothGroup, point, visualParts, colorableParts);
+                }
+
+                if (type === 'premolar') {
+                    const cuspY = crownDirection * 0.54;
+                    const cuspA = createSoftCusp(-size.width * 0.20, cuspY, -size.depth * 0.15, 0.90, enamelMaterial);
+                    const cuspB = createSoftCusp(size.width * 0.20, cuspY, size.depth * 0.15, 0.90, enamelMaterial);
+
+                    addVisualPart(toothGroup, cuspA, visualParts, colorableParts);
+                    addVisualPart(toothGroup, cuspB, visualParts, colorableParts);
+                }
+
+                if (type === 'molar') {
+                    const cuspY = crownDirection * 0.51;
+                    const cuspPositions = [
+                        [-size.width * 0.23, cuspY, -size.depth * 0.20],
+                        [size.width * 0.23, cuspY, -size.depth * 0.20],
+                        [-size.width * 0.23, cuspY, size.depth * 0.20],
+                        [size.width * 0.23, cuspY, size.depth * 0.20]
+                    ];
+
+                    cuspPositions.forEach(pos => {
+                        const cusp = createSoftCusp(pos[0], pos[1], pos[2], 1.0, enamelMaterial);
+                        addVisualPart(toothGroup, cusp, visualParts, colorableParts);
                     });
+                }
+
+                const hitGeometry = new THREE.SphereGeometry(1, 16, 12);
+                const hitMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.001,
+                    depthWrite: false
+                });
+
+                const hitMesh = new THREE.Mesh(hitGeometry, hitMaterial);
+                hitMesh.scale.set(size.hitWidth, size.hitHeight, size.hitDepth);
+                hitMesh.position.set(0, crownDirection * 0.25, 0);
+
+                hitMesh.userData = {
+                    tooth: toothNum,
+                    originalColor: '#FFFFF8',
+                    visualGroup: toothGroup,
+                    visualParts: visualParts,
+                    colorableParts: colorableParts
+                };
+
+                toothGroup.add(hitMesh);
+
+                return {
+                    group: toothGroup,
+                    hitMesh: hitMesh
+                };
+            }
+
+            function createArch(teethArray, yPosition, isUpper = true) {
+                const group = new THREE.Group();
+                const archStartAngle = Math.PI + 0.08;
+                const archEndAngle = -0.08;
+                const archWidthRadius = 3.18;
+                const archDepthRadius = 2.85;
+
+                teethArray.forEach((toothNum, i) => {
+                    const tooth = createStylizedTooth(toothNum, isUpper);
+
+                    const ratio = teethArray.length > 1 ? (i / (teethArray.length - 1)) : 0;
+                    const sideSign = ratio < 0.5 ? -1 : 1;
+                    let angle = archStartAngle - ratio * (archStartAngle - archEndAngle);
+
+                    /*
+                     * Add a little extra spacing only for the back molars so they do not
+                     * look too compressed or stuck together at the ends of the arch.
+                     * Also nudge them slightly closer to the gums for better alignment.
+                     */
+                    const lastDigit = Number(String(toothNum).slice(-1));
+                    const molarAngleOffsetMap = {
+                        6: 0.016,
+                        7: 0.033,
+                        8: 0.052,
+                    };
+                    const molarYNudgeMap = {
+                        6: 0.05,
+                        7: 0.08,
+                        8: 0.11,
+                    };
+
+                    if (molarAngleOffsetMap[lastDigit]) {
+                        angle += sideSign * molarAngleOffsetMap[lastDigit];
+                    }
+
+                    const x = Math.cos(angle) * archWidthRadius;
+                    const z = Math.sin(angle) * archDepthRadius;
+                    const yNudge = molarYNudgeMap[lastDigit]
+                        ? (isUpper ? molarYNudgeMap[lastDigit] : -molarYNudgeMap[lastDigit])
+                        : 0;
+
+                    tooth.group.position.set(x, yPosition + yNudge, z);
+                    tooth.group.lookAt(0, yPosition + yNudge, -0.10);
+
+                    group.add(tooth.group);
+                    teethMeshes.push(tooth.hitMesh);
+                });
 
                     scene.add(group);
                 }
 
-                createArch(adultUpper, 0.6);
-                createArch(adultLower, -0.6);
+            function createGumArch(yPosition, isUpper = true) {
+                const points = [];
+                const gumStartAngle = Math.PI + 0.08;
+                const gumEndAngle = -0.08;
+                const gumWidthRadius = 3.58;
+                const gumDepthRadius = 2.92;
 
-                const gumGeometry = new THREE.TorusGeometry(3.9, 0.5, 12, 50, Math.PI);
-                const gumMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xF5B7B1,
-                    roughness: 0.85,
-                    metalness: 0.0
-                });
+                for (let i = 0; i <= 72; i++) {
+                    const t = i / 72;
+                    const angle = gumStartAngle - t * (gumStartAngle - gumEndAngle);
+                    const x = Math.cos(angle) * gumWidthRadius;
+                    const z = Math.sin(angle) * gumDepthRadius;
+                    points.push(new THREE.Vector3(x, yPosition, z));
+                }
 
-                const upperGums = new THREE.Mesh(gumGeometry, gumMaterial);
-                upperGums.rotation.x = Math.PI / 2;
-                upperGums.position.set(0, 1.1, 0);
-                upperGums.receiveShadow = true;
-                scene.add(upperGums);
+                const curve = new THREE.CatmullRomCurve3(points);
 
-                const lowerGums = new THREE.Mesh(gumGeometry, gumMaterial);
-                lowerGums.rotation.x = Math.PI / 2;
-                lowerGums.position.set(0, -1.1, 0);
-                lowerGums.receiveShadow = true;
-                scene.add(lowerGums);
+                const mainGeometry = new THREE.TubeGeometry(curve, 96, 0.39, 24, false);
+                const mainGum = new THREE.Mesh(mainGeometry, createStandardMaterial(gumMaterialProps));
+                mainGum.castShadow = true;
+                mainGum.receiveShadow = true;
+                scene.add(mainGum);
+
+                const lipPoints = points.map(point => new THREE.Vector3(point.x, point.y + (isUpper ? -0.22 : 0.22), point.z + 0.02));
+                const lipCurve = new THREE.CatmullRomCurve3(lipPoints);
+                const lipGeometry = new THREE.TubeGeometry(lipCurve, 96, 0.19, 18, false);
+                const lipGum = new THREE.Mesh(
+                    lipGeometry,
+                    createStandardMaterial({
+                        ...gumMaterialProps,
+                        color: 0xF9C4BF,
+                        roughness: 0.72
+                    })
+                );
+
+                lipGum.castShadow = true;
+                lipGum.receiveShadow = true;
+                scene.add(lipGum);
+
+                function addGumCover() {
+                    /*
+                     * Simple gum cover/fill:
+                     * Keeps the rounded tube edge, but adds a curved denture-like cover
+                     * so the upper/lower gums do not look like an empty circular arch.
+                     */
+                    const coverSegments = 72;
+                    const vertices = [];
+                    const indices = [];
+
+                    const outerWidthRadius = 3.72;
+                    const outerDepthRadius = 2.98;
+                    const innerWidthRadius = 2.92;
+                    const innerDepthRadius = 2.18;
+
+                    const awayFromTeethY = yPosition + (isUpper ? 0.30 : -0.30);
+                    const nearTeethY = yPosition + (isUpper ? -0.26 : 0.26);
+
+                    function pushVertex(x, y, z) {
+                        vertices.push(x, y, z);
+                        return (vertices.length / 3) - 1;
+                    }
+
+                    for (let i = 0; i <= coverSegments; i++) {
+                        const t = i / coverSegments;
+                        const angle = gumStartAngle - t * (gumStartAngle - gumEndAngle);
+
+                        const outerX = Math.cos(angle) * outerWidthRadius;
+                        const outerZ = Math.sin(angle) * outerDepthRadius;
+                        const innerX = Math.cos(angle) * innerWidthRadius;
+                        const innerZ = Math.sin(angle) * innerDepthRadius;
+
+                        pushVertex(outerX, awayFromTeethY, outerZ);
+                        pushVertex(innerX, awayFromTeethY, innerZ);
+                        pushVertex(outerX, nearTeethY, outerZ);
+                        pushVertex(innerX, nearTeethY, innerZ);
+                    }
+
+                    for (let i = 0; i < coverSegments; i++) {
+                        const base = i * 4;
+                        const next = (i + 1) * 4;
+
+                        const outerAway = base;
+                        const innerAway = base + 1;
+                        const outerNear = base + 2;
+                        const innerNear = base + 3;
+
+                        const nextOuterAway = next;
+                        const nextInnerAway = next + 1;
+                        const nextOuterNear = next + 2;
+                        const nextInnerNear = next + 3;
+
+                        // outer curved wall
+                        indices.push(outerAway, nextOuterAway, outerNear);
+                        indices.push(nextOuterAway, nextOuterNear, outerNear);
+
+                        // inner curved wall
+                        indices.push(innerAway, innerNear, nextInnerAway);
+                        indices.push(nextInnerAway, innerNear, nextInnerNear);
+
+                        // away-from-teeth cover surface
+                        indices.push(outerAway, innerAway, nextOuterAway);
+                        indices.push(nextOuterAway, innerAway, nextInnerAway);
+
+                        // near-teeth cover surface
+                        indices.push(outerNear, nextOuterNear, innerNear);
+                        indices.push(nextOuterNear, nextInnerNear, innerNear);
+                    }
+
+                    // close left end
+                    indices.push(0, 2, 1);
+                    indices.push(1, 2, 3);
+
+                    // close right end
+                    const last = coverSegments * 4;
+                    indices.push(last, last + 1, last + 2);
+                    indices.push(last + 1, last + 3, last + 2);
+
+                    const coverGeometry = new THREE.BufferGeometry();
+                    coverGeometry.setAttribute(
+                        'position',
+                        new THREE.Float32BufferAttribute(vertices, 3)
+                    );
+                    coverGeometry.setIndex(indices);
+                    coverGeometry.computeVertexNormals();
+
+                    const coverMaterial = createStandardMaterial({
+                        ...gumMaterialProps,
+                        color: 0xF3A09B,
+                        roughness: 0.74,
+                        side: THREE.DoubleSide
+                    });
+
+                    const coverMesh = new THREE.Mesh(coverGeometry, coverMaterial);
+                    coverMesh.castShadow = true;
+                    coverMesh.receiveShadow = true;
+                    scene.add(coverMesh);
+                }
+
+                addGumCover();
+
+                function addGumEndCap(basePoint, lipPoint, sideSign) {
+                    const mainCap = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.34, 24, 18),
+                        createStandardMaterial(gumMaterialProps)
+                    );
+                    mainCap.scale.set(1.02, 1.24, 0.96);
+                    mainCap.position.set(
+                        basePoint.x + sideSign * 0.06,
+                        basePoint.y + (isUpper ? 0.01 : -0.01),
+                        basePoint.z
+                    );
+                    mainCap.castShadow = true;
+                    mainCap.receiveShadow = true;
+                    scene.add(mainCap);
+
+                    const lipCap = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.20, 20, 14),
+                        createStandardMaterial({
+                            ...gumMaterialProps,
+                            color: 0xF9C4BF,
+                            roughness: 0.72
+                        })
+                    );
+                    lipCap.scale.set(1.10, 1.16, 0.88);
+                    lipCap.position.set(
+                        lipPoint.x + sideSign * 0.08,
+                        lipPoint.y,
+                        lipPoint.z + 0.01
+                    );
+                    lipCap.castShadow = true;
+                    lipCap.receiveShadow = true;
+                    scene.add(lipCap);
+
+                    const bridge = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.13, 0.13, 0.28, 18, 1),
+                        createStandardMaterial({
+                            ...gumMaterialProps,
+                            color: 0xF6B4AE,
+                            roughness: 0.70
+                        })
+                    );
+                    bridge.scale.set(0.85, 1.0, 0.72);
+                    bridge.position.set(
+                        basePoint.x + sideSign * 0.07,
+                        (basePoint.y + lipPoint.y) / 2,
+                        basePoint.z + 0.01
+                    );
+                    bridge.rotation.z = Math.PI / 2;
+                    bridge.castShadow = true;
+                    bridge.receiveShadow = true;
+                    scene.add(bridge);
+                }
+
+                addGumEndCap(points[0], lipPoints[0], -1);
+                addGumEndCap(points[points.length - 1], lipPoints[lipPoints.length - 1], 1);
+            }
+
+            createGumArch(1.30, true);
+            createGumArch(-1.30, false);
+
+            createArch(adultUpper, 0.95, true);
+            createArch(adultLower, -0.95, false);
 
                 raycaster = new THREE.Raycaster();
                 mouse = new THREE.Vector2();
@@ -1802,48 +3157,115 @@
                 renderThreeVisuals();
             }
 
-            function handleResize() {
-                if (!renderer || !camera) return;
-                const newWidth = container.clientWidth || 700;
-                const newHeight = container.clientHeight || 480;
-                camera.aspect = newWidth / newHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(newWidth, newHeight);
+        function handleResize() {
+            if (!renderer || !camera) return;
+            const newWidth = container.clientWidth || 700;
+            const newHeight = container.clientHeight || 480;
+            camera.aspect = newWidth / newHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(newWidth, newHeight);
+        }
+
+        function setToothPartVisual(part, options = {}) {
+            if (!part || !part.material) return;
+
+            const material = part.material;
+            const opacity = options.opacity ?? 1;
+
+            material.transparent = opacity < 1;
+            material.opacity = opacity;
+            material.emissive.setHex(options.emissiveHex ?? 0x111111);
+            material.emissiveIntensity = options.emissiveIntensity ?? 0.08;
+
+            if (options.colorHex && part.userData.colorable) {
+                material.color.setStyle(options.colorHex);
             }
+
+            material.needsUpdate = true;
+        }
 
             function renderThreeVisuals() {
                 if (!teethMeshes.length) return;
 
-                teethMeshes.forEach(mesh => {
-                    const toothId = mesh.userData.tooth;
-                    const state = ensureToothState(toothId);
+            teethMeshes.forEach(mesh => {
+                const toothId = Number(mesh.userData.tooth);
+                const state = ensureToothState(toothId);
+                const isSelectedTooth = selectedTooth && toothId === Number(selectedTooth);
+                const shouldDim = currentView === '3d' && selectedTooth && !isSelectedTooth;
+                const visualRecord = state.threeD || getPreferredToothVisual(state);
 
-                    mesh.scale.set(1, 1, 1);
-                    mesh.material.emissive.setHex(0x111111);
-                    mesh.material.emissiveIntensity = 0.12;
+                const visualGroup = mesh.userData.visualGroup;
+                const visualParts = mesh.userData.visualParts || [];
+                const colorableParts = mesh.userData.colorableParts || [];
 
-                    if (state.threeD) {
-                        mesh.material.color.setStyle(state.threeD.colorHex);
-                        mesh.userData.originalColor = state.threeD.colorHex;
-                        mesh.userData.legend = state.threeD.code;
-                    } else {
-                        mesh.material.color.setStyle('#FFFFF0');
-                        mesh.userData.originalColor = '#FFFFF0';
-                        delete mesh.userData.legend;
-                    }
+                if (visualGroup) {
+                    visualGroup.scale.set(1, 1, 1);
+                }
+
+                visualParts.forEach(part => {
+                    setToothPartVisual(part, {
+                        opacity: shouldDim ? 0.34 : 1,
+                        emissiveIntensity: shouldDim ? 0.02 : 0.08
+                    });
                 });
 
-                if (selectedMesh && selectedTargetType === '3d') {
-                    applySelectedMeshState(selectedMesh);
+                if (visualRecord) {
+                    colorableParts.forEach(part => {
+                        setToothPartVisual(part, {
+                            colorHex: visualRecord.colorHex,
+                            opacity: shouldDim ? 0.40 : 1,
+                            emissiveIntensity: shouldDim ? 0.03 : 0.10
+                        });
+                    });
+
+                    mesh.userData.originalColor = visualRecord.colorHex;
+                    mesh.userData.legend = visualRecord.code;
+                } else {
+                    colorableParts.forEach(part => {
+                        setToothPartVisual(part, {
+                            colorHex: '#FFFFF8',
+                            opacity: shouldDim ? 0.34 : 1,
+                            emissiveIntensity: shouldDim ? 0.02 : 0.08
+                        });
+                    });
+
+                    mesh.userData.originalColor = '#FFFFF8';
+                    delete mesh.userData.legend;
                 }
+            });
+
+            if (selectedMesh && currentView === '3d') {
+                applySelectedMeshState(selectedMesh);
+            }
+        }
+
+        function applySelectedMeshState(mesh) {
+            if (!mesh) return;
+
+            const visualGroup = mesh.userData.visualGroup;
+            const visualParts = mesh.userData.visualParts || [];
+            const colorableParts = mesh.userData.colorableParts || [];
+
+            if (visualGroup) {
+                visualGroup.scale.set(1.13, 1.13, 1.13);
             }
 
-            function applySelectedMeshState(mesh) {
-                if (!mesh) return;
-                mesh.scale.set(1.18, 1.18, 1.18);
-                mesh.material.emissive.setHex(0x8B0000);
-                mesh.material.emissiveIntensity = 0.25;
-            }
+            visualParts.forEach(part => {
+                setToothPartVisual(part, {
+                    opacity: 1,
+                    emissiveHex: 0x8B0000,
+                    emissiveIntensity: 0.20
+                });
+            });
+
+            colorableParts.forEach(part => {
+                setToothPartVisual(part, {
+                    opacity: 1,
+                    emissiveHex: 0x8B0000,
+                    emissiveIntensity: 0.28
+                });
+            });
+        }
 
             function updateMousePosition(event) {
                 const rect = renderer.domElement.getBoundingClientRect();
@@ -1851,16 +3273,18 @@
                 mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
             }
 
-            function showTooltip(event, mesh) {
-                const toothNumber = mesh.userData.tooth;
-                const toothName = getToothName(toothNumber);
-                const treatment = ensureToothState(toothNumber).threeD;
+        function showTooltip(event, mesh) {
+            const toothNumber = mesh.userData.tooth;
+            const toothName = getToothName(toothNumber);
+            const state = ensureToothState(toothNumber);
+            const treatment = state.threeD || getPreferredToothVisual(state);
 
                 toothTooltipContent.innerHTML = `
                     <div class="text-xs font-extrabold tracking-wide text-red-200 mb-1">Tooth #${toothNumber}</div>
                     <div class="text-sm font-bold leading-tight">${toothName}</div>
+                    <div class="mt-1 text-[11px] text-gray-300">Click to choose this tooth, then select a surface.</div>
                     <div class="mt-2 text-xs ${treatment ? 'text-emerald-200' : 'text-gray-300'}">
-                        ${treatment ? `${treatment.code} - ${treatment.label}` : 'No treatment assigned'}
+                        ${treatment ? `Current visual: ${treatment.code} - ${treatment.label}` : 'No treatment assigned'}
                     </div>
                 `;
 
@@ -1910,23 +3334,25 @@
 
                 const intersects = raycaster.intersectObjects(teethMeshes);
 
-                if (intersects.length > 0) {
-                    selectedMesh = intersects[0].object;
-                    selectedTooth = selectedMesh.userData.tooth;
-                    selectedTargetType = '3d';
-                    selectedSurfaceKey = null;
+            if (intersects.length > 0) {
+                selectedMesh = intersects[0].object;
+                selectedTooth = selectedMesh.userData.tooth;
+                restoreSavedSurfaceSelectionForTooth(selectedTooth);
 
-                    const state = ensureToothState(selectedTooth);
-                    selectedLegend = state.threeD ? state.threeD.code : null;
+                focusCameraOnTooth(selectedMesh);
+                renderThreeVisuals();
+                updateSelectedToothUI();
 
-                    renderThreeVisuals();
-                    updateSelectedToothUI();
-
-                    if (hoveredMesh) {
-                        showTooltip(event, hoveredMesh);
-                    }
+                if (hoveredMesh) {
+                    showTooltip(event, hoveredMesh);
                 }
+
+                return;
             }
+
+            clear3DSurfacePickerSelection(false);
+            hideTooltip();
+        }
 
             const procedureStartTimestamp = Date.now();
 
@@ -2041,18 +3467,137 @@
                 }, 3500);
             }
 
-            function resetFollowUpForm() {
-                const form = document.getElementById('followUpForm');
+            function setFollowUpEmptySlotPlaceholder() {
+                const slotPlaceholder = document.getElementById('followUpSlotPlaceholder');
+
+                if (!slotPlaceholder) return;
+
+                slotPlaceholder.classList.add('follow-up-empty-slot-placeholder');
+                slotPlaceholder.innerHTML = `
+                    <div class="follow-up-empty-icon">
+                        <i class="fa-regular fa-calendar"></i>
+                    </div>
+                    <h4>Choose a date</h4>
+                    <p>Select an available day to see time slots.</p>
+                `;
+            }
+
+            function hideFollowUpSelectedTime() {
+                const selectedTimePill = document.getElementById('followUpSelectedTimePill');
+                const selectedTimeText = document.getElementById('followUpSelectedTimeText');
+
+                if (selectedTimeText) {
+                    selectedTimeText.textContent = '';
+                }
+
+                if (selectedTimePill) {
+                    selectedTimePill.classList.add('hidden');
+                    selectedTimePill.classList.remove('show');
+                    selectedTimePill.style.display = 'none';
+                }
+            }
+
+            function syncFollowUpSlotState() {
+                const slotsWrap = document.querySelector('.follow-up-slots-wrap');
                 const dateInput = document.getElementById('followup_appointment_date');
                 const timeInput = document.getElementById('followup_appointment_time');
-                const reasonInput = document.getElementById('followup_reason');
-
                 const datePill = document.getElementById('followUpDatePill');
                 const slotPlaceholder = document.getElementById('followUpSlotPlaceholder');
                 const slotContainer = document.getElementById('followUpSlotContainer');
                 const slotGrid = document.getElementById('followUpSlotGrid');
                 const selectedTimePill = document.getElementById('followUpSelectedTimePill');
                 const selectedTimeText = document.getElementById('followUpSelectedTimeText');
+                const clearTimeBtn = document.getElementById('followUpClearTimeBtn');
+
+                const hasDate = Boolean(dateInput?.value);
+                const hasSlotMarkup = Boolean(slotGrid?.children?.length);
+                const hasAvailableSlots = Boolean(slotGrid?.querySelector('.slot-chip:not(.disabled)'));
+                const selectedValue = timeInput?.value || '';
+
+                slotsWrap?.classList.toggle('is-empty', !hasDate);
+                slotsWrap?.classList.toggle('has-date', hasDate);
+                slotsWrap?.classList.toggle('has-slots', hasDate && hasSlotMarkup);
+
+                if (!hasDate) {
+                    if (datePill) {
+                        datePill.innerHTML = '';
+                        datePill.classList.add('hidden');
+                        datePill.classList.remove('show');
+                        datePill.style.display = 'none';
+                    }
+
+                    if (slotContainer) {
+                        slotContainer.classList.add('hidden');
+                        slotContainer.style.display = 'none';
+                    }
+
+                    if (slotGrid) {
+                        slotGrid.innerHTML = '';
+                        slotGrid.style.display = 'none';
+                    }
+
+                    if (slotPlaceholder) {
+                        setFollowUpEmptySlotPlaceholder();
+                        slotPlaceholder.classList.remove('hidden');
+                        slotPlaceholder.style.display = 'flex';
+                    }
+
+                    if (clearTimeBtn) {
+                        clearTimeBtn.classList.add('hidden');
+                    }
+
+                    hideFollowUpSelectedTime();
+                    return;
+                }
+
+                if (datePill) {
+                    if (datePill.textContent.trim().length > 0) {
+                        datePill.classList.remove('hidden');
+                        datePill.classList.add('show');
+                        datePill.style.display = 'flex';
+                    } else {
+                        datePill.classList.add('hidden');
+                        datePill.classList.remove('show');
+                        datePill.style.display = 'none';
+                    }
+                }
+
+                if (slotPlaceholder) {
+                    slotPlaceholder.classList.add('hidden');
+                    slotPlaceholder.style.display = 'none';
+                }
+
+                if (slotContainer) {
+                    slotContainer.classList.remove('hidden');
+                    slotContainer.style.display = 'block';
+                }
+
+                if (clearTimeBtn) {
+                    clearTimeBtn.classList.toggle('hidden', !hasAvailableSlots);
+                }
+
+                if (selectedTimePill && selectedTimeText) {
+                    if (selectedValue) {
+                        selectedTimeText.textContent = selectedValue;
+                        selectedTimePill.classList.remove('hidden');
+                        selectedTimePill.classList.add('show');
+                        selectedTimePill.style.display = 'flex';
+                    } else {
+                        hideFollowUpSelectedTime();
+                    }
+                }
+            }
+
+            function resetFollowUpForm() {
+                const form = document.getElementById('followUpForm');
+                const dateInput = document.getElementById('followup_appointment_date');
+                const timeInput = document.getElementById('followup_appointment_time');
+                const reasonInput = document.getElementById('followup_reason');
+                const datePill = document.getElementById('followUpDatePill');
+                const slotPlaceholder = document.getElementById('followUpSlotPlaceholder');
+                const slotContainer = document.getElementById('followUpSlotContainer');
+                const slotGrid = document.getElementById('followUpSlotGrid');
+                const clearTimeBtn = document.getElementById('followUpClearTimeBtn');
 
                 if (form) form.reset();
                 if (dateInput) dateInput.value = '';
@@ -2070,16 +3615,15 @@
 
                 if (datePill) {
                     datePill.innerHTML = '';
+                    datePill.classList.add('hidden');
                     datePill.classList.remove('show');
+                    datePill.style.display = 'none';
                 }
 
                 if (slotPlaceholder) {
+                    setFollowUpEmptySlotPlaceholder();
                     slotPlaceholder.classList.remove('hidden');
                     slotPlaceholder.style.display = 'flex';
-                    slotPlaceholder.innerHTML = `
-            <i class="fa-regular fa-calendar-xmark"></i>
-            <span>Select a date to see available slots</span>
-        `;
                 }
 
                 if (slotContainer) {
@@ -2092,16 +3636,94 @@
                     slotGrid.style.display = 'none';
                 }
 
-                if (selectedTimePill) {
-                    selectedTimePill.classList.add('hidden');
-                    selectedTimePill.classList.remove('show');
-                    selectedTimePill.style.display = 'none';
+                if (clearTimeBtn) {
+                    clearTimeBtn.classList.add('hidden');
                 }
 
-                if (selectedTimeText) {
-                    selectedTimeText.textContent = '';
-                }
+                hideFollowUpSelectedTime();
+                syncFollowUpSlotState();
             }
+
+            const followUpClearTimeBtn = document.getElementById('followUpClearTimeBtn');
+
+            function clearFollowUpTimeSelection() {
+                const slotGrid = document.getElementById('followUpSlotGrid');
+                const timeInput = document.getElementById('followup_appointment_time');
+
+                if (typeof selectedTime !== 'undefined') {
+                    selectedTime = null;
+                }
+
+                if (timeInput) {
+                    timeInput.value = '';
+                    timeInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                slotGrid?.querySelectorAll('.slot-chip').forEach(chip => {
+                    chip.classList.remove(
+                        'selected',
+                        'bg-[#8B0000]',
+                        'text-white',
+                        'border-[#8B0000]',
+                        'shadow-[0_2px_12px_rgba(139,0,0,0.25)]'
+                    );
+                    chip.classList.add('border-[#e8e2dd]', 'bg-[#fafaf8]', 'text-[#1a1410]');
+                    chip.setAttribute('aria-pressed', 'false');
+                });
+
+                syncFollowUpSlotState();
+            }
+
+            if (followUpClearTimeBtn) {
+                followUpClearTimeBtn.addEventListener('click', clearFollowUpTimeSelection);
+            }
+
+            if (typeof renderSlotLoading === 'function') {
+                const originalRenderSlotLoading = renderSlotLoading;
+                renderSlotLoading = function(iso) {
+                    originalRenderSlotLoading(iso);
+                    setTimeout(syncFollowUpSlotState, 0);
+                };
+            }
+
+            if (typeof renderSlots === 'function') {
+                const originalRenderSlots = renderSlots;
+                renderSlots = function(payload, iso) {
+                    originalRenderSlots(payload, iso);
+                    setTimeout(syncFollowUpSlotState, 0);
+                };
+            }
+
+            if (typeof clearSlotSelectionUI === 'function') {
+                const originalClearSlotSelectionUI = clearSlotSelectionUI;
+                clearSlotSelectionUI = function() {
+                    originalClearSlotSelectionUI();
+                    setFollowUpEmptySlotPlaceholder();
+                    setTimeout(syncFollowUpSlotState, 0);
+                };
+            }
+
+            document.getElementById('followUpSlotGrid')?.addEventListener('click', function() {
+                setTimeout(syncFollowUpSlotState, 0);
+            });
+
+            document.getElementById('followup_appointment_date')?.addEventListener('change', function() {
+                setTimeout(syncFollowUpSlotState, 0);
+            });
+
+            document.getElementById('followup_appointment_time')?.addEventListener('change', syncFollowUpSlotState);
+
+            ['followUpDatePill', 'followUpSlotGrid'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (!el) return;
+
+                new MutationObserver(function() {
+                    setTimeout(syncFollowUpSlotState, 0);
+                }).observe(el, {
+                    childList: true,
+                    subtree: true
+                });
+            });
 
             window.openFollowUpModal = function() {
                 resetFollowUpForm();
@@ -2150,19 +3772,20 @@
                             return null;
                         }
 
-                        const cleanEntry = {
-                            tooth: toothNumber,
-                            toothName: entry.toothName || getToothName(toothNumber),
-                            status: null,
-                            surfaces: {
-                                top: null,
-                                left: null,
-                                center: null,
-                                right: null,
-                                bottom: null,
-                            },
-                            threeD: null,
-                        };
+                    const cleanEntry = {
+                        tooth: toothNumber,
+                        toothName: entry.toothName || getToothName(toothNumber),
+                        status: null,
+                        surfaces: {
+                            top: null,
+                            left: null,
+                            center: null,
+                            right: null,
+                            bottom: null,
+                        },
+                        threeD: null,
+                        lastSelectedSurface: null,
+                    };
 
                         if (entry.status && entry.status.code) {
                             cleanEntry.status = entry.status;
@@ -2174,11 +3797,31 @@
 
                         const surfaces = entry.surfaces || {};
 
-                        ['top', 'left', 'center', 'right', 'bottom'].forEach(function(surfaceKey) {
-                            if (surfaces[surfaceKey] && surfaces[surfaceKey].code) {
-                                cleanEntry.surfaces[surfaceKey] = surfaces[surfaceKey];
-                            }
-                        });
+                    ['top', 'left', 'center', 'right', 'bottom'].forEach(function (surfaceKey) {
+                        if (surfaces[surfaceKey] && surfaces[surfaceKey].code) {
+                            cleanEntry.surfaces[surfaceKey] = surfaces[surfaceKey];
+                        }
+                    });
+
+                    const savedSurfaceKey =
+                        ['top', 'left', 'center', 'right', 'bottom'].includes(entry.lastSelectedSurface)
+                            ? entry.lastSelectedSurface
+                            : null;
+
+                    cleanEntry.lastSelectedSurface =
+                        savedSurfaceKey && cleanEntry.surfaces[savedSurfaceKey]
+                            ? savedSurfaceKey
+                            : getFirstTreatedSurfaceKey(cleanEntry);
+
+                    /*
+                     * Keep a 3D visual fallback in the JSON even when the dentist marked
+                     * through a 3D surface picker. The actual clinical detail remains in
+                     * surfaces, but this helps the 3D cylinder show the saved tooth color
+                     * immediately when the procedure is reopened.
+                     */
+                    if (!cleanEntry.threeD) {
+                        cleanEntry.threeD = getPreferredToothVisual(cleanEntry);
+                    }
 
                         const hasTreatment =
                             (cleanEntry.status && cleanEntry.status.code) ||
@@ -2404,12 +4047,34 @@
                 });
             }
 
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape') {
-                    closeResetModal();
-                    closeCancelProcedureModal();
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeResetModal();
+                closeCancelProcedureModal();
+
+                if (currentView === '3d' && selectedTooth) {
+                    clear3DSurfacePickerSelection(false);
                 }
+            }
+        });
+
+        surfacePickerButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                selectSurfaceFrom3DPicker(button.dataset.surface);
             });
+        });
+
+        if (reset3DViewBtn) {
+            reset3DViewBtn.addEventListener('click', function () {
+                clear3DSurfacePickerSelection(true);
+            });
+        }
+
+        if (close3DSurfacePickerBtn) {
+            close3DSurfacePickerBtn.addEventListener('click', function () {
+                clear3DSurfacePickerSelection(false);
+            });
+        }
 
             updateProcedureTimer();
             setInterval(updateProcedureTimer, 1000);

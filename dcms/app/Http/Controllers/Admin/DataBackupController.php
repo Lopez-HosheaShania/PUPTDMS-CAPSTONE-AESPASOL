@@ -64,16 +64,8 @@ class DataBackupController extends Controller
 
         $lastBackup = Backup::where('status', 'completed')->latest()->first();
 
-        /*
-         * Hostinger automated backups are managed outside the Laravel system.
-         * This section only reflects/admin-maintains the coverage status inside PUPTDMS.
-         */
         $hostingerBackup = $this->getHostingerBackupCoverage();
 
-        /*
-         * Kept for backward compatibility with the old Blade/JS variables.
-         * You can remove this later once the Blade no longer uses Auto-Backup Schedule.
-         */
         $autoBackupEnabled = $hostingerBackup['enabled'];
 
         $backupSchedule = [
@@ -171,10 +163,6 @@ class DataBackupController extends Controller
         try {
             Storage::disk('local')->makeDirectory('backups');
 
-            /*
-             * "incremental" is currently stored as a regular DB dump as well.
-             * The type is preserved for UI/history, while true incremental logic can be added later.
-             */
             $this->dumpDatabase($tmpSqlPath);
             $this->gzipFile($tmpSqlPath, $tmpGzPath);
 
@@ -362,10 +350,6 @@ class DataBackupController extends Controller
         ]);
     }
 
-    /*
-     * Redirects admin to Hostinger hPanel.
-     * Add a route for this method, then use it for your "Open Hostinger hPanel" button.
-     */
     public function openHpanel(): RedirectResponse|JsonResponse
     {
         if (!session('admin_logged_in')) {
@@ -402,9 +386,6 @@ class DataBackupController extends Controller
             'backup'
         );
 
-        /*
-         * Legacy setting kept so existing UI/JS that still checks auto_backup_enabled will not break.
-         */
         SystemSetting::setSetting('auto_backup_enabled', '1', 'backup');
 
         AuditLogger::log(
@@ -423,10 +404,6 @@ class DataBackupController extends Controller
         ]);
     }
 
-    /*
-     * This now marks the Hostinger backup coverage status inside the system.
-     * It does not enable/disable Hostinger backups directly.
-     */
     public function toggleAuto(Request $request): JsonResponse
     {
         if (!session('admin_logged_in')) {
@@ -446,9 +423,6 @@ class DataBackupController extends Controller
         SystemSetting::setSetting('hostinger_backup_status', $enabled ? 'active' : 'inactive', 'backup');
         SystemSetting::setSetting('hostinger_backup_last_verified_at', now()->toDateTimeString(), 'backup');
 
-        /*
-         * Legacy setting kept so existing UI/JS that still checks auto_backup_enabled will not break.
-         */
         SystemSetting::setSetting('auto_backup_enabled', $enabled ? '1' : '0', 'backup');
 
         AuditLogger::log(
@@ -467,11 +441,6 @@ class DataBackupController extends Controller
         ]);
     }
 
-    /*
-     * Updated purpose:
-     * This saves backup coverage/status information for Hostinger-managed backups.
-     * It still accepts the old schedule fields so your current JS will not immediately break.
-     */
     public function updateSchedule(Request $request): JsonResponse
     {
         if (!session('admin_logged_in')) {
@@ -487,9 +456,6 @@ class DataBackupController extends Controller
             'hostinger_backup_frequency' => 'nullable|string|max:100',
             'hostinger_backup_notes' => 'nullable|string|max:255',
 
-            /*
-             * Legacy schedule fields from the old Auto-Backup Schedule UI.
-             */
             'daily_enabled' => 'nullable|boolean',
             'daily_time' => 'nullable|date_format:H:i',
             'weekly_enabled' => 'nullable|boolean',
@@ -521,9 +487,6 @@ class DataBackupController extends Controller
             SystemSetting::setSetting('hostinger_backup_notes', $data['hostinger_backup_notes'], 'backup');
         }
 
-        /*
-         * Legacy settings kept for current Blade/JS compatibility.
-         */
         if (array_key_exists('daily_enabled', $data)) {
             SystemSetting::setSetting('backup_schedule_daily_enabled', $data['daily_enabled'] ? '1' : '0', 'backup');
         }
