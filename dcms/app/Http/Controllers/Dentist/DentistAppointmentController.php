@@ -14,6 +14,8 @@ use App\Helpers\PhilippineHolidays;
 use App\Notifications\AppointmentCancelledNotification;
 use App\Notifications\AppointmentRescheduledNotification;
 use App\Models\ServiceType;
+use Illuminate\Support\Facades\Auth;
+
 
 class DentistAppointmentController extends Controller
 {
@@ -238,7 +240,7 @@ class DentistAppointmentController extends Controller
             $patientUser->notify(
                 new AppointmentCancelledNotification(
                     $appointment,
-                    auth()->user()->name ?? 'the dentist',
+                    Auth::user()?->name ?? 'the dentist',
                     $request->reason
                 )
             );
@@ -370,7 +372,7 @@ class DentistAppointmentController extends Controller
             $patientUser->notify(
                 new AppointmentRescheduledNotification(
                     $appointment,
-                    auth()->user()->name ?? 'the dentist'
+                    Auth::user()?->name ?? 'the dentist'
                 )
             );
         }
@@ -384,6 +386,63 @@ class DentistAppointmentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Appointment rescheduled successfully.'
+        ]);
+    }
+
+    public function storeFollowUp(Request $request, $id)
+    {
+        $request->validate([
+            'followup_appointment_date' => 'required|date|after:today',
+            'followup_appointment_time' => 'required',
+            'followup_reason' => 'required|string|max:1000',
+        ]);
+
+        if (Carbon::parse($request->followup_appointment_date)->isToday()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Same-day follow-up scheduling is not allowed. Please choose a future date.',
+            ], 422);
+        }
+
+        $originalAppointment = Appointment::with('patient')->findOrFail($id);
+
+        $mysqlTime = Carbon::createFromFormat('g:i A', trim($request->followup_appointment_time))->format('H:i:s');
+
+        $slotTaken = Appointment::where('appointment_date', $request->followup_appointment_date)
+            ->where('appointment_time', $mysqlTime)
+            ->whereIn('status', ['upcoming', 'rescheduled'])
+            ->exists();
+
+        if ($slotTaken) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sorry, that time slot is already taken. Please choose another time.',
+            ], 422);
+        }
+
+        $followUpAppointment = Appointment::create([
+            'patient_id' => $originalAppointment->patient_id,
+            'dentist_id' => auth()->id(),
+            'service_type' => 'Follow-up',
+            'appointment_date' => $request->followup_appointment_date,
+            'appointment_time' => $mysqlTime,
+            'status' => 'upcoming',
+            'is_follow_up' => true,
+            'follow_up_for_appointment_id' => $originalAppointment->id,
+            'follow_up_reason' => $request->followup_reason,
+            'follow_up_reminder_sent_at' => null,
+            'follow_up_today_reminder_sent_at' => null,
+        ]);
+
+        AuditLogger::log(
+            'create',
+            'dentist_appointments',
+            'Dentist scheduled a follow-up appointment'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Follow-up appointment scheduled successfully.',
         ]);
     }
 }

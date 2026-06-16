@@ -11,10 +11,24 @@ class Appointment extends Model
 
     protected $fillable = [
         'patient_id',
+        'dentist_id',
         'service_type',
         'appointment_date',
         'appointment_time',
         'status',
+        'is_follow_up',
+        'follow_up_for_appointment_id',
+        'follow_up_reason',
+        'follow_up_reminder_sent_at',
+        'follow_up_today_reminder_sent_at',
+        'follow_up_one_day_reminder_sent_at',
+    ];
+
+    protected $casts = [
+        'is_follow_up' => 'boolean',
+        'follow_up_reminder_sent_at' => 'datetime',
+        'follow_up_today_reminder_sent_at' => 'datetime',
+        'follow_up_one_day_reminder_sent_at' => 'datetime',
     ];
 
     public function dentalHistory()
@@ -34,5 +48,15 @@ class Appointment extends Model
     public function dentist()
     {
         return $this->belongsTo(User::class, 'dentist_id');
+    }
+
+    public function originalAppointment()
+    {
+        return $this->belongsTo(Appointment::class, 'follow_up_for_appointment_id');
+    }
+
+    public function followUpAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'follow_up_for_appointment_id');
     }
 }
