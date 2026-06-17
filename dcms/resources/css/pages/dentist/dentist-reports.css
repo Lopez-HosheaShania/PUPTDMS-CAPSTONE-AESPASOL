@@ -1,7 +1,3 @@
-/* ==============================
-   FIX: Template cards title cut
-   ============================== */
-
 .printable-form-card,
 .report-template-card,
 .template-card {
@@ -24,11 +20,6 @@
     word-break: break-word !important;
 }
 
-
-/* ==============================
-   FIX: Report preview being cut
-   ============================== */
-
 .report-preview-wrapper,
 .report-preview-body,
 .report-preview-container,
@@ -44,7 +35,6 @@
     box-sizing: border-box !important;
 }
 
-/* The paper/template itself must not be squeezed or clipped */
 .report-paper,
 .print-paper,
 .preview-paper,
@@ -59,7 +49,6 @@
     margin-right: auto !important;
 }
 
-/* Legal portrait */
 .report-paper.legal,
 .print-paper.legal,
 .preview-paper.legal,
@@ -71,7 +60,6 @@
     min-height: 14in !important;
 }
 
-/* Letter portrait */
 .report-paper.letter,
 .print-paper.letter,
 .preview-paper.letter,
@@ -83,7 +71,6 @@
     min-height: 11in !important;
 }
 
-/* A4 portrait */
 .report-paper.a4,
 .print-paper.a4,
 .preview-paper.a4,
@@ -95,7 +82,6 @@
     min-height: 297mm !important;
 }
 
-/* Prevent logos/header images from being clipped */
 .report-paper img,
 .print-paper img,
 .preview-paper img,
@@ -107,11 +93,6 @@
     height: auto !important;
     object-fit: contain !important;
 }
-
-
-/* ==============================
-   Mobile / tablet preview
-   ============================== */
 
 @media screen and (max-width: 1024px) {
 
@@ -137,11 +118,6 @@
         margin-right: 0 !important;
     }
 }
-
-
-/* ==============================
-   Actual print should NOT be scaled
-   ============================== */
 
 @media print {
 
@@ -173,51 +149,146 @@
     }
 }
 
-/* A series */
-.sheet.paper-a0-portrait { width: 841mm; min-height: 1189mm; }
-.sheet.paper-a0-landscape { width: 1189mm; min-height: 841mm; }
+.sheet.paper-a0-portrait {
+    width: 841mm;
+    min-height: 1189mm;
+}
 
-.sheet.paper-a1-portrait { width: 594mm; min-height: 841mm; }
-.sheet.paper-a1-landscape { width: 841mm; min-height: 594mm; }
+.sheet.paper-a0-landscape {
+    width: 1189mm;
+    min-height: 841mm;
+}
 
-.sheet.paper-a2-portrait { width: 420mm; min-height: 594mm; }
-.sheet.paper-a2-landscape { width: 594mm; min-height: 420mm; }
+.sheet.paper-a1-portrait {
+    width: 594mm;
+    min-height: 841mm;
+}
 
-.sheet.paper-a3-portrait { width: 297mm; min-height: 420mm; }
-.sheet.paper-a3-landscape { width: 420mm; min-height: 297mm; }
+.sheet.paper-a1-landscape {
+    width: 841mm;
+    min-height: 594mm;
+}
 
-.sheet.paper-a4-portrait { width: 210mm; min-height: 297mm; }
-.sheet.paper-a4-landscape { width: 297mm; min-height: 210mm; }
+.sheet.paper-a2-portrait {
+    width: 420mm;
+    min-height: 594mm;
+}
 
-.sheet.paper-a5-portrait { width: 148mm; min-height: 210mm; }
-.sheet.paper-a5-landscape { width: 210mm; min-height: 148mm; }
+.sheet.paper-a2-landscape {
+    width: 594mm;
+    min-height: 420mm;
+}
 
-.sheet.paper-a6-portrait { width: 105mm; min-height: 148mm; }
-.sheet.paper-a6-landscape { width: 148mm; min-height: 105mm; }
+.sheet.paper-a3-portrait {
+    width: 297mm;
+    min-height: 420mm;
+}
 
-/* B series */
-.sheet.paper-b0-portrait { width: 1000mm; min-height: 1414mm; }
-.sheet.paper-b0-landscape { width: 1414mm; min-height: 1000mm; }
+.sheet.paper-a3-landscape {
+    width: 420mm;
+    min-height: 297mm;
+}
 
-.sheet.paper-b1-portrait { width: 707mm; min-height: 1000mm; }
-.sheet.paper-b1-landscape { width: 1000mm; min-height: 707mm; }
+.sheet.paper-a4-portrait {
+    width: 210mm;
+    min-height: 297mm;
+}
 
-.sheet.paper-b2-portrait { width: 500mm; min-height: 707mm; }
-.sheet.paper-b2-landscape { width: 707mm; min-height: 500mm; }
+.sheet.paper-a4-landscape {
+    width: 297mm;
+    min-height: 210mm;
+}
 
-.sheet.paper-b3-portrait { width: 353mm; min-height: 500mm; }
-.sheet.paper-b3-landscape { width: 500mm; min-height: 353mm; }
+.sheet.paper-a5-portrait {
+    width: 148mm;
+    min-height: 210mm;
+}
 
-.sheet.paper-b4-portrait { width: 250mm; min-height: 353mm; }
-.sheet.paper-b4-landscape { width: 353mm; min-height: 250mm; }
+.sheet.paper-a5-landscape {
+    width: 210mm;
+    min-height: 148mm;
+}
 
-.sheet.paper-b5-portrait { width: 176mm; min-height: 250mm; }
-.sheet.paper-b5-landscape { width: 250mm; min-height: 176mm; }
+.sheet.paper-a6-portrait {
+    width: 105mm;
+    min-height: 148mm;
+}
 
-.sheet.paper-b6-portrait { width: 125mm; min-height: 176mm; }
-.sheet.paper-b6-landscape { width: 176mm; min-height: 125mm; }
+.sheet.paper-a6-landscape {
+    width: 148mm;
+    min-height: 105mm;
+}
 
-/* US/common paper sizes */
+.sheet.paper-b0-portrait {
+    width: 1000mm;
+    min-height: 1414mm;
+}
+
+.sheet.paper-b0-landscape {
+    width: 1414mm;
+    min-height: 1000mm;
+}
+
+.sheet.paper-b1-portrait {
+    width: 707mm;
+    min-height: 1000mm;
+}
+
+.sheet.paper-b1-landscape {
+    width: 1000mm;
+    min-height: 707mm;
+}
+
+.sheet.paper-b2-portrait {
+    width: 500mm;
+    min-height: 707mm;
+}
+
+.sheet.paper-b2-landscape {
+    width: 707mm;
+    min-height: 500mm;
+}
+
+.sheet.paper-b3-portrait {
+    width: 353mm;
+    min-height: 500mm;
+}
+
+.sheet.paper-b3-landscape {
+    width: 500mm;
+    min-height: 353mm;
+}
+
+.sheet.paper-b4-portrait {
+    width: 250mm;
+    min-height: 353mm;
+}
+
+.sheet.paper-b4-landscape {
+    width: 353mm;
+    min-height: 250mm;
+}
+
+.sheet.paper-b5-portrait {
+    width: 176mm;
+    min-height: 250mm;
+}
+
+.sheet.paper-b5-landscape {
+    width: 250mm;
+    min-height: 176mm;
+}
+
+.sheet.paper-b6-portrait {
+    width: 125mm;
+    min-height: 176mm;
+}
+
+.sheet.paper-b6-landscape {
+    width: 176mm;
+    min-height: 125mm;
+}
+
 .sheet.paper-letter-portrait {
     width: 8.5in;
     min-height: 11in;
@@ -276,4 +347,2189 @@
 .sheet.paper-ledger-landscape {
     width: 11in;
     min-height: 17in;
+}
+
+.metric-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff5f5 0%, #ffe9e9 100%);
+    border: 1px solid #f3caca;
+    color: #8B0000;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+
+.kpi-card {
+    position: relative;
+    background: linear-gradient(180deg, #ffffff 0%, #fffdfd 100%);
+    border-radius: 22px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid #efe4e4;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .05);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    text-decoration: none;
+    overflow: hidden;
+    min-height: 126px;
+}
+
+.kpi-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, #8B0000 0%, #d97706 100%);
+    opacity: .9;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 34px rgba(139, 0, 0, .10);
+    border-color: #e7c9c9;
+}
+
+.kpi-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+    color: #111827;
+    margin-bottom: 8px;
+    letter-spacing: -0.03em;
+}
+
+.kpi-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.kpi-delta {
+    font-size: 0.78rem;
+    font-weight: 500;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.kpi-delta.up {
+    color: #16a34a;
+}
+
+.kpi-delta.down {
+    color: #dc2626;
+}
+
+.kpi-arrow {
+    margin-left: auto;
+    color: #d1d5db;
+    font-size: 0.95rem;
+    transition: all .2s ease;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #faf5f5;
+    flex-shrink: 0;
+}
+
+.kpi-card:hover .kpi-arrow {
+    color: #8B0000;
+    background: #fff1f1;
+    transform: translateX(2px);
+}
+
+.chart-card {
+    background: linear-gradient(180deg, #ffffff 0%, #fffdfd 100%);
+    border-radius: 20px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .04);
+    border: 1px solid #efe4e4;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.chart-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #333333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-title i {
+    color: #8B0000;
+}
+
+.period-select {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #333333;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 99px;
+    padding: 6px 28px 6px 14px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    transition: all .2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.period-select:hover {
+    border-color: #94a3b8;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.period-select:focus {
+    border-color: #8B0000;
+    box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+.action-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #E5E7EB;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all .2s ease;
+    cursor: pointer;
+}
+
+.action-card:hover {
+    border-color: #8B0000;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, .05);
+    transform: translateY(-2px);
+}
+
+.action-icon {
+    width: 42px;
+    height: 42px;
+    background: #FFF5F5;
+    color: #8B0000;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all .2s;
+}
+
+.action-card:hover .action-icon {
+    background: #8B0000;
+    color: white;
+}
+
+.stock-row {
+    padding: 10px 0;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.stock-row:last-child {
+    border-bottom: none;
+}
+
+.stock-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.stock-bar-bg {
+    height: 6px;
+    background: #F3F4F6;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.stock-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width .8s cubic-bezier(.4, 0, .2, 1);
+}
+
+.chart-empty {
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+    color: #9CA3AF;
+    text-align: center;
+}
+
+.chart-empty>i {
+    font-size: 2.5rem;
+    color: #E5E7EB;
+    margin-bottom: 4px;
+}
+
+.chart-empty p {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6B7280;
+    margin: 0;
+}
+
+.chart-empty span {
+    font-size: 0.75rem;
+}
+
+.chart-empty,
+.chart-loading {
+    height: 100%;
+}
+
+.chart-empty:not(.hidden) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-loading:not(.hidden) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-loading {
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.chart-loading i {
+    font-size: 1.5rem;
+    color: #8B0000;
+    animation: spin 1s linear infinite;
+}
+
+.analytics-section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #8B0000;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.analytics-subgrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 30px;
+}
+
+.analytics-main-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1.2fr .9fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.analytics-secondary-grid {
+    display: grid;
+    grid-template-columns: 1.5fr .9fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.pro-card {
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+    padding: 20px;
+    min-height: 220px;
+}
+
+.service-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.service-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: #fafafa;
+    border: 1px solid #f1f5f9;
+}
+
+.service-rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: #8B0000;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.service-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.service-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.service-count {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #8B0000;
+    white-space: nowrap;
+}
+
+.mini-kpi {
+    background: linear-gradient(180deg, #ffffff 0%, #fffdfd 100%);
+    border: 1px solid #efe7e7;
+    border-radius: 20px;
+    padding: 18px 20px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, .04);
+    min-height: 116px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mini-kpi::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 64px;
+    height: 64px;
+    background: radial-gradient(circle, rgba(139, 0, 0, .08) 0%, rgba(139, 0, 0, 0) 70%);
+    pointer-events: none;
+}
+
+.mini-kpi-label {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #7c8596;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.mini-kpi-value {
+    margin-top: 18px;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #111827;
+    letter-spacing: -0.03em;
+}
+
+.analytics-page-shell {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, .05), transparent 24%),
+        linear-gradient(180deg, #fff 0%, #faf7f7 100%);
+    border-radius: 24px;
+}
+
+.section-card {
+    background: #fff;
+    border: 1px solid #eee2e2;
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .04);
+}
+
+.inventory-shell {
+    background: linear-gradient(180deg, #fff 0%, #fffafa 100%);
+    border: 1px solid #f3dede;
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(139, 0, 0, .04);
+}
+
+.kpi-grid-layout {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.fp-date-input-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.fp-date-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+#dateFrom[readonly],
+#dateTo[readonly] {
+    cursor: pointer;
+}
+
+.report-hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+.summary-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(139, 0, 0, 0.10);
+    color: #6B7280;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.summary-tag-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.report-hero-actions {
+    position: relative;
+    z-index: 2;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.report-hero-btn {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #8B0000;
+    color: #FFFFFF;
+    border: 1px solid rgba(139, 0, 0, 0.18);
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+    box-shadow: 0 12px 26px rgba(139, 0, 0, 0.22);
+    transition: all .18s ease;
+}
+
+.report-hero-btn:hover {
+    background: #660000;
+    transform: translateY(-1px);
+    box-shadow: 0 16px 32px rgba(139, 0, 0, 0.26);
+}
+
+[data-theme="dark"] #mainContent .kpi-card,
+[data-theme="dark"] #mainContent .mini-kpi,
+[data-theme="dark"] #mainContent .chart-card,
+[data-theme="dark"] #mainContent .pro-card,
+[data-theme="dark"] #mainContent .section-card,
+[data-theme="dark"] #mainContent .inventory-shell,
+[data-theme="dark"] #mainContent .action-card,
+.dark #mainContent .kpi-card,
+.dark #mainContent .mini-kpi,
+.dark #mainContent .chart-card,
+.dark #mainContent .pro-card,
+.dark #mainContent .section-card,
+.dark #mainContent .inventory-shell,
+.dark #mainContent .action-card {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.18), transparent 36%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.78), rgba(22, 27, 34, 0.66)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mainContent .kpi-card:hover,
+[data-theme="dark"] #mainContent .action-card:hover,
+.dark #mainContent .kpi-card:hover,
+.dark #mainContent .action-card:hover {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.24), transparent 34%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.88), rgba(22, 27, 34, 0.78)) !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+}
+
+[data-theme="dark"] #mainContent .kpi-value,
+[data-theme="dark"] #mainContent .mini-kpi-value,
+[data-theme="dark"] #mainContent .chart-title,
+[data-theme="dark"] #mainContent .service-name,
+[data-theme="dark"] #mainContent .stock-name,
+[data-theme="dark"] #mainContent .text-gray-800,
+[data-theme="dark"] #mainContent .text-gray-700,
+.dark #mainContent .kpi-value,
+.dark #mainContent .mini-kpi-value,
+.dark #mainContent .chart-title,
+.dark #mainContent .service-name,
+.dark #mainContent .stock-name,
+.dark #mainContent .text-gray-800,
+.dark #mainContent .text-gray-700 {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mainContent .kpi-label,
+[data-theme="dark"] #mainContent .mini-kpi-label,
+[data-theme="dark"] #mainContent .chart-empty p,
+[data-theme="dark"] #mainContent .chart-empty span,
+[data-theme="dark"] #mainContent .text-gray-500,
+[data-theme="dark"] #mainContent .text-gray-400,
+.dark #mainContent .kpi-label,
+.dark #mainContent .mini-kpi-label,
+.dark #mainContent .chart-empty p,
+.dark #mainContent .chart-empty span,
+.dark #mainContent .text-gray-500,
+.dark #mainContent .text-gray-400 {
+    color: #C9D1D9 !important;
+}
+
+[data-theme="dark"] #mainContent .analytics-section-label,
+[data-theme="dark"] #mainContent .chart-title i,
+.dark #mainContent .analytics-section-label,
+.dark #mainContent .chart-title i {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent .metric-chip,
+.dark #mainContent .metric-chip {
+    background: rgba(139, 0, 0, 0.18) !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+    color: #FCA5A5 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] #mainContent .period-select,
+.dark #mainContent .period-select {
+    background-color: rgba(13, 17, 23, 0.78) !important;
+    color: #C9D1D9 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] #mainContent .service-row,
+[data-theme="dark"] #mainContent .stock-bar-bg,
+[data-theme="dark"] #mainContent .bg-gray-50,
+.dark #mainContent .service-row,
+.dark #mainContent .stock-bar-bg,
+.dark #mainContent .bg-gray-50 {
+    background: rgba(13, 17, 23, 0.72) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] #mainContent .kpi-arrow,
+[data-theme="dark"] #mainContent .action-icon,
+.dark #mainContent .kpi-arrow,
+.dark #mainContent .action-icon {
+    background: rgba(139, 0, 0, 0.18) !important;
+    color: #FCA5A5 !important;
+    border: 1px solid rgba(252, 165, 165, 0.18) !important;
+}
+
+[data-theme="dark"] #mainContent .kpi-card:hover .kpi-arrow,
+[data-theme="dark"] #mainContent .action-card:hover .action-icon,
+.dark #mainContent .kpi-card:hover .kpi-arrow,
+.dark #mainContent .action-card:hover .action-icon {
+    background: #8B0000 !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] #mainContent .chart-empty>i,
+.dark #mainContent .chart-empty>i {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent .summary-tag,
+.dark #mainContent .summary-tag {
+    background: rgba(13, 17, 23, 0.70) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #C9D1D9 !important;
+}
+
+[data-theme="dark"] #mainContent .report-hero-btn,
+.dark #mainContent .report-hero-btn {
+    background: linear-gradient(135deg, #8B0000, #5F0000) !important;
+    border-color: rgba(252, 165, 165, 0.18) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 14px 28px rgba(139, 0, 0, 0.30) !important;
+}
+
+[data-theme="dark"] #mainContent .inventory-shell a:not(.chart-empty),
+.dark #mainContent .inventory-shell a:not(.chart-empty) {
+    background: rgba(139, 0, 0, 0.18) !important;
+    color: #FCA5A5 !important;
+    border: 1px solid rgba(252, 165, 165, 0.18) !important;
+}
+
+#mainContent.dentist-page-shell {
+    background: #F9FAFB !important;
+}
+
+#mainContent .report-hero-meta {
+    margin-top: 12px !important;
+}
+
+#mainContent .report-hero-actions {
+    margin-left: 0 !important;
+    align-self: flex-end !important;
+    margin-top: 12px !important;
+}
+
+#mainContent .report-hero-btn {
+    min-height: 46px !important;
+    padding: 0 20px !important;
+    border-radius: 15px !important;
+}
+
+#mainContent .analytics-section-label,
+#mainContent .chart-title,
+#mainContent .quick-report-title {
+    letter-spacing: .08em;
+}
+
+#mainContent .chart-card,
+#mainContent .pro-card,
+#mainContent .inventory-shell,
+#mainContent .kpi-card,
+#mainContent .mini-kpi,
+#mainContent .action-card {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.06), transparent 35%),
+        linear-gradient(145deg, #FFFFFF, #FFFDFD) !important;
+    border-color: rgba(139, 0, 0, 0.12) !important;
+    box-shadow:
+        0 14px 34px rgba(15, 23, 42, 0.055),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+}
+
+#mainContent .chart-empty,
+#mainContent .chart-loading {
+    background: transparent !important;
+    border-radius: 16px !important;
+}
+
+#mainContent .chart-empty>i {
+    width: 74px !important;
+    height: 74px !important;
+    border-radius: 22px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: 8px !important;
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.12), transparent 42%),
+        linear-gradient(145deg, #FFFFFF, #FFF5F5) !important;
+    border: 1px solid rgba(139, 0, 0, 0.10) !important;
+    box-shadow:
+        0 14px 28px rgba(139, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.80) !important;
+    color: #8B0000 !important;
+    font-size: 30px !important;
+}
+
+#mainContent .chart-empty p {
+    color: #4B5563 !important;
+    font-weight: 850 !important;
+}
+
+#mainContent .chart-empty span {
+    color: #8B949E !important;
+    font-weight: 600 !important;
+}
+
+#mainContent .action-card h4,
+#mainContent .service-name,
+#mainContent .stock-name,
+#mainContent .inventory-shell h3 {
+    color: #111827 !important;
+}
+
+#mainContent .action-card p,
+#mainContent .mini-kpi-label,
+#mainContent .kpi-label {
+    color: #6B7280 !important;
+}
+
+#mainContent .service-row {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.04), transparent 42%),
+        #FFFFFF !important;
+    border-color: rgba(139, 0, 0, 0.10) !important;
+}
+
+#mainContent .inventory-shell .col-span-1.bg-gray-50 {
+    background: rgba(255, 255, 255, 0.74) !important;
+    border: 1px solid rgba(139, 0, 0, 0.10) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72) !important;
+}
+
+[data-theme="dark"] #mainContent .chart-card,
+[data-theme="dark"] #mainContent .pro-card,
+[data-theme="dark"] #mainContent .inventory-shell,
+[data-theme="dark"] #mainContent .kpi-card,
+[data-theme="dark"] #mainContent .mini-kpi,
+[data-theme="dark"] #mainContent .action-card,
+.dark #mainContent .chart-card,
+.dark #mainContent .pro-card,
+.dark #mainContent .inventory-shell,
+.dark #mainContent .kpi-card,
+.dark #mainContent .mini-kpi,
+.dark #mainContent .action-card {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.18), transparent 36%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.82), rgba(22, 27, 34, 0.70)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mainContent .chart-card canvas,
+[data-theme="dark"] #mainContent .pro-card canvas,
+[data-theme="dark"] #mainContent .inventory-shell canvas,
+.dark #mainContent .chart-card canvas,
+.dark #mainContent .pro-card canvas,
+.dark #mainContent .inventory-shell canvas {
+    background: transparent !important;
+}
+
+[data-theme="dark"] #mainContent .chart-empty,
+[data-theme="dark"] #mainContent .chart-loading,
+.dark #mainContent .chart-empty,
+.dark #mainContent .chart-loading {
+    background: transparent !important;
+    color: #C9D1D9 !important;
+}
+
+[data-theme="dark"] #mainContent .chart-empty>i,
+.dark #mainContent .chart-empty>i {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.28), transparent 42%),
+        linear-gradient(145deg, rgba(22, 27, 34, 0.95), rgba(13, 17, 23, 0.92)) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, 0.20) !important;
+    box-shadow:
+        0 18px 36px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="dark"] #mainContent .chart-empty p,
+[data-theme="dark"] #mainContent .action-card h4,
+[data-theme="dark"] #mainContent .service-name,
+[data-theme="dark"] #mainContent .stock-name,
+[data-theme="dark"] #mainContent .inventory-shell h3,
+[data-theme="dark"] #mainContent .text-gray-800,
+.dark #mainContent .chart-empty p,
+.dark #mainContent .action-card h4,
+.dark #mainContent .service-name,
+.dark #mainContent .stock-name,
+.dark #mainContent .inventory-shell h3,
+.dark #mainContent .text-gray-800 {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mainContent .chart-empty span,
+[data-theme="dark"] #mainContent .action-card p,
+[data-theme="dark"] #mainContent .text-gray-400,
+[data-theme="dark"] #mainContent .text-gray-500,
+.dark #mainContent .chart-empty span,
+.dark #mainContent .action-card p,
+.dark #mainContent .text-gray-400,
+.dark #mainContent .text-gray-500 {
+    color: #C9D1D9 !important;
+}
+
+[data-theme="dark"] #mainContent .service-row,
+[data-theme="dark"] #mainContent .inventory-shell .col-span-1.bg-gray-50,
+.dark #mainContent .service-row,
+.dark #mainContent .inventory-shell .col-span-1.bg-gray-50 {
+    background: rgba(13, 17, 23, 0.72) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] #mainContent .period-select,
+.dark #mainContent .period-select {
+    background-color: rgba(13, 17, 23, 0.78) !important;
+    color: #C9D1D9 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] #mainContent .action-card:hover,
+.dark #mainContent .action-card:hover {
+    border-color: rgba(252, 165, 165, 0.25) !important;
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.26), transparent 34%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.90), rgba(22, 27, 34, 0.80)) !important;
+}
+
+[data-theme="dark"] #mainContent .stock-bar-bg,
+.dark #mainContent .stock-bar-bg {
+    background: #30363D !important;
+}
+
+[data-theme="dark"] #mainContent .report-hero-btn,
+.dark #mainContent .report-hero-btn {
+    background: linear-gradient(135deg, #8B0000, #5F0000) !important;
+    border-color: rgba(252, 165, 165, 0.18) !important;
+    color: #FFFFFF !important;
+}
+
+#mainContent.dentist-page-shell .report-hero-actions {
+    position: relative !important;
+    z-index: 4 !important;
+    margin-left: auto !important;
+    margin-top: 0 !important;
+    padding-right: 0 !important;
+    align-self: center !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    flex: 0 0 auto !important;
+}
+
+#mainContent.dentist-page-shell .report-hero-btn {
+    width: auto !important;
+    min-width: 158px !important;
+    min-height: 46px !important;
+    padding: 0 20px !important;
+    border-radius: 15px !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.dentist-page-shell .report-hero-meta {
+    margin-top: 12px !important;
+}
+
+#mainContent.dentist-page-shell .analytics-section-label {
+    letter-spacing: .08em !important;
+}
+
+@media only screen and (max-width: 600px) {
+    #mainContent.dentist-page-shell {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-bottom: 28px !important;
+        overflow-x: hidden !important;
+    }
+
+    #mainContent.dentist-page-shell .w-full.fade-in {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero {
+        padding: 16px 14px !important;
+        border-radius: 20px !important;
+        margin-bottom: 18px !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero-content {
+        width: 100% !important;
+        padding-right: 0 !important;
+        display: grid !important;
+        grid-template-columns: 46px minmax(0, 1fr) !important;
+        gap: 12px !important;
+        align-items: center !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero-icon {
+        width: 46px !important;
+        height: 46px !important;
+        min-width: 46px !important;
+        border-radius: 15px !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero-title {
+        font-size: 1.45rem !important;
+        line-height: 1.05 !important;
+        letter-spacing: -0.045em !important;
+        white-space: normal !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero-eyebrow {
+        font-size: 0.62rem !important;
+        line-height: 1 !important;
+        margin-bottom: 6px !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.dentist-page-shell .report-hero-meta {
+        grid-column: 1 / -1 !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 7px !important;
+        width: 100% !important;
+        margin-top: 10px !important;
+    }
+
+    #mainContent.dentist-page-shell .summary-tag {
+        width: 100% !important;
+        max-width: 100% !important;
+        justify-content: flex-start !important;
+        font-size: 0.64rem !important;
+        line-height: 1.1 !important;
+        padding: 7px 10px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    #mainContent.dentist-page-shell .report-hero-actions {
+        width: 100% !important;
+        margin: 12px 0 0 !important;
+        align-self: stretch !important;
+        justify-content: stretch !important;
+    }
+
+    #mainContent.dentist-page-shell .report-hero-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 44px !important;
+        font-size: 0.78rem !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-section-label {
+        font-size: 0.7rem !important;
+        line-height: 1.25 !important;
+        margin-bottom: 12px !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-grid-layout,
+    #mainContent.dentist-page-shell .analytics-subgrid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        margin-bottom: 22px !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-main-grid,
+    #mainContent.dentist-page-shell .analytics-secondary-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+        margin-bottom: 22px !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-card {
+        min-height: 112px !important;
+        padding: 12px !important;
+        border-radius: 16px !important;
+        gap: 9px !important;
+        align-items: flex-start !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 12px !important;
+        font-size: 0.9rem !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-value {
+        font-size: 1.55rem !important;
+        margin-bottom: 4px !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-label {
+        font-size: 0.55rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: .055em !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-delta {
+        font-size: 0.58rem !important;
+        line-height: 1.15 !important;
+        margin-top: 5px !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-arrow {
+        display: none !important;
+    }
+
+    #mainContent.dentist-page-shell .mini-kpi {
+        min-height: 94px !important;
+        padding: 14px !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.dentist-page-shell .mini-kpi-label {
+        font-size: 0.58rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: .055em !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    #mainContent.dentist-page-shell .mini-kpi-value {
+        font-size: 1.55rem !important;
+        margin-top: 12px !important;
+    }
+
+    #mainContent.dentist-page-shell .chart-card,
+    #mainContent.dentist-page-shell .pro-card,
+    #mainContent.dentist-page-shell .inventory-shell,
+    #mainContent.dentist-page-shell .section-card {
+        padding: 14px !important;
+        border-radius: 18px !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.dentist-page-shell .chart-card-header {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+        margin-bottom: 12px !important;
+    }
+
+    #mainContent.dentist-page-shell .chart-title {
+        font-size: 0.86rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #mainContent.dentist-page-shell .period-select {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 36px !important;
+        font-size: 0.7rem !important;
+    }
+
+    #mainContent.dentist-page-shell #gadChartWrap,
+    #mainContent.dentist-page-shell #weeklyChartWrap {
+        min-height: 230px !important;
+    }
+
+    #mainContent.dentist-page-shell .relative.h-\[280px\] {
+        height: 230px !important;
+    }
+
+    #mainContent.dentist-page-shell .metric-chip {
+        font-size: 0.6rem !important;
+        padding: 5px 8px !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.dentist-page-shell .service-row {
+        padding: 10px 11px !important;
+        gap: 10px !important;
+        border-radius: 13px !important;
+    }
+
+    #mainContent.dentist-page-shell .service-meta {
+        min-width: 0 !important;
+    }
+
+    #mainContent.dentist-page-shell .service-name {
+        font-size: 0.76rem !important;
+        line-height: 1.2 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    #mainContent.dentist-page-shell .service-count {
+        font-size: 0.68rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.dentist-page-shell .action-card {
+        padding: 13px !important;
+        border-radius: 15px !important;
+        gap: 10px !important;
+    }
+
+    #mainContent.dentist-page-shell .action-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 11px !important;
+        font-size: 0.92rem !important;
+    }
+
+    #mainContent.dentist-page-shell .section-card .grid,
+    #mainContent.dentist-page-shell .inventory-shell .grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+
+    #mainContent.dentist-page-shell .section-card .action-card {
+        align-items: flex-start !important;
+    }
+
+    #mainContent.dentist-page-shell .section-card .action-card a {
+        width: 100% !important;
+        margin-left: 0 !important;
+        justify-content: center !important;
+        margin-top: 8px !important;
+    }
+
+    #mainContent.dentist-page-shell .inventory-shell .col-span-1.bg-gray-50 {
+        padding: 14px !important;
+        border-radius: 14px !important;
+    }
+
+    #createReportModal .ui-modal-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: 90dvh !important;
+        margin: 0 !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #createReportModal .grid.grid-cols-2 {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    #createReportModal #reportQty {
+        width: 100% !important;
+    }
+
+    #createReportModal #reportQty+span {
+        display: block !important;
+        margin-left: 0 !important;
+        margin-top: 5px !important;
+    }
+
+    #createReportModal .border-t {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    #createReportModal .border-t button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    #downloadCompleteModal .ui-modal-card {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+
+    #mainContent.dentist-page-shell .kpi-grid-layout,
+    #mainContent.dentist-page-shell .analytics-subgrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-main-grid,
+    #mainContent.dentist-page-shell .analytics-secondary-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    #mainContent.dentist-page-shell .report-hero-meta {
+        display: flex !important;
+        flex-wrap: wrap !important;
+    }
+
+    #mainContent.dentist-page-shell .report-hero-btn {
+        min-height: 46px !important;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    #mainContent.dentist-page-shell {
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero {
+        padding: 22px 24px !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero-content {
+        padding-right: 0 !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero-title {
+        font-size: 1.9rem !important;
+    }
+
+    #mainContent.dentist-page-shell .report-hero-actions {
+        margin-left: auto !important;
+        flex-shrink: 0 !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-grid-layout,
+    #mainContent.dentist-page-shell .analytics-subgrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-main-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 18px !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-main-grid .pro-card:last-child {
+        grid-column: 1 / -1 !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-secondary-grid {
+        grid-template-columns: 1fr !important;
+        gap: 18px !important;
+    }
+
+    #mainContent.dentist-page-shell .chart-card,
+    #mainContent.dentist-page-shell .pro-card {
+        padding: 18px !important;
+    }
+
+    #mainContent.dentist-page-shell .inventory-shell .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 18px !important;
+    }
+
+    #createReportModal .ui-modal-card {
+        width: min(92vw, 640px) !important;
+        max-width: 640px !important;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+    #mainContent.dentist-page-shell .dentist-hero-title {
+        font-size: 2rem !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-grid-layout,
+    #mainContent.dentist-page-shell .analytics-subgrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 18px !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-main-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 18px !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-main-grid .pro-card:last-child {
+        grid-column: 1 / -1 !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-secondary-grid {
+        grid-template-columns: 1.35fr .9fr !important;
+        gap: 18px !important;
+    }
+
+    #mainContent.dentist-page-shell .kpi-card {
+        min-height: 118px !important;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    #mainContent.dentist-page-shell {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero {
+        padding: 24px 30px !important;
+    }
+
+    #mainContent.dentist-page-shell .dentist-hero-title {
+        font-size: 2rem !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-main-grid {
+        grid-template-columns: 1.2fr 1.2fr .9fr !important;
+        gap: 20px !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-main-grid .pro-card:last-child {
+        grid-column: auto !important;
+    }
+
+    #mainContent.dentist-page-shell .analytics-secondary-grid {
+        grid-template-columns: 1.5fr .9fr !important;
+        gap: 20px !important;
+    }
+
+    #mainContent.dentist-page-shell .chart-card,
+    #mainContent.dentist-page-shell .pro-card {
+        padding: 20px !important;
+    }
+}
+
+#mainContent.dentist-page-shell .report-custom-select,
+#createReportModal .report-custom-select {
+    position: relative !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    overflow: visible !important;
+}
+
+#mainContent.dentist-page-shell .report-period-select {
+    width: auto !important;
+    min-width: 168px !important;
+}
+
+.report-native-select {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+}
+
+.report-select-trigger {
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 0 12px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(139, 0, 0, 0.14) !important;
+    background: #FFFFFF !important;
+    color: #111827 !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.055) !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+
+    font-family: inherit !important;
+    font-size: 0.78rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+}
+
+.report-select-main {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    min-width: 0 !important;
+}
+
+.report-select-icon {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 10px !important;
+    background: #FEF2F2 !important;
+    color: #8B0000 !important;
+    border: 1px solid rgba(139, 0, 0, 0.10) !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.report-select-icon i {
+    font-size: 0.72rem !important;
+}
+
+.report-select-main [data-report-select-label] {
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.report-select-chevron {
+    color: #94A3B8 !important;
+    font-size: 0.72rem !important;
+    transition: transform .18s ease !important;
+}
+
+.report-custom-select.open .report-select-chevron {
+    transform: rotate(180deg) !important;
+}
+
+.report-select-menu {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 99999 !important;
+
+    padding: 8px !important;
+    border-radius: 16px !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(139, 0, 0, 0.14) !important;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18) !important;
+
+    display: grid !important;
+    gap: 6px !important;
+
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-6px) scale(.98) !important;
+    transition: opacity .18s ease, visibility .18s ease, transform .18s ease !important;
+}
+
+.report-custom-select.open .report-select-menu {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+.report-template-select .report-select-menu {
+    max-height: 260px !important;
+    overflow-y: auto !important;
+}
+
+.report-select-option {
+    width: 100% !important;
+    min-height: 40px !important;
+    padding: 0 11px !important;
+    border-radius: 12px !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: #374151 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+
+    font-family: inherit !important;
+    font-size: 0.78rem !important;
+    font-weight: 850 !important;
+    text-align: left !important;
+    cursor: pointer !important;
+}
+
+.report-select-option i {
+    opacity: 0 !important;
+    color: #8B0000 !important;
+    font-size: 0.7rem !important;
+}
+
+.report-select-option:hover,
+.report-select-option.is-active {
+    background: #FEF2F2 !important;
+    border-color: #FECACA !important;
+    color: #8B0000 !important;
+}
+
+.report-select-option.is-active i {
+    opacity: 1 !important;
+}
+
+.report-select-empty {
+    padding: 12px !important;
+    border-radius: 12px !important;
+    background: #F9FAFB !important;
+    color: #9CA3AF !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+}
+
+.report-custom-select.is-invalid .report-select-trigger {
+    border-color: #F87171 !important;
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, .14) !important;
+}
+
+@media only screen and (max-width: 600px) {
+
+    #mainContent.dentist-page-shell .report-period-select {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+}
+
+#createReportModal .create-report-modal-card {
+    width: min(94vw, 520px) !important;
+    max-width: 520px !important;
+}
+
+#createReportModal .create-report-modal-header {
+    padding: 1rem 1.25rem !important;
+}
+
+#createReportModal .create-report-modal-body {
+    padding: 1rem 1.25rem !important;
+    overflow-y: auto !important;
+    overflow-x: visible !important;
+}
+
+#createReportModal .create-report-form {
+    display: grid !important;
+    gap: 0.9rem !important;
+}
+
+#createReportModal .create-report-date-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important;
+}
+
+#createReportModal .create-report-qty-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    flex-wrap: wrap !important;
+}
+
+#createReportModal .create-report-qty-input {
+    width: 9rem !important;
+    max-width: 100% !important;
+}
+
+#createReportModal .create-report-modal-footer {
+    padding: 0.8rem 1.25rem 1rem !important;
+}
+
+#mainContent.dentist-page-shell .cancellation-rate-icon {
+    background: #FFF1F2 !important;
+    color: #E11D48 !important;
+    border: 1px solid #FFE4E6 !important;
+}
+
+#mainContent.dentist-page-shell .cancellation-rate-icon i {
+    color: currentColor !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .cancellation-rate-icon,
+.dark #mainContent.dentist-page-shell .cancellation-rate-icon {
+    background: rgba(225, 29, 72, 0.18) !important;
+    color: #FDA4AF !important;
+    border-color: rgba(253, 164, 175, 0.24) !important;
+}
+
+@media only screen and (max-width: 600px) {
+    #createReportModal .create-report-modal-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 90dvh !important;
+    }
+
+    #createReportModal .create-report-date-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    #createReportModal .create-report-qty-row {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 0.4rem !important;
+    }
+
+    #createReportModal .create-report-qty-input {
+        width: 100% !important;
+    }
+}
+
+#mainContent.dentist-page-shell .reports-quick-actions-panel {
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    border: 1px solid rgba(139, 0, 0, 0.12) !important;
+    background:
+        radial-gradient(circle at top right, rgba(139, 0, 0, 0.06), transparent 42%),
+        #ffffff !important;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.055) !important;
+}
+
+#mainContent.dentist-page-shell .reports-quick-actions-header {
+    min-height: 78px !important;
+    padding: 1.05rem 1.15rem !important;
+    border-bottom: 1px solid rgba(139, 0, 0, 0.10) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fff7f7 100%) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.85rem !important;
+}
+
+#mainContent.dentist-page-shell .reports-quick-actions-head-icon {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    border-radius: 16px !important;
+    background: #fff1f2 !important;
+    border: 1px solid #fecaca !important;
+    color: #8B0000 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 10px 24px rgba(139, 0, 0, 0.08) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .reports-quick-actions-head-icon,
+.dark #mainContent.dentist-page-shell .reports-quick-actions-head-icon {
+    background: rgba(252, 165, 165, .08) !important;
+    border-color: rgba(252, 165, 165, .16) !important;
+    color: #FCA5A5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .06),
+        0 10px 18px rgba(0, 0, 0, .18) !important;
+}
+
+#mainContent.dentist-page-shell .reports-quick-actions-header h2 {
+    margin: 0 !important;
+    color: #111827 !important;
+    font-size: 0.95rem !important;
+    font-weight: 950 !important;
+    line-height: 1.1 !important;
+}
+
+#mainContent.dentist-page-shell .reports-quick-actions-header p {
+    margin: 0.2rem 0 0 !important;
+    color: #9CA3AF !important;
+    font-size: 0.67rem !important;
+    font-weight: 850 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    line-height: 1.15 !important;
+}
+
+#mainContent.dentist-page-shell .reports-quick-actions-panel .quick-actions-list {
+    padding: 1rem !important;
+    display: grid !important;
+    gap: 0.85rem !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-card {
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+    min-height: 78px !important;
+    width: 100% !important;
+    padding: 1rem 1.05rem !important;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+
+    border-radius: 20px !important;
+    text-decoration: none !important;
+    text-align: left !important;
+
+    background:
+        radial-gradient(circle at 100% 100%, rgba(139, 0, 0, 0.08), transparent 42%),
+        linear-gradient(135deg, #ffffff 0%, #fff8f8 100%) !important;
+    border: 1px solid rgba(139, 0, 0, 0.12) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.78),
+        0 8px 20px rgba(15, 23, 42, 0.045) !important;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: rgba(139, 0, 0, 0.30) !important;
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.17), transparent 42%),
+        linear-gradient(135deg, #8B0000 0%, #650000 58%, #320101 100%) !important;
+    box-shadow: 0 16px 30px rgba(139, 0, 0, 0.20) !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-icon {
+    position: relative !important;
+    z-index: 2 !important;
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    border-radius: 17px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: #f8fafc !important;
+    border: 1px solid #e5e7eb !important;
+    color: #8B0000 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.78),
+        0 8px 18px rgba(15, 23, 42, 0.06) !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-icon i {
+    color: currentColor !important;
+    font-size: 1rem !important;
+    line-height: 1 !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-card:hover .quick-action-icon {
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.24) !important;
+    color: #ffffff !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-copy {
+    position: relative !important;
+    z-index: 2 !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+    display: grid !important;
+    gap: 0.18rem !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-title {
+    color: #111827 !important;
+    font-size: 0.95rem !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.015em !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-sub {
+    color: #6b7280 !important;
+    font-size: 0.75rem !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-arrow {
+    position: relative !important;
+    z-index: 2 !important;
+    margin-left: auto !important;
+    color: #9ca3af !important;
+    font-size: 0.86rem !important;
+    transition: transform 0.18s ease, color 0.18s ease !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-card:hover .quick-action-title,
+#mainContent.dentist-page-shell .quick-action-card:hover .quick-action-sub,
+#mainContent.dentist-page-shell .quick-action-card:hover .quick-action-arrow {
+    color: #ffffff !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-card:hover .quick-action-arrow {
+    transform: translateX(3px) !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-bg-icon {
+    position: absolute !important;
+    right: 0.95rem !important;
+    bottom: -1.8rem !important;
+    z-index: 1 !important;
+    font-size: 5.1rem !important;
+    color: rgba(139, 0, 0, 0.075) !important;
+    pointer-events: none !important;
+    transform: rotate(-10deg) !important;
+}
+
+#mainContent.dentist-page-shell .quick-action-card:hover .quick-action-bg-icon {
+    color: rgba(255, 255, 255, 0.14) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .reports-quick-actions-panel,
+.dark #mainContent.dentist-page-shell .reports-quick-actions-panel {
+    background:
+        radial-gradient(circle at top right, rgba(139, 0, 0, 0.20), transparent 42%),
+        rgba(13, 17, 23, 0.82) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .reports-quick-actions-header,
+.dark #mainContent.dentist-page-shell .reports-quick-actions-header {
+    background: rgba(13, 17, 23, 0.72) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .reports-quick-actions-header h2,
+[data-theme="dark"] #mainContent.dentist-page-shell .quick-action-title,
+.dark #mainContent.dentist-page-shell .reports-quick-actions-header h2,
+.dark #mainContent.dentist-page-shell .quick-action-title {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .quick-action-card,
+.dark #mainContent.dentist-page-shell .quick-action-card {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(139, 0, 0, 0.18), transparent 42%),
+        linear-gradient(135deg, rgba(13, 17, 23, 0.86), rgba(22, 27, 34, 0.76)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .quick-action-card:hover,
+.dark #mainContent.dentist-page-shell .quick-action-card:hover {
+    background:
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.13), transparent 42%),
+        linear-gradient(135deg, #8B0000 0%, #650000 58%, #320101 100%) !important;
+    border-color: rgba(252, 165, 165, 0.28) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .quick-action-icon,
+.dark #mainContent.dentist-page-shell .quick-action-icon {
+    background: rgba(139, 0, 0, 0.22) !important;
+    border-color: rgba(252, 165, 165, 0.20) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .quick-action-sub,
+.dark #mainContent.dentist-page-shell .quick-action-sub {
+    color: #9CA3AF !important;
+}
+
+#mainContent.dentist-page-shell .printable-forms-card,
+#mainContent.dentist-page-shell .report-inventory-shell {
+    overflow: hidden !important;
+}
+
+#mainContent.dentist-page-shell .printable-template-card {
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+#mainContent.dentist-page-shell .printable-template-card h4 {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    line-height: 1.25 !important;
+}
+
+#mainContent.dentist-page-shell .printable-template-print-btn {
+    flex-shrink: 0 !important;
+}
+
+#mainContent.dentist-page-shell .report-inventory-grid {
+    align-items: stretch !important;
+}
+
+#mainContent.dentist-page-shell .inventory-chart-panel,
+#mainContent.dentist-page-shell .low-stock-alert-card {
+    min-width: 0 !important;
+}
+
+#mainContent.dentist-page-shell .low-stock-title-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 12px !important;
+    background: #FEF2F2 !important;
+    color: #DC2626 !important;
+    border: 1px solid #FECACA !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#mainContent.dentist-page-shell .low-stock-title-icon i {
+    color: currentColor !important;
+    font-size: .82rem !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .low-stock-title-icon,
+.dark #mainContent.dentist-page-shell .low-stock-title-icon {
+    background: rgba(220, 38, 38, 0.16) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+}
+
+#mainContent.dentist-page-shell .stock-good-icon {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    border-radius: 999px !important;
+    margin: 0 auto 0.75rem !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: #DCFCE7 !important;
+    color: #16A34A !important;
+    border: 1px solid #BBF7D0 !important;
+    box-shadow: 0 10px 22px rgba(22, 163, 74, 0.10) !important;
+}
+
+#mainContent.dentist-page-shell .stock-good-icon i {
+    color: currentColor !important;
+    font-size: 1.15rem !important;
+    line-height: 1 !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .stock-good-icon,
+.dark #mainContent.dentist-page-shell .stock-good-icon {
+    background: rgba(22, 163, 74, 0.16) !important;
+    color: #86EFAC !important;
+    border-color: rgba(134, 239, 172, 0.24) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 14px 28px rgba(0, 0, 0, 0.24) !important;
+}
+
+#mainContent.dentist-page-shell .chart-empty.hidden,
+#mainContent.dentist-page-shell .chart-loading.hidden {
+    display: none !important;
+}
+
+@media only screen and (max-width: 600px) {
+
+    #mainContent.dentist-page-shell .printable-forms-card,
+    #mainContent.dentist-page-shell .report-inventory-shell {
+        padding: 14px !important;
+        border-radius: 18px !important;
+    }
+
+    #mainContent.dentist-page-shell .printable-forms-card .chart-card-header,
+    #mainContent.dentist-page-shell .report-inventory-shell .chart-card-header {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        align-items: start !important;
+    }
+
+    #mainContent.dentist-page-shell .printable-forms-card .chart-card-header>span,
+    #mainContent.dentist-page-shell .report-inventory-shell .chart-card-header>a {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+
+    #mainContent.dentist-page-shell .printable-template-grid,
+    #mainContent.dentist-page-shell .report-inventory-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+
+    #mainContent.dentist-page-shell .printable-template-card {
+        display: grid !important;
+        grid-template-columns: 40px minmax(0, 1fr) !important;
+        gap: 10px !important;
+        padding: 12px !important;
+        align-items: start !important;
+    }
+
+    #mainContent.dentist-page-shell .printable-template-print-btn {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        justify-content: center !important;
+        min-height: 42px !important;
+    }
+
+    #mainContent.dentist-page-shell .inventory-chart-panel .relative {
+        height: 235px !important;
+        min-height: 235px !important;
+    }
+
+    #mainContent.dentist-page-shell .low-stock-alert-card {
+        padding: 14px !important;
+        border-radius: 16px !important;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+
+    #mainContent.dentist-page-shell .printable-template-grid,
+    #mainContent.dentist-page-shell .report-inventory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #mainContent.dentist-page-shell .low-stock-alert-card {
+        grid-column: 1 / -1 !important;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+
+    #mainContent.dentist-page-shell .printable-template-grid,
+    #mainContent.dentist-page-shell .report-inventory-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    #mainContent.dentist-page-shell .low-stock-alert-card {
+        grid-column: auto !important;
+    }
+}
+
+html[data-theme="dark"] #createReportModal .report-select-trigger,
+html[data-theme="dark"] #mainContent.dentist-page-shell .report-select-trigger,
+.dark #createReportModal .report-select-trigger,
+.dark #mainContent.dentist-page-shell .report-select-trigger {
+    background: #0D1117 !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    color: #F8FAFC !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34) !important;
+}
+
+html[data-theme="dark"] #createReportModal .report-select-menu,
+html[data-theme="dark"] #mainContent.dentist-page-shell .report-select-menu,
+.dark #createReportModal .report-select-menu,
+.dark #mainContent.dentist-page-shell .report-select-menu {
+    background: #0D1117 !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.52) !important;
+}
+
+html[data-theme="dark"] #createReportModal .report-select-option,
+html[data-theme="dark"] #mainContent.dentist-page-shell .report-select-option,
+.dark #createReportModal .report-select-option,
+.dark #mainContent.dentist-page-shell .report-select-option {
+    color: #CBD5E1 !important;
+    background: transparent !important;
+}
+
+html[data-theme="dark"] #createReportModal .report-select-option:hover,
+html[data-theme="dark"] #createReportModal .report-select-option.is-active,
+html[data-theme="dark"] #mainContent.dentist-page-shell .report-select-option:hover,
+html[data-theme="dark"] #mainContent.dentist-page-shell .report-select-option.is-active,
+.dark #createReportModal .report-select-option:hover,
+.dark #createReportModal .report-select-option.is-active,
+.dark #mainContent.dentist-page-shell .report-select-option:hover,
+.dark #mainContent.dentist-page-shell .report-select-option.is-active {
+    background: rgba(139, 0, 0, 0.24) !important;
+    border-color: rgba(252, 165, 165, 0.24) !important;
+    color: #FCA5A5 !important;
+}
+
+html[data-theme="dark"] #createReportModal .report-select-icon,
+html[data-theme="dark"] #mainContent.dentist-page-shell .report-select-icon,
+.dark #createReportModal .report-select-icon,
+.dark #mainContent.dentist-page-shell .report-select-icon {
+    background: rgba(139, 0, 0, 0.22) !important;
+    border-color: rgba(252, 165, 165, 0.20) !important;
+    color: #FCA5A5 !important;
+}
+
+#mainContent.dentist-page-shell .kpi-icon i {
+    color: currentColor !important;
+}
+
+#mainContent.dentist-page-shell .kpi-card-low-stock {
+    background:
+        radial-gradient(circle at top right, rgba(249, 115, 22, 0.08), transparent 42%),
+        linear-gradient(145deg, #ffffff, #fffdfd) !important;
+}
+
+#mainContent.dentist-page-shell .kpi-card-low-stock::before {
+    background: linear-gradient(180deg, #f97316 0%, #dc2626 100%) !important;
+}
+
+#mainContent.dentist-page-shell .kpi-icon-low-stock {
+    background: #fff7ed !important;
+    color: #a10d05 !important;
+    border: 1px solid #fed7aa !important;
+    box-shadow:
+        0 12px 24px rgba(249, 115, 22, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+}
+
+#mainContent.dentist-page-shell .kpi-card-low-stock:hover .kpi-icon-low-stock {
+    background: #a10d05 !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.20) !important;
+}
+
+#mainContent.dentist-page-shell .kpi-value-low-stock {
+    color: #970b0b !important;
+}
+
+#mainContent.dentist-page-shell .kpi-label-low-stock {
+    color: #991b1b !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .kpi-card-low-stock,
+.dark #mainContent.dentist-page-shell .kpi-card-low-stock {
+    background:
+        radial-gradient(circle at top right, rgba(249, 33, 22, 0.18), transparent 42%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.88), rgba(22, 27, 34, 0.74)) !important;
+    border-color: rgba(251, 146, 60, 0.18) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .kpi-icon-low-stock,
+.dark #mainContent.dentist-page-shell .kpi-icon-low-stock {
+    background: rgba(249, 115, 22, 0.16) !important;
+    color: #fdba74 !important;
+    border-color: rgba(253, 186, 116, 0.26) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 14px 28px rgba(0, 0, 0, 0.26) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .kpi-card-low-stock:hover .kpi-icon-low-stock,
+.dark #mainContent.dentist-page-shell .kpi-card-low-stock:hover .kpi-icon-low-stock {
+    background: #c2410c !important;
+    color: #ffffff !important;
+    border-color: rgba(253, 186, 116, 0.34) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .kpi-value-low-stock,
+.dark #mainContent.dentist-page-shell .kpi-value-low-stock {
+    color: #fb923c !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-page-shell .kpi-label-low-stock,
+.dark #mainContent.dentist-page-shell .kpi-label-low-stock {
+    color: #fed7aa !important;
 }

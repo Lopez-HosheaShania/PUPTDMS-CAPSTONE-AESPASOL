@@ -305,8 +305,8 @@ $notifCount = $notifications->count();
                 <div id="docTypeSelect" class="docreq-custom-select docreq-filter-select">
                     <button type="button" class="docreq-select-button" data-select-button aria-haspopup="listbox"
                         aria-expanded="false" aria-controls="docTypeSelectMenu"
-                        onclick="toggleDocreqDropdown('docTypeSelect')">
-                        <span class="docreq-select-leading"><i class="fa-regular fa-file-lines"></i></span>
+                        onclick="toggleDocreqDropdown('docTypeSelect')" <span class="docreq-select-leading"><i
+                            class="fa-regular fa-file-lines"></i></span>
                         <span class="docreq-select-text">
                             <span>Document type</span>
                             <strong id="docTypeSelectLabel">All document types</strong>
@@ -631,6 +631,43 @@ $notifCount = $notifications->count();
     let filterDateTo = '';
     let filterSort = 'newest';
     let documentTypeOptions = [];
+    const DOCREQ_DATA_URL = @json(url('/dentist/document-requests/data'));
+
+    let docreqKnownIds = new Set();
+    let docreqServerSnapshot = null;
+    let docreqPollTimer = null;
+
+    function normalizeDocreqStatus(status) {
+        const normalized = String(status || 'pending').replace(/_/g, '-').toLowerCase();
+
+        if (['ready', 'ready-for-pickup', 'ready-for-release', 'released'].includes(normalized)) {
+            return 'approved';
+        }
+
+        if (!['pending', 'approved', 'rejected'].includes(normalized)) {
+            return 'pending';
+        }
+
+        return normalized;
+    }
+
+    function normalizeDocreqRequest(request) {
+        return {
+            ...request,
+            status: normalizeDocreqStatus(request.status)
+        };
+    }
+
+    function recalculateDocreqStats(source = allRequests) {
+        const normalized = Array.isArray(source) ? source.map(normalizeDocreqRequest) : [];
+
+        return {
+            all: normalized.length,
+            pending: normalized.filter((request) => request.status === 'pending').length,
+            approved: normalized.filter((request) => request.status === 'approved').length,
+            rejected: normalized.filter((request) => request.status === 'rejected').length
+        };
+    }
 
     let currentViewMode = localStorage.getItem('ViewToggleMode') === 'grid' ? 'grid' : 'list';
 
@@ -667,20 +704,34 @@ $notifCount = $notifications->count();
         switchView(savedMode || (isMobile ? 'grid' : 'list'));
     }
 
-    async function loadData() {
-        showSkeleton();
+    async function loadData({ showLoading = true, startWatcher = true } = {}) {
+        if (showLoading) showSkeleton();
+
         try {
-            const res = await fetch('/dentist/document-requests/data', {
-                cache: 'no-store'
+            const res = await fetch(DOCREQ_DATA_URL, {
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
+
+            if (!res.ok) {
+                throw new Error(`Request failed. Status: ${res.status}`);
+            }
+
             const json = await res.json();
 
-            allRequests = json.requests || [];
+            allRequests = Array.isArray(json.requests)
+                ? json.requests.map(normalizeDocreqRequest)
+                : [];
+
+            docreqKnownIds = new Set(allRequests.map((request) => Number(request.id)));
 
             documentTypeOptions = normalizeDocTypes(
-                Array.isArray(json.types) && json.types.length ?
-                    json.types :
-                    allRequests.map(r => r.document_type)
+                Array.isArray(json.types) && json.types.length
+                    ? json.types
+                    : allRequests.map(r => r.document_type)
             );
 
             if (filterDocType && !documentTypeOptions.includes(filterDocType)) {
@@ -688,37 +739,137 @@ $notifCount = $notifications->count();
             }
 
             renderDocTypeOptions(documentTypeOptions);
-            updateStats(json.stats || {});
+            updateStats(json.stats || recalculateDocreqStats());
             renderList();
-        } catch (e) {
-            const listContainer = document.getElementById('requestListContainer');
-            const gridContainer = document.getElementById('requestGridContainer');
-            const tableHead = document.getElementById('docreqTableHead');
+            renderFilterChips();
 
-            if (tableHead) tableHead.style.display = 'none';
-            if (gridContainer) {
-                gridContainer.style.display = 'none';
-                gridContainer.innerHTML = '';
+            document.getElementById('docreqRefreshNotice')?.remove();
+            docreqServerSnapshot = null;
+
+            if (startWatcher) {
+                initDocreqRefreshWatcher();
             }
-            console.error('Document request load failed:', e);
+        } catch (error) {
+            console.error('Document request load failed:', error);
 
-            const rowCountEl = document.getElementById('rowCount');
+            allRequests = [];
+            documentTypeOptions = [];
+
+            renderDocTypeOptions([]);
+            updateStats({
+                all: 0,
+                pending: 0,
+                approved: 0,
+                rejected: 0
+            });
+
+            renderList();
+
             const pageInfoEl = document.getElementById('pageInfo');
+            const pageInfoTopEl = document.getElementById('pageInfoTop');
 
-            if (rowCountEl) rowCountEl.textContent = '0 requests';
-            if (pageInfoEl) pageInfoEl.textContent = '';
-
-            if (listContainer) {
-                listContainer.style.display = 'flex';
-                listContainer.style.flexDirection = 'column';
-                listContainer.innerHTML = `
-        <div class="empty-state-wrapper compact">
-            <div class="empty-icon-box"><i class="fa-solid fa-circle-exclamation"></i></div>
-            <div class="empty-title">Failed to load requests</div>
-            <div class="empty-sub">Could not fetch document requests. Please refresh the page and try again.</div>
-        </div>`;
-            }
+            if (pageInfoEl) pageInfoEl.innerHTML = 'Showing <strong>0</strong> requests';
+            if (pageInfoTopEl) pageInfoTopEl.innerHTML = 'Showing <strong>0</strong> requests';
         }
+    }
+
+    function applyDocreqServerSnapshot(payload) {
+        if (!payload || !Array.isArray(payload.requests)) return;
+
+        allRequests = payload.requests.map(normalizeDocreqRequest);
+        docreqKnownIds = new Set(allRequests.map((request) => Number(request.id)));
+
+        documentTypeOptions = normalizeDocTypes(
+            Array.isArray(payload.types) && payload.types.length
+                ? payload.types
+                : allRequests.map((request) => request.document_type)
+        );
+
+        renderDocTypeOptions(documentTypeOptions);
+        updateStats(payload.stats || recalculateDocreqStats());
+        renderList();
+
+        document.getElementById('docreqRefreshNotice')?.remove();
+        docreqServerSnapshot = null;
+    }
+
+    function showDocreqRefreshNotice(newCount = 1) {
+        let notice = document.getElementById('docreqRefreshNotice');
+
+        if (!notice) {
+            notice = document.createElement('div');
+            notice.id = 'docreqRefreshNotice';
+            notice.className = 'docreq-refresh-notice';
+
+            const tableCard = document.querySelector('#mainContent.docreq-page .table-card');
+            tableCard?.parentNode?.insertBefore(notice, tableCard);
+        }
+
+        notice.innerHTML = `
+        <div class="docreq-refresh-copy">
+            <span class="docreq-refresh-icon">
+                <i class="fa-solid fa-rotate"></i>
+            </span>
+
+            <div>
+                <strong>${newCount} new document request${newCount === 1 ? '' : 's'} available</strong>
+                <small>Refresh to see the latest request${newCount === 1 ? '' : 's'}.</small>
+            </div>
+        </div>
+
+        <button type="button" class="docreq-refresh-btn" id="docreqRefreshNowBtn">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            Refresh
+        </button>
+    `;
+
+        notice.querySelector('#docreqRefreshNowBtn')?.addEventListener('click', () => {
+            applyDocreqServerSnapshot(docreqServerSnapshot);
+
+            if (typeof window.showToast === 'function') {
+                window.showToast('Document requests updated', 'info');
+            }
+        });
+    }
+
+    async function checkDocreqUpdates() {
+        try {
+            const response = await fetch(DOCREQ_DATA_URL, {
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) return;
+
+            const payload = await response.json();
+
+            const incoming = Array.isArray(payload.requests)
+                ? payload.requests.map(normalizeDocreqRequest)
+                : [];
+
+            const newRequests = incoming.filter((request) => !docreqKnownIds.has(Number(request.id)));
+
+            if (newRequests.length > 0) {
+                docreqServerSnapshot = {
+                    ...payload,
+                    requests: incoming
+                };
+
+                showDocreqRefreshNotice(newRequests.length);
+            }
+        } catch (error) {
+            console.warn('Document request refresh check failed:', error);
+        }
+    }
+
+    function initDocreqRefreshWatcher() {
+        if (docreqPollTimer) clearInterval(docreqPollTimer);
+
+        docreqKnownIds = new Set(allRequests.map((request) => Number(request.id)));
+        docreqPollTimer = setInterval(checkDocreqUpdates, 15000);
     }
 
     function showSkeleton() {
@@ -779,14 +930,22 @@ $notifCount = $notifications->count();
         const rowCountEl = document.getElementById('rowCount');
         if (rowCountEl) rowCountEl.textContent = 'Loading...';
 
-        document.getElementById('pageInfo')?.textContent = '';
-        document.getElementById('pagControls')?.innerHTML = '';
+        ['pageInfo', 'pageInfoTop'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '';
+        });
+
+        ['pagControls', 'pagControlsTop'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '';
+        });
     }
 
     function updateStats(stats) {
         stats = stats || {};
+
         const values = {
-            all: stats.all ?? 0,
+            all: stats.all ?? stats.total ?? allRequests.length ?? 0,
             pending: stats.pending ?? 0,
             approved: stats.approved ?? 0,
             rejected: stats.rejected ?? 0
@@ -800,24 +959,27 @@ $notifCount = $notifications->count();
         };
 
         Object.keys(ids).forEach((key) => {
+            const value = values[key] ?? 0;
+
             ids[key].forEach((id) => {
                 const el = document.getElementById(id);
-                if (el) el.textContent = values[key];
+                if (el) el.textContent = value;
             });
+
+            const option = document.querySelector(
+                `#docreqStatusSelect .docreq-sort-option[data-value="${CSS.escape(key)}"]`
+            );
+
+            if (option) {
+                option.dataset.count = value;
+
+                const countEl = option.querySelector('.docreq-option-count, .docreq-sort-option-count');
+                if (countEl) countEl.textContent = value;
+            }
         });
 
         updateStatusDropdownUI(activeFilter);
     }
-
-    document.querySelectorAll('.docreq-sort-option').forEach(option => {
-        const value = option.dataset.value;
-        const count = values[value] ?? 0;
-
-        option.dataset.count = count;
-
-        const countEl = option.querySelector('.docreq-option-count, .docreq-sort-option-count');
-        if (countEl) countEl.textContent = count;
-    });
 
     function getFiltered() {
         let data = allRequests;
@@ -1303,95 +1465,76 @@ $notifCount = $notifications->count();
 
     function buildEmptyStateHtml() {
         const isSearchMiss = searchQuery !== '';
-        const hasAdvancedFilters =
-            filterDocType !== '' ||
-            filterDateFrom !== '' ||
-            filterDateTo !== '' ||
-            filterSort !== 'newest' ||
-            activeFilter !== 'all';
-
         const isDataEmpty = allRequests.length === 0;
+
+        const statusEmptyCopy = {
+            pending: {
+                stateClass: 'empty-pending',
+                iconHtml: '<i class="fa-solid fa-clock-rotate-left"></i>',
+                title: 'No pending requests',
+                subtitle: 'Pending document requests will appear here once submitted.'
+            },
+            approved: {
+                stateClass: 'empty-approved',
+                iconHtml: '<i class="fa-solid fa-file-circle-check"></i>',
+                title: 'No approved requests',
+                subtitle: 'Approved document requests will appear here after review.'
+            },
+            rejected: {
+                stateClass: 'empty-rejected',
+                iconHtml: '<i class="fa-solid fa-file-circle-xmark"></i>',
+                title: 'No rejected requests',
+                subtitle: 'Rejected document requests will appear here when applicable.'
+            }
+        };
 
         let stateClass = 'empty-neutral';
         let iconHtml = '<i class="fa-regular fa-folder-open"></i>';
         let title = 'No document requests yet';
         let subtitle = 'Incoming patient document requests will appear here once submitted.';
-        let buttonLabel = '';
-        let buttonAction = '';
-        const compactClass = 'compact';
+        let buttonHtml = '';
 
         if (isSearchMiss) {
             stateClass = 'empty-search';
             iconHtml = '<i class="fa-solid fa-magnifying-glass"></i>';
             title = `No results for "${esc(searchQuery)}"`;
             subtitle = 'Try another patient name or clear the search to see all requests.';
-            buttonLabel = 'Clear search';
-            buttonAction = 'clearSearch()';
-        } else if (activeFilter === 'pending') {
-            stateClass = 'empty-pending';
-            iconHtml = '<i class="fa-solid fa-clock-rotate-left"></i>';
-            title = 'No pending requests';
-            subtitle = isDataEmpty && !hasAdvancedFilters ?
-                'There are no document requests waiting for review right now.' :
-                'No pending requests match your current filters.';
-            if (hasAdvancedFilters && !isDataEmpty) {
-                buttonLabel = 'Clear filters';
-                buttonAction = 'resetAllFilters()';
-            }
-        } else if (activeFilter === 'approved') {
-            stateClass = 'empty-approved';
-            iconHtml = '<i class="fa-solid fa-file-circle-check"></i>';
-            title = 'No approved requests';
-            subtitle = isDataEmpty && !hasAdvancedFilters ?
-                'Approved document requests will appear here after review.' :
-                'No approved requests match your current filters.';
-            if (hasAdvancedFilters && !isDataEmpty) {
-                buttonLabel = 'Clear filters';
-                buttonAction = 'resetAllFilters()';
-            }
-        } else if (activeFilter === 'rejected') {
-            stateClass = 'empty-rejected';
-            iconHtml = '<i class="fa-solid fa-file-circle-xmark"></i>';
-            title = 'No rejected requests';
-            subtitle = isDataEmpty && !hasAdvancedFilters ?
-                'Rejected document requests will appear here when applicable.' :
-                'No rejected requests match your current filters.';
-            if (hasAdvancedFilters && !isDataEmpty) {
-                buttonLabel = 'Clear filters';
-                buttonAction = 'resetAllFilters()';
-            }
-        } else if (isDataEmpty && !hasAdvancedFilters) {
-            stateClass = 'empty-neutral';
-            iconHtml = '<i class="fa-regular fa-folder-open"></i>';
-            title = 'No document requests yet';
-            subtitle = 'Incoming patient document requests will appear here once submitted.';
-        } else {
+            buttonHtml = `
+            <button type="button"
+                data-clear-search
+                data-search-target="#searchInput"
+                class="empty-state-btn">
+                <i class="fa-solid fa-xmark"></i>
+                Clear search
+            </button>
+        `;
+        } else if (activeFilter !== 'all') {
+            const copy = statusEmptyCopy[activeFilter] || {
+                stateClass: 'empty-filter',
+                iconHtml: '<i class="fa-solid fa-filter-circle-xmark"></i>',
+                title: 'No matching requests found',
+                subtitle: 'No document requests are available for this status.'
+            };
+
+            stateClass = copy.stateClass;
+            iconHtml = copy.iconHtml;
+            title = copy.title;
+            subtitle = copy.subtitle;
+        } else if (!isDataEmpty) {
             stateClass = 'empty-filter';
             iconHtml = '<i class="fa-solid fa-filter-circle-xmark"></i>';
             title = 'No matching requests found';
-            subtitle = 'Your current filters did not return any records. Try adjusting or clearing them.';
-            buttonLabel = 'Clear filters';
-            buttonAction = 'resetAllFilters()';
+            subtitle = 'No document requests match the selected filters.';
         }
 
         return `
-  <div class="empty-state ${stateClass}">
-    <div class="empty-state-icon">${iconHtml}</div>
-    <p class="empty-state-title">${title}</p>
-    <p class="empty-state-sub">${subtitle}</p>
-
-    ${buttonLabel ? `
-                      <button
-                        type="button"
-                        ${buttonAction === 'clearSearch()' ? 'data-clear-search data-search-target="#searchInput"' : `onclick="${buttonAction}"`}
-                        class="empty-state-btn"
-                      >
-                        <i class="fa-solid fa-xmark"></i>
-                        ${buttonLabel}
-                      </button>
-                    ` : ''}
-  </div>
-`;
+        <div class="empty-state ${stateClass}">
+            <div class="empty-state-icon">${iconHtml}</div>
+            <p class="empty-state-title">${title}</p>
+            <p class="empty-state-sub">${subtitle}</p>
+            ${buttonHtml}
+        </div>
+    `;
     }
 
     function buildMobileCard(r) {
@@ -1576,9 +1719,9 @@ $notifCount = $notifications->count();
         const to = Number(p.to || 0);
         const total = Number(p.total || 0);
 
-        const infoHtml = total > 0
-            ? `Showing <strong>${from}–${to}</strong> of <strong>${total}</strong> requests`
-            : 'Showing <strong>0</strong> requests';
+        const infoHtml = total > 0 ?
+            `Showing <strong>${from}–${to}</strong> of <strong>${total}</strong> requests` :
+            'Showing <strong>0</strong> requests';
 
         document.querySelectorAll('.docreq-pagebar .sl-pagebar-info').forEach((el) => {
             el.innerHTML = infoHtml;
@@ -1615,9 +1758,9 @@ $notifCount = $notifications->count();
 
         let html = '<nav class="sl-pagination" aria-label="Document requests pagination">';
 
-        html += current <= 1
-            ? '<button type="button" disabled class="sl-page-disabled" aria-label="Previous page"><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>'
-            : `<button type="button" onclick="docreqGoPage(${current - 1})" class="sl-page-btn" aria-label="Previous page"><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>`;
+        html += current <= 1 ?
+            '<button type="button" disabled class="sl-page-disabled" aria-label="Previous page"><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>' :
+            `<button type="button" onclick="docreqGoPage(${current - 1})" class="sl-page-btn" aria-label="Previous page"><i class="fa-solid fa-chevron-left sl-page-icon"></i></button>`;
 
         if (start > 1) {
             html += '<button type="button" onclick="docreqGoPage(1)" class="sl-page-btn">1</button>';
@@ -1625,9 +1768,9 @@ $notifCount = $notifications->count();
         }
 
         for (let i = start; i <= end; i++) {
-            html += i === current
-                ? `<span class="sl-page-current" aria-current="page">${i}</span>`
-                : `<button type="button" onclick="docreqGoPage(${i})" class="sl-page-btn">${i}</button>`;
+            html += i === current ?
+                `<span class="sl-page-current" aria-current="page">${i}</span>` :
+                `<button type="button" onclick="docreqGoPage(${i})" class="sl-page-btn">${i}</button>`;
         }
 
         if (end < last) {
@@ -1635,9 +1778,9 @@ $notifCount = $notifications->count();
             html += `<button type="button" onclick="docreqGoPage(${last})" class="sl-page-btn">${last}</button>`;
         }
 
-        html += current >= last
-            ? '<button type="button" disabled class="sl-page-disabled" aria-label="Next page"><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>'
-            : `<button type="button" onclick="docreqGoPage(${current + 1})" class="sl-page-btn" aria-label="Next page"><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>`;
+        html += current >= last ?
+            '<button type="button" disabled class="sl-page-disabled" aria-label="Next page"><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>' :
+            `<button type="button" onclick="docreqGoPage(${current + 1})" class="sl-page-btn" aria-label="Next page"><i class="fa-solid fa-chevron-right sl-page-icon"></i></button>`;
 
         html += '</nav>';
 
@@ -1661,6 +1804,7 @@ $notifCount = $notifications->count();
         if (!wrap) return;
 
         const isOpen = wrap.classList.contains('open');
+
         closeDocreqDropdowns();
 
         if (!isOpen) {
@@ -1675,6 +1819,9 @@ $notifCount = $notifications->count();
             wrap.querySelector('[data-select-button]')?.setAttribute('aria-expanded', 'false');
         });
     }
+
+    window.toggleDocreqDropdown = toggleDocreqDropdown;
+    window.closeDocreqDropdowns = closeDocreqDropdowns;
 
     function setCustomSelectValue(selectId, value, label = null) {
         const wrap = document.getElementById(selectId);
@@ -1847,7 +1994,7 @@ $notifCount = $notifications->count();
         const meta = getStatusMeta(status);
         const label = document.getElementById('statusDropdownLabel');
         const count = document.getElementById('statusDropdownCount');
-        const leading = document.querySelector('#docreqStatusSelect .docreq-select-leading');
+        const leading = document.querySelector('#docreqStatusSelect .docreq-sort-icon');
 
         if (label) label.textContent = meta.label;
         if (count) count.textContent = getStatusCount(status);
@@ -1857,8 +2004,10 @@ $notifCount = $notifications->count();
             leading.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
         }
 
-        document.querySelectorAll('#docreqStatusSelect .docreq-select-option').forEach((option) => {
-            option.classList.toggle('active', option.getAttribute('data-value') === status);
+        document.querySelectorAll('#docreqStatusSelect .docreq-sort-option').forEach((option) => {
+            const isActive = option.getAttribute('data-value') === status;
+            option.classList.toggle('active', isActive);
+            option.classList.toggle('is-active', isActive);
         });
     }
 
@@ -1988,10 +2137,18 @@ $notifCount = $notifications->count();
     }
 
     function openFilterModal() {
-        window.syncFilterTagGroup('fSortGroup', filterSort);
+        if (typeof window.syncFilterTagGroup === 'function') {
+            window.syncFilterTagGroup('fSortGroup', filterSort);
+        }
+
         setCustomSelectValue('docTypeSelect', filterDocType);
-        document.getElementById('fDateFrom').value = filterDateFrom;
-        document.getElementById('fDateTo').value = filterDateTo;
+
+        const dateFrom = document.getElementById('fDateFrom');
+        const dateTo = document.getElementById('fDateTo');
+
+        if (dateFrom) dateFrom.value = filterDateFrom || '';
+        if (dateTo) dateTo.value = filterDateTo || '';
+
         renderFilterChips();
         updateShowResultsButton();
 
@@ -2020,11 +2177,19 @@ $notifCount = $notifications->count();
         }
 
         const modal = document.getElementById('filterModal');
-        if (modal) modal.classList.remove('open', 'closing');
+
+        if (modal) {
+            modal.classList.remove('open', 'closing');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
         document.body.classList.remove('filter-lock');
         document.documentElement.classList.remove('filter-lock');
         document.body.style.overflow = '';
     }
+
+    window.openFilterModal = openFilterModal;
+    window.closeFilterModal = closeFilterModal;
 
     function applyFilterModal() {
         filterStatus = activeFilter;
@@ -2192,9 +2357,9 @@ $notifCount = $notifications->count();
 
         window.initGlobalViewToggles?.(document);
 
-        const savedViewMode = window.getGlobalViewMode?.(docreqViewToggle)
-            || localStorage.getItem('ViewToggleMode')
-            || 'list';
+        const savedViewMode = window.getGlobalViewMode?.(docreqViewToggle) ||
+            localStorage.getItem('ViewToggleMode') ||
+            'list';
 
         currentViewMode = savedViewMode === 'grid' ? 'grid' : 'list';
 
@@ -2304,7 +2469,8 @@ $notifCount = $notifications->count();
 
             } catch (error) {
                 console.error('Approve request failed:', error);
-                showDocreqError(error.message || 'Approval failed because of a server error. Please check the Laravel log.');
+                showDocreqError(error.message ||
+                    'Approval failed because of a server error. Please check the Laravel log.');
             } finally {
                 btn.disabled = false;
                 btn.classList.remove('is-loading');

@@ -524,7 +524,6 @@
         flex-shrink: 0;
     }
 
-    /* Dark Mode Overrides for Upcoming Card */
     [data-theme="dark"] #mainContent .upcoming-card-polished {
         background:
             radial-gradient(circle at top left, rgba(139, 0, 0, 0.22), transparent 34%),
@@ -650,7 +649,7 @@ $notifCount = $notifications->count();
 
 @section('content')
 
-<main id="mainContent" class="page-enter pt-[90px] px-3 md:px-6 py-6 fade-in min-h-screen flex-1">
+<main id="mainContent" class="patient-page-shell page-enter pt-[90px] px-3 md:px-6 py-6 fade-in min-h-screen flex-1">
     <div class="w-full fade-up">
 
         @if (isset($upcomingAppointment) && $upcomingAppointment)

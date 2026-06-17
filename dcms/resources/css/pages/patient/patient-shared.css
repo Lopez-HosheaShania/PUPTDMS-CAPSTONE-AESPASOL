@@ -9,6 +9,7 @@ body.role-patient .patient-page-shell {
     flex: 1 1 auto;
     background: #F9FAFB;
     color: #111827;
+    margin-top: 1rem !important;
 }
 
 @media (min-width: 768px) {
