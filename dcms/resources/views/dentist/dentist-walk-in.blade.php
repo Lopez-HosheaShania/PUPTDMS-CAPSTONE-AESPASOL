@@ -4,8 +4,6 @@
 
 @section('styles')
 
-<link rel="stylesheet" href="{{ asset('css/dentist-walk-in.css') }}?v={{ time() }}">
-
     <style>
         * {
             box-sizing: border-box;
@@ -2343,7 +2341,7 @@
         }
 
         #mainContent .book-card>div:last-child {
-            padding: 1.5rem 1.75rem 1.35rem !important;
+            padding: 1.5rem 1.75rem 5.25rem !important;
         }
 
         #mainContent #appointmentForm {
@@ -2399,7 +2397,7 @@
 
         @media (max-width: 768px) {
             #mainContent .book-card>div:last-child {
-                padding: 1rem !important;
+                padding: 1rem 1rem 4.25rem !important;
             }
 
             #mainContent #navBtns {
@@ -2666,7 +2664,7 @@
                 Step 1 of 5
             </p>
 
-            <h2 class="booking-step-title">Patient Account</h2>
+            <h2 class="booking-step-title">Patient account</h2>
 
             <p class="booking-step-subtitle">
                 Search an existing student, faculty, or administrative patient, or create a
@@ -2678,7 +2676,7 @@
             <div class="section-card walkin-account-card">
                 <p class="section-card-title">
                     <i class="fa-solid fa-user-magnifying-glass text-xs"></i>
-                    Select or Create Patient
+                    Select or create patient
                     <span class="section-card-title-line"></span>
                 </p>
 
@@ -2690,7 +2688,7 @@
 
                     <button type="button" class="account-tab" data-tab="guest">
                         <i class="fa-solid fa-user-plus text-[13px]"></i>
-                        Guest Onboarding
+                        Guest onboarding
                     </button>
                 </div>
 
@@ -2715,7 +2713,7 @@
                     <div class="guest-fields-grid">
                         <div>
                             <label class="walkin-field-label" for="guestName">
-                                Guest Full Name <span class="required-star">*</span>
+                                Guest full name <span class="required-star">*</span>
                             </label>
 
                             <input type="text" id="guestName" name="guest_name"
@@ -2754,14 +2752,14 @@
 
                     <button type="button" class="guest-create-btn" id="createGuestBtn">
                         <i class="fa-solid fa-user-plus"></i>
-                        Create Guest Account
+                        Create guest account
                     </button>
                 </div>
 
                 <div class="selected-patient-box" id="selectedPatientBox" hidden>
                     <span>
                         <i class="fa-solid fa-circle-check text-[11px] mr-1"></i>
-                        Selected Patient
+                        Selected patient
                     </span>
                     <strong id="selectedPatientName"></strong>
                     <small id="selectedPatientMeta"></small>
@@ -3773,6 +3771,14 @@
             }
         }
 
+        [guestName, guestEmail, guestPhone].forEach(input => {
+            input?.addEventListener("input", () => {
+                if (patientModeInput?.value === "guest" && selectedPatientId?.value) {
+                    clearSelectedPatientUI();
+                }
+            });
+        });
+
         function clearSelectedPatientUI() {
             selectedWalkInPatient = null;
 
@@ -3795,6 +3801,7 @@
 
                 const pill = result.querySelector(".patient-select-pill");
                 if (pill) {
+                    pill.classList.remove("chosen");
                     pill.innerHTML = `<i class="fa-solid fa-plus"></i> Select`;
                 }
             });
@@ -3861,17 +3868,7 @@
 
             markFormDirty();
 
-            showMiniTab("Existing patient selected. Proceeding to service selection...");
-
-            setTimeout(() => {
-                if (typeof showStep === "function" && step === 0) {
-                    if (!completedSteps.includes(0)) {
-                        completedSteps.push(0);
-                    }
-
-                    showStep(1);
-                }
-            }, 350);
+            showMiniTab("Existing patient selected.");
         }
 
         function selectGuestPatient(shouldProceed = true) {
@@ -3918,20 +3915,81 @@
             markFormDirty();
 
             if (shouldProceed) {
-                showMiniTab("Guest patient details saved. Proceeding to service selection...");
-
-                setTimeout(() => {
-                    if (typeof showStep === "function" && step === 0) {
-                        if (!completedSteps.includes(0)) {
-                            completedSteps.push(0);
-                        }
-
-                        showStep(1);
-                    }
-                }, 350);
+                showMiniTab("Guest patient details saved.");
             }
 
             return true;
+        }
+
+        async function createGuestPatientOnServer() {
+            if (!selectGuestPatient(false)) {
+                return false;
+            }
+
+            const token = document.querySelector('input[name="_token"]')?.value || "";
+            const payload = new FormData();
+            payload.append("guest_name", guestName?.value?.trim() || "");
+            payload.append("guest_email", guestEmail?.value?.trim() || "");
+            payload.append("guest_phone", guestPhone?.value?.trim() || "");
+
+            if (createGuestBtn) {
+                createGuestBtn.disabled = true;
+                createGuestBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Creating guest account`;
+            }
+
+            try {
+                const response = await fetch(`{{ route('dentist.walk-in.guest.store') }}`, {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRF-TOKEN": token,
+                    },
+                    body: payload,
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok || !data?.success || !data?.patient?.id) {
+                    throw new Error(data?.message || "Unable to create guest patient.");
+                }
+
+                selectedWalkInPatient = {
+                    ...data.patient,
+                    mode: "guest",
+                    type: data.patient.type || "Guest",
+                };
+
+                if (selectedPatientId) {
+                    selectedPatientId.value = data.patient.id;
+                }
+
+                if (selectedPatientName) {
+                    selectedPatientName.textContent = data.patient.name || guestName?.value?.trim() || "Guest Patient";
+                }
+
+                if (selectedPatientMeta) {
+                    const metaParts = [
+                        data.patient.type || "Guest",
+                        data.patient.email || guestEmail?.value?.trim(),
+                        guestPhone?.value?.trim(),
+                    ].filter(Boolean);
+                    selectedPatientMeta.textContent = metaParts.join(" • ");
+                }
+
+                selectedPatientBox?.removeAttribute("hidden");
+                showMiniTab("Guest account created.");
+                markFormDirty();
+                return true;
+            } catch (error) {
+                showMiniTab(error.message || "Unable to create guest account. Please try again.");
+                return false;
+            } finally {
+                if (createGuestBtn) {
+                    createGuestBtn.disabled = false;
+                    createGuestBtn.innerHTML = `<i class="fa-solid fa-user-plus"></i> Create guest account`;
+                }
+            }
         }
 
         setPatientMode("existing");
@@ -3945,7 +4003,7 @@
 
         createGuestBtn?.addEventListener("click", () => {
             setPatientMode("guest", false);
-            selectGuestPatient(true);
+            createGuestPatientOnServer();
         });
 
         let patientSearchTimer = null;
@@ -4035,6 +4093,7 @@ function renderPatients(patients) {
 
                 const pill = result.querySelector(".patient-select-pill");
                 if (pill) {
+                    pill.classList.remove("chosen");
                     pill.innerHTML = `<i class="fa-solid fa-plus"></i> Select`;
                 }
             });
@@ -4043,6 +4102,7 @@ function renderPatients(patients) {
 
             const pill = item.querySelector(".patient-select-pill");
             if (pill) {
+                pill.classList.add("chosen");
                 pill.innerHTML = `<i class="fa-solid fa-check"></i> Selected`;
             }
         });
@@ -4376,8 +4436,15 @@ function renderPatients(patients) {
                 const selectedPatientInput = document.getElementById("selectedPatientId");
 
                 if (mode === "guest") {
-                    if (!selectGuestPatient(false)) {
+                    if (!guestName?.value?.trim()) {
+                        showMiniTab("Please enter the guest full name.");
                         scrollToInvalidTarget(guestName || document.getElementById("patientAccountSection"));
+                        return false;
+                    }
+
+                    if (!selectedPatientInput?.value) {
+                        showMiniTab("Please click Create guest account before proceeding.");
+                        scrollToInvalidTarget(createGuestBtn || document.getElementById("patientAccountSection"));
                         return false;
                     }
                 } else if (!selectedPatientInput?.value) {
