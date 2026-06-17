@@ -7,6 +7,25 @@
 @php
 $notifications = collect($notifications ?? []);
 $notifCount = $notifications->count();
+
+$formatDocumentType = function ($type) {
+return ucwords(str_replace(['_', '-'], ' ', (string) ($type ?: 'Document')));
+};
+
+$requestableDocumentTypes = collect([
+'Dental Clearance',
+'Annual Dental Clearance',
+'All Dental Records',
+'Medical Records',
+'Diagnosis and Treatment',
+])
+->map(fn($type) => $formatDocumentType($type))
+->filter()
+->unique(fn($type) => strtolower(trim(preg_replace('/\s+/', ' ', (string) $type))))
+->values();
+
+$defaultDocumentTypes = $requestableDocumentTypes;
+$documentTypes = $requestableDocumentTypes;
 @endphp
 
 <main id="mainContent" class="dentist-page-shell admin-page-shell page-enter docreq-page mode-list">
@@ -193,44 +212,44 @@ $notifCount = $notifications->count();
                     <span class="sl-pagebar-info docreq-page-info" id="pageInfoTop"></span>
 
                     <div class="sl-page-size-control global-page-size-control docreq-page-size-control">
-                            <label for="docreqPerPageSelect">Show</label>
+                        <label for="docreqPerPageSelect">Show</label>
 
-                            <div class="global-page-size-select" data-global-page-size data-page-size-input="#docreqPerPageSelect"
-                                data-page-size-callback="selectDocreqPerPage">
-                                <input type="hidden" id="docreqPerPageSelect" class="global-page-size-native" value="10">
+                        <div class="global-page-size-select" data-global-page-size
+                            data-page-size-input="#docreqPerPageSelect" data-page-size-callback="selectDocreqPerPage">
+                            <input type="hidden" id="docreqPerPageSelect" class="global-page-size-native" value="10">
 
-                                <button type="button" class="global-page-size-trigger" data-page-size-trigger
-                                    aria-haspopup="listbox" aria-expanded="false">
-                                    <span data-page-size-value>10</span>
-                                    <i class="fa-solid fa-chevron-down"></i>
+                            <button type="button" class="global-page-size-trigger" data-page-size-trigger
+                                aria-haspopup="listbox" aria-expanded="false">
+                                <span data-page-size-value>10</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+
+                            <div class="global-page-size-menu" role="listbox">
+                                <button type="button" class="global-page-size-option is-selected" data-page-size-option
+                                    data-value="10" role="option" aria-selected="true">
+                                    <span>10</span>
+                                    <i class="fa-solid fa-check"></i>
                                 </button>
-
-                                <div class="global-page-size-menu" role="listbox">
-                                    <button type="button" class="global-page-size-option is-selected"
-                                        data-page-size-option data-value="10" role="option" aria-selected="true">
-                                        <span>10</span>
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                    <button type="button" class="global-page-size-option"
-                                        data-page-size-option data-value="20" role="option" aria-selected="false">
-                                        <span>20</span>
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                    <button type="button" class="global-page-size-option"
-                                        data-page-size-option data-value="50" role="option" aria-selected="false">
-                                        <span>50</span>
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                    <button type="button" class="global-page-size-option"
-                                        data-page-size-option data-value="100" role="option" aria-selected="false">
-                                        <span>100</span>
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                </div>
+                                <button type="button" class="global-page-size-option" data-page-size-option
+                                    data-value="20" role="option" aria-selected="false">
+                                    <span>20</span>
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                                <button type="button" class="global-page-size-option" data-page-size-option
+                                    data-value="50" role="option" aria-selected="false">
+                                    <span>50</span>
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                                <button type="button" class="global-page-size-option" data-page-size-option
+                                    data-value="100" role="option" aria-selected="false">
+                                    <span>100</span>
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
                             </div>
-
-                            <span>per page</span>
                         </div>
+
+                        <span>per page</span>
+                    </div>
                 </div>
 
                 <div class="sl-pagination-wrap docreq-pagination-wrap">
@@ -302,8 +321,8 @@ $notifCount = $notifications->count();
                 <div id="docTypeSelect" class="docreq-custom-select docreq-filter-select">
                     <button type="button" class="docreq-select-button" data-select-button aria-haspopup="listbox"
                         aria-expanded="false" aria-controls="docTypeSelectMenu"
-                        onclick="toggleDocreqDropdown('docTypeSelect')" <span class="docreq-select-leading"><i
-                            class="fa-regular fa-file-lines"></i></span>
+                        onclick="toggleDocreqDropdown('docTypeSelect')">
+                        <span class="docreq-select-leading"><i class="fa-regular fa-file-lines"></i></span>
                         <span class="docreq-select-text">
                             <span>Document type</span>
                             <strong id="docTypeSelectLabel">All document types</strong>
@@ -629,10 +648,10 @@ $notifCount = $notifications->count();
     let filterSort = 'newest';
     let documentTypeOptions = [];
     const DOCREQ_DATA_URL = @json(url('/dentist/document-requests/data'));
+    const DOCREQ_DEFAULT_DOC_TYPES = @json($documentTypes -> values());
 
     let docreqKnownIds = new Set();
-    let docreqServerSnapshot = null;
-    let docreqPollTimer = null;
+    let docreqRefreshWatcher = null;
 
     function normalizeDocreqStatus(status) {
         const normalized = String(status || 'pending').replace(/_/g, '-').toLowerCase();
@@ -740,8 +759,7 @@ $notifCount = $notifications->count();
             renderList();
             renderFilterChips();
 
-            document.getElementById('docreqRefreshNotice')?.remove();
-            docreqServerSnapshot = null;
+            window.removeGlobalRefreshNotice?.('docreq');
 
             if (startWatcher) {
                 initDocreqRefreshWatcher();
@@ -785,88 +803,39 @@ $notifCount = $notifications->count();
         renderDocTypeOptions(documentTypeOptions);
         updateStats(payload.stats || recalculateDocreqStats());
         renderList();
+        renderFilterChips();
 
-        document.getElementById('docreqRefreshNotice')?.remove();
-        docreqServerSnapshot = null;
-    }
-
-    function showDocreqRefreshNotice(newCount = 1) {
-        let notice = document.getElementById('docreqRefreshNotice');
-
-        if (!notice) {
-            notice = document.createElement('div');
-            notice.id = 'docreqRefreshNotice';
-            notice.className = 'docreq-refresh-notice';
-
-            const tableCard = document.querySelector('#mainContent.docreq-page .table-card');
-            tableCard?.parentNode?.insertBefore(notice, tableCard);
-        }
-
-        notice.innerHTML = `
-        <div class="docreq-refresh-copy">
-            <span class="docreq-refresh-icon">
-                <i class="fa-solid fa-rotate"></i>
-            </span>
-
-            <div>
-                <strong>${newCount} new document request${newCount === 1 ? '' : 's'} available</strong>
-                <small>Refresh to see the latest request${newCount === 1 ? '' : 's'}.</small>
-            </div>
-        </div>
-
-        <button type="button" class="docreq-refresh-btn" id="docreqRefreshNowBtn">
-            <i class="fa-solid fa-arrows-rotate"></i>
-            Refresh
-        </button>
-    `;
-
-        notice.querySelector('#docreqRefreshNowBtn')?.addEventListener('click', () => {
-            applyDocreqServerSnapshot(docreqServerSnapshot);
-
-            if (typeof window.showToast === 'function') {
-                window.showToast('Document requests updated', 'info');
-            }
-        });
-    }
-
-    async function checkDocreqUpdates() {
-        try {
-            const response = await fetch(DOCREQ_DATA_URL, {
-                cache: 'no-store',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
-            if (!response.ok) return;
-
-            const payload = await response.json();
-
-            const incoming = Array.isArray(payload.requests)
-                ? payload.requests.map(normalizeDocreqRequest)
-                : [];
-
-            const newRequests = incoming.filter((request) => !docreqKnownIds.has(Number(request.id)));
-
-            if (newRequests.length > 0) {
-                docreqServerSnapshot = {
-                    ...payload,
-                    requests: incoming
-                };
-
-                showDocreqRefreshNotice(newRequests.length);
-            }
-        } catch (error) {
-            console.warn('Document request refresh check failed:', error);
-        }
+        window.removeGlobalRefreshNotice?.('docreq');
     }
 
     function initDocreqRefreshWatcher() {
-        if (docreqPollTimer) clearInterval(docreqPollTimer);
+        if (!window.initGlobalRefreshWatcher) return;
 
-        docreqKnownIds = new Set(allRequests.map((request) => Number(request.id)));
-        docreqPollTimer = setInterval(checkDocreqUpdates, 15000);
+        docreqRefreshWatcher = window.initGlobalRefreshWatcher({
+            key: 'docreq',
+            url: DOCREQ_DATA_URL,
+            initialItems: allRequests,
+            anchorSelector: '#mainContent.docreq-page .table-card',
+            itemLabel: 'document request',
+            getItems: (payload) => {
+                if (Array.isArray(payload)) {
+                    return payload.map(normalizeDocreqRequest);
+                }
+
+                return Array.isArray(payload?.requests)
+                    ? payload.requests.map(normalizeDocreqRequest)
+                    : [];
+            },
+            getItemId: (request) => request?.id,
+            title: (count) => `${count} new document request${count === 1 ? '' : 's'} available`,
+            subtitle: (count) => `Refresh to see the latest request${count === 1 ? '' : 's'}.`,
+            onRefresh: applyDocreqServerSnapshot,
+            toast: {
+                type: 'info',
+                title: 'Document requests updated',
+                message: 'Latest document requests are now shown.'
+            }
+        });
     }
 
     function showSkeleton() {
@@ -991,7 +960,7 @@ $notifCount = $notifications->count();
                 return displayName.includes(q) || rawName.includes(q) || identifier.includes(q);
             });
         }
-        if (filterDocType) data = data.filter(r => r.document_type === filterDocType);
+        if (filterDocType) data = data.filter(r => sameDocType(r.document_type, filterDocType));
         if (filterDateFrom) {
             const from = new Date(filterDateFrom);
             data = data.filter(r => new Date(r.request_date) >= from);
@@ -1703,7 +1672,7 @@ $notifCount = $notifications->count();
 
     window.selectDocreqPerPage = selectDocreqPerPage;
 
-        window.initGlobalPageSizeSelects?.();
+    window.initGlobalPageSizeSelects?.();
 
     function renderDocreqPagebar(p) {
         if (!p) return;
@@ -1835,12 +1804,38 @@ $notifCount = $notifications->count();
         if (labelEl) labelEl.textContent = finalLabel;
     }
 
+    function formatDocTypeLabel(type = '') {
+        return String(type || '')
+            .replace(/[_-]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .replace(/\w\S*/g, word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+    }
+
+    function normalizeDocTypeKey(type = '') {
+        return formatDocTypeLabel(type).toLowerCase();
+    }
+
+    function sameDocType(a = '', b = '') {
+        return normalizeDocTypeKey(a) === normalizeDocTypeKey(b);
+    }
+
     function normalizeDocTypes(types = []) {
-        return [...new Set(
-            types
-                .map(type => String(type || '').trim())
-                .filter(Boolean)
-        )].sort((a, b) => a.localeCompare(b));
+        const typeMap = new Map();
+        const requestableTypes = Array.isArray(DOCREQ_DEFAULT_DOC_TYPES) && DOCREQ_DEFAULT_DOC_TYPES.length
+            ? DOCREQ_DEFAULT_DOC_TYPES
+            : types;
+
+        requestableTypes.forEach(type => {
+            const label = formatDocTypeLabel(type);
+            const key = normalizeDocTypeKey(label);
+
+            if (label && !typeMap.has(key)) {
+                typeMap.set(key, label);
+            }
+        });
+
+        return Array.from(typeMap.values());
     }
 
     function getDocTypeIcon(type = '') {

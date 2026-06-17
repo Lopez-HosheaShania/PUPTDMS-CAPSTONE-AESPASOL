@@ -4451,3 +4451,357 @@
         font-size: .68rem !important;
     }
 }
+
+/* Document request filter: document type dropdown */
+#filterModal #docTypeSelect.docreq-filter-select {
+    position: relative !important;
+    width: 100% !important;
+    z-index: 60 !important;
+}
+
+#filterModal #docTypeSelect.docreq-filter-select.open {
+    z-index: 1600 !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-button {
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 13px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(139, 0, 0, 0.14) !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    color: #111827 !important;
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) 16px !important;
+    align-items: center !important;
+    gap: 10px !important;
+    text-align: left !important;
+    box-shadow:
+        0 8px 18px rgba(139, 0, 0, 0.055),
+        inset 0 1px 0 rgba(255, 255, 255, 0.80) !important;
+    cursor: pointer !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-button:hover,
+#filterModal #docTypeSelect.open .docreq-select-button {
+    border-color: rgba(139, 0, 0, 0.28) !important;
+    box-shadow:
+        0 0 0 4px rgba(139, 0, 0, 0.06),
+        0 12px 24px rgba(139, 0, 0, 0.10) !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-leading {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 13px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #FEE2E2 !important;
+    color: #8B0000 !important;
+    border: 1px solid #FECACA !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-text {
+    min-width: 0 !important;
+    display: grid !important;
+    gap: 3px !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-text span {
+    color: #9CA3AF !important;
+    font-size: 9.5px !important;
+    font-weight: 900 !important;
+    letter-spacing: .10em !important;
+    text-transform: uppercase !important;
+    line-height: 1 !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-text strong {
+    color: #111827 !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    line-height: 1.05 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+#filterModal #docTypeSelect .docreq-select-chevron {
+    color: #94A3B8 !important;
+    font-size: 12px !important;
+    transition: transform .18s ease !important;
+}
+
+#filterModal #docTypeSelect.open .docreq-select-chevron {
+    transform: rotate(180deg) !important;
+}
+
+#filterModal #docTypeSelectMenu.docreq-select-menu {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-height: min(340px, calc(100dvh - 250px)) !important;
+    overflow-y: auto !important;
+    padding: 8px !important;
+    border-radius: 20px !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(229, 231, 235, 0.95) !important;
+    box-shadow:
+        0 24px 54px rgba(15, 23, 42, .18),
+        inset 0 1px 0 rgba(255, 255, 255, .86) !important;
+    backdrop-filter: blur(18px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-6px) scale(.985) !important;
+    transform-origin: top center !important;
+    transition: opacity .18s ease, visibility .18s ease, transform .18s ease !important;
+    z-index: 1601 !important;
+}
+
+#filterModal #docTypeSelect.open #docTypeSelectMenu.docreq-select-menu {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+#filterModal #docTypeSelectMenu .doc-type-option {
+    width: 100% !important;
+    min-height: 56px !important;
+    padding: 9px 11px !important;
+    border-radius: 15px !important;
+    background: #F8FAFC !important;
+    border: 1px solid #E5E7EB !important;
+    color: #111827 !important;
+    display: grid !important;
+    grid-template-columns: 36px minmax(0, 1fr) 18px !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    gap: 11px !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease !important;
+}
+
+#filterModal #docTypeSelectMenu .doc-type-option:hover,
+#filterModal #docTypeSelectMenu .doc-type-option.active {
+    background: rgba(139, 0, 0, 0.07) !important;
+    border-color: rgba(139, 0, 0, 0.20) !important;
+    box-shadow: 0 8px 18px rgba(139, 0, 0, 0.08) !important;
+    transform: translateY(-1px) !important;
+}
+
+#filterModal #docTypeSelectMenu .docreq-option-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border-radius: 13px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 13px !important;
+}
+
+#filterModal #docTypeSelectMenu .docreq-option-icon i,
+#filterModal #docTypeSelect .docreq-select-leading i,
+#filterModal #docTypeSelectMenu .docreq-option-check {
+    color: currentColor !important;
+}
+
+#filterModal #docTypeSelectMenu .docreq-option-copy {
+    min-width: 0 !important;
+    display: grid !important;
+    gap: 3px !important;
+}
+
+#filterModal #docTypeSelectMenu .docreq-option-copy strong {
+    color: #111827 !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    line-height: 1.1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+#filterModal #docTypeSelectMenu .docreq-option-copy small {
+    color: #9CA3AF !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+}
+
+#filterModal #docTypeSelectMenu .docreq-option-check {
+    justify-self: center !important;
+    display: none !important;
+    font-size: 12px !important;
+    color: #8B0000 !important;
+}
+
+#filterModal #docTypeSelectMenu .doc-type-option.active .docreq-option-check {
+    display: inline-flex !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-all,
+#filterModal .docreq-option-icon.doc-type-blue {
+    background: #DBEAFE !important;
+    color: #2563EB !important;
+    border: 1px solid #BFDBFE !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-orange,
+#filterModal .docreq-option-icon.doc-type-amber {
+    background: #FFF7ED !important;
+    color: #F97316 !important;
+    border: 1px solid #FED7AA !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-green {
+    background: #DCFCE7 !important;
+    color: #16A34A !important;
+    border: 1px solid #86EFAC !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-red {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border: 1px solid #FCA5A5 !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-purple {
+    background: #F3E8FF !important;
+    color: #9333EA !important;
+    border: 1px solid #D8B4FE !important;
+}
+
+#filterModal .docreq-option-icon.doc-type-cyan {
+    background: #CFFAFE !important;
+    color: #0891B2 !important;
+    border: 1px solid #67E8F9 !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-button,
+.dark #filterModal #docTypeSelect .docreq-select-button {
+    background:
+        linear-gradient(145deg, rgba(17, 24, 39, 0.94), rgba(13, 17, 23, 0.90)) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #F8FAFC !important;
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-leading,
+.dark #filterModal #docTypeSelect .docreq-select-leading {
+    background: rgba(139, 0, 0, 0.24) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-text span,
+.dark #filterModal #docTypeSelect .docreq-select-text span,
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-chevron,
+.dark #filterModal #docTypeSelect .docreq-select-chevron {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelect .docreq-select-text strong,
+.dark #filterModal #docTypeSelect .docreq-select-text strong {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu.docreq-select-menu,
+.dark #filterModal #docTypeSelectMenu.docreq-select-menu {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.18), transparent 38%),
+        linear-gradient(145deg, rgba(13, 17, 23, 0.96), rgba(22, 27, 34, 0.92)) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.52),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu .doc-type-option,
+.dark #filterModal #docTypeSelectMenu .doc-type-option {
+    background:
+        radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.10), transparent 42%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028)) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu .doc-type-option:hover,
+[data-theme="dark"] #filterModal #docTypeSelectMenu .doc-type-option.active,
+.dark #filterModal #docTypeSelectMenu .doc-type-option:hover,
+.dark #filterModal #docTypeSelectMenu .doc-type-option.active {
+    background: rgba(139, 0, 0, 0.22) !important;
+    border-color: rgba(252, 165, 165, 0.24) !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu .docreq-option-copy strong,
+.dark #filterModal #docTypeSelectMenu .docreq-option-copy strong {
+    color: #F8FAFC !important;
+}
+
+[data-theme="dark"] #filterModal #docTypeSelectMenu .docreq-option-copy small,
+.dark #filterModal #docTypeSelectMenu .docreq-option-copy small {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-all,
+.dark #filterModal .docreq-option-icon.doc-type-all,
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-blue,
+.dark #filterModal .docreq-option-icon.doc-type-blue {
+    background: rgba(37, 99, 235, 0.18) !important;
+    color: #93C5FD !important;
+    border-color: rgba(147, 197, 253, 0.24) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-orange,
+.dark #filterModal .docreq-option-icon.doc-type-orange,
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-amber,
+.dark #filterModal .docreq-option-icon.doc-type-amber {
+    background: rgba(245, 158, 11, 0.18) !important;
+    color: #FCD34D !important;
+    border-color: rgba(252, 211, 77, 0.24) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-green,
+.dark #filterModal .docreq-option-icon.doc-type-green {
+    background: rgba(22, 163, 74, 0.16) !important;
+    color: #86EFAC !important;
+    border-color: rgba(134, 239, 172, 0.24) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-red,
+.dark #filterModal .docreq-option-icon.doc-type-red {
+    background: rgba(220, 38, 38, 0.16) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, 0.24) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-purple,
+.dark #filterModal .docreq-option-icon.doc-type-purple {
+    background: rgba(147, 51, 234, 0.18) !important;
+    color: #D8B4FE !important;
+    border-color: rgba(216, 180, 254, 0.24) !important;
+}
+
+[data-theme="dark"] #filterModal .docreq-option-icon.doc-type-cyan,
+.dark #filterModal .docreq-option-icon.doc-type-cyan {
+    background: rgba(8, 145, 178, 0.18) !important;
+    color: #67E8F9 !important;
+    border-color: rgba(103, 232, 249, 0.24) !important;
+}

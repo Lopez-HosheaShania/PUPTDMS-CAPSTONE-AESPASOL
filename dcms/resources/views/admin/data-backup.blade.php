@@ -60,7 +60,7 @@ $hostingerVerifiedLabel = $hostingerVerified ? 'Verified' : 'Pending';
 @endphp
 
 <main id="mainContent" class="admin-page-shell backup-page page-enter mode-list">
-    <div class="admin-page-container">
+    <div class="full">
 
         <div class="page-banner">
             <div class="page-banner-inner">
@@ -77,7 +77,7 @@ $hostingerVerifiedLabel = $hostingerVerified ? 'Verified' : 'Pending';
             </div>
         </div>
 
-        <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
+        <div class="admin-page-body">
 
         <div class="backup-stats admin-dashboard-stat-grid" id="backupStats">
             <div class="backup-stat stat-card s-all">

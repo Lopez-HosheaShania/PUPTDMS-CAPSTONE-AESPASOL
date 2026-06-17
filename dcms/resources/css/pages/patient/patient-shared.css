@@ -28,7 +28,7 @@ body.role-patient .patient-page-shell {
 
 [data-theme="dark"] body.role-patient .patient-page-shell,
 .dark body.role-patient .patient-page-shell {
-    background: #0d0f12 !important;
+    background: #101111 !important;
     color: #F3F4F6 !important;
 }
 
@@ -111,5 +111,5 @@ body.role-patient #mobFab.open i {
 
 [data-theme="dark"] body.role-patient #mobFab,
 .dark body.role-patient #mobFab {
-    border-color: #0d0f12;
+    border-color: #101111;
 }

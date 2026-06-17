@@ -45,7 +45,7 @@ $activePeriodPayload = $activePeriod
 @endphp
 
 <main id="mainContent" class="admin-page-shell academic-period-page page-enter mode-list">
-    <div class="admin-page-container">
+    <div class="full">
 
         @if ($errors->any())
         <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -88,7 +88,7 @@ $activePeriodPayload = $activePeriod
             </div>
         </div>
 
-        <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
+        <div class="admin-page-body">
             
         <div class="active-banner mb-6" id="activeBannerWrap">
             <div class="active-banner-inner">

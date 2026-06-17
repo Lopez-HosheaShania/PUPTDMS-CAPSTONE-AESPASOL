@@ -2792,7 +2792,6 @@
         grid-template-columns: minmax(0, 1fr) 42px !important;
         gap: 0.5rem !important;
         width: 100% !important;
-        max-width: 100% !important;
     }
 
     #mainContent.dentist-appointments-page.admin-appointments-page .appointment-filter-actions {

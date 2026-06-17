@@ -698,3 +698,253 @@
         filter: none !important;
     }
 }
+
+@keyframes globalRefreshNoticeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px) scale(.985);
+        filter: blur(6px);
+    }
+
+    65% {
+        opacity: 1;
+        transform: translateY(2px) scale(1.004);
+        filter: blur(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes globalRefreshIconPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, .28);
+        transform: scale(1);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+        transform: scale(1.04);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+        transform: scale(1);
+    }
+}
+
+@keyframes globalRefreshIconSpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes globalRefreshSoftGlow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 14px 34px rgba(15, 23, 42, 0.08),
+            0 0 0 0 rgba(37, 99, 235, 0);
+    }
+
+    50% {
+        box-shadow:
+            0 16px 38px rgba(15, 23, 42, 0.10),
+            0 0 0 4px rgba(37, 99, 235, 0.06);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .global-refresh-notice,
+    .global-refresh-icon,
+    .global-refresh-icon i,
+    .global-refresh-btn {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        filter: none !important;
+    }
+}
+
+@keyframes apptSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes apptPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+}
+
+@keyframes apptPanelFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+        filter: blur(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+.appt-panel-fade {
+    animation: apptPanelFadeIn .32s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes apptFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes apptGlowPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(139, 0, 0, .32);
+    }
+
+    50% {
+        box-shadow: 0 0 0 14px rgba(139, 0, 0, 0);
+    }
+}
+
+@keyframes apptSoftReveal {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.appt-section-reveal {
+    animation: apptSoftReveal .55s ease both;
+}
+
+@keyframes apptDetailModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes apptTabPop {
+    0% {
+        transform: scale(.96);
+    }
+
+    60% {
+        transform: scale(1.035);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.appt-tab.appt-active::after {
+    animation: apptShine .65s ease;
+}
+
+@keyframes apptShine {
+    to {
+        transform: translateX(120%) skewX(-20deg);
+    }
+}
+
+@keyframes apptModalDesktopIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes apptModalDesktopOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(10px) scale(.98);
+    }
+}
+
+@keyframes apptSheetIn {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes apptSheetOut {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(100%);
+    }
+}
+
+@keyframes slideUpRec {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

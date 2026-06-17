@@ -10,6 +10,32 @@ use App\Services\DocumentTemplateRenderer;
 
 class DocumentTemplateController extends Controller
 {
+    private function templateStats(): array
+    {
+        $allowedStatuses = ['active', 'archived'];
+
+        return [
+            'total' => DocumentTemplate::whereIn('status', $allowedStatuses)->count(),
+            'active' => DocumentTemplate::where('status', 'active')->count(),
+            'archived' => DocumentTemplate::where('status', 'archived')->count(),
+        ];
+    }
+
+    private function templatePayload(DocumentTemplate $template): array
+    {
+        return [
+            'id' => $template->id,
+            'name' => $template->name,
+            'code' => $template->code,
+            'document_type' => $template->document_type,
+            'category' => $template->category,
+            'status' => $template->status,
+            'is_default' => (bool) $template->is_default,
+            'notes' => $template->notes,
+            'updated_at' => optional($template->updated_at)->format('M d, Y h:i A'),
+        ];
+    }
+
     public function index(Request $request)
     {
         if (!session('admin_logged_in')) {
@@ -47,12 +73,7 @@ class DocumentTemplateController extends Controller
         }
 
         $templates = $query->get();
-
-        $stats = [
-            'total' => DocumentTemplate::whereIn('status', $allowedStatuses)->count(),
-            'active' => DocumentTemplate::where('status', 'active')->count(),
-            'archived' => DocumentTemplate::where('status', 'archived')->count(),
-        ];
+        $stats = $this->templateStats();
 
         return view('admin.document-template', compact('templates', 'stats'));
     }
@@ -74,23 +95,24 @@ class DocumentTemplateController extends Controller
             'category' => $template->category,
             'engine' => $template->engine,
             'output_format' => $template->output_format,
-
-            // single-field system
             'content' => $renderer->renderForPreview($template),
-
             'paper_size' => $template->paper_size,
             'orientation' => $template->orientation,
             'status' => $template->status,
-            'is_default' => $template->is_default,
+            'is_default' => (bool) $template->is_default,
             'notes' => $template->notes,
             'created_at' => optional($template->created_at)->format('M d, Y h:i A'),
             'updated_at' => optional($template->updated_at)->format('M d, Y h:i A'),
         ]);
     }
 
-    public function archive($id)
+    public function archive(Request $request, $id)
     {
         if (!session('admin_logged_in')) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
             return redirect('/admin/login');
         }
 
@@ -102,14 +124,29 @@ class DocumentTemplateController extends Controller
             'updated_by' => session('admin_id'),
         ]);
 
+        $template->refresh();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Template archived successfully.',
+                'template' => $this->templatePayload($template),
+                'stats' => $this->templateStats(),
+            ]);
+        }
+
         return redirect()
             ->route('admin.document-template')
             ->with('success', 'Template archived successfully.');
     }
 
-    public function activate($id)
+    public function activate(Request $request, $id)
     {
         if (!session('admin_logged_in')) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
             return redirect('/admin/login');
         }
 
@@ -119,6 +156,17 @@ class DocumentTemplateController extends Controller
             'status' => 'active',
             'updated_by' => session('admin_id'),
         ]);
+
+        $template->refresh();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Template activated successfully.',
+                'template' => $this->templatePayload($template),
+                'stats' => $this->templateStats(),
+            ]);
+        }
 
         return redirect()
             ->route('admin.document-template')
