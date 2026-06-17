@@ -5,12 +5,18 @@
     background: #F9FAFB !important;
     color: #111827 !important;
     overflow-x: hidden !important;
+    margin-top: 1rem;
 }
 
 .admin-page-container {
     width: 100%;
-    max-width: 1280px;
-    margin: 0 auto;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+.admin-page-body {
+    width: 100%;
+    margin-top: 1rem;
 }
 
 .admin-stack {

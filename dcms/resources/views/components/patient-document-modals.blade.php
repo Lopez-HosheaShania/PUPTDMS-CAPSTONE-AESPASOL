@@ -1,327 +1,366 @@
-<style>
-    .doc-modal::backdrop {
-        background: rgba(0, 0, 0, 0.6);
-    }
-
-    .doc-modal {
-        border: none;
-        padding: 0;
-        border-radius: 16px;
-        width: 100%;
-        max-width: 420px;
-    }
-
-    .doc-modal-inner {
-        background: #fff;
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    .doc-modal-header {
-        background: linear-gradient(135deg, #660000, #8B0000);
-        color: white;
-        padding: 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .doc-eyebrow {
-        font-size: 10px;
-        text-transform: uppercase;
-        opacity: .7;
-    }
-
-    .doc-title {
-        font-size: 18px;
-        font-weight: 700;
-    }
-
-    .doc-close {
-        background: rgba(255, 255, 255, 0.2);
-        border: none;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        color: white;
-        cursor: pointer;
-    }
-
-    .doc-form {
-        padding: 16px;
-    }
-
-    .doc-group {
-        margin-bottom: 14px;
-    }
-
-    .doc-group label {
-        font-size: 12px;
-        font-weight: 600;
-        margin-bottom: 4px;
-        display: block;
-    }
-
-    .doc-group input,
-    .doc-group textarea {
-        width: 100%;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 8px;
-        font-size: 13px;
-    }
-
-    .doc-submit {
-        width: 100%;
-        background: #8B0000;
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 8px;
-        font-weight: 600;
-    }
-
-    .doc-success-modal::backdrop {
-        background: rgba(0, 0, 0, 0.6);
-    }
-
-    .doc-success-inner {
-        background: white;
-        padding: 24px;
-        text-align: center;
-        border-radius: 16px;
-    }
-
-    .doc-success-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: #16a34a;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 12px;
-        font-size: 22px;
-    }
-
-    .doc-success-btn {
-        margin-top: 12px;
-        background: #8B0000;
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 8px;
-    }
-
-    .doc-native-select {
-        width: 100%;
-        max-width: 100%;
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-image:
-            linear-gradient(45deg, transparent 50%, #8B0000 50%),
-            linear-gradient(135deg, #8B0000 50%, transparent 50%);
-        background-position:
-            calc(100% - 18px) calc(50% - 3px),
-            calc(100% - 12px) calc(50% - 3px);
-        background-size: 6px 6px, 6px 6px;
-        background-repeat: no-repeat;
-        padding-right: 2.75rem;
-    }
-
-    .doc-native-select option {
-        white-space: normal;
-    }
-</style>
-
-<dialog id="dentalClearanceModal" class="modal">
+<dialog id="dentalClearanceModal" class="patient-doc-modal">
     <form id="clearanceRequestForm" method="POST" action="{{ route('patient.document.requests.store') }}"
-        class="modal-box w-[min(92vw,420px)] max-w-[420px] rounded-2xl bg-white shadow-xl relative" novalidate>
+        class="patient-doc-modal-box" novalidate>
         @csrf
-        <div id="clearanceWarning"
-            class="hidden absolute top-4 left-1/2 -translate-x-1/2 px-12 py-2 rounded-full bg-red-600 text-white text-xs font-bold shadow-lg">
-            Please complete all required fields.</div>
-        <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 rounded-full bg-red-50 text-[#8B0000] flex items-center justify-center"><i
-                    class="fa-solid fa-file-circle-check text-lg"></i></div>
-            <h3 class="font-extrabold text-2xl text-gray-800">Clearance</h3>
-        </div>
-        <p class="text-sm text-gray-500 mb-6 border-b border-gray-100 pb-4">Please allow up to three (3)
-            working
-            days for processing.</p>
 
-        <div class="space-y-5">
-            <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Type of
-                    Clearance</label>
-                <select name="document_type" required
-                    class="doc-native-select w-full rounded-xl border-gray-200 bg-gray-50 text-gray-700 focus:ring-2 focus:ring-red-900 focus:border-red-900 py-3 px-4 transition-all">
-                    <option value="" disabled selected>Select type of clearance</option>
-                    <option value="Dental Clearance">Dental Clearance</option>
-                    <option value="Annual Dental Clearance">Annual Dental Clearance</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Purpose</label>
-                <select name="purpose" required
-                    class="doc-native-select w-full rounded-xl border-gray-200 bg-gray-50 text-gray-700 focus:ring-2 focus:ring-red-900 focus:border-red-900 py-3 px-4 transition-all">
-                    <option value="" disabled selected>Select purpose</option>
-                    <option value="On-the-Job Training (OJT)">On-the-Job Training (OJT)</option>
-                    <option value="Employment Requirement">Employment Requirement</option>
-                    <option value="Academic Requirement">Academic Requirement</option>
-                </select>
-            </div>
+        <div id="clearanceWarning" class="patient-doc-warning hidden">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>Please complete all required fields.</span>
         </div>
 
-        <div class="mt-8 flex justify-end gap-3">
-            <button type="button" onclick="dentalClearanceModal.close()"
-                class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition-colors">Cancel</button>
-            <button type="submit"
-                class="px-6 py-2.5 rounded-xl bg-[#8B0000] hover:bg-[#660000] text-white font-bold shadow-md transition-colors">Submit
-                Request</button>
+        <div class="patient-doc-modal-head">
+            <div class="patient-doc-title-wrap">
+                <div class="patient-doc-icon patient-doc-icon-clearance">
+                    <i class="fa-solid fa-file-circle-check"></i>
+                </div>
+                <div>
+                    <p class="patient-doc-eyebrow">Document Request</p>
+                    <h3 class="patient-doc-title">Clearance</h3>
+                </div>
+            </div>
+
+            <button type="button" class="patient-doc-x" onclick="closeDocModal('dentalClearanceModal')"
+                aria-label="Close clearance request modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="patient-doc-modal-body">
+            <p class="patient-doc-help">
+                Select the clearance type and purpose. Processing may take up to three (3) working days.
+            </p>
+
+            <div class="patient-doc-field-grid">
+                <div class="patient-doc-field">
+                    <label class="patient-doc-label">Type of Clearance</label>
+                    <div class="doc-dd" data-doc-dropdown>
+                        <input type="hidden" name="document_type" required>
+                        <button type="button" class="doc-dd-btn" data-doc-toggle aria-expanded="false">
+                            <span data-doc-value>Select type of clearance</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="doc-dd-menu" data-doc-menu>
+                            <button type="button" class="doc-dd-option" data-value="Dental Clearance">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-file-circle-check"></i></span>
+                                <span>
+                                    <strong>Dental Clearance</strong>
+                                    <small>Standard clearance for official school or clinic requirements.</small>
+                                </span>
+                            </button>
+                            <button type="button" class="doc-dd-option" data-value="Annual Dental Clearance">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-calendar-check"></i></span>
+                                <span>
+                                    <strong>Annual Dental Clearance</strong>
+                                    <small>Yearly clearance for annual compliance or submission.</small>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="patient-doc-field">
+                    <label class="patient-doc-label">Purpose</label>
+                    <div class="doc-dd" data-doc-dropdown>
+                        <input type="hidden" name="purpose" required>
+                        <button type="button" class="doc-dd-btn" data-doc-toggle aria-expanded="false">
+                            <span data-doc-value>Select purpose</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="doc-dd-menu" data-doc-menu>
+                            <button type="button" class="doc-dd-option" data-value="On-the-Job Training (OJT)">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-briefcase"></i></span>
+                                <span>
+                                    <strong>On-the-Job Training (OJT)</strong>
+                                    <small>For internship or training clearance submission.</small>
+                                </span>
+                            </button>
+                            <button type="button" class="doc-dd-option" data-value="Employment Requirement">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-id-badge"></i></span>
+                                <span>
+                                    <strong>Employment Requirement</strong>
+                                    <small>For job application or employment compliance.</small>
+                                </span>
+                            </button>
+                            <button type="button" class="doc-dd-option" data-value="Academic Requirement">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                                <span>
+                                    <strong>Academic Requirement</strong>
+                                    <small>For school, class, or program document submission.</small>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="patient-doc-modal-footer">
+            <button type="button" class="patient-doc-btn patient-doc-btn-secondary"
+                onclick="closeDocModal('dentalClearanceModal')">
+                Cancel
+            </button>
+            <button type="submit" class="patient-doc-btn patient-doc-btn-primary">
+                <i class="fa-solid fa-paper-plane"></i>
+                Submit Request
+            </button>
         </div>
     </form>
-    <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
-<dialog id="dentalHealthRecordModal" class="modal">
+<dialog id="dentalHealthRecordModal" class="patient-doc-modal">
     <form id="healthRecordRequestForm" method="POST" action="{{ route('patient.document.requests.store') }}"
-        class="modal-box w-[min(92vw,420px)] max-w-[420px] rounded-2xl bg-white shadow-xl relative" novalidate>
+        class="patient-doc-modal-box" novalidate>
         @csrf
-        <div id="healthRecordWarning"
-            class="hidden absolute top-4 left-1/2 -translate-x-1/2 px-12 py-2 rounded-full bg-red-600 text-white text-xs font-bold shadow-lg">
-            Please complete all required fields.</div>
-        <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 rounded-full bg-red-50 text-[#8B0000] flex items-center justify-center"><i
-                    class="fa-solid fa-file-medical text-lg"></i></div>
-            <h3 class="font-extrabold text-2xl text-gray-800">Health Record</h3>
-        </div>
-        <p class="text-sm text-gray-500 mb-6 border-b border-gray-100 pb-4">Please allow up to three (3)
-            working
-            days for processing.</p>
 
-        <div class="space-y-5">
-            <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Type of
-                    Record</label>
-                <select name="document_type" required
-                    class="doc-native-select w-full rounded-xl border-gray-200 bg-gray-50 text-gray-700 focus:ring-2 focus:ring-red-900 focus:border-red-900 py-3 px-4 transition-all">
-                    <option value="" disabled selected>Select type</option>
-                    <option value="All Dental Records">All Dental Records</option>
-                    <option value="Medical Records">Medical Records</option>
-                    <option value="Diagnosis and Treatment">Diagnosis and Treatment</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Purpose</label>
-                <select name="purpose" required
-                    class="doc-native-select w-full rounded-xl border-gray-200 bg-gray-50 text-gray-700 focus:ring-2 focus:ring-red-900 focus:border-red-900 py-3 px-4 transition-all">
-                    <option value="" disabled selected>Select purpose</option>
-                    <option value="Personal Record">Personal Record</option>
-                    <option value="Academic Requirement">Academic Requirement</option>
-                    <option value="Employment Requirement">Employment Requirement</option>
-                </select>
-            </div>
+        <div id="healthRecordWarning" class="patient-doc-warning hidden">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>Please complete all required fields.</span>
         </div>
 
-        <div class="mt-8 flex justify-end gap-3">
-            <button type="button" onclick="dentalHealthRecordModal.close()"
-                class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition-colors">Cancel</button>
-            <button type="submit"
-                class="px-6 py-2.5 rounded-xl bg-[#8B0000] hover:bg-[#660000] text-white font-bold shadow-md transition-colors">Submit
-                Request</button>
+        <div class="patient-doc-modal-head">
+            <div class="patient-doc-title-wrap">
+                <div class="patient-doc-icon patient-doc-icon-health">
+                    <i class="fa-solid fa-file-medical"></i>
+                </div>
+                <div>
+                    <p class="patient-doc-eyebrow">Document Request</p>
+                    <h3 class="patient-doc-title">Health Record</h3>
+                </div>
+            </div>
+
+            <button type="button" class="patient-doc-x" onclick="closeDocModal('dentalHealthRecordModal')"
+                aria-label="Close health record request modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="patient-doc-modal-body">
+            <p class="patient-doc-help">
+                Choose the health record you need and the reason for the request. Processing may take up to three (3)
+                working days.
+            </p>
+
+            <div class="patient-doc-field-grid">
+                <div class="patient-doc-field">
+                    <label class="patient-doc-label">Type of Record</label>
+                    <div class="doc-dd" data-doc-dropdown>
+                        <input type="hidden" name="document_type" required>
+                        <button type="button" class="doc-dd-btn" data-doc-toggle aria-expanded="false">
+                            <span data-doc-value>Select type of record</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="doc-dd-menu" data-doc-menu>
+                            <button type="button" class="doc-dd-option" data-value="All Dental Records">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-folder-open"></i></span>
+                                <span>
+                                    <strong>All Dental Records</strong>
+                                    <small>Includes available dental history, diagnosis, and treatment details.</small>
+                                </span>
+                            </button>
+                            <button type="button" class="doc-dd-option" data-value="Medical Records">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-notes-medical"></i></span>
+                                <span>
+                                    <strong>Medical Records</strong>
+                                    <small>Includes related health information recorded by the clinic.</small>
+                                </span>
+                            </button>
+                            <button type="button" class="doc-dd-option" data-value="Diagnosis and Treatment">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-stethoscope"></i></span>
+                                <span>
+                                    <strong>Diagnosis and Treatment</strong>
+                                    <small>Focused copy of diagnosis notes and treatment information.</small>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="patient-doc-field">
+                    <label class="patient-doc-label">Purpose</label>
+                    <div class="doc-dd" data-doc-dropdown>
+                        <input type="hidden" name="purpose" required>
+                        <button type="button" class="doc-dd-btn" data-doc-toggle aria-expanded="false">
+                            <span data-doc-value>Select purpose</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="doc-dd-menu" data-doc-menu>
+                            <button type="button" class="doc-dd-option" data-value="Personal Record">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-user-check"></i></span>
+                                <span>
+                                    <strong>Personal Record</strong>
+                                    <small>For your own file or personal reference.</small>
+                                </span>
+                            </button>
+                            <button type="button" class="doc-dd-option" data-value="Academic Requirement">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                                <span>
+                                    <strong>Academic Requirement</strong>
+                                    <small>For class, school office, or program requirement.</small>
+                                </span>
+                            </button>
+                            <button type="button" class="doc-dd-option" data-value="Employment Requirement">
+                                <span class="doc-dd-option-icon"><i class="fa-solid fa-id-badge"></i></span>
+                                <span>
+                                    <strong>Employment Requirement</strong>
+                                    <small>For job application or employment compliance.</small>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="patient-doc-modal-footer">
+            <button type="button" class="patient-doc-btn patient-doc-btn-secondary"
+                onclick="closeDocModal('dentalHealthRecordModal')">
+                Cancel
+            </button>
+            <button type="submit" class="patient-doc-btn patient-doc-btn-primary">
+                <i class="fa-solid fa-paper-plane"></i>
+                Submit Request
+            </button>
         </div>
     </form>
-    <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
-<div id="docSuccessModal"
-    class="fixed inset-0 z-[20000] flex items-center justify-center bg-gray-900/70 backdrop-blur-md transition-opacity duration-300 opacity-0 pointer-events-none hidden">
-    <div class="relative z-[20001] bg-white w-full max-w-sm rounded-3xl p-6 md:p-8 text-center shadow-2xl transform scale-95 transition-transform duration-300"
-        id="docSuccessModalContent">
-
-        <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5">
-            <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">
-                <i class="fa-solid fa-check text-3xl text-green-500"></i>
+<div id="docSuccessModal" class="doc-success-overlay hidden" aria-hidden="true">
+    <div class="doc-success-card" id="docSuccessModalContent" role="dialog" aria-modal="true"
+        aria-labelledby="docSuccessTitle">
+        <div class="doc-success-icon-wrap">
+            <div class="doc-success-icon-ring">
+                <i class="fa-solid fa-check"></i>
             </div>
         </div>
 
-        <h3 class="text-2xl font-extrabold text-gray-900 mb-2">Request Sent!</h3>
-        <p class="text-sm text-gray-500 mb-8 leading-relaxed">
-            Your document request has been successfully submitted. We will process it shortly and notify you once it's
-            ready. Have a great day!
+        <p class="doc-success-eyebrow">Request Submitted</p>
+        <h3 id="docSuccessTitle" class="doc-success-title">Request Sent!</h3>
+        <p id="docSuccessMessage" class="doc-success-message">
+            Your document request has been successfully submitted and is now pending review by the dental clinic.
         </p>
 
-        <button onclick="closeDocSuccessModal()"
-            class="w-full bg-[#8B0000] hover:bg-[#6b0000] text-white font-bold py-3.5 px-4 rounded-xl transition-colors shadow-md shadow-red-900/20">
+        <div class="doc-success-summary">
+            <div class="doc-success-row">
+                <span><i class="fa-solid fa-file-lines"></i> Document</span>
+                <strong id="docSuccessType">Document Request</strong>
+            </div>
+            <div class="doc-success-row">
+                <span><i class="fa-solid fa-clipboard-list"></i> Purpose</span>
+                <strong id="docSuccessPurpose">Not specified</strong>
+            </div>
+            <div class="doc-success-row">
+                <span><i class="fa-regular fa-clock"></i> Processing</span>
+                <strong>Up to 3 working days</strong>
+            </div>
+        </div>
+
+        <button type="button" onclick="closeDocSuccessModal()" class="doc-success-btn">
             Okay, got it!
         </button>
     </div>
 </div>
 
 <script>
+    function setDocModalLock(isLocked) {
+        document.body.classList.toggle('doc-modal-lock', Boolean(isLocked));
+        document.documentElement.classList.toggle('doc-modal-lock', Boolean(isLocked));
+        document.body.classList.toggle('overflow-hidden', Boolean(isLocked));
+    }
+
+    function closeDocDropdowns(exceptDropdown = null) {
+        document.querySelectorAll('[data-doc-dropdown].open').forEach((dropdown) => {
+            if (dropdown === exceptDropdown) return;
+            dropdown.classList.remove('open');
+            dropdown.querySelector('[data-doc-toggle]')?.setAttribute('aria-expanded', 'false');
+        });
+    }
+
+    function resetDocDropdowns(scope) {
+        scope.querySelectorAll('[data-doc-dropdown]').forEach((dropdown) => {
+            const input = dropdown.querySelector('input[type="hidden"]');
+            const valueText = dropdown.querySelector('[data-doc-value]');
+            const toggle = dropdown.querySelector('[data-doc-toggle]');
+            const firstLabel = toggle?.dataset.placeholder || valueText?.dataset.placeholder;
+
+            if (input) input.value = '';
+            dropdown.classList.remove('has-value', 'open');
+            dropdown.querySelectorAll('.doc-dd-option').forEach((option) => option.classList.remove('is-selected'));
+            toggle?.setAttribute('aria-expanded', 'false');
+
+            if (valueText) {
+                valueText.textContent = firstLabel || valueText.getAttribute('data-original-placeholder') || valueText.textContent;
+            }
+        });
+    }
+
     function closeDocModal(id) {
-        document.getElementById(id)?.close();
+        const modal = document.getElementById(id);
+        if (modal && typeof modal.close === 'function') modal.close();
+        closeDocDropdowns();
+        if (!document.getElementById('docSuccessModal')?.classList.contains('is-open')) {
+            setDocModalLock(false);
+        }
     }
 
     function openDocModal(id) {
-        document.getElementById(id)?.showModal();
+        const modal = document.getElementById(id);
+        if (!modal || typeof modal.showModal !== 'function') return;
+        setDocModalLock(true);
+        modal.showModal();
     }
 
-    function openDocSuccessModal() {
+    window.closeDocModal = closeDocModal;
+    window.openDocModal = openDocModal;
+
+    function openDocSuccessModal(details = {}) {
         const modal = document.getElementById('docSuccessModal');
         const content = document.getElementById('docSuccessModalContent');
-
-        const sidebar = document.getElementById('sidebar');
-        const mobileBottomNav = document.getElementById('mobileBottomNav');
-        const mobFabMenu = document.getElementById('mobFabMenu');
-
-        sidebar?.classList.add('pointer-events-none');
-        mobileBottomNav?.classList.add('pointer-events-none');
-        mobFabMenu?.classList.add('pointer-events-none');
+        const typeEl = document.getElementById('docSuccessType');
+        const purposeEl = document.getElementById('docSuccessPurpose');
+        const messageEl = document.getElementById('docSuccessMessage');
 
         if (!modal || !content) return;
 
-        document.body.classList.add('overflow-hidden');
+        const documentType = details.documentType || 'Document Request';
+        const purpose = details.purpose || 'Not specified';
 
+        if (typeEl) typeEl.textContent = documentType;
+        if (purposeEl) purposeEl.textContent = purpose;
+        if (messageEl) {
+            messageEl.textContent = `Your ${documentType} request for ${purpose} has been submitted successfully. The dental clinic will review it and notify you once it is ready for release.`;
+        }
+
+        setDocModalLock(true);
         modal.classList.remove('hidden');
-        modal.classList.remove('pointer-events-none');
+        modal.setAttribute('aria-hidden', 'false');
         void modal.offsetWidth;
-        modal.classList.remove('opacity-0');
-        content.classList.remove('scale-95');
-        content.classList.add('scale-100');
+        modal.classList.add('is-open');
+        content.classList.add('is-open');
     }
 
     function closeDocSuccessModal() {
         const modal = document.getElementById('docSuccessModal');
         const content = document.getElementById('docSuccessModalContent');
 
-        const sidebar = document.getElementById('sidebar');
-        const mobileBottomNav = document.getElementById('mobileBottomNav');
-        const mobFabMenu = document.getElementById('mobFabMenu');
-
-        sidebar?.classList.remove('pointer-events-none');
-        mobileBottomNav?.classList.remove('pointer-events-none');
-        mobFabMenu?.classList.remove('pointer-events-none');
-
         if (!modal || !content) return;
 
-        modal.classList.add('opacity-0');
-        content.classList.remove('scale-100');
-        content.classList.add('scale-95');
-        modal.classList.add('pointer-events-none');
-        document.body.classList.remove('overflow-hidden');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        content.classList.remove('is-open');
+        setDocModalLock(false);
 
         setTimeout(() => {
             modal.classList.add('hidden');
-        }, 300);
+        }, 220);
     }
+
+    window.openDocSuccessModal = openDocSuccessModal;
+    window.closeDocSuccessModal = closeDocSuccessModal;
 
     function showInlineWarning(warningEl, message) {
         if (!warningEl) return;
-        warningEl.textContent = message;
+        const textEl = warningEl.querySelector('span') || warningEl;
+        textEl.textContent = message;
         warningEl.classList.remove('hidden');
 
         setTimeout(() => {
@@ -329,12 +368,20 @@
         }, 2500);
     }
 
+    function getDocRequestDetails(form) {
+        return {
+            documentType: form.querySelector('[name="document_type"]')?.value || 'Document Request',
+            purpose: form.querySelector('[name="purpose"]')?.value || 'Not specified'
+        };
+    }
+
     async function submitDocumentRequestForm(formId, modalId, warningId) {
         const form = document.getElementById(formId);
         const modal = document.getElementById(modalId);
         const warningEl = document.getElementById(warningId);
 
-        if (!form) return;
+        if (!form || form.dataset.docSubmitReady === 'true') return;
+        form.dataset.docSubmitReady = 'true';
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -344,13 +391,14 @@
             const submitBtn = form.querySelector('button[type="submit"]');
 
             if (!documentType?.value || !purpose?.value) {
-                showInlineWarning(warningEl, 'Please complete all required fields');
+                showInlineWarning(warningEl, 'Please complete all required fields.');
                 return;
             }
 
+            const requestDetails = getDocRequestDetails(form);
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Submitting...';
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
 
             try {
                 const formData = new FormData(form);
@@ -358,8 +406,7 @@
                 const response = await fetch(form.action, {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                            .getAttribute('content'),
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
                     },
@@ -373,12 +420,10 @@
                     return;
                 }
 
-                if (modal && typeof modal.close === 'function') {
-                    modal.close();
-                }
-
+                if (modal && typeof modal.close === 'function') modal.close();
                 form.reset();
-                openDocSuccessModal();
+                resetDocDropdowns(form);
+                openDocSuccessModal(requestDetails);
             } catch (error) {
                 showInlineWarning(warningEl, 'Something went wrong. Please try again.');
             } finally {
@@ -389,25 +434,76 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-doc-value]').forEach((valueEl) => {
+            valueEl.dataset.originalPlaceholder = valueEl.textContent.trim();
+        });
+
+        document.querySelectorAll('[data-doc-toggle]').forEach((toggle) => {
+            const valueEl = toggle.querySelector('[data-doc-value]');
+            if (valueEl) toggle.dataset.placeholder = valueEl.textContent.trim();
+
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const dropdown = toggle.closest('[data-doc-dropdown]');
+                const isOpen = dropdown.classList.contains('open');
+
+                closeDocDropdowns(dropdown);
+                dropdown.classList.toggle('open', !isOpen);
+                toggle.setAttribute('aria-expanded', String(!isOpen));
+            });
+        });
+
+        document.querySelectorAll('.doc-dd-option').forEach((option) => {
+            option.addEventListener('click', function(e) {
+                e.preventDefault();
+                const dropdown = option.closest('[data-doc-dropdown]');
+                const input = dropdown.querySelector('input[type="hidden"]');
+                const valueEl = dropdown.querySelector('[data-doc-value]');
+                const toggle = dropdown.querySelector('[data-doc-toggle]');
+                const label = option.querySelector('strong')?.textContent?.trim() || option.dataset.value;
+
+                if (input) input.value = option.dataset.value || label;
+                if (valueEl) valueEl.textContent = label;
+
+                dropdown.classList.add('has-value');
+                dropdown.querySelectorAll('.doc-dd-option').forEach((item) => item.classList.remove('is-selected'));
+                option.classList.add('is-selected');
+                dropdown.classList.remove('open');
+                toggle?.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('[data-doc-dropdown]')) closeDocDropdowns();
+
+            const opener = e.target.closest('[data-doc-open]');
+            if (opener) {
+                e.preventDefault();
+                openDocModal(opener.dataset.docOpen);
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeDocDropdowns();
+        });
+
+        document.querySelectorAll('.patient-doc-modal').forEach((modal) => {
+            modal.addEventListener('close', function() {
+                closeDocDropdowns();
+                if (!document.getElementById('docSuccessModal')?.classList.contains('is-open')) {
+                    setDocModalLock(false);
+                }
+            });
+        });
+
         const successModal = document.getElementById('docSuccessModal');
         if (successModal) {
             successModal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeDocSuccessModal();
-                }
+                if (e.target === this) closeDocSuccessModal();
             });
         }
 
-        submitDocumentRequestForm(
-            'clearanceRequestForm',
-            'dentalClearanceModal',
-            'clearanceWarning'
-        );
-
-        submitDocumentRequestForm(
-            'healthRecordRequestForm',
-            'dentalHealthRecordModal',
-            'healthRecordWarning'
-        );
+        submitDocumentRequestForm('clearanceRequestForm', 'dentalClearanceModal', 'clearanceWarning');
+        submitDocumentRequestForm('healthRecordRequestForm', 'dentalHealthRecordModal', 'healthRecordWarning');
     });
 </script>

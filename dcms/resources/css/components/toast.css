@@ -615,9 +615,9 @@ body>#toastContainer .toast-item {
     margin: 0 0 1rem;
     padding: 0.9rem 1rem;
     border-radius: 18px;
-    border: 1px solid rgba(139, 0, 0, 0.16);
+    border: 1px solid rgba(37, 99, 235, 0.18);
     background:
-        radial-gradient(circle at top right, rgba(139, 0, 0, 0.08), transparent 36%),
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.10), transparent 36%),
         #FFFFFF;
     box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
 
@@ -625,6 +625,9 @@ body>#toastContainer .toast-item {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    animation:
+        globalRefreshNoticeIn .42s cubic-bezier(.22, 1, .36, 1) both,
+        globalRefreshSoftGlow 2.8s ease-in-out 1 .45s !important;
 }
 
 .global-refresh-copy {
@@ -639,16 +642,23 @@ body>#toastContainer .toast-item {
     height: 42px;
     min-width: 42px;
     border-radius: 14px;
-    background: #FEF2F2;
-    color: #8B0000;
+    background: #EFF6FF;
+    color: #2563EB;
+    border: 1px solid #BFDBFE;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    animation: globalRefreshIconPulse 1.65s ease-out infinite !important;
+}
+
+.global-refresh-icon i {
+    color: currentColor !important;
+    animation: globalRefreshIconSpin 1.15s linear infinite !important;
 }
 
 .global-refresh-copy strong {
     display: block;
-    color: #111827;
+    color: #1E3A8A;
     font-size: 0.9rem;
     font-weight: 900;
     line-height: 1.2;
@@ -669,7 +679,7 @@ body>#toastContainer .toast-item {
     padding: 0 1rem;
     border: 0;
     border-radius: 13px;
-    background: #8B0000;
+    background: #2563EB;
     color: #FFFFFF;
     display: inline-flex;
     align-items: center;
@@ -679,25 +689,31 @@ body>#toastContainer .toast-item {
     font-weight: 900;
     white-space: nowrap;
     cursor: pointer;
-    box-shadow: 0 10px 22px rgba(139, 0, 0, 0.22);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.24);
+    transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
 }
 
 .global-refresh-btn:hover {
-    background: #A30000;
+    background: #1D4ED8;
     transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(37, 99, 235, 0.30);
+}
+
+.global-refresh-btn:hover i {
+    animation: globalRefreshIconSpin .75s linear infinite !important;
 }
 
 [data-theme="dark"] .global-refresh-notice,
 .dark .global-refresh-notice {
     background:
-        radial-gradient(circle at top right, rgba(252, 165, 165, 0.12), transparent 36%),
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 36%),
         #0D1117;
-    border-color: rgba(252, 165, 165, 0.22);
+    border-color: rgba(147, 197, 253, 0.24);
 }
 
 [data-theme="dark"] .global-refresh-copy strong,
 .dark .global-refresh-copy strong {
-    color: #F8FAFC;
+    color: #DBEAFE;
 }
 
 [data-theme="dark"] .global-refresh-copy small,
@@ -707,8 +723,20 @@ body>#toastContainer .toast-item {
 
 [data-theme="dark"] .global-refresh-icon,
 .dark .global-refresh-icon {
-    background: rgba(139, 0, 0, 0.22);
-    color: #FCA5A5;
+    background: rgba(37, 99, 235, 0.20);
+    border-color: rgba(147, 197, 253, 0.28);
+    color: #93C5FD;
+}
+
+[data-theme="dark"] .global-refresh-btn,
+.dark .global-refresh-btn {
+    background: #2563EB;
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.26);
+}
+
+[data-theme="dark"] .global-refresh-btn:hover,
+.dark .global-refresh-btn:hover {
+    background: #1D4ED8;
 }
 
 @media (max-width: 767px) {

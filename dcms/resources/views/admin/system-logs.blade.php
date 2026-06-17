@@ -10,7 +10,7 @@ $perPage = $perPage ?? 10;
 @endphp
 
 <main id="mainContent" class="admin-page-shell system-logs-page page-enter mode-list">
-    <div class="admin-page-container system-logs-shell">
+    <div class="w-full system-logs-shell">
 
         <div class="page-banner rounded-2xl mb-6">
             <div class="page-banner-inner">

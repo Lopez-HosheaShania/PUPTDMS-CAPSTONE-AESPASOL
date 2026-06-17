@@ -4,7 +4,7 @@
 
 @section('content')
 <main id="mainContent" class="admin-page-shell cms-page page-enter">
-    <div class="cms-shell">
+    <div class="w-full">
         <div class="page-banner cms-banner"
             style="display:flex!important;align-items:center!important;
                     justify-content:flex-start!important;text-align:left!important;">
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
+        <div class="admin-page-body">
             
         <div class="cms-layout">
             <div class="card">

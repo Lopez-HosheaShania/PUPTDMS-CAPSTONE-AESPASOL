@@ -82,7 +82,20 @@ $docRequestStats = [
 'rejected' => $statsSource['rejected'] ?? $countByStatus('rejected'),
 ];
 
-$docRequestTypes = $docRequestsPayload->pluck('document_type')->filter()->unique()->sort()->values();
+$requestableDocumentTypes = collect([
+'Dental Clearance',
+'Annual Dental Clearance',
+'All Dental Records',
+'Medical Records',
+'Diagnosis and Treatment',
+])
+->map(fn($type) => $formatDocumentType($type))
+->filter()
+->unique(fn($type) => strtolower(trim(preg_replace('/\s+/', ' ', (string) $type))))
+->values();
+
+$defaultDocumentTypes = $requestableDocumentTypes;
+$docRequestTypes = $requestableDocumentTypes;
 
 $perPage =
 $perPage ??
@@ -691,6 +704,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     const ADMIN_DOC_REQUESTS = @json($docRequestsPayload -> values());
     const ADMIN_DOC_STATS = @json($docRequestStats);
     const ADMIN_DOC_TYPES = @json($docRequestTypes -> values());
+    const DOCREQ_DEFAULT_DOC_TYPES = @json($defaultDocumentTypes -> values());
 
     let allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
     let activeFilter = @json(request('status', 'all') ?: 'all');
@@ -1020,7 +1034,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                     status.includes(q);
             });
         }
-        if (filterDocType) data = data.filter(r => r.document_type === filterDocType);
+        if (filterDocType) data = data.filter(r => sameDocType(r.document_type, filterDocType));
         if (filterDateFrom) {
             data = data.filter(r => String(r.filter_date || '').slice(0, 10) >= filterDateFrom);
         }
@@ -1945,12 +1959,38 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         if (labelEl) labelEl.textContent = finalLabel;
     }
 
+    function formatDocTypeLabel(type = '') {
+        return String(type || '')
+            .replace(/[_-]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .replace(/\w\S*/g, word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+    }
+
+    function normalizeDocTypeKey(type = '') {
+        return formatDocTypeLabel(type).toLowerCase();
+    }
+
+    function sameDocType(a = '', b = '') {
+        return normalizeDocTypeKey(a) === normalizeDocTypeKey(b);
+    }
+
     function normalizeDocTypes(types = []) {
-        return [...new Set(
-            types
-                .map(type => String(type || '').trim())
-                .filter(Boolean)
-        )].sort((a, b) => a.localeCompare(b));
+        const typeMap = new Map();
+        const requestableTypes = Array.isArray(DOCREQ_DEFAULT_DOC_TYPES) && DOCREQ_DEFAULT_DOC_TYPES.length
+            ? DOCREQ_DEFAULT_DOC_TYPES
+            : types;
+
+        requestableTypes.forEach(type => {
+            const label = formatDocTypeLabel(type);
+            const key = normalizeDocTypeKey(label);
+
+            if (label && !typeMap.has(key)) {
+                typeMap.set(key, label);
+            }
+        });
+
+        return Array.from(typeMap.values());
     }
 
     function getDocTypeIcon(type = '') {

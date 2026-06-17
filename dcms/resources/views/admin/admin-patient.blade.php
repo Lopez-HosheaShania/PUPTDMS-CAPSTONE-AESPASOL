@@ -8,7 +8,7 @@ $notifications = collect($notifications ?? []);
 $notifCount = $notifications->count();
 @endphp
 
-<main id="mainContent" class="admin-page-shell admin-patient-page dentist-page-shell page-enter mode-list">
+<main id="mainContent" class="admin-page-shell admin-patient-page page-enter mode-list">
   <div class="w-full">
 
     @php

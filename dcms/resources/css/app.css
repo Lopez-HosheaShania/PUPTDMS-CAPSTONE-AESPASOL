@@ -47,6 +47,7 @@
 /* Patient pages */
 @import './pages/patient/dashboard.css';
 @import './pages/patient/book-appointment.css';
+@import './pages/patient/appointment.css';
 @import './pages/patient/patient-profile.css';
 @import './pages/patient/records.css';
 @import './pages/patient/about-us.css';

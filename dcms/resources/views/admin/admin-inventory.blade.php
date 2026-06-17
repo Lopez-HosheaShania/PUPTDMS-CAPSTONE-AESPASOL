@@ -4,7 +4,7 @@
 
 @section('content')
 <main id="mainContent" class="admin-page-shell page-enter inventory-page">
-    <div class="admin-page-container">
+    <div class="full">
 
         <div class="page-banner inventory-admin-banner">
             <div class="page-banner-inner">

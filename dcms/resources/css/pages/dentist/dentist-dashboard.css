@@ -133,6 +133,7 @@
     min-height: 135px;
     height: 135px;
     aspect-ratio: auto !important;
+    color: #8B0000;
     padding: 1rem !important;
     border-radius: 1rem;
     overflow: hidden;
@@ -1065,17 +1066,6 @@
 .dark #mainContent .cal-month-label,
 .dark #mainContent .dashboard-quick-btn {
     color: #FCA5A5 !important;
-}
-
-[data-theme="dark"] #mainContent .border-gray-100,
-[data-theme="dark"] #mainContent .border-gray-200,
-[data-theme="dark"] #mainContent .border-red-100,
-[data-theme="dark"] #mainContent .divide-gray-100> :not([hidden])~ :not([hidden]),
-.dark #mainContent .border-gray-100,
-.dark #mainContent .border-gray-200,
-.dark #mainContent .border-red-100,
-.dark #mainContent .divide-gray-100> :not([hidden])~ :not([hidden]) {
-    border-color: var(--border-dark, rgba(255, 255, 255, 0.10)) !important;
 }
 
 [data-theme="dark"] #mainContent .upcoming-date-btn,
@@ -2753,4 +2743,19 @@
         padding: 0.24rem 0.4rem !important;
         font-size: 0.48rem !important;
     }
+}
+
+[data-theme="dark"] .sched-patient-name,
+.dark .sched-patient-name {
+    color: #F8FAFC !important;
+    background: rgba(23, 23, 23, 0.12) !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="dark"] .sched-time,
+.dark .sched-time,
+[data-theme="dark"] .sched-service,
+.dark .sched-service {
+    color: #CBD5E1 !important;
+    background: rgba(23, 23, 23, 0.12) !important;
 }

@@ -485,13 +485,17 @@ isset($upcomingAppointment) && $upcomingAppointment
 
         if (quickAction === 'record') {
             setTimeout(() => {
-                document.getElementById('dentalHealthRecordModal')?.showModal();
+                window.openDocModal
+                    ? window.openDocModal('dentalHealthRecordModal')
+                    : document.getElementById('dentalHealthRecordModal')?.showModal();
             }, 150);
         }
 
         if (quickAction === 'clearance') {
             setTimeout(() => {
-                document.getElementById('dentalClearanceModal')?.showModal();
+                window.openDocModal
+                    ? window.openDocModal('dentalClearanceModal')
+                    : document.getElementById('dentalClearanceModal')?.showModal();
             }, 150);
         }
 
@@ -929,15 +933,12 @@ isset($upcomingAppointment) && $upcomingAppointment
             '</div>' +
             '</div>' +
 
-            '<div class="mt-4 flex flex-wrap gap-2">' +
-            '<span class="inline-flex items-center rounded-full bg-red-50 text-[#8B0000] px-3 py-1 text-[11px] font-bold border border-red-100">Pending: {{ $pendingDocumentRequests }}</span>' +
-            '</div>' +
             '</div>' +
 
             '<div class="p-4 sm:p-5 flex-1 bg-gradient-to-b from-[#fffefe] via-[#fff8f8] to-[#fff3f3]">' +
             '<div class="space-y-3">' +
 
-            '<button type="button" onclick="document.getElementById(\'dentalHealthRecordModal\')?.showModal()" class="group request-doc-card relative w-full text-left rounded-[0.9rem] border border-red-100 bg-white p-4 shadow-sm transition-all duration-200">' +
+            '<button type="button" data-doc-open="dentalHealthRecordModal" class="group request-doc-card relative w-full text-left rounded-[0.9rem] border border-red-100 bg-white p-4 shadow-sm transition-all duration-200">' +
             '<div class="flex items-start gap-3">' +
             '<div class="icon-box w-14 h-14 rounded-[0.85rem] bg-red-50 text-[#8B0000] flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-105">' +
             '<i class="fa-solid fa-file-medical text-lg"></i>' +
@@ -964,7 +965,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             '</div>' +
             '</button>' +
 
-            '<button type="button" onclick="document.getElementById(\'dentalClearanceModal\')?.showModal()" class="group request-doc-card relative w-full text-left rounded-[0.9rem] border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200">' +
+            '<button type="button" data-doc-open="dentalClearanceModal" class="group request-doc-card relative w-full text-left rounded-[0.9rem] border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200">' +
             '<div class="flex items-start gap-3">' +
             '<div class="icon-box w-14 h-14 rounded-[0.85rem] bg-amber-50 text-[#c96a00] flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-105">' +
             '<i class="fa-solid fa-file-circle-check text-lg"></i>' +

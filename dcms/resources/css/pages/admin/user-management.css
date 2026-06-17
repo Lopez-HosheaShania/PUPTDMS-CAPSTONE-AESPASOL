@@ -319,23 +319,6 @@
     }
 }
 
-.scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 10px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
-}
-
 .um-view[hidden] {
     display: none !important;
 }
@@ -1182,11 +1165,6 @@ body.modal-open {
 
 #mainContent.user-management-page {
     background: var(--admin-page-bg, #f6f7f9);
-}
-
-#mainContent.user-management-page>div {
-    max-width: 1280px;
-    margin-inline: auto;
 }
 
 #mainContent.user-management-page .um-users-card {
@@ -4206,7 +4184,7 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
     }
 
     #addModal .field-input i,
-    #addModal input + i,
+    #addModal input+i,
     #addModal .fa-lock,
     #addModal .fa-envelope {
         font-size: .78rem !important;
@@ -4220,13 +4198,13 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
         align-items: stretch !important;
     }
 
-    #addModal .voice-search-row > input,
-    #addModal .voice-search-row > .relative {
+    #addModal .voice-search-row>input,
+    #addModal .voice-search-row>.relative {
         width: 100% !important;
         min-width: 0 !important;
     }
 
-    #addModal .voice-search-row > .voice-input-toggle {
+    #addModal .voice-search-row>.voice-input-toggle {
         display: flex !important;
         justify-content: flex-end !important;
         align-items: center !important;
@@ -4236,7 +4214,7 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
         margin-top: .1rem !important;
     }
 
-    #addModal .voice-search-row > .voice-input-toggle > .voice-search-mic.external,
+    #addModal .voice-search-row>.voice-input-toggle>.voice-search-mic.external,
     #addModal .voice-search-mic.external {
         display: inline-flex !important;
         visibility: visible !important;
@@ -4347,7 +4325,7 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
         padding-right: 1rem !important;
     }
 
-    #mainContent.user-management-page > div {
+    #mainContent.user-management-page>div {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
@@ -4407,26 +4385,22 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
         white-space: nowrap !important;
     }
 
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid {
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid {
         display: grid !important;
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
         gap: .85rem !important;
         margin-bottom: 1.25rem !important;
     }
 
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-card {
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-card {
         min-height: 96px !important;
         padding: 1rem 1.05rem !important;
         gap: .8rem !important;
         border-radius: 16px !important;
     }
 
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon,
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon-wrapper {
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon,
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon-wrapper {
         width: 42px !important;
         height: 42px !important;
         min-width: 42px !important;
@@ -4436,13 +4410,11 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
         font-size: 14px !important;
     }
 
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-num {
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-num {
         font-size: 28px !important;
     }
 
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-label {
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-label {
         font-size: 9px !important;
         line-height: 1.1 !important;
     }
@@ -4741,23 +4713,19 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
         width: 100% !important;
     }
 
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid {
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
         gap: .7rem !important;
     }
 
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-card {
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-card {
         min-height: 86px !important;
         padding: .85rem !important;
         gap: .55rem !important;
     }
 
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon,
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon-wrapper {
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon,
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon-wrapper {
         width: 36px !important;
         height: 36px !important;
         min-width: 36px !important;
@@ -4765,8 +4733,7 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
         flex-basis: 36px !important;
     }
 
-    #mainContent.user-management-page 
-    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-num {
+    #mainContent.user-management-page #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-num {
         font-size: 24px !important;
     }
 
@@ -4789,4 +4756,81 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
     .um-view-info-grid {
         grid-template-columns: 1fr !important;
     }
+}
+
+#mainContent.user-management-page .um-users-card {
+    margin-bottom: 1.5rem !important;
+    border-radius: 18px !important;
+    overflow: visible !important;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .05) !important;
+}
+
+#mainContent.user-management-page .um-users-card>.um-users-toolbar {
+    border-radius: 18px 18px 0 0 !important;
+    border-bottom: 1px solid #f1ece7 !important;
+}
+
+#mainContent.user-management-page .um-users-content {
+    background: #ffffff !important;
+    border-left: 1px solid #f0eaea !important;
+    border-right: 1px solid #f0eaea !important;
+}
+
+#mainContent.user-management-page #umListView,
+#mainContent.user-management-page #umGridView {
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+}
+
+#mainContent.user-management-page #umGridView {
+    padding: 0 !important;
+}
+
+#mainContent.user-management-page .um-table-scroll {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+}
+
+#mainContent.user-management-page .um-table,
+#mainContent.user-management-page #umListView table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+}
+
+#mainContent.user-management-page .pagebar.um-pagebar {
+    border-radius: 0 0 18px 18px !important;
+    border-left: 1px solid #f0eaea !important;
+    border-right: 1px solid #f0eaea !important;
+    border-bottom: 1px solid #f0eaea !important;
+}
+
+#mainContent.user-management-page .um-pagination-wrap nav {
+    display: flex !important;
+    align-items: center !important;
+    gap: .35rem !important;
+    flex-wrap: nowrap !important;
+}
+
+[data-theme="dark"] #mainContent.user-management-page .um-users-content,
+.dark #mainContent.user-management-page .um-users-content,
+[data-theme="dark"] #mainContent.user-management-page .pagebar.um-pagebar,
+.dark #mainContent.user-management-page .pagebar.um-pagebar {
+    background: #161B22 !important;
+    border-color: #21262D !important;
+}
+
+[data-theme="dark"] #mainContent.user-management-page .um-users-card>.um-users-toolbar,
+.dark #mainContent.user-management-page .um-users-card>.um-users-toolbar {
+    border-bottom-color: #21262D !important;
+}
+
+.um-table-scroll {
+    overflow-x: auto !important;
 }

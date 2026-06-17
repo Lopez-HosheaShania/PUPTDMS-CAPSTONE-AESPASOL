@@ -21,6 +21,13 @@
     border-bottom: 1px solid #f9fafb;
 }
 
+[data-theme="dark"] tr,
+.dark th {
+    color: #94A3B8 !important; 
+    background: #0D1117 !important;
+    border-bottom-color: rgba(255,255,255,0.1) !important;
+}
+
 .data-table tbody tr:hover td {
     background: #fafafa;
 }
