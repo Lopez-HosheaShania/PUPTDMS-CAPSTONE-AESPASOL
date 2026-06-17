@@ -34,46 +34,56 @@ class OIDCController extends Controller
         $this->studentApiService = $studentApiService;
     }
 
-    public function redirect(Request $request)
-    {
-        $loginUrl     = config('services.idp.login_url');
-        $authorizeUrl = config('services.oidc.authorize_url');
-        $clientId     = config('services.oidc.client_id');
-        $redirectUri  = config('services.oidc.redirect');
-        $scope        = config('services.oidc.scope', 'openid profile email');
+   public function redirect(Request $request)
+{
+    $loginUrl     = config('services.idp.login_url');
+    $authorizeUrl = config('services.oidc.authorize_url');
+    $clientId     = config('services.oidc.client_id');
+    $redirectUri  = config('services.oidc.redirect');
+    $scope        = config('services.oidc.scope', 'openid profile email');
 
-        if (!$clientId || !$redirectUri) {
-            return redirect()->route('login')
-                ->with('error', 'OIDC provider is not configured properly.');
-        }
-
-        $state = Str::random(40);
-
-        session([
-            'oidc_state' => $state,
-        ]);
-        session()->save();
-
-        $query = http_build_query([
-            'client_id'     => $clientId,
-            'redirect_uri'  => $redirectUri,
-            'response_type' => 'code',
-            'scope'         => $scope,
-            'state'         => $state,
-            'prompt'        => 'login',
-        ]);
-
-        if ($loginUrl) {
-            $separator = str_contains($loginUrl, '?') ? '&' : '?';
-            $fullUrl = $loginUrl . $separator . $query;
-        } else {
-            $fullUrl = $authorizeUrl . '?' . $query;
-        }
-
-        Log::info('OIDC redirect URL', ['url' => $fullUrl]);
-
-        return redirect()->away($fullUrl);
+    if (!$clientId || !$redirectUri) {
+        return redirect()->route('login')
+            ->with('error', 'OIDC provider is not configured properly.');
     }
+
+    $state = Str::random(40);
+
+    session([
+        'oidc_state' => $state,
+    ]);
+
+    session()->save();
+
+    $query = http_build_query([
+        'client_id'     => $clientId,
+        'redirect_uri'  => $redirectUri,
+        'response_type' => 'code',
+        'scope'         => $scope,
+        'state'         => $state,
+
+        // Force IDP to ask credentials again instead of silent login
+        'prompt'        => 'login',
+        'max_age'       => 0,
+        'fresh'         => now()->timestamp,
+    ]);
+
+    $baseUrl = $loginUrl ?: $authorizeUrl;
+
+    if (!$baseUrl) {
+        return redirect()->route('login')
+            ->with('error', 'OIDC login URL is not configured.');
+    }
+
+    $separator = str_contains($baseUrl, '?') ? '&' : '?';
+    $fullUrl = $baseUrl . $separator . $query;
+
+    Log::info('OIDC redirect URL', [
+        'url' => $fullUrl,
+    ]);
+
+    return redirect()->away($fullUrl);
+}
 
     public function callback(Request $request)
     {
