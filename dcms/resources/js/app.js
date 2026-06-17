@@ -1213,6 +1213,8 @@ function closeHeaderMenus() {
 }
 
 function initHeaderMenus() {
+    if (window.__PUP_HEADER_JS_ACTIVE) return;
+
     const notifBtn = document.getElementById('notifBtn');
     const notifMenu = document.getElementById('notifMenu');
     const userBtn = document.getElementById('userBtn');

@@ -1281,6 +1281,137 @@ select.form-input {
     color: #a7f3d0 !important;
 }
 
+html[data-theme="dark"] body #mainContent #patientAccountSection {
+    background:
+        radial-gradient(circle at top left, rgba(139, 0, 0, 0.22), transparent 38%),
+        linear-gradient(145deg, #0d1117, #111827) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .section-card,
+html[data-theme="dark"] body #mainContent #patientAccountSection .walkin-account-card {
+    background: linear-gradient(145deg, #111827, #0f172a) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .booking-step-title {
+    color: #fecaca !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .booking-step-eyebrow,
+html[data-theme="dark"] body #mainContent #patientAccountSection .section-card-title {
+    color: #fca5a5 !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .booking-step-subtitle {
+    color: #a8b3c2 !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .section-card-title-line {
+    background: rgba(255, 255, 255, 0.13) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .account-tabs {
+    background: rgba(2, 11, 20, 0.78) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .account-tab {
+    color: #cbd5e1 !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .account-tab:hover {
+    color: #fecaca !important;
+    background: rgba(248, 113, 113, 0.12) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .account-tab.active {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #b91c1c, #7f1d1d) !important;
+    box-shadow: 0 12px 24px rgba(127, 29, 29, 0.38) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .walkin-search-icon {
+    color: #fca5a5 !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection #patientSearch,
+html[data-theme="dark"] body #mainContent #patientAccountSection .walkin-search-input,
+html[data-theme="dark"] body #mainContent #patientAccountSection .guest-fields-grid .form-input {
+    background: #0b141c !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection #patientSearch::placeholder,
+html[data-theme="dark"] body #mainContent #patientAccountSection .walkin-search-input::placeholder,
+html[data-theme="dark"] body #mainContent #patientAccountSection .guest-fields-grid .form-input::placeholder {
+    color: #718096 !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection #patientSearch:focus,
+html[data-theme="dark"] body #mainContent #patientAccountSection .walkin-search-input:focus,
+html[data-theme="dark"] body #mainContent #patientAccountSection .guest-fields-grid .form-input:focus {
+    border-color: rgba(252, 165, 165, 0.62) !important;
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.16) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .empty-state {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.96)) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    color: #a8b3c2 !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .patient-results::-webkit-scrollbar-track {
+    background: #0b141c !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .patient-results::-webkit-scrollbar-thumb {
+    background: rgba(248, 113, 113, 0.38) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result {
+    background: #111827 !important;
+    border-color: rgba(255, 255, 255, 0.11) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result:hover,
+html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result.selected {
+    background: #1f2937 !important;
+    border-color: rgba(252, 165, 165, 0.38) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result-name,
+html[data-theme="dark"] body #mainContent #patientAccountSection .selected-patient-box strong {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result-meta,
+html[data-theme="dark"] body #mainContent #patientAccountSection .selected-patient-box small {
+    color: #9ca3af !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .patient-select-pill {
+    background: rgba(248, 113, 113, 0.14) !important;
+    color: #fecaca !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .walkin-field-label {
+    color: #d1d5db !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .selected-patient-box {
+    background: linear-gradient(135deg, rgba(20, 83, 45, 0.32), rgba(17, 24, 39, 0.94)) !important;
+    border-color: rgba(74, 222, 128, 0.24) !important;
+}
+
+html[data-theme="dark"] body #mainContent #patientAccountSection .selected-patient-box span {
+    color: #86efac !important;
+}
+
 [data-theme="dark"] #slotGrid .slot-chip:not(.selected):not(:disabled) {
     background: #161b22 !important;
     border-color: rgba(255, 255, 255, 0.10) !important;
