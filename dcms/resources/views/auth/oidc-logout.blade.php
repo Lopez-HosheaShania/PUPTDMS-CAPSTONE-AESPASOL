@@ -7,7 +7,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -43,7 +43,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         h2 {
@@ -55,6 +57,21 @@
             font-size: 0.9rem;
             color: rgba(255,255,255,0.85);
         }
+
+        .fallback {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .fallback button {
+            border: 0;
+            border-radius: 999px;
+            padding: 0.7rem 1rem;
+            background: #F0C040;
+            color: #3d0000;
+            font-weight: 800;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -63,27 +80,25 @@
     <div class="spinner"></div>
     <h2>Signing you out...</h2>
     <p>Please wait while we securely log you out.</p>
+
+    <form id="idpLogoutForm" method="POST" action="{{ $logoutUrl }}">
+        <input type="hidden" name="client_id" value="{{ $clientId }}">
+        <input type="hidden" name="post_logout_redirect_uri" value="{{ $redirectUrl }}">
+        <input type="hidden" name="redirect_uri" value="{{ $redirectUrl }}">
+    </form>
+
+    <div class="fallback">
+        <button type="button" onclick="document.getElementById('idpLogoutForm').submit();">
+            Continue Logout
+        </button>
+    </div>
 </div>
 
 <script>
-    window.addEventListener('load', async function () {
-        try {
-            await fetch(@json($logoutUrl), {
-                method: 'POST',
-                credentials: 'include', // VERY IMPORTANT
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    client_id: @json($clientId)
-                })
-            });
-        } catch (e) {
-            console.error('IDP logout failed:', e);
-        }
-
-        // redirect back to your system login
-        window.location.href = @json($redirectUrl);
+    window.addEventListener('load', function () {
+        setTimeout(function () {
+            document.getElementById('idpLogoutForm').submit();
+        }, 500);
     });
 </script>
 

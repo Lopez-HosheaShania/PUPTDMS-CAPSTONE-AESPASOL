@@ -407,6 +407,7 @@ $shouldShowDrawer = in_array($sidebarRole, ['admin', 'dentist'], true);
 
         <form action="{{ route('logout') }}" method="POST">
             @csrf
+            <input type="hidden" name="client_id" value="{{ config('services.oidc.client_id') }}">
 
             <button type="submit" class="logout-btn">
                 <span class="logout-icon">
@@ -489,6 +490,7 @@ $shouldShowDrawer = in_array($sidebarRole, ['admin', 'dentist'], true);
 
         <form action="{{ route('logout') }}" method="POST">
             @csrf
+            <input type="hidden" name="client_id" value="{{ config('services.oidc.client_id') }}">
 
             <button type="submit" class="drawer-logout-btn">
                 <i class="fa-solid fa-right-from-bracket"></i>
