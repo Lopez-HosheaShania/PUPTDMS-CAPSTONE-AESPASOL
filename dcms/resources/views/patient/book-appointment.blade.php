@@ -5,13 +5,6 @@
 @section('styles')
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
 
         @keyframes confirmBackdropFade {
             from {
@@ -1103,20 +1096,6 @@
             }
         }
 
-        [data-theme="dark"] #mainContent {
-            background:
-                radial-gradient(circle at top, rgba(139, 0, 0, 0.18), transparent 34%),
-                #020b14 !important;
-            color: #e5e7eb !important;
-        }
-
-        [data-theme="dark"] #mainContent.book-container {
-            background:
-                radial-gradient(circle at top, rgba(139, 0, 0, 0.18), transparent 34%),
-                #020b14 !important;
-            color: #e5e7eb !important;
-        }
-
         [data-theme="dark"] #mainContent .form-input,
         [data-theme="dark"] #mainContent input.form-input,
         [data-theme="dark"] #mainContent textarea.form-input,
@@ -1212,28 +1191,20 @@
             color: #fecaca !important;
         }
 
-        [data-theme="dark"] .book-container {
-            background: transparent;
-        }
-
-        /* Cards / Sections */
         [data-theme="dark"] .book-card {
             background: #0F1A24;
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
 
-        /* Titles */
         [data-theme="dark"] .book-title {
             color: #E6EDF3;
         }
 
-        /* Labels */
         [data-theme="dark"] .book-label {
             color: #9FB3C8;
         }
 
-        /* Inputs */
         [data-theme="dark"] .book-input {
             background: #0B141C;
             border: 1px solid #1F2A36;
@@ -1244,19 +1215,16 @@
             color: #6B7C8F;
         }
 
-        /* Focus */
         [data-theme="dark"] .book-input:focus {
             border-color: #8B0000;
             box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.3);
         }
 
-        /* Select dropdown */
         [data-theme="dark"] select.book-input {
             background: #0B141C;
             color: #E6EDF3;
         }
 
-        /* Buttons */
         [data-theme="dark"] .book-btn-primary {
             background: #8B0000;
             color: #fff;
@@ -1266,7 +1234,6 @@
             background: #a30000;
         }
 
-        /* Secondary button */
         [data-theme="dark"] .book-btn-secondary {
             background: #1A2633;
             color: #C9D6E2;
@@ -1276,12 +1243,10 @@
             background: #243344;
         }
 
-        /* Divider */
         [data-theme="dark"] .book-divider {
             border-color: rgba(255, 255, 255, 0.08);
         }
 
-        /* Empty / helper text */
         [data-theme="dark"] .book-muted {
             color: #7F8C98;
         }
@@ -1292,15 +1257,6 @@
 
         .calendar-shell-no-card>* {
             width: 100%;
-        }
-
-        #mainContent.book-container {
-            width: 100vw !important;
-            max-width: none !important;
-            margin-left: calc(50% - 50vw) !important;
-            margin-right: calc(50% - 50vw) !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
         }
 
         #mainContent .book-page-wrap {
@@ -1355,7 +1311,6 @@
             color: #fca5a5 !important;
         }
 
-        /* FIX: empty slot layout height */
         #mainContent .time-panel.is-empty {
             height: auto !important;
             min-height: 0 !important;
@@ -1368,7 +1323,6 @@
             flex: 0 0 auto !important;
         }
 
-        /* FIX: remove white flash/glitch */
         #mainContent #slotContainer,
         #mainContent #slotPlaceholder,
         #mainContent #slotGrid,
@@ -1404,7 +1358,6 @@
             }
         }
 
-        /* dark mode for choose a date placeholder */
         [data-theme="dark"] #mainContent #slotPlaceholder {
             background: linear-gradient(145deg, #0d1117, #111827) !important;
             border: 1px dashed rgba(255, 255, 255, .14) !important;
@@ -1441,7 +1394,6 @@
             width: 100%;
         }
 
-        /* FORCE empty placeholder back to correct position */
         #mainContent .time-panel.is-empty {
             display: flex !important;
             flex-direction: column !important;
@@ -1458,7 +1410,6 @@
             opacity: 1 !important;
         }
 
-        /* FINAL OVERRIDE: remove Pick a Time Slot card and keep placeholder stable */
         #mainContent .cal-time-layout {
             align-items: start !important;
         }
@@ -1511,7 +1462,6 @@
             display: flex !important;
         }
 
-        /* DARK MODE: prevent white skeleton/slot flash */
         [data-theme="dark"] #mainContent #slotGrid .slot-chip,
         [data-theme="dark"] #mainContent #slotGrid button,
         [data-theme="dark"] #mainContent #slotGrid [class*="bg-white"],
@@ -1575,7 +1525,6 @@
             border-color: rgba(252, 165, 165, 0.35) !important;
         }
 
-        /* selected service card */
         [data-theme="dark"] #mainContent .service-option:has(.service-option-input:checked) .service-option-card {
             background: linear-gradient(135deg, #8B0000, #b00000) !important;
             border-color: rgba(252, 165, 165, 0.45) !important;
@@ -1609,7 +1558,6 @@
             border-color: rgba(255, 255, 255, 0.10) !important;
         }
 
-        /* DARK MODE: Flatpickr calendar */
         [data-theme="dark"] #mainContent .flatpickr-calendar {
             background: #0d1117 !important;
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -2108,7 +2056,6 @@
             box-shadow: 0 6px 16px rgba(0, 0, 0, .25);
         }
 
-        /* UPDATE: Signature upload + draw side by side */
         .signature-methods-grid {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -2233,8 +2180,6 @@
             color: #ffffff !important;
         }
 
-
-        /* FINAL OVERRIDE: Signature upload and draw pad full-width layout */
         .signature-methods-grid {
             display: grid !important;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
@@ -2335,7 +2280,6 @@
             font-size: 0.72rem !important;
         }
 
-        /* FIX: Main card + nav buttons polished position */
         #mainContent .book-card {
             overflow: hidden !important;
         }
@@ -2350,7 +2294,6 @@
             width: 100% !important;
         }
 
-        /* Do not force display here, JS controls hide/show on last step */
         #mainContent #navBtns {
             width: calc(100% - 2.7rem) !important;
             max-width: calc(100% - 2.7rem) !important;
@@ -2368,7 +2311,6 @@
             border-radius: 16px !important;
         }
 
-        /* Step 4 signature size, not too tall */
         #mainContent .signature-section-card {
             margin-top: 1rem !important;
         }
@@ -2509,7 +2451,7 @@
 @endphp
 
 @section('content')
-    <main id="mainContent" class="book-container min-h-screen bg-[#F4F4F4] dark:bg-[#020b14] py-6">
+    <main id="mainContent" class="book-container page-enter">
         <div class="book-page-wrap">
 
             <div class="w-full pt-10 pb-2 animate-fade-up">
@@ -4741,7 +4683,6 @@
             img.src = objectUrl;
         });
 
-        /* ADD: Draw Signature Feature */
         const signatureCanvas = document.getElementById("signatureCanvas");
         const signatureCtx = signatureCanvas?.getContext("2d");
         const signatureUndoBtn = document.getElementById("signatureUndoBtn");
