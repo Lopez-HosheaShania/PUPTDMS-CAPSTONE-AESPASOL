@@ -185,7 +185,9 @@
                 <div class="header-notif-body">
                     @forelse($notifications as $n)
                         <div class="header-notif-item {{ ($n['state'] ?? 'unread') === 'unread' ? 'is-unread' : 'is-read' }}"
-                            data-notif-state="{{ $n['state'] ?? 'unread' }}" data-notif-item>
+                            data-notif-state="{{ $n['state'] ?? 'unread' }}"
+                            @if (!empty($n['mark_read_url'])) data-notif-mark-read-url="{{ $n['mark_read_url'] }}" @endif
+                            data-notif-item>
                             <div class="header-notif-item-icon">
                                 <i class="fa-solid {{ $n['icon'] ?? 'fa-bell' }}"></i>
                             </div>
@@ -194,6 +196,7 @@
                                 <div class="header-notif-item-top">
                                     @if (!empty($n['url']) && $n['url'] !== '#')
                                         <a href="{{ $n['url'] }}"
+                                            data-notif-open-link
                                             class="header-notif-item-title">{{ $n['title'] ?? 'Notification' }}</a>
                                     @else
                                         <span
@@ -211,7 +214,8 @@
 
                                 <div class="header-notif-item-actions">
                                     @if (!empty($n['url']) && $n['url'] !== '#')
-                                        <a href="{{ $n['url'] }}" class="header-notif-link-action">Open</a>
+                                        <a href="{{ $n['url'] }}" class="header-notif-link-action"
+                                            data-notif-open-link>Open</a>
                                     @endif
 
                                     @if (($n['state'] ?? 'unread') === 'unread' && !empty($n['mark_read_url']))

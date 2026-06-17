@@ -1,3 +1,5 @@
+window.__PUP_HEADER_JS_ACTIVE = true;
+
 document.addEventListener('DOMContentLoaded', function () {
     function updateSidebarToggleIcon() {
         const icon = document.getElementById('sidebarToggleIcon');
@@ -241,6 +243,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!form || !form.action) return false;
 
         const formData = new FormData(form);
+        return submitNotifReadRequest(form.action, formData);
+    }
+
+    async function submitNotifReadRequest(url, body = null) {
+        if (!url) return false;
+
         const headers = {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
@@ -250,14 +258,46 @@ document.addEventListener('DOMContentLoaded', function () {
             headers['X-CSRF-TOKEN'] = csrfTokenMeta.content;
         }
 
-        const response = await fetch(form.action, {
+        const response = await fetch(url, {
             method: 'POST',
             credentials: 'same-origin',
             headers,
-            body: formData,
+            body,
         });
 
         return response.ok;
+    }
+
+    function isPlainLeftClick(event) {
+        return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+    }
+
+    async function markItemAsReadBeforeOpen(link, event) {
+        const item = link.closest('[data-notif-item]');
+        const markReadUrl = item ? item.dataset.notifMarkReadUrl : null;
+
+        if (!item || !markReadUrl || (item.dataset.notifState || 'unread') !== 'unread') {
+            return;
+        }
+
+        if (!isPlainLeftClick(event)) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const destination = link.href;
+
+        try {
+            await submitNotifReadRequest(markReadUrl);
+            markItemAsRead(item);
+            updateNotifSummaryUi();
+        } catch (_err) {
+            // Keep navigation working even if the read-state request fails.
+        } finally {
+            window.location.href = destination;
+        }
     }
 
     if (notifBtn && notifMenu) {
@@ -265,8 +305,9 @@ document.addEventListener('DOMContentLoaded', function () {
         notifBtn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
             toggleMenu('notif');
-        });
+        }, true);
 
         notifTabs.forEach(function (button) {
             button.addEventListener('click', function (e) {
@@ -317,6 +358,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        notifMenu.addEventListener('click', function (e) {
+            const openLink = e.target.closest('[data-notif-open-link]');
+
+            if (!openLink || !notifMenu.contains(openLink)) {
+                return;
+            }
+
+            markItemAsReadBeforeOpen(openLink, e);
+        });
+
         setNotifFilter('all');
         updateNotifSummaryUi();
     }
@@ -326,8 +377,9 @@ document.addEventListener('DOMContentLoaded', function () {
         userBtn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
             toggleMenu('user');
-        });
+        }, true);
     }
 
     document.addEventListener('click', function (e) {

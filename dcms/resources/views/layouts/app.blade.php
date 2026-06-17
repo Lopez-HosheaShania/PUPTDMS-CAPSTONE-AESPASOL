@@ -36,6 +36,7 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="{{ asset('css/header.css') }}">
+    <script src="{{ asset('js/header.js') }}?v={{ filemtime(public_path('js/header.js')) }}" defer></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
