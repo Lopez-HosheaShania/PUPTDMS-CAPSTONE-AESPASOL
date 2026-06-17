@@ -531,7 +531,7 @@ $inactiveCount = $inactiveCount ?? 0;
                                     <option value="">No Role</option>
                                     @foreach ($roles as $role)
                                     <option value="{{ $role->id }}" {{ old('role_id')==$role->id ? 'selected' : '' }}>
-                                        {{ $role->name }}
+                                        {{ $role->display_name }}
                                     </option>
                                     @endforeach
                                 </select>
@@ -749,7 +749,7 @@ $inactiveCount = $inactiveCount ?? 0;
 
                         @foreach ($roles as $role)
                         <button type="button" class="um-custom-select-option" data-value="{{ $role->id }}">
-                            <span>{{ $role->name }}</span>
+                            <span>{{ $role->display_name }}</span>
                             <i class="fa-solid fa-check"></i>
                         </button>
                         @endforeach

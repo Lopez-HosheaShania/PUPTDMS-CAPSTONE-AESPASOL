@@ -16,7 +16,8 @@ class UserManagementController extends Controller
 {
     public function index(Request $request)
     {
-        $roles = Role::orderBy('name')->get();
+        $roles = Role::withCount('users')->orderBy('name')->get();
+        $roleCounts = $roles->mapWithKeys(fn ($role) => [$role->slug => $role->users_count]);
 
         $search = trim((string) $request->get('search', ''));
         $roleFilter = trim((string) $request->get('role', ''));
@@ -100,6 +101,7 @@ class UserManagementController extends Controller
                     'patient' => $patientCount,
                     'active' => $activeCount,
                     'inactive' => $inactiveCount,
+                    'roles' => $roleCounts,
                 ],
             ]);
         }
@@ -114,6 +116,7 @@ class UserManagementController extends Controller
             'patientCount',
             'activeCount',
             'inactiveCount',
+            'roleCounts',
             'perPage',
             'search',
             'roleFilter',

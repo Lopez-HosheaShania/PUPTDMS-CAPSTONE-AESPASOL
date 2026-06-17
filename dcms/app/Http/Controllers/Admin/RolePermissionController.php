@@ -5,8 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Helpers\AuditLogger;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class RolePermissionController extends Controller
 {
@@ -237,20 +241,78 @@ class RolePermissionController extends Controller
                 'unique:roles,slug',
                 'regex:/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/'
             ],
+            'user_name' => ['nullable', 'required_with:user_email', 'string', 'max:255'],
+            'user_email' => ['nullable', 'required_with:user_name', 'email', 'max:255', 'unique:users,email', 'unique:patients,email'],
         ], [
             'name.unique' => 'A role with this name already exists.',
             'slug.unique' => 'A role with this slug already exists.',
             'slug.regex'  => 'Slug may only contain lowercase letters, numbers, hyphens, and underscores.',
+            'user_name.required_with' => 'Please enter the user name when adding a user email.',
+            'user_email.required_with' => 'Please enter the user email when adding a user name.',
+            'user_email.unique' => 'A user with this email already exists.',
         ]);
 
-        $role = Role::create([
-            'name' => $request->name,
-            'slug' => $request->slug,
-        ]);
+        [$role, $user] = DB::transaction(function () use ($request) {
+            $role = Role::create([
+                'name' => $request->name,
+                'slug' => $request->slug,
+            ]);
+
+            $user = null;
+
+            if ($request->filled('user_name') && $request->filled('user_email')) {
+                $user = User::create([
+                    'name' => $request->user_name,
+                    'email' => $request->user_email,
+                    'password' => Hash::make(Str::random(16)),
+                    'role_id' => $role->id,
+                    'status' => 'active',
+                ]);
+            }
+
+            return [$role, $user];
+        });
+
+        $message = $user
+            ? "Role \"{$role->name}\" and user \"{$user->name}\" created successfully. The user is now visible in User Management."
+            : "Role \"{$role->name}\" created successfully. You can now assign permissions and use it in User Management.";
+
+        AuditLogger::log(
+            'create',
+            'roles_permissions',
+            "Admin created role ID {$role->id} ({$role->name})"
+        );
+
+        if ($user) {
+            AuditLogger::log(
+                'create',
+                'user',
+                "Created user #{$user->id} ({$user->email}) for role ID {$role->id}"
+            );
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'role' => [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'slug' => $role->slug,
+                ],
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role_id' => $user->role_id,
+                ] : null,
+                'user_management_url' => route('admin.user_management'),
+            ], 201);
+        }
 
         return redirect()
             ->route('admin.role_permissions', ['highlight_role' => $role->id])
-            ->with('success', "Role \"{$request->name}\" created successfully. You can now assign permissions.")
+            ->with('success', $message)
             ->with('new_role_id', $role->id);
     }
 
