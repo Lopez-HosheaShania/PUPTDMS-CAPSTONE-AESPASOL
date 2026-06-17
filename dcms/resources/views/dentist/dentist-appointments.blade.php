@@ -464,21 +464,25 @@ $notifCount = $notifications->count();
 
                                 <div class="appt-actions-wrap">
                                     <a href="{{ route('dentist.dentist.patient.profile', $appt->patient_id) }}?from=appointments"
-                                        class="action-btn action-btn-view" data-tooltip="View profile">
+                                        class="action-btn action-btn-view" data-tooltip="View profile"
+                                        data-tooltip-tone="view">
                                         <i class="fa-regular fa-user"></i>
                                     </a>
 
-                                    <button type="button" class="action-btn action-btn-start"
-                                        data-tooltip="Start procedure" onclick="openStartProcedureModal(this)"
-                                        data-id="{{ $appt->id }}" data-name="{{ $patientName }}"
-                                        data-datetime="{{ $modalDatetime }}"
-                                        data-start-url="{{ route('dentist.odontogram', $appt->patient_id) }}?from=appointments&appointment_id={{ $appt->id }}&start_procedure=1"
-                                        {{ $isToday ? '' : 'disabled' }}>
+                                    <button type="button"
+                                        class="action-btn action-btn-start {{ $isToday ? '' : 'is-start-locked' }}"
+                                        data-tooltip="{{ $isToday ? 'Start procedure' : 'Start procedure is available on the appointment date only' }}"
+                                        data-tooltip-tone="{{ $isToday ? 'start' : 'locked' }}"
+                                        data-start-locked="{{ $isToday ? '0' : '1' }}"
+                                        aria-disabled="{{ $isToday ? 'false' : 'true' }}"
+                                        onclick="openStartProcedureModal(this)" data-id="{{ $appt->id }}"
+                                        data-name="{{ $patientName }}" data-datetime="{{ $modalDatetime }}"
+                                        data-start-url="{{ route('dentist.odontogram', $appt->patient_id) }}?from=appointments&appointment_id={{ $appt->id }}&start_procedure=1">
                                         <i class="fa-solid fa-play"></i>
                                     </button>
 
                                     <button type="button" class="action-btn action-btn-reschedule"
-                                        data-tooltip="Reschedule" onclick="openRescheduleModal({
+                                        data-tooltip="Reschedule appointment" data-tooltip-tone="reschedule" onclick="openRescheduleModal({
       id: '{{ $appt->id }}',
       name: @js($patientName),
       datetime: @js($modalDatetime),
@@ -491,7 +495,7 @@ $notifCount = $notifications->count();
 
 
                                     <button type="button" class="action-btn action-btn-cancel"
-                                        data-tooltip="Cancel appointment"
+                                        data-tooltip="Cancel appointment" data-tooltip-tone="cancel"
                                         onclick="cancelAppointmentFromModal('{{ route('dentist.dentist.appointments.cancel', $appt->id) }}', @js($patientName), @js($dateLabel . ' | ' . $timeLabel))">
                                         <i class="fa-solid fa-xmark"></i>
                                     </button>
@@ -625,20 +629,25 @@ $notifCount = $notifications->count();
                         </div>
 
                         <div class="mobile-appt-actions grid grid-cols-2 gap-3">
-                            <button type="button" class="action-btn action-btn-start"
+                            <button type="button"
+                                class="action-btn action-btn-start {{ $isToday ? '' : 'is-start-locked' }}"
+                                data-tooltip="{{ $isToday ? 'Start procedure' : 'Start procedure is available on the appointment date only' }}"
+                                data-tooltip-tone="{{ $isToday ? 'start' : 'locked' }}"
+                                data-start-locked="{{ $isToday ? '0' : '1' }}"
+                                aria-disabled="{{ $isToday ? 'false' : 'true' }}"
                                 onclick="openStartProcedureModal(this)" data-id="{{ $appt->id }}"
                                 data-name="{{ $patientName }}" data-datetime="{{ $modalDatetime }}"
-                                data-start-url="{{ route('dentist.odontogram', $appt->patient_id) }}?from=appointments&appointment_id={{ $appt->id }}&start_procedure=1"
-                                {{ $isToday ? '' : 'disabled' }}>
+                                data-start-url="{{ route('dentist.odontogram', $appt->patient_id) }}?from=appointments&appointment_id={{ $appt->id }}&start_procedure=1">
                                 <i class="fa-solid fa-play text-[10px]"></i> Start
                             </button>
 
                             <a href="{{ route('dentist.dentist.patient.profile', $appt->patient_id) }}?from=appointments"
-                                class="action-btn action-btn-view">
+                                class="action-btn action-btn-view" data-tooltip="View profile" data-tooltip-tone="view">
                                 <i class="fa-regular fa-user text-[10px]"></i> View
                             </a>
 
-                            <button type="button" class="action-btn action-btn-reschedule" onclick="openRescheduleModal({
+                            <button type="button" class="action-btn action-btn-reschedule"
+                                data-tooltip="Reschedule appointment" data-tooltip-tone="reschedule" onclick="openRescheduleModal({
                     id: '{{ $appt->id }}',
                     name: @js($patientName),
                     datetime: @js($modalDatetime),
@@ -648,7 +657,8 @@ $notifCount = $notifications->count();
                                 <i class="fa-solid fa-rotate-right text-[10px]"></i> Reschedule
                             </button>
 
-                            <button type="button" class="action-btn action-btn-cancel"
+                            <button type="button" class="action-btn action-btn-cancel" data-tooltip="Cancel appointment"
+                                data-tooltip-tone="cancel"
                                 onclick="cancelAppointmentFromModal('{{ route('dentist.dentist.appointments.cancel', $appt->id) }}', @js($patientName), @js($dateLabel . ' | ' . $timeLabel))">
                                 <i class="fa-solid fa-xmark text-[10px]"></i> Cancel
                             </button>
@@ -860,7 +870,8 @@ $notifCount = $notifications->count();
                                     </button>
 
                                     <a href="{{ route('dentist.dentist.patient.profile', $appt->patient_id) }}?from=appointments"
-                                        class="action-btn action-btn-view" data-tooltip="View profile">
+                                        class="action-btn action-btn-view" data-tooltip="View profile"
+                                        data-tooltip-tone="view">
                                         <i class="fa-regular fa-user"></i>
                                     </a>
                                 </div>
@@ -1234,20 +1245,41 @@ $notifCount = $notifications->count();
 
         if (!tooltip || !tooltipText) return;
 
-        const targets = document.querySelectorAll('.appt-actions-wrap [data-tooltip]');
+        const targets = document.querySelectorAll(
+            '.appt-actions-wrap [data-tooltip], .mobile-appt-actions [data-tooltip]'
+        );
+
+        const toneClasses = [
+            'tooltip-view',
+            'tooltip-start',
+            'tooltip-reschedule',
+            'tooltip-cancel',
+            'tooltip-locked'
+        ];
 
         const showTooltip = (el) => {
-            if (el.disabled) return;
+            const message = el.dataset.tooltip || '';
+            if (!message) return;
 
-            tooltipText.textContent = el.dataset.tooltip || '';
+            const tone = el.dataset.tooltipTone || 'default';
+
+            tooltip.classList.remove(...toneClasses);
+            tooltip.classList.add(`tooltip-${tone}`);
+
+            tooltipText.textContent = message;
             tooltip.classList.add('show');
 
             requestAnimationFrame(() => {
                 const rect = el.getBoundingClientRect();
                 const tooltipRect = tooltip.getBoundingClientRect();
 
-                const top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
-                const left = rect.left - tooltipRect.width - 12;
+                let top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                let left = rect.left - tooltipRect.width - 12;
+
+                if (left < 8) {
+                    left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                    top = rect.top - tooltipRect.height - 10;
+                }
 
                 tooltip.style.top = `${Math.max(8, top)}px`;
                 tooltip.style.left = `${Math.max(8, left)}px`;
@@ -1256,6 +1288,7 @@ $notifCount = $notifications->count();
 
         const hideTooltip = () => {
             tooltip.classList.remove('show');
+            tooltip.classList.remove(...toneClasses);
         };
 
         targets.forEach((el) => {
@@ -1277,7 +1310,7 @@ $notifCount = $notifications->count();
     var selectedStartUrl = null;
 
     function openStartProcedureModal(btn) {
-        if (!btn || btn.disabled) return;
+        if (!btn || btn.disabled || btn.dataset.startLocked === '1') return;
 
         selectedApptId = btn.dataset.id || null;
         selectedStartUrl = btn.dataset.startUrl || null;

@@ -34,32 +34,47 @@ class OIDCController extends Controller
         $this->studentApiService = $studentApiService;
     }
 
-   public function redirect(Request $request)
-{
-    $authorizeUrl = config('services.oidc.authorize_url');
+    public function redirect(Request $request)
+    {
+        $loginUrl     = config('services.idp.login_url');
+        $authorizeUrl = config('services.oidc.authorize_url');
+        $clientId     = config('services.oidc.client_id');
+        $redirectUri  = config('services.oidc.redirect');
+        $scope        = config('services.oidc.scope', 'openid profile email');
 
-    $state = bin2hex(random_bytes(32));
+        if (!$clientId || !$redirectUri) {
+            return redirect()->route('login')
+                ->with('error', 'OIDC provider is not configured properly.');
+        }
 
-    session([
-        'oidc_state' => $state,
-    ]);
+        $state = Str::random(40);
 
-    $query = http_build_query([
-        'client_id' => config('services.oidc.client_id'),
-        'redirect_uri' => config('services.oidc.redirect_uri'),
-        'response_type' => 'code',
-        'scope' => 'openid profile email',
-        'state' => $state,
+        session([
+            'oidc_state' => $state,
+        ]);
+        session()->save();
 
-        // Optional lang ito kung supported ng IDP.
-        // Helps prevent automatic login using existing IDP session.
-        'prompt' => 'login',
-    ]);
+        $query = http_build_query([
+            'client_id'     => $clientId,
+            'redirect_uri'  => $redirectUri,
+            'response_type' => 'code',
+            'scope'         => $scope,
+            'state'         => $state,
+            'prompt'        => 'login',
+        ]);
 
-    $fullUrl = $authorizeUrl . '?' . $query;
+        if ($loginUrl) {
+            $separator = str_contains($loginUrl, '?') ? '&' : '?';
+            $fullUrl = $loginUrl . $separator . $query;
+        } else {
+            $fullUrl = $authorizeUrl . '?' . $query;
+        }
 
-    return redirect()->away($fullUrl);
-}
+        Log::info('OIDC redirect URL', ['url' => $fullUrl]);
+
+        return redirect()->away($fullUrl);
+    }
+
     public function callback(Request $request)
     {
         Log::info('OIDC Callback Debug', [

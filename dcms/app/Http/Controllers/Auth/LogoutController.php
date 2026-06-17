@@ -23,27 +23,36 @@ class LogoutController extends Controller
             }
         }
 
+        $idpLogoutUrl = config('services.oidc.logout_url');
+        $clientId = config('services.oidc.client_id');
+        $postLogoutRedirect = route('login');
+
         if ($user) {
             $user->access_token = null;
             $user->refresh_token = null;
             $user->save();
         }
 
+        Cookie::queue(Cookie::forget('jwt_token', '/'));
+
         AuditLogger::log(
             'logout',
             'authentication',
-            'User logged out of the system'
+            'User logged out of the system (global logout)'
         );
 
         Auth::logout();
-
-        $request->session()->flush();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        Cookie::queue(Cookie::forget('jwt_token', '/'));
+        if ($idpLogoutUrl && $clientId) {
+            return view('auth.oidc-logout', [
+                'logoutUrl' => $idpLogoutUrl,
+                'clientId' => $clientId,
+                'redirectUrl' => $postLogoutRedirect,
+            ]);
+        }
 
-        return redirect('/')
-            ->with('success', 'You have been logged out successfully.');
+        return redirect()->route('login');
     }
 }

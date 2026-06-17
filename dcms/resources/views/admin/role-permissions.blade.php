@@ -203,7 +203,7 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
                             <i class="fa-solid fa-shield-halved" style="font-size:24px; color:#d97706;"></i>
                             <div>
                                 <div style="font-weight:800; font-size:13px; color:#92400e;">Protected Role</div>
-                                <div style="font-size:12px; color:#b45309;">Super Admin has unrestricted access and
+                                <div style="font-size:12px; color:#b45309;">Admin has unrestricted access and
                                     cannot be modified.</div>
                             </div>
                         </div>
@@ -467,7 +467,7 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
     <div class="modal-body reset-defaults-body">
         <p class="reset-defaults-copy">
             This restores original permissions for
-            <strong>Super Admin</strong>, <strong>Dentist</strong>, and <strong>Patient</strong>.
+            <strong>Admin</strong>, <strong>Dentist</strong>, and <strong>Patient</strong>.
         </p>
 
         <div class="modal-warning-note">
@@ -1582,7 +1582,7 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         }
 
         closeViewAs();
-        triggerRedirect(roleName, roleSlug, null, color, `Loading ${roleName} view for Super Admin`);
+        triggerRedirect(roleName, roleSlug, null, color, `Loading ${roleName} view for Admin`);
     }
 
     function openPatientPicker(roleName, roleSlug, color) {
@@ -1672,7 +1672,7 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
 
     function startPatientImpersonation(roleName, roleSlug, color, patientId, patientName) {
         closePatientPicker();
-        triggerRedirect(patientName, roleSlug, patientId, color, 'Loading patient dashboard for Super Admin');
+        triggerRedirect(patientName, roleSlug, patientId, color, 'Loading patient dashboard for Admin');
     }
 
     function triggerRedirect(title, slug, patientId, color, sub) {

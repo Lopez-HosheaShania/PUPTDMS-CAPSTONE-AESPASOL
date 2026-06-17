@@ -3334,3 +3334,83 @@ body.dark #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-st
     --admin-appt-action-hover-border: rgba(252, 165, 165, .48);
     --admin-appt-action-shadow: rgba(220, 38, 38, .18);
 }
+
+/* =========================================================
+   FINAL FIX: scope admin-only tooltip overrides
+   Do not hide/override the dentist fixed tooltip when the dentist page
+   still carries admin-appointments-page for shared layout rules.
+   ========================================================= */
+
+body:has(#mainContent.admin-appointments-page.dentist-appointments-page) #actionTooltip {
+    display: block !important;
+}
+
+#mainContent.admin-appointments-page.dentist-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::before,
+#mainContent.admin-appointments-page.dentist-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::after,
+#mainContent.admin-appointments-page.dentist-appointments-page .mobile-appt-actions .action-btn[data-tooltip]::before,
+#mainContent.admin-appointments-page.dentist-appointments-page .mobile-appt-actions .action-btn[data-tooltip]::after {
+    content: none !important;
+    display: none !important;
+}
+
+#mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn[data-tooltip]::after {
+    width: max-content !important;
+    max-width: min(340px, calc(100vw - 32px)) !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    line-height: 1 !important;
+}
+
+#mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-start[data-tooltip] {
+    --admin-appt-tooltip-bg: #15803D;
+    --admin-appt-tooltip-color: #FFFFFF;
+    --admin-appt-tooltip-shadow: rgba(21, 128, 61, .26);
+}
+
+#mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-reschedule[data-tooltip] {
+    --admin-appt-tooltip-bg: #B45309;
+    --admin-appt-tooltip-color: #FFFFFF;
+    --admin-appt-tooltip-shadow: rgba(180, 83, 9, .26);
+}
+
+#mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-cancel[data-tooltip] {
+    --admin-appt-tooltip-bg: #DC2626;
+    --admin-appt-tooltip-color: #FFFFFF;
+    --admin-appt-tooltip-shadow: rgba(220, 38, 38, .30);
+}
+
+#mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-record[data-tooltip] {
+    --admin-appt-tooltip-bg: #0F172A;
+    --admin-appt-tooltip-color: #FFFFFF;
+    --admin-appt-tooltip-shadow: rgba(15, 23, 42, .26);
+}
+
+#mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-admin-locked[data-tooltip] {
+    --admin-appt-tooltip-bg: #DC2626;
+    --admin-appt-tooltip-color: #FFFFFF;
+    --admin-appt-tooltip-shadow: rgba(220, 38, 38, .30);
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-start[data-tooltip],
+.dark #mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-start[data-tooltip] {
+    --admin-appt-tooltip-bg: #15803D;
+    --admin-appt-tooltip-color: #DCFCE7;
+    --admin-appt-tooltip-shadow: rgba(22, 163, 74, .28);
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-reschedule[data-tooltip],
+.dark #mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-reschedule[data-tooltip] {
+    --admin-appt-tooltip-bg: #CA8A04;
+    --admin-appt-tooltip-color: #FEF3C7;
+    --admin-appt-tooltip-shadow: rgba(202, 138, 4, .30);
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-cancel[data-tooltip],
+.dark #mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-cancel[data-tooltip],
+[data-theme="dark"] #mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-admin-locked[data-tooltip],
+.dark #mainContent.admin-appointments-page:not(.dentist-appointments-page) .appt-actions-wrap .action-btn-admin-locked[data-tooltip] {
+    --admin-appt-tooltip-bg: #B91C1C;
+    --admin-appt-tooltip-color: #FEE2E2;
+    --admin-appt-tooltip-shadow: rgba(185, 28, 28, .36);
+}
