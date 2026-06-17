@@ -3926,11 +3926,6 @@
     gap: .8rem !important;
 }
 
-/* =========================================================
-   DATA BACKUP - TABLET / iPAD RESPONSIVE VIEW
-   Covers 768px to 1280px only
-   ========================================================= */
-
 @media (min-width: 768px) and (max-width: 1280px) {
 
     #mainContent.backup-page,
@@ -3941,7 +3936,6 @@
         padding-bottom: 100px !important;
     }
 
-    /* Banner - keep title on the left */
     .backup-page .page-banner {
         display: flex !important;
         align-items: center !important;
@@ -4007,7 +4001,6 @@
         flex: 0 0 auto !important;
     }
 
-    /* Top area */
     .backup-topbar {
         display: flex !important;
         align-items: flex-start !important;
@@ -4028,7 +4021,6 @@
         line-height: 1.35 !important;
     }
 
-    /* Stat cards */
     .backup-stats {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -4069,7 +4061,6 @@
         letter-spacing: .07em !important;
     }
 
-    /* Main layout */
     .backup-main {
         display: grid !important;
         grid-template-columns: 1fr !important;
@@ -4122,7 +4113,6 @@
         border-radius: 13px !important;
     }
 
-    /* History header/actions */
     .backup-history-actions {
         display: inline-flex !important;
         align-items: center !important;
@@ -4149,7 +4139,6 @@
         transform: none !important;
     }
 
-    /* Table should scroll instead of squeezing */
     .backup-table-wrap {
         width: 100% !important;
         max-width: 100% !important;
@@ -4184,7 +4173,6 @@
         line-height: 1.25 !important;
     }
 
-    /* Grid history cards */
     .backup-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: .85rem !important;
@@ -4245,7 +4233,6 @@
         font-size: .72rem !important;
     }
 
-    /* Side cards */
     .mini-card-body {
         padding: .9rem !important;
     }
@@ -4301,7 +4288,6 @@
         font-size: .74rem !important;
     }
 
-    /* Schedule modal */
     #scheduleModal .backup-schedule-modal-card,
     #scheduleModal .modal-box,
     #scheduleModal .um-modal-card {
@@ -4336,7 +4322,6 @@
         font-size: .78rem !important;
     }
 
-    /* Action modal */
     #backupActionModal .modal-box.modal-box-inner.ap-delete-shell.backup-action-shell,
     #backupActionModal .ap-delete-shell,
     #backupActionModal .backup-action-shell {
@@ -4374,7 +4359,6 @@
     }
 }
 
-/* Wider tablets / iPad Pro landscape */
 @media (min-width: 1101px) and (max-width: 1280px) {
 
     .backup-stats {
@@ -4397,7 +4381,6 @@
     }
 }
 
-/* Smaller iPad portrait / narrow tablet */
 @media (min-width: 768px) and (max-width: 900px) {
 
     .backup-page .page-banner-inner {

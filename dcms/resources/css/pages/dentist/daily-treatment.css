@@ -1,0 +1,127 @@
+.daily-treatment-page {
+    --service-table-min: 980px;
+}
+
+.daily-treatment-page .service-table {
+    min-width: var(--service-table-min);
+}
+
+.daily-treatment-page .service-course-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media only screen and (max-width: 600px) {
+    .daily-treatment-page {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        --service-table-min: 860px;
+    }
+
+    .daily-treatment-page .dentist-hero {
+        padding: 0.9rem !important;
+        border-radius: 18px !important;
+    }
+
+    .daily-treatment-page .dentist-hero-content {
+        padding-right: 0 !important;
+        gap: 0.7rem !important;
+    }
+
+    .daily-treatment-page .dentist-hero-icon {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 14px !important;
+    }
+
+    .daily-treatment-page .dentist-hero-title {
+        font-size: 1.25rem !important;
+        line-height: 1.08 !important;
+    }
+
+    .daily-treatment-page .dentist-hero-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .daily-treatment-page .service-toolbar {
+        display: grid !important;
+        grid-template-columns: 1fr;
+        gap: 0.55rem !important;
+        width: 100%;
+    }
+
+    .daily-treatment-page .service-period-input,
+    .daily-treatment-page .global-filter-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .daily-treatment-page .card-body {
+        padding: 0.75rem !important;
+    }
+
+    .daily-treatment-page .service-table th,
+    .daily-treatment-page .service-table td {
+        font-size: 0.68rem !important;
+        padding: 0.55rem 0.45rem !important;
+    }
+
+    .daily-treatment-page .service-course-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .daily-treatment-page .service-report-modal {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+    .daily-treatment-page .service-toolbar {
+        display: grid !important;
+        grid-template-columns: minmax(160px, 220px) minmax(260px, 1fr) auto;
+        align-items: center;
+        width: 100%;
+    }
+
+    .daily-treatment-page .service-course-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    .daily-treatment-page {
+        --service-table-min: 980px;
+    }
+
+    .daily-treatment-page .dentist-hero {
+        align-items: center;
+    }
+
+    .daily-treatment-page .service-report-modal {
+        max-width: 640px !important;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+    .daily-treatment-page .service-toolbar {
+        width: auto;
+        grid-template-columns: 180px 320px auto;
+    }
+
+    .daily-treatment-page .service-course-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    .daily-treatment-page {
+        --service-table-min: 1080px;
+    }
+
+    .daily-treatment-page .service-course-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}

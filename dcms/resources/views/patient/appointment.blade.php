@@ -2273,8 +2273,8 @@ $appt->service_type .
 </script>
 
 <main id="mainContent"
-    class="pt-[90px] px-3 md:px-6 py-6 page-enter min-h-screen flex-1 bg-gray-50 dark:bg-[#000D1A] text-gray-900 dark:text-[#F3F4F6]">
-    <div id="appointmentPage" class="w-full fade-in">
+    class="patient-page-shell page-enter">
+    <div id="appointmentPage" class="w-full">
 
         @php
         $latestPastVisit = $pastVisits->first();

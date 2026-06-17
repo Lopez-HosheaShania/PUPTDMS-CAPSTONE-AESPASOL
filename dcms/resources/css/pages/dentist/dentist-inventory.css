@@ -446,15 +446,10 @@
         width: 100%;
     }
 
-    #mainContent .inventory-view-toggle,
-    #mainContent #viewToggle {
-        display: none !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-    }
-
-    #tableWrapper {
-        display: none !important;
+    #mainContent.inventory-page .inventory-view-toggle {
+        display: inline-flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
     }
 
     .stock-no {
@@ -1408,7 +1403,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .form-group-custom {
@@ -1642,8 +1637,8 @@
 
 [data-theme="dark"] #mainContent.inventory-page .row-count,
 .dark #mainContent.inventory-page .row-count {
-    background: rgba(139, 0, 0, 0.20) !important;
-    border-color: rgba(252, 165, 165, 0.26) !important;
+    background: rgba(139, 0, 0, 0.14) !important;
+    border-color: rgba(252, 165, 165, 0.202) !important;
     color: #FCA5A5 !important;
 }
 
@@ -1690,7 +1685,6 @@
         width: 100% !important;
         min-height: 50px !important;
         height: 50px !important;
-        border-radius: 18px !important;
         flex: 0 0 auto !important;
     }
 
@@ -1736,9 +1730,10 @@
         flex: 0 0 auto !important;
     }
 
-    #mainContent.inventory-page .inventory-view-toggle,
-    #mainContent.inventory-page #viewToggle {
-        display: none !important;
+    #mainContent.inventory-page .inventory-view-toggle {
+        display: inline-flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
     }
 
     [data-theme="dark"] #mainContent.inventory-page .row-count-mobile,
@@ -1885,31 +1880,6 @@
     }
 }
 
-#mainContent.inventory-page .inventory-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
-    align-items: stretch !important;
-}
-
-#mainContent.inventory-page .inventory-card {
-    width: 100% !important;
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    min-width: 0 !important;
-}
-
-#mainContent.inventory-page .inventory-card-head {
-    flex-shrink: 0 !important;
-}
-
-#mainContent.inventory-page .inventory-card-meta {
-    flex: 1 1 auto !important;
-}
-
-#mainContent.inventory-page .inventory-card-actions {
-    flex-shrink: 0 !important;
-}
-
 @media (max-width: 767px) {
     #mainContent.inventory-page .inventory-grid {
         grid-template-columns: 1fr !important;
@@ -2040,4 +2010,350 @@
     background: #161B22 !important;
     border-color: #484F58 !important;
     color: #FFFFFF !important;
+}
+
+#mainContent.inventory-page .inventory-mobile-actions .inventory-view-toggle[data-global-view-toggle],
+#mainContent.inventory-page .inventory-mobile-actions .view-toggle-container[data-global-view-toggle] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+}
+
+@media only screen and (max-width: 600px) {
+    #mainContent.inventory-page .inventory-mobile-actions {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 44px !important;
+        gap: 10px !important;
+        width: 100% !important;
+        align-items: stretch !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.inventory-page #filterBtn {
+        order: 1 !important;
+        grid-column: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.inventory-page #externalClearFilterBtn {
+        order: 1 !important;
+        grid-column: 2 !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.inventory-page #externalClearFilterBtn.hidden {
+        display: none !important;
+    }
+
+    #mainContent.inventory-page .inventory-mobile-actions:has(#externalClearFilterBtn.hidden) {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.inventory-page .inventory-mobile-actions:has(#externalClearFilterBtn.hidden) #filterBtn {
+        grid-column: 1 / -1 !important;
+    }
+
+    #mainContent.inventory-page .inventory-view-toggle[data-global-view-toggle],
+    #mainContent.inventory-page .view-toggle-container[data-global-view-toggle] {
+        order: 2 !important;
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        margin: 0 !important;
+        display: inline-flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        position: relative !important;
+        z-index: 500 !important;
+    }
+
+    #mainContent.inventory-page .inventory-view-toggle[data-global-view-toggle].open,
+    #mainContent.inventory-page .view-toggle-container[data-global-view-toggle].open {
+        z-index: 99999 !important;
+    }
+
+    #mainContent.inventory-page .inventory-add-btn {
+        order: 3 !important;
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        min-height: 44px !important;
+        height: 44px !important;
+        margin: 0 !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.inventory-page .row-count-mobile {
+        order: 4 !important;
+        grid-column: 1 / -1 !important;
+    }
+
+    .inventory-form-modal.ui-modal,
+    #addModal.inventory-form-modal,
+    #editModal.inventory-form-modal,
+    #deleteModal.ui-modal,
+    #deleteModal.inv-delete-modal {
+        align-items: flex-end !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    #addModal.inventory-form-modal .modal-box-custom,
+    #editModal.inventory-form-modal .modal-box-custom,
+    #deleteModal .modal-box-custom,
+    #deleteModal .delete-modal-card,
+    #deleteModal .inv-delete-modal-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: 88dvh !important;
+        margin: 0 !important;
+        border-radius: 26px 26px 0 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        transform: translateY(20px) scale(1) !important;
+    }
+
+    #addModal.inventory-form-modal.open .modal-box-custom,
+    #editModal.inventory-form-modal.open .modal-box-custom,
+    #deleteModal.open .modal-box-custom,
+    #deleteModal.open .delete-modal-card,
+    #deleteModal.open .inv-delete-modal-card {
+        transform: translateY(0) scale(1) !important;
+    }
+
+    #addModal.inventory-form-modal.closing .modal-box-custom,
+    #editModal.inventory-form-modal.closing .modal-box-custom,
+    #deleteModal.closing .modal-box-custom,
+    #deleteModal.closing .delete-modal-card,
+    #deleteModal.closing .inv-delete-modal-card {
+        transform: translateY(100%) scale(1) !important;
+    }
+
+    #addModal.inventory-form-modal .modal-box-split,
+    #editModal.inventory-form-modal .modal-box-split {
+        max-height: 88dvh !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #addModal.inventory-form-modal .modal-sticky-header,
+    #editModal.inventory-form-modal .modal-sticky-header {
+        flex: 0 0 auto !important;
+        padding: 14px 16px 12px !important;
+        min-height: auto !important;
+    }
+
+    #addModal.inventory-form-modal .inventory-modal-head-left,
+    #editModal.inventory-form-modal .inventory-modal-head-left {
+        min-width: 0 !important;
+        gap: 10px !important;
+    }
+
+    #addModal.inventory-form-modal .modal-icon-custom,
+    #editModal.inventory-form-modal .modal-icon-custom {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 13px !important;
+        font-size: 14px !important;
+    }
+
+    #addModal.inventory-form-modal .modal-title-custom,
+    #editModal.inventory-form-modal .modal-title-custom {
+        font-size: 16px !important;
+        line-height: 1.12 !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    #addModal.inventory-form-modal .modal-sub-custom,
+    #editModal.inventory-form-modal .modal-sub-custom {
+        font-size: 11px !important;
+        line-height: 1.25 !important;
+        margin-top: 2px !important;
+    }
+
+    #addModal.inventory-form-modal .inventory-modal-x,
+    #editModal.inventory-form-modal .inventory-modal-x {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 13px !important;
+    }
+
+    #addModal.inventory-form-modal .modal-scroll-body,
+    #editModal.inventory-form-modal .modal-scroll-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 14px 16px 16px !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #addModal.inventory-form-modal .form-grid-2,
+    #editModal.inventory-form-modal .form-grid-2 {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    #addModal.inventory-form-modal .form-group-custom,
+    #editModal.inventory-form-modal .form-group-custom {
+        gap: 4px !important;
+        min-width: 0 !important;
+    }
+
+    #addModal.inventory-form-modal .form-label-custom,
+    #editModal.inventory-form-modal .form-label-custom {
+        font-size: 9.5px !important;
+        line-height: 1 !important;
+        margin-bottom: 2px !important;
+    }
+
+    #addModal.inventory-form-modal .form-input-custom,
+    #editModal.inventory-form-modal .form-input-custom,
+    #addModal.inventory-form-modal .form-select-custom,
+    #editModal.inventory-form-modal .form-select-custom,
+    #addModal.inventory-form-modal .inv-custom-select-btn,
+    #editModal.inventory-form-modal .inv-custom-select-btn {
+        height: 42px !important;
+        min-height: 42px !important;
+        border-radius: 12px !important;
+        font-size: 13px !important;
+    }
+
+    #addModal.inventory-form-modal .st-voice-row,
+    #editModal.inventory-form-modal .st-voice-row {
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        gap: 8px !important;
+    }
+
+    #addModal.inventory-form-modal .voice-input-toggle,
+    #editModal.inventory-form-modal .voice-input-toggle,
+    #addModal.inventory-form-modal .voice-search-mic.external,
+    #editModal.inventory-form-modal .voice-search-mic.external {
+        width: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        margin: 0 !important;
+        position: static !important;
+        transform: none !important;
+    }
+
+    #addModal.inventory-form-modal .modal-sticky-footer,
+    #editModal.inventory-form-modal .modal-sticky-footer {
+        flex: 0 0 auto !important;
+        padding: 12px 16px calc(14px + env(safe-area-inset-bottom)) !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    #addModal.inventory-form-modal .btn-modal-cancel,
+    #addModal.inventory-form-modal .btn-modal-save,
+    #editModal.inventory-form-modal .btn-modal-cancel,
+    #editModal.inventory-form-modal .btn-modal-save {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        border-radius: 13px !important;
+        justify-content: center !important;
+        padding: 0 12px !important;
+        font-size: 13px !important;
+    }
+
+    #deleteModal .delete-modal-card {
+        padding: 26px 18px calc(18px + env(safe-area-inset-bottom)) !important;
+    }
+
+    #deleteModal .delete-modal-icon {
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 18px !important;
+        margin-bottom: 12px !important;
+    }
+
+    #deleteModal .delete-modal-title {
+        font-size: 19px !important;
+    }
+
+    #deleteModal .delete-modal-text {
+        font-size: 13px !important;
+        line-height: 1.45 !important;
+        margin-bottom: 18px !important;
+    }
+
+    #deleteModal .modal-footer-custom,
+    #deleteModal .inv-delete-actions {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    #deleteModal .btn-modal-cancel,
+    #deleteModal .btn-modal-save,
+    #deleteModal .modal-btn-ghost,
+    #deleteModal .inv-delete-confirm {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 42px !important;
+        justify-content: center !important;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+
+    #addModal.inventory-form-modal .modal-box-custom,
+    #editModal.inventory-form-modal .modal-box-custom {
+        width: min(92vw, 720px) !important;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+
+    #addModal.inventory-form-modal .modal-box-custom,
+    #editModal.inventory-form-modal .modal-box-custom {
+        width: min(88vw, 860px) !important;
+        max-height: min(84dvh, 720px) !important;
+    }
+
+    #mainContent.inventory-page .inventory-view-toggle[data-global-view-toggle],
+    #mainContent.inventory-page .view-toggle-container[data-global-view-toggle] {
+        width: auto !important;
+        min-width: 96px !important;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+
+    #addModal.inventory-form-modal .modal-box-custom,
+    #editModal.inventory-form-modal .modal-box-custom {
+        width: min(84vw, 1000px) !important;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+
+    #addModal.inventory-form-modal .modal-box-custom,
+    #editModal.inventory-form-modal .modal-box-custom {
+        width: min(78vw, 1040px) !important;
+    }
 }
