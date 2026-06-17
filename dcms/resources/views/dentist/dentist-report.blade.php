@@ -837,7 +837,7 @@ $topServices = collect($topServices ?? []);
             <h3 class="text-xl font-bold text-[#8B0000] mb-2">Download Complete!</h3>
             <p class="text-gray-500 text-sm leading-relaxed mb-7">Your report has been successfully generated and
                 downloaded.</p>
-            <button onclick="closeDownloadModal()"
+            <button type="button" id="downloadCompleteDoneBtn" onclick="closeDownloadModal()"
                 class="px-8 py-2.5 rounded-xl bg-[#8B0000] hover:bg-[#6b0000] text-white font-bold text-sm shadow-sm transition-all w-full">Done</button>
         </div>
     </div>
@@ -1026,6 +1026,25 @@ $topServices = collect($topServices ?? []);
 
         resetCreateReportForm();
     }
+
+    function closeDownloadModal() {
+        const modalId = 'downloadCompleteModal';
+
+        if (typeof window.closeModal === 'function') {
+            window.closeModal(modalId);
+        } else {
+            forceCloseModal(modalId);
+        }
+
+        window.setTimeout(() => {
+            if (!document.querySelector('.ui-modal.open, .ui-modal.closing, .modal-overlay.open, dialog[open]')) {
+                document.documentElement.classList.remove('modal-lock');
+                document.body.classList.remove('modal-lock');
+            }
+        }, 220);
+    }
+
+    window.closeDownloadModal = closeDownloadModal;
 
     function ensureReportFlatpickrs() {
         if (!window.flatpickr) return;
