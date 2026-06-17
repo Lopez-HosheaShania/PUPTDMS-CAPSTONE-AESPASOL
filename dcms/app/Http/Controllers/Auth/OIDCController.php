@@ -36,55 +36,30 @@ class OIDCController extends Controller
 
    public function redirect(Request $request)
 {
-    $loginUrl     = config('services.idp.login_url');
     $authorizeUrl = config('services.oidc.authorize_url');
-    $clientId     = config('services.oidc.client_id');
-    $redirectUri  = config('services.oidc.redirect');
-    $scope        = config('services.oidc.scope', 'openid profile email');
 
-    if (!$clientId || !$redirectUri) {
-        return redirect()->route('login')
-            ->with('error', 'OIDC provider is not configured properly.');
-    }
-
-    $state = Str::random(40);
+    $state = bin2hex(random_bytes(32));
 
     session([
         'oidc_state' => $state,
     ]);
 
-    session()->save();
-
     $query = http_build_query([
-        'client_id'     => $clientId,
-        'redirect_uri'  => $redirectUri,
+        'client_id' => config('services.oidc.client_id'),
+        'redirect_uri' => config('services.oidc.redirect_uri'),
         'response_type' => 'code',
-        'scope'         => $scope,
-        'state'         => $state,
+        'scope' => 'openid profile email',
+        'state' => $state,
 
-        // Force IDP to ask credentials again instead of silent login
-        'prompt'        => 'login',
-        'max_age'       => 0,
-        'fresh'         => now()->timestamp,
+        // Optional lang ito kung supported ng IDP.
+        // Helps prevent automatic login using existing IDP session.
+        'prompt' => 'login',
     ]);
 
-    $baseUrl = $loginUrl ?: $authorizeUrl;
-
-    if (!$baseUrl) {
-        return redirect()->route('login')
-            ->with('error', 'OIDC login URL is not configured.');
-    }
-
-    $separator = str_contains($baseUrl, '?') ? '&' : '?';
-    $fullUrl = $baseUrl . $separator . $query;
-
-    Log::info('OIDC redirect URL', [
-        'url' => $fullUrl,
-    ]);
+    $fullUrl = $authorizeUrl . '?' . $query;
 
     return redirect()->away($fullUrl);
 }
-
     public function callback(Request $request)
     {
         Log::info('OIDC Callback Debug', [
