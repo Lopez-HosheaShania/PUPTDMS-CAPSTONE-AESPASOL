@@ -154,7 +154,8 @@
         }
 
         return ['today', 'hasPatients', 'fullyBooked', 'holiday',
-        'clinicClosed'];
+            'clinicClosed'
+        ];
     }
 
     function renderUnifiedCalendarLegend(mode) {
@@ -683,6 +684,7 @@
         const slotGrid = document.getElementById(calendarConfig.slotGridId);
         const timePill = document.getElementById(calendarConfig.selectedTimePillId);
         const timeText = document.getElementById(calendarConfig.selectedTimeTextId);
+        const clearSlotBtn = document.getElementById('clearSlotSelectionBtn');
 
         selectedDate = null;
         selectedTime = null;
@@ -717,6 +719,11 @@
         if (slotPlaceholder) {
             slotPlaceholder.classList.remove("hidden");
             slotPlaceholder.style.display = "flex";
+        }
+
+        if (clearSlotBtn) {
+            clearSlotBtn.classList.add('hidden');
+            clearSlotBtn.setAttribute('aria-hidden', 'true');
         }
 
         renderCalendar();
@@ -788,6 +795,7 @@
         const pill = document.getElementById(calendarConfig.datePillId);
         const timePill = document.getElementById(calendarConfig.selectedTimePillId);
         const timeText = document.getElementById(calendarConfig.selectedTimeTextId);
+        const clearSlotBtn = document.getElementById('clearSlotSelectionBtn');
 
         const slots = payload?.slots || [];
         const remaining = payload?.remaining ?? 0;
@@ -806,6 +814,11 @@
             timePill.style.display = "none";
         }
         if (timeText) timeText.textContent = "";
+
+        if (clearSlotBtn) {
+            clearSlotBtn.classList.add('hidden');
+            clearSlotBtn.setAttribute('aria-hidden', 'true');
+        }
 
         const [y, m, d] = iso.split("-");
         const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -851,6 +864,10 @@
                     <i class="fa-regular fa-calendar-xmark"></i>
                     <span>${payload?.message || 'No available slots for this date.'}</span>
                 `;
+            }
+            if (clearSlotBtn) {
+                clearSlotBtn.classList.add('hidden');
+                clearSlotBtn.setAttribute('aria-hidden', 'true');
             }
             return;
         }
@@ -927,7 +944,14 @@
                         currentDisplay?.classList.add("hidden");
 
                         if (currentTimeText) currentTimeText.textContent = "";
-                        currentTimePill?.classList.add("hidden");
+                        if (currentTimePill) {
+                            currentTimePill.classList.remove("show");
+                            currentTimePill.classList.add("hidden");
+                            currentTimePill.style.display = "none";
+                        }
+
+                        clearSlotBtn?.classList.add('hidden');
+                        clearSlotBtn?.setAttribute('aria-hidden', 'true');
 
                         if (typeof markFormDirty === "function") markFormDirty();
                         return;
@@ -966,6 +990,9 @@
                         currentTimePill.classList.add("show");
                         currentTimePill.style.display = "block";
                     }
+
+                    clearSlotBtn?.classList.remove('hidden');
+                    clearSlotBtn?.removeAttribute('aria-hidden');
 
                     if (typeof markFormDirty === "function") markFormDirty();
                 });

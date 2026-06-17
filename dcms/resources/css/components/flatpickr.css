@@ -647,3 +647,69 @@ span.flatpickr-weekday {
 .dark .flatpickr-calendar.hasTime.noCalendar .numInputWrapper span.arrowDown::after {
     border-top-color: #FCA5A5 !important;
 }
+
+.flatpickr-calendar.flatpickr-month-only {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    border-radius: 16px !important;
+}
+
+.flatpickr-calendar.flatpickr-month-only .flatpickr-weekdays,
+.flatpickr-calendar.flatpickr-month-only .flatpickr-innerContainer,
+.flatpickr-calendar.flatpickr-month-only .flatpickr-rContainer,
+.flatpickr-calendar.flatpickr-month-only .flatpickr-days,
+.flatpickr-calendar.flatpickr-month-only .dayContainer {
+    display: none !important;
+}
+
+.flatpickr-calendar.flatpickr-month-only .flatpickr-months {
+    height: 58px !important;
+    min-height: 58px !important;
+    padding: 9px 10px !important;
+    border-radius: 16px !important;
+}
+
+.flatpickr-calendar.flatpickr-month-only .flatpickr-current-month {
+    max-width: calc(100% - 78px) !important;
+}
+
+.flatpickr-calendar.flatpickr-month-only .custom-flatpickr-selects {
+    gap: 8px !important;
+}
+
+.flatpickr-calendar.flatpickr-month-only .custom-flatpickr-select {
+    height: 34px !important;
+    min-height: 34px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    padding: 0 10px !important;
+}
+
+.flatpickr-calendar.flatpickr-month-only .custom-flatpickr-month {
+    min-width: 100px !important;
+}
+
+.flatpickr-calendar.flatpickr-month-only .custom-flatpickr-year {
+    min-width: 78px !important;
+}
+
+.flatpickr-calendar.flatpickr-month-only .flatpickr-prev-month,
+.flatpickr-calendar.flatpickr-month-only .flatpickr-next-month {
+    top: 10px !important;
+    width: 34px !important;
+    height: 34px !important;
+}
+
+@media (max-width: 640px) {
+    .flatpickr-calendar.flatpickr-month-only {
+        width: min(280px, calc(100vw - 24px)) !important;
+        min-width: min(280px, calc(100vw - 24px)) !important;
+        max-width: calc(100vw - 24px) !important;
+    }
+}
+
+dialog .flatpickr-calendar,
+.ui-modal .flatpickr-calendar {
+    z-index: 2147483647 !important;
+}

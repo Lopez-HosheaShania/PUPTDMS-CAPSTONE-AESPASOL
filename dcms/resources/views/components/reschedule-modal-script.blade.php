@@ -11,6 +11,80 @@
 
     let selectedRescheduleId = null;
 
+    function clearRescheduleSlotSelection() {
+        const timeInput = document.getElementById('new_appointment_time');
+        const selectedTimePill = document.getElementById('selectedTimePill');
+        const selectedTimeText = document.getElementById('selectedTimeText');
+        const clearBtn = document.getElementById('clearSlotSelectionBtn');
+        const slotGrid = document.getElementById('slotGrid');
+
+        if (typeof selectedTime !== 'undefined') selectedTime = null;
+
+        if (timeInput) {
+            timeInput.value = '';
+            timeInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        if (selectedTimeText) selectedTimeText.textContent = '';
+
+        if (selectedTimePill) {
+            selectedTimePill.classList.remove('show');
+            selectedTimePill.classList.add('hidden');
+            selectedTimePill.style.display = 'none';
+        }
+
+        if (clearBtn) {
+            clearBtn.classList.add('hidden');
+            clearBtn.setAttribute('aria-hidden', 'true');
+        }
+
+        slotGrid?.querySelectorAll('.slot-chip').forEach(chip => {
+            chip.classList.remove(
+                'selected', 'bg-[#8B0000]', 'text-white', 'border-[#8B0000]',
+                'shadow-[0_2px_12px_rgba(139,0,0,0.25)]'
+            );
+            chip.classList.add('border-[#e8e2dd]', 'bg-[#fafaf8]', 'text-[#1a1410]');
+            chip.setAttribute('aria-pressed', 'false');
+        });
+
+        if (typeof markFormDirty === 'function') markFormDirty();
+    }
+
+    function resetRescheduleSlotUi() {
+        const slotPlaceholder = document.getElementById('slotPlaceholder');
+        const slotGrid = document.getElementById('slotGrid');
+        const selectedTimePill = document.getElementById('selectedTimePill');
+        const selectedTimeText = document.getElementById('selectedTimeText');
+        const clearBtn = document.getElementById('clearSlotSelectionBtn');
+
+        if (slotPlaceholder) {
+            slotPlaceholder.classList.remove('hidden');
+            slotPlaceholder.style.display = 'flex';
+            slotPlaceholder.innerHTML = `
+                <i class="fa-regular fa-calendar-xmark"></i>
+                <span>Select a date to see available slots</span>
+            `;
+        }
+
+        if (slotGrid) {
+            slotGrid.style.display = 'none';
+            slotGrid.innerHTML = '';
+        }
+
+        if (selectedTimePill) {
+            selectedTimePill.classList.remove('show');
+            selectedTimePill.classList.add('hidden');
+            selectedTimePill.style.display = 'none';
+        }
+
+        if (selectedTimeText) selectedTimeText.textContent = '';
+
+        if (clearBtn) {
+            clearBtn.classList.add('hidden');
+            clearBtn.setAttribute('aria-hidden', 'true');
+        }
+    }
+
     function openRescheduleModal(payload = {}) {
         selectedRescheduleId = payload.id || null;
 
@@ -52,30 +126,19 @@
         if (dateError) dateError.style.display = 'none';
         if (timeError) timeError.style.display = 'none';
 
-        document.querySelector('.cal-wrap')?.classList.remove('error');
-        document.querySelector('.slots-wrap')?.classList.remove('error');
+        document.querySelector('#rescheduleModal .cal-wrap')?.classList.remove('error');
+        document.querySelector('#rescheduleModal .slots-wrap')?.classList.remove('error');
 
         document.getElementById('datePill')?.replaceChildren();
+        document.getElementById('datePill')?.classList.remove('show');
 
-        const slotPlaceholder = document.getElementById('slotPlaceholder');
-        const slotGrid = document.getElementById('slotGrid');
-        const selectedTimePill = document.getElementById('selectedTimePill');
-        const selectedTimeText = document.getElementById('selectedTimeText');
+        resetRescheduleSlotUi();
 
-        if (slotPlaceholder) {
-            slotPlaceholder.classList.remove('hidden');
-            slotPlaceholder.style.display = 'flex';
+        const submitBtn = document.getElementById('confirmRescheduleBtn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Reschedule';
         }
-        if (slotGrid) {
-            slotGrid.style.display = 'none';
-            slotGrid.innerHTML = '';
-        }
-        if (selectedTimePill) {
-            selectedTimePill.classList.remove('show');
-            selectedTimePill.classList.add('hidden');
-            selectedTimePill.style.display = 'none';
-        }
-        if (selectedTimeText) selectedTimeText.textContent = '';
 
         modal.classList.remove('hidden');
 
@@ -99,7 +162,6 @@
 
         if (dateInput) dateInput.value = '';
         if (timeInput) timeInput.value = '';
-
     }
 
     function closeRescheduleModal() {
@@ -125,14 +187,14 @@
         if (!selectedDate) {
             const dateError = document.getElementById("dateError");
             if (dateError) dateError.style.display = "flex";
-            document.querySelector(".cal-wrap")?.classList.add("error");
+            document.querySelector("#rescheduleModal .cal-wrap")?.classList.add("error");
             valid = false;
         }
 
         if (!selectedTime) {
             const timeError = document.getElementById("timeError");
             if (timeError) timeError.style.display = "flex";
-            document.querySelector(".slots-wrap")?.classList.add("error");
+            document.querySelector("#rescheduleModal .slots-wrap")?.classList.add("error");
             valid = false;
         }
 
@@ -170,12 +232,14 @@
                 if (typeof closeDayAppointmentsModal === 'function') {
                     closeDayAppointmentsModal();
                 }
+
                 sessionStorage.setItem('dentistToast', JSON.stringify({
                     title: 'Appointment rescheduled',
                     message: `${document.getElementById('resPatientName')?.textContent || 'Appointment'} was updated successfully.`,
                     tone: 'success',
                     duration: 3500
                 }));
+
                 window.location.reload();
             } else {
                 if (submitBtn) {

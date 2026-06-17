@@ -117,7 +117,6 @@
 
 <div class="max-w-7xl mt-4 mx-auto fade-in">
 
-    <!-- PAGE HEADER -->
     <div
         style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap;">
         <div>
@@ -147,12 +146,11 @@
                 font-size:14px;
                 color:#8A7A6F;
             ">
-                View patient dashboards and records as Super Admin.
+                View patient dashboards and records as Admin.
             </p>
         </div>
     </div>
 
-    <!-- SEARCH BAR -->
     <div class="patient-search-row">
         <div class="search-wrap patient-search-wrap">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
@@ -163,7 +161,6 @@
             title="Clear">Clear</button>
     </div>
 
-    <!-- DIRECTORY CARD -->
     <div style="
         background:#fff;
         border:1.5px solid #EDE8E2;
@@ -254,7 +251,6 @@
                 </tbody>
             </table>
 
-            <!-- NO RESULTS MESSAGE -->
             <div id="noPatientResults" style="
                     display:none;
                     text-align:center;

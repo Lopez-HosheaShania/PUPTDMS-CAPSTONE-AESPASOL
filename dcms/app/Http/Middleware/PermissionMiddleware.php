@@ -18,7 +18,6 @@ class PermissionMiddleware
         $originalRoleSlug = session('role');
         $activeRoleSlug = session('impersonated_role') ?: $originalRoleSlug;
 
-        // Super Admin override: allow everything
         if ($originalRoleSlug === 'super_admin') {
             return $next($request);
         }

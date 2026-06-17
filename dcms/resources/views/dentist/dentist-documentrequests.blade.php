@@ -192,48 +192,45 @@ $notifCount = $notifications->count();
                 <div class="flex items-center gap-3 flex-wrap">
                     <span class="sl-pagebar-info docreq-page-info" id="pageInfoTop"></span>
 
-                    <div class="sl-page-size-control docreq-page-size-control">
-                        <label for="docreqPerPageBtn">Show</label>
+                    <div class="sl-page-size-control global-page-size-control docreq-page-size-control">
+                            <label for="docreqPerPageSelect">Show</label>
 
-                        <div id="docreqPerPageCustom" class="docreq-custom-select docreq-page-size-select-wrap">
-                            <button type="button" id="docreqPerPageBtn" class="docreq-page-size-trigger"
-                                data-select-button aria-expanded="false" aria-haspopup="true"
-                                onclick="toggleDocreqDropdown('docreqPerPageCustom')">
-                                <span id="docreqPerPageValue">10</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
+                            <div class="global-page-size-select" data-global-page-size data-page-size-input="#docreqPerPageSelect"
+                                data-page-size-callback="selectDocreqPerPage">
+                                <input type="hidden" id="docreqPerPageSelect" class="global-page-size-native" value="10">
 
-                            <input type="hidden" id="docreqPerPageSelect" value="10">
-
-                            <div class="docreq-page-size-menu" role="listbox">
-                                <button type="button" class="docreq-page-size-option is-active" data-value="10"
-                                    onclick="selectDocreqPerPage(10)">
-                                    <span>10</span>
-                                    <i class="fa-solid fa-check"></i>
+                                <button type="button" class="global-page-size-trigger" data-page-size-trigger
+                                    aria-haspopup="listbox" aria-expanded="false">
+                                    <span data-page-size-value>10</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
                                 </button>
 
-                                <button type="button" class="docreq-page-size-option" data-value="20"
-                                    onclick="selectDocreqPerPage(20)">
-                                    <span>20</span>
-                                    <i class="fa-solid fa-check"></i>
-                                </button>
-
-                                <button type="button" class="docreq-page-size-option" data-value="50"
-                                    onclick="selectDocreqPerPage(50)">
-                                    <span>50</span>
-                                    <i class="fa-solid fa-check"></i>
-                                </button>
-
-                                <button type="button" class="docreq-page-size-option" data-value="100"
-                                    onclick="selectDocreqPerPage(100)">
-                                    <span>100</span>
-                                    <i class="fa-solid fa-check"></i>
-                                </button>
+                                <div class="global-page-size-menu" role="listbox">
+                                    <button type="button" class="global-page-size-option is-selected"
+                                        data-page-size-option data-value="10" role="option" aria-selected="true">
+                                        <span>10</span>
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    <button type="button" class="global-page-size-option"
+                                        data-page-size-option data-value="20" role="option" aria-selected="false">
+                                        <span>20</span>
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    <button type="button" class="global-page-size-option"
+                                        data-page-size-option data-value="50" role="option" aria-selected="false">
+                                        <span>50</span>
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    <button type="button" class="global-page-size-option"
+                                        data-page-size-option data-value="100" role="option" aria-selected="false">
+                                        <span>100</span>
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <span>per page</span>
-                    </div>
+                            <span>per page</span>
+                        </div>
                 </div>
 
                 <div class="sl-pagination-wrap docreq-pagination-wrap">
@@ -1689,16 +1686,10 @@ $notifCount = $notifications->count();
     function updateDocreqPerPageUI(value) {
         const nextValue = Number(value || 10);
         const hidden = document.getElementById('docreqPerPageSelect');
-        const label = document.getElementById('docreqPerPageValue');
 
         if (hidden) hidden.value = String(nextValue);
-        if (label) label.textContent = String(nextValue);
 
-        document.querySelectorAll('.docreq-page-size-option').forEach(option => {
-            const active = Number(option.dataset.value || 0) === nextValue;
-            option.classList.toggle('is-active', active);
-            option.classList.toggle('active', active);
-        });
+        window.syncGlobalPageSizeSelect?.(hidden, nextValue);
     }
 
     function selectDocreqPerPage(value) {
@@ -1711,6 +1702,8 @@ $notifCount = $notifications->count();
     }
 
     window.selectDocreqPerPage = selectDocreqPerPage;
+
+        window.initGlobalPageSizeSelects?.();
 
     function renderDocreqPagebar(p) {
         if (!p) return;

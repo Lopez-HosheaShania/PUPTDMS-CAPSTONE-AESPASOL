@@ -57,11 +57,47 @@ function decorateFlatpickrDays(instance) {
     });
 }
 
+function syncFlatpickrHeader(instance) {
+    if (!instance?.calendarContainer) return;
+
+    const monthSelect = instance.calendarContainer.querySelector('.custom-flatpickr-month');
+    const yearSelect = instance.calendarContainer.querySelector('.custom-flatpickr-year');
+
+    if (monthSelect) monthSelect.value = String(instance.currentMonth);
+    if (yearSelect) yearSelect.value = String(instance.currentYear);
+}
+
+function updateMonthOnlyInput(instance, options = {}) {
+    if (!instance?.input?.matches?.('[data-month-only-picker]')) return;
+
+    const shouldDispatch = options.dispatch !== false;
+    const month = String(instance.currentMonth + 1).padStart(2, '0');
+    const value = `${instance.currentYear}-${month}`;
+    const label = `${instance.l10n.months.longhand[instance.currentMonth]} ${instance.currentYear}`;
+
+    instance.input.value = value;
+
+    if (instance.altInput) {
+        instance.altInput.value = label;
+    }
+
+    if (shouldDispatch) {
+        instance.input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
 function buildFlatpickrHeader(instance) {
     if (!instance?.calendarContainer) return;
 
     const currentMonth = instance.calendarContainer.querySelector('.flatpickr-current-month');
-    if (!currentMonth || currentMonth.querySelector('.custom-flatpickr-selects')) return;
+    if (!currentMonth) return;
+
+    const existing = currentMonth.querySelector('.custom-flatpickr-selects');
+
+    if (existing) {
+        syncFlatpickrHeader(instance);
+        return;
+    }
 
     const monthSelect = document.createElement('select');
     monthSelect.className = 'custom-flatpickr-select custom-flatpickr-month';
@@ -70,7 +106,6 @@ function buildFlatpickrHeader(instance) {
         const option = document.createElement('option');
         option.value = index;
         option.textContent = month;
-        if (index === instance.currentMonth) option.selected = true;
         monthSelect.appendChild(option);
     });
 
@@ -78,11 +113,11 @@ function buildFlatpickrHeader(instance) {
     yearSelect.className = 'custom-flatpickr-select custom-flatpickr-year';
 
     const currentYear = instance.currentYear;
-    for (let year = currentYear - 80; year <= currentYear + 5; year++) {
+
+    for (let year = currentYear - 80; year <= currentYear + 10; year++) {
         const option = document.createElement('option');
         option.value = year;
         option.textContent = year;
-        if (year === currentYear) option.selected = true;
         yearSelect.appendChild(option);
     }
 
@@ -96,16 +131,26 @@ function buildFlatpickrHeader(instance) {
 
     monthSelect.addEventListener('change', () => {
         instance.changeMonth(Number(monthSelect.value) - instance.currentMonth);
+        syncFlatpickrHeader(instance);
+        updateMonthOnlyInput(instance);
     });
 
     yearSelect.addEventListener('change', () => {
         instance.changeYear(Number(yearSelect.value));
+        syncFlatpickrHeader(instance);
+        updateMonthOnlyInput(instance);
     });
+
+    syncFlatpickrHeader(instance);
 }
 
 function refreshFlatpickr(instance) {
     buildFlatpickrHeader(instance);
     decorateFlatpickrDays(instance);
+
+    if (instance?.input?.matches?.('[data-month-only-picker]')) {
+        instance.calendarContainer.classList.add('flatpickr-month-only');
+    }
 }
 
 function initGlobalFlatpickr() {
@@ -131,6 +176,7 @@ function initGlobalFlatpickr() {
         },
     };
 
+
     const dateInputs = document.querySelectorAll(
         '.js-flatpickr-date, .js-flatpickr-date-min-today, .js-flatpickr-date-max-today, .js-flatpickr-date-range-from, .js-flatpickr-date-range-to'
     );
@@ -140,7 +186,7 @@ function initGlobalFlatpickr() {
 
         const parentPopup = el.closest('dialog, .ui-modal');
 
-        options.appendTo = document.body;
+        options.appendTo = parentPopup || document.body;
 
         if (parentPopup) {
             options.positionElement = el;
@@ -169,44 +215,6 @@ function initGlobalFlatpickr() {
         flatpickr(el, options);
     });
 
-    const monthInputs = document.querySelectorAll('.js-flatpickr-month');
-
-    monthInputs.forEach(el => {
-        if (el._flatpickr) return;
-
-        const parentPopup = el.closest('dialog, .ui-modal');
-
-        const options = {
-            dateFormat: "Y-m",
-            altInput: true,
-            altFormat: "F Y",
-            allowInput: false,
-            clickOpens: true,
-            disableMobile: true,
-            position: "auto center",
-            appendTo: document.body,
-
-            onReady: (_dates, _str, instance) => refreshFlatpickr(instance),
-            onMonthChange: (_dates, _str, instance) => refreshFlatpickr(instance),
-            onYearChange: (_dates, _str, instance) => refreshFlatpickr(instance),
-
-            onOpen: (_dates, _str, instance) => {
-                refreshFlatpickr(instance);
-                openFlatpickrSheet(instance);
-            },
-
-            onClose: (_dates, _str, instance) => {
-                closeFlatpickrSheet(instance);
-            },
-        };
-
-        if (parentPopup) {
-            options.positionElement = el;
-        }
-
-        flatpickr(el, options);
-    });
-
     const timeInputs = document.querySelectorAll('.js-flatpickr-time');
 
     timeInputs.forEach(el => {
@@ -226,7 +234,7 @@ function initGlobalFlatpickr() {
             clickOpens: true,
             disableMobile: true,
             position: "auto center",
-            appendTo: document.body,
+            appendTo: parentPopup || document.body,
 
             onOpen: (_dates, _str, instance) => {
                 openFlatpickrSheet(instance);
@@ -245,7 +253,95 @@ function initGlobalFlatpickr() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", initGlobalFlatpickr);
+function initMonthOnlyFlatpickr(root = document) {
+    if (!window.flatpickr) return;
+
+    const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+
+    scope.querySelectorAll('[data-month-only-picker]').forEach(el => {
+        if (el._flatpickr) return;
+
+        const parentPopup = el.closest('dialog, .ui-modal');
+        const rawDefault = el.value || el.dataset.defaultMonth || '';
+        const defaultDate = /^\d{4}-\d{2}$/.test(rawDefault)
+            ? `${rawDefault}-01`
+            : rawDefault || new Date();
+
+        flatpickr(el, {
+            dateFormat: 'Y-m',
+            altInput: true,
+            altFormat: 'F Y',
+            altInputClass: 'form-input-custom service-period-input service-period-alt',
+            defaultDate,
+            allowInput: false,
+            clickOpens: true,
+            disableMobile: true,
+            position: 'auto center',
+            appendTo: parentPopup || document.body,
+            positionElement: parentPopup ? el : undefined,
+
+            onReady: (_dates, _str, instance) => {
+                instance.calendarContainer.classList.add('flatpickr-month-only');
+                refreshFlatpickr(instance);
+                updateMonthOnlyInput(instance, { dispatch: false });
+            },
+
+            onOpen: (_dates, _str, instance) => {
+                instance.calendarContainer.classList.add('flatpickr-month-only');
+                refreshFlatpickr(instance);
+                openFlatpickrSheet(instance);
+            },
+
+            onMonthChange: (_dates, _str, instance) => {
+                instance.calendarContainer.classList.add('flatpickr-month-only');
+                refreshFlatpickr(instance);
+                updateMonthOnlyInput(instance);
+            },
+
+            onYearChange: (_dates, _str, instance) => {
+                instance.calendarContainer.classList.add('flatpickr-month-only');
+                refreshFlatpickr(instance);
+                updateMonthOnlyInput(instance);
+            },
+
+            onClose: (_dates, _str, instance) => {
+                closeFlatpickrSheet(instance);
+            },
+        });
+    });
+}
+
+function setMonthOnlyPickerValue(inputOrSelector, value, dispatch = true) {
+    const input = typeof inputOrSelector === 'string'
+        ? document.querySelector(inputOrSelector)
+        : inputOrSelector;
+
+    if (!input || !value) return;
+
+    const dateValue = /^\d{4}-\d{2}$/.test(value) ? `${value}-01` : value;
+
+    if (input._flatpickr) {
+        input._flatpickr.setDate(dateValue, false);
+        refreshFlatpickr(input._flatpickr);
+        updateMonthOnlyInput(input._flatpickr, { dispatch });
+        return;
+    }
+
+    input.value = String(value).slice(0, 7);
+
+    if (dispatch) {
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+window.initMonthOnlyFlatpickr = initMonthOnlyFlatpickr;
+window.setMonthOnlyPickerValue = setMonthOnlyPickerValue;
+
+document.addEventListener("DOMContentLoaded", () => {
+    initGlobalFlatpickr();
+    initMonthOnlyFlatpickr();
+});
+
 document.addEventListener('mousemove', (e) => {
     const day = e.target.closest('.flatpickr-day');
 
@@ -901,6 +997,79 @@ function getSidebarStorageKey() {
     }[role] || 'sidebarCollapsed';
 }
 
+function getSidebarScrollStorageKey() {
+    const role = getCurrentRole();
+
+    return {
+        admin: 'adminSidebarScrollTop',
+        dentist: 'dentistSidebarScrollTop',
+        patient: 'patientSidebarScrollTop',
+        global: 'sidebarScrollTop',
+    }[role] || 'sidebarScrollTop';
+}
+
+function initSidebarScrollMemory() {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarInner = sidebar?.querySelector('.sidebar-inner');
+
+    if (!sidebar || !sidebarInner) return;
+
+    const storageKey = getSidebarScrollStorageKey();
+
+    let isRestoring = true;
+    let saveTimer = null;
+
+    const getSavedScroll = () => {
+        const saved = Number(localStorage.getItem(storageKey) || 0);
+        return Number.isFinite(saved) && saved > 0 ? saved : 0;
+    };
+
+    const restoreSidebarScroll = () => {
+        const savedScroll = getSavedScroll();
+
+        if (savedScroll > 0) {
+            sidebarInner.scrollTop = savedScroll;
+        }
+    };
+
+    const saveSidebarScroll = () => {
+        if (isRestoring) return;
+
+        clearTimeout(saveTimer);
+
+        saveTimer = setTimeout(() => {
+            localStorage.setItem(storageKey, String(sidebarInner.scrollTop || 0));
+        }, 80);
+    };
+
+    restoreSidebarScroll();
+
+    requestAnimationFrame(() => {
+        restoreSidebarScroll();
+
+        requestAnimationFrame(() => {
+            restoreSidebarScroll();
+            isRestoring = false;
+        });
+    });
+
+    sidebarInner.addEventListener('scroll', saveSidebarScroll, { passive: true });
+
+    document.querySelectorAll('#sidebar a').forEach(link => {
+        link.addEventListener('click', () => {
+            localStorage.setItem(storageKey, String(sidebarInner.scrollTop || 0));
+        });
+    });
+
+    window.addEventListener('beforeunload', () => {
+        localStorage.setItem(storageKey, String(sidebarInner.scrollTop || 0));
+    });
+
+    window.addEventListener('pagehide', () => {
+        localStorage.setItem(storageKey, String(sidebarInner.scrollTop || 0));
+    });
+}
+
 function applyGlobalTheme(theme = 'light') {
     const nextTheme = theme === 'dark' ? 'dark' : 'light';
 
@@ -1398,6 +1567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeaderMenus();
     initMobileDrawerControls();
     initGlobalSidebar();
+    initSidebarScrollMemory();
     initAdminSidebarGroupClick();
     initGlobalDateTime();
     initPatientMobileFab();
@@ -1553,17 +1723,47 @@ window.closeInventoryModal = closeModal;
 window.closeOnBackdrop = closeModalOnBackdrop;
 
 function openFilterDrawer(panelId = 'filterPanel', overlayId = 'filterOverlay') {
+    const panel = document.getElementById(panelId);
+    const overlay = document.getElementById(overlayId);
+
     document.documentElement.classList.add('filter-lock');
     document.body.classList.add('filter-lock');
-    document.getElementById(panelId)?.classList.add('open');
-    document.getElementById(overlayId)?.classList.add('open');
+
+    if (panel) {
+        panel.classList.remove('closing');
+        panel.classList.add('open');
+        panel.setAttribute('aria-hidden', 'false');
+    }
+
+    overlay?.classList.add('open');
 }
 
 function closeFilterDrawer(panelId = 'filterPanel', overlayId = 'filterOverlay') {
+    const panel = document.getElementById(panelId);
+    const overlay = document.getElementById(overlayId);
+
+    overlay?.classList.remove('open');
+
+    if (panel) {
+        panel.classList.remove('open');
+        panel.classList.add('closing');
+        panel.setAttribute('aria-hidden', 'true');
+
+        window.clearTimeout(panel.__filterCloseTimer);
+        panel.__filterCloseTimer = window.setTimeout(() => {
+            panel.classList.remove('closing');
+
+            if (!document.querySelector('.filter-drawer-wrapper.open, .filter-drawer-wrapper.closing')) {
+                document.documentElement.classList.remove('filter-lock');
+                document.body.classList.remove('filter-lock');
+            }
+        }, 300);
+
+        return;
+    }
+
     document.documentElement.classList.remove('filter-lock');
     document.body.classList.remove('filter-lock');
-    document.getElementById(panelId)?.classList.remove('open');
-    document.getElementById(overlayId)?.classList.remove('open');
 }
 
 window.openFilterDrawer = openFilterDrawer;
@@ -2319,13 +2519,508 @@ function getGlobalViewMode(toggleOrId) {
     return toggle.__getGlobalViewMode?.() || toggle.dataset.currentView || 'list';
 }
 
+function initGlobalViewMobileDropdowns(root = document) {
+    const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+    const toggles = scope.querySelectorAll('[data-global-view-toggle]');
+
+    const getButtonLabel = (button) => {
+        return button?.querySelector('.view-mode-label')?.textContent?.trim()
+            || button?.getAttribute('aria-label')
+            || (button?.dataset.viewMode === 'grid' ? 'Grid View' : 'List View');
+    };
+
+    const getButtonIcon = (mode) => {
+        return mode === 'grid' ? 'fa-solid fa-grip' : 'fa-solid fa-list';
+    };
+
+    const closeAllMenus = (except = null) => {
+        document.querySelectorAll('[data-global-view-toggle].open').forEach(toggle => {
+            if (toggle === except) return;
+
+            toggle.classList.remove('open');
+            toggle.querySelector('[data-view-mobile-trigger]')?.setAttribute('aria-expanded', 'false');
+        });
+    };
+
+    toggles.forEach(toggle => {
+        if (toggle.dataset.mobileDropdownInitialized === 'true') return;
+
+        toggle.dataset.mobileDropdownInitialized = 'true';
+
+        const buttons = Array.from(toggle.querySelectorAll('[data-view-mode]'));
+        if (!buttons.length) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'global-view-mobile-trigger';
+        trigger.dataset.viewMobileTrigger = 'true';
+        trigger.setAttribute('aria-expanded', 'false');
+
+        const menu = document.createElement('div');
+        menu.className = 'global-view-mobile-menu';
+
+        buttons.forEach(button => {
+            const mode = button.dataset.viewMode;
+            const option = document.createElement('button');
+
+            option.type = 'button';
+            option.className = 'global-view-mobile-option';
+            option.dataset.viewMobileOption = mode;
+
+            option.innerHTML = `
+                <i class="${getButtonIcon(mode)}"></i>
+                <span>${getButtonLabel(button)}</span>
+            `;
+
+            option.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                button.click();
+                closeAllMenus();
+            });
+
+            menu.appendChild(option);
+        });
+
+        const syncMobileTrigger = () => {
+            const current = toggle.dataset.currentView || 'list';
+            const activeButton = buttons.find(button => button.dataset.viewMode === current) || buttons[0];
+
+            trigger.innerHTML = `
+                <span class="global-view-mobile-main">
+                    <i class="${getButtonIcon(current)}"></i>
+                    <span class="global-view-mobile-label">${getButtonLabel(activeButton)}</span>
+                </span>
+                <i class="fa-solid fa-chevron-down global-view-mobile-chevron"></i>
+            `;
+
+            menu.querySelectorAll('[data-view-mobile-option]').forEach(option => {
+                option.classList.toggle('active', option.dataset.viewMobileOption === current);
+            });
+        };
+
+        trigger.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const willOpen = !toggle.classList.contains('open');
+
+            closeAllMenus(toggle);
+
+            toggle.classList.toggle('open', willOpen);
+            trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        });
+
+        toggle.addEventListener('global-view-change', syncMobileTrigger);
+
+        toggle.appendChild(trigger);
+        toggle.appendChild(menu);
+
+        syncMobileTrigger();
+    });
+
+    document.addEventListener('click', () => closeAllMenus());
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initGlobalViewToggles();
+    initGlobalViewMobileDropdowns();
 });
 
 window.initGlobalViewToggles = initGlobalViewToggles;
 window.setGlobalViewMode = setGlobalViewMode;
 window.getGlobalViewMode = getGlobalViewMode;
+
+
+function injectGlobalPageSizeStyles() {
+    if (document.getElementById('globalPageSizeStyles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'globalPageSizeStyles';
+    style.textContent = `
+        .global-page-size-control {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 7px !important;
+            color: #9CA3AF !important;
+            font-size: .72rem !important;
+            font-weight: 900 !important;
+            white-space: nowrap !important;
+            position: relative !important;
+            z-index: 80 !important;
+        }
+
+        .global-page-size-control label,
+        .global-page-size-control > span {
+            color: #9CA3AF !important;
+            font-size: .72rem !important;
+            font-weight: 900 !important;
+            line-height: 1 !important;
+            white-space: nowrap !important;
+        }
+
+        .global-page-size-select {
+            position: relative !important;
+            width: 70px !important;
+            min-width: 70px !important;
+            height: 32px !important;
+            z-index: 80 !important;
+        }
+
+        .global-page-size-select.open {
+            z-index: 9998 !important;
+        }
+
+        .global-page-size-native {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 1px !important;
+            height: 1px !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .global-page-size-trigger {
+            width: 100% !important;
+            height: 32px !important;
+            min-height: 32px !important;
+            padding: 0 9px 0 11px !important;
+            border-radius: 10px !important;
+            border: 1px solid rgba(139, 0, 0, .14) !important;
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, .98), rgba(255, 247, 247, .92)) !important;
+            color: #374151 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 6px !important;
+            font-size: .76rem !important;
+            font-weight: 950 !important;
+            line-height: 1 !important;
+            cursor: pointer !important;
+            box-shadow:
+                0 5px 12px rgba(139, 0, 0, .045),
+                inset 0 1px 0 rgba(255, 255, 255, .75) !important;
+            transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease !important;
+            font-family: inherit !important;
+        }
+
+        .global-page-size-trigger:hover {
+            border-color: rgba(139, 0, 0, .28) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .global-page-size-trigger i {
+            color: #8B0000 !important;
+            font-size: 8.5px !important;
+            line-height: 1 !important;
+            transition: transform .18s ease !important;
+        }
+
+        .global-page-size-select.open .global-page-size-trigger {
+            border-color: rgba(139, 0, 0, .34) !important;
+            box-shadow:
+                0 0 0 3px rgba(139, 0, 0, .08),
+                0 8px 18px rgba(139, 0, 0, .08) !important;
+        }
+
+        .global-page-size-select.open .global-page-size-trigger i {
+            transform: rotate(180deg) !important;
+        }
+
+        .global-page-size-menu {
+            position: absolute !important;
+            top: calc(100% + 7px) !important;
+            left: 0 !important;
+            width: 82px !important;
+            padding: 5px !important;
+            border-radius: 13px !important;
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, .08), transparent 38%),
+                #FFFFFF !important;
+            border: 1px solid rgba(139, 0, 0, .12) !important;
+            box-shadow: 0 18px 38px rgba(15, 23, 42, .16) !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transform: translateY(-5px) scale(.98) !important;
+            transform-origin: top left !important;
+            transition:
+                opacity .16s ease,
+                visibility .16s ease,
+                transform .16s ease !important;
+            z-index: 9999 !important;
+        }
+
+        .global-page-size-select.open .global-page-size-menu {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            transform: translateY(0) scale(1) !important;
+        }
+
+        .global-page-size-option {
+            width: 100% !important;
+            height: 29px !important;
+            padding: 0 8px !important;
+            border: 0 !important;
+            border-radius: 9px !important;
+            background: transparent !important;
+            color: #4B5563 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
+            font-size: .74rem !important;
+            font-weight: 900 !important;
+            line-height: 1 !important;
+            cursor: pointer !important;
+            transition: background .15s ease, color .15s ease, transform .15s ease !important;
+            font-family: inherit !important;
+        }
+
+        .global-page-size-option:hover {
+            background: rgba(139, 0, 0, .07) !important;
+            color: #8B0000 !important;
+        }
+
+        .global-page-size-option.is-selected,
+        .global-page-size-option.is-active,
+        .global-page-size-option.active {
+            background: #FEF2F2 !important;
+            color: #8B0000 !important;
+        }
+
+        .global-page-size-option i {
+            opacity: 0 !important;
+            color: #8B0000 !important;
+            font-size: 8.5px !important;
+        }
+
+        .global-page-size-option.is-selected i,
+        .global-page-size-option.is-active i,
+        .global-page-size-option.active i {
+            opacity: 1 !important;
+        }
+
+        [data-theme="dark"] .global-page-size-control label,
+        [data-theme="dark"] .global-page-size-control > span,
+        .dark .global-page-size-control label,
+        .dark .global-page-size-control > span {
+            color: #94A3B8 !important;
+        }
+
+        [data-theme="dark"] .global-page-size-trigger,
+        .dark .global-page-size-trigger {
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .015)),
+                rgba(13, 17, 23, .92) !important;
+            border-color: rgba(255, 255, 255, .12) !important;
+            color: #E5E7EB !important;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .26) !important;
+        }
+
+        [data-theme="dark"] .global-page-size-trigger i,
+        .dark .global-page-size-trigger i {
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] .global-page-size-menu,
+        .dark .global-page-size-menu {
+            background:
+                radial-gradient(circle at top left, rgba(139, 0, 0, .22), transparent 40%),
+                #111827 !important;
+            border-color: rgba(255, 255, 255, .12) !important;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .46) !important;
+        }
+
+        [data-theme="dark"] .global-page-size-option,
+        .dark .global-page-size-option {
+            color: #CBD5E1 !important;
+        }
+
+        [data-theme="dark"] .global-page-size-option:hover,
+        .dark .global-page-size-option:hover {
+            background: rgba(139, 0, 0, .24) !important;
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] .global-page-size-option.is-selected,
+        [data-theme="dark"] .global-page-size-option.is-active,
+        [data-theme="dark"] .global-page-size-option.active,
+        .dark .global-page-size-option.is-selected,
+        .dark .global-page-size-option.is-active,
+        .dark .global-page-size-option.active {
+            background: rgba(139, 0, 0, .32) !important;
+            color: #FCA5A5 !important;
+        }
+
+        [data-theme="dark"] .global-page-size-option i,
+        .dark .global-page-size-option i {
+            color: #FCA5A5 !important;
+        }
+
+        @media (max-width: 767px) {
+            .global-page-size-control {
+                width: 100% !important;
+                justify-content: flex-start !important;
+                flex-wrap: wrap !important;
+            }
+
+            .global-page-size-select {
+                width: 68px !important;
+                min-width: 68px !important;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+function getGlobalPageSizeControl(inputOrSelector) {
+    if (!inputOrSelector) return null;
+
+    const input = typeof inputOrSelector === 'string'
+        ? document.querySelector(inputOrSelector)
+        : inputOrSelector;
+
+    if (!input) return null;
+
+    return document.querySelector(`[data-global-page-size][data-page-size-input="#${input.id}"]`)
+        || input.closest('[data-global-page-size]');
+}
+
+function syncGlobalPageSizeSelect(controlOrInput, value) {
+    const control = controlOrInput?.matches?.('[data-global-page-size]')
+        ? controlOrInput
+        : getGlobalPageSizeControl(controlOrInput);
+
+    if (!control) return;
+
+    const inputSelector = control.dataset.pageSizeInput;
+    const nativeInput = inputSelector ? document.querySelector(inputSelector) : control.querySelector('.global-page-size-native');
+    const nextValue = String(value || nativeInput?.value || control.dataset.defaultValue || '10');
+
+    if (nativeInput) nativeInput.value = nextValue;
+
+    control.querySelectorAll('[data-page-size-value]').forEach(label => {
+        label.textContent = nextValue;
+    });
+
+    control.querySelectorAll('[data-page-size-option], .global-page-size-option').forEach(option => {
+        const selected = String(option.dataset.value) === nextValue;
+
+        option.classList.toggle('is-selected', selected);
+        option.classList.toggle('is-active', selected);
+        option.classList.toggle('active', selected);
+        option.setAttribute('aria-selected', selected ? 'true' : 'false');
+    });
+}
+
+function closeGlobalPageSizeSelect(control) {
+    if (!control) return;
+
+    control.classList.remove('open');
+
+    const trigger = control.querySelector('[data-page-size-trigger]');
+    trigger?.setAttribute('aria-expanded', 'false');
+}
+
+function openGlobalPageSizeSelect(control) {
+    document.querySelectorAll('[data-global-page-size].open').forEach(item => {
+        if (item !== control) closeGlobalPageSizeSelect(item);
+    });
+
+    control.classList.add('open');
+
+    const trigger = control.querySelector('[data-page-size-trigger]');
+    trigger?.setAttribute('aria-expanded', 'true');
+}
+
+function setGlobalPageSizeValue(control, value) {
+    const inputSelector = control.dataset.pageSizeInput;
+    const nativeInput = inputSelector ? document.querySelector(inputSelector) : control.querySelector('.global-page-size-native');
+    const nextValue = String(value || '10');
+
+    if (nativeInput) {
+        nativeInput.value = nextValue;
+        nativeInput.dispatchEvent(new Event('input', { bubbles: true }));
+        nativeInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    syncGlobalPageSizeSelect(control, nextValue);
+
+    const callbackName = control.dataset.pageSizeCallback;
+
+    if (callbackName && typeof window[callbackName] === 'function') {
+        window[callbackName](Number(nextValue) || nextValue, control);
+    }
+}
+
+function initGlobalPageSizeSelects(root = document) {
+    injectGlobalPageSizeStyles();
+
+    const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+
+    scope.querySelectorAll('[data-global-page-size]').forEach(control => {
+        if (control.dataset.pageSizeInitialized === 'true') {
+            syncGlobalPageSizeSelect(control);
+            return;
+        }
+
+        control.dataset.pageSizeInitialized = 'true';
+
+        const trigger = control.querySelector('[data-page-size-trigger]');
+        const inputSelector = control.dataset.pageSizeInput;
+        const nativeInput = inputSelector ? document.querySelector(inputSelector) : control.querySelector('.global-page-size-native');
+
+        trigger?.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            control.classList.contains('open')
+                ? closeGlobalPageSizeSelect(control)
+                : openGlobalPageSizeSelect(control);
+        });
+
+        control.querySelectorAll('[data-page-size-option], .global-page-size-option').forEach(option => {
+            option.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                setGlobalPageSizeValue(control, option.dataset.value || '10');
+                closeGlobalPageSizeSelect(control);
+            });
+        });
+
+        nativeInput?.addEventListener('change', () => {
+            syncGlobalPageSizeSelect(control, nativeInput.value);
+        });
+
+        syncGlobalPageSizeSelect(control, nativeInput?.value);
+    });
+}
+
+document.addEventListener('click', event => {
+    if (event.target.closest('[data-global-page-size]')) return;
+
+    document.querySelectorAll('[data-global-page-size].open').forEach(closeGlobalPageSizeSelect);
+});
+
+document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+
+    document.querySelectorAll('[data-global-page-size].open').forEach(closeGlobalPageSizeSelect);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    initGlobalPageSizeSelects();
+});
+
+window.initGlobalPageSizeSelects = initGlobalPageSizeSelects;
+window.syncGlobalPageSizeSelect = syncGlobalPageSizeSelect;
+window.setGlobalPageSizeValue = setGlobalPageSizeValue;
 
 function initDashboardLogsViewToggle() {
     const root = document.getElementById('mainContent');

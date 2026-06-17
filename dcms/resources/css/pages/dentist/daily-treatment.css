@@ -1,30 +1,781 @@
 .daily-treatment-page {
-    --service-table-min: 980px;
+    --service-table-min: 1080px;
 }
 
-.daily-treatment-page .service-table {
-    min-width: var(--service-table-min);
+.daily-treatment-page .dtr-card {
+    overflow: visible !important;
 }
 
-.daily-treatment-page .service-course-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+.daily-treatment-page .dtr-card-header {
+    align-items: center !important;
+    gap: 1rem !important;
 }
 
-@media only screen and (max-width: 600px) {
+.daily-treatment-page .dtr-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(165px, 190px) minmax(280px, 360px) auto !important;
+    align-items: center !important;
+    justify-content: end !important;
+    gap: 10px !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+.daily-treatment-page .dtr-month-picker,
+.daily-treatment-page .dtr-search-row,
+.daily-treatment-page .dtr-search-wrap {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.daily-treatment-page .dtr-filter-actions {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex: 0 0 auto !important;
+}
+
+.daily-treatment-page .global-filter-reset-btn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+}
+
+.daily-treatment-page .service-table,
+.daily-treatment-page .dtr-table {
+    min-width: var(--service-table-min) !important;
+}
+
+.daily-treatment-page .dtr-card-body {
+    padding: 0 !important;
+}
+
+.daily-treatment-page .dtr-table-wrap {
+    padding: 0 !important;
+    overflow-x: auto !important;
+}
+
+.daily-treatment-page .dtr-table th,
+.daily-treatment-page .dtr-table td {
+    vertical-align: middle !important;
+}
+
+.daily-treatment-page .dtr-signature {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    min-height: 26px !important;
+    padding: 0 .6rem !important;
+    border-radius: 999px !important;
+    font-size: .68rem !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+.daily-treatment-page .dtr-signature.yes {
+    background: #ECFDF5 !important;
+    color: #059669 !important;
+    border: 1px solid #A7F3D0 !important;
+}
+
+.daily-treatment-page .dtr-signature.no {
+    background: #F9FAFB !important;
+    color: #9CA3AF !important;
+    border: 1px solid #E5E7EB !important;
+}
+
+.daily-treatment-page .dtr-pagebar {
+    padding: .85rem 1.4rem !important;
+    background: #FAFAFA !important;
+    border-top: 1px solid #F3F4F6 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: .75rem !important;
+    flex-wrap: wrap !important;
+}
+
+.daily-treatment-page .dtr-pagebar-top {
+    border-top: none !important;
+    border-bottom: 1px solid #F3F4F6 !important;
+}
+
+.daily-treatment-page .dtr-pagebar-left {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: .85rem !important;
+    flex-wrap: wrap !important;
+}
+
+.daily-treatment-page .dtr-pagebar-info {
+    font-size: .73rem !important;
+    color: #757575 !important;
+    font-weight: 650 !important;
+}
+
+.daily-treatment-page .dtr-pagebar-info strong {
+    color: #333333 !important;
+    font-weight: 900 !important;
+}
+
+.daily-treatment-page .dtr-page-size-control {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    color: #9CA3AF !important;
+    font-size: .7rem !important;
+    font-weight: 850 !important;
+    white-space: nowrap !important;
+}
+
+.daily-treatment-page .dtr-page-size-select {
+    position: relative !important;
+    min-width: 72px !important;
+}
+
+.daily-treatment-page .dtr-page-size-trigger {
+    width: 72px !important;
+    height: 32px !important;
+    padding: 0 10px !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 10px !important;
+    background: #FFFFFF !important;
+    color: #374151 !important;
+    font-size: .75rem !important;
+    font-weight: 900 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease !important;
+}
+
+.daily-treatment-page .dtr-page-size-trigger:hover,
+.daily-treatment-page .dtr-page-size-select.open .dtr-page-size-trigger {
+    border-color: rgba(139, 0, 0, .38) !important;
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, .08) !important;
+}
+
+.daily-treatment-page .dtr-page-size-trigger i {
+    font-size: .62rem !important;
+    color: #9CA3AF !important;
+    transition: transform .18s ease !important;
+}
+
+.daily-treatment-page .dtr-page-size-select.open .dtr-page-size-trigger i {
+    transform: rotate(180deg) !important;
+}
+
+.daily-treatment-page .dtr-page-size-menu {
+    position: absolute !important;
+    top: calc(100% + 7px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 60 !important;
+    display: grid !important;
+    gap: 4px !important;
+    padding: 6px !important;
+    border-radius: 12px !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(139, 0, 0, .14) !important;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, .16) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-4px) scale(.98) !important;
+    transition: opacity .18s ease, visibility .18s ease, transform .18s ease !important;
+}
+
+.daily-treatment-page .dtr-page-size-select.open .dtr-page-size-menu {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+.daily-treatment-page .dtr-page-size-option {
+    width: 100% !important;
+    min-height: 30px !important;
+    padding: 0 8px !important;
+    border: 1px solid transparent !important;
+    border-radius: 9px !important;
+    background: transparent !important;
+    color: #374151 !important;
+    font-size: .72rem !important;
+    font-weight: 850 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    cursor: pointer !important;
+}
+
+.daily-treatment-page .dtr-page-size-option i {
+    opacity: 0 !important;
+    color: #8B0000 !important;
+    font-size: .62rem !important;
+}
+
+.daily-treatment-page .dtr-page-size-option:hover,
+.daily-treatment-page .dtr-page-size-option.is-active {
+    background: #FEF2F2 !important;
+    border-color: #FECACA !important;
+    color: #8B0000 !important;
+}
+
+.daily-treatment-page .dtr-page-size-option.is-active i {
+    opacity: 1 !important;
+}
+
+.daily-treatment-page .sl-pagination,
+.daily-treatment-page .dtr-pagination {
+    display: flex !important;
+    align-items: center !important;
+    gap: .35rem !important;
+    flex-wrap: nowrap !important;
+}
+
+.daily-treatment-page .sl-page-btn,
+.daily-treatment-page .sl-page-current,
+.daily-treatment-page .sl-page-disabled,
+.daily-treatment-page .sl-page-ellipsis {
+    min-width: 32px !important;
+    height: 32px !important;
+    padding: 0 10px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: .75rem !important;
+    font-weight: 800 !important;
+}
+
+.daily-treatment-page .sl-page-btn {
+    border: 1.5px solid #E5E7EB !important;
+    background: #FFFFFF !important;
+    color: #333333 !important;
+    cursor: pointer !important;
+    transition: all .15s ease !important;
+}
+
+.daily-treatment-page .sl-page-btn:hover {
+    border-color: #8B0000 !important;
+    background: #FEF2F2 !important;
+    color: #8B0000 !important;
+}
+
+.daily-treatment-page .sl-page-current {
+    border: 1.5px solid #8B0000 !important;
+    background: linear-gradient(135deg, #8B0000, #6B0000) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 8px rgba(139, 0, 0, .25) !important;
+}
+
+.daily-treatment-page .sl-page-disabled {
+    border: 1.5px solid #E5E7EB !important;
+    background: #F9FAFB !important;
+    color: #D1D5DB !important;
+    cursor: not-allowed !important;
+}
+
+.daily-treatment-page .sl-page-ellipsis {
+    color: #757575 !important;
+}
+
+.daily-treatment-page .sl-page-icon {
+    font-size: .65rem !important;
+}
+
+.daily-treatment-page .dtr-empty-host {
+    display: none !important;
+    width: 100% !important;
+}
+
+.daily-treatment-page .dtr-empty-host.show {
+    display: block !important;
+}
+
+.daily-treatment-page .dtr-empty-host .empty-state {
+    min-height: 340px !important;
+    padding: 56px 20px 64px !important;
+}
+
+.daily-treatment-page~#filterModal .filter-drawer-panel,
+#filterModal .dtr-filter-drawer {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.daily-treatment-page~#filterModal .filter-drawer-body,
+#filterModal .dtr-filter-drawer .filter-drawer-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+}
+
+#filterModal .active-filter-chip {
+    min-height: 28px !important;
+    padding: 0 .7rem !important;
+    border-radius: 999px !important;
+    background: #FFF7ED !important;
+    border: 1px solid #FED7AA !important;
+    color: #9A3412 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: .45rem !important;
+    font-size: .68rem !important;
+    font-weight: 850 !important;
+}
+
+#filterModal .active-filter-chip i {
+    font-size: .6rem !important;
+}
+
+#filterModal .filter-cancel-btn {
+    background: #F9FAFB !important;
+    color: #4B5563 !important;
+    border: 1px solid #E5E7EB !important;
+}
+
+#filterModal .filter-cancel-btn:hover {
+    background: #F3F4F6 !important;
+    color: #111827 !important;
+}
+
+#filterModal .filter-show-results-btn {
+    min-width: 142px !important;
+}
+
+#filterModal.open .filter-drawer-overlay {
+    opacity: 1 !important;
+}
+
+#filterModal.closing .filter-drawer-overlay {
+    opacity: 0 !important;
+}
+
+#mainContent.daily-treatment-page~#createReportModal,
+#createReportModal,
+#downloadCompleteModal {
+    z-index: 99999 !important;
+}
+
+#createReportModal.ui-modal,
+#downloadCompleteModal.ui-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    background: rgba(15, 23, 42, .50) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+#createReportModal.open,
+#downloadCompleteModal.open {
+    display: flex !important;
+}
+
+#createReportModal .report-create-modal {
+    width: min(94vw, 620px) !important;
+    max-width: 620px !important;
+    max-height: calc(100dvh - 2rem) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: 24px !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .25) !important;
+}
+
+#createReportModal .um-user-modal-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 1.25rem 1.5rem !important;
+    background: #F9FAFB !important;
+}
+
+#createReportModal .um-user-main-card {
+    width: 100% !important;
+    padding: 1.15rem !important;
+    border-radius: 20px !important;
+    background: #FFFFFF !important;
+    border: 1px solid #F1F5F9 !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .045) !important;
+}
+
+#createReportModal .um-section-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: .85rem !important;
+    margin-bottom: 1rem !important;
+}
+
+#createReportModal .um-section-icon {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#createReportModal .um-field-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1rem !important;
+}
+
+#createReportModal .um-field-full {
+    grid-column: 1 / -1 !important;
+}
+
+#createReportModal .field-input {
+    width: 100% !important;
+    min-height: 46px !important;
+    border-radius: 14px !important;
+    outline: none !important;
+    transition: border-color .18s ease, box-shadow .18s ease !important;
+}
+
+#createReportModal .field-input:focus {
+    border-color: rgba(139, 0, 0, .36) !important;
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, .08) !important;
+}
+
+#createReportModal .voice-search-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: .75rem !important;
+    width: 100% !important;
+    position: relative !important;
+}
+
+#createReportModal .voice-search-row>input {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+#createReportModal .voice-search-row>.voice-input-toggle {
+    flex: 0 0 50px !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#createReportModal .voice-search-row .voice-search-mic.external {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    min-height: 50px !important;
+}
+
+#createReportModal .fp-date-input-wrap {
+    position: relative !important;
+    width: 100% !important;
+}
+
+#createReportModal .fp-date-icon {
+    position: absolute !important;
+    right: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #9CA3AF !important;
+    font-size: 14px !important;
+    pointer-events: none !important;
+}
+
+#createReportModal .report-custom-select {
+    position: relative !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    overflow: visible !important;
+}
+
+.report-native-select {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+}
+
+.report-select-trigger {
+    width: 100% !important;
+    min-height: 46px !important;
+    padding: 0 12px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(139, 0, 0, .14) !important;
+    background: #FFFFFF !important;
+    color: #111827 !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .055) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    font-family: inherit !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+    cursor: pointer !important;
+}
+
+.report-select-main {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    min-width: 0 !important;
+}
+
+.report-select-icon {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 10px !important;
+    background: #FEF2F2 !important;
+    color: #8B0000 !important;
+    border: 1px solid rgba(139, 0, 0, .10) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.report-select-icon i {
+    font-size: .72rem !important;
+}
+
+.report-select-main [data-report-select-label] {
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.report-select-chevron {
+    color: #94A3B8 !important;
+    font-size: .72rem !important;
+    transition: transform .18s ease !important;
+}
+
+.report-custom-select.open .report-select-chevron {
+    transform: rotate(180deg) !important;
+}
+
+.report-select-menu {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 99999 !important;
+    padding: 8px !important;
+    border-radius: 16px !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(139, 0, 0, .14) !important;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, .18) !important;
+    display: grid !important;
+    gap: 6px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-6px) scale(.98) !important;
+    transition: opacity .18s ease, visibility .18s ease, transform .18s ease !important;
+}
+
+.report-custom-select.open .report-select-menu {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+.report-template-select .report-select-menu {
+    max-height: 260px !important;
+    overflow-y: auto !important;
+}
+
+.report-select-option {
+    width: 100% !important;
+    min-height: 40px !important;
+    padding: 0 11px !important;
+    border-radius: 12px !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: #374151 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    font-family: inherit !important;
+    font-size: .78rem !important;
+    font-weight: 850 !important;
+    text-align: left !important;
+    cursor: pointer !important;
+}
+
+.report-select-option i {
+    opacity: 0 !important;
+    color: #8B0000 !important;
+    font-size: .7rem !important;
+}
+
+.report-select-option:hover,
+.report-select-option.is-active {
+    background: #FEF2F2 !important;
+    border-color: #FECACA !important;
+    color: #8B0000 !important;
+}
+
+.report-select-option.is-active i {
+    opacity: 1 !important;
+}
+
+.report-custom-select.is-invalid .report-select-trigger {
+    border-color: #F87171 !important;
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, .14) !important;
+}
+
+#createReportModal .report-qty-row {
+    display: inline-grid !important;
+    grid-template-columns: max-content auto !important;
+    align-items: center !important;
+    gap: .85rem !important;
+    width: auto !important;
+    max-width: 100% !important;
+}
+
+#createReportModal .report-qty-control {
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 40px 108px 40px !important;
+    align-items: center !important;
+    justify-content: start !important;
+    gap: 6px !important;
+    padding: 6px !important;
+    border-radius: 16px !important;
+    background: #F9FAFB !important;
+    border: 1px solid #E5E7EB !important;
+}
+
+#createReportModal .report-qty-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 13px !important;
+    border: 1px solid rgba(139, 0, 0, .12) !important;
+    background: #FFFFFF !important;
+    color: #8B0000 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: .72rem !important;
+    cursor: pointer !important;
+    transition: all .18s ease !important;
+}
+
+#createReportModal .report-qty-btn:hover {
+    background: #8B0000 !important;
+    color: #FFFFFF !important;
+}
+
+#createReportModal .report-qty-btn.is-disabled,
+#createReportModal .report-qty-btn:disabled {
+    opacity: .45 !important;
+    cursor: not-allowed !important;
+    background: #F3F4F6 !important;
+    color: #9CA3AF !important;
+}
+
+#createReportModal .report-qty-input {
+    width: 108px !important;
+    min-width: 108px !important;
+    max-width: 108px !important;
+    height: 40px !important;
+    padding: 0 .5rem !important;
+    text-align: center !important;
+    border-radius: 13px !important;
+    font-weight: 850 !important;
+    -moz-appearance: textfield !important;
+}
+
+#createReportModal .report-qty-input::-webkit-outer-spin-button,
+#createReportModal .report-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+#createReportModal .report-qty-helper {
+    color: #9CA3AF !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+}
+
+#createReportModal .report-modal-error {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .8rem .95rem;
+    border-radius: 16px;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #B91C1C;
+    font-size: .82rem;
+    font-weight: 800;
+}
+
+#createReportModal .report-modal-error.hidden {
+    display: none !important;
+}
+
+#createReportModal .modal-ft,
+#createReportModal .um-user-modal-footer {
+    padding: 1rem 1.5rem !important;
+    border-top: 1px solid #F1F5F9 !important;
+    background: #FFFFFF !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: .75rem !important;
+}
+
+@media only screen and (max-width: 1180px) {
+    .daily-treatment-page .dtr-card-header {
+        align-items: flex-start !important;
+        flex-direction: column !important;
+    }
+
+    .daily-treatment-page .dtr-toolbar {
+        width: 100% !important;
+        grid-template-columns: minmax(150px, 190px) minmax(240px, 1fr) auto !important;
+        justify-content: stretch !important;
+    }
+}
+
+@media only screen and (max-width: 767px) {
     .daily-treatment-page {
         padding-left: 12px !important;
         padding-right: 12px !important;
-        --service-table-min: 860px;
+        --service-table-min: 900px;
     }
 
     .daily-treatment-page .dentist-hero {
-        padding: 0.9rem !important;
+        padding: .9rem !important;
         border-radius: 18px !important;
     }
 
     .daily-treatment-page .dentist-hero-content {
         padding-right: 0 !important;
-        gap: 0.7rem !important;
+        gap: .7rem !important;
     }
 
     .daily-treatment-page .dentist-hero-icon {
@@ -39,89 +790,284 @@
     }
 
     .daily-treatment-page .dentist-hero-actions {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-    }
-
-    .daily-treatment-page .service-toolbar {
+        width: 100% !important;
         display: grid !important;
-        grid-template-columns: 1fr;
-        gap: 0.55rem !important;
-        width: 100%;
+        grid-template-columns: 1fr !important;
+        gap: .5rem !important;
     }
 
-    .daily-treatment-page .service-period-input,
-    .daily-treatment-page .global-filter-btn {
+    .daily-treatment-page .dtr-toolbar {
+        grid-template-columns: 1fr !important;
+        gap: .55rem !important;
+    }
+
+    .daily-treatment-page .dtr-filter-actions {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 38px !important;
+        width: 100% !important;
+    }
+
+    .daily-treatment-page .global-filter-btn,
+    .daily-treatment-page .service-period-input {
         width: 100% !important;
         min-width: 0 !important;
     }
 
-    .daily-treatment-page .card-body {
-        padding: 0.75rem !important;
-    }
-
-    .daily-treatment-page .service-table th,
-    .daily-treatment-page .service-table td {
-        font-size: 0.68rem !important;
-        padding: 0.55rem 0.45rem !important;
-    }
-
-    .daily-treatment-page .service-course-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .daily-treatment-page .service-report-modal {
-        width: calc(100vw - 24px) !important;
-        max-width: calc(100vw - 24px) !important;
-    }
-}
-
-@media only screen and (min-width: 600px) {
-    .daily-treatment-page .service-toolbar {
+    .daily-treatment-page .dtr-pagebar {
         display: grid !important;
-        grid-template-columns: minmax(160px, 220px) minmax(260px, 1fr) auto;
-        align-items: center;
-        width: 100%;
+        grid-template-columns: 1fr !important;
+        gap: .55rem !important;
+        padding: .7rem .75rem !important;
     }
 
-    .daily-treatment-page .service-course-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    .daily-treatment-page .dtr-pagebar-left {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+
+    .daily-treatment-page .dtr-pagination-wrap {
+        width: 100% !important;
+        overflow-x: auto !important;
+    }
+
+    .daily-treatment-page .dtr-pagination-wrap nav {
+        min-width: max-content !important;
+    }
+
+    .daily-treatment-page .dtr-table th,
+    .daily-treatment-page .dtr-table td {
+        font-size: .68rem !important;
+        padding: .55rem .45rem !important;
+    }
+
+    #createReportModal.ui-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    #createReportModal .report-create-modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #createReportModal .um-field-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    #createReportModal .report-qty-row {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        justify-items: start !important;
+        gap: .45rem !important;
+        width: 100% !important;
+    }
+
+    #createReportModal .report-qty-control {
+        width: max-content !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
     }
 }
 
-@media only screen and (min-width: 768px) {
-    .daily-treatment-page {
-        --service-table-min: 980px;
+@media only screen and (max-width: 420px) {
+    .daily-treatment-page .dtr-pagebar-left {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        justify-items: start !important;
     }
 
-    .daily-treatment-page .dentist-hero {
-        align-items: center;
-    }
-
-    .daily-treatment-page .service-report-modal {
-        max-width: 640px !important;
+    #createReportModal .um-user-modal-header,
+    #createReportModal .um-user-modal-body,
+    #createReportModal .modal-ft,
+    #createReportModal .um-user-modal-footer {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
     }
 }
 
-@media only screen and (min-width: 992px) {
-    .daily-treatment-page .service-toolbar {
-        width: auto;
-        grid-template-columns: 180px 320px auto;
-    }
+[data-theme="dark"] .daily-treatment-page .dtr-pagebar,
+.dark .daily-treatment-page .dtr-pagebar {
+    background: rgba(13, 17, 23, .82) !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
 
-    .daily-treatment-page .service-course-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+[data-theme="dark"] .daily-treatment-page .dtr-pagebar-info,
+.dark .daily-treatment-page .dtr-pagebar-info,
+[data-theme="dark"] .daily-treatment-page .dtr-page-size-control,
+.dark .daily-treatment-page .dtr-page-size-control {
+    color: #8B949E !important;
+}
+
+[data-theme="dark"] .daily-treatment-page .dtr-pagebar-info strong,
+.dark .daily-treatment-page .dtr-pagebar-info strong {
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] .daily-treatment-page .dtr-page-size-trigger,
+.dark .daily-treatment-page .dtr-page-size-trigger,
+[data-theme="dark"] .daily-treatment-page .dtr-page-size-menu,
+.dark .daily-treatment-page .dtr-page-size-menu,
+[data-theme="dark"] .report-select-trigger,
+.dark .report-select-trigger,
+[data-theme="dark"] .report-select-menu,
+.dark .report-select-menu {
+    background: rgba(13, 17, 23, .96) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] .daily-treatment-page .dtr-page-size-option,
+.dark .daily-treatment-page .dtr-page-size-option,
+[data-theme="dark"] .report-select-option,
+.dark .report-select-option {
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] .daily-treatment-page .dtr-page-size-option:hover,
+[data-theme="dark"] .daily-treatment-page .dtr-page-size-option.is-active,
+.dark .daily-treatment-page .dtr-page-size-option:hover,
+.dark .daily-treatment-page .dtr-page-size-option.is-active,
+[data-theme="dark"] .report-select-option:hover,
+[data-theme="dark"] .report-select-option.is-active,
+.dark .report-select-option:hover,
+.dark .report-select-option.is-active {
+    background: rgba(139, 0, 0, .28) !important;
+    border-color: rgba(248, 113, 113, .28) !important;
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] #createReportModal .report-create-modal,
+.dark #createReportModal .report-create-modal,
+[data-theme="dark"] #downloadCompleteModal .ui-modal-card,
+.dark #downloadCompleteModal .ui-modal-card {
+    background: #161B22 !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] #createReportModal .um-user-modal-header,
+.dark #createReportModal .um-user-modal-header,
+[data-theme="dark"] #createReportModal .modal-ft,
+.dark #createReportModal .modal-ft {
+    background: #161B22 !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+[data-theme="dark"] #createReportModal .um-user-modal-body,
+.dark #createReportModal .um-user-modal-body {
+    background: #0D1117 !important;
+}
+
+[data-theme="dark"] #createReportModal .um-user-main-card,
+.dark #createReportModal .um-user-main-card,
+[data-theme="dark"] #createReportModal .field-input,
+.dark #createReportModal .field-input,
+[data-theme="dark"] #createReportModal .report-qty-control,
+.dark #createReportModal .report-qty-control,
+[data-theme="dark"] #createReportModal .report-qty-btn,
+.dark #createReportModal .report-qty-btn {
+    background: #0D1117 !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #E5E7EB !important;
+}
+
+[data-theme="dark"] #createReportModal .report-modal-error,
+.dark #createReportModal .report-modal-error {
+    background: rgba(220, 38, 38, .14) !important;
+    border-color: rgba(252, 165, 165, .24) !important;
+    color: #FCA5A5 !important;
+}
+
+.daily-treatment-page .service-month-picker,
+.daily-treatment-page .dtr-month-picker {
+    position: relative !important;
+    width: 168px !important;
+    min-width: 168px !important;
+    flex: 0 0 168px !important;
+}
+
+.daily-treatment-page .service-month-picker .service-period-input,
+.daily-treatment-page .service-month-picker .service-period-alt,
+.daily-treatment-page .dtr-month-picker .service-period-input,
+.daily-treatment-page .dtr-month-picker .service-period-alt {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    padding: 0 38px 0 14px !important;
+    border-radius: 13px !important;
+    border: 1px solid rgba(139, 0, 0, .18) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, .96), rgba(255, 245, 245, .9)) !important;
+    color: #374151 !important;
+    font-size: .78rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -.01em !important;
+    box-shadow: 0 8px 20px rgba(139, 0, 0, .08) !important;
+    cursor: pointer !important;
+}
+
+.daily-treatment-page .service-month-picker .service-period-input[readonly],
+.daily-treatment-page .service-month-picker .service-period-alt[readonly],
+.daily-treatment-page .dtr-month-picker .service-period-input[readonly],
+.daily-treatment-page .dtr-month-picker .service-period-alt[readonly] {
+    cursor: pointer !important;
+}
+
+.daily-treatment-page .service-month-icon {
+    position: absolute !important;
+    right: 13px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #8B0000 !important;
+    font-size: .78rem !important;
+    pointer-events: none !important;
+    z-index: 4 !important;
+}
+
+.daily-treatment-page .dtr-toolbar {
+    grid-template-columns: 168px minmax(280px, 360px) auto !important;
+}
+
+@media only screen and (max-width: 600px) {
+
+    .daily-treatment-page .service-month-picker,
+    .daily-treatment-page .dtr-month-picker {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex-basis: auto !important;
     }
 }
 
-@media only screen and (min-width: 1200px) {
-    .daily-treatment-page {
-        --service-table-min: 1080px;
-    }
+[data-theme="dark"] .daily-treatment-page .service-month-picker .service-period-input,
+[data-theme="dark"] .daily-treatment-page .service-month-picker .service-period-alt,
+[data-theme="dark"] .daily-treatment-page .dtr-month-picker .service-period-input,
+[data-theme="dark"] .daily-treatment-page .dtr-month-picker .service-period-alt,
+.dark .daily-treatment-page .service-month-picker .service-period-input,
+.dark .daily-treatment-page .service-month-picker .service-period-alt,
+.dark .daily-treatment-page .dtr-month-picker .service-period-input,
+.dark .daily-treatment-page .dtr-month-picker .service-period-alt {
+    background: rgba(13, 17, 23, .86) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    color: #E5E7EB !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .28) !important;
+}
 
-    .daily-treatment-page .service-course-grid {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-    }
+[data-theme="dark"] .daily-treatment-page .service-month-icon,
+.dark .daily-treatment-page .service-month-icon {
+    color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] body:has(:where(.dental-services-page, .daily-treatment-page)) #filterModal .filter-cancel-btn,
+.dark body:has(:where(.dental-services-page, .daily-treatment-page)) #filterModal .filter-cancel-btn {
+    background: #0D1117 !important;
+    color: #F8FAFC !important;
+    border-color: #30363D !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] body:has(:where(.dental-services-page, .daily-treatment-page)) #filterModal .filter-cancel-btn:hover,
+.dark body:has(:where(.dental-services-page, .daily-treatment-page)) #filterModal .filter-cancel-btn:hover {
+    background: #161B22 !important;
+    color: #FFFFFF !important;
+    border-color: #484F58 !important;
 }
