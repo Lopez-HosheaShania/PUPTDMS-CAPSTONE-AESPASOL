@@ -724,7 +724,7 @@
 #deleteModal h3 {
     margin: 0 !important;
     color: #1F2937 !important;
-    font-size: 1rem !important;
+    font-size: .88rem !important;
     line-height: 1.1 !important;
     font-weight: 900 !important;
 }
@@ -732,7 +732,7 @@
 #deleteModal .inv-delete-head p {
     margin: .2rem 0 0 !important;
     color: #8B95A7 !important;
-    font-size: .72rem !important;
+    font-size: .62rem !important;
     line-height: 1.25 !important;
     font-weight: 700 !important;
 }
@@ -783,21 +783,21 @@
     margin: 0 !important;
     color: #7F1D1D !important;
     font-size: .86rem !important;
-    line-height: 1.45 !important;
+    line-height: 1 !important;
     font-weight: 750 !important;
 }
 
 #deleteModal .inv-delete-alert span {
     display: block !important;
     margin-top: .25rem !important;
-    color: #DC2626 !important;
-    font-size: .74rem !important;
+    color: #cb2424 !important;
+    font-size: .64rem !important;
     font-weight: 600 !important;
 }
 
 #deleteModal #inventoryDeleteName {
     display: inline-flex !important;
-    padding: .16rem .42rem !important;
+    padding: .16rem .72rem !important;
     border-radius: 8px !important;
     background: rgba(255, 255, 255, .8) !important;
     color: #111827 !important;
@@ -1950,4 +1950,790 @@
 .dark #editModal .inv-combo-toggle:hover {
     background: rgba(252, 165, 165, .12) !important;
     color: #FCA5A5 !important;
+}
+
+
+@media (min-width: 768px) and (max-width: 1100px) {
+    #mainContent.inventory-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    #mainContent.inventory-page #statCards {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .75rem !important;
+    }
+
+    #mainContent.inventory-page #statCards .stat-card {
+        min-width: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-toolbar-shell {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "categories"
+            "search"
+            "actions" !important;
+        gap: .7rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        align-items: stretch !important;
+    }
+
+    #mainContent.inventory-page .inventory-category-row {
+        grid-area: categories !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .55rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-category-row .tab-group {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: .45rem !important;
+        flex-wrap: wrap !important;
+    }
+
+    #mainContent.inventory-page .inventory-category-row .tab-btn {
+        min-height: 32px !important;
+        padding: 0 .7rem !important;
+        font-size: .66rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.inventory-page .row-count-desktop {
+        width: 100% !important;
+        max-width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.inventory-page .row-count-mobile {
+        display: none !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row {
+        grid-area: search !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: .55rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row .search-wrap,
+    #mainContent.inventory-page .inventory-search-row .search-wrap.global-search,
+    #mainContent.inventory-page .inventory-search-row .global-search,
+    #mainContent.inventory-page .inventory-search-row .search-input,
+    #mainContent.inventory-page .inventory-search-row [data-search-input] {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row .search-input,
+    #mainContent.inventory-page .inventory-search-row [data-search-input] {
+        height: 42px !important;
+        font-size: .78rem !important;
+        box-sizing: border-box !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row .voice-input-toggle,
+    #mainContent.inventory-page .inventory-search-row .voice-search-mic.external,
+    #mainContent.inventory-page .inventory-search-row .ap-voice-toggle {
+        position: static !important;
+        transform: none !important;
+        margin: 0 !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        justify-self: end !important;
+    }
+
+    #mainContent.inventory-page .toolbar-actions {
+        display: contents !important;
+    }
+
+    #mainContent.inventory-page .inventory-mobile-actions {
+        grid-area: actions !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: .55rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+        flex-wrap: nowrap !important;
+    }
+
+    #mainContent.inventory-page #filterBtn {
+        height: 40px !important;
+        min-height: 40px !important;
+        min-width: 82px !important;
+        padding: 0 .8rem !important;
+        white-space: nowrap !important;
+        flex: 0 0 auto !important;
+    }
+
+    #mainContent.inventory-page .inventory-view-toggle,
+    #mainContent.inventory-page #viewToggle {
+        flex: 0 0 auto !important;
+        margin: 0 !important;
+        transform: none !important;
+    }
+
+    #mainContent.inventory-page .inventory-add-btn {
+        margin-left: auto !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 .95rem !important;
+        white-space: nowrap !important;
+        flex: 0 0 auto !important;
+    }
+
+    #mainContent.inventory-page #externalClearFilterBtn.hidden {
+        display: none !important;
+    }
+
+    #mainContent.inventory-page .inventory-grid {
+        grid-template-columns: 1fr !important;
+        gap: .85rem !important;
+    }
+
+    #mainContent.inventory-page .inventory-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-card-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+    }
+
+    #mainContent.inventory-page .inventory-card-actions {
+        justify-content: flex-start !important;
+        gap: .4rem !important;
+        flex-wrap: wrap !important;
+    }
+}
+
+@media (min-width: 1101px) and (max-width: 1280px) {
+    #mainContent.inventory-page #statCards {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+    }
+
+    #mainContent.inventory-page .inventory-toolbar-shell {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "categories"
+            "search"
+            "actions" !important;
+        gap: .75rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-category-row {
+        grid-area: categories !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .55rem !important;
+        width: 100% !important;
+    }
+
+    #mainContent.inventory-page .inventory-category-row .tab-group {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: .45rem !important;
+        flex-wrap: wrap !important;
+    }
+
+    #mainContent.inventory-page .row-count-desktop {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row {
+        grid-area: search !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        gap: .55rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row .search-wrap,
+    #mainContent.inventory-page .inventory-search-row .search-wrap.global-search,
+    #mainContent.inventory-page .inventory-search-row .global-search,
+    #mainContent.inventory-page .inventory-search-row .search-input,
+    #mainContent.inventory-page .inventory-search-row [data-search-input] {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row .voice-input-toggle,
+    #mainContent.inventory-page .inventory-search-row .voice-search-mic.external,
+    #mainContent.inventory-page .inventory-search-row .ap-voice-toggle {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        position: static !important;
+        transform: none !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.inventory-page .toolbar-actions {
+        display: contents !important;
+    }
+
+    #mainContent.inventory-page .inventory-mobile-actions {
+        grid-area: actions !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: .6rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        flex-wrap: nowrap !important;
+    }
+
+    #mainContent.inventory-page .inventory-add-btn {
+        margin-left: auto !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 .95rem !important;
+        white-space: nowrap !important;
+        flex: 0 0 auto !important;
+    }
+
+    #mainContent.inventory-page .inventory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 767px) {
+    #mainContent.inventory-page .inventory-toolbar-shell {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "categories"
+            "search"
+            "actions" !important;
+        gap: .65rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-category-row {
+        grid-area: categories !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .5rem !important;
+        width: 100% !important;
+    }
+
+    #mainContent.inventory-page .inventory-category-row .tab-group {
+        width: 100% !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: .4rem !important;
+    }
+
+    #mainContent.inventory-page .inventory-category-row .tab-btn {
+        min-height: 30px !important;
+        padding: 0 .62rem !important;
+        font-size: .62rem !important;
+    }
+
+    #mainContent.inventory-page .row-count-desktop {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row {
+        grid-area: search !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 40px !important;
+        gap: .5rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row .search-wrap,
+    #mainContent.inventory-page .inventory-search-row .search-wrap.global-search,
+    #mainContent.inventory-page .inventory-search-row .global-search,
+    #mainContent.inventory-page .inventory-search-row .search-input,
+    #mainContent.inventory-page .inventory-search-row [data-search-input] {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row .search-input,
+    #mainContent.inventory-page .inventory-search-row [data-search-input] {
+        height: 40px !important;
+        font-size: .72rem !important;
+    }
+
+    #mainContent.inventory-page .inventory-search-row .voice-input-toggle,
+    #mainContent.inventory-page .inventory-search-row .voice-search-mic.external,
+    #mainContent.inventory-page .inventory-search-row .ap-voice-toggle {
+        position: static !important;
+        transform: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        margin: 0 !important;
+        justify-self: end !important;
+    }
+
+    #mainContent.inventory-page .toolbar-actions {
+        display: contents !important;
+    }
+
+    #mainContent.inventory-page .inventory-mobile-actions {
+        grid-area: actions !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: .45rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        flex-wrap: nowrap !important;
+    }
+
+    #mainContent.inventory-page #filterBtn {
+        height: 38px !important;
+        min-height: 38px !important;
+        min-width: 74px !important;
+        padding: 0 .65rem !important;
+        font-size: .68rem !important;
+        flex: 0 0 auto !important;
+    }
+
+    #mainContent.inventory-page .inventory-add-btn {
+        margin-left: auto !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 .78rem !important;
+        white-space: nowrap !important;
+        flex: 0 0 auto !important;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+
+    #addModal.inventory-form-modal,
+    #editModal.inventory-form-modal {
+        align-items: flex-end !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    #addModal.inventory-form-modal .modal-box-custom,
+    #editModal.inventory-form-modal .modal-box-custom {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: calc(100dvh - 10px) !important;
+        max-height: calc(100dvh - 10px) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 22px 22px 0 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        transform: translateY(16px) scale(1) !important;
+    }
+
+    #addModal.inventory-form-modal.open .modal-box-custom,
+    #editModal.inventory-form-modal.open .modal-box-custom {
+        transform: translateY(0) scale(1) !important;
+    }
+
+    #addModal.inventory-form-modal.closing .modal-box-custom,
+    #editModal.inventory-form-modal.closing .modal-box-custom {
+        transform: translateY(100%) scale(1) !important;
+    }
+
+    #addModal.inventory-form-modal .modal-box-split,
+    #editModal.inventory-form-modal .modal-box-split {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+
+    #addModal.inventory-form-modal .modal-sticky-header,
+    #editModal.inventory-form-modal .modal-sticky-header {
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        padding: 12px 16px 10px !important;
+        margin: 0 !important;
+        gap: 10px !important;
+    }
+
+    #addModal.inventory-form-modal .inventory-modal-head-left,
+    #editModal.inventory-form-modal .inventory-modal-head-left,
+    #addModal.inventory-form-modal .modal-header-custom,
+    #editModal.inventory-form-modal .modal-header-custom {
+        align-items: center !important;
+        gap: 10px !important;
+        min-width: 0 !important;
+    }
+
+    #addModal.inventory-form-modal .modal-icon-custom,
+    #editModal.inventory-form-modal .modal-icon-custom {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 12px !important;
+        font-size: 13px !important;
+    }
+
+    #addModal.inventory-form-modal .modal-title-custom,
+    #editModal.inventory-form-modal .modal-title-custom {
+        font-size: 15px !important;
+        line-height: 1.08 !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    #addModal.inventory-form-modal .modal-sub-custom,
+    #editModal.inventory-form-modal .modal-sub-custom {
+        font-size: 10.5px !important;
+        line-height: 1.2 !important;
+        margin-top: 2px !important;
+    }
+
+    #addModal.inventory-form-modal .inventory-modal-x,
+    #editModal.inventory-form-modal .inventory-modal-x {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        border-radius: 12px !important;
+    }
+
+    #addModal.inventory-form-modal .modal-scroll-body,
+    #editModal.inventory-form-modal .modal-scroll-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 12px 16px 14px !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
+    }
+
+    #addModal.inventory-form-modal .form-grid-2,
+    #editModal.inventory-form-modal .form-grid-2 {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+
+    #addModal.inventory-form-modal .form-group-custom,
+    #editModal.inventory-form-modal .form-group-custom {
+        gap: 3px !important;
+        min-width: 0 !important;
+    }
+
+    #addModal.inventory-form-modal .form-label-custom,
+    #editModal.inventory-form-modal .form-label-custom {
+        font-size: 9px !important;
+        line-height: 1 !important;
+        margin-bottom: 2px !important;
+        letter-spacing: .07em !important;
+    }
+
+    #addModal.inventory-form-modal .form-input-custom,
+    #editModal.inventory-form-modal .form-input-custom,
+    #addModal.inventory-form-modal .form-select-custom,
+    #editModal.inventory-form-modal .form-select-custom,
+    #addModal.inventory-form-modal .inv-custom-select-btn,
+    #editModal.inventory-form-modal .inv-custom-select-btn {
+        height: 38px !important;
+        min-height: 38px !important;
+        border-radius: 11px !important;
+        font-size: 12px !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    #addModal.inventory-form-modal textarea.form-input-custom,
+    #editModal.inventory-form-modal textarea.form-input-custom {
+        height: 54px !important;
+        min-height: 54px !important;
+        padding-top: 9px !important;
+        padding-bottom: 9px !important;
+        resize: none !important;
+    }
+
+    #addModal.inventory-form-modal .field-error,
+    #editModal.inventory-form-modal .field-error {
+        min-height: 9px !important;
+        font-size: 9px !important;
+        line-height: 1.05 !important;
+    }
+
+    #addModal.inventory-form-modal .char-counter,
+    #editModal.inventory-form-modal .char-counter {
+        font-size: 9px !important;
+        line-height: 1.05 !important;
+    }
+
+    #addModal.inventory-form-modal .st-voice-row,
+    #editModal.inventory-form-modal .st-voice-row {
+        grid-template-columns: minmax(0, 1fr) 38px !important;
+        gap: 8px !important;
+    }
+
+    #addModal.inventory-form-modal .voice-input-toggle,
+    #editModal.inventory-form-modal .voice-input-toggle,
+    #addModal.inventory-form-modal .voice-search-mic.external,
+    #editModal.inventory-form-modal .voice-search-mic.external {
+        width: 38px !important;
+        min-width: 38px !important;
+        max-width: 38px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        margin: 0 !important;
+        position: static !important;
+        transform: none !important;
+    }
+
+    #addModal.inventory-form-modal .modal-sticky-footer,
+    #editModal.inventory-form-modal .modal-sticky-footer {
+        flex: 0 0 auto !important;
+        position: relative !important;
+        bottom: auto !important;
+        z-index: 20 !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        padding: 10px 16px calc(12px + env(safe-area-inset-bottom)) !important;
+        margin: 0 !important;
+        box-shadow: 0 -8px 18px rgba(15, 23, 42, 0.06) !important;
+    }
+
+    #addModal.inventory-form-modal .btn-modal-cancel,
+    #addModal.inventory-form-modal .btn-modal-save,
+    #editModal.inventory-form-modal .btn-modal-cancel,
+    #editModal.inventory-form-modal .btn-modal-save {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        border-radius: 12px !important;
+        justify-content: center !important;
+        padding: 0 12px !important;
+        font-size: 12.5px !important;
+        line-height: 1 !important;
+    }
+}
+
+@media only screen and (max-width: 380px) {
+
+    #addModal.inventory-form-modal .modal-box-custom,
+    #editModal.inventory-form-modal .modal-box-custom {
+        height: calc(100dvh - 6px) !important;
+        max-height: calc(100dvh - 6px) !important;
+    }
+
+    #addModal.inventory-form-modal .modal-sticky-header,
+    #editModal.inventory-form-modal .modal-sticky-header {
+        padding: 10px 14px 8px !important;
+    }
+
+    #addModal.inventory-form-modal .modal-scroll-body,
+    #editModal.inventory-form-modal .modal-scroll-body {
+        padding: 10px 14px 12px !important;
+    }
+
+    #addModal.inventory-form-modal .modal-sticky-footer,
+    #editModal.inventory-form-modal .modal-sticky-footer {
+        padding: 8px 14px calc(10px + env(safe-area-inset-bottom)) !important;
+    }
+
+    #addModal.inventory-form-modal .modal-sub-custom,
+    #editModal.inventory-form-modal .modal-sub-custom {
+        display: none !important;
+    }
+
+    #mainContent.inventory-page #statCards,
+    #mainContent.inventory-page .inventory-stat-grid {
+        gap: 0.62rem !important;
+    }
+
+    #mainContent.inventory-page #statCards .stat-card,
+    #mainContent.inventory-page .inventory-stat-grid .stat-card {
+        min-height: 122px !important;
+        padding: 0.55rem 0.68rem !important;
+        border-radius: 14px !important;
+        gap: 0.5rem !important;
+    }
+
+    #mainContent.inventory-page #statCards .stat-label,
+    #mainContent.inventory-page .inventory-stat-grid .stat-label {
+        font-size: 0.46rem !important;
+    }
+
+    #mainContent.inventory-page #statCards .stat-value,
+    #mainContent.inventory-page .inventory-stat-grid .stat-value,
+    #mainContent.inventory-page #statCards .stat-num,
+    #mainContent.inventory-page .inventory-stat-grid .stat-num,
+    #mainContent.inventory-page #statCards .stat-count,
+    #mainContent.inventory-page .inventory-stat-grid .stat-count {
+        font-size: 1.55rem !important;
+        margin-top: 0.35rem !important;
+    }
+
+    #mainContent.inventory-page #statCards .stat-footer,
+    #mainContent.inventory-page .inventory-stat-grid .stat-footer {
+        font-size: 0.56rem !important;
+    }
+
+    #mainContent.inventory-page #statCards .stat-icon,
+    #mainContent.inventory-page .inventory-stat-grid .stat-icon {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 11px !important;
+    }
+
+    #mainContent.inventory-page #statCards .stat-icon i,
+    #mainContent.inventory-page .inventory-stat-grid .stat-icon i {
+        font-size: 0.78rem !important;
+    }
+}
+
+#mainContent.inventory-page .inventory-grid {
+    display: grid !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+    align-items: start !important;
+    grid-auto-rows: auto !important;
+}
+
+#mainContent.inventory-page.mode-grid .inventory-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+#mainContent.inventory-page.mode-grid .inventory-card {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    align-self: start !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+#mainContent.inventory-page.mode-grid .inventory-card-meta {
+    flex: 0 0 auto !important;
+}
+
+#mainContent.inventory-page.mode-grid .inventory-card-actions {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1199px) {
+    #mainContent.inventory-page.mode-grid .inventory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+    #mainContent.inventory-page.mode-grid .inventory-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.85rem !important;
+        padding: 0.85rem !important;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    #mainContent.inventory-page.mode-grid .inventory-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+}
+
+#mainContent.inventory-page.mode-list #tableWrapper {
+    display: block !important;
+    visibility: visible !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+#mainContent.inventory-page.mode-list #inventoryGrid {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+#mainContent.inventory-page.mode-grid #tableWrapper {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+#mainContent.inventory-page.mode-grid #inventoryGrid {
+    display: grid !important;
+    visibility: visible !important;
+}
+
+#mainContent.inventory-page #tableWrapper .d-inv-table {
+    min-width: 760px !important;
+}
+
+@media only screen and (max-width: 767px) {
+    #mainContent.inventory-page.mode-list #tableWrapper {
+        display: block !important;
+    }
+
+    #mainContent.inventory-page.mode-list #inventoryGrid {
+        display: none !important;
+    }
+
+    #mainContent.inventory-page.mode-grid #tableWrapper {
+        display: none !important;
+    }
+
+    #mainContent.inventory-page.mode-grid #inventoryGrid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.inventory-page.mode-list #tableWrapper {
+        border-top: 1px solid #F0ECE8 !important;
+    }
 }

@@ -176,10 +176,22 @@ $sidebarGroups = [
 'label' => 'Patients',
 ],
 [
+'route' => 'dentist.walk-in.index',
+'active' => ['dentist.walk-in.*'],
+'icon' => 'fa-person-walking',
+'label' => 'Walk-in',
+],
+[
 'route' => 'dentist.dentist.appointments',
 'active' => ['dentist.dentist.appointments'],
 'icon' => 'fa-calendar-check',
 'label' => 'Appointments',
+],
+[
+'route' => 'dentist.dentist.clinic_schedule',
+'active' => ['dentist.dentist.clinic_schedule*'],
+'icon' => 'fa-calendar-days',
+'label' => 'Clinic Schedule',
 ],
 [
 'route' => 'dentist.dentist.documentrequests',
@@ -395,6 +407,7 @@ $shouldShowDrawer = in_array($sidebarRole, ['admin', 'dentist'], true);
 
         <form action="{{ route('logout') }}" method="POST">
             @csrf
+            <input type="hidden" name="client_id" value="{{ config('services.oidc.client_id') }}">
 
             <button type="submit" class="logout-btn">
                 <span class="logout-icon">
@@ -477,6 +490,7 @@ $shouldShowDrawer = in_array($sidebarRole, ['admin', 'dentist'], true);
 
         <form action="{{ route('logout') }}" method="POST">
             @csrf
+            <input type="hidden" name="client_id" value="{{ config('services.oidc.client_id') }}">
 
             <button type="submit" class="drawer-logout-btn">
                 <i class="fa-solid fa-right-from-bracket"></i>

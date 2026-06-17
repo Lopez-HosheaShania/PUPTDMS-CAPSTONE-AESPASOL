@@ -2312,3 +2312,1025 @@ body.dark #mainContent.admin-appointments-page .appt-actions-wrap .action-btn-st
         grid-template-columns: 1fr !important;
     }
 }
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.admin-appointments-page {
+        overflow-x: hidden !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-header-wrap,
+    #mainContent.admin-appointments-page .appointment-controls-bar,
+    #mainContent.admin-appointments-page .appointment-filter-wrap,
+    #mainContent.admin-appointments-page .appointment-controls-actions {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+        position: relative !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-header-wrap {
+        z-index: 900 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-bar {
+        display: grid !important;
+        grid-template-columns: minmax(145px, 210px) minmax(0, 1fr) auto !important;
+        grid-template-areas:
+            "manage status filter"
+            "search search search" !important;
+        align-items: center !important;
+        gap: .65rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        z-index: 930 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-bar:has(#appointmentSortSelect,
+        #apptSortSelect,
+        #sortAppointmentsSelect,
+        .appointment-sort-dropdown,
+        .appt-sort-dropdown,
+        .appointment-sort-wrap,
+        .appt-sort-wrap,
+        .appointment-sort-select,
+        .appt-sort-select,
+        .sort-by-dropdown,
+        .sort-dropdown,
+        [data-appointment-sort]) {
+        grid-template-columns: minmax(145px, 205px) minmax(0, 1fr) minmax(135px, 200px) auto !important;
+        grid-template-areas:
+            "manage status sort filter"
+            "search search search search" !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-bar> :not(.appointment-filter-wrap):not(.appointment-controls-actions) {
+        grid-area: manage !important;
+        justify-self: start !important;
+        align-self: center !important;
+        width: 100% !important;
+        max-width: 210px !important;
+        min-width: 0 !important;
+        text-align: left !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-bar> :not(.appointment-filter-wrap):not(.appointment-controls-actions) * {
+        text-align: left !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-wrap,
+    #mainContent.admin-appointments-page .appointment-controls-actions {
+        display: contents !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-dropdown {
+        grid-area: status !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+        position: relative !important;
+        z-index: 1000 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-dropdown.open {
+        z-index: 4000 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-trigger {
+        width: 100% !important;
+        min-height: 42px !important;
+        height: 42px !important;
+        padding: 5px 10px !important;
+        border-radius: 999px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-trigger-icon {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        border-radius: 10px !important;
+        font-size: 11px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-trigger-text {
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-trigger-text strong {
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        font-size: 11px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-count-badge {
+        min-width: 23px !important;
+        height: 23px !important;
+        padding: 0 7px !important;
+        font-size: 10px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-panel {
+        width: 320px !important;
+        max-width: calc(100vw - 32px) !important;
+        left: 0 !important;
+        right: auto !important;
+        z-index: 4001 !important;
+    }
+
+    #mainContent.admin-appointments-page :is(#appointmentSortSelect,
+        #apptSortSelect,
+        #sortAppointmentsSelect,
+        .appointment-sort-dropdown,
+        .appt-sort-dropdown,
+        .appointment-sort-wrap,
+        .appt-sort-wrap,
+        .appointment-sort-select,
+        .appt-sort-select,
+        .sort-by-dropdown,
+        .sort-dropdown,
+        [data-appointment-sort]) {
+        grid-area: sort !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+        position: relative !important;
+        z-index: 950 !important;
+    }
+
+    #mainContent.admin-appointments-page :is(#appointmentSortSelect,
+        #apptSortSelect,
+        #sortAppointmentsSelect,
+        .appointment-sort-select,
+        .appt-sort-select,
+        select[name="sort"],
+        select[name="sort_by"],
+        select[name="appointment_sort"]) {
+        height: 42px !important;
+        min-height: 42px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 .85rem !important;
+        border-radius: 999px !important;
+        font-size: .74rem !important;
+        font-weight: 800 !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-appointments-page :is(.appointment-sort-trigger,
+        .appt-sort-trigger,
+        .sort-by-trigger,
+        .sort-trigger) {
+        width: 100% !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 5px 10px !important;
+        border-radius: 999px !important;
+    }
+
+    #mainContent.admin-appointments-page :is(.appointment-sort-value,
+        .appt-sort-value,
+        .sort-by-value,
+        .sort-value) {
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        font-size: 11px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions {
+        grid-area: filter !important;
+        justify-self: end !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .45rem !important;
+        width: auto !important;
+        min-width: max-content !important;
+        max-width: 100% !important;
+        flex: none !important;
+        z-index: 2 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions .global-filter-btn {
+        min-height: 42px !important;
+        height: 42px !important;
+        padding: 0 .85rem !important;
+        font-size: .75rem !important;
+        white-space: nowrap !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions .global-filter-reset-btn {
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 42px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row.voice-search-row {
+        grid-area: search !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: .5rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .search-wrap.global-search {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .search-input {
+        width: 100% !important;
+        min-width: 0 !important;
+        font-size: .76rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .voice-input-toggle,
+    #mainContent.admin-appointments-page .appointment-search-row .voice-search-mic.external {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        position: static !important;
+        transform: none !important;
+        margin: 0 !important;
+        flex-shrink: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-actions .tab-toggle-wrap,
+    #mainContent.admin-appointments-page .tab-toggle-wrap {
+        display: none !important;
+    }
+
+    #mainContent.admin-appointments-page .desktop-appointments-table,
+    #mainContent.admin-appointments-page.mode-list .desktop-appointments-table {
+        display: none !important;
+    }
+
+    #mainContent.admin-appointments-page .appointments-list-view,
+    #mainContent.admin-appointments-page .appointments-grid-view {
+        display: none !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appointments-list,
+    #mainContent.admin-appointments-page.mode-list .mobile-appointments-list,
+    #mainContent.admin-appointments-page.mode-grid .mobile-appointments-list {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .85rem !important;
+        width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: .95rem !important;
+        border-radius: 16px !important;
+        gap: .7rem !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-top,
+    #mainContent.admin-appointments-page .mobile-appt-patient,
+    #mainContent.admin-appointments-page .mobile-appt-meta,
+    #mainContent.admin-appointments-page .mobile-appt-field {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-name {
+        max-width: 100% !important;
+        font-size: .86rem !important;
+        line-height: 1.2 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        word-break: normal !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-sub {
+        font-size: .68rem !important;
+        line-height: 1.25 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-label {
+        font-size: .58rem !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-value {
+        font-size: .76rem !important;
+        line-height: 1.3 !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    #mainContent.admin-appointments-page .service-badge,
+    #mainContent.admin-appointments-page .time-chip {
+        max-width: 100% !important;
+        font-size: .68rem !important;
+        padding: .28rem .55rem !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-badges {
+        min-width: 0 !important;
+        gap: .4rem !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .5rem !important;
+        padding-left: 0 !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions .action-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 .55rem !important;
+        border-radius: 12px !important;
+        font-size: .68rem !important;
+        font-weight: 850 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions .action-btn i {
+        font-size: .7rem !important;
+        width: auto !important;
+        min-width: auto !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .appt-month-summary {
+        padding: .7rem .85rem !important;
+        border-radius: 16px !important;
+        margin-bottom: .75rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appt-month-title {
+        font-size: .95rem !important;
+    }
+
+    #mainContent.admin-appointments-page .summary-bar {
+        padding: .85rem .95rem !important;
+        gap: .45rem !important;
+        margin-bottom: .95rem !important;
+    }
+
+    #mainContent.admin-appointments-page .summary-chip {
+        font-size: .68rem !important;
+        padding: .28rem .62rem !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    #mainContent.admin-appointments-page .appointment-controls-bar {
+        grid-template-columns: minmax(120px, 170px) minmax(0, 1fr) auto !important;
+        grid-template-areas:
+            "manage status filter"
+            "search search search" !important;
+        gap: .55rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-bar:has(#appointmentSortSelect,
+        #apptSortSelect,
+        #sortAppointmentsSelect,
+        .appointment-sort-dropdown,
+        .appt-sort-dropdown,
+        .appointment-sort-wrap,
+        .appt-sort-wrap,
+        .appointment-sort-select,
+        .appt-sort-select,
+        .sort-by-dropdown,
+        .sort-dropdown,
+        [data-appointment-sort]) {
+        grid-template-columns: minmax(120px, 170px) minmax(0, 1fr) !important;
+        grid-template-areas:
+            "manage status"
+            "sort filter"
+            "search search" !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-bar> :not(.appointment-filter-wrap):not(.appointment-controls-actions) {
+        max-width: 170px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions {
+        width: auto !important;
+        min-width: max-content !important;
+        justify-self: end !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions .global-filter-btn {
+        width: auto !important;
+        min-width: 86px !important;
+        padding: 0 .75rem !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions .global-filter-reset-btn {
+        flex: 0 0 42px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-appointments-page.mode-grid .mobile-appointments-list {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+#mainContent.admin-appointments-page:not(.dentist-appointments-page) .today-snapshot-card {
+    margin-bottom: 1.15rem !important;
+}
+
+@media only screen and (max-width: 767px) {
+    #mainContent.admin-appointments-page .appointment-controls-bar {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 0.65rem !important;
+        overflow: visible !important;
+        position: relative !important;
+        z-index: 15000 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-control-copy {
+        display: none !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-wrap {
+        order: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 0.65rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+        position: relative !important;
+        z-index: 16000 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-dropdown,
+    #mainContent.admin-appointments-page :is(#appointmentSortSelect,
+        #apptSortSelect,
+        #sortAppointmentsSelect,
+        .appointment-sort-dropdown,
+        .appt-sort-dropdown,
+        .appointment-sort-wrap,
+        .appt-sort-wrap,
+        .appointment-sort-select,
+        .appt-sort-select,
+        .sort-by-dropdown,
+        .sort-dropdown,
+        [data-appointment-sort]) {
+        order: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+        position: relative !important;
+        z-index: 16500 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-trigger {
+        width: 100% !important;
+        min-height: 46px !important;
+        height: 46px !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-dropdown.open {
+        z-index: 25000 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-status-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 25001 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row.voice-search-row {
+        order: 2 !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+        position: relative !important;
+        z-index: 15000 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .search-wrap.global-search {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .search-input {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .voice-input-toggle {
+        width: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        height: 42px !important;
+        position: static !important;
+        transform: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-search-row .voice-search-mic.external {
+        position: static !important;
+        transform: none !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        height: 40px !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-actions {
+        order: 2 !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 44px !important;
+        gap: 0.65rem !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+        position: relative !important;
+        z-index: 17000 !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        display: flex !important;
+        align-items: stretch !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-filter-actions .global-filter-btn {
+        width: 100% !important;
+        min-height: 44px !important;
+        height: 44px !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.admin-appointments-page #appointmentClearFilterBtn {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        align-self: stretch !important;
+    }
+
+    #mainContent.admin-appointments-page #appointmentClearFilterBtn.hidden {
+        display: none !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-actions:has(#appointmentClearFilterBtn.hidden) {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-controls-actions:has(#appointmentClearFilterBtn.hidden) .appointment-filter-actions {
+        grid-column: 1 / -1 !important;
+    }
+
+    #mainContent.admin-appointments-page .view-toggle-container[data-global-view-toggle] {
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        margin: 0 !important;
+        position: relative !important;
+        overflow: visible !important;
+        z-index: 26000 !important;
+    }
+
+    #mainContent.admin-appointments-page .view-toggle-container[data-global-view-toggle].open,
+    #mainContent.admin-appointments-page .view-toggle-container[data-global-view-toggle]:has(.global-view-mobile-menu) {
+        z-index: 30000 !important;
+    }
+
+    #mainContent.admin-appointments-page .view-toggle-container[data-global-view-toggle] .global-view-mobile-trigger {
+        width: 100% !important;
+        min-height: 44px !important;
+        height: 44px !important;
+        position: relative !important;
+        z-index: 30001 !important;
+    }
+
+    #mainContent.admin-appointments-page .view-toggle-container[data-global-view-toggle] .global-view-mobile-menu {
+        position: absolute !important;
+        top: calc(100% + 8px) !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        z-index: 30002 !important;
+        pointer-events: auto !important;
+    }
+
+    #mainContent.admin-appointments-page .view-toggle-container[data-global-view-toggle].open .global-view-mobile-menu {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    #mainContent.admin-appointments-page .appointment-header-wrap:has(.view-toggle-container.open),
+    #mainContent.admin-appointments-page .appointment-controls-bar:has(.view-toggle-container.open),
+    #mainContent.admin-appointments-page .appointment-controls-actions:has(.view-toggle-container.open) {
+        z-index: 30000 !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-appointments-page #upcomingSection,
+    #mainContent.admin-appointments-page #pastSection,
+    #mainContent.admin-appointments-page .appt-month-group,
+    #mainContent.admin-appointments-page .mobile-appointments-list,
+    #mainContent.admin-appointments-page .mobile-appt-card {
+        z-index: 1 !important;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+
+    #mainContent.admin-appointments-page .mobile-appointments-list,
+    #mainContent.admin-appointments-page.mode-list .mobile-appointments-list,
+    #mainContent.admin-appointments-page.mode-grid .mobile-appointments-list,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appointments-list,
+    #mainContent.dentist-appointments-page.admin-appointments-page.mode-list .mobile-appointments-list,
+    #mainContent.dentist-appointments-page.admin-appointments-page.mode-grid .mobile-appointments-list {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 0.65rem !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        width: 100% !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-card,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: 0.78rem 0.82rem !important;
+        border-radius: 15px !important;
+        gap: 0.58rem !important;
+        min-height: 0 !important;
+        height: auto !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-top,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-top {
+        padding-left: 0.18rem !important;
+        gap: 0.5rem !important;
+        align-items: flex-start !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-patient,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-patient {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-name,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-name {
+        font-size: 0.84rem !important;
+        line-height: 1.18 !important;
+        font-weight: 900 !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        white-space: normal !important;
+        word-break: normal !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-sub,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-sub {
+        font-size: 0.68rem !important;
+        line-height: 1.2 !important;
+        margin-top: 0.22rem !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-status,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-status,
+    #mainContent.admin-appointments-page .status-pill,
+    #mainContent.dentist-appointments-page.admin-appointments-page .status-pill {
+        flex-shrink: 0 !important;
+        max-width: 112px !important;
+        min-height: 28px !important;
+        padding: 0.34rem 0.58rem !important;
+        font-size: 0.66rem !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-meta,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-meta,
+    #mainContent.admin-appointments-page .mobile-appt-card .grid.grid-cols-2,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-card .grid.grid-cols-2 {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.45rem !important;
+        padding: 0.62rem !important;
+        margin: 0 !important;
+        border-radius: 13px !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-label,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-label,
+    #mainContent.admin-appointments-page .mobile-appt-card p.text-\[9px\],
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-card p.text-\[9px\] {
+        font-size: 0.55rem !important;
+        line-height: 1 !important;
+        margin-bottom: 0.28rem !important;
+        letter-spacing: 0.06em !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-value,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-value,
+    #mainContent.admin-appointments-page .service-badge,
+    #mainContent.admin-appointments-page .time-chip,
+    #mainContent.dentist-appointments-page.admin-appointments-page .service-badge,
+    #mainContent.dentist-appointments-page.admin-appointments-page .time-chip {
+        min-height: 32px !important;
+        height: 32px !important;
+        padding: 0 0.55rem !important;
+        font-size: 0.68rem !important;
+        line-height: 1 !important;
+        border-radius: 10px !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.45rem !important;
+        padding-left: 0 !important;
+        margin-top: 0.05rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions .action-btn,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-actions .action-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        padding: 0 0.55rem !important;
+        border-radius: 12px !important;
+
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.4rem !important;
+
+        font-size: 0.68rem !important;
+        font-weight: 900 !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        text-align: center !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+
+        color: var(--admin-appt-action-color, #4B5563) !important;
+        background: var(--admin-appt-action-bg, #F3F4F6) !important;
+        border: 1px solid var(--admin-appt-action-border, #E5E7EB) !important;
+        box-shadow: none !important;
+        filter: none !important;
+        text-decoration: none !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions .action-btn i,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-actions .action-btn i {
+        width: auto !important;
+        min-width: auto !important;
+        margin: 0 !important;
+        font-size: 0.68rem !important;
+        color: currentColor !important;
+        flex-shrink: 0 !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions .action-btn:hover:not(:disabled),
+    #mainContent.admin-appointments-page .mobile-appt-actions .action-btn:focus-visible:not(:disabled),
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-actions .action-btn:hover:not(:disabled),
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-actions .action-btn:focus-visible:not(:disabled) {
+        color: var(--admin-appt-action-hover-color, #FFFFFF) !important;
+        background: var(--admin-appt-action-hover-bg, #374151) !important;
+        border-color: var(--admin-appt-action-hover-border, #374151) !important;
+        box-shadow: 0 8px 16px var(--admin-appt-action-shadow, rgba(15, 23, 42, .16)) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    #mainContent.admin-appointments-page .mobile-appt-actions .action-btn:disabled,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-actions .action-btn:disabled {
+        opacity: 0.72 !important;
+        cursor: not-allowed !important;
+        color: #9CA3AF !important;
+        background: #F3F4F6 !important;
+        border-color: #E5E7EB !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    #mainContent.admin-appointments-page .action-btn-view,
+    #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-view {
+        --admin-appt-action-color: #2563EB;
+        --admin-appt-action-bg: #EFF6FF;
+        --admin-appt-action-border: #BFDBFE;
+        --admin-appt-action-hover-color: #FFFFFF;
+        --admin-appt-action-hover-bg: #2563EB;
+        --admin-appt-action-hover-border: #2563EB;
+        --admin-appt-action-shadow: rgba(37, 99, 235, .24);
+    }
+
+    #mainContent.admin-appointments-page .action-btn-record,
+    #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-record {
+        --admin-appt-action-color: #475569;
+        --admin-appt-action-bg: #F8FAFC;
+        --admin-appt-action-border: #CBD5E1;
+        --admin-appt-action-hover-color: #FFFFFF;
+        --admin-appt-action-hover-bg: #0F172A;
+        --admin-appt-action-hover-border: #0F172A;
+        --admin-appt-action-shadow: rgba(15, 23, 42, .22);
+    }
+
+    #mainContent.admin-appointments-page .action-btn-start,
+    #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start {
+        --admin-appt-action-color: #16A34A;
+        --admin-appt-action-bg: #F0FDF4;
+        --admin-appt-action-border: #BBF7D0;
+        --admin-appt-action-hover-color: #FFFFFF;
+        --admin-appt-action-hover-bg: #16A34A;
+        --admin-appt-action-hover-border: #16A34A;
+        --admin-appt-action-shadow: rgba(22, 163, 74, .24);
+    }
+
+    #mainContent.admin-appointments-page .action-btn-reschedule,
+    #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-reschedule {
+        --admin-appt-action-color: #B45309;
+        --admin-appt-action-bg: #FFFBEB;
+        --admin-appt-action-border: #FDE68A;
+        --admin-appt-action-hover-color: #FFFFFF;
+        --admin-appt-action-hover-bg: #D97706;
+        --admin-appt-action-hover-border: #D97706;
+        --admin-appt-action-shadow: rgba(217, 119, 6, .24);
+    }
+
+    #mainContent.admin-appointments-page .action-btn-cancel,
+    #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-cancel {
+        --admin-appt-action-color: #DC2626;
+        --admin-appt-action-bg: #FEF2F2;
+        --admin-appt-action-border: #FECACA;
+        --admin-appt-action-hover-color: #FFFFFF;
+        --admin-appt-action-hover-bg: #DC2626;
+        --admin-appt-action-hover-border: #DC2626;
+        --admin-appt-action-shadow: rgba(220, 38, 38, .24);
+    }
+}
+
+@media only screen and (max-width: 480px) {
+
+    #mainContent.admin-appointments-page .mobile-appt-actions,
+    #mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .action-btn-view,
+.dark #mainContent.admin-appointments-page .action-btn-view,
+[data-theme="dark"] #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-view,
+.dark #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-view {
+    --admin-appt-action-color: #93C5FD;
+    --admin-appt-action-bg: rgba(37, 99, 235, .16);
+    --admin-appt-action-border: rgba(147, 197, 253, .28);
+    --admin-appt-action-hover-color: #DBEAFE;
+    --admin-appt-action-hover-bg: rgba(37, 99, 235, .34);
+    --admin-appt-action-hover-border: rgba(147, 197, 253, .48);
+    --admin-appt-action-shadow: rgba(37, 99, 235, .18);
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .action-btn-record,
+.dark #mainContent.admin-appointments-page .action-btn-record,
+[data-theme="dark"] #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-record,
+.dark #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-record {
+    --admin-appt-action-color: #CBD5E1;
+    --admin-appt-action-bg: rgba(148, 163, 184, .12);
+    --admin-appt-action-border: rgba(203, 213, 225, .22);
+    --admin-appt-action-hover-color: #FFFFFF;
+    --admin-appt-action-hover-bg: rgba(15, 23, 42, .88);
+    --admin-appt-action-hover-border: rgba(203, 213, 225, .34);
+    --admin-appt-action-shadow: rgba(15, 23, 42, .22);
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .action-btn-start,
+.dark #mainContent.admin-appointments-page .action-btn-start,
+[data-theme="dark"] #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start,
+.dark #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start {
+    --admin-appt-action-color: #86EFAC;
+    --admin-appt-action-bg: rgba(22, 163, 74, .16);
+    --admin-appt-action-border: rgba(134, 239, 172, .28);
+    --admin-appt-action-hover-color: #DCFCE7;
+    --admin-appt-action-hover-bg: rgba(22, 163, 74, .34);
+    --admin-appt-action-hover-border: rgba(134, 239, 172, .48);
+    --admin-appt-action-shadow: rgba(22, 163, 74, .18);
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .action-btn-reschedule,
+.dark #mainContent.admin-appointments-page .action-btn-reschedule,
+[data-theme="dark"] #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-reschedule,
+.dark #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-reschedule {
+    --admin-appt-action-color: #FCD34D;
+    --admin-appt-action-bg: rgba(245, 158, 11, .16);
+    --admin-appt-action-border: rgba(253, 230, 138, .28);
+    --admin-appt-action-hover-color: #FEF3C7;
+    --admin-appt-action-hover-bg: rgba(245, 158, 11, .34);
+    --admin-appt-action-hover-border: rgba(253, 230, 138, .48);
+    --admin-appt-action-shadow: rgba(245, 158, 11, .18);
+}
+
+[data-theme="dark"] #mainContent.admin-appointments-page .action-btn-cancel,
+.dark #mainContent.admin-appointments-page .action-btn-cancel,
+[data-theme="dark"] #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-cancel,
+.dark #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-cancel {
+    --admin-appt-action-color: #FCA5A5;
+    --admin-appt-action-bg: rgba(220, 38, 38, .16);
+    --admin-appt-action-border: rgba(252, 165, 165, .28);
+    --admin-appt-action-hover-color: #FEE2E2;
+    --admin-appt-action-hover-bg: rgba(220, 38, 38, .34);
+    --admin-appt-action-hover-border: rgba(252, 165, 165, .48);
+    --admin-appt-action-shadow: rgba(220, 38, 38, .18);
+}

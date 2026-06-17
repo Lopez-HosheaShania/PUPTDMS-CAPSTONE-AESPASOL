@@ -444,18 +444,6 @@
     .detail-box {
         width: 100%;
     }
-
-    #patientListView {
-        display: none !important;
-    }
-
-    #patientGridView {
-        display: block !important;
-    }
-
-    #patientViewToggle {
-        display: none !important;
-    }
 }
 
 #mainContent.admin-patient-page .patient-stat-option {
@@ -511,7 +499,7 @@
     --patient-option-soft: rgba(37, 99, 235, .16);
 }
 
-#mainContent.admin-patient-page #tabsGrid .patient-stat-option > .patient-stat-option-count {
+#mainContent.admin-patient-page #tabsGrid .patient-stat-option>.patient-stat-option-count {
     position: absolute !important;
     top: 10px !important;
     right: 10px !important;
@@ -542,7 +530,7 @@
     pointer-events: none !important;
 }
 
-#mainContent.admin-patient-page #tabsGrid .patient-stat-option.tab-active > .patient-stat-option-count {
+#mainContent.admin-patient-page #tabsGrid .patient-stat-option.tab-active>.patient-stat-option-count {
     background: #FFFFFF !important;
     border-color: var(--patient-option-border) !important;
     color: var(--patient-option-text) !important;
@@ -551,7 +539,6 @@
         0 0 0 3px rgba(255, 255, 255, .72) !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] #mainContent.admin-patient-page .patient-stat-option[data-filter="today"],
 .dark #mainContent.admin-patient-page .patient-stat-option[data-filter="today"],
 [data-theme="dark"] #mainContent.admin-patient-page .patient-stat-option[data-filter="all"],
@@ -594,8 +581,8 @@
     --patient-option-soft: rgba(220, 38, 38, .18);
 }
 
-[data-theme="dark"] #mainContent.admin-patient-page #tabsGrid .patient-stat-option > .patient-stat-option-count,
-.dark #mainContent.admin-patient-page #tabsGrid .patient-stat-option > .patient-stat-option-count {
+[data-theme="dark"] #mainContent.admin-patient-page #tabsGrid .patient-stat-option>.patient-stat-option-count,
+.dark #mainContent.admin-patient-page #tabsGrid .patient-stat-option>.patient-stat-option-count {
     background: rgba(13, 17, 23, .88) !important;
     border-color: var(--patient-option-border) !important;
     color: var(--patient-option-text) !important;
@@ -689,8 +676,906 @@
     #mainContent.admin-patient-page .global-filter-btn {
         width: 100% !important;
     }
+}
 
-    #mainContent.admin-patient-page .view-toggle-container {
+@media only screen and (max-width: 600px) {
+    #mainContent.admin-patient-page.dentist-page-shell {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .page-banner {
+        margin-top: 0.65rem !important;
+        margin-bottom: 0.85rem !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .page-banner-inner {
+        padding: 0.95rem !important;
+        border-radius: 18px !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.65rem !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .page-title {
+        font-size: 1.28rem !important;
+        line-height: 1.1 !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .patient-table-toolbar {
+        padding: 0.85rem !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .patient-toolbar-actions {
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.65rem !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .patient-sort-row,
+    #mainContent.admin-patient-page.dentist-page-shell .patient-search-row,
+    #mainContent.admin-patient-page.dentist-page-shell .patient-filter-actions {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .patient-search-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        gap: 0.5rem !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .voice-input-toggle {
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .voice-search-mic.external {
+        position: static !important;
+        transform: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell #patientContainer {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+    #mainContent.admin-patient-page.dentist-page-shell .patient-toolbar-actions {
+        gap: 0.75rem !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell.mode-grid #patientContainer {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    #mainContent.admin-patient-page.dentist-page-shell .patient-toolbar-actions {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell .patient-search-row {
+        flex: 0 1 360px !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell.mode-grid #patientContainer {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+    #mainContent.admin-patient-page.dentist-page-shell .patient-search-row {
+        flex: 0 1 420px !important;
+    }
+
+    #mainContent.admin-patient-page.dentist-page-shell.mode-grid #patientContainer {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    #mainContent.admin-patient-page.dentist-page-shell.mode-grid #patientContainer {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+}
+
+@media only screen and (min-width: 1280px) {
+    #mainContent.admin-patient-page.dentist-page-shell.mode-grid #patientContainer {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+    #mainContent.admin-patient-page .patient-table-toolbar {
+        padding: 0.85rem !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-toolbar-actions {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 44px !important;
+        gap: 0.65rem !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-sort-row {
+        order: initial !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row {
+        order: initial !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        gap: 0.5rem !important;
+        align-items: center !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row .search-wrap,
+    #mainContent.admin-patient-page .patient-search-row .global-search {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row .search-input {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .voice-input-toggle {
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: static !important;
+        transform: none !important;
+        flex-shrink: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .voice-search-mic.external {
+        position: static !important;
+        transform: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        margin: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions {
+        order: initial !important;
+        grid-column: 1 !important;
+        grid-row: 3 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions #filterBtn {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.admin-patient-page #externalClearFilterBtn {
+        order: initial !important;
+        grid-column: 2 !important;
+        grid-row: 3 !important;
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        align-self: stretch !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    #mainContent.admin-patient-page #externalClearFilterBtn.hidden {
         display: none !important;
+    }
+
+    #mainContent.admin-patient-page .patient-toolbar-actions:has(#externalClearFilterBtn.hidden) {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #mainContent.admin-patient-page .patient-toolbar-actions:has(#externalClearFilterBtn.hidden) .patient-filter-actions {
+        grid-column: 1 / -1 !important;
+    }
+
+    #mainContent.admin-patient-page .view-toggle-container[data-global-view-toggle] {
+        order: initial !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 4 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        margin: 0 !important;
+        align-self: stretch !important;
+        display: inline-flex !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    #mainContent.admin-patient-page .patient-stats-dropdown,
+    #mainContent.admin-patient-page .patient-stats-trigger {
+        width: 100% !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.admin-patient-page {
+        overflow-x: hidden !important;
+    }
+
+    #mainContent.admin-patient-page .patient-table-toolbar {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: .9rem !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-toolbar-actions {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto auto !important;
+        align-items: center !important;
+        justify-content: stretch !important;
+        gap: .65rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-toolbar-actions>* {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-sort-row {
+        order: 1 !important;
+        grid-column: 1 / 2 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-stats-dropdown,
+    #mainContent.admin-patient-page .patient-stats-trigger {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-stats-trigger {
+        min-height: 42px !important;
+        height: 42px !important;
+        padding: 5px 10px !important;
+        border-radius: 999px !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions {
+        order: 2 !important;
+        grid-column: 2 / 3 !important;
+        grid-row: 1 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .45rem !important;
+        width: auto !important;
+        min-width: max-content !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions .global-filter-btn,
+    #mainContent.admin-patient-page .global-filter-btn {
+        width: auto !important;
+        min-width: 92px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 .85rem !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        font-size: .74rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions .global-filter-reset-btn,
+    #mainContent.admin-patient-page .global-filter-reset-btn {
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 42px !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row {
+        order: 4 !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: .5rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row .search-wrap,
+    #mainContent.admin-patient-page .patient-search-row .global-search {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row .search-input {
+        width: 100% !important;
+        min-width: 0 !important;
+        font-size: .76rem !important;
+    }
+
+    #mainContent.admin-patient-page .voice-input-toggle {
+        width: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        height: 42px !important;
+        position: static !important;
+        transform: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .voice-search-mic.external {
+        position: static !important;
+        transform: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        margin: 0 !important;
+        border-radius: 999px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.admin-patient-page #tabsGrid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .75rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-stat-option {
+        min-width: 0 !important;
+        padding: .85rem !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.admin-patient-page .tab-icon-wrap {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 10px !important;
+        font-size: 13px !important;
+        margin-bottom: .45rem !important;
+    }
+
+    #mainContent.admin-patient-page .tab-count {
+        font-size: 22px !important;
+    }
+
+    #mainContent.admin-patient-page .tab-label {
+        font-size: 9px !important;
+        line-height: 1.15 !important;
+    }
+
+    #mainContent.admin-patient-page #tabsGrid .patient-stat-option>.patient-stat-option-count {
+        top: 8px !important;
+        right: 8px !important;
+        min-width: 22px !important;
+        height: 22px !important;
+        padding: 0 6px !important;
+        font-size: 10px !important;
+    }
+
+    #mainContent.admin-patient-page #patientListView {
+        display: none !important;
+    }
+
+    #mainContent.admin-patient-page #patientGridView {
+        display: block !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-list-wrap {
+        padding: .85rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-card-body {
+        padding: .95rem !important;
+        gap: .75rem !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-top,
+    #mainContent.admin-patient-page .patient-grid-main,
+    #mainContent.admin-patient-page .patient-grid-meta,
+    #mainContent.admin-patient-page .detail-box {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-avatar {
+        width: 46px !important;
+        height: 46px !important;
+        min-width: 46px !important;
+        border-radius: 14px !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-name {
+        max-width: 100% !important;
+        font-size: .84rem !important;
+        line-height: 1.2 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-id {
+        max-width: 100% !important;
+        font-size: .66rem !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-patient-page .detail-box {
+        gap: .65rem !important;
+    }
+
+    #mainContent.admin-patient-page .detail-icon {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 11px !important;
+        font-size: .78rem !important;
+    }
+
+    #mainContent.admin-patient-page .detail-label {
+        font-size: 9px !important;
+        margin-bottom: .15rem !important;
+    }
+
+    #mainContent.admin-patient-page .detail-value {
+        max-width: 100% !important;
+        font-size: .78rem !important;
+        line-height: 1.25 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-patient-page .detail-sub {
+        max-width: 100% !important;
+        font-size: .68rem !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    #mainContent.admin-patient-page .patient-toolbar-actions {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        gap: .55rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-sort-row {
+        grid-column: 1 / 2 !important;
+        grid-row: 1 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions {
+        grid-column: 2 / 3 !important;
+        grid-row: 1 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions .global-filter-btn {
+        min-width: 86px !important;
+        padding: 0 .75rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row {
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+    }
+
+    #mainContent.admin-patient-page #tabsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.admin-patient-page {
+        overflow-x: hidden !important;
+    }
+
+    #mainContent.admin-patient-page .patient-table-toolbar {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: .9rem !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-toolbar-actions {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto auto !important;
+        align-items: center !important;
+        justify-content: stretch !important;
+        gap: .65rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-toolbar-actions>* {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-sort-row {
+        order: 1 !important;
+        grid-column: 1 / 2 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-stats-dropdown,
+    #mainContent.admin-patient-page .patient-stats-trigger {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-stats-trigger {
+        min-height: 42px !important;
+        height: 42px !important;
+        padding: 5px 10px !important;
+        border-radius: 999px !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions {
+        order: 2 !important;
+        grid-column: 2 / 3 !important;
+        grid-row: 1 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .45rem !important;
+        width: auto !important;
+        min-width: max-content !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions .global-filter-btn,
+    #mainContent.admin-patient-page .global-filter-btn {
+        width: auto !important;
+        min-width: 92px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 .85rem !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        font-size: .74rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions .global-filter-reset-btn,
+    #mainContent.admin-patient-page .global-filter-reset-btn {
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 42px !important;
+    }
+
+    #mainContent.admin-patient-page .view-toggle-container,
+    #mainContent.admin-patient-page #patientViewToggle {
+        display: none !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row {
+        order: 4 !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: .5rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row .search-wrap,
+    #mainContent.admin-patient-page .patient-search-row .global-search {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row .search-input {
+        width: 100% !important;
+        min-width: 0 !important;
+        font-size: .76rem !important;
+    }
+
+    #mainContent.admin-patient-page .voice-input-toggle {
+        width: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        height: 42px !important;
+        position: static !important;
+        transform: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.admin-patient-page .voice-search-mic.external {
+        position: static !important;
+        transform: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        margin: 0 !important;
+        border-radius: 999px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #mainContent.admin-patient-page #tabsGrid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .75rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-stat-option {
+        min-width: 0 !important;
+        padding: .85rem !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.admin-patient-page .tab-icon-wrap {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 10px !important;
+        font-size: 13px !important;
+        margin-bottom: .45rem !important;
+    }
+
+    #mainContent.admin-patient-page .tab-count {
+        font-size: 22px !important;
+    }
+
+    #mainContent.admin-patient-page .tab-label {
+        font-size: 9px !important;
+        line-height: 1.15 !important;
+    }
+
+    #mainContent.admin-patient-page #tabsGrid .patient-stat-option>.patient-stat-option-count {
+        top: 8px !important;
+        right: 8px !important;
+        min-width: 22px !important;
+        height: 22px !important;
+        padding: 0 6px !important;
+        font-size: 10px !important;
+    }
+
+    #mainContent.admin-patient-page #patientListView {
+        display: none !important;
+    }
+
+    #mainContent.admin-patient-page #patientGridView {
+        display: block !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-list-wrap {
+        padding: .85rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-card-body {
+        padding: .95rem !important;
+        gap: .75rem !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-top,
+    #mainContent.admin-patient-page .patient-grid-main,
+    #mainContent.admin-patient-page .patient-grid-meta,
+    #mainContent.admin-patient-page .detail-box {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.admin-patient-page .patient-avatar {
+        width: 46px !important;
+        height: 46px !important;
+        min-width: 46px !important;
+        border-radius: 14px !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-name {
+        max-width: 100% !important;
+        font-size: .84rem !important;
+        line-height: 1.2 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid-id {
+        max-width: 100% !important;
+        font-size: .66rem !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-patient-page .detail-box {
+        gap: .65rem !important;
+    }
+
+    #mainContent.admin-patient-page .detail-icon {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 11px !important;
+        font-size: .78rem !important;
+    }
+
+    #mainContent.admin-patient-page .detail-label {
+        font-size: 9px !important;
+        margin-bottom: .15rem !important;
+    }
+
+    #mainContent.admin-patient-page .detail-value {
+        max-width: 100% !important;
+        font-size: .78rem !important;
+        line-height: 1.25 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.admin-patient-page .detail-sub {
+        max-width: 100% !important;
+        font-size: .68rem !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    #mainContent.admin-patient-page .patient-toolbar-actions {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        gap: .55rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-sort-row {
+        grid-column: 1 / 2 !important;
+        grid-row: 1 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions {
+        grid-column: 2 / 3 !important;
+        grid-row: 1 !important;
+    }
+
+    #mainContent.admin-patient-page .patient-filter-actions .global-filter-btn {
+        min-width: 86px !important;
+        padding: 0 .75rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-search-row {
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+    }
+
+    #mainContent.admin-patient-page #tabsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+    }
+
+    #mainContent.admin-patient-page .patient-grid {
+        grid-template-columns: 1fr !important;
     }
 }

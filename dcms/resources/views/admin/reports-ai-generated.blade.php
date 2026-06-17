@@ -162,6 +162,34 @@
                     </div>
                 </div>
 
+                @php
+                    $screenDocumentRequestAnalysis = $aiReport['document_request_analysis'] ?? [];
+                @endphp
+
+                @if (!empty($screenDocumentRequestAnalysis))
+                    <div class="air-card">
+                        <div class="air-card-head">
+                            <div class="air-card-icon air-card-icon--accent">
+                                <i class="fa-solid fa-file-signature"></i>
+                            </div>
+                            <div>
+                                <h2 class="air-card-title">Document request analysis</h2>
+                                <p class="air-card-sub">Document request status and processing interpretation</p>
+                            </div>
+                        </div>
+                        <div class="air-card-body">
+                            <div class="air-findings-list">
+                                @foreach ($screenDocumentRequestAnalysis as $item)
+                                    <div class="air-finding-item">
+                                        <span class="air-finding-dot"></span>
+                                        {{ $item }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="air-card">
                     <div class="air-card-head">
                         <div class="air-card-icon air-card-icon--accent">
@@ -193,6 +221,7 @@
                         'Treatment tracking',
                         'Administrative planning',
                         'Operational monitoring',
+                        'Document request processing',
                     ];
                 @endphp
                 <div class="air-card air-card--last">
@@ -318,6 +347,34 @@
                     ],
                     '0',
                 ));
+
+        $documentRequestAnalysis = $aiReport['document_request_analysis'] ?? [];
+
+        $docTotal = data_get($aiReport, 'print_metrics.document_requests_total', 0);
+        $docPending = data_get($aiReport, 'print_metrics.document_requests_pending', 0);
+        $docApproved = data_get($aiReport, 'print_metrics.document_requests_approved', 0);
+        $docRejected = data_get($aiReport, 'print_metrics.document_requests_rejected', 0);
+        $docApprovalRate = data_get($aiReport, 'print_metrics.document_requests_approval_rate', 0);
+        $docPendingRate = data_get($aiReport, 'print_metrics.document_requests_pending_rate', 0);
+        $docRejectionRate = data_get($aiReport, 'print_metrics.document_requests_rejection_rate', 0);
+        $docMostRequested = data_get(
+            $aiReport,
+            'print_metrics.document_requests_most_requested',
+            'No dominant document type yet',
+        );
+        $docMostRequestedCount = data_get($aiReport, 'print_metrics.document_requests_most_requested_count', 0);
+
+        $docApprovalRateLabel = is_numeric($docApprovalRate)
+            ? rtrim(rtrim(number_format((float) $docApprovalRate, 1), '0'), '.') . '%'
+            : $docApprovalRate;
+
+        $docPendingRateLabel = is_numeric($docPendingRate)
+            ? rtrim(rtrim(number_format((float) $docPendingRate, 1), '0'), '.') . '%'
+            : $docPendingRate;
+
+        $docRejectionRateLabel = is_numeric($docRejectionRate)
+            ? rtrim(rtrim(number_format((float) $docRejectionRate, 1), '0'), '.') . '%'
+            : $docRejectionRate;
 
         $completionRateLabel = is_numeric($completionRate)
             ? rtrim(rtrim(number_format((float) $completionRate, 1), '0'), '.') . '%'
@@ -470,6 +527,52 @@
                         <p class="air-print-body-text">{{ implode(' ', $aiReport['inventory_analysis']) }}</p>
                     @endif
                 </section>
+                @if (!empty($documentRequestAnalysis))
+                    <section class="air-print-section">
+                        <div class="air-print-section-title"><span>05</span>
+                            <h2>Document request analysis</h2>
+                        </div>
+
+                        <table class="air-print-table air-print-table--inventory">
+                            <thead>
+                                <tr>
+                                    <th>Document request metric</th>
+                                    <th>Status</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Total requests</td>
+                                    <td class="status-ok">This month</td>
+                                    <td><strong>{{ $docTotal }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Pending requests</td>
+                                    <td class="status-ok">{{ (int) $docPending > 0 ? 'Needs review' : '✓ Clear' }}</td>
+                                    <td><strong>{{ $docPending }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Approved requests</td>
+                                    <td class="status-ok">{{ $docApprovalRateLabel }} approval rate</td>
+                                    <td><strong>{{ $docApproved }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Rejected requests</td>
+                                    <td class="status-ok">{{ $docRejectionRateLabel }} rejection rate</td>
+                                    <td><strong>{{ $docRejected }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Most requested document</td>
+                                    <td class="status-ok">{{ $docMostRequestedCount }} request/s</td>
+                                    <td><strong>{{ $docMostRequested }}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p class="air-print-body-text">{{ implode(' ', $documentRequestAnalysis) }}</p>
+                    </section>
+                @endif
 
                 <div class="air-print-footer">
                     <div class="air-print-footer-left">
@@ -487,7 +590,7 @@
                 </div>
 
                 <section class="air-print-section">
-                    <div class="air-print-section-title"><span>05</span>
+                    <div class="air-print-section-title"><span>06</span>
                         <h2>Risk interpretation</h2>
                     </div>
                     <div class="air-print-risk-box">
@@ -497,7 +600,7 @@
                 </section>
 
                 <section class="air-print-section">
-                    <div class="air-print-section-title"><span>06</span>
+                    <div class="air-print-section-title"><span>07</span>
                         <h2>Recommendations</h2>
                     </div>
                     <div class="air-print-rec-list">
@@ -581,6 +684,46 @@
                                 @endforeach
                             </ul>
                         </section>
+
+                        @if (!empty($documentRequestAnalysis))
+                            <section class="air-modal-print-section">
+                                <div class="air-modal-print-section-title">
+                                    <span>05</span>
+                                    <h2>Document request analysis</h2>
+                                </div>
+
+                                <table class="air-modal-print-table">
+                                    <tbody>
+                                        <tr>
+                                            <th>Document request metric</th>
+                                            <th>Value</th>
+                                        </tr>
+                                        <tr>
+                                            <td>Total requests</td>
+                                            <td>{{ $docTotal }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pending requests</td>
+                                            <td>{{ $docPending }} / {{ $docPendingRateLabel }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Approved requests</td>
+                                            <td>{{ $docApproved }} / {{ $docApprovalRateLabel }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Rejected requests</td>
+                                            <td>{{ $docRejected }} / {{ $docRejectionRateLabel }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Most requested document</td>
+                                            <td>{{ $docMostRequested }} — {{ $docMostRequestedCount }} request/s</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <p class="air-modal-print-body-text">{{ implode(' ', $documentRequestAnalysis) }}</p>
+                            </section>
+                        @endif
 
                         <div class="air-modal-print-footer">
                             <div>
@@ -682,7 +825,7 @@
 
                         <section class="air-modal-print-section">
                             <div class="air-modal-print-section-title">
-                                <span>05</span>
+                                <span>06</span>
                                 <h2>Risk interpretation</h2>
                             </div>
 
@@ -694,7 +837,7 @@
 
                         <section class="air-modal-print-section">
                             <div class="air-modal-print-section-title">
-                                <span>06</span>
+                                <span>07</span>
                                 <h2>Recommendations</h2>
                             </div>
 

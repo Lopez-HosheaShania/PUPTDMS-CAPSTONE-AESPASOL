@@ -1,1003 +1,997 @@
 .glass-panel {
-        background: #ffffff;
-        border-radius: 20px;
-        border: 1px solid #E5E7EB;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.soft-card {
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    border: 1px solid #ECEEF2;
+    border-radius: 18px;
+}
+
+.view-toggle-btn {
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #4B5563;
+    transition: all 0.2s ease;
+}
+
+.toolbar-soft-btn span,
+.view-toggle-btn span,
+.toolbar-label {
+    display: none;
+}
+
+.toolbar-actions {
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+.odontogram-toolbar {
+    align-items: center;
+}
+
+.toolbar-group {
+    gap: 0;
+}
+
+.view-toggle-btn:hover {
+    border-color: #FCA5A5;
+    background: #FEF2F2;
+    color: #8B0000;
+}
+
+.view-toggle-btn.active {
+    background: #8B0000;
+    color: #ffffff;
+    border-color: #8B0000;
+    box-shadow: 0 10px 18px rgba(139, 0, 0, 0.15);
+}
+
+.legend-btn {
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 13px;
+    color: #333333;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    width: 100%;
+}
+
+.legend-btn:hover {
+    background: #FEF2F2;
+    border-color: #FCA5A5;
+    transform: translateY(-1px);
+}
+
+.legend-btn.active {
+    background-color: #FEE2E2;
+    border: 1px solid #8B0000;
+    color: #8B0000;
+    font-weight: 700;
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.08);
+}
+
+.legend-color-dot {
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.treatment-chip {
+    border: 1px solid #FCA5A5;
+    background: #FFF1F2;
+    color: #8B0000;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.selected-tooth-card {
+    background: linear-gradient(135deg, #FFF7F7 0%, #FFFDFD 100%);
+    border: 1px solid #FECACA;
+}
+
+.legend-status-note {
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    color: #9A3412;
+}
+
+.primary-action-btn {
+    background: #8B0000;
+    color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.primary-action-btn:hover {
+    background: #660000;
+}
+
+.primary-action-btn:disabled {
+    background: #D1D5DB;
+    color: #6B7280;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.tooth-tooltip {
+    position: absolute;
+    z-index: 30;
+    pointer-events: none;
+    min-width: 180px;
+    max-width: 240px;
+    background: rgba(17, 24, 39, 0.96);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+    transform: translate(-50%, calc(-100% - 14px));
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.tooth-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tooth-tooltip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    width: 12px;
+    height: 12px;
+    background: rgba(17, 24, 39, 0.96);
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.modal-backdrop {
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+.odontogram-layout {
+    align-items: start;
+}
+
+.odontogram-left-panel {
+    position: relative;
+    top: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.left-view-shell {
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.odontogram-right-shell {
+    position: relative;
+    top: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.odontogram-right-top {
+    flex-shrink: 0;
+}
+
+.odontogram-right-scroll {
+    overflow: visible;
+    flex: unset;
+    padding-right: 0;
+}
+
+.odontogram-right-bottom {
+    flex-shrink: 0;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #F3F4F6;
+    background: #ffffff;
+}
+
+.legend-drawer-open {
+    overflow: hidden;
+}
+
+.legend-drawer-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+#legendDrawer {
+    transform: translateX(100%);
+}
+
+#legendDrawer.open {
+    transform: translateX(0);
+}
+
+.legend-category-block {
+    border: 1px solid #F1F5F9;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    overflow: hidden;
+}
+
+.legend-category-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #FAFAFA;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.legend-category-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#legendDrawerBackdrop {
+    display: none;
+}
+
+#legendDrawerBackdrop.show {
+    display: block;
+}
+
+.legend-category-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #FEF2F2;
+    color: #8B0000;
+    flex-shrink: 0;
+}
+
+.legend-category-body {
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.legend-category-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6B7280;
+    background: #F3F4F6;
+    border-radius: 999px;
+    padding: 5px 10px;
+}
+
+.legend-btn {
+    border-radius: 16px;
+}
+
+.legend-btn .legend-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.legend-btn .legend-code {
+    font-size: 11px;
+    font-weight: 800;
+    color: #8B0000;
+    line-height: 1;
+    margin-bottom: 3px;
+}
+
+.legend-btn .legend-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.25;
+    text-align: left;
+}
+
+.legend-btn.active .legend-label,
+.legend-btn.active .legend-code {
+    color: #8B0000;
+}
+
+.mode-panel {
+    display: none;
+}
+
+.mode-panel.active {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#odontogram2DPanel,
+#odontogram3DPanel {
+    flex: 1;
+    min-height: 0;
+}
+
+#canvas-container {
+    flex: 1;
+    min-height: 520px;
+}
+
+#canvas-container:active {
+    cursor: grabbing;
+}
+
+.odontogram2d-shell {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.odontogram-left-panel,
+.left-view-shell,
+.mode-panel.active {
+    min-height: 0;
+}
+
+.odontogram-board {
+    min-width: fit-content;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0 auto;
+    padding-bottom: 10px;
+}
+
+.odontogram-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: nowrap;
+    min-width: fit-content;
+}
+
+.arch-divider {
+    margin-bottom: 16px;
+}
+
+.tooth-unit {
+    width: 40px;
+    min-width: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.status-box {
+    width: 28px;
+    height: 40px;
+    border: 1.5px solid #8B0000;
+    border-radius: 4px;
+    background: #ffffff;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+}
+
+.status-box::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1.5px;
+    background: #8B0000;
+    transform: translateY(-50%);
+}
+
+.status-box:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(139, 0, 0, 0.12);
+    background: #FEF2F2;
+}
+
+.status-box.selected-target {
+    outline: 2.5px solid rgba(139, 0, 0, 0.2);
+    background: #FEE2E2;
+}
+
+.tooth-number {
+    font-size: 10px;
+    font-weight: 700;
+    color: #4B5563;
+    line-height: 1;
+}
+
+.tooth-2d-wrapper {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid #111827;
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tooth-svg {
+    width: 100%;
+    height: 100%;
+    transform: scale(1.02);
+}
+
+.surface-part {
+    fill: #ffffff;
+    stroke: #111827;
+    stroke-width: 3px;
+    cursor: pointer;
+    transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.surface-part:hover {
+    fill: #E5E7EB;
+}
+
+.surface-part.selected-target {
+    fill: #FEE2E2;
+    stroke: #8B0000;
+    stroke-width: 4px;
+}
+
+.surface-center {
+    stroke-width: 2.5px;
+}
+
+.status-label-left {
+    width: 52px;
+    min-width: 52px;
+    text-align: right;
+    font-weight: 800;
+    font-size: 10px;
+    line-height: 1.2;
+    color: #8B0000;
+    padding-right: 12px;
+    text-transform: uppercase;
+}
+
+.status-label-right {
+    width: 52px;
+    min-width: 52px;
+    text-align: left;
+    font-weight: 800;
+    font-size: 11px;
+    line-height: 1.2;
+    color: #8B0000;
+    padding-left: 12px;
+    text-transform: uppercase;
+}
+
+@media (max-width: 1280px) {
+    #canvas-container {
+        height: 420px;
     }
 
-    .soft-card {
-        background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
-        border: 1px solid #ECEEF2;
-        border-radius: 18px;
-    }
-
-    .view-toggle-btn {
-        width: 46px;
-        min-width: 46px;
-        height: 46px;
-        min-height: 46px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        border: 1px solid #E5E7EB;
-        border-radius: 16px;
-        background: #ffffff;
-        color: #4B5563;
-        transition: all 0.2s ease;
-    }
-
-    .toolbar-soft-btn span,
-    .view-toggle-btn span,
-    .toolbar-label {
-        display: none;
-    }
-
-    .toolbar-actions {
-        gap: 0.5rem;
-        flex-wrap: nowrap;
-    }
-
-    .odontogram-toolbar {
-        align-items: center;
-    }
-
-    .toolbar-group {
-        gap: 0;
-    }
-
-    .view-toggle-btn:hover {
-        border-color: #FCA5A5;
-        background: #FEF2F2;
-        color: #8B0000;
-    }
-
-    .view-toggle-btn.active {
-        background: #8B0000;
-        color: #ffffff;
-        border-color: #8B0000;
-        box-shadow: 0 10px 18px rgba(139, 0, 0, 0.15);
-    }
-
-    .legend-btn {
-        border: 1px solid #E5E7EB;
-        border-radius: 14px;
-        padding: 12px;
-        font-size: 13px;
-        color: #333333;
-        background: #ffffff;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-align: left;
-        width: 100%;
-    }
-
-    .legend-btn:hover {
-        background: #FEF2F2;
-        border-color: #FCA5A5;
-        transform: translateY(-1px);
-    }
-
-    .legend-btn.active {
-        background-color: #FEE2E2;
-        border: 1px solid #8B0000;
-        color: #8B0000;
-        font-weight: 700;
-        box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.08);
-    }
-
-    .legend-color-dot {
-        width: 12px;
-        height: 12px;
-        min-width: 12px;
-        border-radius: 999px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-    }
-
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #D1D5DB;
-        border-radius: 999px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .treatment-chip {
-        border: 1px solid #FCA5A5;
-        background: #FFF1F2;
-        color: #8B0000;
-        border-radius: 999px;
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 1;
-    }
-
-    .selected-tooth-card {
-        background: linear-gradient(135deg, #FFF7F7 0%, #FFFDFD 100%);
-        border: 1px solid #FECACA;
-    }
-
-    .legend-status-note {
-        background: #FFF7ED;
-        border: 1px solid #FED7AA;
-        color: #9A3412;
-    }
-
-    .primary-action-btn {
-        background: #8B0000;
-        color: #ffffff;
-        transition: all 0.2s ease;
-    }
-
-    .primary-action-btn:hover {
-        background: #660000;
-    }
-
-    .primary-action-btn:disabled {
-        background: #D1D5DB;
-        color: #6B7280;
-        cursor: not-allowed;
-        box-shadow: none;
-    }
-
-    .tooth-tooltip {
-        position: absolute;
-        z-index: 30;
-        pointer-events: none;
-        min-width: 180px;
-        max-width: 240px;
-        background: rgba(17, 24, 39, 0.96);
-        color: #ffffff;
-        border-radius: 12px;
-        padding: 10px 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
-        transform: translate(-50%, calc(-100% - 14px));
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.15s ease, visibility 0.15s ease;
-    }
-
-    .tooth-tooltip.show {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .tooth-tooltip::after {
-        content: '';
-        position: absolute;
-        left: 50%;
-        bottom: -6px;
-        width: 12px;
-        height: 12px;
-        background: rgba(17, 24, 39, 0.96);
-        transform: translateX(-50%) rotate(45deg);
-    }
-
-    .modal-backdrop {
-        background: rgba(15, 23, 42, 0.55);
-        backdrop-filter: blur(2px);
-    }
-
-    .odontogram-layout {
-        align-items: start;
-    }
-
-    .odontogram-left-panel {
-        position: relative;
+    .odontogram-left-panel,
+    .odontogram-right-shell {
+        position: static;
         top: auto;
         height: auto;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
+    }
+
+    .odontogram-right-scroll {
+        overflow-y: visible;
+        padding-right: 0;
+        margin-top: 1rem;
+        max-height: none;
+    }
+
+    .odontogram-right-bottom {
+        margin-top: 1rem;
     }
 
     .left-view-shell {
         min-height: auto;
-        display: flex;
-        flex-direction: column;
     }
+}
 
-    .odontogram-right-shell {
-        position: relative;
-        top: auto;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    .odontogram-right-top {
-        flex-shrink: 0;
-    }
-
-    .odontogram-right-scroll {
-        overflow: visible;
-        flex: unset;
-        padding-right: 0;
-    }
-
-    .odontogram-right-bottom {
-        flex-shrink: 0;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid #F3F4F6;
-        background: #ffffff;
-    }
-
-    .legend-drawer-open {
-        overflow: hidden;
-    }
-
-    .legend-drawer-header {
-        position: sticky;
-        top: 0;
-        z-index: 2;
-    }
-
-    #legendDrawer {
-        transform: translateX(100%);
-    }
-
-    #legendDrawer.open {
-        transform: translateX(0);
-    }
-
-    .legend-category-block {
-        border: 1px solid #F1F5F9;
-        border-radius: 18px;
-        background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
-        overflow: hidden;
-    }
-
-    .legend-category-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 14px 16px;
-        background: #FAFAFA;
-        border-bottom: 1px solid #F3F4F6;
-    }
-
-    .legend-category-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    #legendDrawerBackdrop {
-        display: none;
-    }
-
-    #legendDrawerBackdrop.show {
-        display: block;
-    }
-
-    .legend-category-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 12px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: #FEF2F2;
-        color: #8B0000;
-        flex-shrink: 0;
-    }
-
-    .legend-category-body {
-        padding: 14px;
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .legend-category-count {
-        font-size: 11px;
-        font-weight: 700;
-        color: #6B7280;
-        background: #F3F4F6;
-        border-radius: 999px;
-        padding: 5px 10px;
-    }
-
-    .legend-btn {
-        border-radius: 16px;
-    }
-
-    .legend-btn .legend-meta {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        min-width: 0;
-    }
-
-    .legend-btn .legend-code {
-        font-size: 11px;
-        font-weight: 800;
-        color: #8B0000;
-        line-height: 1;
-        margin-bottom: 3px;
-    }
-
-    .legend-btn .legend-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #374151;
-        line-height: 1.25;
-        text-align: left;
-    }
-
-    .legend-btn.active .legend-label,
-    .legend-btn.active .legend-code {
-        color: #8B0000;
-    }
-
-    .mode-panel {
-        display: none;
-    }
-
-    .mode-panel.active {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    #odontogram2DPanel,
-    #odontogram3DPanel {
-        flex: 1;
-        min-height: 0;
-    }
-
+@media (max-width: 768px) {
     #canvas-container {
-        flex: 1;
-        min-height: 520px;
-    }
-
-    #canvas-container:active {
-        cursor: grabbing;
+        height: 340px;
     }
 
     .odontogram2d-shell {
-        width: 100%;
-        overflow-x: auto;
-        overflow-y: hidden;
-    }
-
-    .odontogram-left-panel,
-    .left-view-shell,
-    .mode-panel.active {
-        min-height: 0;
+        padding: 12px;
     }
 
     .odontogram-board {
-        min-width: fit-content;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-        margin: 0 auto;
-        padding-bottom: 10px;
+        min-width: 760px;
     }
+}
 
-    .odontogram-row {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 4px;
-        flex-wrap: nowrap;
-        min-width: fit-content;
-    }
+.odontogram-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
 
-    .arch-divider {
-        margin-bottom: 16px;
-    }
+.odontogram-hero-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
 
-    .tooth-unit {
-        width: 40px;
-        min-width: 40px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-        flex-shrink: 0;
-    }
+.odontogram-hero-left {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch;
+    min-width: 0;
+    flex-wrap: wrap;
+}
 
-    .status-box {
-        width: 28px;
-        height: 40px;
-        border: 1.5px solid #8B0000;
-        border-radius: 4px;
-        background: #ffffff;
-        position: relative;
-        cursor: pointer;
-        transition: all 0.18s ease;
-        flex-shrink: 0;
-    }
+.hero-danger-btn {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    z-index: 5;
 
-    .status-box::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 50%;
-        height: 1.5px;
-        background: #8B0000;
-        transform: translateY(-50%);
-    }
+    width: 42px;
+    height: 42px;
+    padding: 0;
 
-    .status-box:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(139, 0, 0, 0.12);
-        background: #FEF2F2;
-    }
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    .status-box.selected-target {
-        outline: 2.5px solid rgba(139, 0, 0, 0.2);
-        background: #FEE2E2;
-    }
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #e5e7eb;
+    color: #8b0000;
+    text-decoration: none;
+    overflow: visible;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(6px);
+    transition: all 0.2s ease;
+}
 
-    .tooth-number {
-        font-size: 10px;
-        font-weight: 700;
-        color: #4B5563;
-        line-height: 1;
-    }
+.hero-danger-btn span {
+    display: none;
+}
 
-    .tooth-2d-wrapper {
-        width: 38px;
-        height: 38px;
-        min-height: 38px;
-        border-radius: 50%;
-        border: 1.5px solid #111827;
-        background: #ffffff;
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
 
-    .tooth-svg {
-        width: 100%;
-        height: 100%;
-        transform: scale(1.02);
-    }
+.hero-danger-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 10px);
+    transform: translateY(-50%) translateX(-4px);
+    background: rgba(17, 24, 39, 0.96);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 8px 10px;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.18s ease;
+}
 
-    .surface-part {
-        fill: #ffffff;
-        stroke: #111827;
-        stroke-width: 3px;
-        cursor: pointer;
-        transition: fill 0.15s ease, stroke 0.15s ease;
-    }
+.hero-danger-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 4px);
+    width: 8px;
+    height: 8px;
+    background: rgba(17, 24, 39, 0.96);
+    transform: translateY(-50%) rotate(45deg);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.18s ease;
+}
 
-    .surface-part:hover {
-        fill: #E5E7EB;
-    }
+.hero-danger-btn:hover::after,
+.hero-danger-btn:hover::before,
+.hero-danger-btn:focus-visible::after,
+.hero-danger-btn:focus-visible::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) translateX(0);
+}
 
-    .surface-part.selected-target {
-        fill: #FEE2E2;
-        stroke: #8B0000;
-        stroke-width: 4px;
-    }
+@media (max-width: 768px) {
 
-    .surface-center {
-        stroke-width: 2.5px;
-    }
-
-    .status-label-left {
-        width: 52px;
-        min-width: 52px;
-        text-align: right;
-        font-weight: 800;
-        font-size: 10px;
-        line-height: 1.2;
-        color: #8B0000;
-        padding-right: 12px;
-        text-transform: uppercase;
-    }
-
-    .status-label-right {
-        width: 52px;
-        min-width: 52px;
-        text-align: left;
-        font-weight: 800;
-        font-size: 11px;
-        line-height: 1.2;
-        color: #8B0000;
-        padding-left: 12px;
-        text-transform: uppercase;
-    }
-
-    @media (max-width: 1280px) {
-        #canvas-container {
-            height: 420px;
-        }
-
-        .odontogram-left-panel,
-        .odontogram-right-shell {
-            position: static;
-            top: auto;
-            height: auto;
-        }
-
-        .odontogram-right-scroll {
-            overflow-y: visible;
-            padding-right: 0;
-            margin-top: 1rem;
-            max-height: none;
-        }
-
-        .odontogram-right-bottom {
-            margin-top: 1rem;
-        }
-
-        .left-view-shell {
-            min-height: auto;
-        }
-    }
-
-    @media (max-width: 768px) {
-        #canvas-container {
-            height: 340px;
-        }
-
-        .odontogram2d-shell {
-            padding: 12px;
-        }
-
-        .odontogram-board {
-            min-width: 760px;
-        }
-    }
-
-    .odontogram-hero {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .odontogram-hero-main {
-        display: grid;
-        grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr);
-        gap: 1rem;
-        align-items: stretch;
-    }
-
-    .odontogram-hero-left {
-        display: flex;
-        gap: 1rem;
-        align-items: stretch;
-        min-width: 0;
-        flex-wrap: wrap;
-    }
-
-    .hero-danger-btn {
-        position: absolute;
-        top: 18px;
-        left: 18px;
-        z-index: 5;
-
-        width: 42px;
-        height: 42px;
-        padding: 0;
-
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.96);
-        border: 1px solid #e5e7eb;
-        color: #8b0000;
-        text-decoration: none;
-        overflow: visible;
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
-        backdrop-filter: blur(6px);
-        transition: all 0.2s ease;
-    }
-
-    .hero-danger-btn span {
+    .hero-danger-btn::after,
+    .hero-danger-btn::before {
         display: none;
     }
+}
 
+.hero-danger-btn:hover {
+    transform: translateY(-1px) scale(1.03);
+    background: #fff1f2;
+    border-color: #fca5a5;
+    color: #7f1d1d;
+    box-shadow: 0 14px 28px rgba(139, 0, 0, 0.14);
+}
 
-    .hero-danger-btn::after {
-        content: attr(data-tooltip);
-        position: absolute;
-        top: 50%;
-        left: calc(100% + 10px);
-        transform: translateY(-50%) translateX(-4px);
-        background: rgba(17, 24, 39, 0.96);
-        color: #fff;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        line-height: 1;
-        white-space: nowrap;
-        padding: 8px 10px;
-        border-radius: 10px;
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transition: all 0.18s ease;
+.hero-danger-btn:active {
+    transform: scale(0.98);
+}
+
+.hero-patient-card {
+    padding: 1rem 1.2rem;
+    border-radius: 20px;
+}
+
+.hero-title-card,
+.hero-patient-card {
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    border: 1px solid #e5e7eb;
+    border-radius: 24px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.hero-title-card {
+    position: relative;
+    padding: 1.4rem 1.6rem 1.4rem 4.8rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1 1 420px;
+    min-width: 0;
+}
+
+.hero-title-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #8b0000 0%, #b91c1c 100%);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 10px 20px rgba(139, 0, 0, 0.18);
+    flex-shrink: 0;
+}
+
+.hero-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #9ca3af;
+    margin-bottom: 4px;
+}
+
+.hero-title {
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: 900;
+    color: #8b0000;
+    margin: 0 0 0.35rem;
+}
+
+.hero-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.hero-patient-label {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dc2626;
+    margin-bottom: 0.5rem;
+}
+
+.hero-patient-name {
+    margin: 0;
+    color: #111827;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1.05;
+}
+
+.hero-procedure-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.hero-stat {
+    min-width: 122px;
+    padding: 0.7rem 0.85rem;
+    border-radius: 16px;
+}
+
+.hero-stat-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 6px;
+}
+
+.hero-stat-value {
+    display: block;
+    color: #8b0000;
+    font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.hero-stat-date {
+    display: block;
+    color: #4b5563;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.toolbar-group-tools {
+    margin-right: auto;
+}
+
+.toolbar-group-view {
+    margin-left: auto;
+    align-items: flex-end;
+}
+
+.toolbar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.toolbar-label {
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #9ca3af;
+}
+
+.toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.toolbar-soft-btn {
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+    font-size: 15px;
+    font-weight: 800;
+    transition: all 0.2s ease;
+}
+
+.toolbar-soft-btn:hover:not(:disabled) {
+    background: #fff7f7;
+    border-color: #fecaca;
+    color: #8b0000;
+}
+
+.toolbar-soft-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.odontogram-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    border: 1px solid #e5e7eb;
+    border-radius: 22px;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+    padding: 1rem 1.2rem;
+    position: relative;
+    transition:
+        transform 0.32s ease,
+        opacity 0.32s ease,
+        box-shadow 0.32s ease,
+        background 0.32s ease,
+        border-color 0.32s ease;
+    transform: translateY(0);
+    will-change: transform, opacity;
+}
+
+.odontogram-toolbar-sentinel {
+    width: 100%;
+    height: 1px;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .odontogram-toolbar {
+        flex-direction: column;
     }
+}
 
-    .hero-danger-btn::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: calc(100% + 4px);
-        width: 8px;
-        height: 8px;
-        background: rgba(17, 24, 39, 0.96);
-        transform: translateY(-50%) rotate(45deg);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.18s ease;
-    }
+.right-panel-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
 
-    .hero-danger-btn:hover::after,
-    .hero-danger-btn:hover::before,
-    .hero-danger-btn:focus-visible::after,
-    .hero-danger-btn:focus-visible::before {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(-50%) translateX(0);
-    }
+.right-section-card {
+    border: 1px solid #eceef2;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+    overflow: hidden;
+}
 
-    @media (max-width: 768px) {
+.right-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1rem 0.85rem;
+    border-bottom: 1px solid #f3f4f6;
+}
 
-        .hero-danger-btn::after,
-        .hero-danger-btn::before {
-            display: none;
-        }
-    }
+.right-section-body {
+    padding: 1rem;
+}
 
-    .hero-danger-btn:hover {
-        transform: translateY(-1px) scale(1.03);
-        background: #fff1f2;
-        border-color: #fca5a5;
-        color: #7f1d1d;
-        box-shadow: 0 14px 28px rgba(139, 0, 0, 0.14);
-    }
+.right-section-eyebrow {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 4px;
+}
 
-    .hero-danger-btn:active {
-        transform: scale(0.98);
+.right-section-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #111827;
+}
+
+@media (max-width: 1200px) {
+    .odontogram-hero-main {
+        grid-template-columns: 1fr;
     }
 
     .hero-patient-card {
-        padding: 1rem 1.2rem;
-        border-radius: 20px;
-    }
-
-    .hero-title-card,
-    .hero-patient-card {
-        background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
-        border: 1px solid #e5e7eb;
-        border-radius: 24px;
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
-    }
-
-    .hero-title-card {
-        position: relative;
-        padding: 1.4rem 1.6rem 1.4rem 4.8rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex: 1 1 420px;
-        min-width: 0;
-    }
-
-    .hero-title-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #8b0000 0%, #b91c1c 100%);
-        color: #fff;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-        box-shadow: 0 10px 20px rgba(139, 0, 0, 0.18);
-        flex-shrink: 0;
-    }
-
-    .hero-eyebrow {
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: #9ca3af;
-        margin-bottom: 4px;
-    }
-
-    .hero-title {
-        font-size: 2rem;
-        line-height: 1;
-        font-weight: 900;
-        color: #8b0000;
-        margin: 0 0 0.35rem;
-    }
-
-    .hero-subtitle {
-        margin: 0;
-        color: #6b7280;
-        font-size: 1.05rem;
-        font-weight: 600;
-    }
-
-    .hero-patient-label {
-        font-size: 11px;
-        font-weight: 900;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: #dc2626;
-        margin-bottom: 0.5rem;
-    }
-
-    .hero-patient-name {
-        margin: 0;
-        color: #111827;
-        font-size: 2rem;
-        font-weight: 900;
-        line-height: 1.05;
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .hero-procedure-meta {
-        display: flex;
-        gap: 1rem;
-        align-items: stretch;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .odontogram-hero-left {
+        flex-direction: column;
+    }
+
+    .hero-danger-btn {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        top: 14px;
+        left: 14px;
+    }
+
+    .hero-title-card {
+        padding: 1.1rem 1rem 1.1rem 4.1rem;
+    }
+
+    .hero-title {
+        font-size: 1.5rem;
+    }
+
+    .hero-patient-name {
+        font-size: 1.55rem;
+    }
+
+    .hero-procedure-meta {
+        flex-direction: column;
     }
 
     .hero-stat {
-        min-width: 122px;
-        padding: 0.7rem 0.85rem;
-        border-radius: 16px;
-    }
-
-    .hero-stat-label {
-        display: block;
-        font-size: 10px;
-        font-weight: 900;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #9ca3af;
-        margin-bottom: 6px;
-    }
-
-    .hero-stat-value {
-        display: block;
-        color: #8b0000;
-        font-size: 1.35rem;
-        font-weight: 900;
-        line-height: 1;
-    }
-
-    .hero-stat-date {
-        display: block;
-        color: #4b5563;
-        font-size: 0.95rem;
-        font-weight: 700;
-        line-height: 1.1;
-    }
-
-    .toolbar-group-tools {
-        margin-right: auto;
-    }
-
-    .toolbar-group-view {
-        margin-left: auto;
-        align-items: flex-end;
-    }
-
-    .toolbar-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.55rem;
-    }
-
-    .toolbar-label {
-        font-size: 11px;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: #9ca3af;
-    }
-
-    .toolbar-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
-    }
-
-    .toolbar-soft-btn {
-        width: 46px;
-        min-width: 46px;
-        height: 46px;
-        min-height: 46px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        border-radius: 16px;
-        border: 1px solid #e5e7eb;
-        background: #fff;
-        color: #374151;
-        font-size: 15px;
-        font-weight: 800;
-        transition: all 0.2s ease;
-    }
-
-    .toolbar-soft-btn:hover:not(:disabled) {
-        background: #fff7f7;
-        border-color: #fecaca;
-        color: #8b0000;
-    }
-
-    .toolbar-soft-btn:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
+        width: 100%;
+        text-align: left;
     }
 
     .odontogram-toolbar {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: flex-end;
-        gap: 1rem;
-        background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
-        border: 1px solid #e5e7eb;
-        border-radius: 22px;
-        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
-        padding: 1rem 1.2rem;
-        position: relative;
-        transition:
-            transform 0.32s ease,
-            opacity 0.32s ease,
-            box-shadow 0.32s ease,
-            background 0.32s ease,
-            border-color 0.32s ease;
-        transform: translateY(0);
-        will-change: transform, opacity;
-    }
-
-    .odontogram-toolbar-sentinel {
-        width: 100%;
-        height: 1px;
-        pointer-events: none;
-    }
-
-    @media (max-width: 768px) {
-        .odontogram-toolbar {
-            flex-direction: column;
-        }
-    }
-
-    .right-panel-sections {
-        display: flex;
         flex-direction: column;
-        gap: 1rem;
     }
+}
 
-    .right-section-card {
-        border: 1px solid #eceef2;
-        border-radius: 20px;
-        background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
-        overflow: hidden;
-    }
+.right-section-body textarea {
+    width: 100%;
+    min-width: 100%;
+    min-height: 160px;
+}
 
-    .right-section-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 1rem 1rem 0.85rem;
-        border-bottom: 1px solid #f3f4f6;
-    }
-
-    .right-section-body {
-        padding: 1rem;
-    }
-
-    .right-section-eyebrow {
-        font-size: 11px;
-        font-weight: 900;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #9ca3af;
-        margin-bottom: 4px;
-    }
-
-    .right-section-title {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 800;
-        color: #111827;
-    }
-
-    @media (max-width: 1200px) {
-        .odontogram-hero-main {
-            grid-template-columns: 1fr;
-        }
-
-        .hero-patient-card {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .hero-procedure-meta {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .odontogram-hero-left {
-            flex-direction: column;
-        }
-
-        .hero-danger-btn {
-            width: 40px;
-            height: 40px;
-            min-width: 40px;
-            top: 14px;
-            left: 14px;
-        }
-
-        .hero-title-card {
-            padding: 1.1rem 1rem 1.1rem 4.1rem;
-        }
-
-        .hero-title {
-            font-size: 1.5rem;
-        }
-
-        .hero-patient-name {
-            font-size: 1.55rem;
-        }
-
-        .hero-procedure-meta {
-            flex-direction: column;
-        }
-
-        .hero-stat {
-            width: 100%;
-            text-align: left;
-        }
-
-        .odontogram-toolbar {
-            flex-direction: column;
-        }
-    }
-
-    .right-section-body textarea {
-        width: 100%;
-        min-width: 100%;
-        min-height: 160px;
-    }
-
-    .right-panel-sections .right-section-card {
-        overflow: visible;
-    }
-
-/* =========================================================
-   ODONTOGRAM DARK MODE
-   Scoped to: #mainContent.odontogram-page
-   No sidebar/layout hiding.
-   ========================================================= */
+.right-panel-sections .right-section-card {
+    overflow: visible;
+}
 
 .odontogram-page {
     --odo-card: #ffffff;
@@ -1037,7 +1031,6 @@
     color: var(--odo-text) !important;
 }
 
-/* Cards / panels */
 [data-theme="dark"] #mainContent.odontogram-page .glass-panel,
 [data-theme="dark"] #mainContent.odontogram-page .soft-card,
 [data-theme="dark"] #mainContent.odontogram-page .hero-title-card,
@@ -1073,7 +1066,6 @@
     border-top-color: var(--odo-border) !important;
 }
 
-/* Text */
 [data-theme="dark"] #mainContent.odontogram-page .hero-title,
 [data-theme="dark"] #mainContent.odontogram-page .hero-patient-name,
 [data-theme="dark"] #mainContent.odontogram-page .right-section-title,
@@ -1124,7 +1116,6 @@
     color: var(--odo-accent) !important;
 }
 
-/* Generic utility backgrounds inside page */
 [data-theme="dark"] #mainContent.odontogram-page .bg-white,
 [data-theme="dark"] #mainContent.odontogram-page .bg-gray-50,
 [data-theme="dark"] #mainContent.odontogram-page .bg-gray-100,
@@ -1142,7 +1133,6 @@
     border-color: var(--odo-border) !important;
 }
 
-/* Top cancel button */
 [data-theme="dark"] #mainContent.odontogram-page .hero-danger-btn,
 .dark #mainContent.odontogram-page .hero-danger-btn {
     background: rgba(13, 17, 23, 0.78) !important;
@@ -1158,7 +1148,6 @@
     color: #FFFFFF !important;
 }
 
-/* Toolbar buttons */
 [data-theme="dark"] #mainContent.odontogram-page .toolbar-soft-btn,
 [data-theme="dark"] #mainContent.odontogram-page .view-toggle-btn,
 .dark #mainContent.odontogram-page .toolbar-soft-btn,
@@ -1193,7 +1182,6 @@
     box-shadow: 0 10px 24px rgba(139, 0, 0, 0.35) !important;
 }
 
-/* Selected tooth panel */
 [data-theme="dark"] #mainContent.odontogram-page #selectedViewBadge,
 .dark #mainContent.odontogram-page #selectedViewBadge {
     background: rgba(139, 0, 0, 0.20) !important;
@@ -1222,7 +1210,6 @@
     border-color: rgba(252, 165, 165, 0.26) !important;
 }
 
-/* Action buttons */
 [data-theme="dark"] #mainContent.odontogram-page .primary-action-btn,
 .dark #mainContent.odontogram-page .primary-action-btn {
     background: linear-gradient(135deg, #8B0000, #B91C1C) !important;
@@ -1264,7 +1251,6 @@
     box-shadow: 0 10px 24px rgba(139, 0, 0, 0.35) !important;
 }
 
-/* Inputs / textareas */
 [data-theme="dark"] #mainContent.odontogram-page textarea,
 .dark #mainContent.odontogram-page textarea {
     background: rgba(13, 17, 23, 0.72) !important;
@@ -1277,7 +1263,6 @@
     color: #64748B !important;
 }
 
-/* 2D odontogram */
 [data-theme="dark"] #mainContent.odontogram-page .tooth-number,
 .dark #mainContent.odontogram-page .tooth-number {
     color: #CBD5E1 !important;
@@ -1336,7 +1321,6 @@
     stroke: #FCA5A5;
 }
 
-/* 3D canvas */
 [data-theme="dark"] #mainContent.odontogram-page #canvas-container,
 .dark #mainContent.odontogram-page #canvas-container {
     background: #0D1117 !important;
@@ -1351,7 +1335,6 @@
     color: #CBD5E1 !important;
 }
 
-/* Legend drawer */
 [data-theme="dark"] body:has(#mainContent.odontogram-page) #legendDrawer,
 .dark body:has(#mainContent.odontogram-page) #legendDrawer {
     background:
@@ -1470,7 +1453,6 @@
     backdrop-filter: blur(3px);
 }
 
-/* Modals */
 [data-theme="dark"] body:has(#mainContent.odontogram-page) #resetTreatmentModal .relative,
 [data-theme="dark"] body:has(#mainContent.odontogram-page) #cancelProcedureModal .relative,
 .dark body:has(#mainContent.odontogram-page) #resetTreatmentModal .relative,
@@ -1505,18 +1487,12 @@
     border: 1px solid rgba(203, 213, 225, 0.18) !important;
 }
 
-/* Scrollbar */
 [data-theme="dark"] #mainContent.odontogram-page .custom-scrollbar::-webkit-scrollbar-thumb,
 .dark #mainContent.odontogram-page .custom-scrollbar::-webkit-scrollbar-thumb,
 [data-theme="dark"] body:has(#mainContent.odontogram-page) .custom-scrollbar::-webkit-scrollbar-thumb,
 .dark body:has(#mainContent.odontogram-page) .custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(148, 163, 184, 0.32) !important;
 }
-
-/* =========================================================
-   ODONTOGRAM DARK MODE TUNING
-   Glass look for selected legend / preview containers
-   ========================================================= */
 
 [data-theme="dark"] #mainContent.odontogram-page .soft-card,
 [data-theme="dark"] #mainContent.odontogram-page .selected-tooth-card,
@@ -1535,7 +1511,6 @@
     -webkit-backdrop-filter: blur(14px) saturate(140%);
 }
 
-/* selected legend display / selected target display */
 [data-theme="dark"] #mainContent.odontogram-page #selectedToothDisplay,
 [data-theme="dark"] #legendDrawer #drawerSelectedLegendPreview,
 [data-theme="dark"] #mainContent.odontogram-page #selectedLegendPreview,
@@ -1547,7 +1522,6 @@
     color: #FCA5A5 !important;
 }
 
-/* labels inside those cards */
 [data-theme="dark"] #mainContent.odontogram-page .selected-tooth-card .text-gray-500,
 [data-theme="dark"] #legendDrawer .soft-card .text-gray-500,
 .dark #mainContent.odontogram-page .selected-tooth-card .text-gray-500,
@@ -1555,7 +1529,6 @@
     color: #94A3B8 !important;
 }
 
-/* general legend text a bit softer but readable */
 [data-theme="dark"] #mainContent.odontogram-page .selected-tooth-card,
 [data-theme="dark"] #legendDrawer .soft-card,
 .dark #mainContent.odontogram-page .selected-tooth-card,
@@ -1563,7 +1536,6 @@
     color: #E5E7EB !important;
 }
 
-/* marker / color dot a bit deeper-looking in dark mode */
 [data-theme="dark"] #mainContent.odontogram-page .legend-color-dot,
 [data-theme="dark"] #legendDrawer .legend-color-dot,
 .dark #mainContent.odontogram-page .legend-color-dot,

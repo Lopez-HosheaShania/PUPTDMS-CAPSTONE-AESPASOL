@@ -5,10 +5,25 @@
 @section('content')
 <main id="mainContent" class="admin-page-shell cms-page page-enter">
     <div class="cms-shell">
-        <div class="page-banner">
-            <div class="page-banner-inner">
-                <div>
-                    <h1 class="page-title">Assign CMS Access</h1>
+        <div class="page-banner cms-banner"
+            style="display:flex!important;align-items:center!important;
+                    justify-content:flex-start!important;text-align:left!important;">
+            <div class="page-banner-inner cms-banner-inner"
+                style="width:100%!important;max-width:none!important;
+                        margin:0!important;display:flex!important;
+                        align-items:center!important;justify-content:flex-start!important;
+                        text-align:left!important;">
+                <div class="cms-banner-title-wrap"
+                    style="width:100%!important;margin:0!important;
+                            display:flex!important;align-items:center!important;
+                            justify-content:flex-start!important;text-align:left!important;">
+                    <h1 class="page-title cms-banner-title"
+                        style="display:block!important;width:auto!important;
+                                margin:0!important;margin-left:0!important;
+                                margin-right:auto!important;text-align:left!important;
+                                justify-self:start!important;align-self:center!important;">
+                        Assign CMS Access
+                    </h1>
                 </div>
             </div>
         </div>

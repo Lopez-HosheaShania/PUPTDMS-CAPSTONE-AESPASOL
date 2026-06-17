@@ -297,6 +297,7 @@
 
                     <form method="POST" action="{{ $logoutRoute }}" style="margin: 0;">
                         @csrf
+                        <input type="hidden" name="client_id" value="{{ config('services.oidc.client_id') }}">
                         <button type="submit" class="dropdown-menu-item dropdown-logout-item">
                             <div class="dropdown-item-content">
                                 <i class="fa-solid fa-right-from-bracket text-red-500 text-base"></i>

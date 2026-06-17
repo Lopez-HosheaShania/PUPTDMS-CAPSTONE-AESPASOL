@@ -21,155 +21,160 @@
             </div>
         </div>
 
-        <div class="relative z-10 mt-4 px-4 sm:px-6 lg:px-7 pb-8">
+        <div class="relative z-10 mt-4 sm:px-6 lg:px-7 pb-8">
 
-        <div class="stat-grid inventory-stat-grid" id="statCards">
-            <div class="stat-card s-total">
-                <div class="stat-card-info">
-                    <div class="stat-label">Total Items</div>
-                    <div class="stat-value" id="statTotal">—</div>
-                    <div class="stat-footer">all categories</div>
+            <div class="stat-grid inventory-stat-grid" id="statCards">
+                <div class="stat-card s-total">
+                    <div class="stat-card-info">
+                        <div class="stat-label">Total Items</div>
+                        <div class="stat-value" id="statTotal">—</div>
+                        <div class="stat-footer">all categories</div>
+                    </div>
+                    <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
                 </div>
-                <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                <div class="stat-card s-medicine">
+                    <div class="stat-card-info">
+                        <div class="stat-label">Medicines</div>
+                        <div class="stat-value" id="statMedicine">—</div>
+                        <div class="stat-footer">pharmaceutical</div>
+                    </div>
+                    <div class="stat-icon"><i class="fa-solid fa-pills"></i></div>
+                </div>
+                <div class="stat-card s-supplies">
+                    <div class="stat-card-info">
+                        <div class="stat-label">Supplies</div>
+                        <div class="stat-value" id="statSupplies">—</div>
+                        <div class="stat-footer">consumables</div>
+                    </div>
+                    <div class="stat-icon"><i class="fa-solid fa-syringe"></i></div>
+                </div>
+                <div class="stat-card s-low">
+                    <div class="stat-card-info">
+                        <div class="stat-label">Low Stock</div>
+                        <div class="stat-value" id="statLow">—</div>
+                        <div class="stat-footer">need restocking</div>
+                    </div>
+                    <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                </div>
             </div>
-            <div class="stat-card s-medicine">
-                <div class="stat-card-info">
-                    <div class="stat-label">Medicines</div>
-                    <div class="stat-value" id="statMedicine">—</div>
-                    <div class="stat-footer">pharmaceutical</div>
+
+            <div class="inventory-table-card bg-white rounded-xl shadow-sm border border-[#EDE9E4] overflow-hidden">
+
+                <div class="px-4 sm:px-5 py-4 border-b border-[#EDE9E4] flex flex-col gap-4">
+                    <div class="inventory-toolbar-shell flex flex-col lg:flex-row lg:items-center justify-between">
+
+                        <div
+                            class="inventory-category-row flex items-center justify-between sm:justify-start gap-3 w-full lg:w-auto">
+                            <div class="tab-group w-full sm:w-auto flex" role="tablist" aria-label="Inventory category">
+                                <button type="button" data-tab="all" aria-selected="true"
+                                    class="tab-btn active flex-1 sm:flex-none" onclick="setTab('all',this)">All</button>
+
+                                <button type="button" data-tab="medicine" aria-selected="false"
+                                    class="tab-btn flex-1 sm:flex-none"
+                                    onclick="setTab('medicine',this)">Medicine</button>
+
+                                <button type="button" data-tab="supplies" aria-selected="false"
+                                    class="tab-btn flex-1 sm:flex-none"
+                                    onclick="setTab('supplies',this)">Supplies</button>
+                            </div>
+
+                            <span class="row-count row-count-desktop js-row-count" aria-live="polite"></span>
+                        </div>
+
+                        <div class="toolbar-actions w-full lg:w-auto">
+
+                            <div class="inventory-search-row voice-search-row">
+                                <div class="search-wrap global-search flex-1" data-search-wrapper>
+                                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+
+                                    <input type="text" id="searchInput" placeholder="Search Stock No." data-search-input
+                                        class="search-input" oninput="renderTable()" />
+
+                                    <button type="button" class="search-clear" data-search-clear
+                                        aria-label="Clear search">
+                                        <i class="fa-solid fa-xmark text-xs"></i>
+                                    </button>
+                                </div>
+
+                                <div class="voice-input-toggle">
+                                    <button type="button" id="invMicToggleBtn" class="voice-search-mic external"
+                                        data-voice-trigger data-voice-target="#searchInput"
+                                        data-voice-status="#invVoiceStatus" aria-label="Voice search inventory">
+                                        <i class="fa-solid fa-microphone"></i>
+                                    </button>
+                                    <span id="invVoiceStatus" class="voice-status hidden" data-voice-status
+                                        aria-live="polite"></span>
+                                </div>
+                            </div>
+
+                            <div class="inventory-mobile-actions">
+
+                                <button id="filterBtn" type="button" onclick="openFilterPanel()"
+                                    class="global-filter-btn">
+                                    <i class="fa-solid fa-sliders"></i>
+                                    <span>Filter</span>
+                                    <span id="filterBadge" class="filter-badge"></span>
+                                </button>
+
+                                <div class="view-toggle-container" data-global-view-toggle data-view-root="#mainContent"
+                                    data-storage-key="ViewToggleMode" aria-label="View options">
+                                    <span class="view-slider" aria-hidden="true"></span>
+
+                                    <button type="button" class="btn-view-mode active" title="List view"
+                                        aria-label="List view" aria-pressed="true" data-view-mode="list">
+                                        <i class="fa-solid fa-list"></i>
+                                    </button>
+
+                                    <button type="button" class="btn-view-mode" title="Grid view" aria-label="Grid view"
+                                        aria-pressed="false" data-view-mode="grid">
+                                        <i class="fa-solid fa-grip"></i>
+                                    </button>
+                                </div>
+
+                                <button id="externalClearFilterBtn" type="button" onclick="clearFilterPanel()"
+                                    class="global-filter-reset-btn hidden" title="Reset filters">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                </button>
+
+                                <button type="button" onclick="openAddModal()"
+                                    class="btn-add inventory-add-btn justify-center">
+                                    <span class="add-icon"><i class="fa-solid fa-plus"></i></span>
+                                    <span>Add Item</span>
+                                </button>
+
+                                <span class="row-count row-count-mobile js-row-count" aria-live="polite"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-icon"><i class="fa-solid fa-pills"></i></div>
-            </div>
-            <div class="stat-card s-supplies">
-                <div class="stat-card-info">
-                    <div class="stat-label">Supplies</div>
-                    <div class="stat-value" id="statSupplies">—</div>
-                    <div class="stat-footer">consumables</div>
+
+                <div id="tableWrapper" class="overflow-x-auto">
+                    <table class="d-inv-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Stock No.</th>
+                                <th>Supply / Medicine</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Used</th>
+                                <th>Balance</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
                 </div>
-                <div class="stat-icon"><i class="fa-solid fa-syringe"></i></div>
-            </div>
-            <div class="stat-card s-low">
-                <div class="stat-card-info">
-                    <div class="stat-label">Low Stock</div>
-                    <div class="stat-value" id="statLow">—</div>
-                    <div class="stat-footer">need restocking</div>
+
+                <div id="inventoryGrid" class="inventory-grid"></div>
+                <div id="emptyState" class="empty-state-host"></div>
+
+                <div class="table-footer-bar">
+                    <span class="text-xs text-gray-400" id="pageInfo"></span>
+                    <div></div>
                 </div>
-                <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             </div>
         </div>
-        
-        <div class="inventory-table-card bg-white rounded-xl shadow-sm border border-[#EDE9E4] overflow-hidden">
-
-            <div class="px-4 sm:px-5 py-4 border-b border-[#EDE9E4] flex flex-col gap-4">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-
-                    <div
-                        class="inventory-category-row flex items-center justify-between sm:justify-start gap-3 w-full lg:w-auto">
-                        <div class="tab-group w-full sm:w-auto flex" role="tablist" aria-label="Inventory category">
-                            <button type="button" data-tab="all" aria-selected="true"
-                                class="tab-btn active flex-1 sm:flex-none" onclick="setTab('all',this)">All</button>
-
-                            <button type="button" data-tab="medicine" aria-selected="false"
-                                class="tab-btn flex-1 sm:flex-none" onclick="setTab('medicine',this)">Medicine</button>
-
-                            <button type="button" data-tab="supplies" aria-selected="false"
-                                class="tab-btn flex-1 sm:flex-none" onclick="setTab('supplies',this)">Supplies</button>
-                        </div>
-
-                        <span class="row-count row-count-desktop js-row-count" aria-live="polite"></span>
-                    </div>
-
-                    <div class="toolbar-actions w-full lg:w-auto">
-
-                        <div class="inventory-search-row voice-search-row">
-                            <div class="search-wrap global-search flex-1" data-search-wrapper>
-                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-
-                                <input type="text" id="searchInput" placeholder="Search Stock No., Name…"
-                                    data-search-input class="search-input" oninput="renderTable()" />
-
-                                <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
-                                    <i class="fa-solid fa-xmark text-xs"></i>
-                                </button>
-                            </div>
-
-                            <div class="voice-input-toggle">
-                                <button type="button" id="invMicToggleBtn" class="voice-search-mic external"
-                                    data-voice-trigger data-voice-target="#searchInput"
-                                    data-voice-status="#invVoiceStatus" aria-label="Voice search inventory">
-                                    <i class="fa-solid fa-microphone"></i>
-                                </button>
-                                <span id="invVoiceStatus" class="voice-status hidden" data-voice-status
-                                    aria-live="polite"></span>
-                            </div>
-                        </div>
-
-                        <div class="inventory-mobile-actions">
-
-                            <button id="filterBtn" type="button" onclick="openFilterPanel()" class="global-filter-btn">
-                                <i class="fa-solid fa-sliders"></i>
-                                <span>Filter</span>
-                                <span id="filterBadge" class="filter-badge"></span>
-                            </button>
-
-                            <div class="view-toggle-container inventory-view-toggle" id="viewToggle">
-                                <div class="view-slider"></div>
-
-                                <button type="button" class="btn-view-mode active" data-view="list"
-                                    onclick="setViewMode('list', this)" title="List View">
-                                    <i class="fa-solid fa-list"></i>
-                                </button>
-
-                                <button type="button" class="btn-view-mode" data-view="grid"
-                                    onclick="setViewMode('grid', this)" title="Grid View">
-                                    <i class="fa-solid fa-grip"></i>
-                                </button>
-                            </div>
-
-                            <button id="externalClearFilterBtn" type="button" onclick="clearFilterPanel()"
-                                class="global-filter-reset-btn hidden" title="Reset filters">
-                                <i class="fa-solid fa-rotate-left"></i>
-                            </button>
-
-                            <button type="button" onclick="openAddModal()"
-                                class="btn-add inventory-add-btn justify-center">
-                                <span class="add-icon"><i class="fa-solid fa-plus"></i></span>
-                                <span>Add Item</span>
-                            </button>
-
-                            <span class="row-count row-count-mobile js-row-count" aria-live="polite"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tableWrapper" class="overflow-x-auto">
-                <table class="d-inv-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Stock No.</th>
-                            <th>Supply / Medicine</th>
-                            <th>Unit</th>
-                            <th>Qty</th>
-                            <th>Used</th>
-                            <th>Balance</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-
-            <div id="inventoryGrid" class="inventory-grid"></div>
-            <div id="emptyState" class="empty-state-host"></div>
-
-            <div class="table-footer-bar">
-                <span class="text-xs text-gray-400" id="pageInfo"></span>
-                <div></div>
-            </div>
-        </div>
-    </div>
 </main>
 
 <div id="filterModal" class="filter-drawer-wrapper">
@@ -239,9 +244,12 @@
                 <div class="filter-chip-row" id="inventoryStockGroup">
                     <button type="button" class="ftag" data-group="stock" data-val="in-stock">In Stock</button>
                     <button type="button" class="ftag" data-group="stock" data-val="low-stock">Low Stock</button>
-                    <button type="button" class="ftag" data-group="stock" data-val="out-stock">Out of Stock</button>
-                    <button type="button" class="ftag" data-group="stock" data-val="low-high">Lowest Stock</button>
-                    <button type="button" class="ftag" data-group="stock" data-val="high-low">Highest Stock</button>
+                    <button type="button" class="ftag" data-group="stock" data-val="out-stock">Out of
+                        Stock</button>
+                    <button type="button" class="ftag" data-group="stock" data-val="low-high">Lowest
+                        Stock</button>
+                    <button type="button" class="ftag" data-group="stock" data-val="high-low">Highest
+                        Stock</button>
                 </div>
             </div>
         </div>
@@ -693,34 +701,81 @@
 
 @section('scripts')
 <script>
-    var currentViewMode = window.innerWidth <= 767 ? 'grid' : (localStorage.getItem('adminInventoryView') || 'list');
+    var currentViewMode = localStorage.getItem('ViewToggleMode') === 'grid' ? 'grid' : 'list';
 
-    function setViewMode(mode, btn) {
-        if (window.innerWidth <= 767) {
-            currentViewMode = 'grid';
-        } else {
-            currentViewMode = mode;
-        }
+    function bindInventoryGlobalViewToggle() {
+        const toggle = document.querySelector('#mainContent.inventory-page [data-global-view-toggle]');
 
-        const mainContent = document.getElementById('mainContent');
-        if (mainContent) {
-            mainContent.classList.toggle('mode-list', currentViewMode === 'list');
-            mainContent.classList.toggle('mode-grid', currentViewMode === 'grid');
-        }
+        window.initGlobalViewToggles?.(document);
 
-        document.querySelectorAll('.btn-view-mode').forEach(function (b) {
-            b.classList.remove('active');
+        currentViewMode = window.getGlobalViewMode?.(toggle)
+            || localStorage.getItem('ViewToggleMode')
+            || currentViewMode;
+
+        currentViewMode = currentViewMode === 'grid' ? 'grid' : 'list';
+
+        window.setGlobalViewMode?.(toggle, currentViewMode, {
+            persist: false
         });
 
-        var activeBtn = document.querySelector('.btn-view-mode[data-view="' + currentViewMode + '"]');
-        if (activeBtn) activeBtn.classList.add('active');
+        toggle?.addEventListener('global-view-change', function (event) {
+            currentViewMode = event.detail?.mode === 'grid' ? 'grid' : 'list';
+            renderTable();
+        });
+    }
 
-        if (window.innerWidth > 767) localStorage.setItem('adminInventoryView', currentViewMode);
-        renderTable();
+    function setViewMode(mode) {
+        const toggle = document.querySelector('#mainContent.inventory-page [data-global-view-toggle]');
+        currentViewMode = mode === 'grid' ? 'grid' : 'list';
+
+        if (window.setGlobalViewMode && toggle) {
+            window.setGlobalViewMode(toggle, currentViewMode);
+        } else {
+            const mainContent = document.getElementById('mainContent');
+
+            if (mainContent) {
+                mainContent.classList.toggle('mode-list', currentViewMode === 'list');
+                mainContent.classList.toggle('mode-grid', currentViewMode === 'grid');
+            }
+
+            localStorage.setItem('ViewToggleMode', currentViewMode);
+            renderTable();
+        }
     }
 
     var inventory = [];
     var activeTab = 'all';
+
+    let inventoryRefreshWatcher = null;
+
+    const INVENTORY_DATA_URL = @json(route('admin.inventory.data'));
+
+    function applyInventorySnapshot(payload) {
+        inventory = Array.isArray(payload) ? payload : [];
+        renderTable();
+    }
+
+    function initInventoryRefreshWatcher() {
+        if (!window.initGlobalRefreshWatcher) return;
+
+        inventoryRefreshWatcher = window.initGlobalRefreshWatcher({
+            key: 'admin-inventory',
+            url: INVENTORY_DATA_URL,
+            initialItems: inventory,
+            anchorSelector: '#mainContent.inventory-page .inventory-table-card',
+            itemLabel: 'inventory item',
+            getItems: (payload) => Array.isArray(payload) ? payload : [],
+            getItemId: (item) => item?.id,
+            title: (count) => `${count} new inventory item${count === 1 ? '' : 's'} available`,
+            subtitle: (count) => `Refresh to see the latest inventory update${count === 1 ? '' : 's'}.`,
+            onRefresh: applyInventorySnapshot,
+            toast: {
+                type: 'info',
+                title: 'Inventory updated',
+                message: 'Latest inventory records are now shown.'
+            }
+        });
+    }
 
     const inventoryUrlTemplates = {
         update: @json(url('/admin/inventory/__ID__')),
@@ -732,62 +787,43 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        if (window.innerWidth <= 767) {
-            currentViewMode = 'grid';
-        }
-
-        const mainContent = document.getElementById('mainContent');
-        if (mainContent) {
-            mainContent.classList.toggle('mode-list', currentViewMode === 'list');
-            mainContent.classList.toggle('mode-grid', currentViewMode === 'grid');
-        }
-
-        document.querySelectorAll('.btn-view-mode').forEach(function (b) {
-            b.classList.remove('active');
-        });
-
-        var defaultBtn = document.querySelector('.btn-view-mode[data-view="' + currentViewMode + '"]');
-        if (defaultBtn) defaultBtn.classList.add('active');
+        bindInventoryGlobalViewToggle();
 
         applyDashboardStockFilterFromQuery();
         syncInventoryFilterGroups();
         updateFilterButtonState();
         initInventoryChoiceControls();
-        if (window.initGlobalVoiceInputs) window.initGlobalVoiceInputs(document);
+
+        if (window.initGlobalVoiceInputs) {
+            window.initGlobalVoiceInputs(document);
+        }
     });
 
     async function loadInventory() {
-        var res = await fetch('{{ route('admin.inventory.data') }}', {
+        var res = await fetch(INVENTORY_DATA_URL, {
             cache: 'no-store'
         });
+
         var ct = res.headers.get('content-type') || '';
+
         if (!ct.includes('application/json')) {
             console.error('Inventory data is not JSON.');
             return;
         }
+
         inventory = await res.json();
         renderTable();
+
+        if (inventoryRefreshWatcher) {
+            inventoryRefreshWatcher.sync(inventory);
+        } else {
+            initInventoryRefreshWatcher();
+        }
     }
+
     loadInventory();
 
     window.addEventListener('resize', function () {
-        if (window.innerWidth <= 767) {
-            currentViewMode = 'grid';
-        }
-
-        const mainContent = document.getElementById('mainContent');
-        if (mainContent) {
-            mainContent.classList.toggle('mode-list', currentViewMode === 'list');
-            mainContent.classList.toggle('mode-grid', currentViewMode === 'grid');
-        }
-
-        document.querySelectorAll('.btn-view-mode').forEach(function (b) {
-            b.classList.remove('active');
-        });
-
-        var activeBtn = document.querySelector('.btn-view-mode[data-view="' + currentViewMode + '"]');
-        if (activeBtn) activeBtn.classList.add('active');
-
         renderTable();
     });
 
@@ -847,7 +883,9 @@
         var list = data.slice();
 
         if (mode === 'in-stock') {
-            return list.filter(function (item) { return itemBalance(item) > 5; });
+            return list.filter(function (item) {
+                return itemBalance(item) > 5;
+            });
         }
 
         if (mode === 'low-stock') {
@@ -858,15 +896,21 @@
         }
 
         if (mode === 'out-stock') {
-            return list.filter(function (item) { return itemBalance(item) <= 0; });
+            return list.filter(function (item) {
+                return itemBalance(item) <= 0;
+            });
         }
 
         if (mode === 'low-high') {
-            return list.sort(function (a, b) { return itemBalance(a) - itemBalance(b); });
+            return list.sort(function (a, b) {
+                return itemBalance(a) - itemBalance(b);
+            });
         }
 
         if (mode === 'high-low') {
-            return list.sort(function (a, b) { return itemBalance(b) - itemBalance(a); });
+            return list.sort(function (a, b) {
+                return itemBalance(b) - itemBalance(a);
+            });
         }
 
         return list;
@@ -965,7 +1009,9 @@
         if (label) label.textContent = selectedText;
 
         if (shouldValidate) {
-            select.dispatchEvent(new Event('change', { bubbles: true }));
+            select.dispatchEvent(new Event('change', {
+                bubbles: true
+            }));
         }
     }
 
@@ -1022,7 +1068,9 @@
             wrapper.querySelectorAll('.inv-combo-option').forEach(function (option) {
                 option.addEventListener('click', function () {
                     target.value = option.dataset.value || '';
-                    target.dispatchEvent(new Event('input', { bubbles: true }));
+                    target.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
                     closeInventoryChoiceMenus();
                 });
             });
@@ -1045,7 +1093,11 @@
         resetAddForm();
         openModal('addModal');
         if (window.initGlobalVoiceInputs) window.initGlobalVoiceInputs(document.getElementById('addModal'));
-        document.dispatchEvent(new CustomEvent('voice:refresh', { detail: { root: document.getElementById('addModal') } }));
+        document.dispatchEvent(new CustomEvent('voice:refresh', {
+            detail: {
+                root: document.getElementById('addModal')
+            }
+        }));
         captureDiscardForModal('addModal');
     }
 
@@ -1069,13 +1121,13 @@
                 var from = new Date();
                 from.setDate(today.getDate() - Number(range));
 
-                var expectedFrom = window.formatDateForInput
-                    ? window.formatDateForInput(from)
-                    : from.toISOString().slice(0, 10);
+                var expectedFrom = window.formatDateForInput ?
+                    window.formatDateForInput(from) :
+                    from.toISOString().slice(0, 10);
 
-                var expectedTo = window.formatDateForInput
-                    ? window.formatDateForInput(today)
-                    : today.toISOString().slice(0, 10);
+                var expectedTo = window.formatDateForInput ?
+                    window.formatDateForInput(today) :
+                    today.toISOString().slice(0, 10);
 
                 isActive = filterDraft.dateFrom === expectedFrom && filterDraft.dateTo === expectedTo;
             }
@@ -1309,13 +1361,13 @@
         if (dateFrom || dateTo) {
             var activePresetBtn = document.querySelector('#inventoryDatePresetGroup .quick-date-chip.active');
 
-            var label = activePresetBtn
-                ? activePresetBtn.textContent.trim()
-                : dateFrom && dateTo
-                    ? dateFrom + ' to ' + dateTo
-                    : dateFrom
-                        ? 'From ' + dateFrom
-                        : 'Until ' + dateTo;
+            var label = activePresetBtn ?
+                activePresetBtn.textContent.trim() :
+                dateFrom && dateTo ?
+                    dateFrom + ' to ' + dateTo :
+                    dateFrom ?
+                        'From ' + dateFrom :
+                        'Until ' + dateTo;
 
             addChip('Date: ' + label, function () {
                 filterDraft.dateFrom = '';
@@ -1356,7 +1408,8 @@
         document.querySelectorAll('#inventorySortGroup .ftag, #inventoryStockGroup .ftag')
             .forEach(function (btn) {
                 btn.addEventListener('click', function () {
-                    setInventoryDraftValue(btn.getAttribute('data-group'), btn.getAttribute('data-val'));
+                    setInventoryDraftValue(btn.getAttribute('data-group'), btn.getAttribute(
+                        'data-val'));
                 });
             });
 
@@ -1366,11 +1419,12 @@
                 fromId: 'fp_dateFrom',
                 toId: 'fp_dateTo',
                 onChange: function () {
-                    var activePresetBtn = document.querySelector('#inventoryDatePresetGroup .quick-date-chip.active');
+                    var activePresetBtn = document.querySelector(
+                        '#inventoryDatePresetGroup .quick-date-chip.active');
 
-                    inventoryActiveDatePreset = activePresetBtn
-                        ? activePresetBtn.getAttribute('data-range')
-                        : '';
+                    inventoryActiveDatePreset = activePresetBtn ?
+                        activePresetBtn.getAttribute('data-range') :
+                        '';
 
                     filterDraft.dateFrom = document.getElementById('fp_dateFrom')?.value || '';
                     filterDraft.dateTo = document.getElementById('fp_dateTo')?.value || '';
@@ -1388,19 +1442,20 @@
 
                     from.setDate(today.getDate() - range);
 
-                    var fromVal = window.formatDateForInput
-                        ? window.formatDateForInput(from)
-                        : from.toISOString().slice(0, 10);
+                    var fromVal = window.formatDateForInput ?
+                        window.formatDateForInput(from) :
+                        from.toISOString().slice(0, 10);
 
-                    var toVal = window.formatDateForInput
-                        ? window.formatDateForInput(today)
-                        : today.toISOString().slice(0, 10);
+                    var toVal = window.formatDateForInput ?
+                        window.formatDateForInput(today) :
+                        today.toISOString().slice(0, 10);
 
                     var alreadyActive = btn.classList.contains('active');
 
-                    document.querySelectorAll('#inventoryDatePresetGroup .quick-date-chip').forEach(function (b) {
-                        b.classList.remove('active');
-                    });
+                    document.querySelectorAll('#inventoryDatePresetGroup .quick-date-chip')
+                        .forEach(function (b) {
+                            b.classList.remove('active');
+                        });
 
                     if (alreadyActive) {
                         inventoryActiveDatePreset = '';
@@ -1429,9 +1484,10 @@
             input.addEventListener('change', function () {
                 inventoryActiveDatePreset = '';
 
-                document.querySelectorAll('#inventoryDatePresetGroup .quick-date-chip').forEach(function (btn) {
-                    btn.classList.remove('active');
-                });
+                document.querySelectorAll('#inventoryDatePresetGroup .quick-date-chip').forEach(
+                    function (btn) {
+                        btn.classList.remove('active');
+                    });
 
                 filterDraft.dateFrom = document.getElementById('fp_dateFrom')?.value || '';
                 filterDraft.dateTo = document.getElementById('fp_dateTo')?.value || '';
@@ -1711,13 +1767,19 @@
                     '<td style="color:#9A9490;">' + (item.used || 0) + '</td>' +
                     '<td><span class="bal-chip ' + balClass + '">' + balance +
                     ' <span style="font-weight:400;font-size:10px;">' + balLabel + '</span></span></td>' +
-                    '<td><div class="inventory-row-actions">' + inventoryActionButtons(item.id) + '</div></td>' +
+                    '<td><div class="inventory-row-actions">' + inventoryActionButtons(item.id) +
+                    '</div></td>' +
                     '</tr>';
             }
         });
     }
 
-    function buildEmptyStateHtml({ icon, title, sub, actionHtml = '' }) {
+    function buildEmptyStateHtml({
+        icon,
+        title,
+        sub,
+        actionHtml = ''
+    }) {
         return `
         <div class="empty-state">
             <div class="empty-state-icon inventory-empty-icon">
@@ -1935,7 +1997,8 @@
         const res = await fetch(inventoryUrl('destroy', deleteId), {
             method: 'DELETE',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                    'content'),
                 'Accept': 'application/json'
             }
         });
@@ -1980,7 +2043,11 @@
         computeEditBalance();
         openModal('editModal');
         if (window.initGlobalVoiceInputs) window.initGlobalVoiceInputs(document.getElementById('editModal'));
-        document.dispatchEvent(new CustomEvent('voice:refresh', { detail: { root: document.getElementById('editModal') } }));
+        document.dispatchEvent(new CustomEvent('voice:refresh', {
+            detail: {
+                root: document.getElementById('editModal')
+            }
+        }));
         captureDiscardForModal('editModal');
     }
 

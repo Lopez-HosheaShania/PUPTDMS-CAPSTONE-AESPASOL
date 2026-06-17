@@ -725,3 +725,155 @@
     backdrop-filter: blur(18px) saturate(145%) !important;
     -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
 }
+
+@media (max-width: 767px) {
+
+    body.role-dentist #mainContent .greeting-row,
+    body.role-patient #mainContent .greeting-row,
+    #mainContent .dashboard-greeting-row {
+        margin-bottom: 0.85rem !important;
+        gap: 0.75rem !important;
+    }
+
+    body.role-dentist #mainContent .greeting-banner,
+    body.role-patient #mainContent .greeting-banner,
+    #mainContent .dashboard-greeting-banner {
+        margin-top: 0.75rem !important;
+        padding: 14px 16px !important;
+        border-radius: 18px !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    body.role-dentist #mainContent .greeting-banner-inner,
+    body.role-patient #mainContent .greeting-banner-inner,
+    #mainContent .dashboard-greeting-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        gap: 0.65rem !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+    }
+
+    body.role-dentist #mainContent .greeting-banner-copy,
+    body.role-patient #mainContent .greeting-banner-copy,
+    #mainContent .dashboard-greeting-copy {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    body.role-dentist #mainContent .greeting-heading,
+    body.role-patient #mainContent .greeting-heading,
+    #mainContent .dashboard-greeting-heading {
+        gap: 2px !important;
+        line-height: 1.05 !important;
+    }
+
+    #mainContent #greetingText {
+        font-size: 0.84rem !important;
+        line-height: 1.05 !important;
+        font-weight: 650 !important;
+    }
+
+    body.role-dentist #mainContent .greeting-name-line,
+    body.role-patient #mainContent .greeting-name-line,
+    #mainContent .dashboard-greeting-name-line {
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: nowrap !important;
+        gap: 0.24rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        white-space: nowrap !important;
+        font-size: clamp(0.98rem, 4.9vw, 1.18rem) !important;
+        line-height: 1.05 !important;
+        font-weight: 900 !important;
+        letter-spacing: -0.055em !important;
+    }
+
+    #mainContent #patientName,
+    #mainContent #dentistName,
+    #mainContent .greeting-name-prefix {
+        font-size: inherit !important;
+        line-height: inherit !important;
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+    }
+
+    #mainContent .greeting-name-line i {
+        flex-shrink: 0 !important;
+        font-size: 0.78rem !important;
+        margin-left: 0.06rem !important;
+    }
+
+    body.role-dentist #mainContent .greeting-subtitle,
+    body.role-patient #mainContent #greetingSmartMessage,
+    #mainContent .dashboard-greeting-copy p,
+    #mainContent .greeting-banner-copy p {
+        margin-top: 0.5rem !important;
+        font-size: 0.72rem !important;
+        line-height: 1.32 !important;
+        max-width: 100% !important;
+    }
+
+    body.role-patient #mainContent .greeting-banner-copy .mt-4 {
+        margin-top: 0.75rem !important;
+        gap: 0.45rem !important;
+    }
+
+    body.role-patient #mainContent .greeting-insight-chip {
+        padding: 0.38rem 0.58rem !important;
+        font-size: 0.66rem !important;
+        line-height: 1.1 !important;
+        gap: 0.35rem !important;
+    }
+
+    body.role-dentist #mainContent .greeting-banner-actions,
+    body.role-patient #mainContent .greeting-banner-actions,
+    #mainContent .dashboard-greeting-actions {
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 0.55rem !important;
+    }
+
+    body.role-patient #mainContent .greeting-banner-actions>a {
+        width: 100% !important;
+        min-height: 38px !important;
+        padding: 0.55rem 0.85rem !important;
+        font-size: 0.78rem !important;
+        line-height: 1 !important;
+    }
+}
+
+@media (max-width: 380px) {
+
+    body.role-dentist #mainContent .greeting-banner,
+    body.role-patient #mainContent .greeting-banner,
+    #mainContent .dashboard-greeting-banner {
+        padding: 12px 14px !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent #greetingText {
+        font-size: 0.78rem !important;
+    }
+
+    body.role-dentist #mainContent .greeting-name-line,
+    body.role-patient #mainContent .greeting-name-line,
+    #mainContent .dashboard-greeting-name-line {
+        font-size: clamp(0.92rem, 4.7vw, 1.08rem) !important;
+        gap: 0.18rem !important;
+    }
+
+    body.role-dentist #mainContent .greeting-subtitle,
+    body.role-patient #mainContent #greetingSmartMessage,
+    #mainContent .dashboard-greeting-copy p,
+    #mainContent .greeting-banner-copy p {
+        font-size: 0.68rem !important;
+        line-height: 1.28 !important;
+    }
+}

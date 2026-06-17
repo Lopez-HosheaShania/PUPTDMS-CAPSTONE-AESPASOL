@@ -169,6 +169,44 @@ function initGlobalFlatpickr() {
         flatpickr(el, options);
     });
 
+    const monthInputs = document.querySelectorAll('.js-flatpickr-month');
+
+    monthInputs.forEach(el => {
+        if (el._flatpickr) return;
+
+        const parentPopup = el.closest('dialog, .ui-modal');
+
+        const options = {
+            dateFormat: "Y-m",
+            altInput: true,
+            altFormat: "F Y",
+            allowInput: false,
+            clickOpens: true,
+            disableMobile: true,
+            position: "auto center",
+            appendTo: document.body,
+
+            onReady: (_dates, _str, instance) => refreshFlatpickr(instance),
+            onMonthChange: (_dates, _str, instance) => refreshFlatpickr(instance),
+            onYearChange: (_dates, _str, instance) => refreshFlatpickr(instance),
+
+            onOpen: (_dates, _str, instance) => {
+                refreshFlatpickr(instance);
+                openFlatpickrSheet(instance);
+            },
+
+            onClose: (_dates, _str, instance) => {
+                closeFlatpickrSheet(instance);
+            },
+        };
+
+        if (parentPopup) {
+            options.positionElement = el;
+        }
+
+        flatpickr(el, options);
+    });
+
     const timeInputs = document.querySelectorAll('.js-flatpickr-time');
 
     timeInputs.forEach(el => {
@@ -1113,7 +1151,9 @@ function initGlobalSidebar() {
         }
     });
 
-    document.documentElement.classList.remove('sidebar-preload', 'sidebar-collapsed-init');
+    requestAnimationFrame(() => {
+        document.documentElement.classList.remove('sidebar-preload', 'sidebar-collapsed-init');
+    });
 }
 
 function initAdminSidebarGroupClick() {
@@ -1350,17 +1390,6 @@ function initSessionStorageToasts() {
 
         sessionStorage.removeItem(key);
     });
-}
-
-document.documentElement.classList.add('sidebar-preload');
-
-try {
-    const savedSidebarState = localStorage.getItem(getSidebarStorageKey());
-    if (savedSidebarState === '1') {
-        document.documentElement.classList.add('sidebar-collapsed-init');
-    }
-} catch (_) {
-    // Ignore storage errors
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1897,9 +1926,274 @@ window.setGlobalFilterButtonState = function ({
     }
 };
 
+const globalRefreshWatchers = new Map();
+
+function normalizeGlobalRefreshItems(payload, getItems) {
+    const items = typeof getItems === 'function'
+        ? getItems(payload)
+        : Array.isArray(payload)
+            ? payload
+            : [];
+
+    return Array.isArray(items) ? items : [];
+}
+
+function getGlobalRefreshNoticeId(key = 'global') {
+    return `globalRefreshNotice-${String(key || 'global')}`;
+}
+
+function removeGlobalRefreshNotice(key = 'global') {
+    document.getElementById(getGlobalRefreshNoticeId(key))?.remove();
+}
+
+function initGlobalRefreshWatcher(config = {}) {
+    const key = config.key || 'global';
+
+    if (globalRefreshWatchers.has(key)) {
+        const existing = globalRefreshWatchers.get(key);
+        existing.sync(config.initialItems || []);
+        return existing;
+    }
+
+    const interval = Number(config.interval) || 15000;
+    const getItems = config.getItems || ((payload) => Array.isArray(payload) ? payload : []);
+    const getItemId = config.getItemId || ((item) => item?.id);
+    const itemLabel = config.itemLabel || 'item';
+    const anchorSelector = config.anchorSelector || '.table-card';
+    const noticeId = getGlobalRefreshNoticeId(key);
+
+    let pendingPayload = null;
+    let timer = null;
+
+    let knownIds = new Set(
+        normalizeGlobalRefreshItems(config.initialItems || [], getItems)
+            .map(getItemId)
+            .filter((id) => id !== null && id !== undefined)
+            .map(String)
+    );
+
+    const countLabel = (count) => `${itemLabel}${count === 1 ? '' : 's'}`;
+
+    const showNotice = (count) => {
+        let notice = document.getElementById(noticeId);
+
+        if (!notice) {
+            notice = document.createElement('div');
+            notice.id = noticeId;
+            notice.className = 'global-refresh-notice';
+
+            const anchor = document.querySelector(anchorSelector);
+            anchor?.parentNode?.insertBefore(notice, anchor);
+        }
+
+        const title = typeof config.title === 'function'
+            ? config.title(count)
+            : config.title || `${count} new ${countLabel(count)} available`;
+
+        const subtitle = typeof config.subtitle === 'function'
+            ? config.subtitle(count)
+            : config.subtitle || `Refresh to see the latest ${countLabel(count)}.`;
+
+        notice.innerHTML = `
+            <div class="global-refresh-copy">
+                <span class="global-refresh-icon">
+                    <i class="fa-solid fa-rotate"></i>
+                </span>
+
+                <div>
+                    <strong>${title}</strong>
+                    <small>${subtitle}</small>
+                </div>
+            </div>
+
+            <button type="button" class="global-refresh-btn">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                Refresh
+            </button>
+        `;
+
+        notice.querySelector('.global-refresh-btn')?.addEventListener('click', () => {
+            controller.apply();
+        });
+    };
+
+    const controller = {
+        sync(source = []) {
+            knownIds = new Set(
+                normalizeGlobalRefreshItems(source, getItems)
+                    .map(getItemId)
+                    .filter((id) => id !== null && id !== undefined)
+                    .map(String)
+            );
+
+            pendingPayload = null;
+            removeGlobalRefreshNotice(key);
+        },
+
+        async check() {
+            if (!config.url) return;
+
+            try {
+                const response = await fetch(config.url, {
+                    cache: 'no-store',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) return;
+
+                const payload = await response.json();
+                const incoming = normalizeGlobalRefreshItems(payload, getItems);
+
+                const newItems = incoming.filter((item) => {
+                    const id = getItemId(item);
+                    return id !== null && id !== undefined && !knownIds.has(String(id));
+                });
+
+                if (!newItems.length) return;
+
+                pendingPayload = payload;
+                showNotice(newItems.length);
+            } catch (error) {
+                console.warn(`${key} refresh check failed:`, error);
+            }
+        },
+
+        apply() {
+            if (!pendingPayload) return;
+
+            if (typeof config.onRefresh === 'function') {
+                config.onRefresh(pendingPayload);
+            }
+
+            this.sync(pendingPayload);
+
+            if (config.toast !== false && typeof window.showToast === 'function') {
+                window.showToast({
+                    type: config.toast?.type || 'info',
+                    title: config.toast?.title || 'Updated',
+                    message: config.toast?.message || 'Latest records are now shown.',
+                    duration: config.toast?.duration || 3500
+                });
+            }
+        },
+
+        start() {
+            if (timer) clearInterval(timer);
+            timer = setInterval(() => this.check(), interval);
+        },
+
+        stop() {
+            if (timer) clearInterval(timer);
+            timer = null;
+            removeGlobalRefreshNotice(key);
+        }
+    };
+
+    globalRefreshWatchers.set(key, controller);
+
+    if (config.autoStart !== false) {
+        controller.start();
+    }
+
+    return controller;
+}
+
+function syncGlobalRefreshWatcher(key = 'global', source = []) {
+    globalRefreshWatchers.get(key)?.sync(source);
+}
+
+window.initGlobalRefreshWatcher = initGlobalRefreshWatcher;
+window.syncGlobalRefreshWatcher = syncGlobalRefreshWatcher;
+window.removeGlobalRefreshNotice = removeGlobalRefreshNotice;
+
 function initGlobalViewToggles(root = document) {
     const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
     const toggles = scope.querySelectorAll('[data-global-view-toggle]');
+
+    const closeAllViewMenus = (except = null) => {
+        document.querySelectorAll('[data-global-view-toggle].open').forEach(toggle => {
+            if (toggle === except) return;
+
+            toggle.classList.remove('open');
+            toggle.querySelector('[data-view-mobile-trigger]')?.setAttribute('aria-expanded', 'false');
+        });
+    };
+
+    const getModeLabel = (mode, buttons) => {
+        const button = buttons.find(btn => btn.dataset.viewMode === mode);
+
+        return button?.querySelector('.view-mode-label')?.textContent?.trim()
+            || button?.getAttribute('title')
+            || (mode === 'grid' ? 'Grid View' : 'List View');
+    };
+
+    const getModeIcon = (mode) => {
+        return mode === 'grid' ? 'fa-solid fa-grip' : 'fa-solid fa-list';
+    };
+
+    const setMobileTriggerContent = (trigger, mode, buttons) => {
+        if (!trigger) return;
+
+        trigger.innerHTML = `
+            <span class="global-view-mobile-main">
+                <i class="${getModeIcon(mode)}"></i>
+                <span class="global-view-mobile-label">${getModeLabel(mode, buttons)}</span>
+            </span>
+            <i class="fa-solid fa-chevron-down global-view-mobile-chevron"></i>
+        `;
+
+        trigger.setAttribute('aria-label', `Current view: ${getModeLabel(mode, buttons)}`);
+        trigger.setAttribute('title', getModeLabel(mode, buttons));
+    };
+
+    const ensureMobileDropdown = (toggle, buttons) => {
+        if (toggle.querySelector('[data-view-mobile-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'global-view-mobile-trigger';
+        trigger.dataset.viewMobileTrigger = 'true';
+        trigger.setAttribute('aria-label', 'Change view');
+        trigger.setAttribute('aria-expanded', 'false');
+
+        const menu = document.createElement('div');
+        menu.className = 'global-view-mobile-menu';
+        menu.dataset.viewMobileMenu = 'true';
+
+        buttons.forEach(button => {
+            const mode = button.dataset.viewMode;
+            const option = document.createElement('button');
+
+            option.type = 'button';
+            option.className = 'global-view-mobile-option';
+            option.dataset.viewMobileOption = mode;
+
+            option.innerHTML = `
+                <i class="${getModeIcon(mode)}"></i>
+                <span>${getModeLabel(mode, buttons)}</span>
+            `;
+
+            menu.appendChild(option);
+        });
+
+        toggle.appendChild(trigger);
+        toggle.appendChild(menu);
+
+        trigger.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const willOpen = !toggle.classList.contains('open');
+
+            closeAllViewMenus(toggle);
+
+            toggle.classList.toggle('open', willOpen);
+            trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        });
+    };
 
     toggles.forEach((toggle) => {
         if (toggle.dataset.globalViewInitialized === 'true') return;
@@ -1909,7 +2203,7 @@ function initGlobalViewToggles(root = document) {
         const rootSelector = toggle.dataset.viewRoot || '#mainContent';
         const listSelector = toggle.dataset.listView;
         const gridSelector = toggle.dataset.gridView;
-        const storageKey = toggle.dataset.storageKey || `${toggle.id || 'global'}_view_mode`;
+        const storageKey = toggle.dataset.storageKey || 'ViewToggleMode';
 
         const pageRoot = document.querySelector(rootSelector);
         const listView = listSelector ? document.querySelector(listSelector) : null;
@@ -1917,6 +2211,11 @@ function initGlobalViewToggles(root = document) {
         const buttons = Array.from(toggle.querySelectorAll('[data-view-mode]'));
 
         if (!buttons.length) return;
+
+        ensureMobileDropdown(toggle, buttons);
+
+        const mobileTrigger = toggle.querySelector('[data-view-mobile-trigger]');
+        const mobileOptions = Array.from(toggle.querySelectorAll('[data-view-mobile-option]'));
 
         const setMode = (mode, options = {}) => {
             const nextMode = mode === 'grid' ? 'grid' : 'list';
@@ -1935,6 +2234,16 @@ function initGlobalViewToggles(root = document) {
                 button.classList.toggle('is-active', active);
                 button.setAttribute('aria-pressed', active ? 'true' : 'false');
             });
+
+            mobileOptions.forEach((option) => {
+                const active = option.dataset.viewMobileOption === nextMode;
+
+                option.classList.toggle('active', active);
+                option.classList.toggle('is-active', active);
+                option.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+
+            setMobileTriggerContent(mobileTrigger, nextMode, buttons);
 
             toggle.dataset.currentView = nextMode;
 
@@ -1957,11 +2266,33 @@ function initGlobalViewToggles(root = document) {
             });
         });
 
-        const mobile = window.matchMedia('(max-width: 767px)').matches;
-        const savedMode = localStorage.getItem(storageKey);
+        mobileOptions.forEach((option) => {
+            option.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
 
-        setMode(mobile ? 'grid' : savedMode || 'list', { persist: false });
+                setMode(option.dataset.viewMobileOption);
+
+                toggle.classList.remove('open');
+                mobileTrigger?.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        const savedMode = localStorage.getItem(storageKey);
+        setMode(savedMode || 'list', { persist: false });
     });
+
+    if (document.documentElement.dataset.globalViewCloseBound !== 'true') {
+        document.documentElement.dataset.globalViewCloseBound = 'true';
+
+        document.addEventListener('click', () => closeAllViewMenus());
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                closeAllViewMenus();
+            }
+        });
+    }
 }
 
 function setGlobalViewMode(toggleOrId, mode, options = {}) {
@@ -2225,6 +2556,36 @@ function initGlobalVoiceInputs(root = document) {
 
 document.addEventListener('DOMContentLoaded', () => {
     initGlobalVoiceInputs();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const openModalSelector = [
+        '.modal-overlay.open',
+        '.ui-modal.open',
+        'dialog[open]',
+        '[id$="Modal"].opacity-100:not(.pointer-events-none)'
+    ].join(',');
+
+    const syncModalLock = () => {
+        const hasOpenModal = !!document.querySelector(openModalSelector);
+
+        document.documentElement.classList.toggle('modal-lock', hasOpenModal);
+        document.body.classList.toggle('modal-lock', hasOpenModal);
+    };
+
+    const modalObserver = new MutationObserver(syncModalLock);
+
+    modalObserver.observe(document.body, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['class', 'open', 'style', 'aria-hidden']
+    });
+
+    document.addEventListener('click', () => requestAnimationFrame(syncModalLock), true);
+    document.addEventListener('keydown', () => requestAnimationFrame(syncModalLock), true);
+
+    syncModalLock();
 });
 
 window.initGlobalVoiceInputs = initGlobalVoiceInputs;

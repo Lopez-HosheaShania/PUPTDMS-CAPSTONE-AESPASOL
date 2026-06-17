@@ -179,6 +179,92 @@
             </div>
         </div>
 
+                {{-- ===== DOCUMENT REQUEST REPORTS ===== --}}
+        <hr class="section-divider">
+
+        <div class="section-label">
+            <i class="fa-solid fa-file-signature" style="font-size:11px;color:#8B0000;"></i>
+            Document request reports
+        </div>
+
+        @php
+            $docTotal = (int) ($documentRequests['total'] ?? 0);
+            $docSafeTotal = max(1, $docTotal);
+
+            $docPending = (int) ($documentRequests['pending'] ?? 0);
+            $docApproved = (int) ($documentRequests['approved'] ?? 0);
+            $docRejected = (int) ($documentRequests['rejected'] ?? 0);
+
+            $docPendingRate = round(($docPending / $docSafeTotal) * 100, 1);
+            $docApprovedRate = round(($docApproved / $docSafeTotal) * 100, 1);
+            $docRejectedRate = round(($docRejected / $docSafeTotal) * 100, 1);
+
+            $docApprovalRate = (float) ($documentRequests['approval_rate'] ?? 0);
+            $docMostRequested = $documentRequests['most_requested'] ?? 'No requests yet';
+            $docMostRequestedCount = (int) ($documentRequests['most_requested_count'] ?? 0);
+        @endphp
+
+        <div class="appt-grid">
+            <div class="metric-card">
+                <div class="metric-card-accent" style="background:linear-gradient(90deg,#8B0000,#c0392b);"></div>
+                <div class="a-label">Total this month</div>
+                <div class="a-value">{{ number_format($docTotal) }}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:100%;background:#8B0000;"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-accent" style="background:linear-gradient(90deg,#EF9F27,#d97706);"></div>
+                <div class="a-label">Pending</div>
+                <div class="a-value" style="color:#854f0b;">{{ number_format($docPending) }}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:{{ $docPendingRate }}%;background:#EF9F27;"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-accent" style="background:linear-gradient(90deg,#1D9E75,#16a34a);"></div>
+                <div class="a-label">Approved</div>
+                <div class="a-value" style="color:#0f6e56;">{{ number_format($docApproved) }}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:{{ $docApprovedRate }}%;background:#1D9E75;"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-accent" style="background:linear-gradient(90deg,#D85A30,#c0392b);"></div>
+                <div class="a-label">Rejected</div>
+                <div class="a-value" style="color:#993c1d;">{{ number_format($docRejected) }}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:{{ $docRejectedRate }}%;background:#D85A30;"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-accent" style="background:linear-gradient(90deg,#378ADD,#2563eb);"></div>
+                <div class="a-label">Approval rate</div>
+                <div class="a-value" style="color:#2563eb;">{{ number_format($docApprovalRate, 1) }}%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:{{ $docApprovalRate }}%;background:#378ADD;"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-card-accent" style="background:linear-gradient(90deg,#7c3aed,#6d28d9);"></div>
+                <div class="a-label">Most requested</div>
+                <div class="a-value"
+                    style="color:#7c3aed;font-size:1rem;line-height:1.2;word-break:break-word;">
+                    {{ $docMostRequested }}
+                </div>
+                <div class="m-sub">
+                    <i class="fa-solid fa-file-lines" style="font-size:.65rem;"></i>
+                    {{ number_format($docMostRequestedCount) }}
+                    {{ Str::plural('request', $docMostRequestedCount) }}
+                </div>
+            </div>
+        </div>
+        
             {{-- ===== INVENTORY USAGE ===== --}}
             @if (isset($inventory))
                 @php

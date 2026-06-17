@@ -1076,10 +1076,97 @@
     .backup-page {
         padding-left: 12px !important;
         padding-right: 12px !important;
+        overflow-x: hidden !important;
+    }
+
+    .backup-page .page-banner {
+        min-height: auto !important;
+        padding: 1rem !important;
+        border-radius: 16px !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .backup-page .page-banner-inner {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        gap: .8rem !important;
+        text-align: left !important;
+    }
+
+    .backup-page .page-title {
+        font-size: 1.45rem !important;
+        line-height: 1.05 !important;
+        margin: 0 !important;
+        text-align: left !important;
+    }
+
+    .backup-banner-action {
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 .95rem !important;
+        font-size: .72rem !important;
     }
 
     .backup-stats {
-        grid-template-columns: 1fr !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .75rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .backup-stat,
+    .backup-stat.clickable {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 112px !important;
+        padding: .85rem .7rem !important;
+        border-radius: 16px !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: .55rem !important;
+
+        text-align: center !important;
+        overflow: hidden !important;
+    }
+
+    .backup-stat .stat-icon-wrapper {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        border-radius: 14px !important;
+        margin: 0 !important;
+        flex: 0 0 auto !important;
+    }
+
+    .backup-stat-value,
+    .backup-stat .stat-num {
+        display: block !important;
+        font-size: 1.25rem !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        text-align: center !important;
+        max-width: 100% !important;
+    }
+
+    .backup-stat-label,
+    .backup-stat .stat-label {
+        display: block !important;
+        font-size: .58rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: .055em !important;
+        text-align: center !important;
+        white-space: normal !important;
+        max-width: 100% !important;
+        margin-top: .15rem !important;
     }
 
     .backup-main {
@@ -1109,8 +1196,10 @@
     all: unset;
 }
 
-.backup-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+@media (min-width: 1281px) {
+    .backup-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
 }
 
 .backup-stat,
@@ -3835,4 +3924,1375 @@
 
 #backupActionModal .ap-delete-footer {
     gap: .8rem !important;
+}
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.backup-page,
+    .backup-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 100px !important;
+    }
+
+    .backup-page .page-banner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        padding: 1.35rem 1.4rem !important;
+        border-radius: 20px !important;
+        margin-bottom: 1rem !important;
+        overflow: hidden !important;
+    }
+
+    .backup-page .page-banner-inner {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+
+        text-align: left !important;
+    }
+
+    .backup-page .page-banner-inner > div:first-child {
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+
+    .backup-page .page-title {
+        position: static !important;
+        display: block !important;
+        width: auto !important;
+        max-width: 100% !important;
+
+        margin: 0 !important;
+        margin-left: 0 !important;
+        margin-right: auto !important;
+        padding: 0 !important;
+
+        transform: none !important;
+        text-align: left !important;
+        justify-self: start !important;
+        align-self: center !important;
+
+        font-size: 1.8rem !important;
+        line-height: 1.08 !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .backup-banner-action {
+        min-height: 38px !important;
+        height: 38px !important;
+        padding: 0 .9rem !important;
+        border-radius: 999px !important;
+        font-size: .72rem !important;
+        white-space: nowrap !important;
+        flex: 0 0 auto !important;
+    }
+
+    .backup-topbar {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .backup-title {
+        font-size: 1.65rem !important;
+        line-height: 1.08 !important;
+    }
+
+    .backup-subtitle {
+        font-size: .82rem !important;
+        line-height: 1.35 !important;
+    }
+
+    .backup-stats {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        margin-bottom: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .backup-stat,
+    .backup-stat.clickable {
+        min-height: 92px !important;
+        padding: .9rem !important;
+        border-radius: 17px !important;
+        gap: .75rem !important;
+        min-width: 0 !important;
+    }
+
+    .backup-stat .stat-icon-wrapper {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 13px !important;
+        font-size: .9rem !important;
+    }
+
+    .backup-stat-value,
+    .backup-stat .stat-num {
+        font-size: 1.3rem !important;
+        line-height: 1 !important;
+    }
+
+    .backup-stat-label,
+    .backup-stat .stat-label {
+        font-size: .62rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: .07em !important;
+    }
+
+    .backup-main {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        align-items: start !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .side-stack {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .backup-page .card,
+    .backup-page .backup-history-card,
+    .backup-page .backup-grid-card,
+    .backup-page .side-stack .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        border-radius: 17px !important;
+    }
+
+    .backup-page .card-header {
+        min-height: 62px !important;
+        padding: .85rem 1rem !important;
+        gap: .75rem !important;
+    }
+
+    .backup-page .card-title {
+        font-size: .9rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .backup-page .card-subtitle {
+        font-size: .66rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .backup-page .card-icon,
+    .backup-page .empty-state-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 13px !important;
+    }
+
+    .backup-history-actions {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .55rem !important;
+        flex-wrap: nowrap !important;
+        min-width: 0 !important;
+    }
+
+    .backup-page .global-filter-btn,
+    .backup-page #filterBtn {
+        min-height: 40px !important;
+        height: 40px !important;
+        padding: 0 .85rem !important;
+        font-size: .74rem !important;
+        white-space: nowrap !important;
+        flex: 0 0 auto !important;
+    }
+
+    .backup-page .backup-view-toggle,
+    .backup-page .view-toggle {
+        flex: 0 0 auto !important;
+        margin: 0 !important;
+        transform: none !important;
+    }
+
+    .backup-table-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .backup-table-wrap .data-table {
+        min-width: 900px !important;
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    .backup-table-wrap th,
+    .backup-table-wrap td {
+        padding-left: .65rem !important;
+        padding-right: .65rem !important;
+        font-size: .72rem !important;
+        vertical-align: middle !important;
+    }
+
+    .backup-table-wrap th {
+        font-size: .6rem !important;
+        letter-spacing: .07em !important;
+        white-space: nowrap !important;
+    }
+
+    .backup-id,
+    .backup-grid-id {
+        font-size: .7rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .backup-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        padding: .85rem !important;
+    }
+
+    .backup-grid-card {
+        padding: .9rem !important;
+        gap: .75rem !important;
+    }
+
+    .backup-grid-top {
+        gap: .65rem !important;
+    }
+
+    .backup-grid-meta {
+        gap: .6rem !important;
+    }
+
+    .backup-grid-label {
+        font-size: .58rem !important;
+    }
+
+    .backup-grid-value {
+        font-size: .74rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .backup-grid-footer {
+        gap: .55rem !important;
+    }
+
+    .backup-page .type-pill,
+    .backup-page .status-pill,
+    .backup-page .schedule-pill {
+        min-height: 26px !important;
+        padding: 0 .65rem !important;
+        font-size: .66rem !important;
+    }
+
+    #mainContent.backup-page .table-actions,
+    .backup-page .table-actions {
+        gap: .38rem !important;
+    }
+
+    #mainContent.backup-page .table-actions .action-btn,
+    .backup-page .table-actions .action-btn,
+    .backup-grid-footer .action-btn {
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        border-radius: 10px !important;
+    }
+
+    #mainContent.backup-page .table-actions .action-btn i,
+    .backup-page .table-actions .action-btn i,
+    .backup-grid-footer .action-btn i {
+        font-size: .72rem !important;
+    }
+
+    .mini-card-body {
+        padding: .9rem !important;
+    }
+
+    .usage-row {
+        font-size: .74rem !important;
+        gap: .55rem !important;
+    }
+
+    .usage-bar {
+        height: 7px !important;
+        margin-bottom: .75rem !important;
+    }
+
+    .usage-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+    }
+
+    .usage-box {
+        padding: .75rem !important;
+        border-radius: 13px !important;
+    }
+
+    .usage-box-label {
+        font-size: .58rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .usage-box-value {
+        font-size: 1.45rem !important;
+    }
+
+    .schedule-item {
+        grid-template-columns: minmax(0, 1fr) auto auto !important;
+        gap: .65rem !important;
+        padding: .8rem 0 !important;
+    }
+
+    .schedule-title {
+        font-size: .78rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .schedule-time {
+        font-size: .66rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .schedule-edit-btn {
+        min-height: 40px !important;
+        padding: 0 .85rem !important;
+        font-size: .74rem !important;
+    }
+
+    #scheduleModal .backup-schedule-modal-card,
+    #scheduleModal .modal-box,
+    #scheduleModal .um-modal-card {
+        width: min(94vw, 680px) !important;
+        max-width: 680px !important;
+        max-height: calc(100dvh - 2rem) !important;
+        overflow: hidden !important;
+    }
+
+    #scheduleModal .admin-modal-head {
+        padding: 1rem 1.1rem !important;
+    }
+
+    #scheduleModal .backup-schedule-grid {
+        gap: .8rem !important;
+    }
+
+    #scheduleModal .backup-schedule-field {
+        padding: .85rem !important;
+        border-radius: 14px !important;
+    }
+
+    #scheduleModal .backup-modal-actions {
+        gap: .6rem !important;
+    }
+
+    #scheduleModal .backup-modal-cancel,
+    #scheduleModal .modal-btn-ghost,
+    #scheduleModal .backup-save-btn {
+        min-height: 40px !important;
+        padding: 0 1rem !important;
+        font-size: .78rem !important;
+    }
+
+    #backupActionModal .modal-box.modal-box-inner.ap-delete-shell.backup-action-shell,
+    #backupActionModal .ap-delete-shell,
+    #backupActionModal .backup-action-shell {
+        width: min(94vw, 620px) !important;
+        max-width: 620px !important;
+        max-height: calc(100dvh - 2rem) !important;
+    }
+
+    #backupActionModal .ap-delete-head {
+        padding: 1rem 1.1rem !important;
+    }
+
+    #backupActionModal .ap-delete-content {
+        padding: 1.1rem !important;
+    }
+
+    #backupActionModal .ap-delete-title {
+        font-size: .96rem !important;
+    }
+
+    #backupActionModal .ap-delete-subtitle {
+        font-size: .72rem !important;
+    }
+
+    #backupActionModal .ap-delete-warning {
+        padding: .85rem !important;
+    }
+
+    #backupActionModal .ap-delete-warning p {
+        font-size: .82rem !important;
+    }
+
+    #backupActionModal .ap-delete-warning span {
+        font-size: .72rem !important;
+    }
+}
+
+@media (min-width: 1101px) and (max-width: 1280px) {
+
+    .backup-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+
+    .backup-main {
+        grid-template-columns: minmax(0, 1fr) 300px !important;
+        gap: 1rem !important;
+    }
+
+    .side-stack {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    .backup-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    .backup-page .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+
+    .backup-banner-action {
+        width: auto !important;
+        max-width: 100% !important;
+    }
+
+    .backup-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .backup-main {
+        grid-template-columns: 1fr !important;
+    }
+
+    .side-stack {
+        grid-template-columns: 1fr !important;
+    }
+
+    .backup-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .backup-history-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+    }
+
+    .backup-table-wrap .data-table {
+        min-width: 920px !important;
+    }
+
+    .usage-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .schedule-item {
+        grid-template-columns: 1fr auto !important;
+    }
+
+    #scheduleModal .backup-modal-actions,
+    #backupActionModal .ap-delete-footer {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        width: 100% !important;
+    }
+
+    #scheduleModal .backup-modal-cancel,
+    #scheduleModal .modal-btn-ghost,
+    #scheduleModal .backup-save-btn,
+    #backupActionModal .modal-btn-ghost,
+    #backupActionModal .ap-delete-confirm-btn,
+    #backupActionModal .backup-action-confirm {
+        width: 100% !important;
+    }
+}
+
+
+@media (max-width: 1280px) {
+    #mainContent.backup-page,
+    .backup-page {
+        overflow-x: hidden !important;
+        max-width: 100% !important;
+    }
+
+    .backup-page *,
+    .backup-page *::before,
+    .backup-page *::after {
+        box-sizing: border-box !important;
+    }
+
+    .backup-main,
+    .backup-stats,
+    .backup-grid,
+    .side-stack,
+    .backup-history-card,
+    .backup-page .card,
+    .backup-page .backup-grid-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .backup-table-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+@media (min-width: 1101px) and (max-width: 1280px) {
+    #mainContent.backup-page,
+    .backup-page {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 100px !important;
+    }
+
+    .backup-page .page-banner {
+        padding: 1.35rem 1.4rem !important;
+        border-radius: 20px !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .backup-page .page-banner-inner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        text-align: left !important;
+    }
+
+    .backup-page .page-title {
+        font-size: 1.8rem !important;
+        line-height: 1.08 !important;
+        margin: 0 !important;
+        text-align: left !important;
+    }
+
+    .backup-banner-action {
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 1rem !important;
+        font-size: .74rem !important;
+        white-space: nowrap !important;
+    }
+
+    .backup-stats {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .backup-stat,
+    .backup-stat.clickable {
+        min-height: 92px !important;
+        padding: .9rem !important;
+        border-radius: 17px !important;
+        gap: .75rem !important;
+    }
+
+    .backup-stat .stat-icon-wrapper {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 13px !important;
+    }
+
+    .backup-stat-value,
+    .backup-stat .stat-num {
+        font-size: 1.3rem !important;
+        line-height: 1 !important;
+    }
+
+    .backup-stat-label,
+    .backup-stat .stat-label {
+        font-size: .62rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .backup-main {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 300px !important;
+        gap: 1rem !important;
+        align-items: start !important;
+    }
+
+    .side-stack {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    .backup-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        padding: .85rem !important;
+    }
+
+    .backup-table-wrap .data-table {
+        min-width: 980px !important;
+        table-layout: fixed !important;
+    }
+
+    .backup-page .card-header {
+        min-height: 62px !important;
+        padding: .9rem 1rem !important;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+    #mainContent.backup-page,
+    .backup-page {
+        padding-left: .9rem !important;
+        padding-right: .9rem !important;
+        padding-bottom: 100px !important;
+    }
+
+    .backup-page .page-banner {
+        padding: 1.15rem 1.2rem !important;
+        border-radius: 18px !important;
+        margin-bottom: .9rem !important;
+    }
+
+    .backup-page .page-banner-inner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .9rem !important;
+        text-align: left !important;
+    }
+
+    .backup-page .page-title {
+        font-size: 1.6rem !important;
+        line-height: 1.06 !important;
+        margin: 0 !important;
+        text-align: left !important;
+    }
+
+    .backup-banner-action {
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 .9rem !important;
+        font-size: .72rem !important;
+        white-space: nowrap !important;
+    }
+
+    .backup-stats {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .8rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .backup-stat,
+    .backup-stat.clickable {
+        min-height: 88px !important;
+        padding: .85rem !important;
+        border-radius: 16px !important;
+        gap: .7rem !important;
+    }
+
+    .backup-stat .stat-icon-wrapper {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+    }
+
+    .backup-stat-value,
+    .backup-stat .stat-num {
+        font-size: 1.25rem !important;
+    }
+
+    .backup-stat-label,
+    .backup-stat .stat-label {
+        font-size: .6rem !important;
+    }
+
+    .backup-main {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .side-stack {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 1rem !important;
+    }
+
+    .backup-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .8rem !important;
+        padding: .8rem !important;
+    }
+
+    .backup-history-actions {
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: .55rem !important;
+    }
+
+    .backup-table-wrap .data-table {
+        min-width: 940px !important;
+        table-layout: fixed !important;
+    }
+
+    .usage-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .schedule-item {
+        grid-template-columns: minmax(0, 1fr) auto auto !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+    #mainContent.backup-page,
+    .backup-page {
+        padding-left: .8rem !important;
+        padding-right: .8rem !important;
+        padding-bottom: 96px !important;
+        overflow-x: hidden !important;
+    }
+
+    .backup-page .page-banner {
+        padding: 1rem !important;
+        border-radius: 18px !important;
+        margin-bottom: .85rem !important;
+    }
+
+    .backup-page .page-banner-inner {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        gap: .7rem !important;
+        text-align: left !important;
+    }
+
+    .backup-page .page-title {
+        font-size: 1.45rem !important;
+        line-height: 1.05 !important;
+        margin: 0 !important;
+        text-align: left !important;
+    }
+
+    .backup-banner-action {
+        width: auto !important;
+        max-width: 100% !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 .9rem !important;
+        font-size: .72rem !important;
+    }
+
+    .backup-stats {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .7rem !important;
+        margin-bottom: .9rem !important;
+    }
+
+    .backup-stat,
+    .backup-stat.clickable {
+        min-height: 82px !important;
+        padding: .75rem !important;
+        border-radius: 14px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .65rem !important;
+        text-align: left !important;
+    }
+
+    .backup-stat .stat-icon-wrapper {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        order: 2 !important;
+        margin: 0 !important;
+    }
+
+    .backup-stat-value,
+    .backup-stat .stat-num {
+        font-size: 1.2rem !important;
+        line-height: 1 !important;
+        text-align: left !important;
+    }
+
+    .backup-stat-label,
+    .backup-stat .stat-label {
+        font-size: .56rem !important;
+        line-height: 1.12 !important;
+        text-align: left !important;
+        white-space: normal !important;
+    }
+
+    .backup-main {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .side-stack {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .backup-page .card-header {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .75rem !important;
+        padding: .85rem !important;
+    }
+
+    .backup-history-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: .55rem !important;
+    }
+
+    .backup-grid {
+        grid-template-columns: 1fr !important;
+        gap: .75rem !important;
+        padding: .75rem !important;
+    }
+
+    .backup-table-wrap .data-table {
+        min-width: 920px !important;
+        table-layout: fixed !important;
+    }
+
+    .usage-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .schedule-item {
+        grid-template-columns: 1fr auto !important;
+        align-items: center !important;
+    }
+
+    #scheduleModal .backup-modal-actions,
+    #backupActionModal .ap-delete-footer {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        width: 100% !important;
+    }
+
+    #scheduleModal .backup-modal-cancel,
+    #scheduleModal .modal-btn-ghost,
+    #scheduleModal .backup-save-btn,
+    #backupActionModal .modal-btn-ghost,
+    #backupActionModal .ap-delete-confirm-btn,
+    #backupActionModal .backup-action-confirm {
+        width: 100% !important;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+    #mainContent.backup-page,
+    .backup-page {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        padding-bottom: 90px !important;
+        overflow-x: hidden !important;
+    }
+
+    .backup-page .page-banner {
+        padding: 1rem !important;
+        border-radius: 16px !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .backup-page .page-banner-inner {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        gap: .8rem !important;
+        text-align: left !important;
+    }
+
+    .backup-page .page-title {
+        font-size: 1.45rem !important;
+        line-height: 1.05 !important;
+        margin: 0 !important;
+        text-align: left !important;
+    }
+
+    .backup-banner-action {
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 .95rem !important;
+        font-size: .72rem !important;
+    }
+
+    .backup-stats {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .75rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .backup-stat,
+    .backup-stat.clickable {
+        min-height: 112px !important;
+        padding: .85rem .7rem !important;
+        border-radius: 16px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: .55rem !important;
+        text-align: center !important;
+    }
+
+    .backup-stat .stat-icon-wrapper {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        margin: 0 !important;
+    }
+
+    .backup-stat-value,
+    .backup-stat .stat-num {
+        font-size: 1.25rem !important;
+        text-align: center !important;
+    }
+
+    .backup-stat-label,
+    .backup-stat .stat-label {
+        font-size: .58rem !important;
+        line-height: 1.15 !important;
+        text-align: center !important;
+        white-space: normal !important;
+    }
+
+    .backup-main {
+        grid-template-columns: 1fr !important;
+    }
+
+    .side-stack {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    #backupHistoryListView {
+        display: none !important;
+    }
+
+    #backupHistoryGridView {
+        display: block !important;
+    }
+
+    #backupHistoryViewToggle,
+    .backup-page .backup-view-toggle,
+    .backup-page .view-toggle {
+        display: none !important;
+    }
+
+    .backup-grid {
+        grid-template-columns: 1fr !important;
+        padding: .85rem !important;
+        gap: .85rem !important;
+    }
+
+    .backup-history-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+    }
+
+    .usage-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .schedule-item {
+        grid-template-columns: 1fr !important;
+        align-items: start !important;
+    }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+    #mainContent.backup-page,
+    .backup-page {
+        padding-left: 11px !important;
+        padding-right: 11px !important;
+        padding-bottom: 88px !important;
+        overflow-x: hidden !important;
+    }
+
+    .backup-page .page-banner {
+        padding: .95rem !important;
+        border-radius: 15px !important;
+        margin-bottom: .85rem !important;
+    }
+
+    .backup-page .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: .7rem !important;
+        text-align: left !important;
+    }
+
+    .backup-page .page-title {
+        font-size: 1.35rem !important;
+        line-height: 1.05 !important;
+        margin: 0 !important;
+        text-align: left !important;
+    }
+
+    .backup-banner-action {
+        height: 37px !important;
+        min-height: 37px !important;
+        padding: 0 .85rem !important;
+        font-size: .68rem !important;
+    }
+
+    .backup-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+        margin-bottom: .85rem !important;
+    }
+
+    .backup-stat,
+    .backup-stat.clickable {
+        min-height: 98px !important;
+        padding: .75rem .58rem !important;
+        border-radius: 15px !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        gap: .5rem !important;
+    }
+
+    .backup-stat .stat-icon-wrapper {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+    }
+
+    .backup-stat-value,
+    .backup-stat .stat-num {
+        font-size: 1.12rem !important;
+        text-align: center !important;
+    }
+
+    .backup-stat-label,
+    .backup-stat .stat-label {
+        font-size: .52rem !important;
+        line-height: 1.12 !important;
+        text-align: center !important;
+        white-space: normal !important;
+    }
+
+    .backup-main {
+        grid-template-columns: 1fr !important;
+    }
+
+    .side-stack {
+        grid-template-columns: 1fr !important;
+    }
+
+    #backupHistoryListView {
+        display: none !important;
+    }
+
+    #backupHistoryGridView {
+        display: block !important;
+    }
+
+    #backupHistoryViewToggle,
+    .backup-page .backup-view-toggle,
+    .backup-page .view-toggle {
+        display: none !important;
+    }
+
+    .backup-grid {
+        grid-template-columns: 1fr !important;
+        padding: .75rem !important;
+        gap: .75rem !important;
+    }
+
+    .backup-grid-card {
+        padding: .8rem !important;
+        border-radius: 14px !important;
+    }
+
+    .backup-history-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+    }
+
+    .usage-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .schedule-item {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 360px) {
+    #mainContent.backup-page,
+    .backup-page {
+        padding-left: 9px !important;
+        padding-right: 9px !important;
+        padding-bottom: 86px !important;
+        overflow-x: hidden !important;
+    }
+
+    .backup-page .page-banner {
+        padding: .85rem !important;
+        border-radius: 14px !important;
+        margin-bottom: .75rem !important;
+    }
+
+    .backup-page .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: .65rem !important;
+        text-align: left !important;
+    }
+
+    .backup-page .page-title {
+        font-size: 1.22rem !important;
+        line-height: 1.05 !important;
+        margin: 0 !important;
+        text-align: left !important;
+    }
+
+    .backup-banner-action {
+        height: 36px !important;
+        min-height: 36px !important;
+        padding: 0 .75rem !important;
+        font-size: .64rem !important;
+    }
+
+    .backup-stats {
+        grid-template-columns: 1fr !important;
+        gap: .6rem !important;
+        margin-bottom: .8rem !important;
+    }
+
+    .backup-stat,
+    .backup-stat.clickable {
+        min-height: 82px !important;
+        padding: .72rem !important;
+        border-radius: 14px !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .6rem !important;
+        text-align: left !important;
+    }
+
+    .backup-stat .stat-icon-wrapper {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        order: 2 !important;
+        margin: 0 !important;
+    }
+
+    .backup-stat-value,
+    .backup-stat .stat-num {
+        font-size: 1.12rem !important;
+        text-align: left !important;
+    }
+
+    .backup-stat-label,
+    .backup-stat .stat-label {
+        font-size: .5rem !important;
+        line-height: 1.1 !important;
+        text-align: left !important;
+    }
+
+    .backup-main {
+        grid-template-columns: 1fr !important;
+    }
+
+    .side-stack {
+        grid-template-columns: 1fr !important;
+    }
+
+    #backupHistoryListView {
+        display: none !important;
+    }
+
+    #backupHistoryGridView {
+        display: block !important;
+    }
+
+    #backupHistoryViewToggle,
+    .backup-page .backup-view-toggle,
+    .backup-page .view-toggle {
+        display: none !important;
+    }
+
+    .backup-grid {
+        grid-template-columns: 1fr !important;
+        padding: .65rem !important;
+        gap: .65rem !important;
+    }
+
+    .backup-grid-card {
+        padding: .75rem !important;
+        border-radius: 13px !important;
+        gap: .55rem !important;
+    }
+
+    .backup-grid-id {
+        font-size: .62rem !important;
+    }
+
+    .backup-grid-label {
+        font-size: .48rem !important;
+    }
+
+    .backup-grid-value {
+        font-size: .64rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .backup-history-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: .45rem !important;
+    }
+
+    .usage-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .schedule-item {
+        grid-template-columns: 1fr !important;
+        align-items: start !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .backup-filter-overlay.filter-overlay-ui {
+        inset: 74px 0 0 0 !important;
+        left: 0 !important;
+    }
+
+    .backup-filter-drawer.filter-drawer-ui {
+        top: auto !important;
+        right: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: calc(100dvh - 74px) !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #backupActionModal.ui-modal,
+    #backupActionModal.backup-action-modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+
+    #backupActionModal .modal-box.modal-box-inner.ap-delete-shell.backup-action-shell,
+    #backupActionModal .ap-delete-shell,
+    #backupActionModal .backup-action-shell {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #backupActionModal .ap-delete-head {
+        border-radius: 24px 24px 0 0 !important;
+        padding: .95rem 1rem !important;
+    }
+
+    #backupActionModal .ap-delete-content {
+        padding: 1rem !important;
+    }
+
+    #backupActionModal .ap-delete-footer {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .65rem !important;
+        width: 100% !important;
+    }
+
+    #backupActionModal .modal-btn-ghost,
+    #backupActionModal .ap-delete-confirm-btn,
+    #backupActionModal .backup-action-confirm {
+        width: 100% !important;
+    }
+
+    #scheduleModal .backup-schedule-modal-card,
+    #scheduleModal .modal-box,
+    #scheduleModal .um-modal-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    #scheduleModal .backup-modal-actions {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .65rem !important;
+        width: 100% !important;
+    }
+
+    #scheduleModal .backup-modal-cancel,
+    #scheduleModal .modal-btn-ghost,
+    #scheduleModal .backup-save-btn {
+        width: 100% !important;
+    }
 }

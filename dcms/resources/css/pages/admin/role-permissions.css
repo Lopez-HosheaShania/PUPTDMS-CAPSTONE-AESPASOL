@@ -3004,7 +3004,6 @@ body .floating-save-bar .btn-save-float:disabled {
         border-radius: 999px !important;
     }
 
-    /* Active roles: clean 2-column mobile cards, no horizontal cut */
     .role-permissions-page #roleListContainer {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -3062,7 +3061,6 @@ body .floating-save-bar .btn-save-float:disabled {
         font-size: .58rem !important;
     }
 
-    /* Selected role summary */
     .role-permissions-page .accent-card {
         margin-top: 1rem !important;
         margin-bottom: 1rem !important;
@@ -3083,7 +3081,6 @@ body .floating-save-bar .btn-save-float:disabled {
         margin-top: .85rem !important;
     }
 
-    /* Permission card header */
     .role-permissions-page .card {
         width: 100% !important;
         min-width: 0 !important;
@@ -3144,7 +3141,6 @@ body .floating-save-bar .btn-save-float:disabled {
         justify-content: center !important;
     }
 
-    /* Permission groups */
     .role-permissions-page .group-card,
     .role-permissions-page .group-card.perm-group {
         border-radius: 16px !important;
@@ -3302,5 +3298,479 @@ body .floating-save-bar .btn-save-float:disabled {
     .role-permissions-page #roleListContainer .badge-pill {
         font-size: .5rem !important;
         padding-inline: .38rem !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    .role-permissions-page.admin-page-shell,
+    .role-permissions-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: calc(6rem + env(safe-area-inset-bottom)) !important;
+    }
+
+    .role-permissions-page .role-permission-shell,
+    .role-permissions-page .main-grid,
+    .role-permissions-page .card,
+    .role-permissions-page .role-permission-card,
+    .role-permissions-page .role-permission-card-body {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    .role-permissions-page .page-banner {
+        border-radius: 20px !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .role-permissions-page .page-banner-inner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .role-permissions-page .page-banner-inner > div:first-child {
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        text-align: left !important;
+    }
+
+    .role-permissions-page .page-title {
+        text-align: left !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .role-permissions-page .page-subtitle {
+        text-align: left !important;
+        max-width: 100% !important;
+    }
+
+    .role-permissions-page .page-banner-actions {
+        flex: 0 0 auto !important;
+        justify-content: flex-end !important;
+    }
+
+    .role-permissions-page .btn-new-role {
+        min-height: 42px !important;
+        padding: 0 .95rem !important;
+        white-space: nowrap !important;
+        font-size: .76rem !important;
+    }
+
+    .role-permissions-page .main-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .role-permissions-page #roleListContainer,
+    .role-permissions-page .role-list-container,
+    .role-permissions-page .role-list-container.role-list-view,
+    .role-permissions-page .role-list-container.role-grid-view {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-auto-flow: row !important;
+        grid-auto-columns: unset !important;
+        gap: .65rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        scroll-snap-type: none !important;
+    }
+
+    .role-permissions-page #roleListContainer .role-card,
+    .role-permissions-page .role-list-container .role-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 128px !important;
+        margin: 0 !important;
+        padding: .8rem !important;
+        border-radius: 15px !important;
+        scroll-snap-align: unset !important;
+        overflow: hidden !important;
+    }
+
+    .role-permissions-page .role-card:hover {
+        transform: none !important;
+    }
+
+    .role-permissions-page .role-avatar {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        border-radius: 11px !important;
+        font-size: .7rem !important;
+    }
+
+    .role-permissions-page .role-name-label {
+        max-width: 100% !important;
+        font-size: .76rem !important;
+        line-height: 1.15 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .role-permissions-page .badge-pill {
+        max-width: 100% !important;
+        font-size: .52rem !important;
+        padding: .16rem .42rem !important;
+        white-space: nowrap !important;
+    }
+
+    .role-permissions-page .count-label,
+    .role-permissions-page .pct-label {
+        font-size: .56rem !important;
+    }
+
+    .role-permissions-page .progress-bar {
+        height: 4px !important;
+    }
+
+    .role-permissions-page .accent-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin-top: .85rem !important;
+        margin-bottom: 1rem !important;
+        padding: .95rem !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+    }
+
+    .role-permissions-page .accent-card h2,
+    .role-permissions-page .accent-card .text-3xl,
+    .role-permissions-page .accent-card .text-4xl {
+        font-size: 1.9rem !important;
+        line-height: 1 !important;
+    }
+
+    .role-permissions-page .card-header {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        align-items: stretch !important;
+        gap: .75rem !important;
+        padding: .9rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .role-permissions-page .perm-search-row,
+    .role-permissions-page .perm-search-row.voice-search-row {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 42px !important;
+        align-items: center !important;
+        gap: .55rem !important;
+    }
+
+    .role-permissions-page .perm-search-row .search-wrap,
+    .role-permissions-page .perm-search-row .global-search,
+    .role-permissions-page .perm-search-row [data-search-wrapper] {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .role-permissions-page .perm-search-row .search-input,
+    .role-permissions-page .perm-search-row [data-search-input] {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        font-size: .74rem !important;
+    }
+
+    .role-permissions-page .perm-search-row .voice-input-toggle,
+    .role-permissions-page .perm-search-row.voice-search-row .voice-input-toggle {
+        width: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 42px !important;
+        position: static !important;
+    }
+
+    .role-permissions-page .card-header-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        width: 100% !important;
+        gap: .6rem !important;
+    }
+
+    .role-permissions-page #globalViewAsBtn {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    .role-permissions-page .btn-collapse,
+    .role-permissions-page #resetDefaultsBtn,
+    .role-permissions-page .btn-reset {
+        width: 100% !important;
+        min-height: 40px !important;
+        justify-content: center !important;
+        font-size: .72rem !important;
+        border-radius: 999px !important;
+        padding: 0 .7rem !important;
+        white-space: nowrap !important;
+    }
+
+    .role-permissions-page .group-card,
+    .role-permissions-page .group-card.perm-group {
+        width: 100% !important;
+        min-width: 0 !important;
+        border-radius: 16px !important;
+        margin-bottom: .75rem !important;
+        overflow: hidden !important;
+    }
+
+    .role-permissions-page .perm-group-header {
+        display: grid !important;
+        grid-template-columns: 40px minmax(0, 1fr) !important;
+        align-items: start !important;
+        column-gap: .7rem !important;
+        row-gap: .75rem !important;
+        padding: .85rem !important;
+        min-height: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .role-permissions-page .perm-group-icon {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 13px !important;
+        margin: 0 !important;
+    }
+
+    .role-permissions-page .perm-group-info,
+    .role-permissions-page .perm-group-header > div:nth-child(2) {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .role-permissions-page .perm-group-title {
+        max-width: 100% !important;
+        font-size: .8rem !important;
+        line-height: 1.18 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+
+    .role-permissions-page .group-count {
+        font-size: .66rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .role-permissions-page .perm-group-actions,
+    .role-permissions-page .perm-group-header > div:last-child {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto auto !important;
+        align-items: center !important;
+        gap: .5rem !important;
+    }
+
+    .role-permissions-page .dot-row {
+        justify-content: flex-start !important;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
+        gap: 4px !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .role-permissions-page .dot {
+        width: 7px !important;
+        height: 7px !important;
+        min-width: 7px !important;
+        min-height: 7px !important;
+    }
+
+    .role-permissions-page .all-toggle-wrap {
+        min-height: 30px !important;
+        padding: .22rem .42rem .22rem .55rem !important;
+        border-radius: 999px !important;
+        gap: .38rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .role-permissions-page .all-toggle-wrap span {
+        font-size: .55rem !important;
+    }
+
+    .role-permissions-page .toggle-switch {
+        width: 38px !important;
+        height: 22px !important;
+        min-width: 38px !important;
+    }
+
+    .role-permissions-page .toggle-track {
+        width: 38px !important;
+        height: 22px !important;
+    }
+
+    .role-permissions-page .toggle-track::after {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    .role-permissions-page .toggle-switch input:checked + .toggle-track::after {
+        transform: translateX(16px) !important;
+    }
+
+    .role-permissions-page .toggle-switch input:indeterminate + .toggle-track::after {
+        transform: translateX(8px) !important;
+    }
+
+    .role-permissions-page .perm-row {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .7rem !important;
+        padding: .82rem .9rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .role-permissions-page .perm-main,
+    .role-permissions-page .perm-row > div:first-child {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .role-permissions-page .perm-title-row {
+        flex-wrap: wrap !important;
+        gap: .35rem !important;
+    }
+
+    .role-permissions-page .perm-label {
+        font-size: .74rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .role-permissions-page .perm-slug {
+        max-width: 100% !important;
+        font-size: .64rem !important;
+        line-height: 1.25 !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .role-permissions-page .perm-row-actions,
+    .role-permissions-page .perm-row > div:last-child {
+        width: 100% !important;
+        min-width: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .6rem !important;
+    }
+
+    .role-permissions-page .perm-status {
+        min-width: 76px !important;
+        min-height: 24px !important;
+        padding: 0 .55rem !important;
+        font-size: .6rem !important;
+    }
+
+    body .role-permissions-floating-save-bar,
+    body .floating-save-bar {
+        max-width: calc(100vw - 2rem) !important;
+        gap: 1rem !important;
+        padding: .75rem .8rem .75rem 1rem !important;
+    }
+
+    body .role-permissions-floating-save-bar .fsb-actions,
+    body .floating-save-bar .fsb-actions {
+        gap: .5rem !important;
+    }
+
+    body .role-permissions-floating-save-bar .btn-discard,
+    body .role-permissions-floating-save-bar .btn-save-float,
+    body .floating-save-bar .btn-discard,
+    body .floating-save-bar .btn-save-float {
+        min-height: 40px !important;
+        padding: 0 .9rem !important;
+        font-size: .76rem !important;
+        white-space: nowrap !important;
+    }
+
+    .role-modal,
+    .modern-modal.global-dialog,
+    #newRoleModal,
+    #deleteRoleModal,
+    #resetConfirmModal {
+        width: min(94vw, 520px) !important;
+        max-width: 94vw !important;
+    }
+
+    #vaOverlay .va-panel,
+    #patientPickerOverlay .va-panel {
+        width: min(94vw, 620px) !important;
+        max-width: 94vw !important;
+        max-height: 84vh !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 860px) {
+
+    .role-permissions-page .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: .9rem !important;
+    }
+
+    .role-permissions-page .page-title {
+        white-space: normal !important;
+        line-height: 1.1 !important;
+    }
+
+    .role-permissions-page .page-banner-actions,
+    .role-permissions-page .btn-new-role {
+        width: 100% !important;
+    }
+
+    .role-permissions-page .btn-new-role {
+        justify-content: center !important;
+    }
+
+    .role-permissions-page #roleListContainer,
+    .role-permissions-page .role-list-container,
+    .role-permissions-page .role-list-container.role-list-view,
+    .role-permissions-page .role-list-container.role-grid-view {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .role-permissions-page .card-header-actions {
+        grid-template-columns: 1fr !important;
+    }
+
+    body .role-permissions-floating-save-bar,
+    body .floating-save-bar {
+        left: 1rem !important;
+        right: 1rem !important;
+        transform: none !important;
+        width: auto !important;
+        max-width: none !important;
+        border-radius: 18px !important;
     }
 }

@@ -189,7 +189,7 @@ isset($upcomingAppointment) && $upcomingAppointment
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch dashboard-grid-tight">
             <div class="xl:col-span-4">
                 <div id="profileSkeletonContainer"
-                    class="dashboard-glass rounded-[1rem] overflow-hidden skeleton-section h-full skeleton-shell skeleton-fade-swap">
+                    class="dashboard-glass rounded-[1rem] overflow-hidden skeleton-section h-full skeleton-shell skeleton-fade-swap mt-3">
                     <div>
                         <div class="bg-gray-200 px-5 sm:px-6 py-5">
                             <div class="h-3 w-28 skeleton-line mb-3"></div>
@@ -231,7 +231,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             </div>
 
             <div class="xl:col-span-8">
-                <div id="calendarSkeletonContainer" class="w-full h-full min-h-[420px] skeleton-fade-swap"></div>
+                <div id="calendarSkeletonContainer" class="w-full h-full min-h-[420px] skeleton-fade-swap mt-3"></div>
             </div>
         </div>
 
@@ -637,7 +637,7 @@ isset($upcomingAppointment) && $upcomingAppointment
             window.swapSkeletonContent('upcomingAppointmentWrapper',
                 '<div class="upcoming-card-polished bg-white dark:bg-[#161B22] rounded-[1rem] border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">' +
 
-                '<div class="px-4 sm:px-5 py-4 sm:py-4.5">' +
+                '<div class="px-4 sm:px-5 py-4 sm:py-4.5 mb-3">' +
                 '<div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-4 xl:gap-5 items-center">' +
 
                 '<div class="min-w-0">' +

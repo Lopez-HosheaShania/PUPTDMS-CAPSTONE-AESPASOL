@@ -1954,3 +1954,472 @@
 .dark .system-settings-page .settings-timepicker-icon {
     color: #9CA3AF !important;
 }
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.system-settings-page,
+    .system-settings-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 130px !important;
+    }
+
+    #mainContent.system-settings-page.admin-page-shell {
+        min-height: calc(100dvh - 90px) !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.system-settings-page.admin-page-shell > .w-full,
+    .system-settings-page .admin-page-container,
+    .system-settings-page .content-lift {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    .system-settings-page .page-banner {
+        padding: 1.4rem 1.35rem 1.55rem !important;
+        border-radius: 20px !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .system-settings-page .page-banner-inner {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .system-settings-page .page-banner-inner > div:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+    }
+
+    .system-settings-page .page-title {
+        font-size: 1.8rem !important;
+        line-height: 1.08 !important;
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .system-settings-page .page-subtitle {
+        font-size: .8rem !important;
+        line-height: 1.35 !important;
+        max-width: 620px !important;
+    }
+
+    .system-settings-page .page-banner-actions,
+    .system-settings-page .settings-banner-actions {
+        flex: 0 0 auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .55rem !important;
+        flex-wrap: nowrap !important;
+        margin-left: auto !important;
+    }
+
+    .system-settings-page .banner-badge,
+    .system-settings-page .settings-banner-save,
+    .system-settings-page .settings-backup-manager-btn {
+        min-height: 38px !important;
+        height: 38px !important;
+        padding: 0 .85rem !important;
+        font-size: .72rem !important;
+        border-radius: 999px !important;
+        white-space: nowrap !important;
+    }
+
+    .system-settings-page #statCards.system-settings-stats {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .system-settings-page #statCards.system-settings-stats .stat-card {
+        min-width: 0 !important;
+        min-height: 96px !important;
+        padding: .95rem !important;
+        border-radius: 17px !important;
+    }
+
+    .system-settings-page #statCards.system-settings-stats .stat-value,
+    .system-settings-page #statCards.system-settings-stats .stat-num,
+    .system-settings-page #statCards.system-settings-stats .stat-count {
+        font-size: 1.45rem !important;
+        line-height: 1 !important;
+    }
+
+    .system-settings-page #statCards.system-settings-stats .stat-label {
+        font-size: .64rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .system-settings-page #statCards.system-settings-stats .stat-footer {
+        font-size: .62rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .system-settings-page #statCards.system-settings-stats .stat-icon,
+    .system-settings-page #statCards.system-settings-stats .stat-icon-wrapper {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 13px !important;
+        font-size: .9rem !important;
+    }
+
+    .system-settings-page .settings-layout,
+    .system-settings-page .settings-content-grid,
+    .system-settings-page .settings-main-grid,
+    .system-settings-page .settings-shell {
+        display: grid !important;
+        grid-template-columns: 240px minmax(0, 1fr) !important;
+        gap: 1rem !important;
+        align-items: start !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .settings-sidebar-card {
+        width: 100% !important;
+        max-width: 240px !important;
+        min-width: 0 !important;
+        border-radius: 16px !important;
+    }
+
+    .settings-sidebar-head {
+        padding: .8rem .9rem !important;
+    }
+
+    .settings-sidebar-kicker {
+        font-size: .58rem !important;
+    }
+
+    .settings-nav-item {
+        min-height: 36px !important;
+        padding: .5rem .65rem !important;
+        border-radius: 11px !important;
+        gap: .55rem !important;
+        font-size: .72rem !important;
+    }
+
+    .settings-nav-item i {
+        width: 15px !important;
+        font-size: .72rem !important;
+    }
+
+    .system-settings-page .section-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        border-radius: 16px !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .system-settings-page .section-card-hdr {
+        min-height: 58px !important;
+        padding: .85rem 1rem !important;
+        gap: .75rem !important;
+    }
+
+    .system-settings-page .section-card-hdr-left {
+        min-width: 0 !important;
+        gap: .65rem !important;
+    }
+
+    .system-settings-page .section-card-hdr-left i {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        border-radius: 11px !important;
+        font-size: .82rem !important;
+    }
+
+    .system-settings-page .section-card-hdr-left h2,
+    .system-settings-page .section-card-hdr h2 {
+        font-size: .9rem !important;
+        line-height: 1.15 !important;
+        margin: 0 !important;
+    }
+
+    .system-settings-page .section-card-hdr p {
+        font-size: .66rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .system-settings-page .section-card-body {
+        padding: 1rem !important;
+    }
+
+    .system-settings-page .section-card-body .grid {
+        gap: .85rem !important;
+    }
+
+    .system-settings-page .form-label {
+        font-size: .66rem !important;
+        margin-bottom: .35rem !important;
+    }
+
+    .system-settings-page .form-ctrl,
+    .system-settings-page .settings-custom-select-btn {
+        min-height: 40px !important;
+        height: 40px !important;
+        border-radius: 11px !important;
+        font-size: .78rem !important;
+        padding-left: .75rem !important;
+        padding-right: .75rem !important;
+    }
+
+    .system-settings-page textarea.form-ctrl {
+        min-height: 88px !important;
+        height: auto !important;
+        padding-top: .65rem !important;
+        padding-bottom: .65rem !important;
+        line-height: 1.4 !important;
+    }
+
+    .setting-note {
+        font-size: .64rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .setting-row {
+        gap: .85rem !important;
+        padding: .8rem 0 !important;
+        align-items: center !important;
+    }
+
+    .setting-row-info {
+        min-width: 0 !important;
+        padding-right: .6rem !important;
+    }
+
+    .setting-row-label {
+        font-size: .78rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .setting-row-desc {
+        font-size: .68rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .toggle-slider {
+        width: 42px !important;
+        height: 25px !important;
+    }
+
+    .toggle-slider::after {
+        width: 17px !important;
+        height: 17px !important;
+    }
+
+    .toggle-wrap input:checked + .toggle-slider::after {
+        transform: translateX(17px) !important;
+    }
+
+    .permission-chip {
+        min-height: 32px !important;
+        padding: 0 .7rem !important;
+        font-size: .68rem !important;
+    }
+
+    .badge-online,
+    .badge-offline {
+        min-height: 27px !important;
+        padding: 0 .65rem !important;
+        font-size: .66rem !important;
+    }
+
+    .system-settings-page .clinic-voice-row {
+        gap: .5rem !important;
+    }
+
+    .system-settings-page .clinic-voice-clear-btn {
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+    }
+
+    .system-settings-page .voice-input-wrap [data-voice-status] {
+        font-size: .66rem !important;
+        top: -1.25rem !important;
+    }
+
+    .system-settings-page .settings-custom-select-menu {
+        top: calc(100% + 6px) !important;
+        padding: .4rem !important;
+        border-radius: 13px !important;
+        max-height: 220px !important;
+        overflow-y: auto !important;
+        z-index: 20000 !important;
+    }
+
+    .system-settings-page .settings-custom-select-option {
+        min-height: 36px !important;
+        padding: 0 .7rem !important;
+        border-radius: 10px !important;
+        font-size: .74rem !important;
+    }
+
+    #settingsFloatingActions.settings-floating-save-bar,
+    .system-settings-page .settings-floating-save-bar,
+    .system-settings-page .floating-save-bar {
+        left: 50% !important;
+        right: auto !important;
+        bottom: -150px !important;
+        transform: translateX(-50%) !important;
+
+        width: min(94vw, 780px) !important;
+        max-width: 94vw !important;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: .9rem !important;
+
+        padding: .75rem .8rem .75rem 1.1rem !important;
+        border-radius: 999px !important;
+    }
+
+    #settingsFloatingActions.settings-floating-save-bar.show,
+    .system-settings-page .settings-floating-save-bar.show,
+    .system-settings-page .floating-save-bar.show {
+        bottom: 1.25rem !important;
+    }
+
+    #settingsFloatingActions .fsb-text,
+    .system-settings-page .fsb-text {
+        min-width: 130px !important;
+        flex: 1 1 auto !important;
+    }
+
+    #settingsFloatingActions .fsb-title,
+    .system-settings-page .fsb-title {
+        font-size: .78rem !important;
+    }
+
+    #settingsFloatingActions .fsb-sub,
+    .system-settings-page .fsb-sub {
+        font-size: .64rem !important;
+    }
+
+    #settingsFloatingActions .fsb-actions,
+    .system-settings-page .fsb-actions {
+        flex: 0 0 auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: .5rem !important;
+    }
+
+    #settingsFloatingActions .btn-reset-defaults,
+    #settingsFloatingActions .btn-discard,
+    #settingsFloatingActions .btn-save-float,
+    .system-settings-page .btn-reset-defaults,
+    .system-settings-page .btn-discard,
+    .system-settings-page .btn-save-float {
+        min-height: 38px !important;
+        height: 38px !important;
+        padding: 0 .8rem !important;
+        font-size: .72rem !important;
+        white-space: nowrap !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    .system-settings-page .page-banner-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    .system-settings-page .page-banner-actions,
+    .system-settings-page .settings-banner-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        margin-left: 0 !important;
+        flex-wrap: wrap !important;
+    }
+
+    .system-settings-page #statCards.system-settings-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .system-settings-page .settings-layout,
+    .system-settings-page .settings-content-grid,
+    .system-settings-page .settings-main-grid,
+    .system-settings-page .settings-shell {
+        grid-template-columns: 1fr !important;
+        gap: .85rem !important;
+    }
+
+    .settings-sidebar-card {
+        max-width: 100% !important;
+    }
+
+    .settings-sidebar-head {
+        display: none !important;
+    }
+
+    .settings-sidebar-card nav,
+    .settings-sidebar-card .settings-nav,
+    .settings-sidebar-card .settings-sidebar-body {
+        display: flex !important;
+        align-items: center !important;
+        gap: .5rem !important;
+        overflow-x: auto !important;
+        padding: .65rem !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .settings-nav-item {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+        margin-bottom: 0 !important;
+    }
+
+    .system-settings-page .section-card-body .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .setting-row {
+        align-items: flex-start !important;
+    }
+
+    #settingsFloatingActions.settings-floating-save-bar,
+    .system-settings-page .settings-floating-save-bar,
+    .system-settings-page .floating-save-bar {
+        width: min(94vw, 680px) !important;
+        border-radius: 22px !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .75rem !important;
+        padding: .9rem !important;
+    }
+
+    #settingsFloatingActions .fsb-actions,
+    .system-settings-page .fsb-actions {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .55rem !important;
+    }
+
+    #settingsFloatingActions .btn-reset-defaults,
+    #settingsFloatingActions .btn-discard,
+    #settingsFloatingActions .btn-save-float,
+    .system-settings-page .btn-reset-defaults,
+    .system-settings-page .btn-discard,
+    .system-settings-page .btn-save-float {
+        width: 100% !important;
+        padding-inline: .55rem !important;
+    }
+}

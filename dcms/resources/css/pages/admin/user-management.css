@@ -4338,3 +4338,455 @@ html[data-theme="dark"] #mainContent.user-management-page .badge-active::before,
         min-width: 22px !important;
     }
 }
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.user-management-page {
+        overflow-x: hidden !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    #mainContent.user-management-page > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.user-management-page .um-hero {
+        border-radius: 22px !important;
+        padding: 1.35rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+
+    #mainContent.user-management-page .um-hero-content {
+        display: flex !important;
+        align-items: flex-end !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        flex-wrap: nowrap !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.user-management-page .um-hero-copy {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.user-management-page .um-hero-title {
+        font-size: clamp(1.55rem, 3vw, 2rem) !important;
+        line-height: 1.08 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.user-management-page .um-hero-subtitle {
+        max-width: 680px !important;
+        font-size: .86rem !important;
+        line-height: 1.5 !important;
+    }
+
+    #mainContent.user-management-page .um-hero-meta {
+        gap: .5rem !important;
+        margin-top: .85rem !important;
+    }
+
+    #mainContent.user-management-page .um-hero-meta-pill {
+        padding: .48rem .72rem !important;
+        font-size: .7rem !important;
+    }
+
+    #mainContent.user-management-page .um-hero-actions {
+        flex: 0 0 auto !important;
+    }
+
+    #mainContent.user-management-page .um-hero-btn {
+        min-height: 42px !important;
+        padding: 0 .95rem !important;
+        font-size: .76rem !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-card {
+        min-height: 96px !important;
+        padding: 1rem 1.05rem !important;
+        gap: .8rem !important;
+        border-radius: 16px !important;
+    }
+
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon,
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon-wrapper {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        min-height: 42px !important;
+        flex: 0 0 42px !important;
+        border-radius: 12px !important;
+        font-size: 14px !important;
+    }
+
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-num {
+        font-size: 28px !important;
+    }
+
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-label {
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+    }
+
+    #mainContent.user-management-page .um-users-card {
+        border-radius: 18px 18px 0 0 !important;
+        overflow: visible !important;
+    }
+
+    #mainContent.user-management-page .um-users-toolbar {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        align-items: stretch !important;
+        gap: .85rem !important;
+        min-height: auto !important;
+        padding: 1rem !important;
+        width: 100% !important;
+    }
+
+    #mainContent.user-management-page .um-users-heading {
+        width: 100% !important;
+        min-width: 0 !important;
+        justify-content: flex-start !important;
+        white-space: normal !important;
+    }
+
+    #mainContent.user-management-page .um-users-heading h2 {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: 1rem !important;
+    }
+
+    #mainContent.user-management-page .um-users-heading .card-header-icon {
+        width: 40px !important;
+        height: 40px !important;
+        flex: 0 0 40px !important;
+        border-radius: 13px !important;
+    }
+
+    #mainContent.user-management-page #umFilterForm,
+    #mainContent.user-management-page .um-users-filter-form {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: center !important;
+        justify-content: stretch !important;
+        gap: .65rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+    }
+
+    #mainContent.user-management-page #umFilterForm .um-search-row,
+    #mainContent.user-management-page #umFilterForm .um-search-mobile,
+    #mainContent.user-management-page #umFilterForm .um-search-row.voice-search-row {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+    }
+
+    #mainContent.user-management-page #umFilterForm .search-wrap,
+    #mainContent.user-management-page #umFilterForm .global-search,
+    #mainContent.user-management-page #umFilterForm [data-search-wrapper] {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    #mainContent.user-management-page #umFilterForm .search-input,
+    #mainContent.user-management-page #umFilterForm [data-search-input] {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        font-size: .76rem !important;
+    }
+
+    #mainContent.user-management-page #umViewToggle {
+        flex: 0 0 auto !important;
+        justify-self: end !important;
+        transform: scale(.92) !important;
+        transform-origin: right center !important;
+    }
+
+    #mainContent.user-management-page #umListView {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 0 0 18px 18px !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.user-management-page .um-table-scroll {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #mainContent.user-management-page .um-table,
+    #mainContent.user-management-page #umListView table {
+        width: 100% !important;
+        min-width: 880px !important;
+        table-layout: fixed !important;
+    }
+
+    #mainContent.user-management-page .um-table th,
+    #mainContent.user-management-page .um-table td {
+        font-size: .72rem !important;
+        vertical-align: middle !important;
+    }
+
+    #mainContent.user-management-page .um-table tbody td:nth-child(2) .font-semibold,
+    #mainContent.user-management-page .um-table tbody td:nth-child(2) .text-gray-400 {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.user-management-page .um-table tbody td:nth-child(6) .um-action-group {
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+        gap: .3rem !important;
+    }
+
+    #mainContent.user-management-page #umGridView {
+        padding: 1rem !important;
+        border-radius: 0 0 18px 18px !important;
+    }
+
+    #mainContent.user-management-page .um-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+    }
+
+    #mainContent.user-management-page .um-grid-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        padding: .95rem !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+    }
+
+    #mainContent.user-management-page .um-grid-top {
+        gap: .65rem !important;
+        min-width: 0 !important;
+    }
+
+    #mainContent.user-management-page .um-grid-card .w-10.h-10 {
+        width: 2.35rem !important;
+        height: 2.35rem !important;
+        min-width: 2.35rem !important;
+        border-radius: 13px !important;
+    }
+
+    #mainContent.user-management-page .um-grid-card .font-semibold,
+    #mainContent.user-management-page .um-grid-card .text-gray-400 {
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.user-management-page .um-grid-number {
+        font-size: .68rem !important;
+    }
+
+    #mainContent.user-management-page .um-grid-meta {
+        gap: .55rem !important;
+    }
+
+    #mainContent.user-management-page .um-grid-label {
+        font-size: .6rem !important;
+        margin-bottom: .18rem !important;
+    }
+
+    #mainContent.user-management-page .um-grid-value {
+        font-size: .76rem !important;
+        line-height: 1.3 !important;
+        word-break: break-word !important;
+    }
+
+    #mainContent.user-management-page .badge-role,
+    #mainContent.user-management-page .badge-active,
+    #mainContent.user-management-page .badge-inactive {
+        font-size: .66rem !important;
+        padding: .28rem .6rem !important;
+        max-width: 100% !important;
+        white-space: nowrap !important;
+    }
+
+    #mainContent.user-management-page .um-action-group {
+        gap: .35rem !important;
+        flex-wrap: wrap !important;
+    }
+
+    #mainContent.user-management-page .action-btn {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 11px !important;
+    }
+
+    #mainContent.user-management-page .action-btn i {
+        font-size: .78rem !important;
+    }
+
+    #mainContent.user-management-page .sl-pagebar,
+    #mainContent.user-management-page .um-pagebar {
+        gap: .65rem !important;
+        padding: .85rem 1rem !important;
+        flex-wrap: wrap !important;
+    }
+
+    #mainContent.user-management-page .page-btn {
+        min-width: 30px !important;
+        height: 30px !important;
+        font-size: .72rem !important;
+    }
+
+    .um-user-modal-lg,
+    .um-user-modal-md,
+    .um-user-modal-sm {
+        width: min(94vw, 860px) !important;
+        max-width: 94vw !important;
+        max-height: calc(100dvh - 2rem) !important;
+    }
+
+    #addModal .um-user-modal-grid,
+    #editModal .um-user-modal-grid,
+    .um-user-modal .um-user-modal-grid {
+        grid-template-columns: 1fr !important;
+        gap: .85rem !important;
+    }
+
+    .um-user-modal .um-user-modal-body {
+        padding: 1rem 1.1rem !important;
+    }
+
+    .um-user-modal .um-user-main-card,
+    .um-user-modal .um-user-side-card {
+        padding: 1rem !important;
+        border-radius: 18px !important;
+    }
+
+    .um-user-modal .um-field-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+    }
+
+    .um-user-modal .um-status-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+    }
+
+    .um-user-modal .field-input,
+    .um-user-modal select,
+    .um-user-modal input {
+        min-height: 46px !important;
+        height: 46px !important;
+        font-size: .82rem !important;
+    }
+
+    .um-user-modal .um-user-modal-footer {
+        padding: .9rem 1.1rem 1rem !important;
+    }
+
+    .um-view-details-head,
+    .um-view-details-body {
+        padding-left: 1.1rem !important;
+        padding-right: 1.1rem !important;
+    }
+
+    .um-view-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .65rem !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    #mainContent.user-management-page .um-hero-content {
+        align-items: stretch !important;
+        flex-direction: column !important;
+    }
+
+    #mainContent.user-management-page .um-hero-actions {
+        width: 100% !important;
+    }
+
+    #mainContent.user-management-page .um-hero-btn {
+        width: 100% !important;
+    }
+
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .7rem !important;
+    }
+
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-card {
+        min-height: 86px !important;
+        padding: .85rem !important;
+        gap: .55rem !important;
+    }
+
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon,
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-icon-wrapper {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        flex-basis: 36px !important;
+    }
+
+    #mainContent.user-management-page 
+    #statCards.admin-dashboard-stat-grid.user-management-stat-grid .stat-num {
+        font-size: 24px !important;
+    }
+
+    #mainContent.user-management-page #umFilterForm,
+    #mainContent.user-management-page .um-users-filter-form {
+        grid-template-columns: 1fr !important;
+    }
+
+    #mainContent.user-management-page .um-table,
+    #mainContent.user-management-page #umListView table {
+        min-width: 920px !important;
+    }
+
+    #mainContent.user-management-page .um-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .um-user-modal .um-field-grid,
+    .um-user-modal .um-status-grid,
+    .um-view-info-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

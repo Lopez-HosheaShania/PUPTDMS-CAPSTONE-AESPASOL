@@ -62,7 +62,7 @@ $notifCount = $notifications->count();
                   <div class="search-wrap global-search flex-1 md:w-64" data-search-wrapper>
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
 
-                    <input id="searchInput" type="text" placeholder="Search patient name…" data-search-input
+                    <input id="searchInput" type="text" placeholder="Search patient" data-search-input
                       class="search-input" />
 
                     <button type="button" class="search-clear" data-search-clear aria-label="Clear search">
@@ -167,13 +167,19 @@ $notifCount = $notifications->count();
                   </button>
                 </div>
 
-                <div class="view-toggle-container hidden md:flex mr-2">
-                  <div class="view-slider"></div>
+                <div class="view-toggle-container" data-global-view-toggle data-view-root="#mainContent"
+                  data-storage-key="ViewToggleMode" aria-label="View options">
+                  <span class="view-slider" aria-hidden="true"></span>
 
-                  <button id="btnListView" onclick="switchView('list')" class="btn-view-mode active"
-                    title="List View"><i class="fa-solid fa-list text-sm"></i></button>
-                  <button id="btnGridView" onclick="switchView('grid')" class="btn-view-mode" title="Grid View"><i
-                      class="fa-solid fa-grip"></i></button>
+                  <button type="button" class="btn-view-mode active" title="List view" aria-label="List view"
+                    aria-pressed="true" data-view-mode="list">
+                    <i class="fa-solid fa-list"></i>
+                  </button>
+
+                  <button type="button" class="btn-view-mode" title="Grid view" aria-label="Grid view"
+                    aria-pressed="false" data-view-mode="grid">
+                    <i class="fa-solid fa-grip"></i>
+                  </button>
                 </div>
 
                 <button id="externalClearFilterBtn" type="button" onclick="resetAllFilters()"
@@ -494,8 +500,7 @@ $notifCount = $notifications->count();
 
                     <span class="patient-info hidden">
                       {{ $appt->patient->course ?? '' }}|{{ $appt->patient->year_level ?? '' }}|{{
-                      $appt->patient->section ?? '' }}|{{ $appt->appointment_date }}|{{ $appt->patient->department
-                      ?? ''
+                      $appt->patient->section ?? '' }}|{{ $appt->appointment_date }}|{{ $appt->patient->department ?? ''
                       }}|{{ optional($appt->created_at)->toDateTimeString() }}
                     </span>
                   </div>
@@ -639,8 +644,20 @@ $notifCount = $notifications->count();
       <div>
         <h3 class="filter-section-title">Course</h3>
         <div class="filter-chip-grid">
-          @foreach (['BSIT', 'BSECE', 'BSBA - HRM', 'BSED - ENG', 'BSOA', 'BSPSYCH', 'DIT', 'BSME', 'BSBA - MM', 'BSED -
-          MATH', 'DOMT'] as $course)
+          @foreach ([
+          'BSIT',
+          'BSECE',
+          'BSBA - HRM',
+          'BSED - ENG',
+          'BSOA',
+          'BSPSYCH',
+          'DIT',
+          'BSME',
+          'BSBA - MM',
+          'BSED -
+          MATH',
+          'DOMT',
+          ] as $course)
           <label class="choice-chip">
             <input type="radio" name="course" value="{{ $course }}" class="filter-input radio-red chip-radio" />
             <span>{{ $course }}</span>
@@ -745,45 +762,33 @@ $notifCount = $notifications->count();
     const mainContent = document.getElementById('mainContent');
     const btnList = document.getElementById('btnListView');
     const btnGrid = document.getElementById('btnGridView');
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
     if (!mainContent) return;
 
-    if (isMobile) {
-      mode = 'grid';
+    const nextMode = mode === 'grid' ? 'grid' : 'list';
+    const isGrid = nextMode === 'grid';
+
+    mainContent.classList.toggle('mode-grid', isGrid);
+    mainContent.classList.toggle('mode-list', !isGrid);
+
+    if (btnList) {
+      btnList.classList.toggle('active', !isGrid);
+      btnList.setAttribute('aria-pressed', !isGrid ? 'true' : 'false');
     }
 
-    if (mode === 'grid') {
-      mainContent.classList.remove('mode-list');
-      mainContent.classList.add('mode-grid');
-
-      if (btnList) btnList.classList.remove('active');
-      if (btnGrid) btnGrid.classList.add('active');
-
-      if (!isMobile) {
-        localStorage.setItem('patientViewMode', 'grid');
-      }
-    } else {
-      mainContent.classList.remove('mode-grid');
-      mainContent.classList.add('mode-list');
-
-      if (btnGrid) btnGrid.classList.remove('active');
-      if (btnList) btnList.classList.add('active');
-
-      localStorage.setItem('patientViewMode', 'list');
+    if (btnGrid) {
+      btnGrid.classList.toggle('active', isGrid);
+      btnGrid.setAttribute('aria-pressed', isGrid ? 'true' : 'false');
     }
+
+    localStorage.setItem('patientViewMode', nextMode);
   }
 
   function syncResponsivePatientView() {
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    const savedMode = localStorage.getItem('patientViewMode');
 
-    if (isMobile) {
-      switchView('grid');
-      return;
-    }
-
-    const savedMode = localStorage.getItem('patientViewMode') || 'list';
-    switchView(savedMode);
+    switchView(savedMode || (isMobile ? 'grid' : 'list'));
   }
 
   document.addEventListener('DOMContentLoaded', syncResponsivePatientView);
@@ -1154,12 +1159,6 @@ $notifCount = $notifications->count();
             return matchesSearch(p, searchKeyword);
           });
         } else {
-          /*
-            IMPORTANT:
-            Filter count should preview ALL matching patients,
-            not only the current tab like today/upcoming/completed.
-            Kaya hindi natin ginagamit activeTab dito.
-          */
 
           if (draft.program) {
             data = data.filter(function (p) {

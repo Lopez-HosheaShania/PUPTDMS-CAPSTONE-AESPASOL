@@ -30,6 +30,7 @@
         <div class="terms-actions">
             <form method="POST" action="{{ route('logout') }}" style="margin:0;">
                 @csrf
+                <input type="hidden" name="client_id" value="{{ config('services.oidc.client_id') }}">
                 <button type="submit" class="terms-cancel-btn">Cancel</button>
             </form>
             <button type="button" id="termsContinueBtn" class="terms-continue-btn" disabled data-terms-continue>

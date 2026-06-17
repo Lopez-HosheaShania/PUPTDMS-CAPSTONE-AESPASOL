@@ -1845,7 +1845,6 @@
     gap: 10px !important;
 }
 
-/* Option cards same as admin-patient */
 .admin-dental-records-page .record-sort-option {
     position: relative !important;
     min-height: 102px !important;
@@ -1938,7 +1937,6 @@
     line-height: 1 !important;
 }
 
-/* Light tones */
 .admin-dental-records-page .record-sort-option[data-filter="all"],
 .admin-dental-records-page #recordStatusField[data-status-filter="all"] {
     --dr-option-bg: #EFF6FF;
@@ -1987,7 +1985,6 @@
     --dr-option-soft: rgba(220, 38, 38, .16);
 }
 
-/* Dark mode same as admin-patient screenshot */
 [data-theme="dark"] .admin-dental-records-page .record-sort-option[data-filter="all"],
 [data-theme="dark"] .admin-dental-records-page .record-sort-option[data-filter="today"],
 [data-theme="dark"] .admin-dental-records-page #recordStatusField[data-status-filter="all"],
@@ -2127,5 +2124,418 @@
     .admin-dental-records-page .record-sort-grid,
     .admin-dental-records-page .record-sort-menu {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1280px) {
+
+    #mainContent.admin-dental-records-page,
+    .admin-dental-records-page {
+        overflow-x: hidden !important;
+    }
+
+    .admin-dental-records-page .content-lift,
+    .admin-dental-records-page .admin-page-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    .admin-dental-records-page .page-banner {
+        border-radius: 22px !important;
+        margin-bottom: 1rem !important;
+        overflow: hidden !important;
+    }
+
+    .admin-dental-records-page .page-banner-inner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .admin-dental-records-page .page-banner-title,
+    .admin-dental-records-page .page-title {
+        text-align: left !important;
+        line-height: 1.08 !important;
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .admin-dental-records-page #statCards.dental-records-stat-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .admin-dental-records-page #statCards.dental-records-stat-grid .stat-card {
+        min-width: 0 !important;
+        min-height: 104px !important;
+        padding: .95rem !important;
+        border-radius: 18px !important;
+    }
+
+    .admin-dental-records-page #statCards.dental-records-stat-grid .stat-value,
+    .admin-dental-records-page #statCards.dental-records-stat-grid .stat-num,
+    .admin-dental-records-page #statCards.dental-records-stat-grid .stat-count {
+        font-size: 1.5rem !important;
+        line-height: 1 !important;
+    }
+
+    .admin-dental-records-page #statCards.dental-records-stat-grid .stat-label {
+        font-size: .66rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .admin-dental-records-page #statCards.dental-records-stat-grid .stat-footer {
+        font-size: .64rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .admin-dental-records-page #statCards.dental-records-stat-grid .stat-icon,
+    .admin-dental-records-page #statCards.dental-records-stat-grid .stat-icon-wrapper {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 14px !important;
+        font-size: .9rem !important;
+    }
+
+    .admin-dental-records-page .content-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .admin-dental-records-page .table-card,
+    .admin-dental-records-page .quick-actions-list,
+    .admin-dental-records-page .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .admin-dental-records-page .patient-table-toolbar {
+        padding: .85rem !important;
+        overflow: visible !important;
+    }
+
+    .admin-dental-records-page .record-toolbar-layout {
+        display: grid !important;
+        grid-template-columns: minmax(190px, 220px) minmax(0, 1fr) !important;
+        align-items: center !important;
+        gap: .75rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .admin-dental-records-page .record-sort-dropdown {
+        width: 220px !important;
+        min-width: 220px !important;
+        max-width: 220px !important;
+        flex: 0 0 220px !important;
+        z-index: 80 !important;
+    }
+
+    .admin-dental-records-page .record-sort-trigger {
+        width: 100% !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 5px 9px !important;
+    }
+
+    .admin-dental-records-page .record-sort-icon {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        border-radius: 11px !important;
+        font-size: 11px !important;
+    }
+
+    .admin-dental-records-page .record-sort-label {
+        font-size: 8px !important;
+    }
+
+    .admin-dental-records-page .record-sort-value {
+        max-width: 92px !important;
+        font-size: 11px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .admin-dental-records-page .record-sort-count {
+        min-width: 23px !important;
+        height: 23px !important;
+        padding: 0 7px !important;
+        font-size: 10px !important;
+    }
+
+    .admin-dental-records-page .record-sort-panel,
+    .admin-dental-records-page .record-sort-menu {
+        width: 320px !important;
+        max-width: calc(100vw - 32px) !important;
+        left: 0 !important;
+        right: auto !important;
+        z-index: 4001 !important;
+    }
+
+    .admin-dental-records-page .record-sort-option {
+        min-height: 88px !important;
+        padding: 10px 8px !important;
+        border-radius: 15px !important;
+        font-size: 11px !important;
+    }
+
+    .admin-dental-records-page .record-option-icon {
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        border-radius: 12px !important;
+        font-size: 12px !important;
+    }
+
+    .admin-dental-records-page .record-option-count {
+        top: 8px !important;
+        right: 8px !important;
+        min-width: 22px !important;
+        height: 22px !important;
+        font-size: 10px !important;
+    }
+
+    .admin-dental-records-page .record-toolbar-actions {
+        justify-self: end !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: .65rem !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .admin-dental-records-page .record-search-wrap {
+        flex: 1 1 320px !important;
+        width: auto !important;
+        min-width: 220px !important;
+        max-width: 380px !important;
+    }
+
+    .admin-dental-records-page .record-search-row {
+        flex: 1 1 auto !important;
+        min-width: 220px !important;
+        max-width: 380px !important;
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .admin-dental-records-page .record-search-row .search-input {
+        height: 42px !important;
+        font-size: .74rem !important;
+    }
+
+    .admin-dental-records-page .record-search-row .voice-input-toggle,
+    .admin-dental-records-page .record-search-row .voice-search-mic.external {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        margin-left: .5rem !important;
+        position: static !important;
+        transform: none !important;
+    }
+
+    .admin-dental-records-page .record-view-toggle.view-toggle-container,
+    .admin-dental-records-page .record-view-switch {
+        flex: 0 0 auto !important;
+        transform: scale(.92) !important;
+        transform-origin: right center !important;
+        margin: 0 !important;
+    }
+
+    .admin-dental-records-page .table-scroll,
+    .admin-dental-records-page .admin-scroll-x,
+    .admin-dental-records-page .overflow-x-auto {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .admin-dental-records-page .tbl {
+        min-width: 860px !important;
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    .admin-dental-records-page .tbl th,
+    .admin-dental-records-page .tbl td {
+        padding-left: .65rem !important;
+        padding-right: .65rem !important;
+        font-size: .72rem !important;
+        vertical-align: middle !important;
+    }
+
+    .admin-dental-records-page .tbl th {
+        font-size: .6rem !important;
+        letter-spacing: .07em !important;
+        white-space: nowrap !important;
+    }
+
+    .admin-dental-records-page .tbl td.wrap {
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid-view {
+        padding: .85rem !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .85rem !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid-card {
+        padding: .9rem !important;
+        border-radius: 16px !important;
+        gap: .75rem !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid-avatar {
+        width: 2.2rem !important;
+        height: 2.2rem !important;
+        min-width: 2.2rem !important;
+        border-radius: .8rem !important;
+        font-size: .72rem !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid-name {
+        font-size: .82rem !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid-sub {
+        font-size: .64rem !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid-meta {
+        gap: .55rem !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid-meta-item {
+        padding: .65rem .7rem !important;
+        border-radius: 13px !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid-label {
+        font-size: .56rem !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid-value {
+        font-size: .72rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .admin-dental-records-page .quick-actions-list {
+        padding: .75rem !important;
+        gap: .65rem !important;
+    }
+
+    .admin-dental-records-page .quick-action-card {
+        min-height: 68px !important;
+        padding: .78rem .85rem !important;
+        border-radius: 16px !important;
+        gap: .7rem !important;
+    }
+
+    .admin-dental-records-page .quick-action-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 13px !important;
+    }
+
+    .admin-dental-records-page .quick-action-title {
+        font-size: .78rem !important;
+    }
+
+    .admin-dental-records-page .quick-action-sub {
+        font-size: .62rem !important;
+    }
+
+    .admin-dental-records-page .quick-action-bg-icon {
+        font-size: 4rem !important;
+        right: .65rem !important;
+        bottom: -1.15rem !important;
+    }
+
+    .admin-dental-records-page #panelFoot {
+        padding: .85rem 1rem !important;
+    }
+
+    .admin-dental-records-page #panelFoot .ui-btn {
+        min-height: 40px !important;
+        font-size: .76rem !important;
+        border-radius: 12px !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    .admin-dental-records-page #statCards.dental-records-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .admin-dental-records-page .record-toolbar-layout {
+        grid-template-columns: 1fr !important;
+        gap: .65rem !important;
+    }
+
+    .admin-dental-records-page .record-sort-dropdown {
+        width: 240px !important;
+        min-width: 240px !important;
+        max-width: 240px !important;
+    }
+
+    .admin-dental-records-page .record-toolbar-actions {
+        justify-content: flex-start !important;
+        gap: .55rem !important;
+    }
+
+    .admin-dental-records-page .record-search-wrap,
+    .admin-dental-records-page .record-search-row {
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .admin-dental-records-page .record-view-toggle.view-toggle-container,
+    .admin-dental-records-page .record-view-switch {
+        transform: scale(.9) !important;
+        transform-origin: right center !important;
+    }
+
+    .admin-dental-records-page .tbl {
+        min-width: 880px !important;
+    }
+
+    .admin-dental-records-page .dental-record-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .admin-dental-records-page .quick-action-card {
+        min-height: 66px !important;
     }
 }
