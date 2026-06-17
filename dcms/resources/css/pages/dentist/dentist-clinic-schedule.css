@@ -3703,7 +3703,7 @@ html.dark .cs-modal .modal-close-btn i,
 ===================================================== */
 
 @media (max-width: 767px) {
-    #mainContent.clinic-schedule-page .grid.grid-cols-1 > .space-y-6:nth-child(2) > .bg-white:nth-child(2) > div:first-child {
+    #mainContent.clinic-schedule-page .grid.grid-cols-1>.space-y-6:nth-child(2)>.bg-white:nth-child(2)>div:first-child {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
@@ -3713,7 +3713,7 @@ html.dark .cs-modal .modal-close-btn i,
         width: 100% !important;
     }
 
-    #mainContent.clinic-schedule-page .grid.grid-cols-1 > .space-y-6:nth-child(2) > .bg-white:nth-child(2) > div:first-child > div:first-child {
+    #mainContent.clinic-schedule-page .grid.grid-cols-1>.space-y-6:nth-child(2)>.bg-white:nth-child(2)>div:first-child>div:first-child {
         display: flex !important;
         align-items: center !important;
         justify-content: flex-start !important;
@@ -3722,7 +3722,7 @@ html.dark .cs-modal .modal-close-btn i,
         flex: 1 1 auto !important;
     }
 
-    #mainContent.clinic-schedule-page .grid.grid-cols-1 > .space-y-6:nth-child(2) > .bg-white:nth-child(2) > div:first-child > div:last-child {
+    #mainContent.clinic-schedule-page .grid.grid-cols-1>.space-y-6:nth-child(2)>.bg-white:nth-child(2)>div:first-child>div:last-child {
         display: flex !important;
         align-items: center !important;
         justify-content: flex-end !important;
@@ -3732,7 +3732,7 @@ html.dark .cs-modal .modal-close-btn i,
         margin-left: auto !important;
     }
 
-    #mainContent.clinic-schedule-page .grid.grid-cols-1 > .space-y-6:nth-child(2) > .bg-white:nth-child(2) > div:first-child button {
+    #mainContent.clinic-schedule-page .grid.grid-cols-1>.space-y-6:nth-child(2)>.bg-white:nth-child(2)>div:first-child button {
         display: inline-flex !important;
         align-items: center !important;
         justify-content: flex-end !important;
@@ -3773,7 +3773,7 @@ html.dark .cs-modal .modal-close-btn i,
         min-width: 0 !important;
     }
 
-    #mainContent.clinic-schedule-page .page-banner-inner > div:first-child {
+    #mainContent.clinic-schedule-page .page-banner-inner>div:first-child {
         flex: 1 1 auto !important;
         min-width: 0 !important;
         text-align: left !important;
@@ -4251,6 +4251,106 @@ html.dark .cs-modal .modal-close-btn i,
     .clinic-schedule-page .cs-modal .btn-soft,
     .clinic-schedule-page .cs-modal .btn-primary,
     .clinic-schedule-page .cs-modal .rule-save-btn {
+        width: 100% !important;
+    }
+}
+
+/* =========================================================
+   DENTIST CLINIC SCHEDULE — Dentist-side hero banner
+   Replaces the old admin page-banner styling on dentist view.
+   ========================================================= */
+
+#mainContent.dentist-clinic-schedule-page.clinic-schedule-page {
+    background: #F9FAFB !important;
+    color: #111827 !important;
+}
+
+#mainContent.dentist-clinic-schedule-page .w-full {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+}
+
+#mainContent.dentist-clinic-schedule-page .cs-dentist-hero {
+    margin-bottom: 1.25rem !important;
+}
+
+#mainContent.dentist-clinic-schedule-page .cs-dentist-hero .dentist-hero-content {
+    padding-right: 0 !important;
+}
+
+#mainContent.dentist-clinic-schedule-page .cs-hero-actions {
+    position: relative !important;
+    z-index: 2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: .75rem !important;
+    flex-wrap: wrap !important;
+    flex: 0 0 auto !important;
+}
+
+#mainContent.dentist-clinic-schedule-page .cs-hero-action-btn {
+    min-height: 42px !important;
+    padding: 0 1rem !important;
+    border-radius: 12px !important;
+    white-space: nowrap !important;
+}
+
+#mainContent.dentist-clinic-schedule-page .cs-hero-danger-btn {
+    background: #FFFFFF !important;
+    color: #B91C1C !important;
+    border-color: rgba(185, 28, 28, .22) !important;
+    box-shadow: 0 10px 22px rgba(185, 28, 28, .08) !important;
+}
+
+#mainContent.dentist-clinic-schedule-page .cs-hero-danger-btn:hover,
+#mainContent.dentist-clinic-schedule-page .cs-hero-danger-btn:focus-visible {
+    background: #FEF2F2 !important;
+    color: #991B1B !important;
+    border-color: rgba(185, 28, 28, .36) !important;
+    box-shadow: 0 14px 26px rgba(185, 28, 28, .14) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-clinic-schedule-page.clinic-schedule-page,
+.dark #mainContent.dentist-clinic-schedule-page.clinic-schedule-page {
+    background: #0d0f12 !important;
+    color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-clinic-schedule-page .cs-hero-danger-btn,
+.dark #mainContent.dentist-clinic-schedule-page .cs-hero-danger-btn {
+    background: rgba(220, 38, 38, .14) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, .24) !important;
+    box-shadow:
+        0 12px 26px rgba(0, 0, 0, .30),
+        inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-clinic-schedule-page .cs-hero-danger-btn:hover,
+[data-theme="dark"] #mainContent.dentist-clinic-schedule-page .cs-hero-danger-btn:focus-visible,
+.dark #mainContent.dentist-clinic-schedule-page .cs-hero-danger-btn:hover,
+.dark #mainContent.dentist-clinic-schedule-page .cs-hero-danger-btn:focus-visible {
+    background: rgba(220, 38, 38, .24) !important;
+    color: #FECACA !important;
+    border-color: rgba(252, 165, 165, .38) !important;
+}
+
+@media (max-width: 767px) {
+    #mainContent.dentist-clinic-schedule-page .cs-dentist-hero {
+        align-items: stretch !important;
+        gap: 1rem !important;
+    }
+
+    #mainContent.dentist-clinic-schedule-page .cs-hero-actions {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: .6rem !important;
+    }
+
+    #mainContent.dentist-clinic-schedule-page .cs-hero-action-btn {
         width: 100% !important;
     }
 }

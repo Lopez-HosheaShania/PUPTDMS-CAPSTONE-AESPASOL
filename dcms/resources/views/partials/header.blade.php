@@ -94,7 +94,7 @@
         $displayName = $authUser->name ?? 'User';
 
         if ($role === 'super_admin') {
-            $displayRole = 'Super Administrator';
+            $displayRole = 'Administrator';
         } elseif ($role === 'admin') {
             $displayRole = 'Administrator';
         } elseif ($role === 'dentist') {

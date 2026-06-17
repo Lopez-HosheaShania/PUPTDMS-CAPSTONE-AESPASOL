@@ -3103,3 +3103,309 @@
         border-color: #E5E7EB !important;
     }
 }
+
+#mainContent.dentist-appointments-page .action-btn {
+    isolation: isolate !important;
+}
+
+#mainContent.dentist-appointments-page .action-btn-view:hover {
+    background: #EFF6FF !important;
+    color: #2563EB !important;
+    border-color: #93C5FD !important;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, .18) !important;
+}
+
+#mainContent.dentist-appointments-page .action-btn-start:not(.is-start-locked):hover {
+    background: #DCFCE7 !important;
+    color: #15803D !important;
+    border-color: #86EFAC !important;
+    box-shadow: 0 10px 22px rgba(22, 163, 74, .18) !important;
+}
+
+#mainContent.dentist-appointments-page .action-btn-reschedule:hover {
+    background: #FEF3C7 !important;
+    color: #B45309 !important;
+    border-color: #FBBF24 !important;
+    box-shadow: 0 10px 24px rgba(245, 158, 11, .20) !important;
+}
+
+#mainContent.dentist-appointments-page .action-btn-cancel:hover {
+    background: #FEE2E2 !important;
+    color: #DC2626 !important;
+    border-color: #FCA5A5 !important;
+    box-shadow: 0 12px 28px rgba(220, 38, 38, .24) !important;
+}
+
+#mainContent.dentist-appointments-page .action-btn-start.is-start-locked,
+#mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"] {
+    background: #F3F4F6 !important;
+    color: #9CA3AF !important;
+    border-color: #E5E7EB !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    opacity: .9 !important;
+}
+
+#mainContent.dentist-appointments-page .action-btn-start.is-start-locked:hover,
+#mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"]:hover {
+    background: #F9FAFB !important;
+    color: #6B7280 !important;
+    border-color: #D1D5DB !important;
+    box-shadow: 0 8px 18px rgba(107, 114, 128, .12) !important;
+    transform: none !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-view:hover,
+.dark #mainContent.dentist-appointments-page .action-btn-view:hover {
+    background: rgba(37, 99, 235, .20) !important;
+    color: #93C5FD !important;
+    border-color: rgba(147, 197, 253, .44) !important;
+    box-shadow: 0 12px 26px rgba(37, 99, 235, .18) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-start:not(.is-start-locked):hover,
+.dark #mainContent.dentist-appointments-page .action-btn-start:not(.is-start-locked):hover {
+    background: rgba(22, 163, 74, .22) !important;
+    color: #86EFAC !important;
+    border-color: rgba(134, 239, 172, .42) !important;
+    box-shadow: 0 12px 26px rgba(22, 163, 74, .18) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-reschedule:hover,
+.dark #mainContent.dentist-appointments-page .action-btn-reschedule:hover {
+    background: rgba(250, 204, 21, .22) !important;
+    color: #FDE047 !important;
+    border-color: rgba(250, 204, 21, .46) !important;
+    box-shadow: 0 12px 26px rgba(250, 204, 21, .16) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-cancel:hover,
+.dark #mainContent.dentist-appointments-page .action-btn-cancel:hover {
+    background: rgba(220, 38, 38, .24) !important;
+    color: #FCA5A5 !important;
+    border-color: rgba(252, 165, 165, .48) !important;
+    box-shadow: 0 14px 30px rgba(220, 38, 38, .20) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-start.is-start-locked,
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"],
+.dark #mainContent.dentist-appointments-page .action-btn-start.is-start-locked,
+.dark #mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"] {
+    background: rgba(148, 163, 184, .12) !important;
+    color: #64748B !important;
+    border-color: rgba(148, 163, 184, .18) !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-start.is-start-locked:hover,
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"]:hover,
+.dark #mainContent.dentist-appointments-page .action-btn-start.is-start-locked:hover,
+.dark #mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"]:hover {
+    background: rgba(148, 163, 184, .16) !important;
+    color: #94A3B8 !important;
+    border-color: rgba(203, 213, 225, .22) !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .22) !important;
+    transform: none !important;
+}
+
+.action-tooltip-bubble {
+    font-weight: 850 !important;
+    letter-spacing: -.01em !important;
+}
+
+.action-tooltip.tooltip-view .action-tooltip-bubble {
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 12px 26px rgba(37, 99, 235, .24) !important;
+}
+
+.action-tooltip.tooltip-view .action-tooltip-bubble::after {
+    border-left-color: #2563EB !important;
+}
+
+.action-tooltip.tooltip-start .action-tooltip-bubble {
+    background: #15803D !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 12px 26px rgba(21, 128, 61, .24) !important;
+}
+
+.action-tooltip.tooltip-start .action-tooltip-bubble::after {
+    border-left-color: #15803D !important;
+}
+
+.action-tooltip.tooltip-reschedule .action-tooltip-bubble {
+    background: #B45309 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 12px 26px rgba(180, 83, 9, .24) !important;
+}
+
+.action-tooltip.tooltip-reschedule .action-tooltip-bubble::after {
+    border-left-color: #B45309 !important;
+}
+
+.action-tooltip.tooltip-cancel .action-tooltip-bubble {
+    background: #DC2626 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 14px 30px rgba(220, 38, 38, .30) !important;
+}
+
+.action-tooltip.tooltip-cancel .action-tooltip-bubble::after {
+    border-left-color: #DC2626 !important;
+}
+
+.action-tooltip.tooltip-locked .action-tooltip-bubble {
+    background: #475569 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 12px 26px rgba(71, 85, 105, .24) !important;
+}
+
+.action-tooltip.tooltip-locked .action-tooltip-bubble::after {
+    border-left-color: #475569 !important;
+}
+
+[data-theme="dark"] .action-tooltip.tooltip-view .action-tooltip-bubble,
+.dark .action-tooltip.tooltip-view .action-tooltip-bubble {
+    background: #1D4ED8 !important;
+    box-shadow: 0 14px 30px rgba(37, 99, 235, .30) !important;
+}
+
+[data-theme="dark"] .action-tooltip.tooltip-view .action-tooltip-bubble::after,
+.dark .action-tooltip.tooltip-view .action-tooltip-bubble::after {
+    border-left-color: #1D4ED8 !important;
+}
+
+[data-theme="dark"] .action-tooltip.tooltip-reschedule .action-tooltip-bubble,
+.dark .action-tooltip.tooltip-reschedule .action-tooltip-bubble {
+    background: #CA8A04 !important;
+    box-shadow: 0 14px 30px rgba(202, 138, 4, .30) !important;
+}
+
+[data-theme="dark"] .action-tooltip.tooltip-reschedule .action-tooltip-bubble::after,
+.dark .action-tooltip.tooltip-reschedule .action-tooltip-bubble::after {
+    border-left-color: #CA8A04 !important;
+}
+
+[data-theme="dark"] .action-tooltip.tooltip-cancel .action-tooltip-bubble,
+.dark .action-tooltip.tooltip-cancel .action-tooltip-bubble {
+    background: #B91C1C !important;
+    box-shadow: 0 14px 30px rgba(185, 28, 28, .36) !important;
+}
+
+[data-theme="dark"] .action-tooltip.tooltip-cancel .action-tooltip-bubble::after,
+.dark .action-tooltip.tooltip-cancel .action-tooltip-bubble::after {
+    border-left-color: #B91C1C !important;
+}
+
+[data-theme="dark"] .action-tooltip.tooltip-locked .action-tooltip-bubble,
+.dark .action-tooltip.tooltip-locked .action-tooltip-bubble {
+    background: #334155 !important;
+    color: #E5E7EB !important;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, .42) !important;
+}
+
+[data-theme="dark"] .action-tooltip.tooltip-locked .action-tooltip-bubble::after,
+.dark .action-tooltip.tooltip-locked .action-tooltip-bubble::after {
+    border-left-color: #334155 !important;
+}
+
+body:has(#mainContent.dentist-appointments-page.admin-appointments-page) #actionTooltip {
+    display: block !important;
+}
+
+#mainContent.dentist-appointments-page.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::before,
+#mainContent.dentist-appointments-page.admin-appointments-page .appt-actions-wrap .action-btn[data-tooltip]::after,
+#mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-actions .action-btn[data-tooltip]::before,
+#mainContent.dentist-appointments-page.admin-appointments-page .mobile-appt-actions .action-btn[data-tooltip]::after {
+    content: none !important;
+    display: none !important;
+}
+
+#mainContent.dentist-appointments-page .action-tooltip,
+body:has(#mainContent.dentist-appointments-page) #actionTooltip {
+    display: block !important;
+    z-index: 1000000 !important;
+}
+
+#mainContent.dentist-appointments-page ~ .action-tooltip,
+.action-tooltip {
+    overflow: visible !important;
+}
+
+.action-tooltip-bubble {
+    width: max-content !important;
+    max-width: min(520px, calc(100vw - 20px)) !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    line-height: 1 !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+}
+
+#mainContent.dentist-appointments-page .action-btn-start.is-start-locked,
+#mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"],
+#mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start.is-start-locked,
+#mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start[aria-disabled="true"] {
+    --admin-appt-action-color: #9CA3AF !important;
+    --admin-appt-action-bg: #F3F4F6 !important;
+    --admin-appt-action-border: #E5E7EB !important;
+    --admin-appt-action-hover-color: #6B7280 !important;
+    --admin-appt-action-hover-bg: #E5E7EB !important;
+    --admin-appt-action-hover-border: #D1D5DB !important;
+    --admin-appt-action-shadow: rgba(100, 116, 139, .14) !important;
+    background: #F3F4F6 !important;
+    color: #9CA3AF !important;
+    border-color: #E5E7EB !important;
+    cursor: not-allowed !important;
+    opacity: .92 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#mainContent.dentist-appointments-page .action-btn-start.is-start-locked:hover,
+#mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"]:hover,
+#mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start.is-start-locked:hover,
+#mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start[aria-disabled="true"]:hover {
+    background: #E5E7EB !important;
+    color: #6B7280 !important;
+    border-color: #D1D5DB !important;
+    box-shadow: 0 10px 22px rgba(100, 116, 139, .14) !important;
+    transform: none !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-start.is-start-locked,
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"],
+.dark #mainContent.dentist-appointments-page .action-btn-start.is-start-locked,
+.dark #mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"],
+[data-theme="dark"] #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start.is-start-locked,
+[data-theme="dark"] #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start[aria-disabled="true"],
+.dark #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start.is-start-locked,
+.dark #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start[aria-disabled="true"] {
+    --admin-appt-action-color: #94A3B8 !important;
+    --admin-appt-action-bg: rgba(148, 163, 184, .12) !important;
+    --admin-appt-action-border: rgba(203, 213, 225, .18) !important;
+    --admin-appt-action-hover-color: #CBD5E1 !important;
+    --admin-appt-action-hover-bg: rgba(148, 163, 184, .18) !important;
+    --admin-appt-action-hover-border: rgba(203, 213, 225, .26) !important;
+    --admin-appt-action-shadow: rgba(0, 0, 0, .22) !important;
+    background: rgba(148, 163, 184, .12) !important;
+    color: #94A3B8 !important;
+    border-color: rgba(203, 213, 225, .18) !important;
+}
+
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-start.is-start-locked:hover,
+[data-theme="dark"] #mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"]:hover,
+.dark #mainContent.dentist-appointments-page .action-btn-start.is-start-locked:hover,
+.dark #mainContent.dentist-appointments-page .action-btn-start[aria-disabled="true"]:hover,
+[data-theme="dark"] #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start.is-start-locked:hover,
+[data-theme="dark"] #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start[aria-disabled="true"]:hover,
+.dark #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start.is-start-locked:hover,
+.dark #mainContent.dentist-appointments-page.admin-appointments-page .action-btn-start[aria-disabled="true"]:hover {
+    background: rgba(148, 163, 184, .18) !important;
+    color: #CBD5E1 !important;
+    border-color: rgba(203, 213, 225, .26) !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .22) !important;
+}

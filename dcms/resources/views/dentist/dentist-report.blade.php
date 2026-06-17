@@ -20,7 +20,7 @@ $newPatients = $newPatients ?? 0;
 $topServices = collect($topServices ?? []);
 @endphp
 
-<main id="mainContent" class="dentist-page-shell page-enter mode-list">
+<main id="mainContent" class="dentist-page-shell dentist-report-page page-enter mode-list">
     <div class="w-full">
 
         <div class="dentist-hero page-title-row mb-6">
@@ -57,7 +57,7 @@ $topServices = collect($topServices ?? []);
             </div>
 
             <div class="report-hero-actions">
-                <button onclick="openModal('createReportModal')" class="report-hero-btn" type="button">
+                <button onclick="openCreateReportModal()" class="report-hero-btn" type="button">
                     <i class="fa-solid fa-plus"></i>
                     Create Report
                 </button>
@@ -69,57 +69,65 @@ $topServices = collect($topServices ?? []);
             Clinic Performance Overview
         </div>
 
-        <div class="kpi-grid-layout mb-10">
+        <div class="kpi-grid-layout report-kpi-grid mb-8">
 
-            <a href="{{ route('dentist.dentist.patients') }}" class="kpi-card group">
-                <div class="kpi-icon bg-red-50 group-hover:bg-[#8B0000] transition-colors"><i
-                        class="fa-solid fa-users text-[#8B0000] group-hover:text-white transition-colors"></i></div>
+            <a href="{{ route('dentist.dentist.patients') }}" class="kpi-card kpi-card-patients group">
+                <div class="kpi-icon kpi-icon-patients">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+
                 <div class="flex-1 min-w-0">
                     <div class="kpi-value">{{ $patientsThisMonth }}</div>
                     <div class="kpi-label">Patients This Month</div>
+
                     @if (!is_null($patientsDelta))
                     <div class="kpi-delta {{ $patientsDelta >= 0 ? 'up' : 'down' }}">
                         <i class="fa-solid fa-arrow-{{ $patientsDelta >= 0 ? 'up' : 'down' }}"></i>
                         {{ abs($patientsDelta) }}%
                     </div>
                     @else
-                    <div class="kpi-delta text-gray-400 font-normal">No data last month</div>
+                    <div class="kpi-delta neutral">No data last month</div>
                     @endif
                 </div>
+
                 <i class="fa-solid fa-chevron-right kpi-arrow"></i>
             </a>
 
-            <a href="{{ route('dentist.dentist.appointments') }}" class="kpi-card group">
-                <div class="kpi-icon bg-amber-50 group-hover:bg-amber-500 transition-colors"><i
-                        class="fa-solid fa-calendar-check text-amber-600 group-hover:text-white transition-colors"></i>
+            <a href="{{ route('dentist.dentist.appointments') }}" class="kpi-card kpi-card-appointments group">
+                <div class="kpi-icon kpi-icon-appointments">
+                    <i class="fa-solid fa-calendar-check"></i>
                 </div>
+
                 <div class="flex-1 min-w-0">
                     <div class="kpi-value">{{ $appointmentsToday }}</div>
                     <div class="kpi-label">Appointments Today</div>
+
                     @if ($appointmentsDelta > 0)
-                    <div class="kpi-delta up"><i class="fa-solid fa-arrow-up"></i> {{ $appointmentsDelta }} more
+                    <div class="kpi-delta up">
+                        <i class="fa-solid fa-arrow-up"></i>
+                        {{ $appointmentsDelta }} more
                     </div>
-                    @elseif($appointmentsDelta < 0) <div class="kpi-delta down"><i class="fa-solid fa-arrow-down"></i>
-                        {{ abs($appointmentsDelta) }}
-                        fewer
+                    @elseif ($appointmentsDelta < 0) <div class="kpi-delta down">
+                        <i class="fa-solid fa-arrow-down"></i>
+                        {{ abs($appointmentsDelta) }} fewer
                 </div>
                 @else
-                <div class="kpi-delta text-gray-400 font-normal">Same as yesterday</div>
+                <div class="kpi-delta neutral">Same as yesterday</div>
                 @endif
         </div>
+
         <i class="fa-solid fa-chevron-right kpi-arrow"></i>
         </a>
 
-        <div class="kpi-card">
-            <div class="kpi-icon cancellation-rate-icon">
+        <div class="kpi-card kpi-card-cancellation">
+            <div class="kpi-icon kpi-icon-cancellation">
                 <i class="fa-solid fa-calendar-xmark"></i>
             </div>
+
             <div class="flex-1 min-w-0">
                 <div class="kpi-value">{{ $cancellationRate }}%</div>
                 <div class="kpi-label">Cancellation Rate</div>
-                <div class="kpi-delta text-gray-400 font-normal">
-                    Based on recorded appointments
-                </div>
+                <div class="kpi-delta neutral">Based on recorded appointments</div>
             </div>
         </div>
 
@@ -144,10 +152,8 @@ $topServices = collect($topServices ?? []);
                 </div>
                 @endif
             </div>
-
             <i class="fa-solid fa-chevron-right kpi-arrow"></i>
         </a>
-
     </div>
 
     <div class="analytics-section-label">Patient and clinic insights</div>
@@ -586,194 +592,237 @@ $topServices = collect($topServices ?? []);
     </div>
 </main>
 
-<div id="createReportModal" class="ui-modal" onclick="closeModalOnBackdrop(event, 'createReportModal')">
-    <div class="ui-modal-card modal-box-inner create-report-modal-card" onclick="event.stopPropagation()">
-        <div class="modal-hd create-report-modal-header">
-            <div class="modal-header-custom !mb-0">
-                <div class="modal-icon-custom">
-                    <i class="fa-solid fa-file-circle-plus"></i>
+<div id="createReportModal" class="ui-modal modal-overlay" aria-hidden="true"
+    onclick="closeModalOnBackdrop(event, 'createReportModal')">
+    <div class="modal-box-inner um-user-modal um-user-modal-md report-create-modal" onclick="event.stopPropagation()">
+
+        <div
+            class="um-user-modal-header px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
+            <div class="flex items-center gap-3 min-w-0">
+                <div
+                    class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#8B0000] via-[#a40000] to-[#6B0000] flex items-center justify-center shadow-lg shadow-red-900/20 flex-shrink-0">
+                    <i class="fa-solid fa-file-circle-plus text-white text-sm"></i>
                 </div>
 
-                <div>
-                    <h2 class="modal-title-custom">Create Custom Report</h2>
-                    <p class="modal-sub-custom">
-                        Fields marked <span class="text-yellow-500 font-bold">*</span> are required
+                <div class="min-w-0">
+                    <h3 class="font-extrabold text-gray-800 text-lg leading-tight">Create Custom Report</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        Fields marked <span class="text-yellow-500 font-bold">*</span> are required.
                     </p>
                 </div>
             </div>
 
-            <button type="button" onclick="closeCreateModal()" class="modal-x" aria-label="Close modal">
+            <button type="button" onclick="closeCreateModal()" data-close-modal="createReportModal" class="um-modal-x"
+                aria-label="Close create custom report modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <div class="modal-bd create-report-modal-body">
-            <form id="reportForm" class="create-report-form" novalidate>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="form-label">
-                            Report Name <span class="text-red-500">*</span>
-                        </label>
-                        <span id="reportNameCounter" class="text-[11px] font-semibold text-gray-400">0 / 100</span>
-                    </div>
-
-                    <div class="st-voice-row" data-voice-field>
-                        <div class="st-input-wrap">
-                            <input id="reportName" name="report_name" type="text" maxlength="100"
-                                placeholder="e.g. GAD Monthly Report — Dec 2025" class="form-input" />
+        <form id="reportForm" class="flex-1 flex flex-col min-h-0" novalidate>
+            <div class="um-user-modal-body">
+                <div class="um-user-main-card">
+                    <div class="um-section-title">
+                        <div class="um-section-icon bg-red-50 text-[#8B0000]">
+                            <i class="fa-solid fa-file-lines text-sm"></i>
                         </div>
 
-                        <div class="voice-input-toggle">
-                            <span class="voice-status hidden" data-voice-status></span>
-
-                            <button type="button" class="voice-search-mic external" data-global-voice-trigger
-                                data-voice-target="#reportName" aria-label="Use voice input for report name"
-                                title="Voice input">
-                                <i class="fa-solid fa-microphone"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <p id="reportNameErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
-                        <i class="fa-solid fa-circle-exclamation"></i> Report name is required.
-                    </p>
-                </div>
-
-                <div>
-                    <label class="form-label">
-                        Report Type <span class="text-red-500">*</span>
-                    </label>
-
-                    <div class="report-custom-select report-template-select" data-report-select>
-                        <select id="reportType" name="document_template_id" class="report-native-select"
-                            data-report-select-native>
-                            <option value="" disabled selected>Select a report type...</option>
-
-                            @forelse ($customReportTemplates as $template)
-                            <option value="{{ $template->id }}" data-document-type="{{ $template->document_type }}">
-                                {{ $template->name }}
-                            </option>
-                            @empty
-                            <option value="" disabled>No active custom report forms available</option>
-                            @endforelse
-                        </select>
-
-                        <button type="button" class="report-select-trigger" data-report-select-trigger
-                            data-placeholder="Select a report type..." aria-expanded="false">
-                            <span class="report-select-main">
-                                <span class="report-select-icon">
-                                    <i class="fa-solid fa-file-lines"></i>
-                                </span>
-                                <span data-report-select-label>Select a report type...</span>
-                            </span>
-                            <i class="fa-solid fa-chevron-down report-select-chevron"></i>
-                        </button>
-
-                        <div class="report-select-menu" data-report-select-menu>
-                            @forelse ($customReportTemplates as $template)
-                            <button type="button" class="report-select-option" data-report-select-option
-                                data-value="{{ $template->id }}" data-document-type="{{ $template->document_type }}">
-                                <span>{{ $template->name }}</span>
-                                <i class="fa-solid fa-check"></i>
-                            </button>
-                            @empty
-                            <div class="report-select-empty">No active custom report forms available</div>
-                            @endforelse
-                        </div>
-                    </div>
-
-                    <p id="reportTypeErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
-                        <i class="fa-solid fa-circle-exclamation"></i> Please select a report type.
-                    </p>
-                </div>
-
-                <div>
-                    <label class="form-label">
-                        Date Range <span class="text-red-500">*</span>
-                    </label>
-
-                    <div class="create-report-date-grid">
                         <div>
-                            <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">
-                                From <span class="text-red-400">*</span>
+                            <h4 class="text-base font-extrabold text-gray-800 leading-tight">Report Details</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">
+                                Choose the report type, date range, and quantity.
                             </p>
+                        </div>
+                    </div>
+
+                    <div class="um-field-grid">
+                        <div class="um-field-full">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide">
+                                    Report Name <span class="text-red-500">*</span>
+                                </label>
+
+                                <span id="reportNameCounter" class="text-[11px] font-semibold text-gray-400">
+                                    0 / 100
+                                </span>
+                            </div>
+
+                            <div class="voice-search-row" data-voice-field>
+                                <input id="reportName" name="report_name" type="text" maxlength="100"
+                                    placeholder="e.g. GAD Monthly Report — Dec 2025"
+                                    class="field-input flex-1 min-w-0 border border-gray-200 px-3.5 py-3 text-sm bg-white" />
+
+                                <div class="voice-input-toggle">
+                                    <button type="button" id="reportNameMicBtn" class="voice-search-mic external"
+                                        data-voice-trigger data-voice-target="#reportName"
+                                        data-voice-status="#reportNameVoiceStatus"
+                                        aria-label="Voice input for report name">
+                                        <i class="fa-solid fa-microphone"></i>
+                                    </button>
+
+                                    <span id="reportNameVoiceStatus" class="voice-status hidden" data-voice-status
+                                        aria-live="polite"></span>
+                                </div>
+                            </div>
+
+                            <p id="reportNameErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                Report name is required.
+                            </p>
+                        </div>
+
+                        <div class="um-field-full">
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
+                                Report Type <span class="text-red-500">*</span>
+                            </label>
+
+                            <div class="report-custom-select report-template-select" data-report-select>
+                                <select id="reportType" name="document_template_id" class="report-native-select"
+                                    data-report-select-native>
+                                    <option value="" disabled selected>Select a report type...</option>
+
+                                    @forelse ($customReportTemplates as $template)
+                                    <option value="{{ $template->id }}"
+                                        data-document-type="{{ $template->document_type }}">
+                                        {{ $template->name }}
+                                    </option>
+                                    @empty
+                                    <option value="" disabled>No active custom report forms available</option>
+                                    @endforelse
+                                </select>
+
+                                <button type="button" class="report-select-trigger" data-report-select-trigger
+                                    data-placeholder="Select a report type..." aria-expanded="false">
+                                    <span class="report-select-main">
+                                        <span class="report-select-icon">
+                                            <i class="fa-solid fa-file-lines"></i>
+                                        </span>
+                                        <span data-report-select-label>Select a report type...</span>
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down report-select-chevron"></i>
+                                </button>
+
+                                <div class="report-select-menu" data-report-select-menu>
+                                    @forelse ($customReportTemplates as $template)
+                                    <button type="button" class="report-select-option" data-report-select-option
+                                        data-value="{{ $template->id }}"
+                                        data-document-type="{{ $template->document_type }}">
+                                        <span>{{ $template->name }}</span>
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    @empty
+                                    <div class="report-select-empty">No active custom report forms available</div>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            <p id="reportTypeErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                Please select a report type.
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
+                                From <span class="text-red-500">*</span>
+                            </label>
 
                             <div class="fp-date-input-wrap">
                                 <input id="dateFrom" name="date_from" type="text"
-                                    class="form-input pr-10 js-flatpickr-date-max-today" placeholder="Select start date"
-                                    readonly />
+                                    class="field-input w-full border border-gray-200 px-3.5 py-3 pr-10 text-sm bg-white js-flatpickr-date-max-today"
+                                    placeholder="Select start date" readonly />
                                 <i class="fa-regular fa-calendar fp-date-icon"></i>
                             </div>
+
+                            <p id="dateFromErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                Start date is required.
+                            </p>
                         </div>
 
                         <div>
-                            <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
                                 To <span class="text-gray-400 normal-case font-normal">(optional)</span>
-                            </p>
+                            </label>
 
                             <div class="fp-date-input-wrap">
                                 <input id="dateTo" name="date_to" type="text"
-                                    class="form-input pr-10 js-flatpickr-date-max-today" placeholder="Select end date"
-                                    readonly />
+                                    class="field-input w-full border border-gray-200 px-3.5 py-3 pr-10 text-sm bg-white js-flatpickr-date-max-today"
+                                    placeholder="Select end date" readonly />
                                 <i class="fa-regular fa-calendar fp-date-icon"></i>
                             </div>
                         </div>
+
+                        <div class="um-field-full">
+                            <p class="text-[11px] text-gray-400 -mt-2">
+                                <i class="fa-solid fa-circle-info mr-1"></i>
+                                Leave "To" empty to report on a single date.
+                            </p>
+
+                            <p id="dateFutureErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                Dates cannot be in the future.
+                            </p>
+
+                            <p id="dateRangeErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                End date must be on or after start date.
+                            </p>
+                        </div>
+
+                        <div class="um-field-full">
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">
+                                Quantity <span class="text-red-500">*</span>
+                            </label>
+
+                            <div class="report-qty-row">
+                                <div class="report-qty-control">
+                                    <button type="button" class="report-qty-btn" data-qty-minus
+                                        aria-label="Decrease quantity">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+
+                                    <input id="reportQty" name="quantity" type="number" min="1" max="100" step="1"
+                                        placeholder="1 – 100"
+                                        class="field-input report-qty-input border border-gray-200 px-3.5 py-3 text-sm bg-white" />
+
+                                    <button type="button" class="report-qty-btn" data-qty-plus
+                                        aria-label="Increase quantity">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+
+                                <span class="report-qty-helper">Whole numbers only</span>
+                            </div>
+
+                            <p id="reportQtyErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span id="reportQtyErrMsg">Quantity must be between 1 and 100.</span>
+                            </p>
+                        </div>
+
+                        <div class="um-field-full">
+                            <div id="formErrorBanner" class="report-modal-error hidden">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span>Please complete all required fields before downloading.</span>
+                            </div>
+                        </div>
                     </div>
-
-                    <p class="text-[10px] text-gray-400 mt-1.5">
-                        <i class="fa-solid fa-circle-info mr-1"></i>
-                        Leave "To" empty to report on a single date.
-                    </p>
-
-                    <p id="dateFromErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
-                        <i class="fa-solid fa-circle-exclamation"></i> Start date is required.
-                    </p>
-
-                    <p id="dateFutureErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
-                        <i class="fa-solid fa-circle-exclamation"></i> Dates cannot be in the future.
-                    </p>
-
-                    <p id="dateRangeErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
-                        <i class="fa-solid fa-circle-exclamation"></i> End date must be on or after start date.
-                    </p>
                 </div>
+            </div>
 
-                <div>
-                    <label class="form-label">
-                        Quantity <span class="text-red-500">*</span>
-                    </label>
+            <div class="modal-ft um-user-modal-footer">
+                <button type="button" onclick="closeCreateModal()" class="modal-btn-ghost">
+                    Cancel
+                </button>
 
-                    <div class="create-report-qty-row">
-                        <input id="reportQty" name="quantity" type="number" min="1" max="100" step="1"
-                            placeholder="1 – 100" class="form-input create-report-qty-input" />
-
-                        <span class="text-[11px] text-gray-400">Whole numbers only</span>
-                    </div>
-
-                    <p id="reportQtyErr" class="text-red-500 text-xs mt-1 hidden items-center gap-1">
-                        <i class="fa-solid fa-circle-exclamation"></i>
-                        <span id="reportQtyErrMsg">Quantity must be between 1 and 100.</span>
-                    </p>
-                </div>
-
-                <div id="formErrorBanner"
-                    class="hidden items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-2.5 text-sm font-medium">
-                    <i class="fa-solid fa-triangle-exclamation text-red-500 flex-shrink-0"></i>
-                    Please complete all required fields before downloading.
-                </div>
-            </form>
-        </div>
-
-        <div class="modal-ft create-report-modal-footer">
-            <button type="button" onclick="closeCreateModal()" class="btn-close-modal">
-                Cancel
-            </button>
-
-            <button type="button" id="downloadReportBtn" class="modal-btn-primary">
-                <i class="fa-solid fa-download"></i>
-                Download
-            </button>
-        </div>
+                <button type="button" id="downloadReportBtn" class="modal-btn-confirm-reject um-save-user-btn">
+                    <span class="btn-confirm-icon">
+                        <i class="fa-solid fa-download"></i>
+                    </span>
+                    <span>Download</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -799,8 +848,11 @@ $topServices = collect($topServices ?? []);
 <script>
     const PATIENT_SEGMENT_DATA = {
         labels: ['Returning Patients', 'New Patients'],
-        values: [{{ $returningPatients ?? 0 }}, {{ $newPatients ?? 0 }}]
-        };
+        values: [
+            Number(@json($returningPatients ?? 0)),
+            Number(@json($newPatients ?? 0))
+        ]
+    };
 
     const GAD_DATA = {
         labels: @json($gadLabels),
@@ -910,38 +962,124 @@ $topServices = collect($topServices ?? []);
         });
     }
 
-    function closeCreateModal() {
-        closeModal('createReportModal');
-        document.getElementById('reportForm').reset();
+    function forceCloseModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+
+        modal.classList.remove('open', 'closing');
+        modal.setAttribute('aria-hidden', 'true');
+
+        if (!document.querySelector('.ui-modal.open, .modal-overlay.open, dialog[open]')) {
+            document.documentElement.classList.remove('modal-lock');
+            document.body.classList.remove('modal-lock');
+        }
+    }
+
+    function resetCreateReportForm() {
+        const form = document.getElementById('reportForm');
+        if (form) form.reset();
+
         syncReportCustomSelects(document.getElementById('createReportModal'));
-        document.getElementById('reportNameCounter').textContent = '0 / 100';
-        document.getElementById('reportNameCounter').classList.replace('text-red-500', 'text-gray-400');
-        ['reportNameErr', 'reportTypeErr', 'dateFromErr', 'dateFutureErr', 'dateRangeErr', 'reportQtyErr',
+
+        const counter = document.getElementById('reportNameCounter');
+        if (counter) {
+            counter.textContent = '0 / 100';
+            counter.classList.remove('text-red-500');
+            counter.classList.add('text-gray-400');
+        }
+
+        [
+            'reportNameErr',
+            'reportTypeErr',
+            'dateFromErr',
+            'dateFutureErr',
+            'dateRangeErr',
+            'reportQtyErr',
             'formErrorBanner'
-        ]
-            .forEach(id => {
-                let el = document.getElementById(id);
-                if (el) {
-                    el.classList.add('hidden');
-                    el.classList.remove('flex');
-                }
-            });
-        ['reportName', 'reportType', 'dateFrom', 'dateTo', 'reportQty']
-            .forEach(id => {
-                let el = document.getElementById(id);
-                if (el) {
-                    el.classList.remove('border-red-400');
-                    el.classList.add('border-gray-300');
-                }
-            });
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+        });
+
+        ['reportName', 'reportType', 'dateFrom', 'dateTo', 'reportQty'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            el.classList.remove('border-red-400');
+            el.classList.add('border-gray-300');
+        });
 
         document.querySelectorAll('.flatpickr-calendar.open').forEach(cal => {
             cal.classList.remove('open');
         });
     }
 
-    function closeDownloadModal() {
-        closeModal('downloadCompleteModal');
+    function closeCreateModal() {
+        if (typeof window.closeModal === 'function') {
+            window.closeModal('createReportModal');
+        } else {
+            forceCloseModal('createReportModal');
+        }
+
+        resetCreateReportForm();
+    }
+
+    function ensureReportFlatpickrs() {
+        if (!window.flatpickr) return;
+
+        const today = new Date();
+
+        ['dateFrom', 'dateTo'].forEach((id) => {
+            const input = document.getElementById(id);
+            if (!input) return;
+
+            input.setAttribute('max', today.toISOString().split('T')[0]);
+
+            if (input._flatpickr) {
+                input._flatpickr.set('maxDate', 'today');
+                return;
+            }
+
+            window.flatpickr(input, {
+                dateFormat: 'Y-m-d',
+                maxDate: 'today',
+                allowInput: false,
+                clickOpens: true,
+                disableMobile: true,
+                appendTo: document.body,
+                positionElement: input,
+                onOpen: (_dates, _str, instance) => {
+                    instance.calendarContainer.style.zIndex = '1000000';
+                }
+            });
+        });
+    }
+
+    function openCreateReportModal() {
+        const modal = document.getElementById('createReportModal');
+        if (!modal) return;
+
+        modal.classList.remove('closing');
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+
+        document.documentElement.classList.add('modal-lock');
+        document.body.classList.add('modal-lock');
+
+        initReportCustomSelects(modal);
+        syncReportCustomSelects(modal);
+        ensureReportFlatpickrs();
+
+        if (window.initGlobalVoiceInputs) {
+            window.initGlobalVoiceInputs(modal);
+        }
+
+        document.dispatchEvent(new CustomEvent('voice:refresh', {
+            detail: { root: modal }
+        }));
     }
 
     function closeReportSelects(except = null) {
@@ -964,9 +1102,9 @@ $topServices = collect($topServices ?? []);
         const selectedOption = nativeSelect.selectedOptions?.[0];
         const placeholder = trigger?.dataset.placeholder || 'Select option';
 
-        const selectedText = nativeSelect.value
-            ? selectedOption?.textContent?.trim()
-            : placeholder;
+        const selectedText = nativeSelect.value ?
+            selectedOption?.textContent?.trim() :
+            placeholder;
 
         if (label) label.textContent = selectedText || placeholder;
 
@@ -1037,43 +1175,6 @@ $topServices = collect($topServices ?? []);
 
     let gadChartInstance = null,
         weeklyChartInstance = null;
-
-    function setReportChartState(canvasId, emptyId, loadingId, state) {
-        const canvas = document.getElementById(canvasId);
-        const empty = document.getElementById(emptyId);
-        const loading = document.getElementById(loadingId);
-
-        if (!canvas || !empty || !loading) return;
-
-        empty.classList.remove('flex');
-        loading.classList.remove('flex');
-
-        empty.classList.add('hidden');
-        loading.classList.add('hidden');
-
-        empty.style.display = 'none';
-        loading.style.display = 'none';
-
-        if (state === 'empty') {
-            canvas.style.display = 'none';
-
-            empty.classList.remove('hidden');
-            empty.classList.add('flex');
-            empty.style.display = 'flex';
-            return;
-        }
-
-        if (state === 'loading') {
-            canvas.style.display = 'none';
-
-            loading.classList.remove('hidden');
-            loading.classList.add('flex');
-            loading.style.display = 'flex';
-            return;
-        }
-
-        canvas.style.display = 'block';
-    }
 
     function setReportChartState(canvasId, emptyId, loadingId, state) {
         const canvas = document.getElementById(canvasId);
@@ -1278,13 +1379,16 @@ $topServices = collect($topServices ?? []);
     }
 
     function makePieChart(canvasId, items) {
-        if (!items || items.length === 0) return;
-        new Chart(document.getElementById(canvasId), {
+        const canvas = document.getElementById(canvasId);
+
+        if (!canvas || !window.Chart || !Array.isArray(items) || items.length === 0) return;
+
+        new Chart(canvas, {
             type: 'doughnut',
             data: {
                 labels: items.map(i => i.name),
                 datasets: [{
-                    data: items.map(i => Math.max(0, i.qty - i.used)),
+                    data: items.map(i => Math.max(0, Number(i.qty || 0) - Number(i.used || 0))),
                     backgroundColor: PIE_COLORS.slice(0, items.length),
                     borderWidth: 2,
                     borderColor: reportChartBorderColor()
@@ -1348,6 +1452,65 @@ $topServices = collect($topServices ?? []);
         }
     }
 
+    function waitForChartJs(maxTries = 30) {
+        return new Promise((resolve) => {
+            let tries = 0;
+
+            const check = () => {
+                if (window.Chart) {
+                    resolve(true);
+                    return;
+                }
+
+                tries += 1;
+
+                if (tries >= maxTries) {
+                    console.warn('Chart.js is not available on dentist report page.');
+                    resolve(false);
+                    return;
+                }
+
+                setTimeout(check, 100);
+            };
+
+            check();
+        });
+    }
+
+    function initReportCharts() {
+        if (!window.Chart) {
+            showGadEmpty();
+            showWeeklyEmpty();
+            return;
+        }
+
+        const gadFemale = Array.isArray(GAD_DATA.female) ? GAD_DATA.female : [];
+        const gadMale = Array.isArray(GAD_DATA.male) ? GAD_DATA.male : [];
+
+        const gadHasData =
+            gadFemale.reduce((a, b) => a + Number(b || 0), 0) +
+            gadMale.reduce((a, b) => a + Number(b || 0), 0) > 0;
+
+        if (gadHasData) {
+            showGadChart();
+            buildGadChart(GAD_DATA.labels || [], gadFemale, gadMale);
+        } else {
+            showGadEmpty();
+        }
+
+        if (WEEKLY_DATA.datasets && WEEKLY_DATA.datasets.length > 0) {
+            showWeeklyChart();
+            buildWeeklyChart(WEEKLY_DATA.labels || [], WEEKLY_DATA.datasets);
+        } else {
+            showWeeklyEmpty();
+        }
+
+        makePieChart('medicinePieChart', Array.isArray(MEDICINE_ITEMS) ? MEDICINE_ITEMS : []);
+        makePieChart('suppliesPieChart', Array.isArray(SUPPLIES_ITEMS) ? SUPPLIES_ITEMS : []);
+
+        buildPatientSegmentChart();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
 
         initReportCustomSelects(document);
@@ -1356,24 +1519,9 @@ $topServices = collect($topServices ?? []);
             window.initGlobalVoiceInputs(document.getElementById('createReportModal'));
         }
 
-        setTimeout(function () {
-            const gadHasData = GAD_DATA.female.reduce((a, b) => a + b, 0) + GAD_DATA.male.reduce((a,
-                b) => a + b, 0) > 0;
-            if (gadHasData) {
-                showGadChart();
-                buildGadChart(GAD_DATA.labels, GAD_DATA.female, GAD_DATA.male);
-            } else {
-                showGadEmpty();
-            }
-            if (WEEKLY_DATA.datasets && WEEKLY_DATA.datasets.length > 0) {
-                showWeeklyChart();
-                buildWeeklyChart(WEEKLY_DATA.labels, WEEKLY_DATA.datasets);
-            } else {
-                showWeeklyEmpty();
-            }
-            makePieChart('medicinePieChart', MEDICINE_ITEMS);
-            makePieChart('suppliesPieChart', SUPPLIES_ITEMS);
-        }, 150);
+        waitForChartJs().then(() => {
+            initReportCharts();
+        });
 
         document.getElementById('gadPeriodSelect').addEventListener('change', function () {
             reloadGadChart(this.value);
@@ -1687,6 +1835,7 @@ $topServices = collect($topServices ?? []);
             if (this.value.trim()) clearError('reportName', 'reportNameErr');
             document.getElementById('formErrorBanner').classList.add('hidden');
         });
+
         document.getElementById('reportType').addEventListener('change', function () {
             if (this.value) clearError('reportType', 'reportTypeErr');
 
@@ -1695,12 +1844,20 @@ $topServices = collect($topServices ?? []);
             const qtyInput = document.getElementById('reportQty');
             const qtyErr = document.getElementById('reportQtyErr');
             const banner = document.getElementById('formErrorBanner');
+            const qtyButtons = document.querySelectorAll('[data-qty-minus], [data-qty-plus]');
 
-            if (documentType === 'annual_dental_clearance') {
+            const isCertificateRequest = ['annual_dental_clearance', 'dental_clearance'].includes(documentType);
+
+            if (isCertificateRequest) {
                 qtyInput.value = '';
                 qtyInput.placeholder = 'Auto';
                 qtyInput.disabled = true;
                 qtyInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+
+                qtyButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('is-disabled');
+                });
 
                 if (qtyErr) {
                     qtyErr.classList.add('hidden');
@@ -1709,7 +1866,7 @@ $topServices = collect($topServices ?? []);
 
                 banner.innerHTML = `
             <i class="fa-solid fa-circle-info text-blue-500 flex-shrink-0"></i>
-            <span>Annual Dental Clearance will generate one page per approved request in the selected date range.</span>
+            <span>Certificate reports will generate based on approved requests in the selected date range.</span>
         `;
                 banner.classList.remove('hidden');
                 banner.classList.add('flex');
@@ -1719,6 +1876,11 @@ $topServices = collect($topServices ?? []);
                 qtyInput.disabled = false;
                 qtyInput.placeholder = '1 – 100';
                 qtyInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+
+                qtyButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('is-disabled');
+                });
 
                 banner.classList.add('hidden');
                 banner.classList.remove('flex', 'bg-blue-50', 'border-blue-200', 'text-blue-700');
@@ -1770,6 +1932,27 @@ $topServices = collect($topServices ?? []);
         document.getElementById('dateFrom').addEventListener('change', checkDates);
         document.getElementById('dateTo').addEventListener('change', checkDates);
 
+        function setReportQty(value) {
+            const qtyInput = document.getElementById('reportQty');
+            if (!qtyInput || qtyInput.disabled) return;
+
+            const next = Math.min(100, Math.max(1, Number(value) || 1));
+
+            qtyInput.value = String(next);
+            qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
+            qtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        document.querySelector('[data-qty-minus]')?.addEventListener('click', () => {
+            const qtyInput = document.getElementById('reportQty');
+            setReportQty((parseInt(qtyInput.value, 10) || 1) - 1);
+        });
+
+        document.querySelector('[data-qty-plus]')?.addEventListener('click', () => {
+            const qtyInput = document.getElementById('reportQty');
+            setReportQty((parseInt(qtyInput.value, 10) || 0) + 1);
+        });
+
         const qtyInput = document.getElementById('reportQty');
         qtyInput.addEventListener('keydown', e => {
             if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) e.preventDefault();
@@ -1788,8 +1971,6 @@ $topServices = collect($topServices ?? []);
                 /[^0-9]/g, ''), 10);
             if (!isNaN(num)) qtyInput.value = Math.min(Math.max(num, 1), 100);
         });
-
-        buildPatientSegmentChart();
 
         document.addEventListener('click', () => closeReportSelects());
 

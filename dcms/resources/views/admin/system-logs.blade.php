@@ -163,14 +163,37 @@ $perPage = $perPage ?? 10;
                         Showing <strong>{{ $logs->count() }}</strong> {{ Str::plural('entry', $logs->count()) }}
                         @endif
                     </span>
-                    <div class="sl-page-size-control">
+                    <div class="sl-page-size-control global-page-size-control">
                         <label for="perPageSelect">Show</label>
-                        <select id="perPageSelect" class="sl-page-size-select">
-                            @foreach ([10, 20, 50, 100] as $size)
-                            <option value="{{ $size }}" {{ $perPage==$size ? 'selected' : '' }}>
-                                {{ $size }}</option>
-                            @endforeach
-                        </select>
+
+                        <div class="global-page-size-select" data-global-page-size
+                            data-page-size-input="#perPageSelect">
+                            <select id="perPageSelect" class="global-page-size-native" tabindex="-1" aria-hidden="true">
+                                @foreach ([10, 20, 50, 100] as $size)
+                                <option value="{{ $size }}" {{ (int) $perPage===$size ? 'selected' : '' }}>
+                                    {{ $size }}</option>
+                                @endforeach
+                            </select>
+
+                            <button type="button" class="global-page-size-trigger" data-page-size-trigger
+                                aria-haspopup="listbox" aria-expanded="false">
+                                <span data-page-size-value>{{ (int) $perPage }}</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+
+                            <div class="global-page-size-menu" role="listbox">
+                                @foreach ([10, 20, 50, 100] as $size)
+                                <button type="button"
+                                    class="global-page-size-option {{ (int) $perPage === $size ? 'is-selected' : '' }}"
+                                    data-page-size-option data-value="{{ $size }}" role="option"
+                                    aria-selected="{{ (int) $perPage === $size ? 'true' : 'false' }}">
+                                    <span>{{ $size }}</span>
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                                @endforeach
+                            </div>
+                        </div>
+
                         <span>per page</span>
                     </div>
                 </div>
@@ -544,7 +567,7 @@ $perPage = $perPage ?? 10;
         role: @json($role ?? 'all'),
         search: @json($search ?? ''),
         perPage: {{ (int)($perPage ?? 10) }},
-    page: {{ (int) request('page', 1) }},
+    page: { { (int) request('page', 1) } },
     sort: @json($sort ?? 'desc'),
     dateFrom: @json($dateFrom ?? ''),
     dateTo: @json($dateTo ?? ''),
@@ -681,6 +704,8 @@ $perPage = $perPage ?? 10;
             slState.page = 1;
             slFetch();
         });
+
+        window.initGlobalPageSizeSelects?.();
     }
 
     @php $latestLogId = optional(($logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $logs -> getCollection() : $logs) -> first()) -> id ?? 0; @endphp
@@ -1536,6 +1561,7 @@ $perPage = $perPage ?? 10;
         var perPageSelect = document.getElementById('perPageSelect');
         if (perPageSelect && p.per_page) {
             perPageSelect.value = String(p.per_page);
+            window.syncGlobalPageSizeSelect?.(perPageSelect, p.per_page);
         }
 
         var badge = document.getElementById('entryBadge');

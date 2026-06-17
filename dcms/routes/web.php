@@ -641,7 +641,7 @@ Route::post('/impersonate', function (Request $request) {
         AuditLogger::log(
             'impersonation_started',
             'authentication',
-            'Super Admin started impersonating Dentist dashboard'
+            'Admin started impersonating Dentist dashboard'
         );
 
         return response()->json([
@@ -671,7 +671,7 @@ Route::post('/impersonate', function (Request $request) {
         AuditLogger::log(
             'impersonation_started',
             'authentication',
-            'Super Admin started impersonating Patient ID ' . $patient->id
+            'Admin started impersonating Patient ID ' . $patient->id
         );
 
         return response()->json([
@@ -698,7 +698,7 @@ Route::post('/stop-impersonation', function () {
         AuditLogger::log(
             'impersonation_stopped',
             'authentication',
-            'Super Admin stopped impersonation'
+            'Admin stopped impersonation'
         );
     }
 
