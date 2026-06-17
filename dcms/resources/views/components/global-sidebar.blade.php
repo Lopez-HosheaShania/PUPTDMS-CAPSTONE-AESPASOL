@@ -176,6 +176,12 @@ $sidebarGroups = [
 'label' => 'Patients',
 ],
 [
+'route' => 'dentist.walk-in.index',
+'active' => ['dentist.walk-in.*'],
+'icon' => 'fa-person-walking',
+'label' => 'Walk-in',
+],
+[
 'route' => 'dentist.dentist.appointments',
 'active' => ['dentist.dentist.appointments'],
 'icon' => 'fa-calendar-check',

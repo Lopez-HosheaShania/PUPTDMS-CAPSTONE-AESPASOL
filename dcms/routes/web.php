@@ -46,6 +46,8 @@ use App\Http\Controllers\Admin\DentalRecordController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\Dentist\OdontogramController;
 use App\Http\Controllers\Dentist\DentistClinicScheduleController;
+use App\Http\Controllers\Dentist\WalkInController;
+
 
 //api nila albert
 
@@ -1116,6 +1118,19 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
     Route::get('/report/templates/{template}/print', [\App\Http\Controllers\Dentist\DentistReportController::class, 'printTemplate'])
         ->middleware('permission:manage_reports')
         ->name('dentist.dentist.report.templates.print');
+
+    // Walk-in Patients
+    Route::get('/walk-in', [WalkInController::class, 'index'])
+        ->name('dentist.walk-in.index');
+
+    Route::get('/walk-in/search-patient', [WalkInController::class, 'searchPatient'])
+        ->name('dentist.walk-in.search-patient');
+
+    Route::post('/walk-in/guest', [WalkInController::class, 'storeGuest'])
+        ->name('dentist.walk-in.guest.store');
+
+    Route::post('/walk-in/start', [WalkInController::class, 'startWalkIn'])
+        ->name('dentist.walk-in.start');
 
     // Document Requests
     //     if (session('role') !== 'dentist') {
