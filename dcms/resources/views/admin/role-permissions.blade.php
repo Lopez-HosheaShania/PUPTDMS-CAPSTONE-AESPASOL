@@ -408,6 +408,24 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
             </div>
         </div>
 
+        <div class="modal-form-group st-form-group">
+            <label class="modal-label field-label">User Name</label>
+            <div class="st-input-wrap">
+                <i class="fa-solid fa-user st-input-icon"></i>
+                <input type="text" id="newRoleUserName" name="user_name" class="st-input"
+                    placeholder="e.g. Nelson P. Angeles" autocomplete="off">
+            </div>
+        </div>
+
+        <div class="modal-form-group st-form-group">
+            <label class="modal-label field-label">User Email</label>
+            <div class="st-input-wrap">
+                <i class="fa-solid fa-envelope st-input-icon"></i>
+                <input type="email" id="newRoleUserEmail" name="user_email" class="st-input"
+                    placeholder="e.g. user@example.com" autocomplete="off">
+            </div>
+        </div>
+
         <div id="newRoleError" class="modal-inline-error" style="display:none;"></div>
 
         <div class="modal-actions">
@@ -1226,6 +1244,8 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
 
         document.getElementById('newRoleName').value = '';
         document.getElementById('newRoleSlug').value = '';
+        document.getElementById('newRoleUserName').value = '';
+        document.getElementById('newRoleUserEmail').value = '';
         document.getElementById('newRoleError').style.display = 'none';
 
         const modal = document.getElementById('newRoleModal');
@@ -1247,10 +1267,22 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
         e.preventDefault();
         const name = document.getElementById('newRoleName').value.trim();
         const slug = document.getElementById('newRoleSlug').value.trim();
+        const userName = document.getElementById('newRoleUserName').value.trim();
+        const userEmail = document.getElementById('newRoleUserEmail').value.trim();
         const errEl = document.getElementById('newRoleError');
 
         if (!name || !slug) {
             errEl.textContent = 'Please fill out all fields.';
+            errEl.style.display = 'block';
+            return;
+        }
+        if ((userName && !userEmail) || (!userName && userEmail)) {
+            errEl.textContent = 'Please enter both user name and user email.';
+            errEl.style.display = 'block';
+            return;
+        }
+        if (userEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail)) {
+            errEl.textContent = 'Please enter a valid user email.';
             errEl.style.display = 'block';
             return;
         }
@@ -1270,23 +1302,24 @@ $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $lo
             method: 'POST',
             body: new FormData(form),
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
             }
         })
             .then(async res => {
+                const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
-                    const data = await res.json().catch(() => ({}));
                     let errorMsg = 'Could not create role.';
                     if (data.errors) errorMsg = Object.values(data.errors).flat().join(' ');
                     else if (data.message) errorMsg = data.message;
                     throw new Error(errorMsg);
                 }
-                return res;
+                return data;
             })
-            .then(() => {
+            .then(data => {
                 closeNewRoleModal();
                 if (typeof showToast === 'function') {
-                    showToast('Success', 'Role created successfully.', 'success');
+                    showToast('Success', data.message || 'Role created successfully.', 'success');
                 }
 
                 fetch(window.location.href)

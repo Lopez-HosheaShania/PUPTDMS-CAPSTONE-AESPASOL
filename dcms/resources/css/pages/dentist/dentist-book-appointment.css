@@ -1,6 +1,6 @@
 /* =========================================================
    DENTIST WALK-IN / BOOK APPOINTMENT FINAL CSS
-   File: public/css/dentist-walk-in.css
+   File: resources/css/pages/dentist/dentist-book-appointment.css
    ========================================================= */
 
 *,
@@ -12,11 +12,22 @@
 #mainContent.book-container {
     width: 100% !important;
     max-width: 100% !important;
-    margin-left: 0 !important;
     margin-right: 0 !important;
     padding-left: clamp(0.75rem, 2vw, 1.5rem) !important;
     padding-right: clamp(0.75rem, 2vw, 1.5rem) !important;
     overflow-x: hidden !important;
+}
+
+body.role-dentist #mainContent.book-container {
+    margin-left: var(--sidebar-w, 220px) !important;
+    width: calc(100% - var(--sidebar-w, 220px)) !important;
+}
+
+body.role-dentist.sidebar-collapsed #mainContent.book-container,
+html.sidebar-collapsed-init body.role-dentist #mainContent.book-container,
+body.role-dentist:has(#sidebar.collapsed) #mainContent.book-container {
+    margin-left: var(--sidebar-collapsed-w, 64px) !important;
+    width: calc(100% - var(--sidebar-collapsed-w, 64px)) !important;
 }
 
 #dentistWalkInPage,
@@ -164,6 +175,14 @@
     margin-right: auto !important;
     border-radius: 24px !important;
     overflow: hidden !important;
+}
+
+#dentistWalkInPage .book-card > div:last-child,
+#dentistBookAppointmentPage .book-card > div:last-child,
+#walkInAppointmentPage .book-card > div:last-child,
+#dentistWalkInAppointmentPage .book-card > div:last-child,
+.dentist-walk-in-page .book-card > div:last-child {
+    padding-bottom: 5.25rem !important;
 }
 
 .step-content {
@@ -462,7 +481,7 @@ html body #mainContent #patientAccountSection .patient-result.selected {
 html body #mainContent #patientAccountSection .patient-avatar {
     width: 40px !important;
     height: 40px !important;
-    border-radius: 14px !important;
+    border-radius: 999px !important;
     background: linear-gradient(135deg, #8B0000, #660000) !important;
     color: #ffffff !important;
     font-size: 11px !important;
@@ -520,7 +539,8 @@ html body #mainContent #patientAccountSection .patient-select-pill {
 }
 
 html body #mainContent #patientAccountSection .patient-result:hover .patient-select-pill,
-html body #mainContent #patientAccountSection .patient-result.selected .patient-select-pill {
+html body #mainContent #patientAccountSection .patient-result.selected .patient-select-pill,
+html body #mainContent #patientAccountSection .patient-select-pill.chosen {
     background: #8B0000 !important;
     color: #ffffff !important;
 }
@@ -1118,9 +1138,9 @@ select.form-input {
    ========================================================= */
 
 #navBtns {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 1rem 0 0 !important;
+    width: calc(100% - 2.7rem) !important;
+    max-width: calc(100% - 2.7rem) !important;
+    margin: 1rem auto 0 !important;
     padding: 0 !important;
     justify-content: flex-end !important;
     align-items: center !important;
@@ -1365,6 +1385,15 @@ select.form-input {
 }
 
 @media (max-width: 767px) {
+    body.role-dentist #mainContent.book-container,
+    body.role-dentist.sidebar-collapsed #mainContent.book-container,
+    html.sidebar-collapsed-init body.role-dentist #mainContent.book-container,
+    body.role-dentist:has(#sidebar.collapsed) #mainContent.book-container {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
     #mainContent.book-container {
         padding-left: 0.75rem !important;
         padding-right: 0.75rem !important;
@@ -1393,7 +1422,7 @@ select.form-input {
 
     .book-card > div:last-child,
     .walk-in-card > div:last-child {
-        padding: 1rem !important;
+        padding: 1rem 1rem 4.25rem !important;
     }
 
     .booking-step-shell,
@@ -1462,11 +1491,14 @@ select.form-input {
     }
 
     #navBtns {
+        width: 100% !important;
+        max-width: 100% !important;
         display: flex !important;
         justify-content: stretch !important;
         align-items: center !important;
         gap: 0.65rem !important;
-        margin-top: 1rem !important;
+        margin: 1rem 0 0 !important;
+        padding: 0 !important;
     }
 
     #prevBtn,
