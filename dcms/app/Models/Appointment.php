@@ -22,6 +22,7 @@ class Appointment extends Model
         'follow_up_reminder_sent_at',
         'follow_up_today_reminder_sent_at',
         'follow_up_one_day_reminder_sent_at',
+        'is_walk_in',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class Appointment extends Model
         'follow_up_reminder_sent_at' => 'datetime',
         'follow_up_today_reminder_sent_at' => 'datetime',
         'follow_up_one_day_reminder_sent_at' => 'datetime',
+        'is_walk_in' => 'boolean',
     ];
 
     public function dentalHistory()

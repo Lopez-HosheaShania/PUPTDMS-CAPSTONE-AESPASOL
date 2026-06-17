@@ -37,13 +37,6 @@ return [
         'login_url' => env('IDP_LOGIN_URL'),
     ],
 
-    'ogos' => [
-        'base_url' => env('OGOS_API_BASE_URL'),
-        'token_url' => env('OGOS_M2M_TOKEN_URL'),
-        'client_id' => env('OGOS_M2M_CLIENT_ID'),
-        'client_secret' => env('OGOS_M2M_CLIENT_SECRET'),
-    ],
-
     'chatbot' => [
         'api_key' => env('CHATBOT_API_KEY'),
     ],
@@ -69,7 +62,15 @@ return [
     ],
 
     'hostinger' => [
-    'hpanel_url' => env('HOSTINGER_HPANEL_URL', 'https://hpanel.hostinger.com'),
-    ],  
+        'hpanel_url' => env('HOSTINGER_HPANEL_URL', 'https://hpanel.hostinger.com'),
+    ],
+
+    'ogos' => [
+        'base_url' => env('OGOS_API_BASE_URL'),
+        'token_url' => env('OGOS_M2M_TOKEN_URL'),
+        'client_id' => env('OGOS_M2M_CLIENT_ID'),
+        'client_secret' => env('OGOS_M2M_CLIENT_SECRET'),
+        'student_search_path' => env('OGOS_STUDENT_SEARCH_PATH', '/integrations/students/profiles'),
+    ],
 
 ];
