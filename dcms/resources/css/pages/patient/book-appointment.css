@@ -1,3 +1,9 @@
+body.role-patient #mainContent.book-container {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
 #bookAppointmentPage .cal-time-layout {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) minmax(360px, 420px) !important;
