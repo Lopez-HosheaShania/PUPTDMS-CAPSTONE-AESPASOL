@@ -823,7 +823,7 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) {
         margin-top: 6px;
     }
 
-    #rescheduleModal .grid.grid-cols-1.sm\\:grid-cols-3 {
+    #rescheduleModal .grid.grid-cols-1[class~="sm:grid-cols-3"] {
         grid-template-columns: 1fr !important;
         gap: 10px !important;
     }
