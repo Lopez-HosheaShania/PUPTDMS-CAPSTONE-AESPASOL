@@ -1,5 +1,103 @@
+@php
+    /*
+    |--------------------------------------------------------------------------
+    | Manual paper setup per template
+    |--------------------------------------------------------------------------
+    | Dito mo pwedeng i-force ang paper size/orientation kahit ano pa nasa DB.
+    */
+    $manualPaperSettings = [
+        'DCASE-DEFAULT' => [
+            'paper_size' => 'legal',
+            'orientation' => 'landscape',
+        ],
+
+        'GADR-DEFAULT' => [
+            'paper_size' => 'a4',
+            'orientation' => 'landscape',
+        ],
+
+        'DINV-DEFAULT' => [
+            'paper_size' => 'legal',
+            'orientation' => 'landscape',
+        ],
+
+        'MINV-DEFAULT' => [
+            'paper_size' => 'legal',
+            'orientation' => 'landscape',
+        ],
+
+        'MONTHLY-REPORT' => [
+            'paper_size' => 'legal',
+            'orientation' => 'landscape',
+        ],
+
+        'DTR-DEFAULT' => [
+            'label' => 'Legal Portrait',
+            'width' => '8.5in',
+            'height' => '14in',
+            'page_size' => '8.5in 14in',
+            'orientation' => 'portrait',
+        ],
+    ];
+
+    $templateCode = strtoupper(trim($template->code ?? ''));
+
+    $manualSetting = $manualPaperSettings[$templateCode] ?? null;
+
+    $rawPaperSize = strtolower(trim($manualSetting['paper_size'] ?? ($template->paper_size ?: 'a4')));
+    $orientation = strtolower(trim($manualSetting['orientation'] ?? ($template->orientation ?: 'portrait')));
+
+    $paperAliases = [
+        'a3' => 'a3',
+        'a4' => 'a4',
+        'a5' => 'a5',
+
+        'letter' => 'letter',
+        'short' => 'letter',
+        'short bond' => 'letter',
+        'short-bond' => 'letter',
+
+        'legal' => 'legal',
+        'long' => 'legal',
+        'long bond' => 'legal',
+        'long-bond' => 'legal',
+
+        'folio' => 'folio',
+        'f4' => 'folio',
+
+        'tabloid' => 'tabloid',
+        'ledger' => 'ledger',
+    ];
+
+    $paperSize = $paperAliases[$rawPaperSize] ?? 'a4';
+
+    if (!in_array($orientation, ['portrait', 'landscape'], true)) {
+        $orientation = 'portrait';
+    }
+
+    $paperClass = 'paper-' . $paperSize . '-' . $orientation;
+
+    $pagePaperSize = match ($paperSize) {
+        'a3' => 'A3',
+        'a4' => 'A4',
+        'a5' => 'A5',
+        'letter' => 'Letter',
+        'legal' => 'Legal',
+        'folio' => '8.5in 13in',
+        'tabloid' => 'Tabloid',
+        'ledger' => 'Ledger',
+        default => 'A4',
+    };
+
+    $displayPaperSize = strtoupper(
+        $paperSize === 'letter' ? 'Letter' : ($paperSize === 'legal' ? 'Legal' : $paperSize),
+    );
+    $displayOrientation = ucfirst($orientation);
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -171,8 +269,8 @@
         }
 
         @page {
-            size: {{ $template->paper_size ?: 'A4' }} {{ $template->orientation ?: 'portrait' }};
-            margin: 12mm;
+            size: {{ $pagePaperSize }} {{ $orientation }};
+            margin: 8mm;
         }
 
         @media print {
@@ -197,6 +295,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="toolbar no-print">
         <div>
@@ -216,21 +315,21 @@
     </div>
 
     <div class="page-wrap">
-        <article class="sheet">
+        <article class="sheet {{ $paperClass }}">
             <header class="sheet-header">
                 <div>
                     <h2>{{ $template->name }}</h2>
                     <div class="meta">
                         {{ $template->code ?: 'Template Code N/A' }}<br>
                         {{ \Illuminate\Support\Str::headline($template->document_type) }}
-                        @if($template->category)
+                        @if ($template->category)
                             • {{ $template->category }}
                         @endif
                     </div>
                 </div>
                 <div class="sheet-badges">
-                    <span class="badge brand">{{ $template->paper_size ?: 'A4' }}</span>
-                    <span class="badge">{{ \Illuminate\Support\Str::headline($template->orientation ?: 'portrait') }}</span>
+                    <span class="badge brand">{{ $displayPaperSize }}</span>
+                    <span class="badge">{{ $displayOrientation }}</span>
                     <span class="badge">{{ $template->status }}</span>
                 </div>
             </header>
@@ -243,4 +342,5 @@
         </article>
     </div>
 </body>
+
 </html>

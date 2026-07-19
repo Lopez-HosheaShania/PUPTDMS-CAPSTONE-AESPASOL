@@ -1,0 +1,279 @@
+/* ==============================
+   FIX: Template cards title cut
+   ============================== */
+
+.printable-form-card,
+.report-template-card,
+.template-card {
+    min-width: 0 !important;
+    overflow: visible !important;
+}
+
+.printable-form-card h3,
+.printable-form-card .template-title,
+.report-template-card h3,
+.report-template-card .template-title,
+.template-card h3,
+.template-card .template-title {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    display: block !important;
+    line-height: 1.25 !important;
+    max-width: 100% !important;
+    word-break: break-word !important;
+}
+
+
+/* ==============================
+   FIX: Report preview being cut
+   ============================== */
+
+.report-preview-wrapper,
+.report-preview-body,
+.report-preview-container,
+.print-preview-wrapper,
+.print-preview-body,
+.template-preview-wrapper,
+.template-preview-body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    padding: 2rem 1rem !important;
+    box-sizing: border-box !important;
+}
+
+/* The paper/template itself must not be squeezed or clipped */
+.report-paper,
+.print-paper,
+.preview-paper,
+.template-paper,
+.report-sheet,
+.print-sheet,
+.preview-sheet {
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Legal portrait */
+.report-paper.legal,
+.print-paper.legal,
+.preview-paper.legal,
+.template-paper.legal,
+.report-sheet.legal,
+.print-sheet.legal,
+.preview-sheet.legal {
+    width: 8.5in !important;
+    min-height: 14in !important;
+}
+
+/* Letter portrait */
+.report-paper.letter,
+.print-paper.letter,
+.preview-paper.letter,
+.template-paper.letter,
+.report-sheet.letter,
+.print-sheet.letter,
+.preview-sheet.letter {
+    width: 8.5in !important;
+    min-height: 11in !important;
+}
+
+/* A4 portrait */
+.report-paper.a4,
+.print-paper.a4,
+.preview-paper.a4,
+.template-paper.a4,
+.report-sheet.a4,
+.print-sheet.a4,
+.preview-sheet.a4 {
+    width: 210mm !important;
+    min-height: 297mm !important;
+}
+
+/* Prevent logos/header images from being clipped */
+.report-paper img,
+.print-paper img,
+.preview-paper img,
+.template-paper img,
+.report-sheet img,
+.print-sheet img,
+.preview-sheet img {
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+}
+
+
+/* ==============================
+   Mobile / tablet preview
+   ============================== */
+
+@media screen and (max-width: 1024px) {
+
+    .report-preview-wrapper,
+    .report-preview-body,
+    .report-preview-container,
+    .print-preview-wrapper,
+    .print-preview-body,
+    .template-preview-wrapper,
+    .template-preview-body {
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+    }
+
+    .report-paper,
+    .print-paper,
+    .preview-paper,
+    .template-paper,
+    .report-sheet,
+    .print-sheet,
+    .preview-sheet {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+
+/* ==============================
+   Actual print should NOT be scaled
+   ============================== */
+
+@media print {
+
+    .report-preview-wrapper,
+    .report-preview-body,
+    .report-preview-container,
+    .print-preview-wrapper,
+    .print-preview-body,
+    .template-preview-wrapper,
+    .template-preview-body {
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        background: #fff !important;
+    }
+
+    .report-paper,
+    .print-paper,
+    .preview-paper,
+    .template-paper,
+    .report-sheet,
+    .print-sheet,
+    .preview-sheet {
+        margin: 0 auto !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        transform: none !important;
+        zoom: 1 !important;
+    }
+}
+
+/* A series */
+.sheet.paper-a0-portrait { width: 841mm; min-height: 1189mm; }
+.sheet.paper-a0-landscape { width: 1189mm; min-height: 841mm; }
+
+.sheet.paper-a1-portrait { width: 594mm; min-height: 841mm; }
+.sheet.paper-a1-landscape { width: 841mm; min-height: 594mm; }
+
+.sheet.paper-a2-portrait { width: 420mm; min-height: 594mm; }
+.sheet.paper-a2-landscape { width: 594mm; min-height: 420mm; }
+
+.sheet.paper-a3-portrait { width: 297mm; min-height: 420mm; }
+.sheet.paper-a3-landscape { width: 420mm; min-height: 297mm; }
+
+.sheet.paper-a4-portrait { width: 210mm; min-height: 297mm; }
+.sheet.paper-a4-landscape { width: 297mm; min-height: 210mm; }
+
+.sheet.paper-a5-portrait { width: 148mm; min-height: 210mm; }
+.sheet.paper-a5-landscape { width: 210mm; min-height: 148mm; }
+
+.sheet.paper-a6-portrait { width: 105mm; min-height: 148mm; }
+.sheet.paper-a6-landscape { width: 148mm; min-height: 105mm; }
+
+/* B series */
+.sheet.paper-b0-portrait { width: 1000mm; min-height: 1414mm; }
+.sheet.paper-b0-landscape { width: 1414mm; min-height: 1000mm; }
+
+.sheet.paper-b1-portrait { width: 707mm; min-height: 1000mm; }
+.sheet.paper-b1-landscape { width: 1000mm; min-height: 707mm; }
+
+.sheet.paper-b2-portrait { width: 500mm; min-height: 707mm; }
+.sheet.paper-b2-landscape { width: 707mm; min-height: 500mm; }
+
+.sheet.paper-b3-portrait { width: 353mm; min-height: 500mm; }
+.sheet.paper-b3-landscape { width: 500mm; min-height: 353mm; }
+
+.sheet.paper-b4-portrait { width: 250mm; min-height: 353mm; }
+.sheet.paper-b4-landscape { width: 353mm; min-height: 250mm; }
+
+.sheet.paper-b5-portrait { width: 176mm; min-height: 250mm; }
+.sheet.paper-b5-landscape { width: 250mm; min-height: 176mm; }
+
+.sheet.paper-b6-portrait { width: 125mm; min-height: 176mm; }
+.sheet.paper-b6-landscape { width: 176mm; min-height: 125mm; }
+
+/* US/common paper sizes */
+.sheet.paper-letter-portrait {
+    width: 8.5in;
+    min-height: 11in;
+}
+
+.sheet.paper-letter-landscape {
+    width: 11in;
+    min-height: 8.5in;
+}
+
+.sheet.paper-legal-portrait {
+    width: 8.5in;
+    min-height: 14in;
+}
+
+.sheet.paper-legal-landscape {
+    width: 14in;
+    min-height: 8.5in;
+}
+
+.sheet.paper-folio-portrait {
+    width: 8.5in;
+    min-height: 13in;
+}
+
+.sheet.paper-folio-landscape {
+    width: 13in;
+    min-height: 8.5in;
+}
+
+.sheet.paper-executive-portrait {
+    width: 7.25in;
+    min-height: 10.5in;
+}
+
+.sheet.paper-executive-landscape {
+    width: 10.5in;
+    min-height: 7.25in;
+}
+
+.sheet.paper-tabloid-portrait {
+    width: 11in;
+    min-height: 17in;
+}
+
+.sheet.paper-tabloid-landscape {
+    width: 17in;
+    min-height: 11in;
+}
+
+.sheet.paper-ledger-portrait {
+    width: 17in;
+    min-height: 11in;
+}
+
+.sheet.paper-ledger-landscape {
+    width: 11in;
+    min-height: 17in;
+}

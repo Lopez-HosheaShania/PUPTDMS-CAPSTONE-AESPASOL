@@ -207,18 +207,78 @@ class DentistReportController extends Controller
 
         abort_unless($template->status === 'active', 404);
 
-        $renderer = app(DocumentTemplateRenderer::class);
-        $renderedContent = $renderer->renderForPreview($template);
+        $templatePath = $this->getPrintableTemplatePdfPath($template);
+
+        if (!$templatePath || !file_exists($templatePath)) {
+            abort(404, 'PDF template file was not found.');
+        }
+
+        $pdf = new Fpdi('P', 'pt');
+        $pdf->SetAutoPageBreak(false);
+        $pdf->SetMargins(0, 0, 0);
+
+        $pageCount = $pdf->setSourceFile($templatePath);
+
+        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
+            $templatePage = $pdf->importPage($pageNumber);
+            $size = $pdf->getTemplateSize($templatePage);
+
+            $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+            $pdf->useTemplate($templatePage, 0, 0, $size['width'], $size['height'], true);
+        }
 
         AuditLogger::log(
             'view',
             'dentist_reports',
-            "Dentist opened printable template: {$template->name}"
+            "Dentist opened exact PDF template: {$template->name}"
         );
 
-        return view('dentist.document-template-print', compact('template', 'renderedContent'));
+        $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $template->name ?: 'document-template');
+
+        return response($pdf->Output('S'), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="' . $safeName . '.pdf"');
     }
 
+    private function getPrintableTemplatePdfPath(DocumentTemplate $template): ?string
+    {
+        $documentType = strtolower(trim((string) $template->document_type));
+        $code = strtoupper(trim((string) $template->code));
+
+        $pathsByType = [
+            'daily_treatment_record' => 'daily-treatment-record-template.pdf',
+            'dental_services' => 'dental-services-template.pdf',
+            'dental_health_record' => 'dental-health-record-template.pdf',
+            'annual_dental_clearance' => 'annual-dental-clearance-template.pdf',
+            'dental_clearance' => 'dental-clearance-template.pdf',
+            'gad_report' => 'gad-accomplishment-template.pdf',
+            'dental_supplies_inventory' => 'dental-supplies-inventory-template.pdf',
+            'medicine_inventory' => 'medicine-inventory-template.pdf',
+            'monthly_report' => 'monthly-report-template.pdf',
+            'dental_cases' => 'dental-cases-template.pdf',
+        ];
+
+        $pathsByCode = [
+            'DTR-DEFAULT' => 'daily-treatment-record-template.pdf',
+            'DSRV-DEFAULT' => 'dental-services-template.pdf',
+            'DHREC-DEFAULT' => 'dental-health-record-template.pdf',
+            'ADCL-DEFAULT' => 'annual-dental-clearance-template.pdf',
+            'DCLR-DEFAULT' => 'dental-clearance-template.pdf',
+            'GADR-DEFAULT' => 'gad-accomplishment-template.pdf',
+            'DINV-DEFAULT' => 'dental-supplies-inventory-template.pdf',
+            'MINV-DEFAULT' => 'medicine-inventory-template.pdf',
+            'MONTHLY-REPORT' => 'monthly-report-template.pdf',
+            'DCASE-DEFAULT' => 'dental-cases-template.pdf',
+        ];
+
+        $fileName = $pathsByType[$documentType] ?? $pathsByCode[$code] ?? null;
+
+        if (!$fileName) {
+            return null;
+        }
+
+        return storage_path('app/report-templates/' . $fileName);
+    }
     public function gadData(Request $request)
     {
         $activeRole = session('impersonated_role') ?: session('role');
@@ -1422,7 +1482,7 @@ class DentistReportController extends Controller
     {
         $pdf->SetTextColor(0, 0, 0);
 
-   
+
         $pdf->SetFillColor(255, 255, 255);
         $pdf->Rect(318, 50, 165, 18, 'F');
 
@@ -1436,7 +1496,7 @@ class DentistReportController extends Controller
             8
         );
 
-   
+
         $rowY = [
             'student' => 176.8,
             'faculty' => 207.2,
@@ -1445,7 +1505,7 @@ class DentistReportController extends Controller
             'total' => 304.8,
         ];
 
-      
+
         $colX = [
             'actual_patient' => 73.7,
             'rde' => 134.6,
@@ -1752,7 +1812,7 @@ class DentistReportController extends Controller
         $this->drawPdfCell($pdf, 200, 303, $this->dhrBoolMark($goodHealth, false), 16, 8, 'C');
         $this->drawPdfCell($pdf, 384, 303, $this->findDhrMedicalTextOnly($medicalAnswers, ['good', 'health']), 115, 8, 'L');
 
-      
+
         $this->drawPdfCell(
             $pdf,
             312,
