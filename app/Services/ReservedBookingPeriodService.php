@@ -27,7 +27,7 @@ class ReservedBookingPeriodService
 
             $period = ReservedBookingPeriod::create([
                 ...$this->normalize($data),
-                'is_active' => true,
+                'is_active' => $this->requestedActive($data),
                 'created_by' => $actor->id,
                 'updated_by' => $actor->id,
             ]);
@@ -37,7 +37,11 @@ class ReservedBookingPeriodService
             return $period->load('slots');
         });
 
-        $this->invitationService->syncPeriod($period);
+        // Inactive periods are drafts only. They do not reserve clinic time and
+        // they do not create patient notifications until they are activated.
+        if ($period->is_active) {
+            $this->invitationService->syncPeriod($period, true);
+        }
 
         return $period;
     }
@@ -47,10 +51,23 @@ class ReservedBookingPeriodService
         array $data,
         User $actor
     ): ReservedBookingPeriod {
+        $wasActive = (bool) $period->is_active;
+
         $updatedPeriod = DB::transaction(function () use ($period, $data, $actor) {
             $lockedPeriod = ReservedBookingPeriod::query()
                 ->lockForUpdate()
                 ->findOrFail($period->id);
+
+            $newIsActive = $this->requestedActive($data);
+
+            if ($lockedPeriod->is_active
+                && ! $newIsActive
+                && $lockedPeriod->activeAppointments()->exists()) {
+                $this->fail(
+                    'is_active',
+                    'This reserved period has active patient bookings and cannot be set to Inactive. Cancel or complete those bookings first.'
+                );
+            }
 
             $this->validateScheduleRestrictions($data, $lockedPeriod->id);
             $normalized = $this->normalize($data);
@@ -84,6 +101,7 @@ class ReservedBookingPeriodService
 
             $lockedPeriod->update([
                 ...$normalized,
+                'is_active' => $newIsActive,
                 'updated_by' => $actor->id,
             ]);
 
@@ -94,7 +112,16 @@ class ReservedBookingPeriodService
             return $lockedPeriod->refresh()->load('slots');
         });
 
-        $this->invitationService->syncPeriod($updatedPeriod);
+        if ($updatedPeriod->is_active) {
+            // Only a transition from Inactive -> Active should make existing
+            // invitations unread again. Normal edits while already active only
+            // refresh their notification payload.
+            $this->invitationService->syncPeriod($updatedPeriod, ! $wasActive);
+        } else {
+            // Deactivation immediately removes invitations and releases the date
+            // and time range for regular booking logic, which only reads active periods.
+            $this->invitationService->removePeriod($updatedPeriod);
+        }
 
         return $updatedPeriod;
     }
@@ -105,20 +132,30 @@ class ReservedBookingPeriodService
     ): void {
         $this->validateStudentTarget($data);
 
+        $start = $this->normalizeTime($data['start_time']);
+        $end = $this->normalizeTime($data['end_time']);
+        $this->validateTimeslots($data, $start, $end);
+
+        // Inactive periods are saved as drafts. Operational restrictions that
+        // actually reserve clinic availability are enforced only on activation.
+        if (! $this->requestedActive($data)) {
+            return;
+        }
+
         $date = Carbon::parse($data['reserved_date']);
         $dateString = $date->toDateString();
 
         if (BlockedDate::whereDate('date', $dateString)->exists()) {
             $this->fail(
                 'reserved_date',
-                'The selected date is blocked and cannot have a reserved booking period.'
+                'The selected date is blocked and cannot have an active reserved booking period.'
             );
         }
 
         if (array_key_exists($dateString, PhilippineHolidays::recordsRange(0, 2))) {
             $this->fail(
                 'reserved_date',
-                'Reserved booking periods cannot be scheduled on a holiday.'
+                'Active reserved booking periods cannot be scheduled on a holiday.'
             );
         }
 
@@ -130,7 +167,7 @@ class ReservedBookingPeriodService
         if (! $clinicSchedule || $clinicSchedule->status === 'closed') {
             $this->fail(
                 'reserved_date',
-                'The clinic is closed on the selected date.'
+                'The clinic is closed on the selected date. Keep this period Inactive or choose an open clinic date.'
             );
         }
 
@@ -151,13 +188,10 @@ class ReservedBookingPeriodService
         if ($dateConflictQuery->lockForUpdate()->exists()) {
             $this->fail(
                 'reserved_date',
-                'This date already has a reserved booking period. Choose another available date.'
+                'This date already has an active reserved booking period. Set that period to Inactive first or choose another date.'
             );
         }
 
-        $start = $this->normalizeTime($data['start_time']);
-        $end = $this->normalizeTime($data['end_time']);
-        $this->validateTimeslots($data, $start, $end);
         $clinicOpen = $this->normalizeTime($clinicSchedule->open_time);
         $clinicClose = $this->normalizeTime($clinicSchedule->close_time);
 
@@ -165,7 +199,7 @@ class ReservedBookingPeriodService
             $this->fail(
                 'start_time',
                 sprintf(
-                    'The reserved period must stay within clinic hours (%s–%s).',
+                    'The reserved period must stay within clinic hours (%s-%s) before it can be activated.',
                     Carbon::parse($clinicOpen)->format('g:i A'),
                     Carbon::parse($clinicClose)->format('g:i A')
                 )
@@ -175,7 +209,7 @@ class ReservedBookingPeriodService
         if ($start === $clinicOpen && $end === $clinicClose) {
             $this->fail(
                 'end_time',
-                'A reserved period cannot occupy the clinic’s entire operating day.'
+                'An active reserved period cannot occupy the clinic\'s entire operating day.'
             );
         }
 
@@ -191,7 +225,7 @@ class ReservedBookingPeriodService
         if ($hasExistingAppointments) {
             $this->fail(
                 'start_time',
-                'This time range already contains regular appointments. Choose an unoccupied period.'
+                'This time range already contains regular appointments and cannot be activated as a reserved period.'
             );
         }
     }
@@ -203,7 +237,6 @@ class ReservedBookingPeriodService
         return [
             'title' => trim($data['title']),
             'reserved_date' => Carbon::parse($data['reserved_date'])->toDateString(),
-            'active_reserved_date' => Carbon::parse($data['reserved_date'])->toDateString(),
             'start_time' => $this->normalizeTime($data['start_time']),
             'end_time' => $this->normalizeTime($data['end_time']),
             'booking_mode' => $data['booking_mode'],
@@ -303,6 +336,11 @@ class ReservedBookingPeriodService
                 ->values()
                 ->all()
         );
+    }
+
+    private function requestedActive(array $data): bool
+    {
+        return filter_var($data['is_active'] ?? false, FILTER_VALIDATE_BOOLEAN);
     }
 
     private function normalizeTime(?string $time): string

@@ -12,16 +12,16 @@ use Illuminate\Support\Collection;
 
 class ReservedBookingInvitationService
 {
-    public function syncPeriod(ReservedBookingPeriod $period): void
+    public function syncPeriod(ReservedBookingPeriod $period, bool $markUnread = true): void
     {
         $period->refresh();
 
         Patient::query()
             ->with('user')
             ->whereNotNull('user_id')
-            ->chunkById(200, function ($patients) use ($period) {
+            ->chunkById(200, function ($patients) use ($period, $markUnread) {
                 foreach ($patients as $patient) {
-                    $this->syncPatientPeriod($patient, $period, true);
+                    $this->syncPatientPeriod($patient, $period, $markUnread);
                 }
             });
     }

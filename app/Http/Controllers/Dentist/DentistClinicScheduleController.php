@@ -18,7 +18,7 @@ class DentistClinicScheduleController extends Controller
 
     public function index(StudentTargetOptionService $studentTargetOptionService)
     {
-        $schedules = ClinicSchedule::active()->orderBy('id')->get();
+        $schedules = ClinicSchedule::query()->orderByDesc('is_active')->orderBy('id')->get();
         $blockedDates = BlockedDate::orderBy('date')->get();
         $reservedBookingPeriods = ReservedBookingPeriod::query()
             ->with(['creator:id,name', 'slots'])
@@ -96,7 +96,10 @@ class DentistClinicScheduleController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateRule($request);
-        $this->ensureDaysAreAvailable($request, $validated['days']);
+
+        if ((bool) $validated['is_active']) {
+            $this->ensureDaysAreAvailable($request, $validated['days']);
+        }
 
         ClinicSchedule::create($this->prepareRule($validated));
 
@@ -106,7 +109,10 @@ class DentistClinicScheduleController extends Controller
     public function update(Request $request, ClinicSchedule $clinicSchedule)
     {
         $validated = $this->validateRule($request);
-        $this->ensureDaysAreAvailable($request, $validated['days'], $clinicSchedule->id);
+
+        if ((bool) $validated['is_active']) {
+            $this->ensureDaysAreAvailable($request, $validated['days'], $clinicSchedule->id);
+        }
 
         $clinicSchedule->update($this->prepareRule($validated));
 
@@ -258,11 +264,12 @@ class DentistClinicScheduleController extends Controller
         return $request->validate([
             'days' => 'required|array|min:1',
             'days.*' => 'in:Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+            'is_active' => 'required|boolean',
             'status' => 'required|in:open,closed,limited',
             'open_time' => 'required_unless:status,closed|nullable|date_format:H:i',
             'close_time' => 'required_unless:status,closed|nullable|date_format:H:i|after:open_time',
             'break_time' => 'nullable|string',
-            'max_slots' => 'required_unless:status,closed|nullable|integer|min:1|max:50',
+            'max_slots' => 'required_unless:status,closed|nullable|integer|min:1|max:30',
             'notes' => 'nullable|string|max:500',
         ]);
     }
@@ -278,7 +285,7 @@ class DentistClinicScheduleController extends Controller
         $request->validate([
             'days' => [
                 function ($attribute, $value, $fail) use ($conflictingDays) {
-                    $fail('A schedule already exists for ' . $this->formatDays($conflictingDays) . '. Edit the existing schedule instead of adding another rule for the same day.');
+                    $fail('An active schedule already exists for ' . $this->formatDays($conflictingDays) . '. Set the current active schedule to Inactive before activating this rule.');
                 },
             ],
         ]);
@@ -337,7 +344,7 @@ class DentistClinicScheduleController extends Controller
             'break_time' => $validated['break_time'] ?? null,
             'max_slots' => $validated['max_slots'] ?? 0,
             'notes' => $validated['notes'] ?? null,
-            'is_active' => true,
+            'is_active' => (bool) $validated['is_active'],
         ];
     }
 }

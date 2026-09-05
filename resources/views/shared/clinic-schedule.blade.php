@@ -33,7 +33,8 @@
             'unblock' => 'admin.clinic_schedule.unblock',
         ];
 
-        $openRules = $schedules->where('status', '!=', 'closed');
+        $activeSchedules = $schedules->where('is_active', true);
+        $openRules = $activeSchedules->where('status', '!=', 'closed');
         $openDays = $openRules->sum(fn($s) => count($s->days ?? []));
         $maxSlots = $openRules->max('max_slots') ?? 0;
         $blockedThisMonth = $blockedDates->filter(fn($b) => \Carbon\Carbon::parse($b->date)->isCurrentMonth())->count();
@@ -46,7 +47,7 @@
         ->count();
 
         $scheduleByDay = [];
-        foreach ($schedules as $s) {
+        foreach ($activeSchedules as $s) {
             foreach ($s->days ?? [] as $d) {
                 $scheduleByDay[$d] = $s;
             }
@@ -80,6 +81,7 @@
                         const hasRuleErrors =
                             @json(
                                 $errors->has('days') ||
+                                    $errors->has('is_active') ||
                                     $errors->has('status') ||
                                     $errors->has('open_time') ||
                                     $errors->has('close_time') ||
@@ -99,6 +101,9 @@
 
                         @if ($errors->has('days'))
                             setFieldError('ruleDaysError', @json($errors->first('days')), null, 'ruleDaysGroup');
+                        @endif
+                        @if ($errors->has('is_active'))
+                            setFieldError('ruleStateError', @json($errors->first('is_active')), 'ruleActivationState');
                         @endif
                         @if ($errors->has('status'))
                             setFieldError('ruleStatusError', @json($errors->first('status')), 'ruleStatus');
@@ -317,6 +322,7 @@
                                                     <th>Lunch Break</th>
                                                     <th>Max Slots</th>
                                                     <th>Status</th>
+                                                    <th>Rule State</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
@@ -347,7 +353,7 @@
                                                                 @if ($rule->status !== 'closed')
                                                                     <div class="cap-bar w-16">
                                                                         <div class="cap-fill"
-                                                                            style="width:{{ min(100, ($rule->max_slots / 10) * 100) }}%">
+                                                                            style="width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
                                                                         </div>
                                                                     </div>
                                                                 @endif
@@ -360,6 +366,13 @@
                                                                 <span class="badge-limited">Limited</span>
                                                             @else
                                                                 <span class="badge-closed">Closed</span>
+                                                            @endif
+                                                        </td>
+                                                        <td data-label="Rule State">
+                                                            @if ($rule->is_active)
+                                                                <span class="status-pill status-active">Active</span>
+                                                            @else
+                                                                <span class="badge-closed">Inactive</span>
                                                             @endif
                                                         </td>
                                                         <td data-label="Actions">
@@ -404,13 +417,19 @@
                                                     <div>
                                                         <div class="schedule-rule-card-title">{{ $rule->days_label }}
                                                         </div>
-                                                        <div class="mt-2">
+                                                        <div class="mt-2 flex items-center gap-2 flex-wrap">
                                                             @if ($rule->status === 'open')
                                                                 <span class="badge-open">Open</span>
                                                             @elseif($rule->status === 'limited')
                                                                 <span class="badge-limited">Limited</span>
                                                             @else
                                                                 <span class="badge-closed">Closed</span>
+                                                            @endif
+
+                                                            @if ($rule->is_active)
+                                                                <span class="status-pill status-active">Active</span>
+                                                            @else
+                                                                <span class="badge-closed">Inactive</span>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -452,7 +471,7 @@
                                                             @if ($rule->status !== 'closed')
                                                                 <div class="cap-bar w-16">
                                                                     <div class="cap-fill"
-                                                                        style="width:{{ min(100, ($rule->max_slots / 10) * 100) }}%">
+                                                                        style="width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
                                                                     </div>
                                                                 </div>
                                                             @endif
@@ -747,6 +766,7 @@
                                                         $periodPayload = [
                                                             'id' => $period->id,
                                                             'title' => $period->title,
+                                                            'is_active' => (bool) $period->is_active,
                                                             'reserved_date' => optional($period->reserved_date)->format(
                                                                 'Y-m-d',
                                                             ),
@@ -809,7 +829,7 @@
                                                             @if ($isPastPeriod)
                                                                 <span class="badge-closed">Past</span>
                                                             @elseif ($period->is_active)
-                                                                <span class="badge-open">Active</span>
+                                                                <span class="status-pill status-active">Active</span>
                                                             @else
                                                                 <span class="badge-closed">Inactive</span>
                                                             @endif
@@ -859,6 +879,7 @@
                                                 $periodPayload = [
                                                     'id' => $period->id,
                                                     'title' => $period->title,
+                                                    'is_active' => (bool) $period->is_active,
                                                     'reserved_date' => optional($period->reserved_date)->format(
                                                         'Y-m-d',
                                                     ),
@@ -891,7 +912,7 @@
                                                     @if ($isPastPeriod)
                                                         <span class="badge-closed">Past</span>
                                                     @elseif ($period->is_active)
-                                                        <span class="badge-open">Active</span>
+                                                        <span class="status-pill status-active">Active</span>
                                                     @else
                                                         <span class="badge-closed">Inactive</span>
                                                     @endif
@@ -1181,6 +1202,27 @@
                                 </div>
 
                                 <div class="mb-5" data-global-field>
+                                    <label class="form-label" for="ruleActivationState">
+                                        Schedule State
+                                    </label>
+
+                                    <select id="ruleActivationState" class="form-select-custom js-custom-select"
+                                        data-placeholder="Select schedule state">
+                                        <option value="0" selected>Inactive</option>
+                                        <option value="1">Active</option>
+                                    </select>
+
+                                    <div class="field-help">
+                                        New schedule rules start as Inactive. To activate a replacement rule,
+                                        set the current active rule for the same day(s) to Inactive first.
+                                    </div>
+
+                                    <div id="ruleStateError" class="global-field-error"
+                                        data-error-for="ruleActivationState" aria-hidden="true">
+                                    </div>
+                                </div>
+
+                                <div class="mb-5" data-global-field>
                                     <label class="form-label" for="ruleStatus">
                                         Clinic Status
                                     </label>
@@ -1266,7 +1308,7 @@
                                             </div>
 
                                             <div class="field-help">
-                                                Set how many appointments may be accepted.
+                                                Set how many appointments may be accepted per day, from 1 to 30.
                                             </div>
                                         </div>
                                     </div>
@@ -1541,7 +1583,7 @@
                                             class="form-input-custom global-control-with-icon js-flatpickr-date-min-today @error('reserved_date', 'reservedPeriod') is-invalid @enderror"
                                             data-flatpickr-append-to-body
                                             data-flatpickr-disabled-date-tooltip="This date already has an active reserved booking period"
-                                            data-flatpickr-disabled-dates='@json($reservedBookingPeriods->where('is_active', true)->pluck('reserved_date')->map(fn($date) => optional($date)->format('Y-m-d'))->filter()->values())'
+                                            data-flatpickr-disabled-dates='[]'
                                             placeholder="Select date">
                                     </div>
                                     <div class="global-field-error @error('reserved_date', 'reservedPeriod') show @enderror"
@@ -1621,6 +1663,28 @@
                                         data-error-for="reserved-booking-mode"
                                         aria-hidden="{{ $reservedErrors->has('booking_mode') ? 'false' : 'true' }}">
                                         @error('booking_mode', 'reservedPeriod')
+                                            {{ $message }}
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div data-global-field>
+                                    <label for="reservedActivationState" class="form-label">Period State <span
+                                            class="text-red-500">*</span></label>
+                                    <select id="reservedActivationState" name="is_active"
+                                        class="form-select-custom js-custom-select @error('is_active', 'reservedPeriod') is-invalid @enderror"
+                                        data-placeholder="Select period state" data-field-label="Period State"
+                                        onchange="handleReservedPeriodStateChange()" required>
+                                        <option value="0" selected>Inactive</option>
+                                        <option value="1">Active</option>
+                                    </select>
+                                    <p class="field-help">
+                                        Inactive saves the setup only. Active reserves the selected date and time and sends booking notifications to eligible users.
+                                    </p>
+                                    <div class="global-field-error @error('is_active', 'reservedPeriod') show @enderror"
+                                        data-error-for="reservedActivationState"
+                                        aria-hidden="{{ $reservedErrors->has('is_active') ? 'false' : 'true' }}">
+                                        @error('is_active', 'reservedPeriod')
                                             {{ $message }}
                                         @enderror
                                     </div>
@@ -1918,12 +1982,18 @@
         const weeklyAppointments = @json($weeklyAppointments ?? []);
         const reservedBookingPeriods = @json($reservedBookingPeriods);
 
+        function reservedPeriodStateIsActive() {
+            const value = document.getElementById('reservedActivationState')?.value ?? '0';
+
+            return String(value) === '1';
+        }
+
         function syncReservedDateAvailability(ignorePeriodId = null) {
             const dateInput = document.getElementById('reservedDate');
 
             if (!dateInput) return;
 
-            const disabledDates = reservedBookingPeriods
+            const disabledDates = reservedPeriodStateIsActive() ? reservedBookingPeriods
                 .filter(period => {
                     const isActive = period?.is_active === true ||
                         period?.is_active === 1 ||
@@ -1932,7 +2002,7 @@
                     return isActive && String(period.id) !== String(ignorePeriodId ?? '');
                 })
                 .map(period => String(period.reserved_date || '').slice(0, 10))
-                .filter(Boolean);
+                .filter(Boolean) : [];
 
             dateInput.dataset.flatpickrDisabledDates = JSON.stringify(disabledDates);
 
@@ -1940,6 +2010,28 @@
                 dateInput._flatpickr.set('disable', disabledDates);
                 dateInput._flatpickr.redraw();
             }
+
+            const selectedDate = String(dateInput.value || '').slice(0, 10);
+
+            if (reservedPeriodStateIsActive() && selectedDate && disabledDates.includes(selectedDate)) {
+                if (dateInput._flatpickr) {
+                    dateInput._flatpickr.clear(false);
+                } else {
+                    dateInput.value = '';
+                }
+
+                window.showFormInputValidationMessage?.(
+                    dateInput,
+                    'This date already has an active reserved booking period. Set that period to Inactive first or choose another date.'
+                );
+            } else {
+                window.showFormInputValidationMessage?.(dateInput, '');
+            }
+        }
+
+        function handleReservedPeriodStateChange() {
+            const periodId = document.getElementById('reservedPeriodId')?.value || null;
+            syncReservedDateAvailability(periodId);
         }
 
         function clearFieldError(errorId, inputId = null, groupId = null) {
@@ -2260,6 +2352,7 @@
             const form = document.getElementById('ruleForm');
             const methodField = document.getElementById('ruleMethodField');
             const title = document.getElementById('ruleModalTitle');
+            const activationState = document.getElementById('ruleActivationState');
             const status = document.getElementById('ruleStatus');
             const openTime = document.getElementById('ruleOpenTime');
             const closeTime = document.getElementById('ruleCloseTime');
@@ -2268,7 +2361,7 @@
             const timeFields = document.getElementById('ruleTimeFields');
             const defaultBreak = document.querySelector('.break-chip[data-val="12:00-13:00"]');
 
-            if (!backdrop || !form || !methodField || !title || !status || !openTime || !closeTime || !maxSlots || !notes ||
+            if (!backdrop || !form || !methodField || !title || !activationState || !status || !openTime || !closeTime || !maxSlots || !notes ||
                 !timeFields) {
                 console.error('Rule modal elements not found.');
                 return;
@@ -2346,6 +2439,7 @@
             });
 
             selectedBreak = '12:00-13:00';
+            setCustomSelectValue(activationState, '0');
             setCustomSelectValue(status, 'open');
             setCustomSelectValue(openTime, '09:00');
             setCustomSelectValue(closeTime, '17:00');
@@ -2405,7 +2499,9 @@
                 });
 
                 const selectedStatus = rule.status || 'open';
+                const selectedActivationState = rule.is_active ? '1' : '0';
 
+                setCustomSelectValue(activationState, selectedActivationState);
                 setCustomSelectValue(status, selectedStatus);
                 toggleStatusFields(selectedStatus);
 
@@ -2550,6 +2646,9 @@
                         form.querySelectorAll('.day-toggle.active')
                     ).map(day => day.dataset.day);
 
+                    const activationState =
+                        document.getElementById('ruleActivationState')?.value || '0';
+
                     const status =
                         document.getElementById('ruleStatus')?.value || '';
 
@@ -2595,18 +2694,20 @@
                         firstInvalid = daysGroup;
                     }
 
-                    const conflicts =
-                        findConflictingScheduleDays(activeDays);
+                    if (activationState === '1') {
+                        const conflicts =
+                            findConflictingScheduleDays(activeDays);
 
-                    if (conflicts.length) {
-                        window.showGlobalGroupError?.(
-                            daysGroup,
-                            'rule-days',
-                            `A schedule already exists for ${conflicts.join(', ')}.`
-                        );
+                        if (conflicts.length) {
+                            window.showGlobalGroupError?.(
+                                daysGroup,
+                                'rule-days',
+                                `An active schedule already exists for ${conflicts.join(', ')}. Set the current active schedule to Inactive before activating this rule.`
+                            );
 
-                        valid = false;
-                        firstInvalid ||= daysGroup;
+                            valid = false;
+                            firstInvalid ||= daysGroup;
+                        }
                     }
 
                     if (status !== 'closed') {
@@ -2704,6 +2805,9 @@
                 )
             ).map(day => day.dataset.day);
 
+            const activationState =
+                document.getElementById('ruleActivationState').value;
+
             const status =
                 document.getElementById('ruleStatus').value;
 
@@ -2735,6 +2839,7 @@
                 inject('days[]', day);
             });
 
+            inject('is_active', activationState);
             inject('status', status);
 
             if (status !== 'closed') {
@@ -3223,8 +3328,9 @@
             const modalIcon = document.getElementById('reservedPeriodModalIcon');
             const submitButton = document.getElementById('reservedPeriodSubmitButton');
             const submitText = document.getElementById('reservedPeriodSubmitText');
+            const activationState = document.getElementById('reservedActivationState');
 
-            if (!modal || !form || !methodField || !idField) {
+            if (!modal || !form || !methodField || !idField || !activationState) {
                 return;
             }
 
@@ -3243,6 +3349,11 @@
             submitText.textContent = 'Save Reserved Period';
 
             document.getElementById('reservedDate').value = '';
+            activationState.value = '0';
+            const activationCustomSelect = activationState.closest('.custom-select');
+            if (activationCustomSelect) {
+                window.syncCustomSelect?.(activationCustomSelect);
+            }
             document.getElementById('reservedStartTime').value = '09:00';
             document.getElementById('reservedEndTime').value = '13:00';
             document.getElementById('reservedPatientType').value = 'student';
@@ -3290,15 +3401,17 @@
                 }
             };
 
-            syncReservedDateAvailability(
-                mode === 'edit' ? periodId : null
-            );
+            const valuesAreActive = values.is_active === true ||
+                values.is_active === 1 ||
+                values.is_active === '1';
 
+            setValue('reservedActivationState', valuesAreActive ? '1' : '0', '0');
             setValue('reservedTitle', values.title);
             setValue(
                 'reservedDate',
                 values.reserved_date ? String(values.reserved_date).slice(0, 10) : ''
             );
+            syncReservedDateAvailability(mode === 'edit' ? periodId : null);
             setValue('reservedStartTime', values.start_time ? String(values.start_time).slice(0, 5) : '09:00');
             setValue('reservedEndTime', values.end_time ? String(values.end_time).slice(0, 5) : '13:00');
             setValue('reservedPatientType', values.target_patient_type, 'student');

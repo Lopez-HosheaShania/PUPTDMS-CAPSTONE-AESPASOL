@@ -26,6 +26,9 @@ class ReservedBookingPeriodRequest extends FormRequest
 
         $this->merge([
             'title' => trim((string) $this->input('title')),
+            'is_active' => $this->has('is_active')
+                ? $this->input('is_active')
+                : '0',
             'program_code' => filled($this->input('program_code'))
                 ? strtoupper(trim((string) $this->input('program_code')))
                 : null,
@@ -43,17 +46,24 @@ class ReservedBookingPeriodRequest extends FormRequest
     {
         $isStudent = $this->input('target_patient_type') === 'student';
         $usesTimeslots = $this->input('booking_mode') === 'timeslot';
+        $isActive = $this->boolean('is_active');
         $reservedBookingPeriod = $this->route('reservedBookingPeriod');
+
+        $reservedDateRules = [
+            'required',
+            'date',
+            'after_or_equal:today',
+        ];
+
+        if ($isActive) {
+            $reservedDateRules[] = Rule::unique('reserved_booking_periods', 'active_reserved_date')
+                ->ignore($reservedBookingPeriod?->id);
+        }
 
         return [
             'title' => ['required', 'string', 'max:120'],
-            'reserved_date' => [
-                'required',
-                'date',
-                'after_or_equal:today',
-                Rule::unique('reserved_booking_periods', 'active_reserved_date')
-                    ->ignore($reservedBookingPeriod?->id),
-            ],
+            'is_active' => ['required', 'boolean'],
+            'reserved_date' => $reservedDateRules,
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
             'booking_mode' => [
@@ -122,7 +132,7 @@ class ReservedBookingPeriodRequest extends FormRequest
             'year_level.required' => 'Select a year level for the student group.',
             'section.required' => 'Enter a section for the student group.',
             'end_time.after' => 'The reserved end time must be later than its start time.',
-            'reserved_date.unique' => 'This date already has a reserved booking period. Choose another available date.',
+            'reserved_date.unique' => 'This date already has an active reserved booking period. Set that period to Inactive first or choose another date.',
             'max_capacity.max' => 'Maximum capacity cannot exceed '.ReservedBookingPeriod::MAX_CAPACITY.' patients.',
             'timeslots.required' => 'Add at least one selectable timeslot for patients.',
             'timeslots.min' => 'Add at least one selectable timeslot for patients.',

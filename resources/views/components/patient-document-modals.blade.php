@@ -354,6 +354,21 @@
         }, 2500);
     }
 
+    function showDocumentRequestErrorToast(message, title = 'Request Not Allowed') {
+        if (typeof window.showToast !== 'function') {
+            return false;
+        }
+
+        window.showToast({
+            type: 'error',
+            title,
+            message: message || 'Failed to submit request.',
+            duration: 6000
+        });
+
+        return true;
+    }
+
     function getDocRequestDetails(form) {
         return {
             documentType: form.querySelector('[name="document_type"]')?.value || 'Document Request',
@@ -402,7 +417,20 @@
                 const data = await response.json();
 
                 if (!response.ok || !data.success) {
-                    showInlineWarning(warningEl, data.message || 'Failed to submit request.');
+                    const message = data.message || 'Unable to submit this request.';
+
+                    warningEl?.classList.add('hidden');
+
+                    // Native <dialog> elements are rendered in the browser's top layer,
+                    // so close the request modal first to keep the global toast visible.
+                    closeDocModal(modalId);
+
+                    if (!showDocumentRequestErrorToast(message)) {
+                        // Fallback only if the global toast is unavailable.
+                        openDocModal(modalId);
+                        showInlineWarning(warningEl, message);
+                    }
+
                     return;
                 }
 
@@ -411,7 +439,15 @@
                 resetDocDropdowns(form);
                 openDocSuccessModal(requestDetails);
             } catch (error) {
-                showInlineWarning(warningEl, 'Something went wrong. Please try again.');
+                const message = 'Please try again.';
+
+                warningEl?.classList.add('hidden');
+                closeDocModal(modalId);
+
+                if (!showDocumentRequestErrorToast(message, 'Request Failed')) {
+                    openDocModal(modalId);
+                    showInlineWarning(warningEl, message);
+                }
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnText;

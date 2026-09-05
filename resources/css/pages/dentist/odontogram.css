@@ -735,23 +735,23 @@
     pointer-events: none;
     user-select: none;
     color: #475569;
-    font-size: 5.5px;
+    font-size: 6.5px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: .02em;
-    opacity: .58;
+    opacity: 1;
     text-transform: uppercase;
     white-space: nowrap;
     writing-mode: vertical-rl;
 }
 
 .tooth-endpoint-surface-label-left {
-    left: -8px;
+    left: -12px;
     transform: translateY(-50%) rotate(180deg);
 }
 
 .tooth-endpoint-surface-label-right {
-    right: -8px;
+    right: -12px;
     transform: translateY(-50%);
 }
 

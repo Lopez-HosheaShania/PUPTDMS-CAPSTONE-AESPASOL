@@ -95,7 +95,30 @@
 }
 
 .dental-records-main-card {
+    min-width: 0;
     overflow: visible;
+}
+
+.dental-records-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 1.25rem;
+}
+
+.dental-records-side-column {
+    min-width: 0;
+}
+
+@media (min-width: 1280px) {
+    .dental-records-layout {
+        grid-template-columns: minmax(0, 1fr) clamp(300px, 24vw, 420px);
+    }
+
+    .dental-records-side-column {
+        position: sticky;
+        top: 1.25rem;
+    }
 }
 
 .dental-record-panel {

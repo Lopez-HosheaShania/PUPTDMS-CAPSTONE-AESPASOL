@@ -401,7 +401,7 @@ class DentalRecordController extends Controller
             'oral' => $latestProcedure?->oral_examination ?: 'No oral examination record yet.',
             'diagnosis' => $latestProcedure?->diagnosis ?: 'No diagnosis record yet.',
             'prescription' => $latestProcedure?->prescriptions ?: 'No prescription recorded.',
-            'odontogram_data' => $latestProcedure?->odontogram_data ?: ($patient->odontogram?->odontogram_data ?: []),
+            'odontogram_data' => $latestAppointment?->procedure?->odontogram_data ?: [],
             'full_record_url' => route('admin.admin.patient.profile', [
                 'patient' => $patient->id,
                 'from' => 'patients',
