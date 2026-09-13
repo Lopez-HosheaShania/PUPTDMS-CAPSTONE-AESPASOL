@@ -100,14 +100,6 @@ class RolePermissionController extends Controller
         ],
     ];
 
-    /*
-     * Only genuinely retired/legacy permissions belong here.
-     *
-     * Active clinical permissions such as create_follow_up_appointments,
-     * create_procedure_records, create_medical_records, create_odontograms,
-     * etc. must NOT be placed here because this list is physically deleted
-     * from the permissions table by ensureRequiredPermissionsExist().
-     */
     private const REMOVED_PERMISSION_SLUGS = [
         'manage_super_admin_accounts',
         'manage_document_requests',
