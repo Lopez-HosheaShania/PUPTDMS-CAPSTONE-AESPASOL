@@ -2,38 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Helpers\AuditLogger;
 
 class RolePermissionController extends Controller
 {
     private const CORE_ROLE_SLUGS = ['admin', 'dentist', 'patient'];
-
-    private const MODULE_PRIORITY = [
-        'General Access',
-        'Patients',
-        'Appointments',
-        'Dental Records',
-        'Clinic Schedule',
-        'Document Requests',
-        'Inventory',
-        'Service Types',
-        'Reports',
-        'Document Templates',
-        'Dentist Continuity',
-        'User Management',
-        'Role Permissions',
-        'System Settings',
-        'Academic Period',
-        'Faculty Integration',
-        'CMS Integration',
-        'System Logs',
-    ];
 
     private const ADMIN_ONLY_HIDDEN_PERMISSION_SLUGS = [
         'view_roles_permissions',
@@ -41,6 +20,7 @@ class RolePermissionController extends Controller
         'update_role_permissions',
         'delete_custom_roles',
     ];
+
     private const LEGACY_DENTIST_DEFAULT_PERMISSION_SLUGS = [
         'access_dentist_dashboard',
         'view_patient_profiles',
@@ -79,6 +59,7 @@ class RolePermissionController extends Controller
         'view_reports',
         'create_report_files',
     ];
+
     private const LEGACY_PERMISSION_MIGRATIONS = [
         'create_delete_clinic_schedule' => [
             'create_clinic_schedule',
@@ -118,6 +99,15 @@ class RolePermissionController extends Controller
             'update_user_password',
         ],
     ];
+
+    /*
+     * Only genuinely retired/legacy permissions belong here.
+     *
+     * Active clinical permissions such as create_follow_up_appointments,
+     * create_procedure_records, create_medical_records, create_odontograms,
+     * etc. must NOT be placed here because this list is physically deleted
+     * from the permissions table by ensureRequiredPermissionsExist().
+     */
     private const REMOVED_PERMISSION_SLUGS = [
         'manage_super_admin_accounts',
         'manage_document_requests',
@@ -140,14 +130,8 @@ class RolePermissionController extends Controller
         'manage_inventory_items',
         'create_disable_users',
         'update_role_password',
-        'create_follow_up_appointments',
         'manage_appointments',
         'view_appointment_details',
-        'create_procedure_records',
-        'create_dental_records',
-        'create_medical_records',
-        'create_odontograms',
-        'update_odontograms',
         'manage_audit_trail',
         'set_archive_records',
         'update_cms_integration',
@@ -159,15 +143,21 @@ class RolePermissionController extends Controller
         ['name' => 'Access Dentist Dashboard', 'slug' => 'access_dentist_dashboard', 'module' => 'General Access'],
         ['name' => 'Access Patient Dashboard', 'slug' => 'access_patient_dashboard', 'module' => 'General Access'],
         ['name' => 'Receive Notifications', 'slug' => 'receive_notifications', 'module' => 'General Access'],
+
         ['name' => 'Manage System Settings', 'slug' => 'manage_system_settings', 'module' => 'System Settings'],
+        ['name' => 'Set Appointment Limit', 'slug' => 'set_appointment_limit', 'module' => 'System Settings'],
+        ['name' => 'Set Notification Rules', 'slug' => 'set_notification_rules', 'module' => 'System Settings'],
+
         ['name' => 'View System Logs', 'slug' => 'view_system_logs', 'module' => 'System Logs'],
         ['name' => 'Export System Logs', 'slug' => 'export_system_logs', 'module' => 'System Logs'],
         ['name' => 'Archive System Logs', 'slug' => 'archive_system_logs', 'module' => 'System Logs'],
+
         ['name' => 'View Account Details', 'slug' => 'view_account_details', 'module' => 'User Management'],
         ['name' => 'Create Users', 'slug' => 'create_users', 'module' => 'User Management'],
         ['name' => 'Disable Users', 'slug' => 'disable_users', 'module' => 'User Management'],
         ['name' => 'Update User Role', 'slug' => 'update_user_role', 'module' => 'User Management'],
         ['name' => 'Update User Password', 'slug' => 'update_user_password', 'module' => 'User Management'],
+
         ['name' => 'View Roles & Permissions', 'slug' => 'view_roles_permissions', 'module' => 'Role Permissions'],
         ['name' => 'Create Custom Roles', 'slug' => 'create_custom_roles', 'module' => 'Role Permissions'],
         ['name' => 'Update Role Permissions', 'slug' => 'update_role_permissions', 'module' => 'Role Permissions'],
@@ -187,46 +177,61 @@ class RolePermissionController extends Controller
         ['name' => 'Cancel Dentist Transitions', 'slug' => 'cancel_dentist_transitions', 'module' => 'Dentist Continuity'],
         ['name' => 'Extend Dentist Access', 'slug' => 'extend_dentist_access', 'module' => 'Dentist Continuity'],
         ['name' => 'View Dentist Transition Audit Logs', 'slug' => 'view_dentist_transition_audit_logs', 'module' => 'Dentist Continuity'],
+
         ['name' => 'Manage Document Templates', 'slug' => 'manage_document_templates', 'module' => 'Document Templates'],
+
         ['name' => 'View Service Type', 'slug' => 'view_service_type', 'module' => 'Service Types'],
         ['name' => 'Create Service Type', 'slug' => 'create_service_type', 'module' => 'Service Types'],
         ['name' => 'Delete Service Type', 'slug' => 'delete_service_type', 'module' => 'Service Types'],
         ['name' => 'Update Default Service Type', 'slug' => 'update_default_service_type', 'module' => 'Service Types'],
+
         ['name' => 'View Reports', 'slug' => 'view_reports', 'module' => 'Reports'],
         ['name' => 'Create Report Files', 'slug' => 'create_report_files', 'module' => 'Reports'],
         ['name' => 'View AI Reports', 'slug' => 'view_ai_reports', 'module' => 'Reports'],
         ['name' => 'Create AI Generative Reports', 'slug' => 'create_ai_generative_reports', 'module' => 'Reports'],
+
         ['name' => 'View Inventory', 'slug' => 'view_inventory', 'module' => 'Inventory'],
         ['name' => 'Add Inventory', 'slug' => 'add_inventory', 'module' => 'Inventory'],
         ['name' => 'Update Inventory', 'slug' => 'update_inventory', 'module' => 'Inventory'],
         ['name' => 'Delete Inventory', 'slug' => 'delete_inventory', 'module' => 'Inventory'],
+
         ['name' => 'View Academic Periods/PUP Calendar/Time', 'slug' => 'view_academic_periods', 'module' => 'Academic Period'],
         ['name' => 'Update Academic Period', 'slug' => 'update_academic_period', 'module' => 'Academic Period'],
         ['name' => 'Create Academic Period', 'slug' => 'create_academic_period', 'module' => 'Academic Period'],
         ['name' => 'Delete Academic Period', 'slug' => 'delete_academic_period', 'module' => 'Academic Period'],
-        ['name' => 'Set Appointment Limit', 'slug' => 'set_appointment_limit', 'module' => 'System Settings'],
-        ['name' => 'Set Notification Rules', 'slug' => 'set_notification_rules', 'module' => 'System Settings'],
+
         ['name' => 'View Dental Records', 'slug' => 'view_dental_records', 'module' => 'Dental Records'],
         ['name' => 'Manage Dental Records', 'slug' => 'manage_dental_records', 'module' => 'Dental Records'],
+        ['name' => 'Create Procedure Records', 'slug' => 'create_procedure_records', 'module' => 'Dental Records'],
+        ['name' => 'Create Dental Records', 'slug' => 'create_dental_records', 'module' => 'Dental Records'],
+        ['name' => 'Create Medical Records', 'slug' => 'create_medical_records', 'module' => 'Dental Records'],
+        ['name' => 'Create Odontograms', 'slug' => 'create_odontograms', 'module' => 'Dental Records'],
+        ['name' => 'Update Odontograms', 'slug' => 'update_odontograms', 'module' => 'Dental Records'],
+
         ['name' => 'View Appointments', 'slug' => 'view_appointments', 'module' => 'Appointments'],
         ['name' => 'Reschedule Appointments', 'slug' => 'reschedule_appointments', 'module' => 'Appointments'],
         ['name' => 'Cancel Appointments', 'slug' => 'cancel_appointments', 'module' => 'Appointments'],
+        ['name' => 'Create Follow-Up Appointments', 'slug' => 'create_follow_up_appointments', 'module' => 'Appointments'],
         ['name' => 'Manage Walk-in Patients', 'slug' => 'manage_walk_in_patients', 'module' => 'Appointments'],
         ['name' => 'Add Existing Record', 'slug' => 'manage_existing_records', 'module' => 'Appointments'],
+        ['name' => 'Book Appointments', 'slug' => 'book_appointments', 'module' => 'Appointments'],
+        ['name' => 'View Own Appointments', 'slug' => 'view_own_appointments', 'module' => 'Appointments'],
+
         ['name' => 'View Schedule and Dates', 'slug' => 'view_clinic_schedule', 'module' => 'Clinic Schedule'],
         ['name' => 'Update Clinic Hours', 'slug' => 'update_clinic_schedule', 'module' => 'Clinic Schedule'],
         ['name' => 'Create Clinic Hours', 'slug' => 'create_clinic_schedule', 'module' => 'Clinic Schedule'],
         ['name' => 'Delete Clinic Hours', 'slug' => 'delete_clinic_schedule', 'module' => 'Clinic Schedule'],
+
         ['name' => 'View Patient Profiles', 'slug' => 'view_patient_profiles', 'module' => 'Patients'],
         ['name' => 'Manage Patient Profiles', 'slug' => 'manage_patient_profiles', 'module' => 'Patients'],
+        ['name' => 'View Own Profile', 'slug' => 'view_own_profile', 'module' => 'Patients'],
+
         ['name' => 'View Document Requests', 'slug' => 'view_document_requests', 'module' => 'Document Requests'],
         ['name' => 'Approve Document Requests', 'slug' => 'approve_document_requests', 'module' => 'Document Requests'],
         ['name' => 'Reject Document Requests', 'slug' => 'reject_document_requests', 'module' => 'Document Requests'],
-        ['name' => 'Book Appointments', 'slug' => 'book_appointments', 'module' => 'Appointments'],
-        ['name' => 'View Own Appointments', 'slug' => 'view_own_appointments', 'module' => 'Appointments'],
-        ['name' => 'View Own Profile', 'slug' => 'view_own_profile', 'module' => 'Patients'],
-        ['name' => 'View Own Records', 'slug' => 'view_own_records', 'module' => 'Dental Records'],
         ['name' => 'Request Documents', 'slug' => 'request_documents', 'module' => 'Document Requests'],
+
+        ['name' => 'View Own Records', 'slug' => 'view_own_records', 'module' => 'Dental Records'],
     ];
 
     private const DEFAULT_ROLE_PERMISSIONS = [
@@ -261,7 +266,6 @@ class RolePermissionController extends Controller
             'update_default_service_type',
             'view_ai_reports',
             'create_ai_generative_reports',
-            'create_ai_generative_reports',
             'view_inventory',
             'add_inventory',
             'update_inventory',
@@ -269,6 +273,8 @@ class RolePermissionController extends Controller
             'view_patient_profiles',
             'view_dental_records',
             'view_appointments',
+            'reschedule_appointments',
+            'cancel_appointments',
             'view_clinic_schedule',
             'update_clinic_schedule',
             'create_clinic_schedule',
@@ -337,25 +343,14 @@ class RolePermissionController extends Controller
         $this->synchronizeAdminOnlyPermissions();
 
         $roles = Role::with('permissions')->get();
+
         $permissions = Permission::where('slug', '!=', 'manage_backup')
             ->whereNotIn('slug', self::REMOVED_PERMISSION_SLUGS)
             ->whereNotIn('slug', self::ADMIN_ONLY_HIDDEN_PERMISSION_SLUGS)
+            ->orderBy('module')
             ->orderBy('name')
-            ->get()
-            ->sortBy(function (Permission $permission) {
-                $modulePriority = array_search(
-                    $permission->module,
-                    self::MODULE_PRIORITY,
-                    true
-                );
+            ->get();
 
-                return [
-                    $modulePriority === false ? PHP_INT_MAX : $modulePriority,
-                    mb_strtolower($permission->module),
-                    mb_strtolower($permission->name),
-                ];
-            })
-            ->values();
         $groupedPermissions = $permissions->groupBy('module');
 
         $highlightRoleId = session('new_role_id') ?? $request->query('highlight_role');
@@ -388,6 +383,7 @@ class RolePermissionController extends Controller
     {
         foreach (self::CORE_ROLE_SLUGS as $slug) {
             $role = Role::where('slug', $slug)->first();
+
             if ($role && $role->permissions()->count() === 0) {
                 $this->applyDefaults($role, $slug);
             }
@@ -396,17 +392,61 @@ class RolePermissionController extends Controller
 
     private function ensureRequiredPermissionsExist(): void
     {
-        foreach (self::REQUIRED_PERMISSIONS as $permission) {
-            Permission::updateOrCreate(
-                ['slug' => $permission['slug']],
-                $permission
+        $recreatedDefaultPermissionIds = [];
+
+        foreach (self::REQUIRED_PERMISSIONS as $permissionData) {
+            $permission = Permission::updateOrCreate(
+                ['slug' => $permissionData['slug']],
+                $permissionData
             );
+
+            /*
+             * If an active permission was deleted by an older version of this
+             * controller, updateOrCreate() recreates it. Restore only those
+             * freshly recreated permissions to the core roles that normally
+             * receive them by default.
+             *
+             * This does NOT force permissions back after an admin manually
+             * removes an existing permission from a role.
+             */
+            if (! $permission->wasRecentlyCreated) {
+                continue;
+            }
+
+            foreach (self::DEFAULT_ROLE_PERMISSIONS as $roleSlug => $defaultPermissionSlugs) {
+                if (! in_array($permission->slug, $defaultPermissionSlugs, true)) {
+                    continue;
+                }
+
+                $recreatedDefaultPermissionIds[$roleSlug][] = (int) $permission->id;
+            }
         }
 
         $this->migrateLegacyPermissionAssignments();
 
         Permission::whereIn('slug', self::REMOVED_PERMISSION_SLUGS)->delete();
+
+        $this->restoreRecreatedDefaultPermissionAssignments($recreatedDefaultPermissionIds);
         $this->backfillLegacyDentistDefaults();
+    }
+
+    private function restoreRecreatedDefaultPermissionAssignments(array $permissionIdsByRole): void
+    {
+        foreach ($permissionIdsByRole as $roleSlug => $permissionIds) {
+            $permissionIds = array_values(array_unique(array_map('intval', $permissionIds)));
+
+            if ($permissionIds === []) {
+                continue;
+            }
+
+            $role = Role::where('slug', $roleSlug)->first();
+
+            if (! $role) {
+                continue;
+            }
+
+            $role->permissions()->syncWithoutDetaching($permissionIds);
+        }
     }
 
     private function migrateLegacyPermissionAssignments(): void
@@ -439,9 +479,12 @@ class RolePermissionController extends Controller
 
     private function applyDefaults(Role $role, string $slug): void
     {
-        if (!isset(self::DEFAULT_ROLE_PERMISSIONS[$slug])) return;
+        if (! isset(self::DEFAULT_ROLE_PERMISSIONS[$slug])) {
+            return;
+        }
 
         $ids = Permission::whereIn('slug', self::DEFAULT_ROLE_PERMISSIONS[$slug])->pluck('id');
+
         $role->permissions()->sync($ids);
     }
 
@@ -499,7 +542,9 @@ class RolePermissionController extends Controller
             $permissionIds = array_map('intval', $request->input("permissions.{$role->id}", []));
         }
 
-        $role->permissions()->sync($this->normalizePermissionIdsForRole($role, $permissionIds));
+        $role->permissions()->sync(
+            $this->normalizePermissionIdsForRole($role, $permissionIds)
+        );
 
         AuditLogger::log(
             'update',
@@ -510,27 +555,32 @@ class RolePermissionController extends Controller
         if ($request->expectsJson()) {
             $savedPermissions = Permission::whereIn('id', $permissionIds)
                 ->get(['id', 'name', 'slug', 'module'])
-                ->map(fn($p) => [
-                    'id'     => $p->id,
-                    'name'   => $p->name,
-                    'slug'   => $p->slug,
-                    'module' => $p->module,
+                ->map(fn ($permission) => [
+                    'id' => $permission->id,
+                    'name' => $permission->name,
+                    'slug' => $permission->slug,
+                    'module' => $permission->module,
                 ])
                 ->values()
                 ->toArray();
 
             return response()->json([
-                'success'     => true,
-                'message'     => "Permissions for \"{$role->name}\" updated successfully.",
-                'role_id'     => $role->id,
-                'role_name'   => $role->name,
+                'success' => true,
+                'message' => "Permissions for \"{$role->name}\" updated successfully.",
+                'role_id' => $role->id,
+                'role_name' => $role->name,
                 'permissions' => $savedPermissions,
             ]);
         }
 
         $savedPermissions = Permission::whereIn('id', $permissionIds)
             ->get(['id', 'name', 'slug', 'module'])
-            ->map(fn($p) => ['id' => $p->id, 'name' => $p->name, 'slug' => $p->slug, 'module' => $p->module])
+            ->map(fn ($permission) => [
+                'id' => $permission->id,
+                'name' => $permission->name,
+                'slug' => $permission->slug,
+                'module' => $permission->module,
+            ])
             ->values()
             ->toArray();
 
@@ -538,14 +588,16 @@ class RolePermissionController extends Controller
             ->route($this->rolePermissionsRouteName())
             ->with('success', 'Role permissions updated successfully.')
             ->with('saved_view_as', [
-                'role_id'     => $role->id,
-                'role_name'   => $role->name,
+                'role_id' => $role->id,
+                'role_name' => $role->name,
                 'permissions' => $savedPermissions,
             ]);
     }
 
     public function reset()
     {
+        $this->ensureRequiredPermissionsExist();
+
         foreach (self::DEFAULT_ROLE_PERMISSIONS as $slug => $permissionSlugs) {
             $role = Role::where('slug', $slug)->firstOrFail();
             $permissionIds = Permission::whereIn('slug', $permissionSlugs)->pluck('id');
@@ -574,7 +626,8 @@ class RolePermissionController extends Controller
             ]);
         }
 
-        return redirect()->route($this->rolePermissionsRouteName())
+        return redirect()
+            ->route($this->rolePermissionsRouteName())
             ->with('success', 'Default permissions restored.');
     }
 
@@ -587,12 +640,12 @@ class RolePermissionController extends Controller
                 'string',
                 'max:255',
                 'unique:roles,slug',
-                'regex:/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/'
+                'regex:/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/',
             ],
         ], [
             'name.unique' => 'A role with this name already exists.',
             'slug.unique' => 'A role with this slug already exists.',
-            'slug.regex'  => 'Slug may only contain lowercase letters, numbers, hyphens, and underscores.',
+            'slug.regex' => 'Slug may only contain lowercase letters, numbers, hyphens, and underscores.',
         ]);
 
         $role = Role::create([
@@ -635,7 +688,7 @@ class RolePermissionController extends Controller
             $role = Role::findOrFail($id);
 
             if (
-                in_array(strtolower($role->slug), ['super_admin', 'super-admin', 'superadmin']) ||
+                in_array(strtolower($role->slug), ['super_admin', 'super-admin', 'superadmin'], true) ||
                 str_contains(strtolower($role->name), 'super')
             ) {
                 $message = 'Cannot delete the Super Admin role.';
@@ -647,7 +700,8 @@ class RolePermissionController extends Controller
                     ], 422);
                 }
 
-                return redirect()->route($this->rolePermissionsRouteName())
+                return redirect()
+                    ->route($this->rolePermissionsRouteName())
                     ->with('error', $message);
             }
 
@@ -690,7 +744,8 @@ class RolePermissionController extends Controller
                 ]);
             }
 
-            return redirect()->route($this->rolePermissionsRouteName())
+            return redirect()
+                ->route($this->rolePermissionsRouteName())
                 ->with('success', $message);
         } catch (\Throwable $e) {
             $message = app()->hasDebugModeEnabled() && config('app.debug')
@@ -704,7 +759,8 @@ class RolePermissionController extends Controller
                 ], 500);
             }
 
-            return redirect()->route($this->rolePermissionsRouteName())
+            return redirect()
+                ->route($this->rolePermissionsRouteName())
                 ->with('error', $message);
         }
     }
@@ -745,13 +801,19 @@ class RolePermissionController extends Controller
             ->map(fn ($id) => (int) $id)
             ->all();
 
-        $normalizedPermissionIds = array_values(array_unique(array_map('intval', $permissionIds)));
+        $normalizedPermissionIds = array_values(
+            array_unique(array_map('intval', $permissionIds))
+        );
 
         if ($role->slug === 'admin') {
-            return array_values(array_unique(array_merge($normalizedPermissionIds, $adminOnlyPermissionIds)));
+            return array_values(
+                array_unique(array_merge($normalizedPermissionIds, $adminOnlyPermissionIds))
+            );
         }
 
-        return array_values(array_diff($normalizedPermissionIds, $adminOnlyPermissionIds));
+        return array_values(
+            array_diff($normalizedPermissionIds, $adminOnlyPermissionIds)
+        );
     }
 
     private function synchronizeAdminOnlyPermissions(): void
@@ -765,23 +827,26 @@ class RolePermissionController extends Controller
             return;
         }
 
-        Role::with('permissions')->get()->each(function (Role $role) use ($adminOnlyPermissionIds): void {
-            $currentPermissionIds = $role->permissions
-                ->pluck('id')
-                ->map(fn ($id) => (int) $id)
-                ->all();
+        Role::with('permissions')
+            ->get()
+            ->each(function (Role $role) use ($adminOnlyPermissionIds): void {
+                $currentPermissionIds = $role->permissions
+                    ->pluck('id')
+                    ->map(fn ($id) => (int) $id)
+                    ->all();
 
-            $normalizedPermissionIds = $role->slug === 'admin'
-                ? array_values(array_unique(array_merge($currentPermissionIds, $adminOnlyPermissionIds)))
-                : array_values(array_diff($currentPermissionIds, $adminOnlyPermissionIds));
+                $normalizedPermissionIds = $role->slug === 'admin'
+                    ? array_values(array_unique(array_merge($currentPermissionIds, $adminOnlyPermissionIds)))
+                    : array_values(array_diff($currentPermissionIds, $adminOnlyPermissionIds));
 
-            sort($currentPermissionIds);
-            $sortedNormalizedPermissionIds = $normalizedPermissionIds;
-            sort($sortedNormalizedPermissionIds);
+                sort($currentPermissionIds);
 
-            if ($currentPermissionIds !== $sortedNormalizedPermissionIds) {
-                $role->permissions()->sync($normalizedPermissionIds);
-            }
-        });
+                $sortedNormalizedPermissionIds = $normalizedPermissionIds;
+                sort($sortedNormalizedPermissionIds);
+
+                if ($currentPermissionIds !== $sortedNormalizedPermissionIds) {
+                    $role->permissions()->sync($normalizedPermissionIds);
+                }
+            });
     }
 }
