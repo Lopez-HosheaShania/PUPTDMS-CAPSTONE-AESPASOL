@@ -392,15 +392,6 @@ class RolePermissionController extends Controller
                 $permissionData
             );
 
-            /*
-             * If an active permission was deleted by an older version of this
-             * controller, updateOrCreate() recreates it. Restore only those
-             * freshly recreated permissions to the core roles that normally
-             * receive them by default.
-             *
-             * This does NOT force permissions back after an admin manually
-             * removes an existing permission from a role.
-             */
             if (! $permission->wasRecentlyCreated) {
                 continue;
             }
