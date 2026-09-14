@@ -369,26 +369,25 @@
                                 </div>
 
                                 <div id="odontogram3DPanel" class="mode-panel">
+                                    <div class="three-mouse-guide" aria-label="3D model mouse controls">
+                                        <div class="three-mouse-guide-item">
+                                            <span class="mouse-button-key">L</span>
+                                            <span><strong>Left mouse:</strong> Click a surface; drag to rotate</span>
+                                        </div>
+                                        <div class="three-mouse-guide-item">
+                                            <span class="mouse-button-key">R</span>
+                                            <span><strong>Right mouse:</strong> Move the model</span>
+                                        </div>
+                                        <div class="three-mouse-guide-item">
+                                            <span class="mouse-button-key mouse-wheel-key"><i
+                                                    class="fa-solid fa-arrows-up-down"></i></span>
+                                            <span><strong>Scroll:</strong> Zoom in/out</span>
+                                        </div>
+                                    </div>
                                     <div id="canvas-container">
                                         <div id="loadingOverlay" class="odontogram-loading-overlay">
                                             <i class="fa-solid fa-circle-notch fa-spin"></i>
                                             <p>Generating 3D Model...</p>
-                                        </div>
-
-                                        <div class="three-mouse-guide" aria-label="3D model mouse controls">
-                                            <div class="three-mouse-guide-item">
-                                                <span class="mouse-button-key">L</span>
-                                                <span><strong>Left mouse:</strong> Click a surface; drag to rotate</span>
-                                            </div>
-                                            <div class="three-mouse-guide-item">
-                                                <span class="mouse-button-key">R</span>
-                                                <span><strong>Right mouse:</strong> Move the model</span>
-                                            </div>
-                                            <div class="three-mouse-guide-item">
-                                                <span class="mouse-button-key mouse-wheel-key"><i
-                                                        class="fa-solid fa-arrows-up-down"></i></span>
-                                                <span><strong>Scroll:</strong> Zoom in/out</span>
-                                            </div>
                                         </div>
 
                                         <div id="toothTooltip" class="tooth-tooltip">
@@ -396,6 +395,13 @@
                                         </div>
 
                                         <div id="surfacePicker3D" class="hidden odontogram-surface-picker">
+
+                                            <button type="button" id="surfacePickerDragHandle"
+                                                class="ui-icon-btn neutral surface-picker-drag-handle"
+                                                title="Drag to move surface picker" aria-label="Move surface picker">
+                                                <i class="fa-solid fa-up-down-left-right"></i>
+                                            </button>
+
                                             <div class="odontogram-surface-picker-head">
                                                 <div class="odontogram-surface-picker-copy">
                                                     <p class="global-form-label">
@@ -850,9 +856,9 @@
                         <span>
                             {{ $savedVisitEditMode
                                 ? 'Are you sure you want to cancel this edit? Any unsaved changes in this saved visit may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                lost.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        lost.'
                                 : 'Are you sure you want to cancel this procedure? Any unsaved progress in this session may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                lost.' }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        lost.' }}
                         </span>
                     </div>
                 </div>
@@ -1044,6 +1050,7 @@
             const toothTooltip = document.getElementById('toothTooltip');
             const toothTooltipContent = document.getElementById('toothTooltipContent');
             const surfacePicker3D = document.getElementById('surfacePicker3D');
+            const surfacePickerDragHandle = document.getElementById('surfacePickerDragHandle');
             const surfacePickerToothLabel = document.getElementById('surfacePickerToothLabel');
             const surfacePickerHelperText = document.getElementById('surfacePickerHelperText');
             const surfacePickerButtons = Array.from(document.querySelectorAll('.surface-picker-btn'));
@@ -1850,22 +1857,316 @@
                 surfacePickerButtons.forEach(btn => {
                     const surfaceKey = btn.dataset.surface;
                     const disabled = !selectedTooth;
-                    const isActive = isTargetSelected(selectedTooth, 'surface', surfaceKey);
-                    const toothState = selectedTooth ? ensureToothState(selectedTooth) : null;
-                    const treatment = toothState?.surfaces[surfaceKey] || toothState?.status;
+                    const isActive = isTargetSelected(
+                        selectedTooth,
+                        'surface',
+                        surfaceKey
+                    );
+
+                    const toothState =
+                        selectedTooth ?
+                        ensureToothState(selectedTooth) :
+                        null;
+
+                    const treatment =
+                        toothState?.surfaces[surfaceKey] ||
+                        toothState?.status;
+
+                    const surfaceLabel =
+                        getSurfaceLabel(
+                            surfaceKey,
+                            selectedTooth
+                        );
 
                     btn.disabled = disabled;
-                    btn.textContent = getSurfaceLabel(surfaceKey, selectedTooth).replace(' Surface', '');
-                    btn.setAttribute('aria-label', getSurfaceLabel(surfaceKey, selectedTooth));
-                    btn.classList.toggle('active', isActive);
-                    btn.classList.toggle('has-treatment', Boolean(treatment));
-                    btn.setAttribute('aria-pressed', String(isActive));
-                    btn.title =
-                        `${getSurfaceLabel(surfaceKey, selectedTooth)}${treatment ? `: ${treatment.code} - ${treatment.label}` : ': No treatment assigned'}`;
-                    if (treatment?.colorHex) btn.style.setProperty('--surface-treatment-color', treatment
-                        .colorHex);
-                    else btn.style.removeProperty('--surface-treatment-color');
+
+                    btn.textContent =
+                        surfaceLabel.replace(' Surface', '');
+
+                    btn.classList.toggle(
+                        'active',
+                        isActive
+                    );
+
+                    btn.classList.toggle(
+                        'has-treatment',
+                        Boolean(treatment)
+                    );
+
+                    btn.setAttribute(
+                        'aria-pressed',
+                        String(isActive)
+                    );
+
+                    btn.removeAttribute('title');
+
+                    btn.setAttribute(
+                        'aria-label',
+                        treatment ?
+                        `${surfaceLabel}: ${getLegendDisplayCode(treatment.code)} - ${treatment.label}` :
+                        `${surfaceLabel}: No treatment assigned`
+                    );
+
+                    if (treatment?.colorHex) {
+                        btn.style.setProperty(
+                            '--surface-treatment-color',
+                            treatment.colorHex
+                        );
+
+                        const treatmentDot =
+                            document.createElement('span');
+
+                        treatmentDot.className =
+                            'surface-picker-treatment-dot';
+
+                        treatmentDot.setAttribute(
+                            'data-tooltip',
+                            `${getLegendDisplayCode(treatment.code)} - ${treatment.label}`
+                        );
+
+                        treatmentDot.setAttribute(
+                            'data-tooltip-tone',
+                            'neutral'
+                        );
+
+                        treatmentDot.setAttribute(
+                            'data-tooltip-color',
+                            treatment.colorHex
+                        );
+                        treatmentDot.setAttribute(
+                            'aria-hidden',
+                            'true'
+                        );
+
+                        btn.appendChild(
+                            treatmentDot
+                        );
+                    } else {
+                        btn.style.removeProperty(
+                            '--surface-treatment-color'
+                        );
+                    }
                 });
+            }
+
+            function initSurfacePickerDrag() {
+                if (
+                    !surfacePicker3D ||
+                    !surfacePickerDragHandle ||
+                    !container
+                ) {
+                    return;
+                }
+
+                let dragging = false;
+                let activePointerId = null;
+                let pointerOffsetX = 0;
+                let pointerOffsetY = 0;
+
+                function clampPickerPosition(left, top) {
+                    const containerRect =
+                        container.getBoundingClientRect();
+
+                    const pickerRect =
+                        surfacePicker3D.getBoundingClientRect();
+
+                    const padding = 8;
+
+                    const maxLeft = Math.max(
+                        padding,
+                        containerRect.width -
+                        pickerRect.width -
+                        padding
+                    );
+
+                    const maxTop = Math.max(
+                        padding,
+                        containerRect.height -
+                        pickerRect.height -
+                        padding
+                    );
+
+                    return {
+                        left: Math.min(
+                            maxLeft,
+                            Math.max(padding, left)
+                        ),
+
+                        top: Math.min(
+                            maxTop,
+                            Math.max(padding, top)
+                        )
+                    };
+                }
+
+                function movePicker(clientX, clientY) {
+                    const containerRect =
+                        container.getBoundingClientRect();
+
+                    const nextPosition =
+                        clampPickerPosition(
+                            clientX -
+                            containerRect.left -
+                            pointerOffsetX,
+
+                            clientY -
+                            containerRect.top -
+                            pointerOffsetY
+                        );
+
+                    surfacePicker3D.style.left =
+                        `${nextPosition.left}px`;
+
+                    surfacePicker3D.style.top =
+                        `${nextPosition.top}px`;
+
+                    surfacePicker3D.style.right = 'auto';
+                    surfacePicker3D.style.bottom = 'auto';
+                    surfacePicker3D.style.transform = 'none';
+                }
+
+                function stopDragging(event) {
+                    if (
+                        !dragging ||
+                        (
+                            activePointerId !== null &&
+                            event.pointerId !== activePointerId
+                        )
+                    ) {
+                        return;
+                    }
+
+                    dragging = false;
+
+                    surfacePickerDragHandle.classList.remove(
+                        'is-dragging'
+                    );
+
+                    if (
+                        activePointerId !== null &&
+                        surfacePickerDragHandle.hasPointerCapture?.(
+                            activePointerId
+                        )
+                    ) {
+                        surfacePickerDragHandle.releasePointerCapture(
+                            activePointerId
+                        );
+                    }
+
+                    activePointerId = null;
+                }
+
+                surfacePickerDragHandle.addEventListener(
+                    'pointerdown',
+                    function(event) {
+                        if (
+                            event.pointerType === 'mouse' &&
+                            event.button !== 0
+                        ) {
+                            return;
+                        }
+
+                        const containerRect =
+                            container.getBoundingClientRect();
+
+                        const pickerRect =
+                            surfacePicker3D.getBoundingClientRect();
+
+                        dragging = true;
+                        activePointerId = event.pointerId;
+
+                        pointerOffsetX =
+                            event.clientX - pickerRect.left;
+
+                        pointerOffsetY =
+                            event.clientY - pickerRect.top;
+
+                        surfacePicker3D.style.left =
+                            `${pickerRect.left - containerRect.left}px`;
+
+                        surfacePicker3D.style.top =
+                            `${pickerRect.top - containerRect.top}px`;
+
+                        surfacePicker3D.style.right = 'auto';
+                        surfacePicker3D.style.bottom = 'auto';
+                        surfacePicker3D.style.transform = 'none';
+
+                        surfacePickerDragHandle.classList.add(
+                            'is-dragging'
+                        );
+
+                        surfacePickerDragHandle.setPointerCapture?.(
+                            event.pointerId
+                        );
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                );
+
+                surfacePickerDragHandle.addEventListener(
+                    'pointermove',
+                    function(event) {
+                        if (
+                            !dragging ||
+                            event.pointerId !== activePointerId
+                        ) {
+                            return;
+                        }
+
+                        movePicker(
+                            event.clientX,
+                            event.clientY
+                        );
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                );
+
+                surfacePickerDragHandle.addEventListener(
+                    'pointerup',
+                    stopDragging
+                );
+
+                surfacePickerDragHandle.addEventListener(
+                    'pointercancel',
+                    stopDragging
+                );
+
+                window.addEventListener(
+                    'resize',
+                    function() {
+                        if (
+                            !surfacePicker3D.style.left ||
+                            surfacePicker3D.classList.contains('hidden')
+                        ) {
+                            return;
+                        }
+
+                        const currentLeft =
+                            parseFloat(
+                                surfacePicker3D.style.left
+                            ) || 0;
+
+                        const currentTop =
+                            parseFloat(
+                                surfacePicker3D.style.top
+                            ) || 0;
+
+                        const position =
+                            clampPickerPosition(
+                                currentLeft,
+                                currentTop
+                            );
+
+                        surfacePicker3D.style.left =
+                            `${position.left}px`;
+
+                        surfacePicker3D.style.top =
+                            `${position.top}px`;
+                    }
+                );
             }
 
             function selectSurfaceFrom3DPicker(surfaceKey, useMultiSelect = false) {
@@ -4670,6 +4971,7 @@
                     );
             }
 
+            initSurfacePickerDrag();
             initLegendPanelResize();
 
             if (procedureDurationInput && existingProcedureDuration && existingProcedureDuration !== '00:00:00') {

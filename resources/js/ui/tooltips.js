@@ -22,13 +22,21 @@ function initGlobalActionTooltips() {
     let activeTarget = null;
 
     function hideTooltip() {
-        tooltip.classList.remove('show', ...toneClasses);
-        tooltip.setAttribute('aria-hidden', 'true');
+        tooltip.classList.remove(
+            'show',
+            ...toneClasses
+        );
+
+        tooltip.style.removeProperty(
+            '--tooltip-bg'
+        );
+
+        tooltip.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
         tooltip.textContent = '';
-
-        tooltip.style.left = '';
-        tooltip.style.top = '';
-
         activeTarget = null;
     }
 
@@ -104,8 +112,27 @@ function initGlobalActionTooltips() {
                                     ? 'reset'
                                     : 'neutral');
 
-        tooltip.classList.remove(...toneClasses);
-        tooltip.classList.add(`tooltip-${tone}`);
+        tooltip.classList.remove(
+            ...toneClasses
+        );
+
+        tooltip.classList.add(
+            `tooltip-${tone}`
+        );
+
+        tooltip.style.removeProperty(
+            '--tooltip-bg'
+        );
+
+        const customColor =
+            target.dataset.tooltipColor?.trim();
+
+        if (customColor) {
+            tooltip.style.setProperty(
+                '--tooltip-bg',
+                customColor
+            );
+        }
 
         tooltip.textContent = message;
         tooltip.setAttribute('aria-hidden', 'false');
@@ -238,6 +265,10 @@ function renderGlobalChartTooltip(context) {
 
     element.classList.remove(
         ...toneClasses
+    );
+
+    element.style.removeProperty(
+        '--tooltip-bg'
     );
 
     element.classList.add(

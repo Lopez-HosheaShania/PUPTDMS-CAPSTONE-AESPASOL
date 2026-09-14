@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 export const ODONTOGRAM_SURFACE_KEYS = ['top', 'left', 'center', 'right', 'bottom'];
-const ENAMEL = '#fffaf3';
+const ENAMEL = '#f7edd6';
 const crownGeometryCache = new Map();
 const hitGeometry = new THREE.SphereGeometry(1, 8, 6);
 const hitMaterial = new THREE.MeshBasicMaterial({ visible: false });
@@ -15,6 +15,7 @@ const ARCHES = {
 };
 const ARCH_START = Math.PI + 0.06;
 const ARCH_END = -0.06;
+const TOOTH_WIDTH_SCALE = 1.10;
 let dentalTextures = null;
 const occlusalTextureCache = new Map();
 
@@ -82,7 +83,7 @@ function getDentalTextures() {
     for (let y = 0; y < 64; y++) {
         const edge = smooth((y / 63 - 0.60) / 0.34);
         for (let x = 0; x < 2; x++) {
-            optical.set([Math.round(255 * (0.08 + 0.92 * edge)), Math.round(255 * (1 - 0.78 * edge)), 0, 255], (y * 2 + x) * 4);
+            optical.set([Math.round(255 * (0.06 + 0.32 * edge)), Math.round(255 * (1 - 0.50 * edge)), 0, 255], (y * 2 + x) * 4);
         }
     }
     dentalTextures = {
@@ -179,7 +180,7 @@ function addDentalScattering(material, kind, profile = null) {
     const enamel = kind === 'enamel';
     const uniforms = {
         dentalScatter: { value: enamel ? .095 : .075 },
-        dentalTint: { value: new THREE.Color(enamel ? '#ffeac9' : '#ffc3b5') },
+        dentalTint: { value: new THREE.Color(enamel ? '#f2ddb0' : '#ffc3b5') },
         dentalDimming: { value: 1 }
     };
     if (enamel) Object.assign(uniforms, {
@@ -240,7 +241,7 @@ function addDentalScattering(material, kind, profile = null) {
                     for (int dentalLight = 0; dentalLight < NUM_DIR_LIGHTS; dentalLight++) {
                         float backlight = pow(clamp(dot(-normal, directionalLights[dentalLight].direction) + .22, 0.0, 1.0), 2.0);
                         float edgeLight = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 3.0);
-                        dentalTransmittedLight += directionalLights[dentalLight].color * (backlight + .10 * edgeLight);
+                        dentalTransmittedLight += directionalLights[dentalLight].color * (backlight + .04 * edgeLight);
                     }
                 #endif
                 reflectedLight.indirectDiffuse += diffuseColor.rgb * dentalTint
@@ -252,15 +253,51 @@ function addDentalScattering(material, kind, profile = null) {
 
 function createEnamelMaterial(profile) {
     const texture = getDentalTextures();
-    return addDentalScattering(new THREE.MeshPhysicalMaterial({
-        color: ENAMEL, vertexColors: true, metalness: 0, roughness: .28,
-        roughnessMap: texture.enamel, bumpMap: texture.enamel, bumpScale: .002,
-        clearcoat: .38, clearcoatRoughness: .17, clearcoatRoughnessMap: texture.enamel,
-        ior: 1.62, transmission: .28, transmissionMap: texture.optical,
-        thickness: .105, thicknessMap: texture.optical,
-        attenuationColor: '#fff1d8', attenuationDistance: .34,
-        envMapIntensity: .80, opacity: 1, transparent: false
-    }), 'enamel', profile);
+
+    const material = new THREE.MeshPhysicalMaterial({
+        color: ENAMEL,
+        vertexColors: true,
+        metalness: 0,
+        roughness: .28,
+
+        roughnessMap: texture.enamel,
+        bumpMap: texture.enamel,
+        bumpScale: .002,
+
+        clearcoat: .38,
+        clearcoatRoughness: .17,
+        clearcoatRoughnessMap: texture.enamel,
+
+        ior: 1.62,
+        transmission: .16,
+        transmissionMap: texture.optical,
+
+        envMapIntensity: .80,
+        opacity: 1,
+        transparent: false
+    });
+
+    if ('thickness' in material) {
+        material.thickness = .105;
+    }
+
+    if ('thicknessMap' in material) {
+        material.thicknessMap = texture.optical;
+    }
+
+    if ('attenuationColor' in material) {
+        material.attenuationColor.set('#f6e3b8');
+    }
+
+    if ('attenuationDistance' in material) {
+        material.attenuationDistance = .34;
+    }
+
+    return addDentalScattering(
+        material,
+        'enamel',
+        profile
+    );
 }
 
 function createGingivaMaterial() {
@@ -316,8 +353,13 @@ function toothProfile(toothNumber, isUpper) {
     const mesialSign = [1, 4, 5, 8].includes(Math.floor(Number(toothNumber) / 10)) ? 1 : -1;
     const anterior = position <= 3;
     return {
-        width: width * (primary ? .80 : 1), height: height * (primary ? .78 : 1),
-        depth: depth * (primary ? .82 : 1), type, position: index, isUpper, mesialSign,
+        width: width * (primary ? .80 : 1) * TOOTH_WIDTH_SCALE,
+        height: height * (primary ? .78 : 1),
+        depth: depth * (primary ? .82 : 1),
+        type,
+        position: index,
+        isUpper,
+        mesialSign,
         tilt: isUpper ? (anterior ? .065 : .025) : (anterior ? .028 : -.045)
     };
 }
@@ -457,7 +499,7 @@ function createCrownGeometry(profile) {
     const edgeOwners = new Map();
     const ringCount = SIDE_RINGS + CAP_RINGS;
     const stride = SEGMENTS + 1;
-    const cervical = new THREE.Color('#e8dcc4'), body = new THREE.Color('#fbf5e9'), edgeColor = new THREE.Color('#fcfcfa');
+    const cervical = new THREE.Color('#dcc9a3'), body = new THREE.Color('#f2ead3'), edgeColor = new THREE.Color('#dbc9a7');
     const addVertex = (point, uv, ring, segment) => {
         vertices.push(...point); uvs.push(...uv);
         const height = clamp01(Math.abs(point[1]) / profile.height);
@@ -672,7 +714,7 @@ export function createOdontogramGumArch({ scene, yPosition, isUpper = true, teet
     const placements = toothPlacements(teethArray, isUpper).map(item => ({ ...item, profile: toothProfile(item.number, isUpper) }));
     const positions = [], colors = [], uvs = [], effects = [], indices = [];
     const segments = 32, marginRows = 4, wallRows = 6, faceSegments = segments / 4;
-    const marginColor = new THREE.Color('#d69aa0'), attachedColor = new THREE.Color('#c7838e'), mucosaColor = new THREE.Color('#b56d7d');
+    const marginColor = new THREE.Color('#923746'), attachedColor = new THREE.Color('#8e393a'), mucosaColor = new THREE.Color('#b25454');
 
     function profileAt(angle) {
         const next = placements.findIndex(item => item.angle <= angle);
@@ -832,7 +874,9 @@ function finishOralGeometry(positions, colors, uvs, effects, indices) {
 export function createOdontogramTongue({ scene, yPosition = 0 }) {
     const positions = [], colors = [], uvs = [], effects = [], indices = [];
     const lengthSegments = 56, radialSegments = 64, stride = radialSegments + 1;
-    const tipColor = new THREE.Color('#c78383'), dorsalColor = new THREE.Color('#ba7a7b'), ventralColor = new THREE.Color('#ac6b78');
+    const tipColor = new THREE.Color('#a95560'),
+        dorsalColor = new THREE.Color('#933145'),
+        ventralColor = new THREE.Color('#75373e');
     const add = (x, y, z, u, v, dorsal) => {
         positions.push(x, y + yPosition, z); uvs.push(u * 4, v * 7);
         const color = ventralColor.clone().lerp(dorsalColor, dorsal).lerp(tipColor, smooth((v - .48) / .52) * dorsal);
@@ -881,7 +925,7 @@ export function createOdontogramPalate({ scene, yPosition = 0, isUpper = true, t
     const positions = [], colors = [], uvs = [], effects = [], indices = [];
     const rings = 36, segments = 64, stride = segments + 1, arch = isUpper ? ARCHES.upper : ARCHES.lower;
     const placements = toothPlacements(teethArray, isUpper).map(item => ({ ...item, profile: toothProfile(item.number, isUpper) }));
-    const oralColor = new THREE.Color(isUpper ? '#c18b86' : '#b87980'), anteriorColor = new THREE.Color(isUpper ? '#cd9690' : '#bf858b');
+    const oralColor = new THREE.Color(isUpper ? '#b65e5e' : '#934b4b'), anteriorColor = new THREE.Color(isUpper ? '#934a4a' : '#713d3d');
     function depthAt(angle) {
         const next = placements.findIndex(item => item.angle <= angle);
         if (next <= 0) return placements[next === 0 ? 0 : placements.length - 1].profile.depth;

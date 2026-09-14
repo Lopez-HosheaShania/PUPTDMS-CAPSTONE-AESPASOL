@@ -2232,6 +2232,7 @@ class DentistReportController extends Controller
         $pdf->SetFont('Helvetica', '', 8);
 
         $patientName = trim((string) ($patient->name ?? ''));
+        [$lastName, $firstName, $middleName] = $this->splitDentalHealthRecordNameParts($patient, $patientName);
 
         $yearSection = '';
 
@@ -2263,7 +2264,9 @@ class DentistReportController extends Controller
         $previousDentist = trim((string) ($dentalHistory->previous_dentist ?? ''));
         $previousDentist = preg_replace('/^dr\.?\s*/i', '', $previousDentist) ?? $previousDentist;
 
-        $this->drawPdfCellAutoFont($pdf, 278, 151, $patientName, 420, 8, 'L', 'Helvetica', '', 8, 5.8);
+        $this->drawPdfCellAutoFont($pdf, 96, 151, $lastName, 110, 8, 'C', 'Helvetica', '', 8, 5.8);
+        $this->drawPdfCellAutoFont($pdf, 242, 151, $firstName, 150, 8, 'C', 'Helvetica', '', 8, 5.8);
+        $this->drawPdfCellAutoFont($pdf, 372, 151, $middleName, 115, 8, 'C', 'Helvetica', '', 8, 5.8);
         $this->drawPdfCellAutoFont($pdf, 161, 177, $yearSection, 62, 8, 'C', 'Helvetica', '', 7.8, 5.6);
         $this->drawPdfCellAutoFont($pdf, 346, 177, $facultyCollege, 76, 8, 'C', 'Helvetica', '', 7.2, 5.4);
         $this->drawPdfCellAutoFont($pdf, 505, 176, $adminDept, 58, 8, 'C', 'Helvetica', '', 7.2, 5.4);
@@ -2866,11 +2869,26 @@ class DentistReportController extends Controller
         $lastName = trim((string) (data_get($patient, 'user.last_name') ?? ''));
         $firstName = trim((string) (data_get($patient, 'user.first_name') ?? ''));
         $middleName = trim((string) (data_get($patient, 'user.middle_name') ?? ''));
+        [$fallbackLastName, $fallbackFirstName, $fallbackMiddleName] =
+            $this->splitDentalHealthRecordFallbackName($patientName);
+
+        if ($lastName !== '' && $firstName !== '') {
+            return [$lastName, $firstName, $middleName];
+        }
+
+        $lastName = $lastName !== '' ? $lastName : $fallbackLastName;
+        $firstName = $firstName !== '' ? $firstName : $fallbackFirstName;
+        $middleName = $middleName !== '' ? $middleName : $fallbackMiddleName;
 
         if ($lastName !== '' || $firstName !== '' || $middleName !== '') {
             return [$lastName, $firstName, $middleName];
         }
 
+        return ['', '', ''];
+    }
+
+    private function splitDentalHealthRecordFallbackName(string $patientName): array
+    {
         $parts = preg_split('/\s+/', trim($patientName)) ?: [];
         $parts = array_values(array_filter($parts, fn($part) => $part !== ''));
 
@@ -2882,9 +2900,9 @@ class DentistReportController extends Controller
             return ['', $parts[0], ''];
         }
 
-        $firstName = array_shift($parts);
         $lastName = array_pop($parts);
-        $middleName = implode(' ', $parts);
+        $middleName = count($parts) > 1 ? array_pop($parts) : '';
+        $firstName = implode(' ', $parts);
 
         return [$lastName, $firstName, $middleName];
     }
@@ -5165,27 +5183,366 @@ class DentistReportController extends Controller
                 continue;
             }
 
-            $code = trim((string) (
-                $item['status']['code']
-                ?? $item['threeD']['code']
-                ?? ''
-            ));
+            $pos = $toothMap[$tooth];
+            $surfaces = is_array($item['surfaces'] ?? null) ? $item['surfaces'] : [];
+            $wholeRecord = $this->dhrOdontogramRecord($item['status'] ?? null)
+                ?: $this->dhrOdontogramRecord($item['threeD'] ?? ($item['three_d'] ?? null));
+            $hasSurfaceMarks = false;
 
-            if ($code === '') {
+            foreach (['top', 'right', 'bottom', 'left', 'center'] as $surfaceKey) {
+                $record = $this->dhrOdontogramRecord($surfaces[$surfaceKey] ?? null);
+
+                if (! $record) {
+                    continue;
+                }
+
+                $hasSurfaceMarks = true;
+                $this->drawDentalHealthToothSurfaceMark($pdf, $pos['x'], $pos['y'], $surfaceKey, $record);
+            }
+
+            if ($wholeRecord && ! $hasSurfaceMarks) {
+                $this->drawDentalHealthWholeToothMark($pdf, $pos['x'], $pos['y'], $wholeRecord);
+            }
+
+            $displayRecord = $wholeRecord;
+
+            if (! $displayRecord) {
+                foreach (['center', 'top', 'right', 'bottom', 'left'] as $surfaceKey) {
+                    $displayRecord = $this->dhrOdontogramRecord($surfaces[$surfaceKey] ?? null);
+
+                    if ($displayRecord) {
+                        break;
+                    }
+                }
+            }
+
+            if (! $displayRecord) {
                 continue;
             }
 
-            $pos = $toothMap[$tooth];
-
-            $this->drawPdfCell(
+            $this->drawDentalHealthStatusBoxMark(
                 $pdf,
+                $tooth,
                 $pos['x'],
                 $pos['y'],
-                $code,
-                18,
-                5,
-                'C'
+                $displayRecord
             );
         }
+
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->SetFillColor(255, 255, 255);
+        $pdf->SetTextColor(0, 0, 0);
+    }
+
+    private function dhrOdontogramRecord($record): ?array
+    {
+        if (! is_array($record)) {
+            return null;
+        }
+
+        $code = trim((string) ($record['code'] ?? ''));
+
+        if ($code === '') {
+            return null;
+        }
+
+        return [
+            'code' => $code,
+            'color' => $this->dhrOdontogramColor($record['colorHex'] ?? ($record['color_hex'] ?? null)),
+        ];
+    }
+
+    private function dhrOdontogramColor(?string $hex): array
+    {
+        $hex = ltrim(trim((string) $hex), '#');
+
+        if (! preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
+            return [239, 68, 68];
+        }
+
+        return [
+            hexdec(substr($hex, 0, 2)),
+            hexdec(substr($hex, 2, 2)),
+            hexdec(substr($hex, 4, 2)),
+        ];
+    }
+
+    private function drawDentalHealthWholeToothMark(Fpdi $pdf, float $centerX, float $centerY, array $record): void
+    {
+        $this->drawDentalHealthFilledCircle($pdf, $centerX, $centerY - 2.2, 8.8, $record['color']);
+    }
+
+    private function drawDentalHealthToothSurfaceMark(
+        Fpdi $pdf,
+        float $centerX,
+        float $centerY,
+        string $surface,
+        array $record
+    ): void {
+        if ($surface === 'center') {
+            $this->drawDentalHealthFilledCircle($pdf, $centerX, $centerY - 2.2, 4.5, $record['color']);
+            return;
+        }
+
+        $outer = 9.8;
+        $inner = 3.7;
+        $centerY -= 2.2;
+
+        if (in_array($surface, ['top', 'right', 'bottom', 'left'], true)) {
+            $this->drawDentalHealthCurvedSurfaceCap(
+                $pdf,
+                $centerX,
+                $centerY,
+                $outer,
+                $inner,
+                $surface,
+                $record['color']
+            );
+            return;
+        }
+    }
+
+    private function drawDentalHealthCurvedSurfaceCap(
+        Fpdi $pdf,
+        float $centerX,
+        float $centerY,
+        float $outerRadius,
+        float $innerRadius,
+        string $surface,
+        array $rgb
+    ): void {
+        $anglesBySurface = [
+            'top' => [225, 315],
+            'right' => [315, 45],
+            'bottom' => [45, 135],
+            'left' => [135, 225],
+        ];
+
+        if (! isset($anglesBySurface[$surface])) {
+            return;
+        }
+
+        [$startAngle, $endAngle] = $anglesBySurface[$surface];
+
+        $commands = $this->dhrRingSegmentPath(
+            $centerX,
+            $centerY,
+            $outerRadius,
+            $innerRadius,
+            $startAngle,
+            $endAngle
+        );
+
+        $this->drawDentalHealthRawPath($pdf, $commands, $rgb);
+    }
+
+    private function dhrRingSegmentPath(
+        float $centerX,
+        float $centerY,
+        float $outerRadius,
+        float $innerRadius,
+        float $startAngle,
+        float $endAngle
+    ): array {
+        $outerPoints = $this->dhrArcPoints($centerX, $centerY, $outerRadius, $startAngle, $endAngle, true);
+        $innerPoints = $this->dhrArcPoints($centerX, $centerY, $innerRadius, $endAngle, $startAngle, false);
+        $commands = [['m', $outerPoints[0][0], $outerPoints[0][1]]];
+
+        foreach (array_slice($outerPoints, 1) as $point) {
+            $commands[] = ['l', $point[0], $point[1]];
+        }
+
+        foreach ($innerPoints as $point) {
+            $commands[] = ['l', $point[0], $point[1]];
+        }
+
+        $commands[] = ['l', $outerPoints[0][0], $outerPoints[0][1]];
+
+        return $commands;
+    }
+
+    private function dhrArcPoints(
+        float $centerX,
+        float $centerY,
+        float $radius,
+        float $startAngle,
+        float $endAngle,
+        bool $clockwise = true
+    ): array {
+        $delta = $endAngle - $startAngle;
+
+        if ($clockwise && $delta < 0) {
+            $delta += 360;
+        } elseif (! $clockwise && $delta > 0) {
+            $delta -= 360;
+        }
+
+        $segments = max(4, (int) ceil(abs($delta) / 10));
+        $points = [];
+
+        for ($i = 0; $i <= $segments; $i++) {
+            $points[] = $this->dhrPointOnCircle(
+                $centerX,
+                $centerY,
+                $radius,
+                $startAngle + (($delta / $segments) * $i)
+            );
+        }
+
+        return $points;
+    }
+
+    private function dhrPointOnCircle(float $centerX, float $centerY, float $radius, float $angle): array
+    {
+        $radians = deg2rad($angle);
+
+        return [
+            $centerX + ($radius * cos($radians)),
+            $centerY + ($radius * sin($radians)),
+        ];
+    }
+
+    private function drawDentalHealthStatusBoxMark(
+        Fpdi $pdf,
+        int $tooth,
+        float $toothCenterX,
+        float $toothCenterY,
+        array $record
+    ): void {
+        [$r, $g, $b] = $record['color'];
+        $boxWidth = 21.0;
+        $boxHeight = 16.6;
+        $statusBoxOffset = 29.5;
+        $boxCenterY = $this->isDentalHealthUpperTooth($tooth)
+            ? $toothCenterY - $statusBoxOffset
+            : $toothCenterY + $statusBoxOffset;
+
+        $boxX = $toothCenterX - ($boxWidth / 2);
+        $boxY = $boxCenterY - ($boxHeight / 2);
+        $inset = 1.0;
+
+        $pdf->SetFillColor($r, $g, $b);
+        $pdf->SetDrawColor($r, $g, $b);
+        $pdf->Rect(
+            $boxX + $inset,
+            $boxY + $inset,
+            $boxWidth - ($inset * 2),
+            7.0,
+            'F'
+        );
+
+        $codeLength = max(1, mb_strlen($record['code']));
+        $fontSize = $codeLength >= 3 ? 4.5 : ($codeLength === 2 ? 5.1 : 6.2);
+
+        $pdf->SetTextColor($r, $g, $b);
+        $pdf->SetFont('Helvetica', 'B', $fontSize);
+        $pdf->SetXY($boxX, $boxY + 9.0);
+        $pdf->Cell($boxWidth, 7.2, $record['code'], 0, 0, 'C');
+    }
+
+    private function isDentalHealthUpperTooth(int $tooth): bool
+    {
+        return ($tooth >= 11 && $tooth <= 28) ||
+            ($tooth >= 51 && $tooth <= 65);
+    }
+
+    private function drawDentalHealthFilledCircle(
+        Fpdi $pdf,
+        float $centerX,
+        float $centerY,
+        float $radius,
+        array $rgb
+    ): void {
+        $control = $radius * 0.5522847498;
+        $commands = [
+            ['m', $centerX + $radius, $centerY],
+            ['c', $centerX + $radius, $centerY + $control, $centerX + $control, $centerY + $radius, $centerX, $centerY + $radius],
+            ['c', $centerX - $control, $centerY + $radius, $centerX - $radius, $centerY + $control, $centerX - $radius, $centerY],
+            ['c', $centerX - $radius, $centerY - $control, $centerX - $control, $centerY - $radius, $centerX, $centerY - $radius],
+            ['c', $centerX + $control, $centerY - $radius, $centerX + $radius, $centerY - $control, $centerX + $radius, $centerY],
+        ];
+
+        $this->drawDentalHealthRawPath($pdf, $commands, $rgb);
+    }
+
+    private function drawDentalHealthFilledPolygon(Fpdi $pdf, array $points, array $rgb): void
+    {
+        if (count($points) < 3) {
+            return;
+        }
+
+        $commands = [['m', $points[0][0], $points[0][1]]];
+
+        foreach (array_slice($points, 1) as $point) {
+            $commands[] = ['l', $point[0], $point[1]];
+        }
+
+        $this->drawDentalHealthRawPath($pdf, $commands, $rgb);
+    }
+
+    private function drawDentalHealthRawPath(Fpdi $pdf, array $commands, array $rgb): void
+    {
+        [$r, $g, $b] = $rgb;
+        [$scale, $pageHeight] = $this->dhrPdfMetrics($pdf);
+
+        $path = sprintf('%.3F %.3F %.3F rg', $r / 255, $g / 255, $b / 255);
+
+        foreach ($commands as $command) {
+            $operator = $command[0] ?? '';
+
+            if ($operator === 'm' || $operator === 'l') {
+                $path .= sprintf(
+                    ' %.2F %.2F %s',
+                    $command[1] * $scale,
+                    ($pageHeight - $command[2]) * $scale,
+                    $operator
+                );
+                continue;
+            }
+
+            if ($operator === 'c') {
+                $path .= sprintf(
+                    ' %.2F %.2F %.2F %.2F %.2F %.2F c',
+                    $command[1] * $scale,
+                    ($pageHeight - $command[2]) * $scale,
+                    $command[3] * $scale,
+                    ($pageHeight - $command[4]) * $scale,
+                    $command[5] * $scale,
+                    ($pageHeight - $command[6]) * $scale
+                );
+            }
+        }
+
+        $path .= ' h f';
+
+        $this->dhrPdfOut($pdf, $path);
+    }
+
+    private function dhrPdfMetrics(Fpdi $pdf): array
+    {
+        return \Closure::bind(
+            fn() => [$this->k, $this->h],
+            $pdf,
+            get_class($pdf)
+        )();
+    }
+
+    private function dhrPdfOut(Fpdi $pdf, string $command): void
+    {
+        \Closure::bind(
+            function (string $command): void {
+                $this->_out($command);
+            },
+            $pdf,
+            get_class($pdf)
+        )($command);
+    }
+
+    private function dhrContrastingTextColor(array $rgb): array
+    {
+        [$r, $g, $b] = $rgb;
+        $luminance = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+        return $luminance < 140 ? [255, 255, 255] : [0, 0, 0];
     }
 }
