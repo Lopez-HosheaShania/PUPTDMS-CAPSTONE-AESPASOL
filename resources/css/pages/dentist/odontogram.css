@@ -314,8 +314,31 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: .75rem;
-
+    padding-left: 2.6rem;
     margin-bottom: .75rem;
+}
+
+.surface-picker-drag-handle {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 2;
+
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    min-height: 32px;
+
+    padding: 0;
+
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.surface-picker-drag-handle:active,
+.surface-picker-drag-handle.is-dragging {
+    cursor: grabbing;
 }
 
 .odontogram-surface-picker-copy {
@@ -552,13 +575,17 @@
 }
 
 .three-mouse-guide {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    z-index: 5;
+    position: static;
+    flex: 0 0 auto;
+    width: 100%;
     display: flex;
+    align-items: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: 8px;
+    margin: 0 0 .65rem;
+    padding: 0;
+
     pointer-events: none;
 }
 
@@ -1030,10 +1057,8 @@
     }
 
     .three-mouse-guide {
-        right: 10px;
-        top: 10px;
-        left: 10px;
         gap: 6px;
+        margin-bottom: .5rem;
     }
 
     .three-mouse-guide-item {
@@ -1047,6 +1072,22 @@
 
     .odontogram-board {
         min-width: 760px;
+    }
+
+    .surface-picker-drag-handle {
+        top: .65rem;
+        left: .65rem;
+
+        width: 28px;
+        min-width: 28px;
+        height: 28px;
+        min-height: 28px;
+
+        font-size: .62rem;
+    }
+
+    .odontogram-surface-picker-head {
+        padding-left: 2.25rem;
     }
 
     #surfacePicker3D {
@@ -3200,17 +3241,24 @@ body:has(#mainContent.odontogram-page) #toastContainer .toast-item.odontogram-ti
     position: relative;
 }
 
-#surfacePicker3D .surface-picker-btn.has-treatment::after {
-    content: '';
+#surfacePicker3D .surface-picker-treatment-dot {
     position: absolute;
     right: 3px;
     bottom: 3px;
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: var(--surface-treatment-color);
     box-shadow: 0 0 0 1px var(--card);
-    pointer-events: none;
+    cursor: help;
+    pointer-events: auto;
+}
+
+#surfacePicker3D .surface-picker-treatment-dot::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
 }
 
 #surfacePicker3D .surface-picker-btn:focus-visible {
