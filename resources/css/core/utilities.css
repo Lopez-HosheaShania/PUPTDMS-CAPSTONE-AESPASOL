@@ -2322,20 +2322,6 @@
         box-shadow .18s ease;
 }
 
-.global-record-card::before {
-    content: "";
-
-    position: absolute;
-    top: 8px;
-    bottom: 8px;
-    left: 0;
-
-    width: 4px;
-    border-radius: 0 999px 999px 0;
-
-    background: var(--record-accent);
-}
-
 .global-record-card:hover {
     transform: translateY(-1px);
     border-color: color-mix(in srgb,
