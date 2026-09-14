@@ -424,7 +424,6 @@
     font-size: 16px;
     flex-shrink: 0;
     border: 1px solid var(--status-border, rgba(139, 0, 0, 0.12));
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--status-solid, #8B0000) 12%, transparent);
 }
 
 .card-header-icon i {
@@ -683,10 +682,12 @@
     box-shadow: none !important;
 }
 
-[data-theme="dark"] .card-header-icon {
-    background: linear-gradient(135deg, rgba(139, 0, 0, .18) 0%, rgba(192, 57, 43, .12) 100%) !important;
-    border: 1px solid rgba(252, 165, 165, 0.15);
-    color: #FCA5A5 !important;
+[data-theme="dark"] .card-header-icon,
+.dark .card-header-icon {
+    background: var(--status-bg, var(--crimson-soft)) !important;
+    border-color: var(--status-border, var(--crimson-mid)) !important;
+    color: var(--status-solid, var(--status-cancelled-text)) !important;
+
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }

@@ -4,7 +4,7 @@ async function loadOdontogramThreeModule() {
     if (!odontogramThreeModulePromise) {
         odontogramThreeModulePromise =
             import(
-                './odontogram-three'
+                './odontogram-primary-stacked-three'
             )
                 .catch(error => {
                     odontogramThreeModulePromise =
@@ -72,10 +72,25 @@ const ODONTOGRAM_PREVIEW_TEETH = {
 function getOdontogramPreviewToothName(
     tooth
 ) {
-    const typeIndex =
-        Number(String(tooth).slice(-1));
+    const toothNumber =
+        Number(tooth);
 
-    const typeNames = {
+    const toothString =
+        String(toothNumber);
+
+    const firstDigit =
+        Number(toothString[0]);
+
+    const typeIndex =
+        Number(
+            toothString.slice(-1)
+        );
+
+    const isPrimary =
+        [5, 6, 7, 8]
+            .includes(firstDigit);
+
+    const adultTypeNames = {
         1: 'Central Incisor',
         2: 'Lateral Incisor',
         3: 'Canine',
@@ -86,15 +101,29 @@ function getOdontogramPreviewToothName(
         8: '3rd Molar'
     };
 
-    const firstDigit =
-        Number(String(tooth)[0]);
+    const primaryTypeNames = {
+        1: 'Central Incisor',
+        2: 'Lateral Incisor',
+        3: 'Canine',
+        4: '1st Molar',
+        5: '2nd Molar'
+    };
 
     const quadrantNames = {
         1: 'Upper Right',
         2: 'Upper Left',
         3: 'Lower Left',
-        4: 'Lower Right'
+        4: 'Lower Right',
+
+        5: 'Upper Right',
+        6: 'Upper Left',
+        7: 'Lower Left',
+        8: 'Lower Right'
     };
+
+    const isUpper =
+        [1, 2, 5, 6]
+            .includes(firstDigit);
 
     return {
         quadrant:
@@ -102,11 +131,15 @@ function getOdontogramPreviewToothName(
             'Unknown',
 
         type:
-            typeNames[typeIndex] ||
+            (
+                isPrimary
+                    ? primaryTypeNames
+                    : adultTypeNames
+            )[typeIndex] ||
             'Tooth',
 
         arch:
-            [1, 2].includes(firstDigit)
+            isUpper
                 ? 'Maxillary (Upper)'
                 : 'Mandibular (Lower)'
     };
@@ -435,6 +468,65 @@ function openOdontogramPreviewTooth(
     });
 }
 
+async function selectOdontogramPreviewSurface(
+    root,
+    tooth,
+    surfaceKey
+) {
+    if (!root || !tooth || !surfaceKey) {
+        return;
+    }
+
+    const state =
+        odontogramPreviewThreeStates.get(
+            root
+        );
+
+    if (!state) {
+        return;
+    }
+
+    try {
+        const {
+            updateOdontogramThreeScene
+        } =
+            await loadOdontogramThreeModule();
+
+        updateOdontogramThreeScene(
+            state,
+            root.__odontogramPreviewData || [],
+            {
+                selectedTooth:
+                    Number(tooth),
+
+                selectedSurfaceKey:
+                    surfaceKey,
+
+                selectedTargetType:
+                    'surface',
+
+                selectedTargets: [
+                    {
+                        tooth:
+                            Number(tooth),
+
+                        targetType:
+                            'surface',
+
+                        surfaceKey:
+                            surfaceKey
+                    }
+                ]
+            }
+        );
+    } catch (error) {
+        console.error(
+            'Unable to select odontogram preview surface:',
+            error
+        );
+    }
+}
+
 const odontogramPreviewThreeStates = new WeakMap();
 const odontogramPreviewCreationPromises = new WeakMap();
 const odontogramPreviewRenderRetries = new WeakMap();
@@ -703,12 +795,32 @@ async function renderOdontogramPreview(root) {
                             mode:
                                 'preview',
 
+                            showDentitionToggle:
+                                true,
+
                             onToothClick:
-                                tooth => {
+                                (
+                                    tooth,
+                                    mesh,
+                                    event,
+                                    surfaceKey
+                                ) => {
+                                    if (!tooth) {
+                                        return;
+                                    }
+
                                     openOdontogramPreviewTooth(
                                         root,
                                         tooth
                                     );
+
+                                    if (surfaceKey) {
+                                        selectOdontogramPreviewSurface(
+                                            root,
+                                            tooth,
+                                            surfaceKey
+                                        );
+                                    }
                                 },
 
                             onReady:

@@ -34,32 +34,26 @@ class DentistDashboardController extends Controller
             ->orderBy('appointment_time', 'asc')
             ->get();
 
-        $calendarStartDate =
-            Carbon::today()
-            ->startOfMonth()
-            ->toDateString();
-
         $calendarEndDate =
             Carbon::today()
             ->addDays(90)
-            ->endOfMonth()
             ->toDateString();
 
         $calendarAppointments =
             Appointment::with('patient')
-            ->whereBetween(
+            ->whereDate(
                 'appointment_date',
-                [
-                    $calendarStartDate,
-                    $calendarEndDate,
-                ]
+                '>=',
+                $today
+            )
+            ->whereDate(
+                'appointment_date',
+                '<=',
+                $calendarEndDate
             )
             ->whereIn('status', [
-                'pending',
-                'confirmed',
                 'upcoming',
                 'rescheduled',
-                'completed',
             ])
             ->orderBy(
                 'appointment_date',
@@ -101,7 +95,7 @@ class DentistDashboardController extends Controller
                         'name' => $name,
                         'time' => $time,
                         'service' => ucwords($service),
-                        'status' => $appointment->status ?? 'pending',
+                        'status' => $appointment->status ?? 'upcoming',
                         'date' => Carbon::parse($appointment->appointment_date)->format('Y-m-d'),
 
                         'patientProfileUrl' => $appointment->patient_id
