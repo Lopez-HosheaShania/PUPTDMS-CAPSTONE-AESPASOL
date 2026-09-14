@@ -7,7 +7,36 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserDeactivation extends Model
 {
+    use \App\Models\Concerns\StoresOptionalDetails;
     use HasFactory;
+
+    protected function detailFields(): array
+    {
+        return [
+            'employmentSnapshot' => ['employment_status', 'last_working_date'],
+            'accessSnapshot' => ['account_status', 'access_ends_at'],
+        ];
+    }
+
+    public function employmentSnapshot()
+    {
+        return $this->hasOne(UserDeactivationEmployment::class);
+    }
+
+    public function accessSnapshot()
+    {
+        return $this->hasOne(UserDeactivationAccess::class);
+    }
+
+    public function refresh()
+    {
+        parent::refresh();
+        if ($this->exists) {
+            $this->pendingOptionalDetails = [];
+        }
+
+        return $this;
+    }
 
     protected $fillable = [
         'user_id',

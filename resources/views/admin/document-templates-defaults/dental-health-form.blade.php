@@ -28,9 +28,9 @@
         /* ---- PATIENT INFO ---- */
         .pi-name-row { display: flex; align-items: flex-end; margin-bottom: 1px; }
         .pi-name-row .lbl  { font-size: 12px; margin-right: 4px; white-space: nowrap; }
-        .pi-name-row .line { flex: 1; border-bottom: 1px solid #000; height: 15px; }
-        .pi-sub { display: flex; font-size: 10px; padding-left: 42px; margin-bottom: 4px; }
-        .pi-sub span { flex: 1; }
+        .pi-name-fields { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 0; border-bottom: 1px solid #000; min-height: 15px; }
+        .pi-name-field { min-width: 0; height: 15px; text-align: center; }
+        .pi-sub { display: grid; grid-template-columns: repeat(3, 1fr); font-size: 10px; padding-left: 42px; margin-bottom: 4px; text-align: center; }
         .pi-row { display: flex; align-items: center; gap: 3px; margin-bottom: 3px; font-size: 12px; }
         .pi-row .ibox { border: 1px solid #000; width: 26px; height: 15px; flex-shrink: 0; }
         .pi-row .line { border-bottom: 1px solid #000; height: 15px; }
@@ -128,7 +128,11 @@
 <!-- ====== PATIENT INFO ====== -->
 <div class="pi-name-row">
     <span class="lbl">Name:</span>
-    <div class="line"></div>
+    <div class="pi-name-fields">
+        <div class="pi-name-field"></div>
+        <div class="pi-name-field"></div>
+        <div class="pi-name-field"></div>
+    </div>
 </div>
 <div class="pi-sub">
     <span>Last Name</span><span>First Name</span><span>Middle Name</span>

@@ -50,6 +50,8 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\DentistTransitionDetail::class => 'Dentist Continuity',
         \App\Models\DentistTransitionCancellation::class => 'Dentist Continuity',
         \App\Models\DentistTransitionItemResolution::class => 'Dentist Continuity',
+        \App\Models\DentistTransitionItemAssignment::class => 'Dentist Continuity',
+        \App\Models\DentistTransitionItemState::class => 'Dentist Continuity',
         \App\Models\DentistTransitionChecklistItem::class => 'Dentist Continuity',
         \App\Models\DentistTransitionItem::class => 'Dentist Continuity',
         \App\Models\DocumentRequest::class => 'Document Requests',
@@ -76,6 +78,8 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\ToothLegend::class => 'Dental Records',
         \App\Models\ToothSurface::class => 'Dental Records',
         \App\Models\User::class => 'User Management',
+        \App\Models\UserDeactivationEmployment::class => 'User Management',
+        \App\Models\UserDeactivationAccess::class => 'User Management',
     ];
 
     public function register(): void

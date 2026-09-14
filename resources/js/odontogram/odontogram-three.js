@@ -5,7 +5,7 @@ import { createOdontogramPresentation, ODONTOGRAM_SURFACE_KEYS } from './odontog
 
 const ADULT_UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
 const ADULT_LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
-const ENAMEL = '#fffaf3';
+const ENAMEL = '#f7edd6';
 const activeOdontogramStates = new Set();
 const normalizeOdontogramData = data => Array.isArray(data) ? data : Object.values(data || {});
 
@@ -95,7 +95,7 @@ function addOdontogramLights(state) {
         key.shadow.bias = -0.0001;
         key.shadow.radius = 3;
     }
-    const fill = new THREE.DirectionalLight(0xf1f5ff, .70);
+    const fill = new THREE.DirectionalLight(0xf1f5ff, .32);
     fill.position.set(7, -6, 8);
     const rim = new THREE.DirectionalLight(0xffffff, .85);
     rim.position.set(-3, 4, -7);
@@ -106,10 +106,21 @@ function addOdontogramEnvironment(state) {
     const environment = new RoomEnvironment(state.renderer);
     const pmrem = new THREE.PMREMGenerator(state.renderer);
     try {
-        state.environmentTarget = pmrem.fromScene(environment, .06);
+        state.environmentTarget = pmrem.fromScene(environment, .035);
         state.scene.environment = state.environmentTarget.texture;
     } finally {
-        environment.dispose?.();
+        environment.traverse?.((object) => {
+            object.geometry?.dispose?.();
+
+            if (Array.isArray(object.material)) {
+                object.material.forEach(material => {
+                    material?.dispose?.();
+                });
+            } else {
+                object.material?.dispose?.();
+            }
+        });
+
         pmrem.dispose();
     }
 }
@@ -264,7 +275,7 @@ export function updateOdontogramThreeScene(state, data = [], options = {}) {
             material.emissive.set(0x000000);
             material.roughness = treatment ? .44 : .28;
             material.clearcoat = treatment ? .12 : .38;
-            material.transmission = opticalEnamel ? .28 : 0;
+            material.transmission = opticalEnamel ? .16 : 0;
             material.bumpScale = treatment ? .0008 : .002;
             material.envMapIntensity = treatment ? .38 : .80;
             const uniforms = material.userData.dentalUniforms;
