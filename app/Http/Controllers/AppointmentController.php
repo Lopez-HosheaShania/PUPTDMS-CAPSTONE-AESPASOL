@@ -105,7 +105,7 @@ class AppointmentController extends Controller
                                     $regular->regularBooking()
                                         ->whereTime('appointment_time', '>=', $nowTime);
                                 })->orWhereHas('reservedBookingPeriod', function ($period) use ($nowTime) {
-                                    $period->withTrashed()->whereTime('end_time', '>=', $nowTime);
+                                    $period->withTrashed()->withScheduleColumns()->whereTime('end_time', '>=', $nowTime);
                                 });
                             });
                     });
@@ -132,7 +132,7 @@ class AppointmentController extends Controller
                                     $regular->regularBooking()
                                         ->whereTime('appointment_time', '<', $nowTime);
                                 })->orWhereHas('reservedBookingPeriod', function ($period) use ($nowTime) {
-                                    $period->withTrashed()->whereTime('end_time', '<', $nowTime);
+                                    $period->withTrashed()->withScheduleColumns()->whereTime('end_time', '<', $nowTime);
                                 });
                             });
                     });

@@ -134,7 +134,7 @@ class AppointmentDetailsPersistenceTest extends TestCase
         $this->assertSame(1, $period->activeAppointments()->count());
         $this->assertSame(0, Appointment::regularBooking()->count());
         $this->assertSame(1, Appointment::forReservedSlot($slot->id)->count());
-        $this->assertSame(1, Appointment::whereHas('reservedBookingPeriod', fn ($query) => $query->whereTime('end_time', '>=', '10:00:00'))->count());
+        $this->assertSame(1, Appointment::whereHas('reservedBookingPeriod', fn ($query) => $query->withScheduleColumns()->whereTime('end_time', '>=', '10:00:00'))->count());
         $this->assertSame($slot->id, $appointment->fresh()->reservedBookingPeriodSlot->id);
 
         $other = Appointment::create(['patient_id' => $appointment->patient_id, 'dentist_id' => $appointment->dentist_id,

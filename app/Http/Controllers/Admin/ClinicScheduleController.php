@@ -21,6 +21,7 @@ class ClinicScheduleController extends Controller
         $schedules    = ClinicSchedule::query()->orderByDesc('is_active')->orderBy('id')->get();
         $blockedDates = BlockedDate::orderBy('date')->get();
         $reservedBookingPeriods = ReservedBookingPeriod::query()
+            ->withScheduleColumns()
             ->with(['creator:id,name', 'slots'])
             ->orderBy('reserved_date')
             ->orderBy('start_time')

@@ -75,9 +75,16 @@ class UserEmploymentStatusSynchronizationTest extends TestCase
         $this->assertDatabaseHas('user_deactivations', [
             'user_id' => $user->id,
             'deactivated_by' => $actor->id,
-            'employment_status' => 'retired',
-            'account_status' => 'retired',
             'reason' => 'retirement',
+        ]);
+        $event = $user->deactivationEvents()->latest('id')->firstOrFail();
+        $this->assertDatabaseHas('user_deactivation_employments', [
+            'user_deactivation_id' => $event->id,
+            'employment_status' => 'retired',
+        ]);
+        $this->assertDatabaseHas('user_deactivation_accesses', [
+            'user_deactivation_id' => $event->id,
+            'account_status' => 'retired',
         ]);
         $this->assertSame('retirement', $user->fresh()->deactivation_reason);
     }
