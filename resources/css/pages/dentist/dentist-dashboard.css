@@ -165,7 +165,7 @@
     position: absolute;
     z-index: 120;
 
-    width: min(400px, calc(100vw - 32px));
+    width: min(460px, calc(100vw - 24px));
     padding: 0;
 
     overflow: visible;
@@ -330,10 +330,10 @@
 
     align-items: center;
 
-    gap: .6rem;
+    gap: .65rem;
 
     padding:
-        .62rem .65rem .62rem .78rem;
+        .68rem .72rem .68rem .82rem;
 }
 
 .scheduled-hover-patient-info {
@@ -343,17 +343,25 @@
 .scheduled-hover-patient-name-row {
     display: flex;
     align-items: center;
-    gap: .4rem;
+    gap: .35rem;
     min-width: 0;
 }
 
 .scheduled-hover-patient-name-row .global-record-name {
     min-width: 0;
-    flex: 1;
+    max-width: 100%;
+    flex: 0 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.scheduled-hover-patient-name-row .appt-type-icon {
+    flex: 0 0 auto !important;
 }
 
 .scheduled-hover-patient-card .global-record-subline {
-    margin-top: .2rem;
+    margin-top: .18rem;
     gap: .3rem;
 
     color: var(--text-3);
@@ -366,6 +374,7 @@
     flex-wrap: nowrap;
 
     min-width: 0;
+    overflow: hidden;
     white-space: nowrap;
 }
 
@@ -374,9 +383,39 @@
     white-space: nowrap;
 }
 
+.scheduled-hover-patient-card .global-record-subline>span:first-child {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scheduled-hover-status-row {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    margin-top: .34rem;
+}
+
+.scheduled-hover-status-row .status-pill {
+    max-width: 100%;
+    min-height: 22px;
+    padding: 0 .5rem;
+    gap: .28rem;
+    font-size: .58rem;
+    white-space: nowrap;
+}
+
 .scheduled-hover-actions {
+    display: flex;
+    align-items: center;
+    align-self: center;
     flex-wrap: nowrap;
     gap: .3rem;
+}
+
+.scheduled-hover-actions .ui-action-btn {
+    --ui-action-size: 30px;
 }
 
 .scheduled-modal-list {
@@ -409,7 +448,24 @@
 }
 
 .scheduled-modal-name-row .global-record-name {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.scheduled-modal-name-row .appt-type-icon {
+    flex: 0 0 auto !important;
+}
+
+.scheduled-modal-status-dot {
+    flex: 0 0 auto;
+}
+
+.scheduled-modal-status-pill {
+    display: none;
     min-width: 0;
 }
 
@@ -436,6 +492,45 @@
     gap: .35rem;
 }
 
+@media (max-width: 767px) {
+    .day-hover-card.card {
+        width: min(430px, calc(100vw - 20px));
+    }
+
+    .scheduled-hover-patient-body.global-record-card-body {
+        gap: .5rem;
+        padding: .62rem;
+    }
+
+    .scheduled-hover-actions {
+        gap: .24rem;
+    }
+
+    .scheduled-hover-actions .ui-action-btn {
+        --ui-action-size: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .scheduled-hover-patient-body.global-record-card-body {
+        grid-template-columns:
+            auto minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .scheduled-hover-actions {
+        grid-column: 2;
+        justify-content: flex-start;
+        margin-top: .08rem;
+    }
+
+    .scheduled-hover-status-row .status-pill {
+        min-height: 21px;
+        padding-inline: .44rem;
+        font-size: .54rem;
+    }
+}
+
 @media (max-width: 1023px) {
 
     .row2-grid,
@@ -450,6 +545,28 @@
 
     .upcoming-card {
         min-height: 340px;
+    }
+
+    .scheduled-modal-status-dot {
+        display: none !important;
+    }
+
+    .scheduled-modal-status-pill {
+        display: inline-flex;
+        align-items: center;
+        flex: 0 0 auto;
+    }
+
+    .scheduled-modal-status-pill .status-pill {
+        min-height: 22px;
+        height: 22px;
+        padding: 0 .45rem;
+        gap: .25rem;
+
+        font-size: .55rem;
+        line-height: 1;
+
+        white-space: nowrap;
     }
 }
 
@@ -1253,6 +1370,25 @@
     .gad-chart-shell {
         height: 220px;
         min-height: 220px;
+    }
+
+    .scheduled-modal-name-row {
+        flex-wrap: wrap;
+        row-gap: .25rem;
+    }
+
+    .scheduled-modal-status-pill {
+        flex-basis: 100%;
+        width: fit-content;
+    }
+
+    .scheduled-modal-status-pill .status-pill {
+        min-height: 20px;
+        height: 20px;
+
+        padding: 0 .4rem;
+
+        font-size: .5rem;
     }
 }
 

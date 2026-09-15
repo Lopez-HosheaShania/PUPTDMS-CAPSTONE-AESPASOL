@@ -18,9 +18,35 @@
     --bg-panel-soft: #262626;
     --border-dark: rgba(255, 255, 255, 0.10);
     --text-primary: #F3F4F6;
-    --text-secondary: #C9D1D9;
-    --text-muted: #8B949E;
+    --text-secondary: var(--text-2);
+    --text-muted: var(--text-3);
     --text-on-brand: #FFFFFF;
+
+    --table-surface: var(--card);
+    --table-toolbar-surface: var(--card);
+    --table-surface-soft: var(--surface);
+    --table-row-surface: var(--card);
+
+    --table-header-surface: var(--neutral-warm-50);
+
+    --table-border: var(--border);
+
+    --table-border-soft:
+        color-mix(in srgb,
+            var(--border) 78%,
+            transparent);
+
+    --table-row-hover:
+        color-mix(in srgb,
+            var(--crimson) 3%,
+            var(--card));
+
+    --table-text: var(--text-1);
+    --table-text-muted: var(--text-2);
+    --table-heading-muted: var(--text-3);
+
+    --table-shadow:
+        0 6px 20px var(--alpha-slate-900-6);
 
     --filter-panel-bg: #FFFFFF;
     --filter-panel-soft-bg: #FAFAFA;
@@ -44,7 +70,7 @@
     --filter-chip-active-border: rgba(128, 29, 29, 0.421);
 
     --filter-input-bg: #FFFFFF;
-    --filter-input-text: #1F2937;
+    --filter-input-text: #181a1e;
     --filter-input-placeholder: #9CA3AF;
     --filter-input-border: #E5E7EB;
     --filter-input-icon: #6B7280;
@@ -602,6 +628,35 @@
 
 [data-theme="dark"],
 .dark {
+    --table-surface: var(--card);
+    --table-toolbar-surface: var(--surface);
+    --table-surface-soft: var(--surface);
+    --table-row-surface: var(--card);
+
+    --table-header-surface:
+        color-mix(in srgb,
+            var(--surface) 94%,
+            var(--neutral-warm-500) 6%);
+
+    --table-border: var(--border);
+
+    --table-border-soft:
+        color-mix(in srgb,
+            var(--border) 72%,
+            transparent);
+
+    --table-row-hover:
+        color-mix(in srgb,
+            var(--crimson) 9%,
+            var(--card));
+
+    --table-text: var(--text-1);
+    --table-text-muted: var(--text-2);
+    --table-heading-muted: var(--text-3);
+
+    --table-shadow:
+        0 8px 24px var(--alpha-black-22);
+
     --filter-panel-bg: var(--card);
     --filter-panel-soft-bg: var(--surface);
     --filter-panel-text: var(--text-1);
