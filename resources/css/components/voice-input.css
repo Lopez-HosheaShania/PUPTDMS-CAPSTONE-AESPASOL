@@ -1,6 +1,6 @@
 :root {
     --voice-mic-size: 42px;
-    --voice-mic-radius: 14px;
+    --voice-mic-radius: 10px;
 
     --voice-mic-bg: var(--card);
     --voice-mic-border: var(--border);
@@ -31,7 +31,7 @@
     gap: 0.65rem;
     width: 100%;
     min-width: 0;
-    overflow: visible !important;
+    overflow: visible;
 }
 
 .global-voice-row.is-textarea,
@@ -60,7 +60,7 @@
     width: auto;
     min-width: var(--voice-mic-size);
     margin: 0;
-    overflow: visible !important;
+    overflow: visible;
     pointer-events: auto;
 }
 
@@ -88,13 +88,13 @@
     background: var(--voice-mic-bg);
     color: var(--voice-mic-icon);
     border-radius: var(--voice-mic-radius);
-    transform: translateY(0) scale(1) !important;
+    transform: translateY(0) scale(1);
     transition:
         background 180ms ease,
         border-color 180ms ease,
         color 180ms ease,
         box-shadow 180ms ease,
-        transform 150ms ease !important;
+        transform 150ms ease;
     cursor: pointer;
 }
 
@@ -105,52 +105,52 @@
     width: 1rem;
     height: 1rem;
 
-    display: inline-flex !important;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 
     flex: 0 0 1rem;
 
-    color: currentColor !important;
+    color: currentColor;
 
-    font-size: .86rem !important;
-    line-height: 1 !important;
+    font-size: .86rem;
+    line-height: 1;
 
-    opacity: 1 !important;
-    visibility: visible !important;
+    opacity: 1;
+    visibility: visible;
 
-    pointer-events: none !important;
+    pointer-events: none;
 
     transform: none;
 
     transition:
         color 180ms ease,
-        transform 180ms ease !important;
+        transform 180ms ease;
 }
 
 .voice-search-mic.external>.fa-microphone,
 .voice-search-mic.external>.fa-stop {
-    display: inline-flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+    display: inline-flex;
+    opacity: 1;
+    visibility: visible;
 }
 
 .voice-search-mic.external:hover {
     border-color:
-        var(--voice-mic-hover-border) !important;
+        var(--voice-mic-hover-border);
 
     background:
-        var(--voice-mic-hover-bg) !important;
+        var(--voice-mic-hover-bg);
 
     color:
-        var(--voice-mic-hover-icon) !important;
+        var(--voice-mic-hover-icon);
 
     box-shadow:
         0 2px 4px rgba(139, 0, 0, 0.07),
         0 8px 18px rgba(139, 0, 0, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-    transform: translateY(-2px) !important;
+    transform: translateY(-2px);
 }
 
 .voice-search-mic.external:hover::before {
@@ -164,40 +164,40 @@
 .voice-search-mic.external:active {
     box-shadow:
         0 1px 2px rgba(139, 0, 0, 0.1),
-        0 3px 8px rgba(139, 0, 0, 0.1) !important;
-    transform: translateY(0) scale(0.96) !important;
+        0 3px 8px rgba(139, 0, 0, 0.1);
+    transform: translateY(0) scale(0.96);
 }
 
 .voice-search-mic.external:focus {
-    outline: none !important;
+    outline: none;
 }
 
 .voice-search-mic.external:focus-visible {
-    border-color: #b91c1c !important;
-    outline: none !important;
+    border-color: #b91c1c;
+    outline: none;
     box-shadow:
         0 0 0 4px rgba(139, 0, 0, 0.12),
-        0 8px 18px rgba(139, 0, 0, 0.14) !important;
+        0 8px 18px rgba(139, 0, 0, 0.14);
 }
 
 .voice-search-mic.external.mic-active,
 .voice-search-mic.external.is-listening,
 .voice-search-mic.external[aria-pressed="true"] {
-    border-color: rgba(127, 29, 29, 0.45) !important;
+    border-color: rgba(127, 29, 29, 0.45);
 
     background:
         linear-gradient(135deg,
             var(--voice-mic-active-start) 0%,
-            var(--voice-mic-active-end) 100%) !important;
+            var(--voice-mic-active-end) 100%);
 
-    color: #ffffff !important;
+    color: #ffffff;
 
     box-shadow:
         0 0 0 3px rgba(139, 0, 0, 0.10),
         0 7px 12px rgba(139, 0, 0, 0.20),
-        inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
 
-    transform: scale(1.02) !important;
+    transform: scale(1.02);
     animation: globalVoiceMicPulse 1.25s ease-in-out infinite;
 }
 
@@ -211,7 +211,7 @@
 .voice-search-mic.external.mic-active>i,
 .voice-search-mic.external.is-listening>i,
 .voice-search-mic.external[aria-pressed="true"]>i {
-    color: #ffffff !important;
+    color: #ffffff;
     transform: scale(1.04);
 }
 
@@ -219,7 +219,7 @@
 .st-voice-row .voice-search-mic.external.is-listening,
 .voice-search-row .voice-search-mic.external.mic-active,
 .voice-search-row .voice-search-mic.external.is-listening {
-    transform: scale(1.02) !important;
+    transform: scale(1.02);
 }
 
 .voice-status {
@@ -273,7 +273,7 @@
 .st-voice-row .voice-status.hidden,
 .voice-search-row .voice-status.hidden,
 .patient-voice-status.hidden {
-    display: none !important;
+    display: none;
 }
 
 .voice-status.is-default {
@@ -305,18 +305,18 @@
 .st-input-wrap,
 .search-wrap,
 .voice-input-toggle {
-    overflow: visible !important;
+    overflow: visible;
 }
 
 [data-theme="dark"] .voice-search-mic.external,
 .dark .voice-search-mic.external {
-    border-color: var(--border) !important;
-    background: var(--surface) !important;
-    color: var(--text-2) !important;
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text-2);
 
     box-shadow:
         0 8px 20px rgba(0, 0, 0, 0.26),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="dark"] .voice-search-mic.external:hover,
@@ -324,14 +324,14 @@
     border-color:
         color-mix(in srgb,
             var(--border) 65%,
-            var(--crimson) 35%) !important;
+            var(--crimson) 35%);
 
     background:
         color-mix(in srgb,
             var(--surface) 82%,
-            var(--crimson) 18%) !important;
+            var(--crimson) 18%);
 
-    color: #FCA5A5 !important;
+    color: #FCA5A5;
 }
 
 [data-theme="dark"] .voice-status.is-listening,
@@ -376,13 +376,13 @@
     .voice-search-mic.external,
     .voice-search-mic.external::before,
     .voice-search-mic.external>i {
-        transition: none !important;
+        transition: none;
     }
 
     .voice-search-mic.external.mic-active,
     .voice-search-mic.external.is-listening,
     .voice-search-mic.external[aria-pressed="true"] {
-        animation: none !important;
+        animation: none;
     }
 }
 
@@ -483,7 +483,7 @@
 }
 
 .global-voice-waveform.is-idle span {
-    height: 5px !important;
+    height: 5px;
 }
 
 [data-theme="dark"] .global-voice-waveform,
@@ -507,7 +507,6 @@
 }
 
 .inventory-page .table-card,
-.inventory-page .table-toolbar,
 .inventory-page .inventory-toolbar-shell,
 .inventory-page .toolbar-actions,
 
@@ -527,7 +526,7 @@
 .role-permission-toolbar-card .card-header,
 .role-permission-toolbar,
 .role-permission-toolbar-row {
-    overflow: visible !important;
+    overflow: visible;
 }
 
 @media (max-width: 575px) {
@@ -570,7 +569,7 @@
 
         flex-basis: 13px;
 
-        font-size: 11px !important;
+        font-size: 11px;
     }
 }
 
@@ -582,6 +581,6 @@
     }
 
     .voice-search-mic.external>i {
-        font-size: 10px !important;
+        font-size: 10px;
     }
 }

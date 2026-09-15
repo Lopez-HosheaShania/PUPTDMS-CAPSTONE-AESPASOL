@@ -228,9 +228,8 @@
 
     @include('partials.global-toast')
 
-    <div id="logoutConfirmModal" class="ui-modal logout-confirm-modal modal-theme-warning" role="dialog"
-        aria-modal="true" aria-labelledby="logoutConfirmTitle" aria-describedby="logoutConfirmDescription"
-        aria-hidden="true">
+    <div id="logoutConfirmModal" class="ui-modal logout-confirm-modal" role="dialog" aria-modal="true"
+        aria-labelledby="logoutConfirmTitle" aria-describedby="logoutConfirmDescription" aria-hidden="true">
         <div class="ui-modal-card modal-sm logout-confirm-card">
             <div class="modal-hd">
                 <div class="modal-heading">
