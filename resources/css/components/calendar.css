@@ -1409,8 +1409,8 @@
 
 .dashboard-calendar-side-label {
     display: block;
-    margin-bottom: .65rem;
-    color: #9ca3af;
+    margin-bottom: .35rem;
+    color: var(--calendar-panel-muted);
     font-size: .62rem;
     font-weight: 800;
     letter-spacing: .1em;
@@ -1603,8 +1603,7 @@
     box-shadow:
         0 4px 12px color-mix(in srgb,
             var(--status-completed-solid) 12%,
-            transparent),
-        inset 0 1px 0 rgba(255, 255, 255, .8);
+            transparent);
 }
 
 .cal-cell.completed-appointment:hover {
@@ -1868,7 +1867,7 @@
         var(--calendar-slot-text);
 }
 
-.slot-chip:not(.disabled):hover {
+.slot-chip:not(.disabled):not(.selected):hover {
     border-color:
         var(--calendar-slot-hover-border);
 

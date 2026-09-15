@@ -590,7 +590,6 @@
     white-space: nowrap;
     word-break: keep-all;
     overflow-wrap: normal;
-    font-variant-numeric: tabular-nums;
 }
 
 [data-theme="dark"] .booking-step-title {

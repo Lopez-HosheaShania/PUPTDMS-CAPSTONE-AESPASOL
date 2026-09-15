@@ -172,8 +172,13 @@ function loadOdontogramThreeModule() {
         'odontogram-three',
         () =>
             import(
-                './odontogram/odontogram-three'
+                './odontogram/odontogram-primary-stacked-three'
             )
+                .then(module => {
+                    module.enableOdontogramPrimaryTeeth?.();
+
+                    return module;
+                })
     );
 }
 

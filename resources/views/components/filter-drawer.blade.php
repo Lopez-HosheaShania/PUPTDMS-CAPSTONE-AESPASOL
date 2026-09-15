@@ -51,7 +51,7 @@
         <div class="filter-drawer-footer">
 
             <button @if ($clearId) id="{{ $clearId }}" @endif type="button"
-                class="filter-clear-btn ui-btn ui-btn-secondary ui-btn-sm"
+                class="ui-btn ui-btn-secondary"
                 @if ($clearCallback) onclick="{{ $clearCallback }}" @endif>
                 <i class="fa-regular fa-trash-can"></i>
                 <span>{{ $clearLabel }}</span>
@@ -60,16 +60,14 @@
             <div class="filter-footer-actions">
 
                 <button @if ($cancelId) id="{{ $cancelId }}" @endif type="button"
-                    class="filter-cancel-btn ui-btn ui-btn-secondary"
+                    class="ui-btn ui-btn-secondary"
                     @if ($cancelCallback) onclick="{{ $cancelCallback }}" @endif>
-                    <i class="fa-solid fa-xmark"></i>
                     <span>{{ $cancelLabel }}</span>
                 </button>
 
                 <button @if ($applyId) id="{{ $applyId }}" @endif type="button"
-                    class="filter-apply-btn ui-btn ui-btn-primary"
+                    class="ui-btn ui-btn-primary"
                     @if ($applyCallback) onclick="{{ $applyCallback }}" @endif>
-                    <i class="fa-solid fa-check"></i>
 
                     @if ($resultsId)
                         <span id="{{ $resultsId }}" class="filter-results-text">
