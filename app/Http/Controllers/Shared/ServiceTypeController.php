@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Shared;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -12,7 +12,14 @@ class ServiceTypeController extends Controller
     {
         $services = ServiceType::orderBy('name')->get();
 
-        return view('admin.service-types', compact('services'));
+        $layoutRole = request()->routeIs('dentist.*')
+            ? 'dentist'
+            : 'admin';
+
+        return view('shared.service-types', compact(
+            'services',
+            'layoutRole'
+        ));
     }
 
     public function store(Request $request)
