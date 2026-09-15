@@ -76,18 +76,6 @@
     flex-shrink: 0;
 }
 
-body.role-dentist .table-card {
-    background: #ffffff;
-    border-radius: 16px;
-    border: 1px solid #F0F6FC;
-    overflow: hidden;
-}
-
-body.role-dentist .table-card>div:first-child {
-    position: relative;
-    z-index: 2;
-}
-
 [data-theme="dark"] .dentist-hero,
 .dark .dentist-hero {
     background:
@@ -181,22 +169,7 @@ body.role-dentist .table-card>div:first-child {
     color: #FFFFFF !important;
 }
 
-[data-theme="dark"] body.role-dentist .table-card,
-.dark body.role-dentist .table-card {
-    background: #161B22 !important;
-    border-color: #30363D !important;
-}
-
 @media (max-width: 767px) {
-    body.role-dentist #mainContent .table-card {
-        border-radius: 20px !important;
-        overflow: visible !important;
-        margin-top: 0 !important;
-    }
-
-    body.role-dentist #mainContent .table-card>div:first-child {
-        border-radius: 20px 20px 0 0 !important;
-    }
 
     .dentist-hero {
         padding: 18px 16px;

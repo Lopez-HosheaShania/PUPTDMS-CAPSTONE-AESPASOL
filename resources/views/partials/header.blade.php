@@ -411,8 +411,32 @@
                         </a>
                     @endif
 
+
+                    @if ($isPatientHeader)
+                        <div class="dropdown-menu-divider patient-mobile-logout-divider" role="separator"></div>
+
+                        <form action="{{ route('logout') }}" method="POST"
+                            class="js-logout-form patient-mobile-logout-form">
+                            @csrf
+
+                            <button type="submit" class="dropdown-menu-item patient-mobile-logout-item">
+                                <div class="dropdown-item-content">
+                                    <span class="dropdown-item-icon">
+                                        <i class="fa-solid fa-right-from-bracket"></i>
+                                    </span>
+
+                                    <span class="dropdown-item-text">
+                                        Log Out
+                                    </span>
+                                </div>
+                            </button>
+                        </form>
+                    @endif
+
                 </div>
+
             </div>
         </div>
+    </div>
     </div>
 </header>
