@@ -5,7 +5,6 @@
     align-items: center;
     gap: 16px;
     min-width: 0;
-    padding-right: 122px;
 }
 
 .dentist-hero-icon {
@@ -81,25 +80,25 @@
     background:
         radial-gradient(circle at top left, rgba(139, 0, 0, 0.30), transparent 34%),
         radial-gradient(circle at 88% 16%, rgba(252, 165, 165, 0.08), transparent 28%),
-        linear-gradient(135deg, rgba(13, 17, 23, 0.86), rgba(22, 27, 34, 0.76)) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+        linear-gradient(135deg, rgba(13, 17, 23, 0.86), rgba(22, 27, 34, 0.76));
+    border: 1px solid rgba(255, 255, 255, 0.10);
     box-shadow:
         0 18px 38px rgba(0, 0, 0, 0.38),
-        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
 [data-theme="dark"] .dentist-hero-title,
 .dark .dentist-hero-title {
-    background: linear-gradient(90deg, #FCA5A5 0%, #F87171 45%, #B91C1C 100%) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    color: transparent !important;
+    background: linear-gradient(90deg, #FCA5A5 0%, #F87171 45%, #B91C1C 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 [data-theme="dark"] .dentist-hero-eyebrow,
 .dark .dentist-hero-eyebrow {
-    color: #FCA5A5 !important;
+    color: #FCA5A5;
 }
 
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero,
@@ -107,23 +106,23 @@
     background:
         radial-gradient(circle at top left, rgba(139, 0, 0, 0.30), transparent 34%),
         radial-gradient(circle at 88% 16%, rgba(252, 165, 165, 0.08), transparent 28%),
-        linear-gradient(135deg, rgba(13, 17, 23, 0.86), rgba(22, 27, 34, 0.76)) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+        linear-gradient(135deg, rgba(13, 17, 23, 0.86), rgba(22, 27, 34, 0.76));
+    border: 1px solid rgba(255, 255, 255, 0.10);
     box-shadow:
         0 18px 38px rgba(0, 0, 0, 0.38),
-        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
-    backdrop-filter: blur(18px) saturate(145%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
 }
 
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero-icon,
 .dark body.role-dentist #mainContent .dentist-hero-icon {
-    background: linear-gradient(135deg, #8B0000, #5F0000) !important;
+    background: linear-gradient(135deg, #8B0000, #5F0000);
     border: 1px solid rgba(252, 165, 165, 0.18);
     box-shadow:
         0 10px 26px rgba(139, 0, 0, 0.34),
         0 0 18px rgba(252, 165, 165, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
 }
 
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero-title,
@@ -131,42 +130,42 @@
     background: linear-gradient(90deg,
             #FCA5A5 0%,
             #F87171 45%,
-            #B91C1C 100%) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    color: transparent !important;
-    text-shadow: none !important;
+            #B91C1C 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-shadow: none;
 }
 
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero-eyebrow,
 .dark body.role-dentist #mainContent .dentist-hero-eyebrow {
-    color: #FCA5A5 !important;
+    color: #FCA5A5;
 }
 
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero-date,
 .dark body.role-dentist #mainContent .dentist-hero-date {
-    color: #CBD5E1 !important;
+    color: #CBD5E1;
 }
 
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero-date i,
 .dark body.role-dentist #mainContent .dentist-hero-date i {
-    color: #FACC15 !important;
+    color: #FACC15;
 }
 
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero .tab-toggle-wrap,
 .dark body.role-dentist #mainContent .dentist-hero .tab-toggle-wrap {
-    background: rgba(13, 17, 23, 0.70) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(13, 17, 23, 0.70);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow:
         0 10px 22px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero .tab-btn-toggle.active .tab-count-badge,
 .dark body.role-dentist #mainContent .dentist-hero .tab-btn-toggle.active .tab-count-badge {
-    background: rgba(255, 255, 255, 0.18) !important;
-    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.18);
+    color: #FFFFFF;
 }
 
 @media (max-width: 767px) {
@@ -177,9 +176,9 @@
     }
 
     .dentist-hero-content {
-        flex-direction: row !important;
-        align-items: flex-start !important;
-        gap: 12px !important;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 12px;
     }
 
     .dentist-hero-left {
@@ -214,89 +213,164 @@
         justify-content: center;
     }
 
-    body.role-dentist #mainContent .dentist-hero {
-        overflow: visible !important;
-    }
-
     body.role-dentist #mainContent .dentist-hero-content {
-        width: 100% !important;
-        min-width: 0 !important;
-        padding-left: 2px !important;
-        padding-right: 2px !important;
+        width: 100%;
+        min-width: 0;
+        padding-left: 2px;
+        padding-right: 2px;
     }
 
     body.role-dentist #mainContent .dentist-hero-eyebrow {
-        white-space: nowrap !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
-        line-height: 1.25 !important;
-        letter-spacing: 0.10em !important;
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.25;
+        letter-spacing: 0.10em;
     }
 
     body.role-dentist #mainContent .dentist-hero-title,
     body.role-dentist #mainContent h1 {
-        overflow: visible !important;
-        text-overflow: clip !important;
-        line-height: 1.16 !important;
-        letter-spacing: -0.035em !important;
-        padding-left: 2px !important;
-        padding-right: 4px !important;
-        padding-top: 2px !important;
-        padding-bottom: 4px !important;
-        max-width: 100% !important;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.16;
+        letter-spacing: -0.035em;
+        padding-left: 2px;
+        padding-right: 4px;
+        padding-top: 2px;
+        padding-bottom: 4px;
+        max-width: 100%;
     }
 
-    body.role-dentist #mainContent .dentist-hero {
-        overflow: hidden !important;
+    .dentist-hero {
+        min-height: 0;
+
+        padding: 16px;
+        border-radius: 18px;
+
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+
+        align-items: stretch;
+
+        gap: 12px;
+
+        overflow: hidden;
+    }
+
+    .dentist-hero-content {
+        width: 100%;
+        min-width: 0;
+
+        padding-right: 0;
+
+        display: flex;
+        align-items: center;
+
+        gap: 12px;
+    }
+
+    .dentist-hero-icon {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+
+        border-radius: 14px;
+
+        flex: 0 0 44px;
+    }
+
+    .dentist-hero-eyebrow {
+        margin-bottom: 4px;
+
+        font-size: 9px;
+        line-height: 1.15;
+
+        white-space: normal;
+    }
+
+    .dentist-hero-title {
+        margin: 0;
+
+        font-size: 1.25rem;
+        line-height: 1.08;
+    }
+
+    .dentist-hero-actions {
+        width: 100%;
+        min-width: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+
+        gap: 8px;
+    }
+
+    .dentist-hero-actions>* {
+        flex: 0 0 auto;
+    }
+
+    .dentist-hero-left {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .dentist-hero-summary {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .dentist-hero-actions .tab-toggle-wrap {
+        max-width: 100%;
     }
 
     body.role-dentist #mainContent .dentist-hero-content {
-        width: 100% !important;
-        min-width: 0 !important;
-        padding-right: 0 !important;
+        width: 100%;
+        min-width: 0;
+        padding-right: 0;
     }
 
     body.role-dentist #mainContent .dentist-hero-left {
-        display: grid !important;
-        grid-template-columns: 48px minmax(0, 1fr) !important;
-        column-gap: 12px !important;
-        row-gap: 10px !important;
-        align-items: center !important;
-        width: 100% !important;
-        min-width: 0 !important;
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        column-gap: 12px;
+        row-gap: 10px;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
     }
 
     body.role-dentist #mainContent .dentist-hero-left .dentist-hero-icon {
-        grid-column: 1 !important;
-        grid-row: 1 !important;
-        width: 48px !important;
-        height: 48px !important;
-        min-width: 48px !important;
+        grid-column: 1;
+        grid-row: 1;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
     }
 
     body.role-dentist #mainContent .dentist-hero-left>.min-w-0 {
-        grid-column: 2 !important;
-        grid-row: 1 !important;
-        min-width: 0 !important;
-        width: 100% !important;
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 0;
+        width: 100%;
     }
 
     body.role-dentist #mainContent .dentist-hero-summary {
-        grid-column: 1 / -1 !important;
-        grid-row: 2 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
 
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 5px !important;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 5px;
 
-        margin-top: 0 !important;
-        overflow: visible !important;
+        margin-top: 0;
+        overflow: visible;
     }
 }
 
@@ -311,16 +385,16 @@
     .dentist-hero-content {
         width: 100%;
         gap: 12px;
-        padding-right: 0 !important;
+        padding-right: 0;
         align-items: flex-start;
-        flex-direction: row !important;
+        flex-direction: row;
     }
 
     .dentist-hero-left {
         width: 100%;
-        display: flex !important;
-        align-items: center !important;
-        gap: 12px !important;
+        display: flex;
+        align-items: center;
+        gap: 12px;
         min-width: 0;
     }
 
@@ -333,13 +407,13 @@
     }
 
     .dentist-hero-eyebrow {
-        margin-bottom: 6px !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 7px !important;
-        white-space: nowrap !important;
-        font-size: 10px !important;
-        line-height: 1 !important;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+        font-size: 10px;
+        line-height: 1;
     }
 
     .dentist-hero-title {

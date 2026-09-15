@@ -14,12 +14,6 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.stat-grid:has(> :nth-child(3):last-child) .stat-card:last-child {
-    grid-column: 1 / -1;
-    border-right: 0;
-    border-bottom: 0;
-}
-
 .stat-card-link {
     cursor: pointer;
     text-decoration: none;
