@@ -2735,6 +2735,30 @@
             ] || {}),
 
             selectDate,
+
+            render() {
+                renderCalendar();
+            },
+
+            renderLoading() {
+                renderCalendarLoading();
+            },
+
+            setSelectedDate(value = null) {
+                selectedDate = value || null;
+            },
+
+            setSelectedTime(value = null) {
+                selectedTime = value || null;
+            },
+
+            getSelectedDate() {
+                return selectedDate;
+            },
+
+            getSelectedTime() {
+                return selectedTime;
+            },
         };
 
         if (
