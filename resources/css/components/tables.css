@@ -998,7 +998,7 @@
     background:
         color-mix(in srgb,
             var(--table-surface) 86%,
-            var(--status-approved-solid) 14%) !important;
+            var(--status-approved-solid) 14%);
 }
 
 [data-theme="dark"] .data-table tbody tr.is-active:hover td,
@@ -1006,7 +1006,7 @@
     background:
         color-mix(in srgb,
             var(--table-surface) 80%,
-            var(--status-approved-solid) 20%) !important;
+            var(--status-approved-solid) 20%);
 }
 
 .table-record-card.is-active {
@@ -1094,7 +1094,7 @@
     gap: .38rem;
 
     border: 1px solid var(--table-border);
-    border-radius: 999px;
+    border-radius: 10px;
 
     background: var(--table-surface-soft);
     color: var(--table-text);
@@ -1109,7 +1109,6 @@
     font-size: .66rem;
     line-height: 1;
 }
-
 
 .table-tag-danger {
     background: var(--status-cancelled-bg);

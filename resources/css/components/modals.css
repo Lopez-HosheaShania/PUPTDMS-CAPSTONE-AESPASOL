@@ -537,6 +537,10 @@
     gap: 0.85rem;
 }
 
+.ui-modal .modal-form-grid-2>.global-form-group:last-child {
+    margin-bottom: 0;
+}
+
 .ui-modal .modal-inline-control {
     display: flex;
     align-items: center;
@@ -556,10 +560,11 @@
 }
 
 .ui-modal .modal-helper-text {
-    margin: .25rem 0 .75rem;
-    color: #9CA3AF;
+    margin: .4rem 0 0;
+    color: var(--text-3);
     font-size: .72rem;
-    font-weight: 600;
+    font-weight: 500;
+    font-style: italic;
     line-height: 1.4;
 }
 
@@ -586,11 +591,6 @@
     padding-inline: 1.25rem;
     border-radius: 12px;
     font-weight: 850;
-}
-
-[data-theme="dark"] .ui-modal .modal-helper-text,
-.dark .ui-modal .modal-helper-text {
-    color: #94A3B8;
 }
 
 [data-theme="dark"] .ui-modal .modal-error-banner,
@@ -824,9 +824,9 @@ html:has(dialog[open]) .asw-menu,
 body:has(dialog[open]) .asw-menu,
 html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu,
 body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .global-confirm-alert {
@@ -908,7 +908,7 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
 [data-theme="dark"] #holidaySchedulingNoticeModal .global-confirm-alert>i,
 .dark #holidaySchedulingNoticeModal .global-confirm-alert>i {
     color:
-        var(--red-300) !important;
+        var(--red-300);
 }
 
 [data-theme="dark"] .ui-modal .global-confirm-alert>i,
@@ -921,13 +921,13 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
 [data-theme="dark"] #holidaySchedulingNoticeModal .global-confirm-alert strong,
 .dark #holidaySchedulingNoticeModal .global-confirm-alert strong {
     color:
-        var(--text-1) !important;
+        var(--text-1);
 }
 
 [data-theme="dark"] #holidaySchedulingNoticeModal .global-confirm-alert span,
 .dark #holidaySchedulingNoticeModal .global-confirm-alert span {
     color:
-        var(--text-2) !important;
+        var(--text-2);
 }
 
 .modal-ft--centered {

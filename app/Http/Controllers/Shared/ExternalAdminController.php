@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Shared;
 
 use App\Http\Controllers\Controller;
 use App\Models\ExternalAdminAccess;
@@ -16,22 +16,15 @@ use Illuminate\View\View;
 
 class ExternalAdminController extends Controller
 {
-    /**
-     * Show Assign CMS Access page.
-     */
     public function index(): View
     {
-        return view('admin.assign-cms-access');
+        return view('shared.assign-cms-access');
     }
 
-    /**
-     * Save CMS access to local database.
-     */
     public function store(Request $request): RedirectResponse
     {
         abort_unless(
-            Auth::user()?->hasPermission('create_cms_integration'),
-            403
+            Auth::user()?->hasPermission('create_cms_integration'), 403
         );
 
         $validated = $request->validate([
@@ -113,7 +106,7 @@ class ExternalAdminController extends Controller
                 'email_address' => $validated['email_address'] ?? null,
                 'access_level' => $validated['access_level'] ?? null,
                 'role' => $validated['role'] ?? null,
-            ], static fn ($value): bool => !is_null($value) && $value !== ''));
+            ], static fn($value): bool => !is_null($value) && $value !== ''));
 
             if ($response->failed()) {
                 Log::error('OCMS external admin search failed', [
@@ -139,7 +132,7 @@ class ExternalAdminController extends Controller
             $searchTerm = strtolower(trim((string) ($validated['search'] ?? '')));
 
             $mapped = $records
-                ->map(fn (array $item): array => $this->mapAdminRecord($item))
+                ->map(fn(array $item): array => $this->mapAdminRecord($item))
                 ->filter(function (array $user) use ($searchTerm): bool {
                     if ($searchTerm === '') {
                         return true;

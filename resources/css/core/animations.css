@@ -70,8 +70,8 @@
 .greeting-banner {
     background:
         radial-gradient(circle at top left, rgba(255, 215, 0, 0.10), transparent 28%),
-        linear-gradient(270deg, #8B0000, #660000, #9f1d1d, #5A0000) !important;
-    background-size: 260% 260% !important;
+        linear-gradient(270deg, #8B0000, #660000, #9f1d1d, #5A0000);
+    background-size: 260% 260%;
     animation: greetingGradientFlow 13s ease infinite;
 }
 
@@ -244,6 +244,39 @@
 .spin {
     animation: spin .8s linear infinite;
     display: inline-block;
+}
+
+@keyframes contentFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes contentFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}
+
+.content-fade-in {
+    animation: contentFadeIn .22s ease both;
+}
+
+.content-fade-out {
+    animation: contentFadeOut .18s ease both;
+    pointer-events: none;
 }
 
 @keyframes fadeSlideUp {
@@ -1171,6 +1204,8 @@
     .stat-soft-rise,
     .fade-up,
     .fade-in,
+    .content-fade-in,
+    .content-fade-out,
     .spin,
     .dot-pulse,
     .upcoming-carousel-out-left,
@@ -1181,15 +1216,15 @@
     .global-carousel-out-right,
     .global-carousel-in-left,
     .global-carousel-in-right {
-        animation: none !important;
+        animation: none;
     }
 
     .page-enter,
     .fade-up,
     .fade-in {
-        transform: none !important;
-        filter: none !important;
-        opacity: 1 !important;
+        transform: none;
+        filter: none;
+        opacity: 1;
     }
 
     .modal-overlay,
@@ -1199,15 +1234,15 @@
     .patient-doc-modal-box,
     .doc-success-overlay,
     .doc-success-card {
-        animation: none !important;
-        transition: none !important;
+        animation: none;
+        transition: none;
     }
 
     .modal-overlay .modal-box-inner,
     .ui-modal-card,
     .patient-doc-modal-box,
     .doc-success-card {
-        filter: none !important;
+        filter: none;
     }
 
     .role-modal,
@@ -1216,30 +1251,30 @@
     #patientPickerOverlay,
     #vaOverlay .va-panel,
     #patientPickerOverlay .va-panel {
-        animation: none !important;
-        transition: none !important;
-        filter: none !important;
+        animation: none;
+        transition: none;
+        filter: none;
     }
 
     .global-refresh-notice,
     .global-refresh-icon,
     .global-refresh-icon i,
     .global-refresh-btn {
-        animation: none !important;
-        transition: none !important;
-        transform: none !important;
-        filter: none !important;
+        animation: none;
+        transition: none;
+        transform: none;
+        filter: none;
     }
 
     .chat-action-btn,
     .chat-action-btn::before {
-        animation: none !important;
-        transition: none !important;
+        animation: none;
+        transition: none;
     }
 
     .auth-landing-campus-slide {
-        transition: opacity .01ms !important;
-        transform: none !important;
+        transition: opacity .01ms;
+        transform: none;
     }
 
     .book-appointment-btn::before,
@@ -1254,6 +1289,6 @@
     .appt-panel-fade,
     .appt-section-reveal,
     .appt-tab.appt-active::after {
-        animation: none !important;
+        animation: none;
     }
 }
