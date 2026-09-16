@@ -39,12 +39,8 @@
         $maxSlots = $openRules->max('max_slots') ?? 0;
         $blockedThisMonth = $blockedDates->filter(fn($b) => \Carbon\Carbon::parse($b->date)->isCurrentMonth())->count();
         $holidaysThisMonth = collect($philippineHolidays)
-        ->filter(
-            fn($holiday, $date) =>
-                \Carbon\Carbon::parse($date)
-                    ->isCurrentMonth()
-        )
-        ->count();
+            ->filter(fn($holiday, $date) => \Carbon\Carbon::parse($date)->isCurrentMonth())
+            ->count();
 
         $scheduleByDay = [];
         foreach ($activeSchedules as $s) {
@@ -64,14 +60,32 @@
         ];
 
         $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !== 'none');
+
+        $serviceBadgeClass = function ($service) {
+            $service = strtolower(trim((string) $service));
+
+            if (str_contains($service, 'surgery')) {
+                return 'service-badge-surgery';
+            }
+
+            if (str_contains($service, 'check')) {
+                return 'service-badge-checkup';
+            }
+
+            if (str_contains($service, 'whiten')) {
+                return 'service-badge-whitening';
+            }
+
+            if (str_contains($service, 'extrac')) {
+                return 'service-badge-extraction';
+            }
+
+            return 'service-badge-default';
+        };
+
     @endphp
 
-    <main id="mainContent"
-        class="{{ $pageShellClass }}
-        clinic-schedule-page
-        {{ $isDentistView ? 'dentist-clinic-schedule-page' : 'admin-clinic-schedule-page' }}
-        page-enter
-        mode-list">
+    <main id="mainContent" class="{{ $pageShellClass }} clinic-schedule-page page-enter mode-list">
 
         <div class="w-full">
 
@@ -135,7 +149,7 @@
             @endif
 
             @if ($isDentistView)
-                <section class="dentist-hero cs-dentist-hero mb-5">
+                <section class="dentist-hero mb-5">
                     <div class="dentist-hero-content">
                         <div class="dentist-hero-icon">
                             <i class="fa-solid fa-calendar-week"></i>
@@ -153,14 +167,14 @@
                         </div>
                     </div>
 
-                    <div class="dentist-hero-actions cs-hero-actions">
+                    <div class="dentist-hero-actions">
                         <button type="button" onclick="openRuleModal()" class="ui-btn ui-btn-primary">
 
                             <i class="fa-solid fa-plus"></i>
                             <span>Add Schedule Rule</span>
                         </button>
 
-                        <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-danger">
+                        <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-secondary">
 
                             <i class="fa-solid fa-ban"></i>
                             <span>Block Date</span>
@@ -183,7 +197,7 @@
                                 <span>Add Schedule Rule</span>
                             </button>
 
-                            <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-danger">
+                            <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-secondary">
 
                                 <i class="fa-solid fa-ban"></i>
                                 <span>Block Date</span>
@@ -195,7 +209,7 @@
 
             <div class="admin-page-body">
 
-                <div id="statCards" class="stat-grid cs-stat-grid">
+                <div id="statCards" class="stat-grid">
                     @php
                         $statCards = [
                             [
@@ -244,30 +258,172 @@
                     @endforeach
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="grid grid-cols-1 gap-6 mb-6">
 
-                    <div class="lg:col-span-2 space-y-6">
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        <section id="clinicHoursCard" class="card">
+                            <div class="card-header card-header-inline">
+                                <div class="card-header-left">
+                                    <span class="card-header-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-clock"></i>
+                                    </span>
 
-                        <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-
-                            <div
-                                class="px-4 py-4 border-b bg-gray-50 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-calendar-week text-[#8B0000] mt-0.5"></i>
-                                    <h2 class="font-bold text-gray-800 text-sm leading-5">Weekly Appointment View</h2>
+                                    <h2 class="card-title">Clinic Hours</h2>
                                 </div>
-                                <div class="flex items-center justify-between gap-2 sm:justify-end">
 
+                                <div class="card-header-right">
+                                    <button type="button" onclick="openRuleModal()"
+                                        class="ui-btn ui-btn-primary ui-btn-sm">
+
+                                        <i class="fa-solid fa-plus"></i>
+                                        <span>Add</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-list-view">
+                                @foreach ($dayNames as $fullName => $abbr)
+                                    @php $s = $scheduleByDay[$abbr] ?? null; @endphp
+
+                                    <div class="table-list-row">
+                                        <div class="flex items-center justify-between gap-3 px-4 py-3">
+                                            <span class="table-record-title">{{ $fullName }}</span>
+
+                                            @if ($s && $s->status !== 'closed')
+                                                <span class="table-record-value">{{ $s->hours_range }}</span>
+                                            @else
+                                                <span class="status-pill status-inactive">Closed</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+
+                                @if ($breakSchedule)
+                                    <div class="table-list-row">
+                                        <div class="flex items-center justify-between gap-3 px-4 py-3">
+                                            <span class="table-date">
+                                                <i class="fa-solid fa-mug-hot"></i>
+                                                Lunch
+                                            </span>
+
+                                            @php [$bs,$be]=explode('-',$breakSchedule->break_time); @endphp
+                                            <span class="table-record-value">
+                                                {{ date('g:i A', strtotime(trim($bs) . ':00')) }} –
+                                                {{ date('g:i A', strtotime(trim($be) . ':00')) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </section>
+
+                        <section id="blockedDatesCard" class="card">
+                            <div class="card-header card-header-inline">
+                                <div class="card-header-left">
+                                    <span class="card-header-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-ban"></i>
+                                    </span>
+
+                                    <h2 class="card-title">Blocked Dates</h2>
+                                </div>
+
+                                <div class="card-header-right">
+                                    <button type="button" onclick="openBlockModal()"
+                                        class="ui-btn ui-btn-primary ui-btn-sm">
+                                        <i class="fa-solid fa-plus"></i>
+                                        <span>Add</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            @if ($blockedDates->count())
+                                <div id="blockedDatesListView" class="table-list-view">
+                                    @foreach ($blockedDates as $blocked)
+                                        @php
+                                            $bd = \Carbon\Carbon::parse($blocked->date);
+                                            $blockedReasonClass = match ($blocked->reason) {
+                                                'Holiday' => 'status-all',
+                                                'Dentist Unavailable' => 'status-pending',
+                                                default => 'status-inactive',
+                                            };
+                                        @endphp
+
+                                        <div class="table-list-row">
+                                            <div class="flex items-start gap-3 px-4 py-3">
+                                                <div class="global-info-icon status-cancelled" aria-hidden="true">
+                                                    {{ $bd->day }}
+                                                </div>
+
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="table-record-title">
+                                                        {{ $bd->format('D, M j, Y') }}
+                                                    </div>
+
+                                                    <div class="global-info-group mt-2">
+                                                        <span class="status-pill {{ $blockedReasonClass }}">
+                                                            {{ $blocked->reason }}
+                                                        </span>
+                                                    </div>
+
+                                                    @if ($blocked->note)
+                                                        <span class="global-info-subvalue mt-2">
+                                                            {{ $blocked->note }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+
+                                                <form action="{{ route($clinicScheduleRouteNames['unblock'], $blocked) }}"
+                                                    method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+
+                                                    <button type="submit" class="ui-action-btn ui-action-delete"
+                                                        data-tooltip="Remove blocked date" aria-label="Remove blocked date">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="card-body">
+                                    <div class="flex flex-col items-center justify-center gap-2 py-8 text-center">
+                                        <span class="global-info-icon status-completed" aria-hidden="true">
+                                            <i class="fa-solid fa-check"></i>
+                                        </span>
+                                        <span class="ui-muted-text">No blocked dates</span>
+                                    </div>
+                                </div>
+                            @endif
+                        </section>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                        <section id="weeklyAppointmentCard" class="card xl:col-span-2">
+                            <div class="card-header">
+                                <div class="card-header-left">
+                                    <span class="card-header-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-calendar-week"></i>
+                                    </span>
+
+                                    <h2 class="card-title">Weekly Appointment View</h2>
+                                </div>
+
+                                <div class="card-header-right">
                                     <button type="button" id="prevWeek" class="ui-icon-btn neutral"
-                                        data-tooltip="Previous week" data-tooltip-tone="neutral" aria-label="Previous week">
+                                        data-tooltip="Previous week" data-tooltip-tone="neutral"
+                                        aria-label="Previous week">
                                         <i class="fa-solid fa-chevron-left"></i>
                                     </button>
-                                    <span id="weekRangeLabel"
-                                        class="text-xs font-semibold text-gray-600 px-1 min-w-[140px] text-center"></span>
+
+                                    <span id="weekRangeLabel" class="ui-muted-text text-center"></span>
+
                                     <button type="button" id="nextWeek" class="ui-icon-btn neutral"
                                         data-tooltip="Next week" data-tooltip-tone="neutral" aria-label="Next week">
                                         <i class="fa-solid fa-chevron-right"></i>
                                     </button>
+
                                     <button type="button" id="todayBtn" class="ui-btn ui-btn-secondary ui-btn-sm">
                                         <i class="fa-solid fa-calendar-day"></i>
                                         <span>Today</span>
@@ -275,45 +431,285 @@
                                 </div>
                             </div>
 
-                            <div class="p-4 overflow-x-auto">
-                                <div id="weekGrid" class="week-grid" style="min-width:480px;"></div>
-                                <div class="flex flex-wrap gap-3 mt-3 justify-end">
-                                    <div class="flex items-center gap-1.5 text-xs text-gray-500"><span
-                                            class="w-3 h-3 rounded bg-blue-200 border-l-2 border-blue-500 inline-block"></span>Check-up
-                                    </div>
-                                    <div class="flex items-center gap-1.5 text-xs text-gray-500"><span
-                                            class="w-3 h-3 rounded bg-green-200 border-l-2 border-green-500 inline-block"></span>Cleaning
-                                    </div>
-                                    <div class="flex items-center gap-1.5 text-xs text-gray-500"><span
-                                            class="w-3 h-3 rounded bg-yellow-100 border-l-2 border-yellow-400 inline-block"></span>Surgery
-                                    </div>
-                                    <div class="flex items-center gap-1.5 text-xs text-gray-500"><span
-                                            class="w-3 h-3 rounded bg-purple-100 border-l-2 border-purple-400 inline-block"></span>Prosthesis
+                            <div class="card-body">
+                                <div id="weekGrid" class="week-grid"></div>
+
+                                <div class="global-info-group mt-3 justify-end">
+                                    <span class="service-badge service-badge-checkup">
+                                        Check-up
+                                    </span>
+
+                                    <span class="service-badge service-badge-default">
+                                        Cleaning
+                                    </span>
+
+                                    <span class="service-badge service-badge-surgery">
+                                        Surgery
+                                    </span>
+
+                                    <span class="service-badge service-badge-default">
+                                        Prosthesis
+                                    </span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="holidaysCard" class="card flex flex-col">
+                            <div class="card-header">
+                                <div class="card-header-left">
+                                    <span class="card-header-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-umbrella-beach"></i>
+                                    </span>
+
+                                    <h2 class="card-title">Upcoming Holidays</h2>
+                                </div>
+                            </div>
+
+                            @php
+                                $today = now()->startOfDay();
+
+                                $MONTHS_SHORT = [
+                                    'Jan',
+                                    'Feb',
+                                    'Mar',
+                                    'Apr',
+                                    'May',
+                                    'Jun',
+                                    'Jul',
+                                    'Aug',
+                                    'Sep',
+                                    'Oct',
+                                    'Nov',
+                                    'Dec',
+                                ];
+
+                                $upcoming = collect($philippineHolidays)
+                                    ->filter(
+                                        fn($holiday, $date) => \Carbon\Carbon::parse($date)->startOfDay()->gte($today),
+                                    )
+                                    ->sortKeys()
+                                    ->take(5);
+
+                                $nonWorkingHolidayCount = $upcoming
+                                    ->filter(function ($holiday) {
+                                        return is_array($holiday) ? $holiday['is_blocked_for_booking'] ?? true : true;
+                                    })
+                                    ->count();
+
+                                $workingHolidayCount = $upcoming->count() - $nonWorkingHolidayCount;
+
+                                $nextHolidayDate = $upcoming->keys()->first();
+
+                                $nextHoliday = $nextHolidayDate ? \Carbon\Carbon::parse($nextHolidayDate) : null;
+
+                                $nextHolidayData = $nextHolidayDate ? $upcoming->get($nextHolidayDate) : null;
+
+                                $nextHolidayName = is_array($nextHolidayData)
+                                    ? $nextHolidayData['name'] ?? 'Philippine Holiday'
+                                    : (string) $nextHolidayData;
+
+                                $nextHolidayIsBlocked = is_array($nextHolidayData)
+                                    ? $nextHolidayData['is_blocked_for_booking'] ?? true
+                                    : true;
+                            @endphp
+
+                            @if ($upcoming->count())
+                                <div class="table-list-view">
+                                    @foreach ($upcoming as $hDate => $holiday)
+                                        @php
+                                            $hC = \Carbon\Carbon::parse($hDate);
+                                            $diff = (int) $today->diffInDays($hC, false);
+                                            $holidayName = is_array($holiday)
+                                                ? $holiday['name'] ?? 'Philippine Holiday'
+                                                : (string) $holiday;
+                                            $isBlockedHoliday = is_array($holiday)
+                                                ? $holiday['is_blocked_for_booking'] ?? true
+                                                : true;
+                                        @endphp
+
+                                        <div class="table-list-row">
+                                            <div class="flex items-center gap-3 px-4 py-3">
+                                                <div class="w-11 shrink-0 text-center">
+                                                    <div class="global-info-label">
+                                                        {{ strtoupper($MONTHS_SHORT[$hC->month - 1]) }}
+                                                    </div>
+
+                                                    <div class="mt-0.5 text-xl font-extrabold leading-none"
+                                                        style="color: var(--text-1);">
+                                                        {{ $hC->day }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="truncate text-[.76rem] font-bold leading-tight"
+                                                        style="color: var(--text-1);" title="{{ $holidayName }}">
+                                                        {{ $holidayName }}
+                                                    </div>
+
+                                                    <div class="mt-1 text-[.68rem] font-medium leading-none"
+                                                        style="color: var(--text-3);">
+                                                        {{ $diff === 0 ? 'Today' : ($diff === 1 ? 'Tomorrow' : "In $diff days") }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="shrink-0">
+                                                    @if ($isBlockedHoliday)
+                                                        <span class="cal-pill cal-pill-yellow">
+                                                            <i class="fa-solid fa-star text-[10px]"></i>
+                                                            Non-Working
+                                                        </span>
+                                                    @else
+                                                        <span class="cal-pill cal-pill-working-holiday">
+                                                            <i class="fa-solid fa-briefcase text-[10px]"></i>
+                                                            Working Holiday
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="card-body">
+                                    <div class="flex flex-col items-center justify-center gap-2 py-8 text-center">
+                                        <span class="global-info-icon status-default" aria-hidden="true">
+                                            <i class="fa-solid fa-calendar"></i>
+                                        </span>
+                                        <span class="ui-muted-text">No upcoming holidays.</span>
                                     </div>
                                 </div>
+                            @endif
+
+                            @if ($upcoming->count())
+                                <div class="flex flex-1 items-center px-5 py-8">
+
+                                    <div class="w-full">
+
+                                        <div class="table-record-label mb-3">
+                                            Next Holiday
+                                        </div>
+
+                                        <div class="flex items-center gap-3">
+
+                                            <div class="w-11 shrink-0 text-center">
+                                                <div class="global-info-label">
+                                                    {{ strtoupper($MONTHS_SHORT[$nextHoliday->month - 1]) }}
+                                                </div>
+
+                                                <div class="mt-0.5 text-xl font-extrabold leading-none"
+                                                    style="color: var(--text-1);">
+                                                    {{ $nextHoliday->day }}
+                                                </div>
+                                            </div>
+
+                                            <div class="min-w-0 flex-1">
+                                                <div class="truncate text-[.76rem] font-bold leading-tight"
+                                                    style="color: var(--text-1);" title="{{ $nextHolidayName }}">
+                                                    {{ $nextHolidayName }}
+                                                </div>
+
+                                                <div class="mt-1 text-[.68rem] font-medium leading-none"
+                                                    style="color: var(--text-3);">
+                                                    {{ $nextHoliday->format('M d, Y') }}
+                                                </div>
+                                            </div>
+
+                                            <div class="shrink-0">
+                                                @if ($nextHolidayIsBlocked)
+                                                    <span class="cal-pill cal-pill-yellow">
+                                                        <i class="fa-solid fa-star text-[10px]"></i>
+                                                        Non-Working
+                                                    </span>
+                                                @else
+                                                    <span class="cal-pill cal-pill-working-holiday">
+                                                        <i class="fa-solid fa-briefcase text-[10px]"></i>
+                                                        Working Holiday
+                                                    </span>
+                                                @endif
+                                            </div>
+
+                                        </div>
+
+                                        <div class="mt-4">
+
+                                            @if ($nextHolidayIsBlocked)
+                                                <div class="global-info-item global-info-item-compact">
+
+                                                    <span class="global-info-icon status-pending" aria-hidden="true">
+                                                        <i class="fa-solid fa-calendar-xmark"></i>
+                                                    </span>
+
+                                                    <div class="global-info-copy">
+                                                        <span class="global-info-label">
+                                                            Booking Availability
+                                                        </span>
+
+                                                        <span class="global-info-value">
+                                                            Regular bookings unavailable
+                                                        </span>
+
+                                                        <span class="global-info-subvalue">
+                                                            Appointments cannot be booked on this non-working holiday.
+                                                        </span>
+                                                    </div>
+
+                                                </div>
+                                            @else
+                                                <div class="global-info-item global-info-item-compact">
+
+                                                    <span class="global-info-icon status-active" aria-hidden="true">
+                                                        <i class="fa-solid fa-calendar-check"></i>
+                                                    </span>
+
+                                                    <div class="global-info-copy">
+                                                        <span class="global-info-label">
+                                                            Booking Availability
+                                                        </span>
+
+                                                        <span class="global-info-value">
+                                                            Regular bookings available
+                                                        </span>
+
+                                                        <span class="global-info-subvalue">
+                                                            The clinic follows the active schedule on this working holiday.
+                                                        </span>
+                                                    </div>
+
+                                                </div>
+                                            @endif
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            @endif
+
+                        </section>
+                    </div>
+
+                    <section id="scheduleRulesCard" class="card">
+                        <div class="card-header">
+                            <div class="card-header-left">
+                                <span class="card-header-icon" aria-hidden="true">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </span>
+
+                                <h2 class="card-title">Schedule Rules</h2>
+                            </div>
+
+                            <div class="card-header-right">
+
+                                <x-view-toggle id="scheduleRulesViewToggle" storage-key="scheduleRulesView"
+                                    list-view="#scheduleRulesListView" grid-view="#scheduleRulesGridView" />
                             </div>
                         </div>
 
-
-                        <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                            <div class="px-5 py-4 flex items-center justify-between cs-rules-card-header">
-                                <div class="weekly-toolbar flex items-center gap-2">
-                                    <i class="fa-solid fa-list-check text-[#8B0000]"></i>
-                                    <h2 class="font-bold text-gray-800 text-sm">Schedule Rules</h2>
-                                </div>
-
-                                <div class="cs-rules-header-actions">
-                                    <span class="cs-rules-count">{{ $schedules->count() }} rules</span>
-
-                                    <x-view-toggle id="scheduleRulesViewToggle" storage-key="scheduleRulesView"
-                                        list-view="#scheduleRulesListView" grid-view="#scheduleRulesGridView" />
-                                </div>
-                            </div>
-
-                            @if ($schedules->count())
-                                <div id="scheduleRulesListView" class="schedule-rules-view">
-                                    <div class="overflow-x-auto px-2 pb-2 sm:px-0 sm:pb-0">
-                                        <table class="data-table sched-table">
+                        @if ($schedules->count())
+                            <div id="scheduleRulesListView" class="table-list-view">
+                                <div class="hidden md:block">
+                                    <div class="table-scroll">
+                                        <table class="data-table">
                                             <thead>
                                                 <tr>
                                                     <th>Day(s)</th>
@@ -328,16 +724,32 @@
                                             </thead>
                                             <tbody>
                                                 @foreach ($schedules as $rule)
+                                                    @php
+                                                        $ruleStatusClass = match ($rule->status) {
+                                                            'open' => 'status-active',
+                                                            'limited' => 'status-pending',
+                                                            default => 'status-inactive',
+                                                        };
+                                                        $ruleStatusLabel = match ($rule->status) {
+                                                            'open' => 'Open',
+                                                            'limited' => 'Limited',
+                                                            default => 'Closed',
+                                                        };
+                                                        $ruleStateClass = $rule->is_active
+                                                            ? 'status-active'
+                                                            : 'status-pending';
+                                                    @endphp
                                                     <tr>
-                                                        <td data-label="Day(s)" class="font-semibold text-gray-800">
-                                                            {{ $rule->days_label }}</td>
+                                                        <td data-label="Day(s)">
+                                                            <strong>{{ $rule->days_label }}</strong>
+                                                        </td>
                                                         <td data-label="Opens">
                                                             {{ $rule->open_time ? date('g:i A', strtotime($rule->open_time)) : '—' }}
                                                         </td>
                                                         <td data-label="Closes">
                                                             {{ $rule->close_time ? date('g:i A', strtotime($rule->close_time)) : '—' }}
                                                         </td>
-                                                        <td data-label="Lunch Break" class="text-xs text-gray-500">
+                                                        <td data-label="Lunch Break">
                                                             @if ($rule->break_time && $rule->break_time !== 'none')
                                                                 @php [$bs,$be]=explode('-', $rule->break_time); @endphp
                                                                 {{ date('g:i A', strtotime(trim($bs) . ':00')) }} –
@@ -347,11 +759,11 @@
                                                             @endif
                                                         </td>
                                                         <td data-label="Max Slots">
-                                                            <div class="flex items-center gap-2">
-                                                                <span
-                                                                    class="font-bold text-[#8B0000]">{{ $rule->max_slots }}</span>
+                                                            <div class="flex items-center gap-3">
+                                                                <strong>{{ $rule->max_slots }}</strong>
+
                                                                 @if ($rule->status !== 'closed')
-                                                                    <div class="cap-bar w-16">
+                                                                    <div class="cap-bar" aria-hidden="true">
                                                                         <div class="cap-fill"
                                                                             style="width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
                                                                         </div>
@@ -360,33 +772,26 @@
                                                             </div>
                                                         </td>
                                                         <td data-label="Status">
-                                                            @if ($rule->status === 'open')
-                                                                <span class="badge-open">Open</span>
-                                                            @elseif($rule->status === 'limited')
-                                                                <span class="badge-limited">Limited</span>
-                                                            @else
-                                                                <span class="badge-closed">Closed</span>
-                                                            @endif
+                                                            <span class="status-pill {{ $ruleStatusClass }}">
+                                                                {{ $ruleStatusLabel }}
+                                                            </span>
                                                         </td>
                                                         <td data-label="Rule State">
-                                                            @if ($rule->is_active)
-                                                                <span class="status-pill status-active">Active</span>
-                                                            @else
-                                                                <span class="badge-closed">Inactive</span>
-                                                            @endif
+                                                            <span class="status-pill {{ $ruleStateClass }}">
+                                                                {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                                            </span>
                                                         </td>
-                                                        <td data-label="Actions">
+                                                        <td data-label="Actions" class="table-action-cell">
                                                             <div class="ui-action-group">
                                                                 <button type="button"
                                                                     onclick='openRuleModal(
-        "edit",
-        {{ $rule->id }},
-        {{ json_encode($rule) }}
-    )'
+                                                                                "edit",
+                                                                                {{ $rule->id }},
+                                                                                {{ json_encode($rule) }}
+                                                                            )'
                                                                     class="ui-action-btn ui-action-edit"
                                                                     data-tooltip="Edit schedule"
                                                                     aria-label="Edit schedule">
-
                                                                     <i class="fa-solid fa-pen"></i>
                                                                 </button>
 
@@ -395,9 +800,9 @@
                                                                     data-tooltip="Delete schedule"
                                                                     aria-label="Delete schedule"
                                                                     onclick='openScheduleDeleteModal(
-        @json(route($clinicScheduleRouteNames['destroy'], $rule)), @json($rule->days_label)
-                                                        )'>
-
+                                                                                @json(route($clinicScheduleRouteNames['destroy'], $rule)),
+                                                                                @json($rule->days_label)
+                                                                            )'>
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>
                                                             </div>
@@ -409,322 +814,268 @@
                                     </div>
                                 </div>
 
-                                <div id="scheduleRulesGridView" class="schedule-rules-view" hidden>
-                                    <div class="schedule-rules-grid">
-                                        @foreach ($schedules as $rule)
-                                            <div class="schedule-rule-card">
-                                                <div class="schedule-rule-card-top">
-                                                    <div>
-                                                        <div class="schedule-rule-card-title">{{ $rule->days_label }}
-                                                        </div>
-                                                        <div class="mt-2 flex items-center gap-2 flex-wrap">
-                                                            @if ($rule->status === 'open')
-                                                                <span class="badge-open">Open</span>
-                                                            @elseif($rule->status === 'limited')
-                                                                <span class="badge-limited">Limited</span>
-                                                            @else
-                                                                <span class="badge-closed">Closed</span>
-                                                            @endif
+                                <div id="scheduleRulesMobileList" class="md:hidden">
+                                    @foreach ($schedules as $rule)
+                                        @php
+                                            $ruleStatusClass = match ($rule->status) {
+                                                'open' => 'status-active',
+                                                'limited' => 'status-pending',
+                                                default => 'status-inactive',
+                                            };
+                                            $ruleStatusLabel = match ($rule->status) {
+                                                'open' => 'Open',
+                                                'limited' => 'Limited',
+                                                default => 'Closed',
+                                            };
+                                            $ruleStateClass = $rule->is_active ? 'status-active' : 'status-pending';
+                                        @endphp
 
-                                                            @if ($rule->is_active)
-                                                                <span class="status-pill status-active">Active</span>
-                                                            @else
-                                                                <span class="badge-closed">Inactive</span>
-                                                            @endif
+                                        <div class="table-list-row">
+                                            <div class="table-record-card-layout">
+
+                                                <div class="table-record-content">
+
+                                                    <div class="table-record-header">
+
+                                                        <div class="table-primary">
+                                                            <strong>{{ $rule->days_label }}</strong>
                                                         </div>
+
+                                                        <div class="global-info-group">
+                                                            <span class="status-pill {{ $ruleStatusClass }}">
+                                                                {{ $ruleStatusLabel }}
+                                                            </span>
+
+                                                            <span class="status-pill {{ $ruleStateClass }}">
+                                                                {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                                            </span>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="table-record-meta">
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Opens
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                {{ $rule->open_time ? date('g:i A', strtotime($rule->open_time)) : '—' }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Closes
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                {{ $rule->close_time ? date('g:i A', strtotime($rule->close_time)) : '—' }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Lunch Break
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                @if ($rule->break_time && $rule->break_time !== 'none')
+                                                                    @php [$bs,$be] = explode('-', $rule->break_time); @endphp
+
+                                                                    {{ date('g:i A', strtotime(trim($bs) . ':00')) }}
+                                                                    –
+                                                                    {{ date('g:i A', strtotime(trim($be) . ':00')) }}
+                                                                @else
+                                                                    —
+                                                                @endif
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Max Slots
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                <strong>{{ $rule->max_slots }}</strong>
+
+                                                                @if ($rule->status !== 'closed')
+                                                                    <span class="cap-bar" aria-hidden="true">
+                                                                        <span class="cap-fill"
+                                                                            style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                        </span>
+                                                                    </span>
+                                                                @endif
+                                                            </span>
+                                                        </div>
+
                                                     </div>
                                                 </div>
 
-                                                <div class="schedule-rule-card-meta">
-                                                    <div>
-                                                        <div class="schedule-rule-card-label">Opens</div>
-                                                        <div class="schedule-rule-card-value">
-                                                            {{ $rule->open_time ? date('g:i A', strtotime($rule->open_time)) : '—' }}
-                                                        </div>
-                                                    </div>
+                                                <div class="table-record-actions">
+                                                    <div class="ui-action-group">
 
-                                                    <div>
-                                                        <div class="schedule-rule-card-label">Closes</div>
-                                                        <div class="schedule-rule-card-value">
-                                                            {{ $rule->close_time ? date('g:i A', strtotime($rule->close_time)) : '—' }}
-                                                        </div>
-                                                    </div>
+                                                        <button type="button"
+                                                            onclick='openRuleModal(
+                            "edit",
+                            {{ $rule->id }},
+                            {{ json_encode($rule) }}
+                        )'
+                                                            class="ui-action-btn ui-action-edit"
+                                                            data-tooltip="Edit schedule" aria-label="Edit schedule">
 
-                                                    <div>
-                                                        <div class="schedule-rule-card-label">Lunch Break</div>
-                                                        <div class="schedule-rule-card-value">
-                                                            @if ($rule->break_time && $rule->break_time !== 'none')
-                                                                @php [$bs,$be]=explode('-', $rule->break_time); @endphp
-                                                                {{ date('g:i A', strtotime(trim($bs) . ':00')) }} –
-                                                                {{ date('g:i A', strtotime(trim($be) . ':00')) }}
-                                                            @else
-                                                                —
-                                                            @endif
-                                                        </div>
-                                                    </div>
+                                                            <i class="fa-solid fa-pen"></i>
+                                                        </button>
 
-                                                    <div>
-                                                        <div class="schedule-rule-card-label">Max Slots</div>
-                                                        <div class="schedule-rule-card-value flex items-center gap-2">
-                                                            <span
-                                                                class="font-bold text-[#8B0000]">{{ $rule->max_slots }}</span>
-                                                            @if ($rule->status !== 'closed')
-                                                                <div class="cap-bar w-16">
-                                                                    <div class="cap-fill"
-                                                                        style="width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
-                                                                    </div>
-                                                                </div>
-                                                            @endif
-                                                        </div>
+                                                        <button type="button" class="ui-action-btn ui-action-delete"
+                                                            data-tooltip="Delete schedule" aria-label="Delete schedule"
+                                                            onclick='openScheduleDeleteModal(
+                            @json(route($clinicScheduleRouteNames['destroy'], $rule)),
+                            @json($rule->days_label)
+                        )'>
+
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+
                                                     </div>
                                                 </div>
 
-                                                <div class="schedule-rule-card-actions ui-action-group">
-                                                    <button type="button"
-                                                        onclick='openRuleModal(
-        "edit",
-        {{ $rule->id }},
-        {{ json_encode($rule) }}
-    )'
-                                                        class="ui-action-btn ui-action-edit" data-tooltip="Edit schedule"
-                                                        aria-label="Edit schedule">
-
-                                                        <i class="fa-solid fa-pen"></i>
-                                                    </button>
-
-                                                    <button type="button" class="ui-action-btn ui-action-delete"
-                                                        data-tooltip="Delete schedule" aria-label="Delete schedule"
-                                                        onclick='openScheduleDeleteModal(
-        @json(route($clinicScheduleRouteNames['destroy'], $rule)), @json($rule->days_label)
-                                            )'>
-
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @else
-                                <div id="scheduleRulesEmptyState"
-                                    class="empty-state-host clinic-schedule-empty-state-host"></div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-
-                        <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                            <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-                                <div class="flex items-center gap-2"><i class="fa-solid fa-clock text-[#8B0000]"></i>
-                                    <h2 class="font-bold text-gray-800 text-sm">Clinic Hours</h2>
-                                </div>
-                                <button type="button" onclick="openRuleModal()" class="ui-btn ui-btn-edit ui-btn-sm">
-                                    <i class="fa-solid fa-pen"></i>
-                                    <span>Edit</span>
-                                </button>
-                            </div>
-                            <div class="p-4 space-y-0.5">
-                                @foreach ($dayNames as $fullName => $abbr)
-                                    @php $s = $scheduleByDay[$abbr] ?? null; @endphp
-                                    <div
-                                        class="flex justify-between items-center py-1.5 {{ !$loop->last ? 'border-b border-gray-50' : '' }}">
-                                        <span class="text-xs font-semibold text-gray-600">{{ $fullName }}</span>
-                                        @if ($s && $s->status !== 'closed')
-                                            <span class="text-xs font-bold text-[#8B0000]">{{ $s->hours_range }}</span>
-                                        @else
-                                            <span class="text-xs font-medium text-gray-400">Closed</span>
-                                        @endif
-                                    </div>
-                                @endforeach
-                                @if ($breakSchedule)
-                                    <div class="pt-2 mt-1 border-t border-gray-100">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-xs text-gray-400 italic flex items-center gap-1"><i
-                                                    class="fa-solid fa-mug-hot text-yellow-400"></i> Lunch</span>
-                                            @php [$bs,$be]=explode('-',$breakSchedule->break_time); @endphp
-                                            <span
-                                                class="text-xs font-medium text-gray-500">{{ date('g:i A', strtotime(trim($bs) . ':00')) }}
-                                                – {{ date('g:i A', strtotime(trim($be) . ':00')) }}</span>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                            <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between gap-3 flex-wrap">
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-ban text-[#8B0000]"></i>
-                                    <h2 class="font-bold text-gray-800 text-sm">Blocked Dates</h2>
-                                </div>
-
-                                <div class="flex items-center gap-2">
-                                    <button type="button" onclick="openBlockModal()"
-                                        class="ui-btn ui-btn-primary ui-btn-sm">
-                                        <i class="fa-solid fa-plus"></i>
-                                        <span>Add</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="p-4">
-                                @if ($blockedDates->count())
-                                    <div id="blockedDatesListView" class="blocked-dates-view">
-                                        @foreach ($blockedDates as $blocked)
-                                            @php
-                                                $bd = \Carbon\Carbon::parse($blocked->date);
-                                                $badgeCls = match ($blocked->reason) {
-                                                    'Holiday' => 'badge-holiday',
-                                                    'Dentist Unavailable' => 'badge-limited',
-                                                    default => 'badge-closed',
-                                                };
-                                            @endphp
-
-                                            <div
-                                                class="blocked-list-item flex items-start gap-3 py-2.5 {{ !$loop->last ? 'border-b border-gray-50' : '' }}">
-                                                <div
-                                                    class="blocked-date-pill w-9 h-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0 text-[#8B0000] text-xs font-bold">
-                                                    {{ $bd->day }}
-                                                </div>
-
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="blocked-title text-xs font-bold text-gray-800 truncate">
-                                                        {{ $bd->format('D, M j, Y') }}
-                                                    </p>
-                                                    <span
-                                                        class="{{ $badgeCls }} mt-0.5 inline-block">{{ $blocked->reason }}</span>
-                                                    @if ($blocked->note)
-                                                        <p
-                                                            class="blocked-note text-[10px] text-gray-400 mt-0.5 italic truncate">
-                                                            {{ $blocked->note }}
-                                                        </p>
-                                                    @endif
-                                                </div>
-
-                                                <form action="{{ route($clinicScheduleRouteNames['unblock'], $blocked) }}"
-                                                    method="POST">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="ui-action-btn ui-action-delete"
-                                                        data-tooltip="Remove blocked date"
-                                                        aria-label="Remove blocked date">
-
-                                                        <i class="fa-solid fa-xmark"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <div class="flex flex-col items-center justify-center py-10 text-center">
-                                        <i class="fa-solid fa-check-circle text-4xl text-green-400 mb-3"></i>
-                                        <p class="text-sm text-gray-400">No blocked dates</p>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                            <div class="px-5 py-4 border-b bg-gray-50">
-                                <div class="flex items-center gap-2"><i
-                                        class="fa-solid fa-umbrella-beach text-[#8B0000]"></i>
-                                    <h2 class="font-bold text-gray-800 text-sm">Upcoming Holidays</h2>
-                                </div>
-                            </div>
-                            <div class="p-4">
-                                @php
-                                    $today = now()->startOfDay();
-                                    $MONTHS_SHORT = [
-                                        'Jan',
-                                        'Feb',
-                                        'Mar',
-                                        'Apr',
-                                        'May',
-                                        'Jun',
-                                        'Jul',
-                                        'Aug',
-                                        'Sep',
-                                        'Oct',
-                                        'Nov',
-                                        'Dec',
-                                    ];
-                                    $upcoming = collect($philippineHolidays)
-                                    ->filter(
-                                        fn($holiday, $date) =>
-                                            \Carbon\Carbon::parse($date)
-                                                ->startOfDay()
-                                                ->gte($today)
-                                    )
-                                    ->sortKeys()
-                                    ->take(5);
-                                @endphp
-                                @forelse($upcoming as $hDate => $holiday)
-                                    @php
-                                        $hC = \Carbon\Carbon::parse($hDate);
-
-                                        $diff = (int) $today->diffInDays(
-                                            $hC,
-                                            false
-                                        );
-
-                                        $holidayName = is_array($holiday)
-                                            ? ($holiday['name'] ?? 'Philippine Holiday')
-                                            : (string) $holiday;
-
-                                        $isBlockedHoliday = is_array($holiday)
-                                            ? ($holiday['is_blocked_for_booking'] ?? true)
-                                            : true;
-                                    @endphp
-
-                                    <div
-                                        class="holiday-item flex items-center gap-3 py-2 border-b border-gray-50 last:border-b-0">
-
-                                        <div class="w-10 text-center flex-shrink-0">
-                                            <div class="month text-[10px] font-bold uppercase text-[#8B0000]">
-                                                {{ $MONTHS_SHORT[$hC->month - 1] }}
-                                            </div>
-
-                                            <div class="day text-xl font-extrabold text-gray-800 leading-tight">
-                                                {{ $hC->day }}
                                             </div>
                                         </div>
-
-                                        <div class="flex-1 min-w-0">
-                                            <p class="holiday-title text-xs font-semibold text-gray-800 truncate">
-                                                {{ $holidayName }}
-                                            </p>
-
-                                            <p class="holiday-meta text-[10px] text-gray-400">
-                                                {{ $diff === 0 ? 'Today' : ($diff === 1 ? 'Tomorrow' : "In $diff days") }}
-                                            </p>
-                                        </div>
-
-                                        <span
-                                            class="{{ $isBlockedHoliday ? 'holiday-badge badge-holiday' : 'badge-open' }} flex-shrink-0">
-                                            {{ $isBlockedHoliday ? 'Non-Working' : 'Working Holiday' }}
-                                        </span>
-                                    </div>
-                                @empty
-                                    <p class="text-xs text-gray-400 text-center py-4">No upcoming holidays.</p>
-                                @endforelse
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
 
-                    </div>
-                    <section class="card lg:col-span-3 reserved-periods-wide-card">
-                        <div class="card-header cs-rules-card-header">
+                            <div id="scheduleRulesGridView" class="table-grid-view" hidden>
+                                <div class="table-record-grid">
+                                    @foreach ($schedules as $rule)
+                                        @php
+                                            $ruleStatusClass = match ($rule->status) {
+                                                'open' => 'status-active',
+                                                'limited' => 'status-pending',
+                                                default => 'status-inactive',
+                                            };
+                                            $ruleStatusLabel = match ($rule->status) {
+                                                'open' => 'Open',
+                                                'limited' => 'Limited',
+                                                default => 'Closed',
+                                            };
+                                            $ruleStateClass = $rule->is_active ? 'status-active' : 'status-pending';
+                                        @endphp
+
+                                        <article class="table-record-card">
+                                            <div class="table-record-card-layout">
+                                                <div class="table-record-content">
+                                                    <div class="table-record-header">
+                                                        <div class="table-primary">
+                                                            <h3 class="table-record-title">{{ $rule->days_label }}
+                                                            </h3>
+                                                        </div>
+
+                                                        <div class="global-info-group">
+                                                            <span class="status-pill {{ $ruleStatusClass }}">
+                                                                {{ $ruleStatusLabel }}
+                                                            </span>
+                                                            <span class="status-pill {{ $ruleStateClass }}">
+                                                                {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="table-record-meta">
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Opens</span>
+                                                            <span class="table-record-value">
+                                                                {{ $rule->open_time ? date('g:i A', strtotime($rule->open_time)) : '—' }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Closes</span>
+                                                            <span class="table-record-value">
+                                                                {{ $rule->close_time ? date('g:i A', strtotime($rule->close_time)) : '—' }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Lunch Break</span>
+                                                            <span class="table-record-value">
+                                                                @if ($rule->break_time && $rule->break_time !== 'none')
+                                                                    @php [$bs,$be]=explode('-', $rule->break_time); @endphp
+                                                                    {{ date('g:i A', strtotime(trim($bs) . ':00')) }} –
+                                                                    {{ date('g:i A', strtotime(trim($be) . ':00')) }}
+                                                                @else
+                                                                    —
+                                                                @endif
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Max Slots
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                <strong>{{ $rule->max_slots }}</strong>
+
+                                                                @if ($rule->status !== 'closed')
+                                                                    <span class="cap-bar" aria-hidden="true">
+                                                                        <span class="cap-fill"
+                                                                            style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                        </span>
+                                                                    </span>
+                                                                @endif
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="table-record-actions">
+                                                    <div class="ui-action-group">
+                                                        <button type="button"
+                                                            onclick='openRuleModal(
+                                                                        "edit",
+                                                                        {{ $rule->id }},
+                                                                        {{ json_encode($rule) }}
+                                                                    )'
+                                                            class="ui-action-btn ui-action-edit"
+                                                            data-tooltip="Edit schedule" aria-label="Edit schedule">
+                                                            <i class="fa-solid fa-pen"></i>
+                                                        </button>
+
+                                                        <button type="button" class="ui-action-btn ui-action-delete"
+                                                            data-tooltip="Delete schedule" aria-label="Delete schedule"
+                                                            onclick='openScheduleDeleteModal(
+                                                                        @json(route($clinicScheduleRouteNames['destroy'], $rule)),
+                                                                        @json($rule->days_label)
+                                                                    )'>
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <div id="scheduleRulesEmptyState" class="empty-state-host"></div>
+                        @endif
+                    </section>
+
+                    <section id="reservedPeriodsCard" class="card">
+                        <div class="card-header">
                             <div class="card-header-left">
                                 <span class="card-header-icon" aria-hidden="true">
                                     <i class="fa-solid fa-calendar-check"></i>
                                 </span>
+
                                 <h2 class="card-title">Reserved Booking Periods</h2>
                             </div>
-                            <div class="card-header-right cs-rules-header-actions reserved-period-header-actions">
-                                <span class="cs-rules-count">
-                                    {{ $reservedBookingPeriods->count() }}
-                                    {{ \Illuminate\Support\Str::plural('period', $reservedBookingPeriods->count()) }}
-                                </span>
+
+                            <div class="card-header-right">
 
                                 <x-view-toggle id="reservedPeriodsViewToggle" storage-key="reservedPeriodsView"
                                     list-view="#reservedPeriodsListView" grid-view="#reservedPeriodsGridView" />
@@ -739,11 +1090,11 @@
                             </div>
                         </div>
 
-                        <div class="card-body reserved-periods-card-body">
-                            @if ($reservedBookingPeriods->count())
-                                <div id="reservedPeriodsListView" class="reserved-periods-view">
-                                    <div class="overflow-x-auto px-2 pb-2 sm:px-0 sm:pb-0">
-                                        <table class="data-table sched-table reserved-period-table">
+                        @if ($reservedBookingPeriods->count())
+                            <div id="reservedPeriodsListView" class="table-list-view reserved-periods-list-view">
+                                <div class="reserved-periods-desktop-list">
+                                    <div class="table-scroll">
+                                        <table class="data-table">
                                             <thead>
                                                 <tr>
                                                     <th>Schedule</th>
@@ -787,60 +1138,90 @@
                                                                 ->values()
                                                                 ->all(),
                                                         ];
+                                                        $periodStatusClass = $isPastPeriod
+                                                            ? 'status-inactive'
+                                                            : ($period->is_active
+                                                                ? 'status-active'
+                                                                : 'status-pending');
+                                                        $periodStatusLabel = $isPastPeriod
+                                                            ? 'Past'
+                                                            : ($period->is_active
+                                                                ? 'Active'
+                                                                : 'Inactive');
                                                     @endphp
+
                                                     <tr>
-                                                        <td data-label="Schedule" class="reserved-period-schedule-cell">
-                                                            <strong
-                                                                class="text-gray-800">{{ \Carbon\Carbon::parse($period->reserved_date)->format('M d, Y') }}</strong>
-                                                            <div class="reserved-period-time">
-                                                                <i class="fa-regular fa-clock" aria-hidden="true"></i>
-                                                                {{ date('g:i A', strtotime($period->start_time)) }}–{{ date('g:i A', strtotime($period->end_time)) }}
+                                                        <td data-label="Schedule">
+                                                            <div class="flex flex-col items-start gap-1">
+
+                                                                <div class="table-primary">
+                                                                    <strong>
+                                                                        {{ \Carbon\Carbon::parse($period->reserved_date)->format('M d, Y') }}
+                                                                    </strong>
+                                                                </div>
+
+                                                                <div class="table-date">
+                                                                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+
+                                                                    <span>
+                                                                        {{ date('g:i A', strtotime($period->start_time)) }}
+                                                                        –
+                                                                        {{ date('g:i A', strtotime($period->end_time)) }}
+                                                                    </span>
+                                                                </div>
+
                                                             </div>
                                                         </td>
-                                                        <td data-label="Purpose">
-                                                            <div class="font-semibold text-gray-800">{{ $period->title }}
+                                                        <td data-label="Purpose" class="table-cell-main">
+                                                            <div class="table-primary">
+                                                                <strong>{{ $period->title }}</strong>
                                                             </div>
-                                                            <div class="text-xs text-gray-400 mt-0.5 reserved-period-note">
-                                                                <i class="fa-solid fa-tooth" aria-hidden="true"></i>
-                                                                {{ $period->allowed_services === null ? 'All dental services' : implode(', ', $period->allowed_services) }}
+                                                            <div class="global-info-group mt-1">
+                                                                @if ($period->allowed_services === null)
+                                                                    <span class="service-badge service-badge-default">
+                                                                        All dental services
+                                                                    </span>
+                                                                @else
+                                                                    @foreach ($period->allowed_services as $service)
+                                                                        <span
+                                                                            class="service-badge {{ $serviceBadgeClass($service) }}">
+                                                                            {{ $service }}
+                                                                        </span>
+                                                                    @endforeach
+                                                                @endif
                                                             </div>
                                                             @if ($period->notes)
-                                                                <div
-                                                                    class="text-xs text-gray-400 mt-0.5 reserved-period-note">
+                                                                <span class="global-info-subvalue">
                                                                     {{ $period->notes }}
-                                                                </div>
+                                                                </span>
                                                             @endif
                                                         </td>
                                                         <td data-label="Target Group">
-                                                            <span
-                                                                class="reserved-target-badge">{{ $period->target_label }}</span>
+                                                            <span class="status-pill status-all">
+                                                                {{ $period->target_label }}
+                                                            </span>
                                                         </td>
                                                         <td data-label="Booking">
                                                             {{ $period->booking_mode === 'timeslot' ? 'Date + timeslot' : 'Date only' }}
                                                             @if ($period->booking_mode === 'timeslot')
-                                                                <div class="text-xs text-gray-400 mt-0.5">
+                                                                <span class="global-info-subvalue">
                                                                     {{ $period->slots->count() }} selectable
                                                                     {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
                                                                     · {{ $period->timeslot_duration_minutes }} min each
-                                                                </div>
+                                                                </span>
                                                             @endif
                                                         </td>
                                                         <td data-label="Capacity">
-                                                            <strong
-                                                                class="text-[#8B0000]">{{ $period->max_capacity }}</strong>
-                                                            <span class="text-xs text-gray-400">patients</span>
+                                                            <strong>{{ $period->max_capacity }}</strong>
+                                                            <span class="global-info-subvalue">patients</span>
                                                         </td>
                                                         <td data-label="Status">
-                                                            @if ($isPastPeriod)
-                                                                <span class="badge-closed">Past</span>
-                                                            @elseif ($period->is_active)
-                                                                <span class="status-pill status-active">Active</span>
-                                                            @else
-                                                                <span class="badge-closed">Inactive</span>
-                                                            @endif
+                                                            <span class="status-pill {{ $periodStatusClass }}">
+                                                                {{ $periodStatusLabel }}
+                                                            </span>
                                                         </td>
                                                         @if ($canManageReservedPeriods)
-                                                            <td data-label="Actions">
+                                                            <td data-label="Actions" class="table-action-cell">
                                                                 <div class="ui-action-group">
                                                                     @if ($canUpdateReservedPeriods && !$isPastPeriod)
                                                                         <button type="button"
@@ -858,9 +1239,9 @@
                                                                             data-tooltip="Remove reserved period"
                                                                             aria-label="Remove reserved period"
                                                                             onclick='openReservedPeriodDeleteModal(
-                                                    @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
-                                                    @json($period->title)
-                                                )'>
+                                                                                @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
+                                                                                @json($period->title)
+                                                                            )'>
                                                                             <i class="fa-solid fa-trash"></i>
                                                                         </button>
                                                                     @endif
@@ -874,154 +1255,331 @@
                                     </div>
                                 </div>
 
-                                <div id="reservedPeriodsGridView" class="reserved-periods-view" hidden>
-                                    <div class="schedule-rules-grid reserved-periods-grid">
-                                        @foreach ($reservedBookingPeriods as $period)
-                                            @php
-                                                $isPastPeriod = \Carbon\Carbon::parse($period->reserved_date)
-                                                    ->startOfDay()
-                                                    ->lt(\Carbon\Carbon::today());
-                                                $periodPayload = [
-                                                    'id' => $period->id,
-                                                    'title' => $period->title,
-                                                    'is_active' => (bool) $period->is_active,
-                                                    'reserved_date' => optional($period->reserved_date)->format(
-                                                        'Y-m-d',
-                                                    ),
-                                                    'start_time' => $period->start_time,
-                                                    'end_time' => $period->end_time,
-                                                    'target_patient_type' => $period->target_patient_type,
-                                                    'allowed_services' => $period->allowed_services,
-                                                    'program_code' => $period->program_code,
-                                                    'year_level' => $period->year_level,
-                                                    'section' => $period->section,
-                                                    'max_capacity' => $period->max_capacity,
-                                                    'timeslot_duration_minutes' => $period->timeslot_duration_minutes,
-                                                    'notes' => $period->notes,
-                                                    'booking_mode' => $period->booking_mode,
-                                                    'timeslots' => $period->slots
-                                                        ->map(fn($slot) => ['time' => $slot->slot_time])
-                                                        ->values()
-                                                        ->all(),
-                                                ];
-                                            @endphp
-                                            <article class="schedule-rule-card reserved-period-card">
-                                                <div class="schedule-rule-card-top">
-                                                    <div class="reserved-period-card-heading">
-                                                        <span class="reserved-period-card-date">
-                                                            <i class="fa-regular fa-calendar"></i>
-                                                            {{ \Carbon\Carbon::parse($period->reserved_date)->format('M d, Y') }}
-                                                        </span>
-                                                        <h3 class="schedule-rule-card-title">{{ $period->title }}</h3>
+                                <div class="reserved-periods-compact-list">
+                                    @foreach ($reservedBookingPeriods as $period)
+                                        @php
+                                            $isPastPeriod = \Carbon\Carbon::parse($period->reserved_date)
+                                                ->startOfDay()
+                                                ->lt(\Carbon\Carbon::today());
+                                            $periodPayload = [
+                                                'id' => $period->id,
+                                                'title' => $period->title,
+                                                'is_active' => (bool) $period->is_active,
+                                                'reserved_date' => optional($period->reserved_date)->format('Y-m-d'),
+                                                'start_time' => $period->start_time,
+                                                'end_time' => $period->end_time,
+                                                'target_patient_type' => $period->target_patient_type,
+                                                'allowed_services' => $period->allowed_services,
+                                                'program_code' => $period->program_code,
+                                                'year_level' => $period->year_level,
+                                                'section' => $period->section,
+                                                'max_capacity' => $period->max_capacity,
+                                                'timeslot_duration_minutes' => $period->timeslot_duration_minutes,
+                                                'notes' => $period->notes,
+                                                'booking_mode' => $period->booking_mode,
+                                                'timeslots' => $period->slots
+                                                    ->map(fn($slot) => ['time' => $slot->slot_time])
+                                                    ->values()
+                                                    ->all(),
+                                            ];
+                                            $periodStatusClass = $isPastPeriod
+                                                ? 'status-inactive'
+                                                : ($period->is_active
+                                                    ? 'status-active'
+                                                    : 'status-pending');
+                                            $periodStatusLabel = $isPastPeriod
+                                                ? 'Past'
+                                                : ($period->is_active
+                                                    ? 'Active'
+                                                    : 'Inactive');
+                                        @endphp
+
+                                        <div class="table-list-row reserved-periods-list-row">
+                                            <div class="reserved-periods-list-layout">
+                                                <div class="reserved-periods-list-heading">
+                                                    <div class="table-primary">
+                                                        <strong>{{ $period->title }}</strong>
                                                     </div>
 
-                                                    @if ($isPastPeriod)
-                                                        <span class="badge-closed">Past</span>
-                                                    @elseif ($period->is_active)
-                                                        <span class="status-pill status-active">Active</span>
-                                                    @else
-                                                        <span class="badge-closed">Inactive</span>
-                                                    @endif
+                                                    <div class="global-info-group reserved-periods-service-badges">
+                                                        @if ($period->allowed_services === null)
+                                                            <span class="service-badge service-badge-default">
+                                                                All dental services
+                                                            </span>
+                                                        @else
+                                                            @foreach ($period->allowed_services as $service)
+                                                                <span
+                                                                    class="service-badge {{ $serviceBadgeClass($service) }}">
+                                                                    {{ $service }}
+                                                                </span>
+                                                            @endforeach
+                                                        @endif
+                                                    </div>
                                                 </div>
 
-                                                <span class="reserved-target-badge">{{ $period->target_label }}</span>
+                                                <div class="reserved-periods-list-status">
+                                                    <span class="status-pill {{ $periodStatusClass }}">
+                                                        {{ $periodStatusLabel }}
+                                                    </span>
+                                                </div>
 
-                                                <div class="schedule-rule-card-meta reserved-period-card-meta">
-                                                    <div>
-                                                        <div class="schedule-rule-card-label">Reserved Time</div>
-                                                        <div class="schedule-rule-card-value reserved-period-card-value">
-                                                            <i class="fa-regular fa-clock"></i>
-                                                            {{ date('g:i A', strtotime($period->start_time)) }}–{{ date('g:i A', strtotime($period->end_time)) }}
-                                                        </div>
+                                                <div class="reserved-periods-list-details">
+                                                    <div class="reserved-periods-list-detail">
+                                                        <span class="reserved-periods-list-key">Schedule</span>
+                                                        <span class="reserved-periods-list-value">
+                                                            {{ \Carbon\Carbon::parse($period->reserved_date)->format('M d, Y') }}
+                                                            <span class="reserved-periods-list-subvalue">
+                                                                {{ date('g:i A', strtotime($period->start_time)) }}–{{ date('g:i A', strtotime($period->end_time)) }}
+                                                            </span>
+                                                        </span>
                                                     </div>
-                                                    <div>
-                                                        <div class="schedule-rule-card-label">Booking</div>
-                                                        <div class="schedule-rule-card-value">
+
+                                                    <div class="reserved-periods-list-detail">
+                                                        <span class="reserved-periods-list-key">Target</span>
+                                                        <span class="reserved-periods-list-value">
+                                                            {{ $period->target_label }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="reserved-periods-list-detail">
+                                                        <span class="reserved-periods-list-key">Booking</span>
+                                                        <span class="reserved-periods-list-value">
                                                             {{ $period->booking_mode === 'timeslot' ? 'Date + timeslot' : 'Date only' }}
                                                             @if ($period->booking_mode === 'timeslot')
-                                                                <span class="reserved-period-card-sub">
-                                                                    {{ $period->slots->count() }} slots ·
-                                                                    {{ $period->timeslot_duration_minutes }} min
+                                                                <span class="reserved-periods-list-subvalue">
+                                                                    {{ $period->slots->count() }} selectable
+                                                                    {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
+                                                                    · {{ $period->timeslot_duration_minutes }} min each
                                                                 </span>
                                                             @endif
-                                                        </div>
+                                                        </span>
                                                     </div>
-                                                    <div>
-                                                        <div class="schedule-rule-card-label">Capacity</div>
-                                                        <div class="schedule-rule-card-value">
-                                                            <strong
-                                                                class="text-[#8B0000]">{{ $period->max_capacity }}</strong>
-                                                            patients
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div class="schedule-rule-card-label">Dental Services</div>
-                                                        <div class="schedule-rule-card-value">
-                                                            {{ $period->allowed_services === null ? 'All dental services' : implode(', ', $period->allowed_services) }}
-                                                        </div>
+
+                                                    <div class="reserved-periods-list-detail">
+                                                        <span class="reserved-periods-list-key">Capacity</span>
+                                                        <span class="reserved-periods-list-value">
+                                                            <strong>{{ $period->max_capacity }}</strong> patients
+                                                        </span>
                                                     </div>
                                                 </div>
 
                                                 @if ($period->notes)
-                                                    <p class="reserved-period-card-note">{{ $period->notes }}</p>
+                                                    <div class="reserved-periods-list-note">
+                                                        {{ $period->notes }}
+                                                    </div>
                                                 @endif
 
                                                 @if ($canManageReservedPeriods)
-                                                    <div class="schedule-rule-card-actions ui-action-group">
-                                                        @if ($canUpdateReservedPeriods && !$isPastPeriod)
-                                                            <button type="button"
-                                                                onclick='openReservedPeriodModal("edit", {{ $period->id }}, @json($periodPayload))'
-                                                                class="ui-action-btn ui-action-edit"
-                                                                data-tooltip="Edit reserved period"
-                                                                aria-label="Edit reserved period">
-                                                                <i class="fa-solid fa-pen"></i>
-                                                            </button>
-                                                        @endif
+                                                    <div class="reserved-periods-list-actions table-action-cell">
+                                                        <div class="ui-action-group">
+                                                            @if ($canUpdateReservedPeriods && !$isPastPeriod)
+                                                                <button type="button"
+                                                                    onclick='openReservedPeriodModal("edit", {{ $period->id }}, @json($periodPayload))'
+                                                                    class="ui-action-btn ui-action-edit"
+                                                                    data-tooltip="Edit reserved period"
+                                                                    aria-label="Edit reserved period">
+                                                                    <i class="fa-solid fa-pen"></i>
+                                                                </button>
+                                                            @endif
 
-                                                        @if ($canDeleteReservedPeriods)
-                                                            <button type="button" class="ui-action-btn ui-action-delete"
-                                                                data-tooltip="Remove reserved period"
-                                                                aria-label="Remove reserved period"
-                                                                onclick='openReservedPeriodDeleteModal(
-                                            @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
-                                            @json($period->title)
-                                        )'>
-                                                                <i class="fa-solid fa-trash"></i>
-                                                            </button>
-                                                        @endif
+                                                            @if ($canDeleteReservedPeriods)
+                                                                <button type="button"
+                                                                    class="ui-action-btn ui-action-delete"
+                                                                    data-tooltip="Remove reserved period"
+                                                                    aria-label="Remove reserved period"
+                                                                    onclick='openReservedPeriodDeleteModal(
+                                                                        @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
+                                                                        @json($period->title)
+                                                                    )'>
+                                                                    <i class="fa-solid fa-trash"></i>
+                                                                </button>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 @endif
-                                            </article>
-                                        @endforeach
-                                    </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @else
-                                <div id="reservedPeriodsEmptyState"
-                                    class="empty-state-host clinic-schedule-empty-state-host"></div>
-                            @endif
-                        </div>
+                            </div>
+
+                            <div id="reservedPeriodsGridView" class="table-grid-view" hidden>
+                                <div class="table-record-grid">
+                                    @foreach ($reservedBookingPeriods as $period)
+                                        @php
+                                            $isPastPeriod = \Carbon\Carbon::parse($period->reserved_date)
+                                                ->startOfDay()
+                                                ->lt(\Carbon\Carbon::today());
+                                            $periodPayload = [
+                                                'id' => $period->id,
+                                                'title' => $period->title,
+                                                'is_active' => (bool) $period->is_active,
+                                                'reserved_date' => optional($period->reserved_date)->format('Y-m-d'),
+                                                'start_time' => $period->start_time,
+                                                'end_time' => $period->end_time,
+                                                'target_patient_type' => $period->target_patient_type,
+                                                'allowed_services' => $period->allowed_services,
+                                                'program_code' => $period->program_code,
+                                                'year_level' => $period->year_level,
+                                                'section' => $period->section,
+                                                'max_capacity' => $period->max_capacity,
+                                                'timeslot_duration_minutes' => $period->timeslot_duration_minutes,
+                                                'notes' => $period->notes,
+                                                'booking_mode' => $period->booking_mode,
+                                                'timeslots' => $period->slots
+                                                    ->map(fn($slot) => ['time' => $slot->slot_time])
+                                                    ->values()
+                                                    ->all(),
+                                            ];
+                                            $periodStatusClass = $isPastPeriod
+                                                ? 'status-inactive'
+                                                : ($period->is_active
+                                                    ? 'status-active'
+                                                    : 'status-pending');
+                                            $periodStatusLabel = $isPastPeriod
+                                                ? 'Past'
+                                                : ($period->is_active
+                                                    ? 'Active'
+                                                    : 'Inactive');
+                                        @endphp
+
+                                        <article class="table-record-card">
+                                            <div class="table-record-card-layout">
+                                                <div class="table-record-content">
+                                                    <div class="table-record-header">
+                                                        <div class="table-primary">
+                                                            <h3 class="table-record-title">{{ $period->title }}</h3>
+                                                        </div>
+
+                                                        <span class="status-pill {{ $periodStatusClass }}">
+                                                            {{ $periodStatusLabel }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="global-info-group">
+                                                        @if ($period->allowed_services === null)
+                                                            <span class="service-badge service-badge-default">
+                                                                All dental services
+                                                            </span>
+                                                        @else
+                                                            @foreach ($period->allowed_services as $service)
+                                                                <span
+                                                                    class="service-badge {{ $serviceBadgeClass($service) }}">
+                                                                    {{ $service }}
+                                                                </span>
+                                                            @endforeach
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="table-record-meta reserved-period-grid-details">
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Schedule</span>
+                                                            <span class="table-record-value">
+                                                                {{ \Carbon\Carbon::parse($period->reserved_date)->format('M d, Y') }},
+                                                                {{ date('g:i A', strtotime($period->start_time)) }}–{{ date('g:i A', strtotime($period->end_time)) }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Target</span>
+                                                            <span class="table-record-value">
+                                                                {{ $period->target_label }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Booking</span>
+                                                            <span class="table-record-value">
+                                                                {{ $period->booking_mode === 'timeslot' ? 'Date + timeslot' : 'Date only' }}
+                                                                @if ($period->booking_mode === 'timeslot')
+                                                                    <span class="global-info-subvalue">
+                                                                        {{ $period->slots->count() }} selectable
+                                                                        {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
+                                                                        · {{ $period->timeslot_duration_minutes }} min
+                                                                        each
+                                                                    </span>
+                                                                @endif
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Capacity</span>
+                                                            <span class="table-record-value">
+                                                                {{ $period->max_capacity }} patients
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    @if ($period->notes)
+                                                        <span class="global-info-subvalue">{{ $period->notes }}</span>
+                                                    @endif
+                                                </div>
+
+                                                @if ($canManageReservedPeriods)
+                                                    <div class="table-record-actions">
+                                                        <div class="ui-action-group">
+                                                            @if ($canUpdateReservedPeriods && !$isPastPeriod)
+                                                                <button type="button"
+                                                                    onclick='openReservedPeriodModal("edit", {{ $period->id }}, @json($periodPayload))'
+                                                                    class="ui-action-btn ui-action-edit"
+                                                                    data-tooltip="Edit reserved period"
+                                                                    aria-label="Edit reserved period">
+                                                                    <i class="fa-solid fa-pen"></i>
+                                                                </button>
+                                                            @endif
+
+                                                            @if ($canDeleteReservedPeriods)
+                                                                <button type="button"
+                                                                    class="ui-action-btn ui-action-delete"
+                                                                    data-tooltip="Remove reserved period"
+                                                                    aria-label="Remove reserved period"
+                                                                    onclick='openReservedPeriodDeleteModal(
+                                                                            @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
+                                                                            @json($period->title)
+                                                                        )'>
+                                                                    <i class="fa-solid fa-trash"></i>
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </article>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <div class="card-body">
+                                <div id="reservedPeriodsEmptyState" class="empty-state-host"></div>
+                            </div>
+                        @endif
                     </section>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="appointmentDetailModal" class="ui-modal cs-modal">
-        <div class="ui-modal-card cs-modal-card cs-detail-modal-card" onclick="event.stopPropagation()">
-            <div class="modal-hdr">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-bold">Appointment Details</h3>
-                        <p class="text-sm text-white/70 mt-0.5">Selected booked slot information</p>
+    <div id="appointmentDetailModal" class="ui-modal">
+        <div class="ui-modal-card appointment-detail-modal-card" onclick="event.stopPropagation()">
+            <div class="modal-hd">
+                <div class="modal-heading">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-calendar-check"></i>
                     </div>
-                    <button onclick="closeAppointmentDetailModal()"
-                        class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30">
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
+
+                    <div class="modal-copy">
+                        <h3 class="modal-title">Appointment Details</h3>
+                        <p class="modal-subtitle">Selected booked slot information</p>
+                    </div>
                 </div>
+
+                <button type="button" class="modal-x" onclick="closeAppointmentDetailModal()"
+                    aria-label="Close appointment details">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
-            <div class="modal-body">
+            <div class="modal-bd">
                 <div class="space-y-4">
                     <div>
                         <label class="form-label">Patient Name</label>
@@ -1048,8 +1606,8 @@
         </div>
     </div>
 
-    <div id="ruleModalBackdrop" class="ui-modal cs-modal cs-rule-modal modal-theme-primary">
-        <div class="ui-modal-card cs-modal-card cs-rule-modal-card" onclick="event.stopPropagation()">
+    <div id="ruleModalBackdrop" class="ui-modal schedule-rule-modal modal-theme-primary">
+        <div class="ui-modal-card schedule-rule-modal-card" onclick="event.stopPropagation()">
 
             <div class="modal-hd">
                 <div class="modal-heading">
@@ -1161,36 +1719,41 @@
 
                                 <div class="global-label-row">
                                     <label class="form-label" for="ruleNotes">
-                                        Notes <span class="field-optional">optional</span>
+                                        Notes
+                                        <span class="field-optional">optional</span>
                                     </label>
-
-                                    <span id="ruleNotesCount" class="char-counter">
-                                        0 / 150 characters
-                                    </span>
                                 </div>
 
-                                <div class="voice-search-row rule-notes-field mb-2" data-voice-field>
+                                <div class="global-voice-row is-textarea rule-notes-field mb-2" data-voice-field>
 
-                                    <div class="global-control-wrap global-form-textarea-wrap rule-notes-textarea-wrap"
-                                        data-clearable-field>
+                                    <div class="global-voice-control" data-clearable-field>
 
-                                        <textarea id="ruleNotes" name="notes" class="form-input-custom global-form-textarea rule-notes-textarea"
-                                            maxlength="150" data-char-limit="150" data-char-counter="#ruleNotesCount"
-                                            placeholder="e.g. Reduced operations due to holiday program." data-clearable-input></textarea>
+                                        <div class="global-form-textarea-wrap rule-notes-textarea-wrap">
 
-                                        <button type="button" id="ruleNotesClearBtn"
-                                            class="search-clear field-clear-btn field-clear-btn--textarea" data-field-clear
-                                            aria-label="Clear notes" title="Clear notes">
+                                            <textarea id="ruleNotes" name="notes" class="form-input-custom global-form-textarea rule-notes-textarea"
+                                                maxlength="150" data-char-limit="150" data-char-counter="#ruleNotesCount"
+                                                placeholder="e.g. Reduced operations due to holiday program." data-clearable-input></textarea>
 
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
+                                            <button type="button" id="ruleNotesClearBtn"
+                                                class="search-clear field-clear-btn field-clear-btn--textarea"
+                                                data-field-clear aria-label="Clear notes" title="Clear notes">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+
+                                            <span id="ruleNotesCount" class="char-counter">
+                                                0 / 150 characters
+                                            </span>
+
+                                        </div>
                                     </div>
 
                                     <x-voice-input target="#ruleNotes" status-id="ruleNotesVoiceStatus"
                                         label="Voice input for schedule notes" title="Voice input" />
-                                    <div id="ruleNotesError" class="global-field-error" data-error-for="ruleNotes"
-                                        aria-hidden="true">
-                                    </div>
+
+                                </div>
+
+                                <div id="ruleNotesError" class="global-field-error" data-error-for="ruleNotes"
+                                    aria-hidden="true">
                                 </div>
                             </div>
                         </div>
@@ -1372,14 +1935,14 @@
         </div>
     </div>
 
-    <div id="blockModalBackdrop" class="ui-modal modal-theme-danger cs-modal cs-block-modal" aria-hidden="true">
+    <div id="blockModalBackdrop" class="ui-modal modal-theme-danger block-date-modal" aria-hidden="true">
 
         <form id="blockDateForm" action="{{ route($clinicScheduleRouteNames['block']) }}" method="POST"
-            class="ui-modal-card modal-lg modal-card-form cs-modal-card cs-block-modal-card" role="dialog"
-            aria-modal="true" aria-labelledby="blockDateModalTitle" data-global-validation data-discard-form
+            class="ui-modal-card modal-md modal-card-form" role="dialog" aria-modal="true"
+            aria-labelledby="blockDateModalTitle" data-global-validation data-discard-form
             data-discard-title="Discard blocked date?" data-discard-subtitle="You have unsaved blocked-date details."
-            data-discard-message="Closing this modal will remove the blocked-date details you entered." novalidate>
-
+            data-discard-message="Closing this modal will remove the blocked-date details you entered."
+            onclick="event.stopPropagation()" novalidate>
             @csrf
 
             <div class="modal-hd">
@@ -1435,7 +1998,7 @@
                         <div class="fp-date-input-wrap">
                             <input type="text" id="blockDate" name="date"
                                 class="form-input-custom fp-date-input js-flatpickr-date-min-today"
-                                min="{{ date('Y-m-d') }}" data-field-label="Date"
+                                data-flatpickr-append-to-body min="{{ date('Y-m-d') }}" data-field-label="Date"
                                 data-required-message="Please select a date." data-validation-rule="clinicFutureOrToday"
                                 placeholder="Select blocked date" required readonly>
                             <i class="fa-solid fa-calendar-days fp-date-icon"></i>
@@ -1473,9 +2036,11 @@
                     </div>
 
                     <div data-global-field>
+
                         <div class="global-label-row">
                             <label class="form-label" for="blockNote">
-                                Note <span class="field-optional">optional</span>
+                                Notes
+                                <span class="field-optional">optional</span>
                             </label>
 
                             <span id="blockNoteCount" class="char-counter">
@@ -1485,32 +2050,35 @@
 
                         <div class="global-voice-row">
                             <div class="global-voice-control">
+
                                 <input type="text" id="blockNote" name="note" class="form-input-custom"
                                     maxlength="150" data-char-limit="150" data-char-counter="#blockNoteCount"
                                     placeholder="e.g. National holiday, maintenance, outreach event...">
+
                             </div>
 
                             <x-voice-input target="#blockNote" status-id="blockNoteVoiceStatus"
                                 label="Voice input for blocked date note" title="Voice input" />
                         </div>
+
                         <div id="blockNoteError" class="global-field-error" data-error-for="blockNote"
                             aria-hidden="true">
                         </div>
+
                         <div class="field-help">
                             Add extra context for admins viewing blocked dates later.
                         </div>
+
                     </div>
                 </div>
             </div>
 
             <div class="modal-ft">
                 <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="blockModalBackdrop">
-
                     Cancel
                 </button>
 
-                <button type="submit" class="ui-btn ui-btn-danger">
-
+                <button type="submit" class="ui-btn ui-btn-primary">
                     <i class="fa-solid fa-ban"></i>
                     <span>Block Date</span>
                 </button>
@@ -1518,8 +2086,8 @@
         </form>
     </div>
 
-    <div id="reservedPeriodModalBackdrop" class="ui-modal cs-modal modal-theme-primary" aria-hidden="true">
-        <div class="ui-modal-card cs-modal-card cs-reserved-modal-card" onclick="event.stopPropagation()">
+    <div id="reservedPeriodModalBackdrop" class="ui-modal modal-theme-primary" aria-hidden="true">
+        <div class="ui-modal-card reserved-period-modal-card" onclick="event.stopPropagation()">
             <div class="modal-hd">
                 <div class="modal-heading">
                     <div class="modal-icon">
@@ -1596,8 +2164,7 @@
                                             class="form-input-custom global-control-with-icon js-flatpickr-date-min-today @error('reserved_date', 'reservedPeriod') is-invalid @enderror"
                                             data-flatpickr-append-to-body
                                             data-flatpickr-disabled-date-tooltip="This date already has an active reserved booking period"
-                                            data-flatpickr-disabled-dates='[]'
-                                            placeholder="Select date">
+                                            data-flatpickr-disabled-dates='[]' placeholder="Select date">
                                     </div>
                                     <div class="global-field-error @error('reserved_date', 'reservedPeriod') show @enderror"
                                         data-error-for="reservedDate"
@@ -1692,7 +2259,8 @@
                                         <option value="1">Active</option>
                                     </select>
                                     <p class="field-help">
-                                        Inactive saves the setup only. Active reserves the selected date and time and sends booking notifications to eligible users.
+                                        Inactive saves the setup only. Active reserves the selected date and time and sends
+                                        booking notifications to eligible users.
                                     </p>
                                     <div class="global-field-error @error('is_active', 'reservedPeriod') show @enderror"
                                         data-error-for="reservedActivationState"
@@ -1739,8 +2307,9 @@
                                     <div data-global-field>
                                         <label for="reservedProgramCode" class="form-label">Program <span
                                                 class="text-red-500">*</span></label>
-                                        <select id="reservedProgramCode" name="program_code" data-field-label="Program"
-                                            class="form-select-custom js-custom-select" data-placeholder="Select program"
+                                        <select id="reservedProgramCode" name="program_code"
+                                            data-field-label="Program" class="form-select-custom js-custom-select"
+                                            data-placeholder="Select program"
                                             onchange="updateReservedStudentTargetDropdowns(this.value, '', '')">
                                             <option value="">Select program</option>
                                             @foreach ($studentTargetOptions->unique('course_code') as $studentOption)
@@ -1765,7 +2334,8 @@
                                                 onchange="updateReservedStudentTargetDropdowns(document.getElementById('reservedProgramCode').value, this.value, '')">
                                                 <option value="">Select year</option>
                                                 @foreach ($studentTargetOptions->pluck('year_level')->filter()->unique()->sort() as $year)
-                                                    <option value="{{ $year }}">Year {{ $year }}</option>
+                                                    <option value="{{ $year }}">Year {{ $year }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                             @error('year_level', 'reservedPeriod')
@@ -1827,7 +2397,8 @@
                             </div>
                             <div>
                                 <div class="modal-section-title">Allowed Dental Services</div>
-                                <div class="modal-section-sub">Select every service patients may choose during this reserved period.</div>
+                                <div class="modal-section-sub">Select every service patients may choose during this
+                                    reserved period.</div>
                             </div>
                         </div>
 
@@ -1849,7 +2420,8 @@
                                 </label>
                             @endforeach
                         </div>
-                        <p class="field-help">Only these services will appear when an eligible patient books this period.</p>
+                        <p class="field-help">Only these services will appear when an eligible patient books this period.
+                        </p>
                         <div class="global-field-error @error('allowed_services', 'reservedPeriod') show @enderror"
                             data-error-for="reserved-allowed-services"
                             aria-hidden="{{ $reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*') ? 'false' : 'true' }}">
@@ -1950,8 +2522,8 @@
                                         value="09:00" placeholder="Select timeslot">
                                 </div>
                             </div>
-                            <button id="reservedAddTimeslotButton" type="button"
-                                class="ui-btn ui-btn-primary" onclick="addReservedTimeslot()">
+                            <button id="reservedAddTimeslotButton" type="button" class="ui-btn ui-btn-primary"
+                                onclick="addReservedTimeslot()">
                                 <i class="fa-solid fa-plus"></i>
                                 <span>Add Timeslot</span>
                             </button>
@@ -2229,29 +2801,65 @@
             return element.innerHTML;
         }
 
-        function getServiceColor(serviceType) {
-            const service = (serviceType || '').toLowerCase();
+        function getAppointmentStatusMeta(status) {
+            const normalized = String(status || '')
+                .trim()
+                .toLowerCase();
 
-            if (service.includes('oral check')) {
-                return 'background:#dbeafe;border-left:3px solid #3b82f6;color:#1e3a8a;';
+            if (['pending', 'confirmed', 'upcoming'].includes(normalized)) {
+                return {
+                    className: 'status-upcoming',
+                    label: 'Upcoming',
+                };
             }
 
-            if (service.includes('cleaning')) {
-                return 'background:#dcfce7;border-left:3px solid #22c55e;color:#166534;';
+            if (['reschedule', 'rescheduled'].includes(normalized)) {
+                return {
+                    className: 'status-rescheduled',
+                    label: 'Rescheduled',
+                };
             }
+
+            if (normalized === 'completed') {
+                return {
+                    className: 'status-completed',
+                    label: 'Completed',
+                };
+            }
+
+            if (['canceled', 'cancelled'].includes(normalized)) {
+                return {
+                    className: 'status-cancelled',
+                    label: 'Cancelled',
+                };
+            }
+
+            return {
+                className: 'status-upcoming',
+                label: 'Upcoming',
+            };
+        }
+
+        function getServiceBadgeClass(serviceType) {
+            const service = String(serviceType || '').toLowerCase();
 
             if (service.includes('surgery')) {
-                return 'background:#fef3c7;border-left:3px solid #f59e0b;color:#92400e;';
+                return 'service-badge-surgery';
             }
 
-            if (
-                service.includes('restoration') ||
-                service.includes('prosthesis')
-            ) {
-                return 'background:#f3e8ff;border-left:3px solid #a855f7;color:#6b21a8;';
+            if (service.includes('check')) {
+                return 'service-badge-checkup';
             }
 
-            return 'background:#f3f4f6;border-left:3px solid #6b7280;color:#374151;';
+            if (service.includes('whiten')) {
+                return 'service-badge-whitening';
+            }
+
+            if (service.includes('extrac')) {
+                return 'service-badge-extraction';
+            }
+
+            return 'service-badge-default';
         }
 
         function buildWeekGrid() {
@@ -2312,17 +2920,39 @@
                         const slotAppointments = getAppointmentsForSlot(isoDate, h);
                         if (slotAppointments.length > 0) {
                             inner = slotAppointments.map(appt => {
-                                const service = appt.service_type === 'Others' ? (appt
-                                    .other_services || 'Other Service') : appt.service_type;
-                                const serviceStyle = getServiceColor(service);
-                                return `<button type="button" onclick='openAppointmentDetailModal(${JSON.stringify(appt)})'
-                                    style="${serviceStyle}margin:4px;border-radius:8px;padding:6px 7px;font-size:.62rem;line-height:1.25;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.06);width:calc(100% - 8px);text-align:left;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;"
-                                    onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(0,0,0,.10)'"
-                                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,.06)'"
-                                    title="Click to view details">
-                                    <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${appt.patient_name}</div>
-                                    <div style="font-size:.58rem;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${service}</div>
-                                </button>`;
+                                const service =
+                                    appt.service_type === 'Others' ?
+                                    (appt.other_services || 'Other Service') :
+                                    (appt.service_type || 'Other Service');
+
+                                const statusMeta =
+                                    getAppointmentStatusMeta(appt.status);
+
+                                const serviceBadgeClass =
+                                    getServiceBadgeClass(service);
+
+                                return `
+        <button
+            type="button"
+            class="week-appointment ${statusMeta.className}"
+            onclick='openAppointmentDetailModal(${JSON.stringify(appt)})'
+            title="Click to view details"
+        >
+            <div class="week-appointment-top">
+                <strong class="week-appointment-patient">
+                    ${escapeCalendarText(appt.patient_name || 'Unknown Patient')}
+                </strong>
+
+                <span class="week-appointment-status">
+                    ${statusMeta.label}
+                </span>
+            </div>
+
+            <span class="service-badge ${serviceBadgeClass}">
+                ${escapeCalendarText(service)}
+            </span>
+        </button>
+    `;
                             }).join('');
                         }
                     }
@@ -2333,18 +2963,134 @@
             document.getElementById('weekGrid').innerHTML = html;
         }
 
-        document.getElementById('prevWeek').addEventListener('click', () => {
-            weekOffset--;
-            buildWeekGrid();
-        });
-        document.getElementById('nextWeek').addEventListener('click', () => {
-            weekOffset++;
-            buildWeekGrid();
-        });
-        document.getElementById('todayBtn').addEventListener('click', () => {
-            weekOffset = 0;
-            buildWeekGrid();
-        });
+        let weekCarouselAnimating = false;
+
+        const WEEK_CAROUSEL_OUT_MS = 180;
+        const WEEK_CAROUSEL_IN_MS = 280;
+
+        function clearWeekCarouselClasses(element) {
+            if (!element) {
+                return;
+            }
+
+            element.classList.remove(
+                'global-carousel-out-left',
+                'global-carousel-out-right',
+                'global-carousel-in-left',
+                'global-carousel-in-right'
+            );
+        }
+
+        function runWeekCarousel(direction, updateContent) {
+            const weekGrid =
+                document.getElementById('weekGrid');
+
+            if (!weekGrid) {
+                updateContent();
+                return;
+            }
+
+            const reducedMotion =
+                window.matchMedia(
+                    '(prefers-reduced-motion: reduce)'
+                ).matches;
+
+            if (!direction || reducedMotion) {
+                updateContent();
+                return;
+            }
+
+            if (weekCarouselAnimating) {
+                return;
+            }
+
+            weekCarouselAnimating = true;
+
+            const outClass =
+                direction > 0 ?
+                'global-carousel-out-left' :
+                'global-carousel-out-right';
+
+            const inClass =
+                direction > 0 ?
+                'global-carousel-in-right' :
+                'global-carousel-in-left';
+
+            clearWeekCarouselClasses(weekGrid);
+
+            weekGrid.classList.add(outClass);
+
+            window.setTimeout(() => {
+                weekGrid.classList.remove(outClass);
+
+                updateContent();
+
+                requestAnimationFrame(() => {
+                    clearWeekCarouselClasses(weekGrid);
+
+                    weekGrid.classList.add(inClass);
+
+                    window.setTimeout(() => {
+                        weekGrid.classList.remove(inClass);
+
+                        weekCarouselAnimating = false;
+                    }, WEEK_CAROUSEL_IN_MS);
+                });
+            }, WEEK_CAROUSEL_OUT_MS);
+        }
+
+        function changeWeek(direction) {
+            if (weekCarouselAnimating) {
+                return;
+            }
+
+            runWeekCarousel(
+                direction,
+                () => {
+                    weekOffset += direction;
+                    buildWeekGrid();
+                }
+            );
+        }
+
+        document
+            .getElementById('prevWeek')
+            ?.addEventListener(
+                'click',
+                () => changeWeek(-1)
+            );
+
+        document
+            .getElementById('nextWeek')
+            ?.addEventListener(
+                'click',
+                () => changeWeek(1)
+            );
+
+        document
+            .getElementById('todayBtn')
+            ?.addEventListener(
+                'click',
+                () => {
+                    if (
+                        weekCarouselAnimating ||
+                        weekOffset === 0
+                    ) {
+                        return;
+                    }
+
+                    const direction =
+                        weekOffset < 0 ? 1 : -1;
+
+                    runWeekCarousel(
+                        direction,
+                        () => {
+                            weekOffset = 0;
+                            buildWeekGrid();
+                        }
+                    );
+                }
+            );
 
         function initWeeklyAppointmentView() {
             const weekGrid =
@@ -2413,7 +3159,8 @@
             const timeFields = document.getElementById('ruleTimeFields');
             const defaultBreak = document.querySelector('.break-chip[data-val="12:00-13:00"]');
 
-            if (!backdrop || !form || !methodField || !title || !activationState || !status || !openTime || !closeTime || !maxSlots || !notes ||
+            if (!backdrop || !form || !methodField || !title || !activationState || !status || !openTime || !closeTime || !
+                maxSlots || !notes ||
                 !timeFields) {
                 console.error('Rule modal elements not found.');
                 return;
@@ -2920,7 +3667,7 @@
             return `${year}-${month}-${day}`;
         }
 
-        function openBlockModal() {
+        async function openBlockModal() {
             const backdrop = document.getElementById('blockModalBackdrop');
             const blockDate = document.getElementById('blockDate');
 
@@ -2930,18 +3677,14 @@
             }
 
             document
-                .querySelectorAll(
-                    '#blockDateForm .global-field-error'
-                )
+                .querySelectorAll('#blockDateForm .global-field-error')
                 .forEach(error => {
                     error.innerHTML = '';
                     error.classList.remove('show');
                 });
 
             document
-                .querySelectorAll(
-                    '#blockDateForm .is-invalid'
-                )
+                .querySelectorAll('#blockDateForm .is-invalid')
                 .forEach(element => {
                     element.classList.remove('is-invalid');
                 });
@@ -2953,20 +3696,28 @@
             blockDate.classList.remove('js-flatpickr-date-max-today');
             blockDate.classList.add('js-flatpickr-date-min-today');
 
-            if (blockDate._flatpickr) {
-                blockDate._flatpickr.set('maxDate', null);
-                blockDate._flatpickr.set('minDate', today);
-                blockDate._flatpickr.clear();
-            } else {
-                blockDate.value = '';
-            }
-
             setCustomSelectValue(
                 document.getElementById('blockReason'),
                 'Holiday'
             );
 
             window.openModal('blockModalBackdrop');
+
+            try {
+                await window.initGlobalDatePickers?.(backdrop);
+            } catch (error) {
+                console.error('Unable to initialize Block Date picker.', error);
+            }
+
+            const picker = blockDate._flatpickr;
+
+            if (picker) {
+                picker.set('maxDate', null);
+                picker.set('minDate', today);
+                picker.clear(false);
+            } else {
+                blockDate.value = '';
+            }
         }
 
         function registerClinicDateValidation() {
@@ -3052,6 +3803,26 @@
 
             document.getElementById('blockDate')?.addEventListener('input', () => clearFieldError('blockDateError',
                 'blockDate'));
+
+            document
+                .querySelector('#blockModalBackdrop .fp-date-input-wrap')
+                ?.addEventListener('click', async function() {
+                    const input = document.getElementById('blockDate');
+
+                    if (!input) return;
+
+                    if (!input._flatpickr) {
+                        try {
+                            await window.initGlobalDatePickers?.(
+                                document.getElementById('blockModalBackdrop')
+                            );
+                        } catch (error) {
+                            console.error('Unable to initialize Block Date picker.', error);
+                        }
+                    }
+
+                    input._flatpickr?.open();
+                });
             document.getElementById('blockReason')?.addEventListener('change', () => clearFieldError(
                 'blockReasonError', 'blockReason'));
             document.getElementById('blockNote')?.addEventListener('input', () => clearFieldError('blockNoteError',
@@ -3481,9 +4252,9 @@
             setValue('reservedNewSlotTime', '09:00');
             setValue('reservedNotes', values.notes);
 
-            const allowedServices = Array.isArray(values.allowed_services)
-                ? values.allowed_services.map(service => String(service).toLowerCase())
-                : (mode === 'edit' ? serviceCheckboxes.map(checkbox => checkbox.value.toLowerCase()) : []);
+            const allowedServices = Array.isArray(values.allowed_services) ?
+                values.allowed_services.map(service => String(service).toLowerCase()) :
+                (mode === 'edit' ? serviceCheckboxes.map(checkbox => checkbox.value.toLowerCase()) : []);
 
             serviceCheckboxes.forEach(checkbox => {
                 checkbox.checked = allowedServices.includes(checkbox.value.toLowerCase());
