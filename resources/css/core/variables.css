@@ -1,4 +1,5 @@
 :root {
+    --font-family-base: 'Inter Variable', sans-serif;
     --float-right: 22px;
     --fab-size: 56px;
     --back-fab-size: 52px;

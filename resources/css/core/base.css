@@ -65,8 +65,7 @@ body.role-admin.layout-no-sidebar #mainContent {
 html,
 body {
     font-family:
-        'Inter Variable',
-        sans-serif;
+        var(--font-family-base);
 }
 
 html,
