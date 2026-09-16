@@ -170,6 +170,8 @@ class DentistReportController extends Controller
             ->get();
 
         $customReportTypes = [
+            'dpt_emergency',
+            'dpt_non_emergency',
             'dental_services',
             'daily_treatment_record',
             'dental_health_record',
@@ -303,6 +305,8 @@ class DentistReportController extends Controller
         $code = strtoupper(trim((string) $template->code));
 
         $pathsByType = [
+            'dpt_emergency' => 'dpt-emergency-template.pdf',
+            'dpt_non_emergency' => 'dpt-non-emergency-template.pdf',
             'daily_treatment_record' => 'daily-treatment-record-template.pdf',
             'dental_services' => 'dental-services-template.pdf',
             'dental_health_record' => 'dental-health-record-template.pdf',
@@ -5110,67 +5114,7 @@ class DentistReportController extends Controller
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetFont('Helvetica', 'B', 5.2);
 
-        $toothMap = [
-            55 => ['x' => 194.4, 'y' => 266.0],
-            54 => ['x' => 218.2, 'y' => 266.0],
-            53 => ['x' => 242.4, 'y' => 266.0],
-            52 => ['x' => 266.7, 'y' => 266.0],
-            51 => ['x' => 290.9, 'y' => 266.0],
-
-            61 => ['x' => 321.6, 'y' => 266.0],
-            62 => ['x' => 345.4, 'y' => 266.0],
-            63 => ['x' => 369.6, 'y' => 266.0],
-            64 => ['x' => 393.9, 'y' => 266.0],
-            65 => ['x' => 418.1, 'y' => 266.0],
-
-            18 => ['x' => 121.7, 'y' => 322.0],
-            17 => ['x' => 145.4, 'y' => 322.0],
-            16 => ['x' => 169.7, 'y' => 322.0],
-            15 => ['x' => 193.9, 'y' => 322.0],
-            14 => ['x' => 218.2, 'y' => 322.0],
-            13 => ['x' => 242.4, 'y' => 322.0],
-            12 => ['x' => 266.7, 'y' => 322.0],
-            11 => ['x' => 290.9, 'y' => 322.0],
-
-            21 => ['x' => 319.5, 'y' => 317.2],
-            22 => ['x' => 345.4, 'y' => 322.0],
-            23 => ['x' => 369.6, 'y' => 322.0],
-            24 => ['x' => 393.9, 'y' => 322.0],
-            25 => ['x' => 418.1, 'y' => 322.0],
-            26 => ['x' => 442.4, 'y' => 322.0],
-            27 => ['x' => 466.6, 'y' => 322.0],
-            28 => ['x' => 490.8, 'y' => 322.0],
-
-            48 => ['x' => 121.7, 'y' => 392.0],
-            47 => ['x' => 145.4, 'y' => 392.0],
-            46 => ['x' => 169.7, 'y' => 392.0],
-            45 => ['x' => 193.9, 'y' => 392.0],
-            44 => ['x' => 218.2, 'y' => 392.0],
-            43 => ['x' => 242.4, 'y' => 392.0],
-            42 => ['x' => 266.7, 'y' => 392.0],
-            41 => ['x' => 290.9, 'y' => 392.0],
-
-            31 => ['x' => 321.6, 'y' => 392.0],
-            32 => ['x' => 345.4, 'y' => 392.0],
-            33 => ['x' => 369.6, 'y' => 392.0],
-            34 => ['x' => 393.9, 'y' => 392.0],
-            35 => ['x' => 418.1, 'y' => 392.0],
-            36 => ['x' => 442.4, 'y' => 392.0],
-            37 => ['x' => 466.6, 'y' => 392.0],
-            38 => ['x' => 490.8, 'y' => 392.0],
-
-            85 => ['x' => 194.4, 'y' => 449.8],
-            84 => ['x' => 218.2, 'y' => 449.8],
-            83 => ['x' => 242.4, 'y' => 449.8],
-            82 => ['x' => 266.7, 'y' => 449.8],
-            81 => ['x' => 290.9, 'y' => 449.8],
-
-            71 => ['x' => 321.6, 'y' => 449.8],
-            72 => ['x' => 345.4, 'y' => 449.8],
-            73 => ['x' => 369.6, 'y' => 449.8],
-            74 => ['x' => 393.9, 'y' => 449.8],
-            75 => ['x' => 418.1, 'y' => 449.8],
-        ];
+        $toothMap = $this->dhrOdontogramPositions();
 
         foreach ($odontogramData as $item) {
             $tooth = (int) ($item['tooth'] ?? 0);
@@ -5218,9 +5162,7 @@ class DentistReportController extends Controller
 
             $this->drawDentalHealthStatusBoxMark(
                 $pdf,
-                $tooth,
-                $pos['x'],
-                $pos['y'],
+                $pos['status'],
                 $displayRecord
             );
         }
@@ -5228,6 +5170,42 @@ class DentistReportController extends Controller
         $pdf->SetDrawColor(0, 0, 0);
         $pdf->SetFillColor(255, 255, 255);
         $pdf->SetTextColor(0, 0, 0);
+    }
+    
+    private function dhrOdontogramPositions(): array
+    {
+        $scaleX = 467.844818 / 858;
+        $scaleY = 217.080017 / 413;
+        $rows = [
+            ['teeth' => [[55, 54, 53, 52, 51], [61, 62, 63, 64, 65]],
+                'firstX' => [223.75, 456.75], 'y' => 78, 'statusX' => [202, 434], 'statusY' => 12],
+            ['teeth' => [[18, 17, 16, 15, 14, 13, 12, 11], [21, 22, 23, 24, 25, 26, 27, 28]],
+                'firstX' => [90.75, 456.75], 'y' => 185, 'statusX' => [69, 434], 'statusY' => 119],
+            ['teeth' => [[48, 47, 46, 45, 44, 43, 42, 41], [31, 32, 33, 34, 35, 36, 37, 38]],
+                'firstX' => [90.75, 456.75], 'y' => 220, 'statusX' => [69, 434], 'statusY' => 253],
+            ['teeth' => [[85, 84, 83, 82, 81], [71, 72, 73, 74, 75]],
+                'firstX' => [229.5, 451.5], 'y' => 327, 'statusX' => [202, 434], 'statusY' => 362],
+        ];
+        $positions = [];
+
+        foreach ($rows as $row) {
+            foreach ($row['teeth'] as $half => $teeth) {
+                foreach ($teeth as $column => $tooth) {
+                    $positions[$tooth] = [
+                        'x' => 72 + ($row['firstX'][$half] + $column * 44.4) * $scaleX,
+                        'y' => 221.579742 + $row['y'] * $scaleY,
+                        'status' => [
+                            'x' => 72 + ($row['statusX'][$half] + $column * 44.4) * $scaleX,
+                            'y' => 221.579742 + $row['statusY'] * $scaleY,
+                            'width' => 44.4 * $scaleX,
+                            'height' => 33 * $scaleY,
+                        ],
+                    ];
+                }
+            }
+        }
+
+        return $positions;
     }
 
     private function dhrOdontogramRecord($record): ?array
@@ -5265,7 +5243,7 @@ class DentistReportController extends Controller
 
     private function drawDentalHealthWholeToothMark(Fpdi $pdf, float $centerX, float $centerY, array $record): void
     {
-        $this->drawDentalHealthFilledCircle($pdf, $centerX, $centerY - 2.2, 8.8, $record['color']);
+        $this->drawDentalHealthFilledCircle($pdf, $centerX, $centerY, 8.1, $record['color']);
     }
 
     private function drawDentalHealthToothSurfaceMark(
@@ -5276,13 +5254,13 @@ class DentistReportController extends Controller
         array $record
     ): void {
         if ($surface === 'center') {
-            $this->drawDentalHealthFilledCircle($pdf, $centerX, $centerY - 2.2, 4.5, $record['color']);
+            $this->drawDentalHealthFilledCircle($pdf, $centerX, $centerY, 3.8, $record['color']);
             return;
         }
 
-        $outer = 9.8;
-        $inner = 3.7;
-        $centerY -= 2.2;
+        // Keep fills inside the bitmap outlines and outside the central surface.
+        $outer = 8.1;
+        $inner = 4.9;
 
         if (in_array($surface, ['top', 'right', 'bottom', 'left'], true)) {
             $this->drawDentalHealthCurvedSurfaceCap(
@@ -5308,10 +5286,10 @@ class DentistReportController extends Controller
         array $rgb
     ): void {
         $anglesBySurface = [
-            'top' => [225, 315],
-            'right' => [315, 45],
-            'bottom' => [45, 135],
-            'left' => [135, 225],
+            'top' => [228, 312],
+            'right' => [318, 42],
+            'bottom' => [48, 132],
+            'left' => [138, 222],
         ];
 
         if (! isset($anglesBySurface[$surface])) {
@@ -5400,21 +5378,14 @@ class DentistReportController extends Controller
 
     private function drawDentalHealthStatusBoxMark(
         Fpdi $pdf,
-        int $tooth,
-        float $toothCenterX,
-        float $toothCenterY,
+        array $box,
         array $record
     ): void {
         [$r, $g, $b] = $record['color'];
-        $boxWidth = 21.0;
-        $boxHeight = 16.6;
-        $statusBoxOffset = 29.5;
-        $boxCenterY = $this->isDentalHealthUpperTooth($tooth)
-            ? $toothCenterY - $statusBoxOffset
-            : $toothCenterY + $statusBoxOffset;
-
-        $boxX = $toothCenterX - ($boxWidth / 2);
-        $boxY = $boxCenterY - ($boxHeight / 2);
+        $boxWidth = $box['width'];
+        $boxHeight = $box['height'];
+        $boxX = $box['x'];
+        $boxY = $box['y'];
         $inset = 1.0;
 
         $pdf->SetFillColor($r, $g, $b);
@@ -5423,7 +5394,7 @@ class DentistReportController extends Controller
             $boxX + $inset,
             $boxY + $inset,
             $boxWidth - ($inset * 2),
-            7.0,
+            ($boxHeight / 2) - ($inset * 2),
             'F'
         );
 
@@ -5432,14 +5403,8 @@ class DentistReportController extends Controller
 
         $pdf->SetTextColor($r, $g, $b);
         $pdf->SetFont('Helvetica', 'B', $fontSize);
-        $pdf->SetXY($boxX, $boxY + 9.0);
-        $pdf->Cell($boxWidth, 7.2, $record['code'], 0, 0, 'C');
-    }
-
-    private function isDentalHealthUpperTooth(int $tooth): bool
-    {
-        return ($tooth >= 11 && $tooth <= 28) ||
-            ($tooth >= 51 && $tooth <= 65);
+        $pdf->SetXY($boxX, $boxY + ($boxHeight / 2));
+        $pdf->Cell($boxWidth, $boxHeight / 2, $record['code'], 0, 0, 'C');
     }
 
     private function drawDentalHealthFilledCircle(

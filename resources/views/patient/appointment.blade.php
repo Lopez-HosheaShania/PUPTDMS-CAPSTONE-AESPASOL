@@ -353,8 +353,6 @@
                                         </div>
 
                                         <span class="status-pill status-completed appt-highlight-count">
-                                            <span class="status-dot"></span>
-
                                             {{ $mostVisitedCount > 0 ? $mostVisitedCount . 'x' : '—' }}
                                             {{ $mostVisitedCount > 0 ? $mostVisitedCount . 'x' : '—' }}
                                         </span>
@@ -828,16 +826,22 @@
             @endphp
 
             <section class="appointment-services-section">
-                <div class="appt-list-heading">
-                    <div class="appt-list-heading-icon">
-                        <i class="fa-solid fa-tooth"></i>
-                    </div>
 
-                    <div class="appt-list-heading-copy">
-                        <h2>Services Offered</h2>
-                        <p>
-                            Available dental care services at the clinic.
-                        </p>
+                <div class="mb-4">
+                    <div class="appt-list-heading">
+
+                        <div class="appt-list-heading-icon">
+                            <i class="fa-solid fa-tooth"></i>
+                        </div>
+
+                        <div class="appt-list-heading-copy">
+                            <h2>Services Offered</h2>
+
+                            <p>
+                                Available dental care services at the clinic.
+                            </p>
+                        </div>
+
                     </div>
                 </div>
 

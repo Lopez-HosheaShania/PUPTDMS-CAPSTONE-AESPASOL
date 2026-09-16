@@ -70,6 +70,18 @@
     --patient-avatar-size: 56px;
 }
 
+.card:has(.search-combo .search-results:not(.hidden)),
+.card:has(.search-combo .search-results.is-open) {
+    position: relative;
+    z-index: 100;
+    overflow: visible;
+}
+
+.card:has(.search-combo .search-results:not(.hidden)) .card-body,
+.card:has(.search-combo .search-results.is-open) .card-body {
+    overflow: visible;
+}
+
 @media (min-width: 768px) and (max-width: 1024px) {
     .patient-avatar-sm {
         --patient-avatar-size: 32px;
@@ -295,15 +307,15 @@
 [data-theme="dark"] .preview-meta-item,
 .dark .info-card,
 .dark .preview-meta-item {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
+    background: var(--card);
+    border-color: var(--border);
 }
 
 [data-theme="dark"] .preview-name,
 [data-theme="dark"] .preview-meta-value,
 .dark .preview-name,
 .dark .preview-meta-value {
-    color: var(--text-1) !important;
+    color: var(--text-1);
 }
 
 [data-theme="dark"] .section-note,
@@ -312,15 +324,15 @@
 .dark .section-note,
 .dark .preview-email,
 .dark .tip-item {
-    color: var(--text-3) !important;
+    color: var(--text-3);
 }
 
 [data-theme="dark"] .preview-card::before {
-    background: rgba(139, 0, 0, .10) !important;
+    background: rgba(139, 0, 0, .10);
 }
 
 [data-theme="dark"] .preview-card::after {
-    background: rgba(192, 57, 43, .08) !important;
+    background: rgba(192, 57, 43, .08);
 }
 
 .section-head {
@@ -378,19 +390,18 @@
 .card {
     background: var(--card);
     border-radius: 16px;
-    border: 1px solid rgba(0, 0, 0, .05);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, .04);
+    border: 1px solid var(--border);
     overflow: hidden;
     animation: fadeSlideUp .4s ease .2s both;
 }
 
 .card-header {
     padding: .9rem 1.25rem;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #fafafa;
+    background: var(--surface);
     flex-wrap: wrap;
 }
 
@@ -424,11 +435,27 @@
     font-size: 16px;
     flex-shrink: 0;
     border: 1px solid var(--status-border, rgba(139, 0, 0, 0.12));
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--status-solid, #8B0000) 12%, transparent);
+}
+
+.card-header-icon:has(> span) {
+    border-radius: 50%;
+}
+
+.card-header-icon>span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+
+    color: currentColor;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .card-header-icon i {
-    color: currentColor !important;
+    color: currentColor;
 }
 
 .card-title {
@@ -445,7 +472,7 @@
 
     margin-left: auto;
 
-    color: var(--crimson, #8B0000) !important;
+    color: var(--crimson, #8B0000);
 
     font-size: .72rem;
     font-weight: 700;
@@ -485,27 +512,27 @@
 }
 
 .card-link i {
-    color: currentColor !important;
+    color: currentColor;
     font-size: .65rem;
 }
 
 [data-theme="dark"] .card-link,
 .dark .card-link {
-    color: #FCA5A5 !important;
+    color: #FCA5A5;
 }
 
 [data-theme="dark"] .card-link:hover,
 .dark .card-link:hover {
-    color: #FECACA !important;
+    color: #FECACA;
 }
 
 [data-theme="dark"] .card-link i,
 .dark .card-link i {
-    color: currentColor !important;
+    color: currentColor;
 }
 
 .card-arrow-btn i {
-    color: currentColor !important;
+    color: currentColor;
 }
 
 .card-arrow-btn:hover {
@@ -519,36 +546,12 @@
     background:
         color-mix(in srgb,
             var(--surface) 82%,
-            var(--crimson) 18%) !important;
+            var(--crimson) 18%);
 
     border-color:
-        rgba(252, 165, 165, .20) !important;
+        rgba(252, 165, 165, .20);
 
-    color: #FCA5A5 !important;
-}
-
-.card-header::before,
-.card-header::after {
-    content: '';
-    position: absolute;
-    border-radius: 999px;
-    pointer-events: none;
-}
-
-.card-header::before {
-    width: 120px;
-    height: 120px;
-    top: -55px;
-    right: -30px;
-    background: radial-gradient(circle, rgba(139, 0, 0, 0.08) 0%, rgba(139, 0, 0, 0.03) 48%, transparent 72%);
-}
-
-.card-header::after {
-    width: 90px;
-    height: 90px;
-    bottom: -42px;
-    left: 210px;
-    background: radial-gradient(circle, rgba(192, 57, 43, 0.08) 0%, rgba(192, 57, 43, 0.03) 50%, transparent 72%);
+    color: #FCA5A5;
 }
 
 .card-header.card-header-inline {
@@ -661,69 +664,65 @@
 }
 
 [data-theme="dark"] .section-title {
-    color: #f3f4f6 !important;
+    color: #f3f4f6;
 }
 
 [data-theme="dark"] .section-block,
 .dark .section-block {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
+    background: var(--card);
+    border-color: var(--border);
 }
 
 [data-theme="dark"] .panel-header,
 .dark .panel-header {
-    background: var(--surface) !important;
-    border-color: var(--border) !important;
+    background: var(--surface);
+    border-color: var(--border);
 }
 
 [data-theme="dark"] .panel-card,
 .dark .panel-card {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-    box-shadow: none !important;
+    background: var(--card);
+    border-color: var(--border);
+    box-shadow: none;
 }
 
-[data-theme="dark"] .card-header-icon {
-    background: linear-gradient(135deg, rgba(139, 0, 0, .18) 0%, rgba(192, 57, 43, .12) 100%) !important;
-    border: 1px solid rgba(252, 165, 165, 0.15);
-    color: #FCA5A5 !important;
+[data-theme="dark"] .card-header-icon,
+.dark .card-header-icon {
+    background: var(--status-bg, var(--crimson-soft));
+    border-color: var(--status-border, var(--crimson-mid));
+    color: var(--status-solid, var(--status-cancelled-text));
+
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }
 
 [data-theme="dark"] .card-arrow-btn,
 .dark .card-arrow-btn {
-    background: var(--surface) !important;
-    border-color: var(--border) !important;
-    color: var(--text-3) !important;
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-3);
 }
 
 [data-theme="dark"] .card,
 .dark .card {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
+    background: var(--card);
+    border-color: var(--border);
 }
 
 [data-theme="dark"] .card-header,
 .dark .card-header {
-    background: var(--surface) !important;
-    border-color: var(--border) !important;
+    background: var(--surface);
+    border-color: var(--border);
 }
 
 [data-theme="dark"] .card-title,
 .dark .card-title {
-    color: var(--text-1) !important;
+    color: var(--text-1);
 }
 
 [data-theme="dark"] .card-subtitle,
 .dark .card-subtitle {
-    color: var(--text-3) !important;
-}
-
-@media (max-width: 1024px) {
-    .panel-card {
-        position: static;
-    }
+    color: var(--text-3);
 }
 
 .dashboard-greeting-row,
@@ -864,8 +863,8 @@
 
     .dashboard-greeting-inner,
     .greeting-banner-inner {
-        flex-direction: column !important;
-        align-items: stretch !important;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .dashboard-greeting-actions,
@@ -883,16 +882,16 @@
 
     .dashboard-greeting-name-line,
     .greeting-name-line {
-        font-size: clamp(1.25rem, 8vw, 1.55rem) !important;
+        font-size: clamp(1.25rem, 8vw, 1.55rem);
     }
 
     #greetingText {
-        font-size: 0.9rem !important;
+        font-size: 0.9rem;
     }
 
     .dashboard-greeting-copy p,
     .greeting-banner-copy p {
-        font-size: 0.72rem !important;
+        font-size: 0.72rem;
     }
 }
 
@@ -902,11 +901,11 @@
 .dark #mainContent .greeting-banner {
     background:
         radial-gradient(circle at top left, rgba(139, 0, 0, .34), transparent 34%),
-        linear-gradient(135deg, rgba(90, 0, 0, .92), rgba(139, 0, 0, .78)) !important;
-    border-color: rgba(255, 255, 255, .12) !important;
+        linear-gradient(135deg, rgba(90, 0, 0, .92), rgba(139, 0, 0, .78));
+    border-color: rgba(255, 255, 255, .12);
     box-shadow:
         0 18px 38px rgba(0, 0, 0, .34),
-        inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+        inset 0 1px 0 rgba(255, 255, 255, .08);
 }
 
 .quick-actions-card {
@@ -1009,7 +1008,7 @@
 }
 
 .quick-action-icon i {
-    color: currentColor !important;
+    color: currentColor;
     font-size: inherit;
 }
 
@@ -1161,7 +1160,7 @@
 
 [data-theme="dark"] .quick-action-icon i,
 .dark .quick-action-icon i {
-    color: currentColor !important;
+    color: currentColor;
 }
 
 [data-theme="dark"] .quick-action-bg-icon,
@@ -1170,330 +1169,6 @@
         color-mix(in srgb,
             var(--crimson) 18%,
             transparent);
-}
-
-@media (max-width: 767px) {
-    .patient-avatar-sm {
-        --patient-avatar-size: 28px;
-    }
-
-    .patient-avatar-md {
-        --patient-avatar-size: 36px;
-    }
-
-    .patient-avatar-lg {
-        --patient-avatar-size: 46px;
-    }
-
-    .section-head {
-        align-items: flex-start;
-    }
-
-    .card-header-icon {
-        width: 34px;
-        height: 34px;
-        min-width: 34px;
-
-        border-radius: 10px;
-
-        font-size: 12px;
-    }
-
-    .card-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: .7rem;
-        padding: .8rem 1rem;
-    }
-
-    .card-header>div:first-child {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .card-header-right {
-        width: 100%;
-
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-
-        gap: .55rem;
-    }
-
-    .card-header>.card-link {
-        align-self: flex-end;
-
-        margin-left: auto;
-    }
-
-    .card-body {
-        padding: 1rem;
-    }
-
-    .card-header-left {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .card-header-meta,
-    .card-header-badge {
-        align-self: flex-start;
-    }
-
-    .card-icon {
-        width: 26px;
-        height: 26px;
-        font-size: 10px;
-        margin-top: 1px;
-    }
-
-    .card-title {
-        font-size: .76rem;
-        line-height: 1.15;
-    }
-
-    .card-subtitle {
-        font-size: .68rem;
-        margin-top: .12rem;
-        line-height: 1.2;
-    }
-
-    body.role-dentist #mainContent .greeting-row,
-    body.role-patient #mainContent .greeting-row,
-    #mainContent .dashboard-greeting-row {
-        margin-bottom: 0.85rem !important;
-        gap: 0.75rem !important;
-    }
-
-    body.role-dentist #mainContent .greeting-banner,
-    body.role-patient #mainContent .greeting-banner,
-    #mainContent .dashboard-greeting-banner {
-        margin-top: 0 !important;
-
-        padding: 14px 16px !important;
-
-        border-radius: 18px !important;
-
-        min-height: 0 !important;
-        overflow: hidden !important;
-    }
-
-    body.role-dentist #mainContent .greeting-banner-inner,
-    body.role-patient #mainContent .greeting-banner-inner,
-    #mainContent .dashboard-greeting-inner {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        justify-content: flex-start !important;
-        gap: 0.65rem !important;
-        padding: 0 !important;
-        min-height: 0 !important;
-    }
-
-    body.role-dentist #mainContent .greeting-banner-copy,
-    body.role-patient #mainContent .greeting-banner-copy,
-    #mainContent .dashboard-greeting-copy {
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    body.role-dentist #mainContent .greeting-heading,
-    body.role-patient #mainContent .greeting-heading,
-    #mainContent .dashboard-greeting-heading {
-        gap: 2px !important;
-        line-height: 1.05 !important;
-    }
-
-    #mainContent #greetingText {
-        font-size: 0.84rem !important;
-        line-height: 1.05 !important;
-        font-weight: 650 !important;
-    }
-
-    body.role-dentist #mainContent .greeting-name-line,
-    body.role-patient #mainContent .greeting-name-line,
-    #mainContent .dashboard-greeting-name-line {
-        display: flex !important;
-        align-items: center !important;
-        flex-wrap: nowrap !important;
-        gap: 0.24rem !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        white-space: nowrap !important;
-        font-size: clamp(0.98rem, 4.9vw, 1.18rem) !important;
-        line-height: 1.05 !important;
-        font-weight: 900 !important;
-    }
-
-    #mainContent #patientName,
-    #mainContent #dentistName,
-    #mainContent .greeting-name-prefix {
-        font-size: inherit !important;
-        line-height: inherit !important;
-        white-space: nowrap !important;
-        word-break: keep-all !important;
-        overflow-wrap: normal !important;
-    }
-
-    #mainContent .greeting-name-line i {
-        flex-shrink: 0 !important;
-        font-size: 0.78rem !important;
-        margin-left: 0.06rem !important;
-    }
-
-    body.role-dentist #mainContent .greeting-subtitle,
-    body.role-patient #mainContent #greetingSmartMessage,
-    #mainContent .dashboard-greeting-copy p,
-    #mainContent .greeting-banner-copy p {
-        font-size: 0.72rem !important;
-        line-height: 1.32 !important;
-        max-width: 100% !important;
-    }
-
-    body.role-patient #mainContent .greeting-banner-copy .mt-4 {
-        margin-top: 0.75rem !important;
-        gap: 0.45rem !important;
-    }
-
-    body.role-patient #mainContent .greeting-insight-chip {
-        padding: 0.38rem 0.58rem !important;
-        font-size: 0.66rem !important;
-        line-height: 1.1 !important;
-        gap: 0.35rem !important;
-    }
-
-    body.role-dentist #mainContent .greeting-banner-actions,
-    body.role-patient #mainContent .greeting-banner-actions,
-    #mainContent .dashboard-greeting-actions {
-        width: 100% !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        justify-content: flex-start !important;
-        gap: 0.55rem !important;
-    }
-
-    body.role-patient #mainContent .greeting-banner-actions>a {
-        width: 100% !important;
-        min-height: 38px !important;
-        padding: 0.45rem 0.85rem !important;
-        font-size: 0.58rem !important;
-        line-height: 1 !important;
-    }
-
-    .quick-actions-list {
-        gap: .5rem;
-        padding: .65rem;
-    }
-
-    .quick-action-card {
-        min-height: 58px;
-
-        padding: .62rem .68rem;
-
-        gap: .55rem;
-
-        border-radius: 13px;
-    }
-
-    .quick-action-arrow {
-        font-size: .62rem;
-    }
-
-    .quick-action-bg-icon {
-        right: .55rem;
-        bottom: -1rem;
-
-        font-size: 3rem;
-    }
-
-    .quick-action-icon {
-        width: 32px;
-        height: 32px;
-        min-width: 32px;
-
-        border-radius: 10px;
-
-        font-size: .72rem;
-    }
-
-    .quick-action-title {
-        font-size: .72rem;
-        line-height: 1.15;
-    }
-
-    .quick-action-sub {
-        font-size: .56rem;
-        line-height: 1.25;
-    }
-
-    .card-header:has(> .global-select-compact) {
-        flex-wrap: nowrap;
-    }
-
-    .card-header:has(> .global-select-compact) .card-header-left {
-        flex: 1 1 auto;
-        width: auto;
-        min-width: 0;
-    }
-
-    .card-header:has(> .global-select-compact) .card-header-right.global-select-compact {
-        flex: 0 0 180px !important;
-
-        width: 180px !important;
-        min-width: 180px !important;
-        max-width: 180px !important;
-
-        margin-left: auto !important;
-        justify-content: flex-end !important;
-    }
-
-    .global-select-compact .custom-select-button {
-        min-height: 36px;
-
-        padding-left: .7rem;
-        padding-right: .7rem;
-
-        font-size: .72rem;
-    }
-
-    .card-header.card-header-inline {
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        flex-wrap: nowrap !important;
-        gap: .5rem;
-    }
-
-    .card-header.card-header-inline .card-header-left {
-        width: auto !important;
-        min-width: 0 !important;
-        flex: 1 1 auto !important;
-    }
-
-    .card-header.card-header-inline> :last-child {
-        width: auto !important;
-        margin-left: auto !important;
-        align-self: center !important;
-        flex: 0 0 auto !important;
-    }
-
-    .card-header.card-header-inline>.card-link {
-        width: auto !important;
-        margin-left: auto !important;
-        align-self: center !important;
-        white-space: nowrap;
-    }
-
-    .card-header.card-header-inline>.status-pill {
-        flex-shrink: 0 !important;
-        white-space: nowrap !important;
-    }
-
-    .card-header.card-header-inline>.ui-btn {
-        flex-shrink: 0 !important;
-        white-space: nowrap !important;
-    }
-
 }
 
 .card-header:has(> .global-select-compact) {
@@ -1507,13 +1182,13 @@
 }
 
 .card-header:has(> .global-select-compact) .card-header-right.global-select-compact {
-    flex: 0 0 180px !important;
-    width: 180px !important;
-    min-width: 180px !important;
+    flex: 0 0 180px;
+    width: 180px;
+    min-width: 180px;
 
-    margin-left: auto !important;
+    margin-left: auto;
 
-    justify-content: flex-end !important;
+    justify-content: flex-end;
 }
 
 .card-header {
@@ -1723,8 +1398,8 @@
 }
 
 .appt-visit-title-row .appt-type-icon {
-    flex: 0 0 auto !important;
-    align-self: center !important;
+    flex: 0 0 auto;
+    align-self: center;
 }
 
 .appt-visit-title-group>.status-pill,
@@ -1836,6 +1511,336 @@
 .dark .appt-visit-actions {
     background: var(--surface);
     border-color: var(--border);
+}
+
+@media (max-width: 1024px) {
+    .panel-card {
+        position: static;
+    }
+}
+
+@media (max-width: 767px) {
+    .patient-avatar-sm {
+        --patient-avatar-size: 28px;
+    }
+
+    .patient-avatar-md {
+        --patient-avatar-size: 36px;
+    }
+
+    .patient-avatar-lg {
+        --patient-avatar-size: 46px;
+    }
+
+    .section-head {
+        align-items: flex-start;
+    }
+
+    .card-header-icon {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+
+        border-radius: 10px;
+
+        font-size: 12px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: .7rem;
+        padding: .8rem 1rem;
+    }
+
+    .card-header>div:first-child {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .card-header-right {
+        width: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+
+        gap: .55rem;
+    }
+
+    .card-header>.card-link {
+        align-self: flex-end;
+
+        margin-left: auto;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .card-header-left {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .card-header-meta,
+    .card-header-badge {
+        align-self: flex-start;
+    }
+
+    .card-icon {
+        width: 26px;
+        height: 26px;
+        font-size: 10px;
+        margin-top: 1px;
+    }
+
+    .card-title {
+        font-size: .76rem;
+        line-height: 1.15;
+    }
+
+    .card-subtitle {
+        font-size: .68rem;
+        margin-top: .12rem;
+        line-height: 1.2;
+    }
+
+    body.role-dentist #mainContent .greeting-row,
+    body.role-patient #mainContent .greeting-row,
+    #mainContent .dashboard-greeting-row {
+        margin-bottom: 0.85rem;
+        gap: 0.75rem;
+    }
+
+    body.role-dentist #mainContent .greeting-banner,
+    body.role-patient #mainContent .greeting-banner,
+    #mainContent .dashboard-greeting-banner {
+        margin-top: 0;
+
+        padding: 14px 16px;
+
+        border-radius: 18px;
+
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    body.role-dentist #mainContent .greeting-banner-inner,
+    body.role-patient #mainContent .greeting-banner-inner,
+    #mainContent .dashboard-greeting-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 0.65rem;
+        padding: 0;
+        min-height: 0;
+    }
+
+    body.role-dentist #mainContent .greeting-banner-copy,
+    body.role-patient #mainContent .greeting-banner-copy,
+    #mainContent .dashboard-greeting-copy {
+        width: 100%;
+        min-width: 0;
+    }
+
+    body.role-dentist #mainContent .greeting-heading,
+    body.role-patient #mainContent .greeting-heading,
+    #mainContent .dashboard-greeting-heading {
+        gap: 2px;
+        line-height: 1.05;
+    }
+
+    #mainContent #greetingText {
+        font-size: 0.84rem;
+        line-height: 1.05;
+        font-weight: 650;
+    }
+
+    body.role-dentist #mainContent .greeting-name-line,
+    body.role-patient #mainContent .greeting-name-line,
+    #mainContent .dashboard-greeting-name-line {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 0.24rem;
+        width: 100%;
+        max-width: 100%;
+        white-space: nowrap;
+        font-size: clamp(0.98rem, 4.9vw, 1.18rem);
+        line-height: 1.05;
+        font-weight: 900;
+    }
+
+    #mainContent #patientName,
+    #mainContent #dentistName,
+    #mainContent .greeting-name-prefix {
+        font-size: inherit;
+        line-height: inherit;
+        white-space: nowrap;
+        word-break: keep-all;
+        overflow-wrap: normal;
+    }
+
+    #mainContent .greeting-name-line i {
+        flex-shrink: 0;
+        font-size: 0.78rem;
+        margin-left: 0.06rem;
+    }
+
+    body.role-dentist #mainContent .greeting-subtitle,
+    body.role-patient #mainContent #greetingSmartMessage,
+    #mainContent .dashboard-greeting-copy p,
+    #mainContent .greeting-banner-copy p {
+        font-size: 0.72rem;
+        line-height: 1.32;
+        max-width: 100%;
+    }
+
+    body.role-patient #mainContent .greeting-banner-copy .mt-4 {
+        margin-top: 0.75rem;
+        gap: 0.45rem;
+    }
+
+    body.role-patient #mainContent .greeting-insight-chip {
+        padding: 0.38rem 0.58rem;
+        font-size: 0.66rem;
+        line-height: 1.1;
+        gap: 0.35rem;
+    }
+
+    body.role-dentist #mainContent .greeting-banner-actions,
+    body.role-patient #mainContent .greeting-banner-actions,
+    #mainContent .dashboard-greeting-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 0.55rem;
+    }
+
+    body.role-patient #mainContent .greeting-banner-actions>a {
+        width: 100%;
+        min-height: 38px;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.58rem;
+        line-height: 1;
+    }
+
+    .quick-actions-list {
+        gap: .5rem;
+        padding: .65rem;
+    }
+
+    .quick-action-card {
+        min-height: 58px;
+
+        padding: .62rem .68rem;
+
+        gap: .55rem;
+
+        border-radius: 13px;
+    }
+
+    .quick-action-arrow {
+        font-size: .62rem;
+    }
+
+    .quick-action-bg-icon {
+        right: .55rem;
+        bottom: -1rem;
+
+        font-size: 3rem;
+    }
+
+    .quick-action-icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+
+        border-radius: 10px;
+
+        font-size: .72rem;
+    }
+
+    .quick-action-title {
+        font-size: .72rem;
+        line-height: 1.15;
+    }
+
+    .quick-action-sub {
+        font-size: .56rem;
+        line-height: 1.25;
+    }
+
+    .card-header:has(> .global-select-compact) {
+        flex-wrap: nowrap;
+    }
+
+    .card-header:has(> .global-select-compact) .card-header-left {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+    }
+
+    .card-header:has(> .global-select-compact) .card-header-right.global-select-compact {
+        flex: 0 0 180px;
+
+        width: 180px;
+        min-width: 180px;
+        max-width: 180px;
+
+        margin-left: auto;
+        justify-content: flex-end;
+    }
+
+    .global-select-compact .custom-select-button {
+        min-height: 36px;
+
+        padding-left: .7rem;
+        padding-right: .7rem;
+
+        font-size: .72rem;
+    }
+
+    .card-header.card-header-inline {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        gap: .5rem;
+    }
+
+    .card-header.card-header-inline .card-header-left {
+        width: auto;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .card-header.card-header-inline> :last-child {
+        width: auto;
+        margin-left: auto;
+        align-self: center;
+        flex: 0 0 auto;
+    }
+
+    .card-header.card-header-inline>.card-link {
+        width: auto;
+        margin-left: auto;
+        align-self: center;
+        white-space: nowrap;
+    }
+
+    .card-header.card-header-inline>.status-pill {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .card-header.card-header-inline>.ui-btn {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
 }
 
 @media (min-width: 721px) and (max-width: 1024px) {
@@ -2021,27 +2026,27 @@
     body.role-dentist #mainContent .greeting-banner,
     body.role-patient #mainContent .greeting-banner,
     #mainContent .dashboard-greeting-banner {
-        padding: 12px 14px !important;
-        border-radius: 16px !important;
+        padding: 12px 14px;
+        border-radius: 16px;
     }
 
     #mainContent #greetingText {
-        font-size: 0.78rem !important;
+        font-size: 0.78rem;
     }
 
     body.role-dentist #mainContent .greeting-name-line,
     body.role-patient #mainContent .greeting-name-line,
     #mainContent .dashboard-greeting-name-line {
-        font-size: clamp(0.92rem, 4.7vw, 1.08rem) !important;
-        gap: 0.18rem !important;
+        font-size: clamp(0.92rem, 4.7vw, 1.08rem);
+        gap: 0.18rem;
     }
 
     body.role-dentist #mainContent .greeting-subtitle,
     body.role-patient #mainContent #greetingSmartMessage,
     #mainContent .dashboard-greeting-copy p,
     #mainContent .greeting-banner-copy p {
-        font-size: 0.68rem !important;
-        line-height: 1.28 !important;
+        font-size: 0.68rem;
+        line-height: 1.28;
     }
 
     .card-header-icon {
@@ -2065,11 +2070,11 @@
     }
 
     .card-header:has(> .global-select-compact) .card-header-right.global-select-compact {
-        width: 122px !important;
-        min-width: 122px !important;
-        max-width: 122px !important;
+        width: 122px;
+        min-width: 122px;
+        max-width: 122px;
 
-        flex-basis: 122px !important;
+        flex-basis: 122px;
     }
 
     .global-select-compact .custom-select-button {
@@ -2126,7 +2131,7 @@
     }
 
     .appt-visit-title-row .appt-type-icon {
-        font-size: 7px !important;
+        font-size: 7px;
     }
 
     .appt-visit-card .status-pill,

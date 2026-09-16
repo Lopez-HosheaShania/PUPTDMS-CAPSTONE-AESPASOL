@@ -537,6 +537,10 @@
     gap: 0.85rem;
 }
 
+.ui-modal .modal-form-grid-2>.global-form-group:last-child {
+    margin-bottom: 0;
+}
+
 .ui-modal .modal-inline-control {
     display: flex;
     align-items: center;
@@ -556,10 +560,11 @@
 }
 
 .ui-modal .modal-helper-text {
-    margin: .25rem 0 .75rem;
-    color: #9CA3AF;
+    margin: .4rem 0 0;
+    color: var(--text-3);
     font-size: .72rem;
-    font-weight: 600;
+    font-weight: 500;
+    font-style: italic;
     line-height: 1.4;
 }
 
@@ -586,11 +591,6 @@
     padding-inline: 1.25rem;
     border-radius: 12px;
     font-weight: 850;
-}
-
-[data-theme="dark"] .ui-modal .modal-helper-text,
-.dark .ui-modal .modal-helper-text {
-    color: #94A3B8;
 }
 
 [data-theme="dark"] .ui-modal .modal-error-banner,
@@ -723,6 +723,8 @@ html:has(.modal-overlay.open) #mobileBottomNav,
 body:has(.modal-overlay.open) #mobileBottomNav,
 html:has(dialog[open]) #mobileBottomNav,
 body:has(dialog[open]) #mobileBottomNav,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) #mobileBottomNav,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) #mobileBottomNav,
 
 html:has(.ui-modal.open) #mobFabMenu,
 body:has(.ui-modal.open) #mobFabMenu,
@@ -730,6 +732,17 @@ html:has(.modal-overlay.open) #mobFabMenu,
 body:has(.modal-overlay.open) #mobFabMenu,
 html:has(dialog[open]) #mobFabMenu,
 body:has(dialog[open]) #mobFabMenu,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) #mobFabMenu,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) #mobFabMenu,
+
+html:has(.ui-modal.open) .assistive-fab-group,
+body:has(.ui-modal.open) .assistive-fab-group,
+html:has(.modal-overlay.open) .assistive-fab-group,
+body:has(.modal-overlay.open) .assistive-fab-group,
+html:has(dialog[open]) .assistive-fab-group,
+body:has(dialog[open]) .assistive-fab-group,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .assistive-fab-group,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .assistive-fab-group,
 
 html:has(.ui-modal.open) .floating-actions,
 body:has(.ui-modal.open) .floating-actions,
@@ -737,13 +750,80 @@ html:has(.modal-overlay.open) .floating-actions,
 body:has(.modal-overlay.open) .floating-actions,
 html:has(dialog[open]) .floating-actions,
 body:has(dialog[open]) .floating-actions,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .floating-actions,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .floating-actions,
+
+html:has(.ui-modal.open) .floating-action,
+body:has(.ui-modal.open) .floating-action,
+html:has(.modal-overlay.open) .floating-action,
+body:has(.modal-overlay.open) .floating-action,
+html:has(dialog[open]) .floating-action,
+body:has(dialog[open]) .floating-action,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .floating-action,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .floating-action,
 
 html:has(.ui-modal.open) .back-to-top,
 body:has(.ui-modal.open) .back-to-top,
 html:has(.modal-overlay.open) .back-to-top,
 body:has(.modal-overlay.open) .back-to-top,
 html:has(dialog[open]) .back-to-top,
-body:has(dialog[open]) .back-to-top {
+body:has(dialog[open]) .back-to-top,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .back-to-top,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .back-to-top,
+
+html:has(.ui-modal.open) .chatbot-fab,
+body:has(.ui-modal.open) .chatbot-fab,
+html:has(.modal-overlay.open) .chatbot-fab,
+body:has(.modal-overlay.open) .chatbot-fab,
+html:has(dialog[open]) .chatbot-fab,
+body:has(dialog[open]) .chatbot-fab,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .chatbot-fab,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .chatbot-fab,
+
+html:has(.ui-modal.open) .chatbot-panel,
+body:has(.ui-modal.open) .chatbot-panel,
+html:has(.modal-overlay.open) .chatbot-panel,
+body:has(.modal-overlay.open) .chatbot-panel,
+html:has(dialog[open]) .chatbot-panel,
+body:has(dialog[open]) .chatbot-panel,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .chatbot-panel,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .chatbot-panel,
+
+html:has(.ui-modal.open) .assistive-help-popover,
+body:has(.ui-modal.open) .assistive-help-popover,
+html:has(.modal-overlay.open) .assistive-help-popover,
+body:has(.modal-overlay.open) .assistive-help-popover,
+html:has(dialog[open]) .assistive-help-popover,
+body:has(dialog[open]) .assistive-help-popover,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .assistive-help-popover,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .assistive-help-popover,
+
+html:has(.ui-modal.open) .asw-container,
+body:has(.ui-modal.open) .asw-container,
+html:has(.modal-overlay.open) .asw-container,
+body:has(.modal-overlay.open) .asw-container,
+html:has(dialog[open]) .asw-container,
+body:has(dialog[open]) .asw-container,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-container,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-container,
+
+html:has(.ui-modal.open) .asw-widget,
+body:has(.ui-modal.open) .asw-widget,
+html:has(.modal-overlay.open) .asw-widget,
+body:has(.modal-overlay.open) .asw-widget,
+html:has(dialog[open]) .asw-widget,
+body:has(dialog[open]) .asw-widget,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-widget,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-widget,
+
+html:has(.ui-modal.open) .asw-menu,
+body:has(.ui-modal.open) .asw-menu,
+html:has(.modal-overlay.open) .asw-menu,
+body:has(.modal-overlay.open) .asw-menu,
+html:has(dialog[open]) .asw-menu,
+body:has(dialog[open]) .asw-menu,
+html:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu,
+body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -828,7 +908,7 @@ body:has(dialog[open]) .back-to-top {
 [data-theme="dark"] #holidaySchedulingNoticeModal .global-confirm-alert>i,
 .dark #holidaySchedulingNoticeModal .global-confirm-alert>i {
     color:
-        var(--red-300) !important;
+        var(--red-300);
 }
 
 [data-theme="dark"] .ui-modal .global-confirm-alert>i,
@@ -841,13 +921,13 @@ body:has(dialog[open]) .back-to-top {
 [data-theme="dark"] #holidaySchedulingNoticeModal .global-confirm-alert strong,
 .dark #holidaySchedulingNoticeModal .global-confirm-alert strong {
     color:
-        var(--text-1) !important;
+        var(--text-1);
 }
 
 [data-theme="dark"] #holidaySchedulingNoticeModal .global-confirm-alert span,
 .dark #holidaySchedulingNoticeModal .global-confirm-alert span {
     color:
-        var(--text-2) !important;
+        var(--text-2);
 }
 
 .modal-ft--centered {

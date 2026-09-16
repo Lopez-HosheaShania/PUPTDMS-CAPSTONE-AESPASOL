@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Shared;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
@@ -115,7 +115,7 @@ class DentalRecordController extends Controller
         if ($request->ajax() || $request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'html' => view('admin.dental-records', $viewData + [
+                'html' => view('shared.dental-records', $viewData + [
                     'layoutRole' => $this->resolveLayoutRole(),
                 ])->render(),
                 'pagination' => $pagination,
@@ -128,7 +128,7 @@ class DentalRecordController extends Controller
             ]);
         }
 
-        return view('admin.dental-records', $viewData + [
+        return view('shared.dental-records', $viewData + [
             'layoutRole' => $this->resolveLayoutRole(),
         ]);
     }

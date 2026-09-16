@@ -829,14 +829,6 @@
                 calendarConfig.mode ===
                 'dentist-dashboard'
             ) {
-                /*
-                * The dentist dashboard is an overview,
-                * not a booking picker.
-                *
-                * Full dates and past dates should remain
-                * inspectable. Only actual closures retain
-                * an unavailable state.
-                */
                 isDisabled =
                     isHolidayBlocked ||
                     isClosed;
@@ -1903,20 +1895,33 @@
                 return;
             }
 
-            window.initCustomSelects?.(
-                calendarContainer
-            );
+            if (
+                typeof window.initCustomSelects ===
+                'function'
+            ) {
+                await window.initCustomSelects(
+                    calendarContainer
+                );
+            }
 
-            calendarContainer
-                .querySelectorAll(
+            const calendarSelectWrappers =
+                calendarContainer.querySelectorAll(
                     '.calendar-split-picker .custom-select'
-                )
-                .forEach(wrapper => {
+                );
 
-                    window.syncCustomSelect?.(
+            for (
+                const wrapper
+                of calendarSelectWrappers
+            ) {
+                if (
+                    typeof window.syncCustomSelect ===
+                    'function'
+                ) {
+                    await window.syncCustomSelect(
                         wrapper
                     );
-                });
+                }
+            }
 
             bindCalendarClicks(
                 `#${calendarConfig.calendarContainerId} [data-date]`
@@ -2347,10 +2352,33 @@
             hasCalendarRenderedOnce = true;
 
             if (isInitialAnimatedRender) {
-                window.setTimeout(
-                    initializeRenderedCalendar,
-                    180
+                let initAttempts = 0;
+
+                const initializeCalendarWhenReady = () => {
+                    const customSelect =
+                        container.querySelector(
+                            'select.js-custom-select'
+                        );
+
+                    if (
+                        customSelect ||
+                        initAttempts >= 10
+                    ) {
+                        initializeRenderedCalendar();
+                        return;
+                    }
+
+                    initAttempts++;
+
+                    requestAnimationFrame(
+                        initializeCalendarWhenReady
+                    );
+                };
+
+                requestAnimationFrame(
+                    initializeCalendarWhenReady
                 );
+
             } else {
                 initializeRenderedCalendar();
             }
@@ -2707,6 +2735,30 @@
             ] || {}),
 
             selectDate,
+
+            render() {
+                renderCalendar();
+            },
+
+            renderLoading() {
+                renderCalendarLoading();
+            },
+
+            setSelectedDate(value = null) {
+                selectedDate = value || null;
+            },
+
+            setSelectedTime(value = null) {
+                selectedTime = value || null;
+            },
+
+            getSelectedDate() {
+                return selectedDate;
+            },
+
+            getSelectedTime() {
+                return selectedTime;
+            },
         };
 
         if (
@@ -2969,66 +3021,86 @@
 
             dashboardSlotCache.set(iso, payload);
 
-            const slots = Array.isArray(payload?.slots) ? payload.slots : [];
+            const slots =
+                Array.isArray(payload?.slots)
+                    ? payload.slots
+                    : [];
 
-            const availableSlots = slots.filter(slot => {
-                if (typeof slot === 'string') return true;
+            const availableSlots =
+                slots.filter(slot => {
+                    if (typeof slot === 'string') {
+                        return true;
+                    }
 
-                return !(
-                    slot.is_taken ||
-                    slot.taken ||
-                    slot.booked ||
-                    slot.available === false
-                );
-            });
+                    return !(
+                        slot.is_taken ||
+                        slot.taken ||
+                        slot.booked ||
+                        slot.available === false
+                    );
+                });
 
-            const previewSlots = availableSlots.slice(0, 5);
-            const earliestSlot = previewSlots.length ?
-                (typeof previewSlots[0] === 'string' ? previewSlots[0] : previewSlots[0]?.time) :
-                null;
-
-            const bookingUrl = calendarConfig.bookingUrl ?
-                `${calendarConfig.bookingUrl}?date=${encodeURIComponent(iso)}` :
-                '#';
+            const earliestSlot =
+                availableSlots.length
+                    ? (
+                        typeof availableSlots[0] === 'string'
+                            ? availableSlots[0]
+                            : availableSlots[0]?.time
+                    )
+                    : null;
 
             if (!availableSlots.length) {
                 panel.innerHTML = `
-            <div class="dashboard-calendar-side-content">
-                <div class="dashboard-calendar-side-top">
-                    <div>
-                        <span class="dashboard-calendar-eyebrow">
-                            Selected date
-                        </span>
+                    <div class="dashboard-calendar-side-content">
 
-                        <strong class="dashboard-calendar-side-date">
-                            ${formatCalendarDateLabel(iso)}
-                        </strong>
+                        <div class="dashboard-calendar-side-top">
+
+                            <div>
+                                <span class="dashboard-calendar-eyebrow">
+                                    Selected date
+                                </span>
+
+                                <strong class="dashboard-calendar-side-date">
+                                    ${formatCalendarDateLabel(iso)}
+                                </strong>
+                            </div>
+
+                            <span class="dashboard-calendar-status unavailable">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                                No slots
+                            </span>
+
+                        </div>
+
+                        <div class="dashboard-calendar-side-state unavailable">
+
+                            <i class="fa-regular fa-calendar-xmark"></i>
+
+                            <p>
+                                ${
+                                    payload?.message ||
+                                    'No available appointment slots for this date.'
+                                }
+                            </p>
+
+                        </div>
+
                     </div>
-
-                    <span class="dashboard-calendar-status unavailable">
-                        <i class="fa-solid fa-circle-xmark"></i>
-                        No slots
-                    </span>
-                </div>
-
-                <div class="dashboard-calendar-side-state unavailable">
-                    <i class="fa-regular fa-calendar-xmark"></i>
-
-                    <p>
-                        ${payload?.message || 'No available appointment slots for this date.'}
-                    </p>
-                </div>
-            </div>
-        `;
+                `;
 
                 scrollSelectedCalendarDetailsIntoView();
 
                 return;
             }
 
+            const defaultFooterText =
+                'Select a time to continue';
+
             panel.innerHTML = `
                 <div class="dashboard-calendar-side-content">
+
                     <div class="dashboard-calendar-side-top">
+
                         <div>
                             <span class="dashboard-calendar-eyebrow">
                                 Selected date
@@ -3040,50 +3112,278 @@
                         </div>
 
                         <span class="dashboard-calendar-status available">
+
                             <i class="fa-solid fa-circle-check"></i>
+
                             ${availableSlots.length}
-                            ${availableSlots.length === 1 ? 'time slot' : 'time slots'}
+
+                            ${
+                                availableSlots.length === 1
+                                    ? 'time slot'
+                                    : 'time slots'
+                            }
+
                         </span>
+
                     </div>
 
                     <div class="dashboard-calendar-side-section">
+
                         <span class="dashboard-calendar-side-label">
-                            Available times
+                            Select an available time
                         </span>
 
-                        <div class="dashboard-calendar-preview-slots">
-                            ${previewSlots.map(slot => {
-                const time = typeof slot === 'string'
-                    ? slot
-                    : slot.time;
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                            Tap a time slot to select it.
+                        </p>
 
-                return `
-                                    <span class="dashboard-calendar-preview-slot">
+                        <div class="dashboard-calendar-preview-slots">
+
+                            ${availableSlots.map(slot => {
+                                const time =
+                                    typeof slot === 'string'
+                                        ? slot
+                                        : slot.time;
+
+                                const safeTime =
+                                    escapeCalendarText(time);
+
+                                return `
+                                    <button
+                                        type="button"
+                                        class="
+                                            slot-chip
+                                            inline-flex
+                                            items-center
+                                            gap-2
+                                            px-3
+                                            py-2
+                                            rounded-xl
+                                            border
+                                            text-xs
+                                            font-bold
+                                            cursor-pointer
+                                        "
+                                        data-dashboard-time="${safeTime}"
+                                        aria-pressed="false"
+                                    >
                                         <i class="fa-regular fa-clock"></i>
-                                        ${time}
-                                    </span>
+
+                                        <span>
+                                            ${safeTime}
+                                        </span>
+                                    </button>
                                 `;
-            }).join('')}
+                            }).join('')}
+
                         </div>
+
                     </div>
 
                     <div class="dashboard-calendar-side-footer">
-                        <span>
-                            ${earliestSlot
-                    ? `Earliest available: ${earliestSlot}`
-                    : 'Slots are subject to confirmation'}
+
+                        <span data-dashboard-selection-label>
+                            ${defaultFooterText}
                         </span>
 
                         <a
-                            href="${bookingUrl}"
-                            class="dashboard-calendar-book-btn"
+                            href="#"
+                            class="
+                                dashboard-calendar-book-btn
+                                opacity-50
+                                pointer-events-none
+                            "
+                            data-dashboard-book-link
+                            aria-disabled="true"
+                            tabindex="-1"
                         >
                             <i class="fa-solid fa-calendar-plus"></i>
+
                             Book this date
                         </a>
+
                     </div>
+
                 </div>
             `;
+
+            const bookLink =
+                panel.querySelector(
+                    '[data-dashboard-book-link]'
+                );
+
+            const selectionLabel =
+                panel.querySelector(
+                    '[data-dashboard-selection-label]'
+                );
+
+            const timeButtons =
+                panel.querySelectorAll(
+                    '[data-dashboard-time]'
+                );
+
+            function disableDashboardBookLink() {
+                if (!bookLink) return;
+
+                bookLink.href = '#';
+
+                bookLink.classList.add(
+                    'opacity-50',
+                    'pointer-events-none'
+                );
+
+                bookLink.setAttribute(
+                    'aria-disabled',
+                    'true'
+                );
+
+                bookLink.setAttribute(
+                    'tabindex',
+                    '-1'
+                );
+            }
+
+            function enableDashboardBookLink(time) {
+                if (
+                    !bookLink ||
+                    !calendarConfig.bookingUrl
+                ) {
+                    return;
+                }
+
+                const targetUrl =
+                    new URL(
+                        calendarConfig.bookingUrl,
+                        window.location.origin
+                    );
+
+                targetUrl.searchParams.set(
+                    'date',
+                    iso
+                );
+
+                targetUrl.searchParams.set(
+                    'time',
+                    time
+                );
+
+                bookLink.href =
+                    targetUrl.toString();
+
+                bookLink.classList.remove(
+                    'opacity-50',
+                    'pointer-events-none'
+                );
+
+                bookLink.setAttribute(
+                    'aria-disabled',
+                    'false'
+                );
+
+                bookLink.removeAttribute(
+                    'tabindex'
+                );
+            }
+
+            timeButtons.forEach(button => {
+                button.addEventListener(
+                    'click',
+                    () => {
+                        const time =
+                            String(
+                                button.dataset
+                                    .dashboardTime || ''
+                            ).trim();
+
+                        if (!time) return;
+                        if (selectedTime === time) {
+                            selectedTime = null;
+
+                            button.classList.remove(
+                                'selected'
+                            );
+
+                            button.setAttribute(
+                                'aria-pressed',
+                                'false'
+                            );
+
+                            const buttonIcon =
+                                button.querySelector('i');
+
+                            if (buttonIcon) {
+                                buttonIcon.className =
+                                    'fa-regular fa-clock';
+                            }
+
+                            if (selectionLabel) {
+                                selectionLabel.textContent =
+                                    defaultFooterText;
+                            }
+
+                            disableDashboardBookLink();
+
+                            return;
+                        }
+
+                        timeButtons.forEach(option => {
+                            option.classList.remove(
+                                'selected'
+                            );
+
+                            option.setAttribute(
+                                'aria-pressed',
+                                'false'
+                            );
+
+                            const optionIcon =
+                                option.querySelector('i');
+
+                            if (optionIcon) {
+                                optionIcon.className =
+                                    'fa-regular fa-clock';
+                            }
+                        });
+
+                        selectedTime = time;
+
+                        button.classList.add(
+                            'selected'
+                        );
+
+                        button.setAttribute(
+                            'aria-pressed',
+                            'true'
+                        );
+
+                        const selectedIcon =
+                            button.querySelector('i');
+
+                        if (selectedIcon) {
+                            selectedIcon.className =
+                                'fa-solid fa-circle-check';
+                        }
+
+                        if (selectionLabel) {
+                            selectionLabel.textContent =
+                                `Selected time: ${time}`;
+                        }
+
+                        enableDashboardBookLink(
+                            time
+                        );
+                    }
+                );
+            });
+
+            bookLink?.addEventListener(
+                'click',
+                event => {
+                    if (!selectedTime) {
+                        event.preventDefault();
+                    }
+                }
+            );
 
             scrollSelectedCalendarDetailsIntoView();
         }
@@ -3743,10 +4043,20 @@
 
             ensureSharedCalendarSource();
 
-            const queryDate =
+            const queryParams =
                 new URLSearchParams(
                     window.location.search
-                ).get('date');
+                );
+
+            const queryDate =
+                queryParams.get(
+                    'date'
+                );
+
+            const queryTime =
+                queryParams.get(
+                    'time'
+                );
 
             const queryDateState =
                 queryDate
@@ -3784,8 +4094,7 @@
                             .cellDate
                             .getMonth();
 
-                    selectedDate =
-                        queryDateState.iso;
+                    selectedDate = null;
 
                     focusedDateIso =
                         queryDateState.iso;
@@ -3814,7 +4123,7 @@
                 async () => {
                     renderCalendar();
 
-                    if (
+                   if (
                         calendarConfig.mode ===
                         'booking' &&
                         queryDateState &&
@@ -3823,6 +4132,42 @@
                         await selectDate(
                             queryDateState.iso
                         );
+
+                        if (queryTime) {
+                            const queryTimeChip =
+                                Array.from(
+                                    document.querySelectorAll(
+                                        `#${calendarConfig.slotGridId} .slot-chip`
+                                    )
+                                )
+                                .find(chip => {
+                                    return (
+                                        String(
+                                            chip.dataset.time || ''
+                                        ).trim() ===
+                                        String(
+                                            queryTime
+                                        ).trim()
+                                        &&
+                                        !chip.classList.contains(
+                                            'disabled'
+                                        )
+                                    );
+                                });
+
+                            if (queryTimeChip) {
+                                queryTimeChip.click();
+
+                            } else {
+                                window.showToast?.({
+                                    type: 'info',
+                                    title: 'Time slot unavailable',
+                                    message:
+                                        'The time you selected is no longer available. Please choose another available slot.',
+                                    duration: 4000,
+                                });
+                            }
+                        }
                     }
                 },
                 calendarConfig.mode ===

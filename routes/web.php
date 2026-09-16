@@ -10,13 +10,10 @@ use App\Http\Controllers\Admin\AdminPatientController;
 use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminSessionManagementController;
 use App\Http\Controllers\Admin\ClinicScheduleController;
-use App\Http\Controllers\Admin\DentalRecordController;
 use App\Http\Controllers\Admin\DentistTransitionController;
 use App\Http\Controllers\Admin\DocumentRequestController as AdminDocumentRequestController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
-use App\Http\Controllers\Admin\ExternalAdminController;
 use App\Http\Controllers\Admin\RolePermissionController;
-use App\Http\Controllers\Admin\ServiceTypeController;
 use App\Http\Controllers\Admin\SystemLogController;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -33,14 +30,18 @@ use App\Http\Controllers\Dentist\DentistPatientController;
 use App\Http\Controllers\Dentist\InventoryController;
 use App\Http\Controllers\Dentist\OdontogramController;
 use App\Http\Controllers\Dentist\WalkInController;
+use App\Http\Controllers\Shared\DentalRecordController;
+use App\Http\Controllers\Shared\ExternalAdminController;
+use App\Http\Controllers\Shared\FacultyController;
+use App\Http\Controllers\Shared\ServiceTypeController;
 use App\Http\Controllers\DocumentRequestController;
-use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\Security\SessionManagementController;
 use App\Models\Patient;
 use App\Models\Role;
+use App\Models\User;
 use App\Services\StudentApiService;
 use App\Services\IdpHealthService;
 use Illuminate\Http\Request;
@@ -49,40 +50,33 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
-// api nila albert
-
-Route::get('/debug-ogos-config', function () {
-    return response()->json([
-        'base_url' => config('services.ogos.base_url'),
-        'token_url' => config('services.ogos.token_url'),
-        'client_id' => config('services.ogos.client_id'),
-        'client_secret_exists' => filled(config('services.ogos.client_secret')),
-        'client_secret_length' => strlen((string) config('services.ogos.client_secret')),
-    ]);
-});
-
-Route::get('/test-student-api', function (StudentApiService $studentApiService) {
-    $email = 'student5@gmail.com'; // palitan mo kung needed
-
-    return response()->json($studentApiService->getStudentByEmail($email));
-});
-
 // kela matt
-Route::get('/faculties', [FacultyController::class, 'getFacultyList']);
+Route::get('/faculties', [FacultyController::class, 'getFacultyList'])
+    ->middleware([
+        'auth',
+        'permission:view_faculty_integration,create_faculty_integration,update_faculty_integration',
+    ])
+    ->name('shared.faculties.index');
 
 Route::get('/faculty-integration', function () {
-    return view('admin.faculty-integration');
-})->middleware(['auth', 'role:admin', 'permission:view_faculty_integration'])->name('admin.faculty.integration');
+    $user = Auth::user();
 
-Route::post('/faculty-integration/store', [FacultyController::class, 'store'])
-    ->middleware(['auth', 'role:admin', 'permission:create_faculty_integration'])
-    ->name('admin.faculty.store');
+    abort_unless($user, 403);
+
+    if ($user->hasAnyRole(['super_admin', 'admin'])) {
+        return redirect()->route('admin.faculty.integration');
+    }
+
+    if ($user->hasAnyRole(['dentist', 'dentist_role'])) {
+        return redirect()->route('dentist.faculty.integration');
+    }
+
+    abort(403);
+})
+    ->middleware('auth')
+    ->name('faculty.integration.redirect');
 
 // routes/web.php---
-
-Route::get('/debug-session', function () {
-    return response()->json(session()->all());
-});
 
 Route::get('/csrf-token', function () {
     return response()->json(['token' => csrf_token()]);
@@ -275,6 +269,16 @@ Route::get(
 Route::prefix('admin')
     ->middleware(['auth', 'role:admin'])
     ->group(function () {
+
+        Route::get('/faculty-integration', function () {
+            return view('shared.faculty-integration');
+        })
+            ->middleware('permission:view_faculty_integration,create_faculty_integration,update_faculty_integration')
+            ->name('admin.faculty.integration');
+
+        Route::post('/faculty-integration/store', [FacultyController::class, 'store'])
+            ->middleware('permission:create_faculty_integration')
+            ->name('admin.faculty.store');
 
         /*
         |--------------------------------------------------------------------------
@@ -525,7 +529,7 @@ Route::prefix('admin')
             ->middleware('permission:update_academic_period')
             ->name('admin.academic_periods.set_active');
 
-        Route::post('/admin/academic-periods/sync-flss', [AcademicPeriodController::class, 'syncFromFlss'])
+        Route::post('/academic-periods/sync-flss', [AcademicPeriodController::class, 'syncFromFlss'])
             ->middleware('permission:update_academic_period')
             ->name('admin.academic_periods.sync_flss');
 
@@ -1011,8 +1015,8 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->middleware('permission:view_own_appointments,book_appointments')
         ->name('book.appointment.index');
 
-    Route::get('/patient/appointments/cancelled', function () {
-        return view('patient.cancelled'); // <-- include 'patient.'
+    Route::get('/appointments/cancelled', function () {
+        return view('patient.cancelled');
     })->name('patient.appointment.cancelled.view');
 });
 
@@ -1052,7 +1056,7 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:create_follow_up_appointments')
         ->name('dentist.dentist.appointments.follow-up.store');
 
-    Route::get('/dentist/appointment-slots', [AppointmentController::class, 'slotsForDate'])
+    Route::get('/appointment-slots', [AppointmentController::class, 'slotsForDate'])
         ->middleware('permission:reschedule_appointments')
         ->name('dentist.appointment.slots');
 
@@ -1150,6 +1154,10 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
     Route::post('/report/medicine-inventory-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadMedicineInventoryReport'])
         ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.medicine-inventory-download');
+
+    Route::post('/report/dpt-download', [\App\Http\Controllers\Dentist\DptReportController::class, 'download'])
+        ->middleware('permission:create_report_files')
+        ->name('dentist.dentist.report.dpt-download');
 
     Route::post('/report/daily-treatment-record-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDailyTreatmentRecordReport'])
         ->middleware('permission:create_report_files')
@@ -1346,7 +1354,7 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->name('dentist.dentist.inventory.destroy');
 
     // clinic status
-    Route::post('/dentist/clinic-status', [DentistDashboardController::class, 'updateClinicStatus'])
+    Route::post('/clinic-status', [DentistDashboardController::class, 'updateClinicStatus'])
         ->middleware('permission:update_clinic_schedule')
         ->name('dentist.clinic-status.update');
 
@@ -1467,12 +1475,12 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
 
     Route::get('/external-admins/{adminId}', [ExternalAdminController::class, 'show'])
         ->middleware('permission:view_cms_integration,create_cms_integration')
-        ->where('adminId', '[A-Za-z0-9\\-_]+')
         ->name('dentist.external-admins.show');
 
     Route::get('/faculty-integration', function () {
-        return view('admin.faculty-integration');
-    })->middleware('permission:view_faculty_integration,create_faculty_integration')
+        return view('shared.faculty-integration');
+    })
+        ->middleware('permission:view_faculty_integration,create_faculty_integration,update_faculty_integration')
         ->name('dentist.faculty.integration');
 
     Route::post('/faculty-integration/store', [FacultyController::class, 'store'])
@@ -1599,6 +1607,24 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
 Route::post('/chat/send', [ChatbotController::class, 'chat']);
 
 if (app()->environment('local')) {
+
+    // api nila albert
+    Route::get('/debug-ogos-config', function () {
+        return response()->json([
+            'base_url' => config('services.ogos.base_url'),
+            'token_url' => config('services.ogos.token_url'),
+            'client_id' => config('services.ogos.client_id'),
+            'client_secret_exists' => filled(config('services.ogos.client_secret')),
+            'client_secret_length' => strlen((string) config('services.ogos.client_secret')),
+        ]);
+    });
+
+    Route::get('/test-student-api', function (StudentApiService $studentApiService) {
+        $email = 'student5@gmail.com';
+
+        return response()->json($studentApiService->getStudentByEmail($email));
+    });
+
     Route::get('/dev/error-pages/{code}', function (string $code) {
         $allowedCodes = [
             '401',

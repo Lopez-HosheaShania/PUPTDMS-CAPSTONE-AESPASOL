@@ -14,7 +14,6 @@
         $layoutRole = $layoutRole ?? (request()->routeIs('dentist.*') ? 'dentist' : 'admin');
 
         $isDentistView = $layoutRole === 'dentist';
-        $isAdminView = !$isDentistView;
 
         $routePrefix = $isDentistView ? 'dentist' : 'admin';
 
@@ -61,139 +60,178 @@
                     <div class="admin-banner-actions">
                         <span class="admin-banner-pill" id="serviceActiveCountPill">
                             Active Services:
-                            <span data-service-count>{{ $services->count() }}</span>
+                            <span data-service-count>
+                                {{ $services->where('is_active_for_booking', true)->count() }}
+                            </span>
                         </span>
                     </div>
                 </div>
             </div>
         @endif
 
+        <div class="stat-grid">
+            <div class="stat-card s-crimson">
+                <div class="stat-card-info">
+                    <span class="stat-label">Total Services</span>
+
+                    <strong class="stat-value" data-service-stat-total>
+                        {{ $services->count() }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="stat-card s-active">
+                <div class="stat-card-info">
+                    <span class="stat-label">Visible for Booking</span>
+
+                    <strong class="stat-value" data-service-stat-visible>
+                        {{ $services->where('is_active_for_booking', true)->count() }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="stat-card s-inactive">
+                <div class="stat-card-info">
+                    <span class="stat-label">Hidden</span>
+
+                    <strong class="stat-value" data-service-stat-hidden>
+                        {{ $services->where('is_active_for_booking', false)->count() }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="stat-card s-purple">
+                <div class="stat-card-info">
+                    <span class="stat-label">Default Services</span>
+
+                    <strong class="stat-value" data-service-stat-default>
+                        {{ $services->where('is_default', true)->count() }}
+                    </strong>
+                </div>
+            </div>
+        </div>
 
         <div class="content-lift">
             <div class="service-types-grid">
 
-                <div class="min-w-0">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-header-left">
-                                <div class="card-header-icon"><i class="fa-solid fa-plus"></i></div>
-                                <span class="card-title">Add New Service</span>
-                            </div>
-                        </div>
-
-                        <div class="card-body">
-                            <form id="addServiceForm" method="POST"
-                                action="{{ route($routePrefix . '.service-types.store') }}" data-global-validation
-                                novalidate>
-                                @csrf
-
-                                <div class="global-form-group" data-global-field>
-                                    <label for="serviceNameInput" class="global-form-label">
-                                        Service Name
-                                        <span class="required-mark">*</span>
-                                    </label>
-
-                                    <div class="global-voice-row" data-voice-field>
-
-                                        <div class="global-voice-control" data-clearable-field>
-                                            <div class="global-control-wrap">
-
-                                                <i class="fa-solid fa-tag global-control-icon"></i>
-
-                                                <input type="text" id="serviceNameInput" name="name"
-                                                    value="{{ old('name') }}"
-                                                    class="form-input-custom global-control-with-icon"
-                                                    placeholder="e.g. Tooth Extraction" autocomplete="off"
-                                                    data-field-label="Service Name"
-                                                    data-required-message="Please enter a service name."
-                                                    data-clearable-input required>
-
-                                                <button type="button" class="search-clear field-clear-btn" data-field-clear
-                                                    aria-label="Clear service name">
-                                                    <i class="fa-solid fa-xmark"></i>
-                                                </button>
-
-                                            </div>
-                                        </div>
-
-                                        <x-voice-input target="#serviceNameInput" status-id="serviceNameVoiceStatus"
-                                            label="Voice input for service name" title="Voice input" />
-
-                                    </div>
+                @if ($canCreateServiceType)
+                    <div class="min-w-0">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-header-left">
+                                    <div class="card-header-icon"><i class="fa-solid fa-plus"></i></div>
+                                    <span class="card-title">Add New Service</span>
                                 </div>
+                            </div>
 
-                                <div class="global-form-group" data-global-field>
-                                    <div class="global-label-row">
-                                        <label for="serviceDescInput" class="global-form-label">
-                                            Description (Optional)
+                            <div class="card-body">
+                                <form id="addServiceForm" method="POST"
+                                    action="{{ route($routePrefix . '.service-types.store') }}" data-global-validation
+                                    novalidate>
+                                    @csrf
+
+                                    <div class="global-form-group" data-global-field>
+                                        <label for="serviceNameInput" class="global-form-label">
+                                            Service Name
+                                            <span class="required-mark">*</span>
                                         </label>
 
-                                        <div class="global-label-meta">
-                                            <button type="button" class="service-copy-bullet-box" data-copy-bullet>
+                                        <div class="global-voice-row is-textarea" data-voice-field>
 
-                                                <span class="service-copy-bullet-symbol">
-                                                    •
-                                                </span>
+                                            <div class="global-voice-control" data-clearable-field>
+                                                <div class="global-control-wrap">
+
+                                                    <i class="fa-solid fa-tag global-control-icon"></i>
+
+                                                    <input type="text" id="serviceNameInput" name="name"
+                                                        value="{{ old('name') }}"
+                                                        class="form-input-custom global-control-with-icon"
+                                                        placeholder="e.g. Tooth Extraction" autocomplete="off"
+                                                        data-field-label="Service Name"
+                                                        data-required-message="Please enter a service name."
+                                                        data-clearable-input required>
+
+                                                    <button type="button" class="search-clear field-clear-btn"
+                                                        data-field-clear aria-label="Clear service name">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+
+                                                </div>
+                                            </div>
+
+                                            <x-voice-input target="#serviceNameInput" status-id="serviceNameVoiceStatus"
+                                                label="Voice input for service name" title="Voice input" />
+
+                                        </div>
+                                    </div>
+
+                                    <div class="global-form-group" data-global-field>
+                                        <div class="global-label-row">
+                                            <label for="serviceDescInput" class="global-form-label">
+                                                Description
+                                                <span class="field-optional">(Optional)</span>
+                                            </label>
+
+                                            <button type="button" class="service-copy-bullet-box" data-copy-bullet>
+                                                <span class="service-copy-bullet-symbol">•</span>
 
                                                 <span class="service-copy-bullet-label">
                                                     Copy this bullet
                                                 </span>
                                             </button>
-
-                                            <span id="serviceDescCount" class="char-counter">
-                                                0 / 255 characters
-                                            </span>
                                         </div>
-                                    </div>
 
-                                    <div class="global-voice-row" data-voice-field>
+                                        <div class="global-voice-row is-textarea" data-voice-field>
 
-                                        <div class="global-voice-control" data-clearable-field>
-                                            <div class="global-form-textarea-wrap">
+                                            <div class="global-voice-control" data-clearable-field>
+                                                <div class="global-form-textarea-wrap">
 
-                                                <textarea id="serviceDescInput" name="description" class="form-input-custom global-form-textarea"
-                                                    placeholder="Brief details about the service..." maxlength="255" data-char-limit="255"
-                                                    data-char-counter="#serviceDescCount" data-clearable-input>{{ old('description') }}</textarea>
+                                                    <textarea id="serviceDescInput" name="description" class="form-input-custom global-form-textarea"
+                                                        placeholder="Brief details about the service..." maxlength="255" data-char-limit="255"
+                                                        data-char-counter="#serviceDescCount" data-clearable-input>{{ old('description') }}</textarea>
 
-                                                <button type="button"
-                                                    class="search-clear field-clear-btn field-clear-btn--textarea"
-                                                    data-field-clear aria-label="Clear description">
-                                                    <i class="fa-solid fa-xmark"></i>
-                                                </button>
+                                                    <button type="button"
+                                                        class="search-clear field-clear-btn field-clear-btn--textarea"
+                                                        data-field-clear aria-label="Clear description">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
 
+                                                    <span id="serviceDescCount" class="char-counter">
+                                                        0 / 255 characters
+                                                    </span>
+
+                                                </div>
                                             </div>
+
+                                            <x-voice-input target="#serviceDescInput" status-id="serviceDescVoiceStatus"
+                                                label="Voice input for service description" title="Voice input" />
+
                                         </div>
-
-                                        <x-voice-input target="#serviceDescInput" status-id="serviceDescVoiceStatus"
-                                            label="Voice input for service description" title="Voice input" />
-
                                     </div>
-                                </div>
 
-                                <div class="flex justify-end">
-                                    <button type="submit" class="ui-btn ui-btn-primary">
-                                        <i class="fa-solid fa-floppy-disk"></i>
-                                        <span>Save Service</span>
-                                    </button>
-                                </div>
-                            </form>
+                                    <div class="flex justify-end">
+                                        <button type="submit" class="ui-btn ui-btn-primary">
+                                            <i class="fa-solid fa-floppy-disk"></i>
+                                            <span>Save Service</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-
+                @endif
                 <div class="min-w-0">
                     <div class="card">
-                        <div class="card-header service-list-card-header">
+                        <div class="card-header">
                             <div class="card-header-left">
-                                <div class="card-header-icon"><i class="fa-solid fa-list-check"></i></div>
+                                <div class="card-header-icon">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+
                                 <span class="card-title">Existing Services</span>
                             </div>
 
-                            <div class="service-card-header-actions">
-                                <span class="entry-badge" id="serviceEntryCountBadge">
-                                    {{ $services->count() }} {{ Str::plural('Item', $services->count()) }}
-                                </span>
-
+                            <div class="card-header-right">
                                 <x-view-toggle id="serviceTypeViewToggle" class="service-type-view-toggle"
                                     storage-key="serviceTypeView" list-view="#serviceTypeListView"
                                     grid-view="#serviceTypeGridView" />
@@ -305,7 +343,7 @@
                                             <div class="service-grid-card">
                                                 <div class="service-grid-topline">
 
-                                                    <span class="service-grid-id">
+                                                    <span class="table-tag table-tag-neutral">
                                                         #{{ $service->id }}
                                                     </span>
 
@@ -375,17 +413,17 @@
                                                                 <i class="fa-solid fa-trash"></i>
                                                             </button>
                                                         @endif
-                                                    </div>
 
-                                                    @if ($canViewServiceTypes)
-                                                        <button type="button" class="ui-action-btn ui-action-view"
-                                                            data-tooltip="View details"
-                                                            aria-label="View {{ $service->name }} details"
-                                                            data-service-action="view"
-                                                            data-service-id="{{ $service->id }}">
-                                                            <i class="fa-solid fa-eye"></i>
-                                                        </button>
-                                                    @endif
+                                                        @if ($canViewServiceTypes)
+                                                            <button type="button" class="ui-action-btn ui-action-view"
+                                                                data-tooltip="View details"
+                                                                aria-label="View {{ $service->name }} details"
+                                                                data-service-action="view"
+                                                                data-service-id="{{ $service->id }}">
+                                                                <i class="fa-solid fa-eye"></i>
+                                                            </button>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                         </article>
@@ -398,7 +436,7 @@
                     </div>
                 </div>
             </div>
-
+        </div>
     </main>
 
     @if ($canDeleteServiceType)
@@ -446,7 +484,7 @@
                             <span class="required-mark">*</span>
                         </label>
 
-                        <div class="global-voice-row" data-voice-field>
+                        <div class="global-voice-row is-textarea" data-voice-field>
 
                             <div class="global-voice-control">
                                 <div class="global-control-wrap">
@@ -471,27 +509,19 @@
                         <div class="global-label-row">
                             <label for="manageServiceDescription" class="global-form-label">
                                 Description
+                                <span class="field-optional">(Optional)</span>
                             </label>
 
-                            <div class="global-label-meta">
-                                <button type="button" class="service-copy-bullet-box" data-copy-bullet>
+                            <button type="button" class="service-copy-bullet-box" data-copy-bullet>
+                                <span class="service-copy-bullet-symbol">•</span>
 
-                                    <span class="service-copy-bullet-symbol">
-                                        •
-                                    </span>
-
-                                    <span class="service-copy-bullet-label">
-                                        Copy this bullet
-                                    </span>
-                                </button>
-
-                                <span id="manageServiceDescCount" class="char-counter">
-                                    0 / 255 characters
+                                <span class="service-copy-bullet-label">
+                                    Copy this bullet
                                 </span>
-                            </div>
+                            </button>
                         </div>
 
-                        <div class="global-voice-row" data-voice-field>
+                        <div class="global-voice-row is-textarea" data-voice-field>
 
                             <div class="global-voice-control">
                                 <div class="global-form-textarea-wrap">
@@ -499,6 +529,10 @@
                                     <textarea id="manageServiceDescription" name="description" class="form-input-custom global-form-textarea"
                                         maxlength="255" data-char-limit="255" data-char-counter="#manageServiceDescCount"
                                         placeholder="Brief details about the service..."></textarea>
+
+                                    <span id="manageServiceDescCount" class="char-counter">
+                                        0 / 255 characters
+                                    </span>
 
                                 </div>
                             </div>
@@ -509,7 +543,7 @@
                         </div>
                     </div>
 
-                    <div class="global-form-group modal-field-full" data-global-field>
+                    <div class="global-form-group field-group full" data-global-field>
                         <div class="service-booking-row">
                             <div class="service-booking-copy">
                                 <div class="service-booking-icon">
@@ -590,10 +624,6 @@
                 <div class="modal-profile-card">
 
                     <div class="modal-profile-main">
-
-                        <div class="modal-profile-avatar">
-                            <i class="fa-solid fa-tooth"></i>
-                        </div>
 
                         <div class="modal-profile-main-copy">
 
@@ -936,20 +966,38 @@
                 serviceTypeServices.sort((a, b) => String(a.name).localeCompare(String(b.name)));
             }
 
-            function servicePlural(count) {
-                return count === 1 ? 'Item' : 'Items';
-            }
-
             function updateServiceCounts() {
-                const count = serviceTypeServices.length;
+                const totalCount = serviceTypeServices.length;
+
+                const visibleCount = serviceTypeServices.filter(
+                    service => service.is_active_for_booking
+                ).length;
+
+                const hiddenCount = totalCount - visibleCount;
+
+                const defaultCount = serviceTypeServices.filter(
+                    service => service.is_default
+                ).length;
+
                 document.querySelectorAll('[data-service-count]').forEach((node) => {
-                    node.textContent = count;
+                    node.textContent = visibleCount;
                 });
 
-                const entryBadge = document.getElementById('serviceEntryCountBadge');
-                if (entryBadge) {
-                    entryBadge.textContent = `${count} ${servicePlural(count)}`;
-                }
+                document.querySelectorAll('[data-service-stat-total]').forEach((node) => {
+                    node.textContent = totalCount;
+                });
+
+                document.querySelectorAll('[data-service-stat-visible]').forEach((node) => {
+                    node.textContent = visibleCount;
+                });
+
+                document.querySelectorAll('[data-service-stat-hidden]').forEach((node) => {
+                    node.textContent = hiddenCount;
+                });
+
+                document.querySelectorAll('[data-service-stat-default]').forEach((node) => {
+                    node.textContent = defaultCount;
+                });
             }
 
             function actionButtons(service) {
@@ -1159,68 +1207,21 @@
         ` :
                             '';
 
-                        const editButton = !CAN_UPDATE_SERVICE_TYPE ?
-                            '' :
-                            `
-                            <button
-                                type="button"
-                                class="ui-action-btn ui-action-edit"
-                                data-tooltip="Manage service"
-                                data-tooltip-tone="edit"
-                                aria-label="Manage ${escapeHtml(service.name)}"
-                                data-service-action="edit"
-                                data-service-id="${service.id}"
-                            >
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                        `;
-
-                        const deleteButton = !CAN_DELETE_SERVICE_TYPE || service.is_default ?
-                            '' :
-                            `
-                            <button
-                                type="button"
-                                class="ui-action-btn ui-action-delete"
-                                data-tooltip="Delete service"
-                                aria-label="Delete ${escapeHtml(service.name)}"
-                                data-service-action="delete"
-                                data-service-id="${service.id}"
-                            >
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        `;
-
                         const description =
                             service.description ?
                             escapeHtml(service.description) :
                             'No description provided.';
 
-                        const viewButton = !CAN_VIEW_SERVICE_TYPES ?
-                            '' :
-                            `
-                                <button
-                                    type="button"
-                                    class="ui-action-btn ui-action-view"
-                                    data-tooltip="View details"
-                                    aria-label="View ${escapeHtml(service.name)} details"
-                                    data-service-action="view"
-                                    data-service-id="${service.id}"
-                                >
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                            `;
-
                         return `
                     <article
                         class="table-record-card"
-                        data-service-id="${service.id}"
-                    >
+                        data-service-id="${service.id}">
                         <div class="service-grid-card">
                             <div class="service-grid-topline">
 
                                 <span class="table-tag table-tag-neutral">
-    #${service.id}
-</span>
+                                    #${service.id}
+                                </span>
 
                                 <div class="service-grid-statuses">
                                     ${visibility}
@@ -1249,13 +1250,10 @@
                                 ${description}
                             </p>
 
-                            <div class="service-grid-footer">
+                           <div class="service-grid-footer">
                                 <div class="ui-action-group">
-                                    ${editButton}
-                                    ${deleteButton}
+                                    ${actionButtons(service)}
                                 </div>
-
-                                ${viewButton}
                             </div>
                         </div>
                     </article>

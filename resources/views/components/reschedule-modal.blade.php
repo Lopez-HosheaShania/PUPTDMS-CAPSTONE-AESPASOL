@@ -239,6 +239,21 @@
 
     let selectedRescheduleId = null;
 
+    function getRescheduleCalendar() {
+        const container =
+            document.getElementById(
+                'calGridWrapReschedule'
+            );
+
+        if (!container) {
+            return null;
+        }
+
+        return window.__appointmentCalendars?.[
+            container.id
+        ] || null;
+    }
+
     function clearRescheduleSlotSelection() {
         const timeInput = document.getElementById('new_appointment_time');
         const selectedSlotDisplay =
@@ -253,7 +268,7 @@
         const clearBtn = document.getElementById('clearSlotSelectionBtn');
         const slotGrid = document.getElementById('slotGrid');
 
-        if (typeof selectedTime !== 'undefined') selectedTime = null;
+        getRescheduleCalendar()?.setSelectedTime?.(null);
 
         if (timeInput) {
             timeInput.value = '';
@@ -334,19 +349,14 @@
                 'clearSlotSelectionBtn'
             );
 
-        if (
-            typeof selectedDate !==
-            'undefined'
-        ) {
-            selectedDate = null;
-        }
+        const calendar =
+            getRescheduleCalendar();
 
-        if (
-            typeof selectedTime !==
-            'undefined'
-        ) {
-            selectedTime = null;
-        }
+        calendar
+            ?.setSelectedDate?.(null);
+
+        calendar
+            ?.setSelectedTime?.(null);
 
         if (dateInput) {
             dateInput.value = '';
@@ -453,9 +463,6 @@
         if (timeInput) timeInput.value = '';
         if (reasonInput) reasonInput.value = '';
 
-        if (typeof selectedDate !== 'undefined') selectedDate = null;
-        if (typeof selectedTime !== 'undefined') selectedTime = null;
-
         const calendarGroup =
             document.querySelector(
                 '#rescheduleModal .cal-wrap'
@@ -488,15 +495,15 @@
             'rescheduleModal'
         );
 
-        if (typeof renderCalendarLoading === 'function') {
-            renderCalendarLoading();
-        }
+        const calendar = getRescheduleCalendar();
 
-        if (typeof renderCalendar === 'function') {
-            setTimeout(() => {
-                renderCalendar();
-            }, 0);
-        }
+        calendar
+            ?.renderLoading?.();
+
+        setTimeout(() => {
+            calendar
+                ?.render?.();
+        }, 0);
 
         if (dateInput) dateInput.value = '';
         if (timeInput) timeInput.value = '';
@@ -565,6 +572,26 @@
 
         let valid = true;
 
+        const dateInput =
+            document.getElementById(
+                'new_appointment_date'
+            );
+
+        const timeInput =
+            document.getElementById(
+                'new_appointment_time'
+            );
+
+        const selectedDateValue =
+            String(
+                dateInput?.value || ''
+            ).trim();
+
+        const selectedTimeValue =
+            String(
+                timeInput?.value || ''
+            ).trim();
+
         const calendarGroup =
             document.querySelector(
                 '#rescheduleModal .cal-wrap'
@@ -575,7 +602,7 @@
                 '#rescheduleModal .slots-wrap'
             );
 
-        if (!selectedDate) {
+        if (!selectedDateValue) {
             window.showGlobalGroupError?.(
                 calendarGroup,
                 'reschedule-date',
@@ -590,7 +617,7 @@
             );
         }
 
-        if (!selectedTime) {
+        if (!selectedTimeValue) {
             window.showGlobalGroupError?.(
                 timeSlotGroup,
                 'reschedule-time',

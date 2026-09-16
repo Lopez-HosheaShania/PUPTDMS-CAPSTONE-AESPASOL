@@ -109,6 +109,9 @@
         "{{ session('impersonated_role') ?? (optional(optional(auth()->user())->role)->slug ?? 'guest') }}";
     window.chatbotSessionId = "{{ session()->getId() }}";
     window.chatbotBotName = 'PUP SmileGuide AI';
+
+    window.chatbotDocumentRequestStoreUrl =
+        @json(route('patient.document.requests.store'));
 </script>
 
 <script>
@@ -122,7 +125,36 @@
 
     const currentUserId = window.authUserId || document.querySelector('meta[name="auth-user-id"]')?.getAttribute(
         'content') || 'guest';
-    const currentUserRole = window.authUserRole || 'guest';
+
+    function normalizeChatbotRole(role) {
+        const normalizedRole = String(role || 'guest')
+            .trim()
+            .toLowerCase();
+
+        const roleAliases = {
+            admin: 'admin',
+            super_admin: 'admin',
+            'super-admin': 'admin',
+            superadmin: 'admin',
+
+            dentist: 'dentist',
+            dentist_role: 'dentist',
+            'dentist-role': 'dentist',
+
+            patient: 'patient',
+            patient_role: 'patient',
+            'patient-role': 'patient',
+
+            guest: 'guest'
+        };
+
+        return roleAliases[normalizedRole] || 'guest';
+    }
+
+    const currentUserRole = normalizeChatbotRole(
+        window.authUserRole
+    );
+
     const currentChatSessionId = window.chatbotSessionId || 'session';
 
     const chatStorageKey = `puptdms_chatbot_messages_${currentUserRole}_${currentUserId}_${currentChatSessionId}`;
@@ -389,6 +421,9 @@
                 introShown = true;
             }
 
+            input.value = '';
+            updateChatInputCounter();
+
             setTimeout(() => input.focus(), 100);
         }
     }
@@ -455,7 +490,22 @@
         return true;
     }
 
+    function cleanChatbotResponse(text) {
+        if (typeof text !== 'string') {
+            return text;
+        }
+
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/\*\*/g, '')
+            .trim();
+    }
+
     function addMessage(type, text, options = {}) {
+        if (type === 'ai') {
+            text = cleanChatbotResponse(text);
+        }
+
         const row = document.createElement('div');
         row.className = `chat-row ${type}`;
 
@@ -593,8 +643,7 @@
     function sendQuickMessage(message) {
         if (sendBtn.disabled) return;
 
-        input.value = message;
-        sendMessage();
+        sendMessage(message);
     }
 
     function cleanErrorMessage(data) {
@@ -623,6 +672,144 @@
         return new Promise(resolve => {
             setTimeout(resolve, 500 + Math.random() * 700);
         });
+    }
+
+
+    async function submitChatbotDocumentRequest(action) {
+        const documentType = String(
+            action?.document_type || ''
+        ).trim();
+
+        const purpose = String(
+            action?.purpose || ''
+        ).trim();
+
+        if (!documentType || !purpose) {
+            addMessage(
+                'ai',
+                'I need both the document type and purpose before I can submit the request.'
+            );
+
+            return;
+        }
+
+        const csrfMeta =
+            document.querySelector(
+                'meta[name="csrf-token"]'
+            );
+
+        const csrfToken =
+            csrfMeta ?
+            csrfMeta.getAttribute('content') :
+            '';
+
+        try {
+            const response = await fetch(
+                window.chatbotDocumentRequestStoreUrl ||
+                '/document-requests', {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json',
+
+                        'Accept': 'application/json',
+
+                        'X-Requested-With': 'XMLHttpRequest',
+
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+
+                    body: JSON.stringify({
+                        document_type: documentType,
+
+                        purpose: purpose
+                    })
+                }
+            );
+
+            let data = {};
+
+            const responseText =
+                await response.text();
+
+            if (responseText) {
+                try {
+                    data =
+                        JSON.parse(
+                            responseText
+                        );
+                } catch (parseError) {
+                    console.warn(
+                        'Document request returned a non-JSON response.',
+                        parseError
+                    );
+                }
+            }
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                let message =
+                    data?.message || '';
+
+                if (!message) {
+                    if (
+                        response.status === 401
+                    ) {
+                        message =
+                            'Your patient session could not be verified. Please sign in again.';
+                    } else if (
+                        response.status === 403
+                    ) {
+                        message =
+                            'Your current role is not allowed to submit a patient document request.';
+                    } else if (
+                        response.status === 419
+                    ) {
+                        message =
+                            'Your session has expired. Please refresh the page and try again.';
+                    } else if (
+                        response.status === 422
+                    ) {
+                        message =
+                            'The document request could not be submitted. Please check the request details.';
+                    } else {
+                        message =
+                            'The document request could not be submitted right now. Please try again.';
+                    }
+                }
+
+                addMessage(
+                    'ai',
+                    message
+                );
+
+                return;
+            }
+
+
+            addMessage(
+                'ai',
+                `Your ${documentType} request for ${purpose} was submitted successfully and is now pending review by the dental clinic.`
+            );
+
+            addActionButton(
+                'View Document Requests',
+                '/document-requests'
+            );
+
+        } catch (error) {
+            console.error(
+                'Chatbot document request failed.',
+                error
+            );
+
+            addMessage(
+                'ai',
+                'I could not connect to the document request service. Please try again.'
+            );
+        }
     }
 
     function runSystemCommand(message) {
@@ -686,8 +873,12 @@
         }
     }
 
-    async function sendMessage() {
-        const message = input.value.trim();
+    async function sendMessage(messageOverride = null) {
+        const message = String(
+            messageOverride !== null ?
+            messageOverride :
+            input.value
+        ).trim();
 
         if (!message || sendBtn.disabled) return;
 
@@ -760,15 +951,30 @@
                 throw new Error(cleanErrorMessage(data));
             }
 
-            let reply = data.reply || 'No response from AI.';
+            if (
+                data?.action?.type ===
+                'submit_document_request'
+            ) {
+                await submitChatbotDocumentRequest(
+                    data.action
+                );
 
-            if (window.authUserName && reply.toLowerCase().startsWith('hello')) {
-                reply = reply.replace(/^hello(?:\s+there)?[!,.\s]*/i, `Hello ${window.authUserName}! `).replace(
-                    /\s+/g, ' ').trim();
+                return;
             }
 
-            addMessage('ai', reply);
-            handleSmartActions(data.reply || '', message);
+            let reply =
+                data.reply ||
+                'No response from AI.';
+
+            addMessage(
+                'ai',
+                reply
+            );
+
+            handleSmartActions(
+                data.reply || '',
+                message
+            );
 
         } catch (error) {
             removeTyping();
@@ -946,102 +1152,434 @@
                 ['Appointments', 'How can I view and manage clinic appointments as admin?'],
                 ['Reports', 'Where can I view reports and analytics?']
             ],
+
             '/admin/dashboard': [
                 ['Dashboard', 'What can I see on the admin dashboard?'],
-                ['Inventory', 'How can I check inventory overview as admin?'],
+                ['Inventory', 'How can I check the inventory overview as admin?'],
                 ['Reports', 'Where can I view clinic reports?']
             ],
+
             '/admin/patient-directory': [
                 ['Patients', 'How can I search and manage patients?'],
-                ['Records', 'How can I view patient dental records?'],
+                ['Records', 'How can I view a patient dental record?'],
                 ['Profile', 'How can I open a patient profile?']
             ],
+
+            '/admin/patient/': [
+                ['Profile', 'What information can I view in this patient profile?'],
+                ['Records', 'How can I review this patient dental records?'],
+                ['Appointments', 'How can I check this patient appointments?']
+            ],
+
+            '/admin/dental-records': [
+                ['Records', 'How can I review dental records as admin?'],
+                ['Patient', 'How can I find a patient dental record?'],
+                ['Details', 'What information is available in a dental record?']
+            ],
+
+            '/dentist/walk-in': [
+                ['Walk-in', 'How does the walk-in patient workflow work?'],
+                ['Patient', 'How can I search an existing patient for a walk-in?'],
+                ['Start', 'How can I start a walk-in consultation?']
+            ],
+
+            '/admin/add-existing-record': [
+                ['Existing Record', 'How can I add an existing dental record?'],
+                ['Patient', 'How can I search for a patient before adding an existing record?'],
+                ['Record', 'What information do I need when adding an existing record?']
+            ],
+
+            '/admin/dentist-transitions': [
+                ['Continuity', 'How does Dentist Continuity work?'],
+                ['Successor', 'How can I assign a successor dentist?'],
+                ['Finalize', 'How can I finalize a dentist transition?']
+            ],
+
+            '/faculty-integration': [
+                ['Faculty', 'What can I do on the Faculty Integration page?'],
+                ['Search', 'How can I find a faculty member for integration?'],
+                ['Access', 'How does faculty integration work in the clinic system?']
+            ],
+
             '/admin/appointments': [
                 ['Appointments', 'How can I manage appointments as admin?'],
                 ['Reschedule', 'How can I reschedule an appointment?'],
                 ['Cancel', 'How can I cancel an appointment?']
             ],
+
+            '/admin/clinic-schedule': [
+                ['Schedule', 'How can I manage the clinic schedule?'],
+                ['Block Date', 'How can I block an unavailable clinic date?'],
+                ['Availability', 'How can I manage available appointment schedules?']
+            ],
+
+            '/admin/academic-periods': [
+                ['Periods', 'How do Academic Periods work?'],
+                ['Active', 'How can I check or change the active academic period?'],
+                ['Sync', 'How does Academic Period synchronization work?']
+            ],
+
             '/admin/document-requests': [
                 ['Requests', 'How can I review document requests?'],
                 ['Approve', 'How can I approve a document request?'],
                 ['Reject', 'How can I reject a document request?']
+            ],
+
+            '/admin/service-types': [
+                ['Services', 'How can I manage dental service types?'],
+                ['Add', 'How can I add a new service type?'],
+                ['Status', 'How can I manage the status of a service type?']
+            ],
+
+            '/admin/document-template': [
+                ['Templates', 'How can I manage document templates?'],
+                ['Default', 'How can I set a default document template?'],
+                ['Archive', 'How can I archive or activate a document template?']
+            ],
+
+            '/admin/inventory': [
+                ['Inventory', 'How can I manage clinic inventory?'],
+                ['Add Item', 'How can I add an inventory item?'],
+                ['Stock', 'How can I check medicine and supply stock?']
+            ],
+
+            '/admin/report-files': [
+                ['Reports', 'How can I generate clinic reports?'],
+                ['Files', 'Where can I find generated report files?'],
+                ['Download', 'How can I download a clinic report?']
+            ],
+
+            '/admin/reports': [
+                ['AI Reports', 'What are AI-assisted reports?'],
+                ['Generate', 'How can I generate an AI-assisted report?'],
+                ['Download', 'How can I download an AI-generated report?']
+            ],
+
+            '/admin/user-management': [
+                ['Users', 'What can I do in User Management?'],
+                ['Create', 'How can I create a new user account?'],
+                ['Role', 'How can I update a user role?']
+            ],
+
+            '/admin/assign-cms-access': [
+                ['CMS Access', 'What is Assign CMS Access used for?'],
+                ['Assign', 'How can I assign CMS access to a user?'],
+                ['Status', 'How can I check a user CMS access status?']
+            ],
+
+            '/admin/role-permissions': [
+                ['Roles', 'How can I manage roles?'],
+                ['Permissions', 'How can I update role permissions?'],
+                ['Custom Role', 'How can I create a custom role?']
+            ],
+
+            '/admin/system-logs': [
+                ['Logs', 'What information can I see in System Logs?'],
+                ['Search', 'How can I find a specific system log?'],
+                ['Export', 'How can I export system logs?']
+            ],
+
+            '/admin/session-management': [
+                ['Sessions', 'What can I see in the Session Dashboard?'],
+                ['Devices', 'How can I review active user sessions and devices?'],
+                ['Revoke', 'How can I terminate an active user session?']
+            ],
+
+            '/admin/system-settings': [
+                ['Settings', 'What can I configure in System Settings?'],
+                ['Notifications', 'How can I configure notification settings?'],
+                ['Update', 'How can I update system settings?']
             ]
         },
+
         dentist: {
             default: [
                 ['Today', 'How can I check today’s appointments?'],
                 ['Patients', 'How can I open a patient profile?'],
                 ['Odontogram', 'How can I start or view a patient odontogram?']
             ],
+
             '/dentist/dashboard': [
                 ['Today', 'How can I check today’s appointments?'],
                 ['Calendar', 'How can I view scheduled appointments?'],
                 ['Reports', 'Where can I view dentist reports?']
             ],
-            '/dentist/appointments': [
-                ['Appointments', 'How can I manage appointments as dentist?'],
-                ['Start', 'How can I start an appointment?'],
-                ['Follow-up', 'How can I set a follow-up appointment?']
-            ],
+
             '/dentist/patients': [
                 ['Patients', 'How can I view patient profiles?'],
                 ['Records', 'How can I review patient dental records?'],
                 ['Odontogram', 'How can I open a patient odontogram?']
             ],
+
+            '/dentist/dental-records': [
+                ['Records', 'How can I review dental records?'],
+                ['Patient', 'How can I find a patient dental record?'],
+                ['Treatment', 'Where can I review treatment information?']
+            ],
+
             '/dentist/walk-in': [
                 ['Walk-in', 'How can I add a walk-in patient?'],
                 ['Search', 'How can I search an existing patient for walk-in?'],
                 ['Start', 'How can I start a walk-in consultation?']
+            ],
+
+            '/dentist/add-existing-record': [
+                ['Existing Record', 'How can I add an existing dental record?'],
+                ['Search', 'How can I search a patient before adding an existing record?'],
+                ['Save', 'How can I save an existing dental record?']
+            ],
+
+            '/dentist/transitions': [
+                ['Continuity', 'What can I do in Dentist Continuity?'],
+                ['Successor', 'How does dentist successor assignment work?'],
+                ['Status', 'How can I check a dentist transition status?']
+            ],
+
+            '/dentist/faculty-integration': [
+                ['Faculty', 'What can I do on the Faculty Integration page?'],
+                ['Search', 'How can I find a faculty member for integration?'],
+                ['Access', 'How does faculty integration work?']
+            ],
+
+            '/dentist/appointments': [
+                ['Appointments', 'How can I manage appointments as dentist?'],
+                ['Start', 'How can I start an appointment?'],
+                ['Follow-up', 'How can I set a follow-up appointment?']
+            ],
+
+            '/dentist/clinic-schedule': [
+                ['Schedule', 'How can I manage the clinic schedule?'],
+                ['Availability', 'How can I manage available clinic schedules?'],
+                ['Block Date', 'How can I block an unavailable date?']
+            ],
+
+            '/dentist/academic-periods': [
+                ['Periods', 'How do Academic Periods work?'],
+                ['Active', 'How can I check the active academic period?'],
+                ['Sync', 'How does Academic Period synchronization work?']
+            ],
+
+            '/dentist/document-requests': [
+                ['Requests', 'How can I review document requests?'],
+                ['Approve', 'How can I approve a document request?'],
+                ['Reject', 'How can I reject a document request?']
+            ],
+
+            '/dentist/service-types': [
+                ['Services', 'How can I manage dental service types?'],
+                ['Add', 'How can I add a service type?'],
+                ['Status', 'How can I manage a service type status?']
+            ],
+
+            '/dentist/document-template': [
+                ['Templates', 'How can I manage document templates?'],
+                ['Default', 'How can I set a default document template?'],
+                ['Archive', 'How can I archive or activate a document template?']
+            ],
+
+            '/dentist/inventory': [
+                ['Inventory', 'How can I manage clinic inventory?'],
+                ['Add Item', 'How can I add an inventory item?'],
+                ['Stock', 'How can I check medicine and supply stock?']
+            ],
+
+            '/dentist/report': [
+                ['Reports', 'What reports are available to the dentist?'],
+                ['DTR', 'How can I generate a Daily Treatment Record report?'],
+                ['Download', 'How can I download a clinic report?']
+            ],
+
+            '/dentist/reports': [
+                ['AI Reports', 'What are AI-assisted reports?'],
+                ['Generate', 'How can I generate an AI-assisted report?'],
+                ['Download', 'How can I download an AI-generated report?']
+            ],
+
+            '/dentist/user-management': [
+                ['Users', 'What can I do in User Management?'],
+                ['Create', 'How can I create a user account?'],
+                ['Role', 'How can I update a user role?']
+            ],
+
+            '/dentist/assign-cms-access': [
+                ['CMS Access', 'What is Assign CMS Access used for?'],
+                ['Assign', 'How can I assign CMS access?'],
+                ['Status', 'How can I check CMS access status?']
+            ],
+
+            '/dentist/role-permissions': [
+                ['Roles', 'How can I manage roles?'],
+                ['Permissions', 'How can I update role permissions?'],
+                ['Custom Role', 'How can I create a custom role?']
+            ],
+
+            '/dentist/system-logs': [
+                ['Logs', 'What information can I see in System Logs?'],
+                ['Search', 'How can I find a specific system log?'],
+                ['Export', 'How can I export system logs?']
+            ],
+
+            '/dentist/system-settings': [
+                ['Settings', 'What can I configure in System Settings?'],
+                ['Notifications', 'How can I configure notification settings?'],
+                ['Update', 'How can I update system settings?']
             ]
         },
+
         patient: {
             default: [
                 ['Book', 'How do I book an appointment from the patient dashboard?'],
                 ['Records', 'How can I open my dental records from the dashboard?'],
                 ['Documents', 'Where can I request a dental clearance document?']
             ],
+
             '/homepage': [
                 ['Book', 'How do I book an appointment from the patient dashboard?'],
                 ['Schedule', 'Where can I check available appointment dates and clinic schedule?'],
                 ['Records', 'How can I open my dental records from the dashboard?']
             ],
+
+            '/patient/dashboard': [
+                ['Book', 'How do I book an appointment from the patient dashboard?'],
+                ['Schedule', 'Where can I check available appointment dates?'],
+                ['Records', 'How can I open my dental records?']
+            ],
+
+            '/patient/appointment': [
+                ['Available', 'How can I check available dates for booking an appointment?'],
+                ['Reschedule', 'How can I reschedule my existing appointment?'],
+                ['Cancel', 'How can I cancel my appointment in the system?']
+            ],
+
             '/patient/appointments': [
                 ['Available', 'How can I check available dates for booking an appointment?'],
                 ['Reschedule', 'How can I reschedule my existing appointment?'],
                 ['Cancel', 'How can I cancel my appointment in the system?']
             ],
+
+            '/book-appointment': [
+                ['Date', 'How can I choose an available appointment date?'],
+                ['Time', 'How can I select an available appointment time?'],
+                ['Booking', 'What do I need to complete my appointment booking?']
+            ],
+
+            '/patient/book-appointment': [
+                ['Date', 'How can I choose an available appointment date?'],
+                ['Time', 'How can I select an available appointment time?'],
+                ['Booking', 'What do I need to complete my appointment booking?']
+            ],
+
+            '/signature-review': [
+                ['Signature', 'What should I check on the signature review page?'],
+                ['Booking', 'How do I complete my appointment booking?'],
+                ['Edit', 'What should I do if my signature information is incorrect?']
+            ],
+
             '/record': [
                 ['Records', 'What information can I see on the Dental Records page?'],
                 ['Odontogram', 'Where can I view my odontogram in the Dental Records page?'],
                 ['Treatment', 'Where can I see my treatment history and diagnosis?']
             ],
+
             '/document-requests': [
                 ['Clearance', 'How can I request a dental clearance document?'],
                 ['Health Record', 'How can I request my dental health record?'],
                 ['Status', 'Where can I check the status of my document request?']
+            ],
+
+            '/about-us': [
+                ['Clinic', 'What information can I find on the About Us page?'],
+                ['Services', 'What dental clinic services are available?'],
+                ['Help', 'Where can I find information about the dental clinic?']
             ]
         },
+
         guest: {
             default: [
                 ['Log in', 'How do I log in to the clinic system?'],
                 ['SSO', 'How do I use the SSO login option?'],
                 ['Help', 'What can I do on this login page?']
+            ],
+
+            '/login': [
+                ['Log in', 'How do I log in to the clinic system?'],
+                ['SSO', 'How do I use the SSO login option?'],
+                ['Help', 'What can I do on this login page?']
+            ],
+
+            '/backup-login': [
+                ['Log in', 'How do I use the backup login option?'],
+                ['Account', 'What account can I use for backup login?'],
+                ['Help', 'What should I do if I cannot sign in?']
             ]
         }
     };
 
+    function getCurrentPageChips(roleChips) {
+        const currentPath =
+            window.location.pathname.replace(/\/+$/, '') || '/';
+
+        if (roleChips[currentPath]) {
+            return roleChips[currentPath];
+        }
+
+        const matchingPath = Object.keys(roleChips)
+            .filter(path => {
+                if (path === 'default') {
+                    return false;
+                }
+
+                const normalizedPath =
+                    path.replace(/\/+$/, '');
+
+                return (
+                    currentPath === normalizedPath ||
+                    currentPath.startsWith(
+                        normalizedPath + '/'
+                    )
+                );
+            })
+            .sort(
+                (a, b) =>
+                b.length - a.length
+            )[0];
+
+        return matchingPath ?
+            roleChips[matchingPath] :
+            roleChips.default;
+    }
+
     function renderDynamicChips() {
-        const chipWrap = document.querySelector('.chatbot-quick-chips');
-        if (!chipWrap) return;
+        const chipWrap =
+            document.querySelector(
+                '.chatbot-quick-chips'
+            );
 
-        const roleChips = rolePageChips[currentUserRole] || rolePageChips.guest;
-        const chips = roleChips[window.location.pathname] || roleChips.default;
+        if (!chipWrap) {
+            return;
+        }
 
-        chipWrap.innerHTML = chips.map(([label, message]) => `
-        <button type="button" class="chatbot-chip" onclick="sendQuickMessage('${message.replace(/'/g, "\\'")}')">
-            ${label}
-        </button>
-    `).join('');
+        const roleChips =
+            rolePageChips[currentUserRole] ||
+            rolePageChips.guest;
+
+        const chips =
+            getCurrentPageChips(
+                roleChips
+            );
+
+        chipWrap.innerHTML =
+            chips.map(
+                ([label, message]) => `
+                <button
+                    type="button"
+                    class="chatbot-chip"
+                    onclick="sendQuickMessage('${message.replace(/'/g, "\\'")}')"
+                >
+                    ${label}
+                </button>
+            `
+            ).join('');
     }
 
     renderDynamicChips();

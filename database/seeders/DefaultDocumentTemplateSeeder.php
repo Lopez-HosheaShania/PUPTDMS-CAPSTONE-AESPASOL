@@ -10,6 +10,8 @@ class DefaultDocumentTemplateSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(DptDocumentTemplateSeeder::class);
+
         $templates = [
             [
                 'name' => 'Dental Health Record',

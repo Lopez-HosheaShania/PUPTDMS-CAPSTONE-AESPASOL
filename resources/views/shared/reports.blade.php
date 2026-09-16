@@ -3810,6 +3810,8 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             document.getElementById('formErrorBanner');
 
         const endpointMap = {
+            dpt_emergency: "{{ route('dentist.dentist.report.dpt-download') }}",
+            dpt_non_emergency: "{{ route('dentist.dentist.report.dpt-download') }}",
             gad_report: GAD_REPORT_DOWNLOAD_URL,
             annual_dental_clearance: ANNUAL_CLEARANCE_DOWNLOAD_URL,
             dental_clearance: DENTAL_CLEARANCE_DOWNLOAD_URL,

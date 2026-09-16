@@ -683,142 +683,6 @@ body.role-patient #mainContent.patient-dashboard-page * {
     min-width: 0;
 }
 
-.reserved-dashboard-reminders {
-    display: grid;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.reserved-dashboard-reminder {
-    overflow: hidden;
-    border-color: rgba(185, 28, 28, .16);
-}
-
-.reserved-dashboard-reminder-header {
-    display: flex;
-    align-items: center;
-    gap: .8rem;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #f3e8e8;
-    background: linear-gradient(90deg, #fff, #fff8f8);
-}
-
-.reserved-dashboard-reminder-icon,
-.reserved-dashboard-reminder-bell {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 2.85rem;
-    height: 2.85rem;
-    border: 1px solid #fecaca;
-    border-radius: .85rem;
-    background: #fff7f7;
-    color: #a40000;
-}
-
-.reserved-dashboard-reminder-heading {
-    flex: 1 1 auto;
-}
-
-.reserved-dashboard-reminder-title-row,
-.reserved-dashboard-reminder-meta,
-.reserved-dashboard-reminder-body,
-.reserved-dashboard-reminder-message {
-    display: flex;
-    align-items: center;
-}
-
-.reserved-dashboard-reminder-title-row {
-    flex-wrap: wrap;
-    gap: .55rem;
-}
-
-.reserved-dashboard-reminder-title-row h2 {
-    margin: 0;
-    color: #1f2937;
-    font-size: .95rem;
-    font-weight: 800;
-}
-
-.reserved-dashboard-reminder-meta {
-    flex-wrap: wrap;
-    gap: .35rem 1rem;
-    margin-top: .35rem;
-    color: #6b7280;
-    font-size: .78rem;
-}
-
-.reserved-dashboard-reminder-meta > span {
-    display: inline-flex;
-    align-items: center;
-    gap: .4rem;
-}
-
-.reserved-dashboard-reminder-body {
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-}
-
-.reserved-dashboard-reminder-message {
-    flex: 1 1 auto;
-    gap: .8rem;
-    padding: .8rem 1rem;
-    border: 1px solid #f1e4e4;
-    border-radius: .9rem;
-    background: #fff;
-}
-
-.reserved-dashboard-reminder-message strong {
-    display: block;
-    color: #1f2937;
-    font-size: .84rem;
-}
-
-.reserved-dashboard-reminder-message p {
-    margin: .15rem 0 0;
-    color: #6b7280;
-    font-size: .78rem;
-    line-height: 1.45;
-}
-
-.reserved-dashboard-reminder-action {
-    flex: 0 0 auto;
-    white-space: nowrap;
-}
-
-[data-theme="dark"] .reserved-dashboard-reminder-header {
-    border-bottom-color: rgba(255, 255, 255, .08);
-    background: linear-gradient(90deg, rgba(255, 255, 255, .04), rgba(127, 29, 29, .12));
-}
-
-[data-theme="dark"] .reserved-dashboard-reminder-title-row h2,
-[data-theme="dark"] .reserved-dashboard-reminder-message strong {
-    color: #f3f4f6;
-}
-
-[data-theme="dark"] .reserved-dashboard-reminder-message {
-    border-color: rgba(255, 255, 255, .08);
-    background: rgba(255, 255, 255, .035);
-}
-
-@media (max-width: 767px) {
-    .reserved-dashboard-reminder-header,
-    .reserved-dashboard-reminder-body {
-        padding: .9rem;
-    }
-
-    .reserved-dashboard-reminder-body {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .reserved-dashboard-reminder-action {
-        width: 100%;
-    }
-}
-
 .request-doc-card h3,
 .request-doc-card p {
     overflow-wrap: anywhere;
@@ -1174,9 +1038,7 @@ body.role-patient #mainContent.patient-dashboard-page * {
     display: inline-flex;
     align-items: center;
     gap: .45rem;
-
-    color: var(--crimson, #8B0000);
-
+    color: var(--crimson-1);
     font-size: 10px;
     font-weight: 800;
     line-height: 1;
@@ -1186,9 +1048,7 @@ body.role-patient #mainContent.patient-dashboard-page * {
 
 .patient-profile-section-percentage {
     flex-shrink: 0;
-
-    color: #374151;
-
+    color: var(--text-secondary);
     font-size: 11px;
     font-weight: 800;
 }
@@ -1196,20 +1056,16 @@ body.role-patient #mainContent.patient-dashboard-page * {
 .patient-profile-progress {
     height: 5px;
     margin-top: .5rem;
-
     overflow: hidden;
-
     border-radius: 999px;
-    background: #F3F4F6;
+    background: var(--bg-panel-soft);
 }
 
 .patient-profile-progress>span {
     display: block;
-
     height: 100%;
-
     border-radius: inherit;
-    background: var(--crimson, #8B0000);
+    background: var(--crimson);
 }
 
 .patient-profile-section-note {
@@ -1300,23 +1156,6 @@ body.role-patient #mainContent.patient-dashboard-page * {
     overflow-wrap: anywhere;
 }
 
-.patient-profile-next-visit-icon {
-    width: 26px;
-    height: 26px;
-    flex: 0 0 26px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: .65rem;
-
-    background: #FEF2F2;
-    color: var(--crimson, #8B0000);
-
-    font-size: 11px;
-}
-
 [data-theme="dark"] .patient-profile-section {
     border-top-color: var(--border-dark);
 }
@@ -1347,11 +1186,6 @@ body.role-patient #mainContent.patient-dashboard-page * {
 [data-theme="dark"] .patient-profile-activity-item>strong,
 [data-theme="dark"] .patient-profile-next-visit>div>strong {
     color: var(--text-primary);
-}
-
-[data-theme="dark"] .patient-profile-next-visit-icon {
-    background: var(--crimson-soft);
-    color: #FCA5A5;
 }
 
 .patient-profile-emergency {
@@ -1847,18 +1681,9 @@ body.role-patient #mainContent.patient-dashboard-page * {
     min-width: 0;
 }
 
-.dashboard-availability-btn {
-    flex: 0 0 auto;
-    white-space: nowrap;
-}
-
 @media (max-width: 767px) {
     .dashboard-upcoming-empty-header {
         align-items: stretch;
-    }
-
-    .dashboard-availability-btn {
-        width: 100%;
     }
 }
 

@@ -229,16 +229,21 @@
     white-space: nowrap;
 }
 
+[data-theme="dark"] .appt-calendar-eyebrow,
+.dark .appt-calendar-eyebrow {
+    color: var(--text-2);
+}
+
 [data-theme="dark"] .appt-list-heading-icon,
 .dark .appt-list-heading-icon {
     background: var(--crimson-soft);
-    border-color: rgba(252, 165, 165, .16);
-    color: #fca5a5;
+    border-color: var(--crimson-mid);
+    color: var(--crimson-1);
 }
 
 [data-theme="dark"] .appt-list-heading h2,
 .dark .appt-list-heading h2 {
-    color: #fca5a5;
+    color: var(--crimson-1);
 }
 
 [data-theme="dark"] .appt-list-tabs,
@@ -308,31 +313,6 @@
 @media (max-width: 720px) {
     .appointment-services-section {
         margin-top: 1.2rem;
-    }
-
-    .appointment-services-heading {
-        align-items: center;
-
-        gap: .6rem;
-
-        margin-bottom: .7rem;
-    }
-
-    .appointment-services-heading-icon {
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-
-        border-radius: 11px;
-
-        font-size: .8rem;
-    }
-
-    .appointment-services-heading p {
-        margin-top: .18rem;
-
-        font-size: .68rem;
-        line-height: 1.25;
     }
 
     .appt-list-heading {
@@ -522,46 +502,6 @@
     margin-top: 4rem;
 }
 
-.appointment-services-heading {
-    display: flex;
-    align-items: center;
-    gap: .85rem;
-
-    margin-bottom: 1rem;
-}
-
-.appointment-services-heading-icon {
-    width: 46px;
-    height: 46px;
-    min-width: 46px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 14px;
-    background: var(--crimson-soft);
-    border: 1px solid var(--crimson-mid);
-    color: var(--crimson);
-    font-size: 1rem;
-}
-
-.appointment-services-heading-copy {
-    min-width: 0;
-}
-
-.appointment-services-heading p {
-    margin: .3rem 0 0;
-    color: var(--text-2);
-    font-size: .84rem;
-    font-weight: 600;
-}
-
-[data-theme="dark"] .appointment-services-heading-icon,
-.dark .appointment-services-heading-icon {
-    background: var(--crimson-soft);
-    border-color: rgba(252, 165, 165, .16);
-    color: #fca5a5;
-}
-
 .appt-mini-chart {
     margin-top: 0.75rem;
     border-radius: 0.9rem;
@@ -622,24 +562,28 @@
     gap: 0.6rem;
 }
 
-[data-theme="dark"] .appt-calendar-side-card {
-    border-color: rgba(255, 255, 255, 0.1);
-    background: linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(32, 11, 11, 0.9));
+[data-theme="dark"] .appt-calendar-side-card,
+.dark .appt-calendar-side-card {
+    border-color: var(--border);
+    background: var(--card);
 }
 
-[data-theme="dark"] .appt-calendar-side-stat {
-    border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.03);
+[data-theme="dark"] .appt-calendar-side-stat,
+.dark .appt-calendar-side-stat {
+    border-color: var(--border);
+    background: var(--surface);
 }
 
-[data-theme="dark"] .appt-mini-chart {
-    border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.03);
+[data-theme="dark"] .appt-mini-chart,
+.dark .appt-mini-chart {
+    border-color: var(--border);
+    background: var(--surface);
 }
 
-[data-theme="dark"] .appt-quick-actions {
-    border-color: rgba(255, 255, 255, 0.1);
-    background: linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(32, 11, 11, 0.9));
+[data-theme="dark"] .appt-quick-actions,
+.dark .appt-quick-actions {
+    border-color: var(--border);
+    background: var(--card);
 }
 
 @media (max-width: 1023px) {
@@ -804,8 +748,9 @@
 
     border-radius: 999px;
 
-    color: var(--crimson);
-    background: var(--crimson-soft);
+    color: var(--status-pending-text);
+    background: var(--status-pending-bg);
+    border: 1px solid var(--status-pending-border);
 }
 
 .appt-tip-title {
@@ -827,29 +772,40 @@
 }
 
 [data-theme="dark"] #mainContent .appt-summary-card,
+.dark #mainContent .appt-summary-card,
 [data-theme="dark"] #mainContent .appt-empty-state,
-[data-theme="dark"] #mainContent .appt-tip-card {
+.dark #mainContent .appt-empty-state,
+[data-theme="dark"] #mainContent .appt-tip-card,
+.dark #mainContent .appt-tip-card {
     background:
-        radial-gradient(circle at top right, rgba(139, 0, 0, .20), transparent 40%),
-        linear-gradient(145deg, #0D1117, #111827) !important;
-    border-color: rgba(255, 255, 255, .10) !important;
-    box-shadow: 0 18px 38px rgba(0, 0, 0, .35) !important;
+        radial-gradient(circle at top right,
+            var(--crimson-soft),
+            transparent 40%),
+        var(--card) !important;
+
+    border-color: var(--border) !important;
+    box-shadow: 0 18px 38px var(--alpha-black-34) !important;
 }
 
-[data-theme="dark"] #mainContent .appt-empty-state {
-    border-color: rgba(252, 165, 165, .20) !important;
+[data-theme="dark"] #mainContent .appt-empty-state,
+.dark #mainContent .appt-empty-state {
+    border-color: var(--crimson-mid) !important;
 }
 
-[data-theme="dark"] #mainContent .appt-empty-icon {
-    background: rgba(139, 0, 0, .20) !important;
-    color: #FCA5A5 !important;
-    border-color: rgba(252, 165, 165, .18) !important;
+[data-theme="dark"] #mainContent .appt-empty-icon,
+.dark #mainContent .appt-empty-icon {
+    background: var(--crimson-soft) !important;
+    color: var(--crimson-1) !important;
+    border-color: var(--crimson-mid) !important;
 }
 
-[data-theme="dark"] #mainContent .appt-tip-card {
+[data-theme="dark"] #mainContent .appt-tip-card,
+.dark #mainContent .appt-tip-card {
     background:
-        radial-gradient(circle at top left, rgba(245, 158, 11, .10), transparent 32%),
-        linear-gradient(145deg, #0D1117, #161B22) !important;
+        radial-gradient(circle at top left,
+            var(--status-pending-bg),
+            transparent 32%),
+        var(--card) !important;
 }
 
 @media (min-width: 768px) {
@@ -1158,38 +1114,49 @@
     border-color: rgba(252, 165, 165, .22) !important;
 }
 
-[data-theme="dark"] .appt-empty-mini-icon {
-    background: rgba(252, 165, 165, .12);
-    color: #FCA5A5;
+[data-theme="dark"] .appt-empty-mini-icon,
+.dark .appt-empty-mini-icon {
+    background: var(--crimson-soft);
+    color: var(--crimson-1);
 }
 
-[data-theme="dark"] .appt-empty-mini-title {
-    color: #F3F4F6;
+[data-theme="dark"] .appt-empty-mini-title,
+.dark .appt-empty-mini-title {
+    color: var(--text-1);
 }
 
-[data-theme="dark"] .appt-empty-mini-text {
-    color: #C9D1D9;
+[data-theme="dark"] .appt-empty-mini-text,
+.dark .appt-empty-mini-text {
+    color: var(--text-2);
 }
 
-[data-theme="dark"] .appt-record-body {
-    background: #0D1117;
+[data-theme="dark"] .appt-record-body,
+.dark .appt-record-body {
+    background: var(--surface);
 }
 
 [data-theme="dark"] .appt-info-card,
+.dark .appt-info-card,
 [data-theme="dark"] .appt-dentist-card,
-[data-theme="dark"] .appt-record-accordion {
-    background: #161B22;
-    border-color: rgba(255, 255, 255, .10);
+.dark .appt-dentist-card,
+[data-theme="dark"] .appt-record-accordion,
+.dark .appt-record-accordion {
+    background: var(--card);
+    border-color: var(--border);
 }
 
 [data-theme="dark"] .appt-info-value,
-[data-theme="dark"] .appt-record-accordion summary {
-    color: #F3F4F6;
+.dark .appt-info-value,
+[data-theme="dark"] .appt-record-accordion summary,
+.dark .appt-record-accordion summary {
+    color: var(--text-1);
 }
 
 [data-theme="dark"] .appt-record-panel,
-[data-theme="dark"] .appt-empty-mini {
-    color: #C9D1D9;
+.dark .appt-record-panel,
+[data-theme="dark"] .appt-empty-mini,
+.dark .appt-empty-mini {
+    color: var(--text-2);
 }
 
 .appt-record-panel {
@@ -1619,39 +1586,49 @@
     color: var(--status-cancelled-text);
 }
 
-[data-theme="dark"] .appt-timeline-empty {
+[data-theme="dark"] .appt-timeline-empty,
+.dark .appt-timeline-empty {
     background:
-        radial-gradient(circle at 50% 0%, rgba(139, 0, 0, .25), transparent 38%),
-        linear-gradient(145deg, #0B1220, #0D1117) !important;
-    border: 1px solid rgba(252, 165, 165, .18) !important;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, .45) !important;
+        radial-gradient(circle at 50% 0%,
+            var(--crimson-mid),
+            transparent 38%),
+        var(--card) !important;
+
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 18px 40px var(--alpha-black-42) !important;
 }
 
-[data-theme="dark"] .appt-timeline-path::before {
-    background: linear-gradient(to bottom,
-            #FCA5A5,
-            rgba(252, 165, 165, .18)) !important;
+[data-theme="dark"] .appt-timeline-path::before,
+.dark .appt-timeline-path::before {
+    background:
+        linear-gradient(to bottom,
+            var(--crimson-1),
+            var(--crimson-mid)) !important;
 }
 
-[data-theme="dark"] .appt-timeline-dot {
-    background: #161B22 !important;
-    border-color: rgba(252, 165, 165, .28) !important;
-    color: #FCA5A5 !important;
+[data-theme="dark"] .appt-timeline-dot,
+.dark .appt-timeline-dot {
+    background: var(--surface) !important;
+    border-color: var(--crimson-mid) !important;
+    color: var(--crimson-1) !important;
 }
 
-[data-theme="dark"] .appt-timeline-dot.active {
-    background: #8B0000 !important;
-    color: #fff !important;
-    border-color: #8B0000 !important;
-    box-shadow: 0 0 0 8px rgba(139, 0, 0, .25) !important;
+[data-theme="dark"] .appt-timeline-dot.active,
+.dark .appt-timeline-dot.active {
+    background: var(--crimson) !important;
+    color: var(--text-on-brand) !important;
+    border-color: var(--crimson) !important;
+    box-shadow: 0 0 0 8px var(--crimson-soft) !important;
 }
 
-[data-theme="dark"] .appt-timeline-step p:first-of-type {
-    color: #F3F4F6 !important;
+[data-theme="dark"] .appt-timeline-step p:first-of-type,
+.dark .appt-timeline-step p:first-of-type {
+    color: var(--text-1) !important;
 }
 
-[data-theme="dark"] .appt-timeline-step p:last-of-type {
-    color: #C9D1D9 !important;
+[data-theme="dark"] .appt-timeline-step p:last-of-type,
+.dark .appt-timeline-step p:last-of-type {
+    color: var(--text-2) !important;
 }
 
 @media (max-width: 767px) {
