@@ -1499,7 +1499,7 @@ View all appointments
 
                                         labels: {
                                             font: {
-                                                family: 'Inter',
+                                                
                                                 size: 11
                                             },
 
@@ -1557,8 +1557,7 @@ View all appointments
                                                 '--text-2'
                                             ),
 
-                                            font: {
-                                                family: 'Inter',
+                                            font: {                                              
                                                 size: 10
                                             }
                                         }

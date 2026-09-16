@@ -447,7 +447,7 @@ span.flatpickr-weekday {
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9CA3AF;
+    color: var(--text-3);
     font-size: 14px;
     pointer-events: none;
     line-height: 1;
@@ -475,8 +475,8 @@ span.flatpickr-weekday {
 
 .fp-date-input[readonly],
 .form-input-custom.js-flatpickr-date[readonly] {
-    background: #FFFFFF;
-    color: #333333;
+    background: var(--card);
+    color: var(--text-1);
     cursor: pointer;
 }
 

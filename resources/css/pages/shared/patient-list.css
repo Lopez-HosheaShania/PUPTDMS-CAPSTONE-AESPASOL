@@ -1498,21 +1498,11 @@
 
 #mainContent.shared-patient-page.mode-list .card-col-header {
     display: grid;
-
     grid-template-columns:
         minmax(220px, 1.45fr) minmax(160px, .85fr) minmax(180px, 1fr) 40px;
-
     align-items: center;
-
     gap: 18px;
-
-    padding:
-        .65rem 1rem;
-
-    background: var(--table-header-surface);
-    border-bottom: 1px solid var(--table-border);
-
-    color: var(--table-heading-muted);
+    padding: .65rem 1rem;
 }
 
 #mainContent.shared-patient-page.mode-list #patientContainer {

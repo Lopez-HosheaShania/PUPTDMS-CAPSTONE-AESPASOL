@@ -489,6 +489,97 @@ function refreshFlatpickr(instance) {
     }
 }
 
+const GLOBAL_DATE_INPUT_SELECTOR = [
+    '.js-flatpickr-date',
+    '.js-flatpickr-date-min-today',
+    '.js-flatpickr-date-max-today',
+    '.js-flatpickr-date-range-from',
+    '.js-flatpickr-date-range-to',
+].join(',');
+
+function ensureGlobalDateInputIcons(
+    root = document
+) {
+    const scope =
+        root &&
+            typeof root.querySelectorAll === 'function'
+            ? root
+            : document;
+
+    const inputs = [];
+
+    if (
+        scope.matches?.(
+            GLOBAL_DATE_INPUT_SELECTOR
+        )
+    ) {
+        inputs.push(scope);
+    }
+
+    inputs.push(
+        ...scope.querySelectorAll(
+            GLOBAL_DATE_INPUT_SELECTOR
+        )
+    );
+
+    inputs.forEach(input => {
+        if (
+            input.closest(
+                '[data-flatpickr-trigger]'
+            )?.querySelector(
+                '.global-control-icon'
+            )
+        ) {
+            return;
+        }
+
+        let wrapper =
+            input.closest(
+                '.fp-date-input-wrap'
+            );
+
+        if (!wrapper) {
+            wrapper =
+                document.createElement('div');
+
+            wrapper.className =
+                'fp-date-input-wrap';
+
+            input.parentNode.insertBefore(
+                wrapper,
+                input
+            );
+
+            wrapper.appendChild(input);
+        }
+
+        input.classList.add(
+            'fp-date-input'
+        );
+
+        if (
+            wrapper.querySelector(
+                '.fp-date-icon'
+            )
+        ) {
+            return;
+        }
+
+        const icon =
+            document.createElement('i');
+
+        icon.className =
+            'fa-regular fa-calendar fp-date-icon';
+
+        icon.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+        wrapper.appendChild(icon);
+    });
+}
+
 function initGlobalFlatpickr() {
     if (!window.flatpickr) return;
 
@@ -818,6 +909,8 @@ export async function initGlobalDatePickers(
     if (!hasFlatpickrFields) {
         return;
     }
+
+    ensureGlobalDateInputIcons(scope);
 
     if (!globalDatePickerBootPromise) {
         globalDatePickerBootPromise =
