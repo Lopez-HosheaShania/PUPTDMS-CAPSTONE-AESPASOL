@@ -348,7 +348,7 @@ class WalkInController extends Controller
     ) {
         $patient = $this->resolveWalkInSourcePatient($patient);
 
-        $this->backfillConnectedPatientMedicalHistory(
+        $personalInfo = $this->backfillConnectedPatientMedicalHistory(
             $patient,
             $studentApiService
         );
@@ -365,10 +365,7 @@ class WalkInController extends Controller
             'medicalHistory.diseaseAnswers.disease',
         ]);
 
-        $ogosEmergencyDefaults = $this->resolveConnectedPatientEmergencyDefaults(
-            $patient,
-            $studentApiService
-        );
+        $ogosEmergencyDefaults = $this->resolveConnectedPatientEmergencyDefaults($personalInfo);
 
         /*
     |--------------------------------------------------------------------------
@@ -648,181 +645,88 @@ class WalkInController extends Controller
         return false;
     }
 
-    private function resolveConnectedPatientEmergencyDefaults(
-        Patient $patient,
-        StudentApiService $studentApiService
-    ): array {
-        $patient->loadMissing('information');
-
-        $information = $patient->information;
-
-        $classification = strtolower(
-            trim((string) ($patient->classification ?? ''))
-        );
-
-        $isStudent =
-            filled($information?->student_no) ||
-            (
-                filled($patient->email) &&
-                filled($information?->course_code)
-            ) ||
-            $classification === 'student';
-
-        if (! $isStudent) {
+    private function resolveConnectedPatientEmergencyDefaults(array $personalInfo): array
+    {
+        if ($personalInfo === []) {
             return [];
         }
 
-        $studentNumber = trim(
-            (string) ($information?->student_no ?? '')
-        );
-
-        $studentProfile = [];
-
-        try {
-            if (filled($patient->email)) {
-                $studentProfileResponse =
-                    $studentApiService->getStudentByEmail(
-                        (string) $patient->email
-                    );
-
-                $studentProfile =
-                    is_array(
-                        $studentProfileResponse['data']
-                            ?? null
+        return array_filter([
+            'emergency_person' =>
+            $this->cleanStringValue(
+                $personalInfo['emergencyContactName']
+                    ?? $personalInfo['emergency_contact_name']
+                    ?? data_get(
+                        $personalInfo,
+                        'emergencyContact.name'
                     )
-                    ? $studentProfileResponse['data']
-                    : [];
-            }
+                    ?? data_get(
+                        $personalInfo,
+                        'emergency_contact.name'
+                    )
+                    ?? data_get(
+                        $personalInfo,
+                        'emergency_contact.contact_name'
+                    )
+                    ?? data_get(
+                        $personalInfo,
+                        'emergencyContact.contactName'
+                    )
+                    ?? null
+            ),
 
-            $studentNumber =
-                $studentNumber
-                ?: data_get(
-                    $studentProfile,
-                    'studentNumber'
-                )
-                ?: data_get(
-                    $studentProfile,
-                    'student_number'
-                );
-
-            if ($studentNumber === '') {
-                return [];
-            }
-
-            $personalInfoResponse =
-                $studentApiService
-                ->getPersonalInfoByStudentNumber(
-                    $studentNumber
-                );
-
-            $personalInfo =
-                is_array(
-                    $personalInfoResponse['data']
-                        ?? null
-                )
-                ? $personalInfoResponse['data']
-                : [];
-
-            if ($personalInfo === []) {
-                return [];
-            }
-
-            return array_filter([
-                'emergency_person' =>
+            'emergency_number' =>
+            $this->normalizePhilippineMobile(
                 $this->cleanStringValue(
-                    $personalInfo['emergencyContactName']
-                        ?? $personalInfo['emergency_contact_name']
+                    $personalInfo['emergencyContactNumber']
+                        ?? $personalInfo['emergency_contact_number']
                         ?? data_get(
                             $personalInfo,
-                            'emergencyContact.name'
+                            'emergencyContact.number'
                         )
                         ?? data_get(
                             $personalInfo,
-                            'emergency_contact.name'
+                            'emergencyContact.contactNumber'
                         )
                         ?? data_get(
                             $personalInfo,
-                            'emergency_contact.contact_name'
+                            'emergency_contact.number'
                         )
                         ?? data_get(
                             $personalInfo,
-                            'emergencyContact.contactName'
+                            'emergency_contact.contact_number'
                         )
                         ?? null
-                ),
+                )
+            ),
 
-                'emergency_number' =>
-                $this->normalizePhilippineMobile(
-                    $this->cleanStringValue(
-                        $personalInfo['emergencyContactNumber']
-                            ?? $personalInfo['emergency_contact_number']
-                            ?? data_get(
-                                $personalInfo,
-                                'emergencyContact.number'
-                            )
-                            ?? data_get(
-                                $personalInfo,
-                                'emergencyContact.contactNumber'
-                            )
-                            ?? data_get(
-                                $personalInfo,
-                                'emergency_contact.number'
-                            )
-                            ?? data_get(
-                                $personalInfo,
-                                'emergency_contact.contact_number'
-                            )
-                            ?? null
-                    )
-                ),
-
-                'emergency_relation' =>
-                $this->normalizeEmergencyRelation(
-                    $this->cleanStringValue(
-                        $personalInfo['emergencyContactRelationship']
-                            ?? $personalInfo['emergency_contact_relationship']
-                            ?? $personalInfo['emergencyContactRelation']
-                            ?? $personalInfo['emergency_contact_relation']
-                            ?? data_get(
-                                $personalInfo,
-                                'emergencyContact.relationship'
-                            )
-                            ?? data_get(
-                                $personalInfo,
-                                'emergencyContact.relation'
-                            )
-                            ?? data_get(
-                                $personalInfo,
-                                'emergency_contact.relationship'
-                            )
-                            ?? data_get(
-                                $personalInfo,
-                                'emergency_contact.relation'
-                            )
-                            ?? null
-                    )
-                ),
-            ], fn($value) => filled($value));
-        } catch (\Throwable $e) {
-            Log::warning(
-                'Walk-in OGOS emergency defaults fetch failed',
-                [
-                    'patient_id' =>
-                    $patient->id,
-
-                    'student_no' =>
-                    $studentNumber,
-
-                    'email' =>
-                    $patient->email,
-
-                    'message' =>
-                    $e->getMessage(),
-                ]
-            );
-
-            return [];
-        }
+            'emergency_relation' =>
+            $this->normalizeEmergencyRelation(
+                $this->cleanStringValue(
+                    $personalInfo['emergencyContactRelationship']
+                        ?? $personalInfo['emergency_contact_relationship']
+                        ?? $personalInfo['emergencyContactRelation']
+                        ?? $personalInfo['emergency_contact_relation']
+                        ?? data_get(
+                            $personalInfo,
+                            'emergencyContact.relationship'
+                        )
+                        ?? data_get(
+                            $personalInfo,
+                            'emergencyContact.relation'
+                        )
+                        ?? data_get(
+                            $personalInfo,
+                            'emergency_contact.relationship'
+                        )
+                        ?? data_get(
+                            $personalInfo,
+                            'emergency_contact.relation'
+                        )
+                        ?? null
+                )
+            ),
+        ], fn($value) => filled($value));
     }
 
     private function resolveWalkInSourcePatient(Patient $patient): Patient
@@ -999,7 +903,7 @@ class WalkInController extends Controller
     private function backfillConnectedPatientMedicalHistory(
         Patient $patient,
         StudentApiService $studentApiService
-    ): void {
+    ): array {
         $patient->loadMissing([
             'information',
             'medicalHistory',
@@ -1019,18 +923,18 @@ class WalkInController extends Controller
 
         $isStudent =
             filled(
-                $information?->student_no
+                $patient->student_no
             ) ||
             (
                 filled($patient->email) &&
                 filled(
-                    $information?->course_code
+                    $patient->course_code
                 )
             ) ||
             $classification === 'student';
 
         if (! $isStudent) {
-            return;
+            return [];
         }
 
         $medicalHistory =
@@ -1054,12 +958,12 @@ class WalkInController extends Controller
             );
 
         if (! $needsBackfill) {
-            return;
+            return [];
         }
 
         $studentNumber = trim(
             (string) (
-                $information?->student_no
+                $patient->student_no
                 ?? ''
             )
         );
@@ -1069,7 +973,7 @@ class WalkInController extends Controller
         $addresses = [];
 
         try {
-            if (filled($patient->email)) {
+            if (filled($patient->email) && ($studentNumber === '' || blank($information?->gender))) {
                 $studentProfileResponse =
                     $studentApiService
                     ->getStudentByEmail(
@@ -1093,12 +997,13 @@ class WalkInController extends Controller
                 ?: data_get(
                     $studentProfile,
                     'student_number'
-                );
+                )
+                ?: '';
 
             if (
                 $studentNumber !== '' &&
                 blank(
-                    $information?->student_no
+                    $patient->student_no
                 )
             ) {
                 $patient->student_no =
@@ -1119,18 +1024,20 @@ class WalkInController extends Controller
                     ? $personalInfoResponse['data']
                     : [];
 
-                $addressResponse =
-                    $studentApiService
-                    ->getAddressesByStudentNumber(
-                        $studentNumber
-                    );
+                if (blank($information?->address)) {
+                    $addressResponse =
+                        $studentApiService
+                        ->getAddressesByStudentNumber(
+                            $studentNumber
+                        );
 
-                $addresses =
-                    is_array(
-                        $addressResponse['data'] ?? null
-                    )
-                    ? $addressResponse['data']
-                    : [];
+                    $addresses =
+                        is_array(
+                            $addressResponse['data'] ?? null
+                        )
+                        ? $addressResponse['data']
+                        : [];
+                }
             }
 
             $birthdate =
@@ -1218,6 +1125,8 @@ class WalkInController extends Controller
                 ]
             );
         }
+        // Reuse even a partial result; do not repeat a failed external request.
+        return $personalInfo;
     }
     private function syncStudentMedicalHistory(
         Patient $patient,

@@ -13,6 +13,7 @@ use App\Services\StudentApiService;
 use App\Services\ReservedBookingInvitationService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use App\Services\AppointmentOdontogramSnapshotService;
 
 class HomepageController extends Controller
 {
@@ -20,9 +21,9 @@ class HomepageController extends Controller
 
     public function __construct(
         private readonly StudentApiService $studentApiService,
-        private readonly ReservedBookingInvitationService $reservedBookingInvitationService
-    ) {
-    }
+        private readonly ReservedBookingInvitationService $reservedBookingInvitationService,
+        private readonly AppointmentOdontogramSnapshotService $appointmentOdontogramSnapshotService
+    ) {}
 
     public function index()
     {
@@ -84,6 +85,10 @@ class HomepageController extends Controller
             ->orderBy('appointment_time', 'desc')
             ->get();
 
+        $previousOdontogramByAppointment =
+            $this->appointmentOdontogramSnapshotService
+            ->previousSnapshotsByAppointment($records);
+
         $notifications = [];
 
         return view('patient.index', compact(
@@ -95,6 +100,7 @@ class HomepageController extends Controller
             'philippineHolidays',
             'records',
             'notifications',
+            'previousOdontogramByAppointment',
             'reservedBookingReminders'
         ));
     }

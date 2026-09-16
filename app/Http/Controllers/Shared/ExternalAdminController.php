@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Shared;
 
 use App\Http\Controllers\Controller;
 use App\Models\ExternalAdminAccess;
@@ -18,22 +18,15 @@ use Illuminate\View\View;
 
 class ExternalAdminController extends Controller
 {
-    /**
-     * Show Assign CMS Access page.
-     */
     public function index(): View
     {
-        return view('admin.assign-cms-access');
+        return view('shared.assign-cms-access');
     }
 
-    /**
-     * Save CMS access to local database.
-     */
     public function store(Request $request): RedirectResponse
     {
         abort_unless(
-            Auth::user()?->hasPermission('create_cms_integration'),
-            403
+            Auth::user()?->hasPermission('create_cms_integration'), 403
         );
 
         $validated = $request->validate([

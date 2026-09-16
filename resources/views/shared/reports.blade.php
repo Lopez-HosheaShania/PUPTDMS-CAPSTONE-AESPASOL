@@ -3018,7 +3018,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 
                         ticks: {
                             font: {
-                                family: 'Inter',
+                                
                                 size: 11,
                                 weight: '600'
                             }
@@ -3031,7 +3031,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                         ticks: {
                             precision: 0,
                             font: {
-                                family: 'Inter',
+                                
                                 size: 11
                             }
                         },
@@ -3089,7 +3089,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 
                         labels: {
                             font: {
-                                family: 'Inter',
+                                
                                 size: 11
                             },
 
@@ -3516,7 +3516,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                         position: 'top',
                         labels: {
                             font: {
-                                family: 'Inter',
+                                
                                 size: 11
                             },
                             usePointStyle: true,
@@ -3540,7 +3540,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                             display: true,
                             text: 'Number of Cases',
                             font: {
-                                family: 'Inter',
+                                
                                 size: 10
                             }
                         }
@@ -3552,7 +3552,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                         },
                         ticks: {
                             font: {
-                                family: 'Inter',
+                                
                                 size: 10
                             }
                         }
@@ -3587,7 +3587,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                         position: 'top',
                         labels: {
                             font: {
-                                family: 'Inter',
+                                
                                 size: 11
                             },
                             usePointStyle: true,
@@ -3608,7 +3608,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                         },
                         ticks: {
                             font: {
-                                family: 'Inter',
+                                
                                 size: 10
                             }
                         }
@@ -3622,7 +3622,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                         ticks: {
                             precision: 0,
                             font: {
-                                family: 'Inter',
+                                
                                 size: 10
                             }
                         },
@@ -3660,7 +3660,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                         position: 'right',
                         labels: {
                             font: {
-                                family: 'Inter',
+                                
                                 size: 10
                             },
                             usePointStyle: true,
@@ -3810,6 +3810,8 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             document.getElementById('formErrorBanner');
 
         const endpointMap = {
+            dpt_emergency: "{{ route('dentist.dentist.report.dpt-download') }}",
+            dpt_non_emergency: "{{ route('dentist.dentist.report.dpt-download') }}",
             gad_report: GAD_REPORT_DOWNLOAD_URL,
             annual_dental_clearance: ANNUAL_CLEARANCE_DOWNLOAD_URL,
             dental_clearance: DENTAL_CLEARANCE_DOWNLOAD_URL,

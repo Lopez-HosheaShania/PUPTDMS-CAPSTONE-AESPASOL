@@ -282,7 +282,7 @@
                                     </div>
                                 </div>
 
-                                <div id="patientContainer" class="space-y-3 px-3 md:px-6 pb-6 pt-4">
+                                <div id="patientContainer">
 
                        @php
                                     $appointments = collect($appointments)

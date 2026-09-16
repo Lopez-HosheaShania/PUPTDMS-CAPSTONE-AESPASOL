@@ -172,8 +172,13 @@ function loadOdontogramThreeModule() {
         'odontogram-three',
         () =>
             import(
-                './odontogram/odontogram-three'
+                './odontogram/odontogram-primary-stacked-three'
             )
+                .then(module => {
+                    module.enableOdontogramPrimaryTeeth?.();
+
+                    return module;
+                })
     );
 }
 
@@ -941,10 +946,37 @@ async function loadChartJs() {
                 'chart.js/auto'
             )
                 .then(module => {
-                    window.Chart =
+                    const Chart =
                         module.default;
 
-                    return module.default;
+                    const rootStyles =
+                        getComputedStyle(
+                            document.documentElement
+                        );
+
+                    const appFont =
+                        rootStyles
+                            .getPropertyValue(
+                                '--font-family-base'
+                            )
+                            .trim() ||
+                        "'Inter Variable', sans-serif";
+
+                    Chart.defaults.font.family =
+                        appFont;
+
+                    Chart.defaults.color =
+                        rootStyles
+                            .getPropertyValue(
+                                '--text-2'
+                            )
+                            .trim() ||
+                        '#3d3c3b';
+
+                    window.Chart =
+                        Chart;
+
+                    return Chart;
                 })
                 .catch(error => {
                     chartJsPromise =

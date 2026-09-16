@@ -143,6 +143,8 @@ class AdminReportController extends Controller
             ->get();
 
         $customReportTypes = [
+            'dpt_emergency',
+            'dpt_non_emergency',
             'dental_services',
             'daily_treatment_record',
             'dental_health_record',

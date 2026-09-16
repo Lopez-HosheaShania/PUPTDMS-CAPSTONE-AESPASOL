@@ -466,8 +466,6 @@
         </script>
     @endif
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
         let adminInventoryOverviewChart = null;
 
