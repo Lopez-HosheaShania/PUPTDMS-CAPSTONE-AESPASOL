@@ -122,8 +122,10 @@ class OdontogramController extends Controller
 
         $latestProcedureWithOdontogram = $patientOdontogram
             ? null
-            : AppointmentProcedure::where('patient_id', $patient->id)
-            ->whereNotNull('odontogram_data')
+            : AppointmentProcedure::whereHas('appointment', function ($query) use ($patient) {
+                $query->where('patient_id', $patient->id);
+            })
+            ->whereHas('odontogram', fn ($query) => $query->where('has_data', true))
             ->latest('updated_at')
             ->latest('id')
             ->first();
@@ -162,7 +164,7 @@ class OdontogramController extends Controller
                     return [
                         'name' => $appointment->patient->name ?? 'Unknown',
                         'time' => Carbon::parse($appointment->appointment_time)->format('h:i A'),
-                        'service' => $appointment->service_type,
+                        'service' => $appointment->service_type_name,
                     ];
                 })->toArray();
             })
@@ -798,7 +800,7 @@ class OdontogramController extends Controller
             ->all();
 
         $allowsProcedureCompletionWithoutOdontogramChanges = $this->allowsProcedureCompletionWithoutOdontogramChanges(
-            $appointment->service_type
+            $appointment->service_type_name
         );
 
         $hasOdontogramChanges = count($cleanOdontogramData) > 0;
@@ -965,25 +967,15 @@ class OdontogramController extends Controller
             }
 
             $procedurePayload = [
-                'patient_id' => $patient->id,
                 'odontogram_data' => $cleanOdontogramData,
                 'oral_examination' => $validated['oral_examination'] ?? null,
                 'diagnosis' => $validated['diagnosis'] ?? null,
                 'prescriptions' => $validated['prescriptions'] ?? null,
                 'completion_action' => $completionAction,
+                'procedure_started_at' => $procedureStartedAt,
+                'procedure_completed_at' => $procedureCompletedAt,
+                'procedure_duration_seconds' => max(0, $procedureDurationSeconds),
             ];
-
-            if (Schema::hasColumn('appointment_procedures', 'procedure_started_at')) {
-                $procedurePayload['procedure_started_at'] = $procedureStartedAt;
-            }
-
-            if (Schema::hasColumn('appointment_procedures', 'procedure_completed_at')) {
-                $procedurePayload['procedure_completed_at'] = $procedureCompletedAt;
-            }
-
-            if (Schema::hasColumn('appointment_procedures', 'procedure_duration_seconds')) {
-                $procedurePayload['procedure_duration_seconds'] = max(0, $procedureDurationSeconds);
-            }
 
             AppointmentProcedure::updateOrCreate(
                 [
@@ -1768,7 +1760,7 @@ class OdontogramController extends Controller
         ]);
 
         $allowsProcedureCompletionWithoutOdontogramChanges = $this->allowsProcedureCompletionWithoutOdontogramChanges(
-            $appointment->service_type
+            $appointment->service_type_name
         );
 
         if (
@@ -1908,7 +1900,7 @@ class OdontogramController extends Controller
         ]);
 
         $allowsProcedureCompletionWithoutOdontogramChanges = $this->allowsProcedureCompletionWithoutOdontogramChanges(
-            $appointment->service_type
+            $appointment->service_type_name
         );
 
         if (
@@ -2075,10 +2067,16 @@ class OdontogramController extends Controller
                 $procedureDurationSeconds
             );
 
+        $serviceType = ServiceType::where(
+            'name',
+            $draft['service_type']
+        )->firstOrFail();
+
         $appointmentPayload = [
             'patient_id' => $patient->id,
             'dentist_id' => auth()->id(),
-            'service_type' => $draft['service_type'],
+            'service_type_id' => $serviceType->id,
+            'service_type' => $serviceType->name,
             'appointment_date' => $appointmentDate,
             'appointment_time' => $appointmentTime,
             'status' => 'completed',

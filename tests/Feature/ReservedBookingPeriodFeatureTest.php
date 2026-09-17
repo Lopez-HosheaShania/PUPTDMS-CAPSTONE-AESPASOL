@@ -13,6 +13,7 @@ use App\Models\ReservedBookingPeriod;
 use App\Models\ServiceType;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\DentistDutyService;
 use App\Services\StudentTargetOptionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Database\QueryException;
@@ -24,6 +25,18 @@ use Tests\TestCase;
 class ReservedBookingPeriodFeatureTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function assertPeriodDatabaseHas(array $values): void
+    {
+        $query = ReservedBookingPeriod::withTrashed()
+            ->withScheduleColumns()
+            ->join('reserved_booking_period_configurations as config', 'config.reserved_booking_period_id', '=', 'reserved_booking_periods.id')
+            ->join('reserved_booking_period_targets as target', 'target.reserved_booking_period_id', '=', 'reserved_booking_periods.id');
+        foreach ($values as $field => $value) {
+            $query->where($field === 'id' ? 'reserved_booking_periods.id' : $field, $value);
+        }
+        $this->assertTrue($query->exists(), 'Expected normalized reserved period matching '.json_encode($values));
+    }
 
     private const RESERVED_DATE = '2026-09-07';
 
@@ -79,7 +92,7 @@ class ReservedBookingPeriodFeatureTest extends TestCase
 
         $period = ReservedBookingPeriod::firstOrFail();
 
-        $this->assertDatabaseHas('reserved_booking_periods', [
+        $this->assertPeriodDatabaseHas([
             'id' => $period->id,
             'title' => 'Mandatory Oral Check-up',
             'reserved_date' => self::RESERVED_DATE,
@@ -125,7 +138,7 @@ class ReservedBookingPeriodFeatureTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('success');
 
-        $this->assertDatabaseHas('reserved_booking_periods', [
+        $this->assertPeriodDatabaseHas([
             'id' => $period->id,
             'title' => 'Updated Oral Check-up',
             'max_capacity' => 3,
@@ -301,7 +314,7 @@ class ReservedBookingPeriodFeatureTest extends TestCase
             ->assertSessionHasNoErrors(null, 'reservedPeriod')
             ->assertSessionHas('success');
 
-        $this->assertDatabaseHas('reserved_booking_periods', [
+        $this->assertPeriodDatabaseHas([
             'target_patient_type' => 'faculty',
             'booking_mode' => 'date_only',
             'program_code' => null,
@@ -521,7 +534,7 @@ class ReservedBookingPeriodFeatureTest extends TestCase
             ->post(route('admin.clinic_schedule.reserved_periods.store'), $payload)
             ->assertSessionHas('success');
 
-        $this->assertDatabaseHas('reserved_booking_periods', [
+        $this->assertPeriodDatabaseHas([
             'reserved_date' => '2026-09-08',
             'active_reserved_date' => '2026-09-08',
             'is_active' => true,
@@ -616,8 +629,8 @@ class ReservedBookingPeriodFeatureTest extends TestCase
             ['09:00:00', '10:00:00', '11:00:00'],
             $period->slots()->pluck('slot_time')->all()
         );
-        $this->assertDatabaseHas('appointments', [
-            'id' => $appointment->id,
+        $this->assertDatabaseHas('appointment_reserved_bookings', [
+            'appointment_id' => $appointment->id,
             'reserved_booking_period_slot_id' => $firstSlot->id,
         ]);
     }
@@ -893,6 +906,8 @@ class ReservedBookingPeriodFeatureTest extends TestCase
         Mail::fake();
         Notification::fake();
 
+        $dentist = $this->makeScheduleManager('dentist');
+        app(DentistDutyService::class)->clockOut($dentist, Carbon::now());
         $patientUser = $this->makePatientUser();
         $patient = $patientUser->patient;
         $period = ReservedBookingPeriod::create([
@@ -957,7 +972,7 @@ class ReservedBookingPeriodFeatureTest extends TestCase
                 'appointment_date' => '2026-09-14',
                 'appointment_time' => '4:00 PM',
                 'service_type' => 'Oral Check-up',
-                'final_confirmation' => '1',
+                'final_confirmation' => true,
                 'contact_email' => $patient->email,
                 'contact_phone' => '09171234567',
                 'contact_address' => 'PUP Taguig Campus',
@@ -971,11 +986,16 @@ class ReservedBookingPeriodFeatureTest extends TestCase
 
         $this->assertDatabaseHas('appointments', [
             'patient_id' => $patient->id,
-            'reserved_booking_period_id' => $period->id,
-            'reserved_booking_period_slot_id' => $slot->id,
+            'dentist_id' => $dentist->id,
             'appointment_date' => self::RESERVED_DATE,
             'appointment_time' => '10:00:00',
             'status' => 'upcoming',
+        ]);
+        $this->assertDatabaseHas('appointment_reserved_bookings', [
+            'appointment_id' => Appointment::where('patient_id', $patient->id)->firstOrFail()->id,
+            'booking_patient_id' => $patient->id,
+            'reserved_booking_period_id' => $period->id,
+            'reserved_booking_period_slot_id' => $slot->id,
         ]);
         $this->assertDatabaseHas('dental_histories', [
             'patient_id' => $patient->id,

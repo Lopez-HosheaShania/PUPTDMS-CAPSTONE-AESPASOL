@@ -249,8 +249,7 @@ class OIDCController extends Controller
             }
         }
 
-        $assignedAccess = ExternalAdminAccess::where('email', $email)
-            ->orWhere('external_admin_id', (string) $ssoUserId)
+        $assignedAccess = ExternalAdminAccess::forIdentity($email, (string) $ssoUserId)
             ->first();
 
         $facultyAccess = null;
@@ -385,7 +384,6 @@ class OIDCController extends Controller
         $user->refresh_token = $refreshToken;
         $user->last_login_at = now();
         $user->save();
-        // I-reload para makuha yung actual role na naka-set sa DB
         $user->refresh();
         $actualRoleSlug = optional($user->role)->slug ?? $roleSlug;
 
@@ -565,22 +563,67 @@ class OIDCController extends Controller
         ?ExternalAdminAccess $assignedAccess,
         ?Faculty $facultyAccess
     ): Patient {
-        $phone = $this->extractStudentPhone($studentData);
-        $facultyCode = $patient?->faculty_code;
-        $studentNo = $this->extractStudentNumber($studentData) ?: $patient?->student_no;
-        $programCode = $this->extractStudentProgramCode($studentData) ?: $patient?->course_code;
-        $programName = $this->extractStudentProgramName($studentData) ?: $patient?->course_name;
-        $yearLevel = $studentData['yearLevel'] ?? $studentData['year_level'] ?? $patient?->year_level;
-        $section = $studentData['section'] ?? $patient?->section;
+        $patient?->loadMissing('information');
+
+        $information = $patient?->information;
+
+        $phone =
+            $this->extractStudentPhone($studentData)
+            ?: (string) ($information?->phone ?? '');
+
+        $facultyCode =
+            $information?->faculty_code;
+
+        $studentNo =
+            $this->extractStudentNumber($studentData)
+            ?: $information?->student_no;
+
+        $programCode =
+            $this->extractStudentProgramCode($studentData)
+            ?: $information?->course_code;
+
+        $programName =
+            $this->extractStudentProgramName($studentData)
+            ?: $information?->course_name;
+
+        $yearLevel =
+            $studentData['yearLevel']
+            ?? $studentData['year_level']
+            ?? $information?->year_level;
+
+        $section =
+            $studentData['section']
+            ?? $information?->section;
+
 
         $personalInfo = [];
         $studentAddresses = [];
-        $birthdate = null;
-        $gender = null;
-        $placeOfBirth = null;
-        $heightM = null;
-        $weightKg = null;
-        $address = $patient?->address;
+
+        $birthdate =
+            $information?->birthdate
+            ? $information->birthdate->format('Y-m-d')
+            : null;
+
+        $gender =
+            $information?->gender;
+
+        $placeOfBirth =
+            $information?->place_of_birth;
+
+        $heightM =
+            $information?->height_m !== null
+            ? (float) $information->height_m
+            : null;
+
+        $weightKg =
+            $information?->weight_kg !== null
+            ? (float) $information->weight_kg
+            : null;
+
+
+        $address =
+            $information?->address
+            ?? $patient?->getRawOriginal('address');
 
         try {
             if (!empty($studentNo)) {
@@ -601,23 +644,46 @@ class OIDCController extends Controller
             ]);
         }
 
+ 
+
+        $resolvedStudentAddress =
+            $this->formatStudentAddress(
+                $studentAddresses
+            );
+
+        if (filled($resolvedStudentAddress)) {
+            $address = $resolvedStudentAddress;
+        }
+
         $birthdate = $this->normalizeDate(
             $personalInfo['dateOfBirth']
                 ?? $personalInfo['birthdate']
                 ?? $studentData['birthdate']
                 ?? $studentData['dateOfBirth']
-                ?? null
+                ?? $birthdate
         );
         $gender = $this->normalizeGenderLabel(
             $personalInfo['gender']['name']
                 ?? $personalInfo['gender']
                 ?? $studentData['gender']
-                ?? null
+                ?? $gender
         );
-        $placeOfBirth = $this->cleanStringValue($personalInfo['placeOfBirth'] ?? $personalInfo['place_of_birth'] ?? null);
-        $heightM = $this->normalizeNullableFloat($personalInfo['heightM'] ?? $personalInfo['height_m'] ?? null);
-        $weightKg = $this->normalizeNullableFloat($personalInfo['weightKg'] ?? $personalInfo['weight_kg'] ?? null);
-        $address = $this->formatStudentAddress($studentAddresses) ?: $address;
+        $placeOfBirth = $this->cleanStringValue(
+            $personalInfo['placeOfBirth']
+                ?? $personalInfo['place_of_birth']
+                ?? $placeOfBirth
+        );
+        $heightM = $this->normalizeNullableFloat(
+            $personalInfo['heightM']
+                ?? $personalInfo['height_m']
+                ?? $heightM
+        );
+
+        $weightKg = $this->normalizeNullableFloat(
+            $personalInfo['weightKg']
+                ?? $personalInfo['weight_kg']
+                ?? $weightKg
+        );
 
         if ($assignedAccess) {
             try {
@@ -790,34 +856,57 @@ class OIDCController extends Controller
         $user->gender = $gender ?: $user->gender;
         $user->save();
 
-        $supportsExtendedStudentFields = Schema::hasColumns('patients', [
-            'place_of_birth',
-            'height_m',
-            'weight_kg',
-        ]);
-
         if ($patient) {
             $patient->user_id = $patient->user_id ?: $user->id;
             $patient->name = $user->name ?: $name ?: $email;
             $patient->email = $user->email;
-            $patient->phone = $phone ?: $patient->phone;
-            $patient->birthdate = $birthdate ?: $patient->birthdate;
-            $patient->gender = $gender ?: $patient->gender;
-            if ($supportsExtendedStudentFields) {
-                $patient->place_of_birth = $placeOfBirth ?: $patient->place_of_birth;
-                $patient->height_m = $heightM ?? $patient->height_m;
-                $patient->weight_kg = $weightKg ?? $patient->weight_kg;
+            $patient->phone =
+                $phone
+                ?: $information?->phone;
+
+            $patient->birthdate =
+                $birthdate
+                ?: $information?->birthdate;
+
+            $patient->gender =
+                $gender
+                ?: $information?->gender;
+
+            $patient->faculty_code =
+                $facultyCode
+                ?: $information?->faculty_code;
+
+            $patient->student_no =
+                $studentNo
+                ?: $information?->student_no;
+
+            $patient->course_code =
+                $programCode
+                ?: $information?->course_code;
+
+            $patient->course_name =
+                $programName
+                ?: $information?->course_name;
+
+            $patient->year_level =
+                $yearLevel
+                ?? $information?->year_level;
+
+            $patient->section =
+                $section
+                ?: $information?->section;
+
+            $patient->is_pwd =
+                $information?->is_pwd
+                ?? false;
+
+            $patient->is_senior =
+                $information?->is_senior
+                ?? false;
+
+            if (filled($address)) {
+                $patient->address = $address;
             }
-            $patient->faculty_code = $facultyCode ?: $patient->faculty_code;
-            $patient->classification = $classification;
-            $patient->student_no = $studentNo ?: $patient->student_no;
-            $patient->course_code = $programCode ?: $patient->course_code;
-            $patient->course_name = $programName ?: $patient->course_name;
-            $patient->year_level = $yearLevel ?: $patient->year_level;
-            $patient->section = $section ?: $patient->section;
-            $patient->is_pwd = $patient->is_pwd ?? false;
-            $patient->is_senior = $patient->is_senior ?? false;
-            $patient->address = $address ?: $patient->address;
 
             if (empty($patient->password)) {
                 $patient->password = Hash::make(Str::random(16));
@@ -847,13 +936,11 @@ class OIDCController extends Controller
             'is_pwd' => false,
             'is_senior' => false,
             'address' => $address,
-        ];
 
-        if ($supportsExtendedStudentFields) {
-            $patientPayload['place_of_birth'] = $placeOfBirth;
-            $patientPayload['height_m'] = $heightM;
-            $patientPayload['weight_kg'] = $weightKg;
-        }
+            'place_of_birth' => $placeOfBirth,
+            'height_m' => $heightM,
+            'weight_kg' => $weightKg,
+        ];
 
         $patient = Patient::create($patientPayload);
 

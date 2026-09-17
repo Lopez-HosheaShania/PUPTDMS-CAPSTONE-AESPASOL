@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Helpers\PhilippineHolidays;
 use App\Helpers\AuditLogger;
 use App\Services\FacultyApiService;
+use App\Models\AcademicYear;
+use App\Models\AcademicTerm;
 
 class AcademicPeriodController extends Controller
 {
@@ -19,20 +21,60 @@ class AcademicPeriodController extends Controller
         // Fetch PH holidays (previous year, current year, next year)
         $holidays = PhilippineHolidays::recordsRange(1, 1);
 
-        $query = AcademicPeriod::query();
+        $query = AcademicPeriod::query()
+            ->with(['academicYear', 'academicTerm']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
 
-            $query->where(function ($q) use ($search) {
-                $q->where('academic_year', 'like', "%{$search}%")
-                    ->orWhere('semester', 'like', "%{$search}%")
+            $termCode = match (strtolower($search)) {
+                '1st semester',
+                'first semester' => 'first_semester',
+
+                '2nd semester',
+                'second semester' => 'second_semester',
+
+                'summer' => 'summer',
+
+                default => null,
+            };
+
+            $query->where(function ($q) use ($search, $termCode) {
+                $q->whereHas('academicYear', function ($yearQuery) use ($search) {
+                    $yearQuery->where('name', 'like', "%{$search}%");
+                })
                     ->orWhere('description', 'like', "%{$search}%");
+
+                if ($termCode !== null) {
+                    $q->orWhereHas('academicTerm', function ($termQuery) use ($termCode) {
+                        $termQuery->where('code', $termCode);
+                    });
+                } else {
+                    $q->orWhereHas('academicTerm', function ($termQuery) use ($search) {
+                        $termQuery->where('name', 'like', "%{$search}%");
+                    });
+                }
             });
         }
 
         if ($request->filled('semester')) {
-            $query->where('semester', $request->semester);
+            $termCode = match (strtolower(trim($request->semester))) {
+                '1st semester',
+                'first semester' => 'first_semester',
+
+                '2nd semester',
+                'second semester' => 'second_semester',
+
+                'summer' => 'summer',
+
+                default => null,
+            };
+
+            if ($termCode !== null) {
+                $query->whereHas('academicTerm', function ($termQuery) use ($termCode) {
+                    $termQuery->where('code', $termCode);
+                });
+            }
         }
 
         if ($request->filled('status')) {
@@ -66,10 +108,12 @@ class AcademicPeriodController extends Controller
             ->withQueryString();
 
         $calendarPeriods = AcademicPeriod::query()
+            ->with(['academicYear', 'academicTerm'])
             ->orderBy('start_date')
             ->get();
 
-        $activePeriod = AcademicPeriod::where('is_active', true)
+        $activePeriod = AcademicPeriod::with(['academicYear', 'academicTerm'])
+            ->where('is_active', true)
             ->orderByDesc('start_date')
             ->first();
 
@@ -119,9 +163,21 @@ class AcademicPeriodController extends Controller
             AcademicPeriod::query()->update(['is_active' => false]);
         }
 
-        AcademicPeriod::create([
-            'academic_year' => $validated['academic_year'],
-            'semester' => $validated['semester'],
+        $academicYear = AcademicYear::firstOrCreate([
+            'name' => trim($validated['academic_year']),
+        ]);
+
+        $termCode = match ($validated['semester']) {
+            'First Semester' => 'first_semester',
+            'Second Semester' => 'second_semester',
+            'Summer' => 'summer',
+        };
+
+        $academicTerm = AcademicTerm::where('code', $termCode)->firstOrFail();
+
+        $academicPeriod = AcademicPeriod::create([
+            'academic_year_id' => $academicYear->id,
+            'academic_term_id' => $academicTerm->id,
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'description' => $validated['description'] ?? null,
@@ -162,9 +218,21 @@ class AcademicPeriodController extends Controller
                 ->update(['is_active' => false]);
         }
 
+        $academicYear = AcademicYear::firstOrCreate([
+            'name' => trim($validated['academic_year']),
+        ]);
+
+        $termCode = match ($validated['semester']) {
+            'First Semester' => 'first_semester',
+            'Second Semester' => 'second_semester',
+            'Summer' => 'summer',
+        };
+
+        $academicTerm = AcademicTerm::where('code', $termCode)->firstOrFail();
+
         $academicPeriod->update([
-            'academic_year' => $validated['academic_year'],
-            'semester' => $validated['semester'],
+            'academic_year_id' => $academicYear->id,
+            'academic_term_id' => $academicTerm->id,
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'description' => $validated['description'] ?? null,
@@ -214,14 +282,17 @@ class AcademicPeriodController extends Controller
         FacultyApiService $facultyApiService
     ) {
         try {
-            $currentActive = AcademicPeriod::query()
+            $currentActive = AcademicPeriod::with([
+                'academicYear',
+                'academicTerm',
+            ])
                 ->where('is_active', true)
                 ->first();
 
             $previousState = $currentActive
                 ? [
-                    'academic_year' => $currentActive->academic_year,
-                    'semester' => $currentActive->semester,
+                    'academic_year' => $currentActive->academicYear?->name,
+                    'semester' => $currentActive->academicTerm?->name,
                     'start_date' => optional(
                         $currentActive->start_date
                     )->format('Y-m-d'),
@@ -235,10 +306,11 @@ class AcademicPeriodController extends Controller
                 ->syncActiveAcademicYearSemester();
 
             $academicPeriod->refresh();
+            $academicPeriod->load(['academicYear', 'academicTerm']);
 
             $currentState = [
-                'academic_year' => $academicPeriod->academic_year,
-                'semester' => $academicPeriod->semester,
+                'academic_year' => $academicPeriod->academicYear?->name,
+                'semester' => $academicPeriod->academicTerm?->name,
                 'start_date' => optional(
                     $academicPeriod->start_date
                 )->format('Y-m-d'),
@@ -252,8 +324,8 @@ class AcademicPeriodController extends Controller
                 $previousState === $currentState;
 
             $message = $alreadySynced
-                ? "Academic year {$academicPeriod->academic_year} "
-                . "{$academicPeriod->semester} is already synced with FLSS."
+                ? "Academic year {$academicPeriod->academicYear?->name} "
+                . "{$academicPeriod->academicTerm?->name} is already synced with FLSS."
                 : 'Academic period synced from FLSS successfully.';
 
             AuditLogger::log(
@@ -270,8 +342,8 @@ class AcademicPeriodController extends Controller
 
             $payload = [
                 'id' => $academicPeriod->id,
-                'academic_year' => $academicPeriod->academic_year,
-                'semester' => $academicPeriod->semester,
+                'academic_year' => $academicPeriod->academicYear?->name,
+                'semester' => $academicPeriod->academicTerm?->name,
 
                 'start_date' => optional(
                     $academicPeriod->start_date
@@ -381,11 +453,35 @@ class AcademicPeriodController extends Controller
         string $semester,
         ?int $ignoreId = null
     ): void {
-        $semesterAliases = $this->semesterAliases($semester);
+        $year = AcademicYear::firstOrCreate([
+            'name' => trim($academicYear),
+        ]);
+
+        $termCode = match (strtolower(trim($semester))) {
+            '1st semester',
+            'first semester' => 'first_semester',
+
+            '2nd semester',
+            'second semester' => 'second_semester',
+
+            'summer' => 'summer',
+
+            default => null,
+        };
+
+        if ($termCode === null) {
+            return;
+        }
+
+        $term = AcademicTerm::where('code', $termCode)->first();
+
+        if ($term === null) {
+            return;
+        }
 
         $duplicateQuery = AcademicPeriod::query()
-            ->where('academic_year', $academicYear)
-            ->whereIn('semester', $semesterAliases);
+            ->where('academic_year_id', $year->id)
+            ->where('academic_term_id', $term->id);
 
         if ($ignoreId !== null) {
             $duplicateQuery->whereKeyNot($ignoreId);
@@ -402,14 +498,5 @@ class AcademicPeriodController extends Controller
                 },
             ],
         ]);
-    }
-
-    private function semesterAliases(string $semester): array
-    {
-        return match ($semester) {
-            'First Semester', '1st Semester' => ['First Semester', '1st Semester'],
-            'Second Semester', '2nd Semester' => ['Second Semester', '2nd Semester'],
-            default => [$semester],
-        };
     }
 }

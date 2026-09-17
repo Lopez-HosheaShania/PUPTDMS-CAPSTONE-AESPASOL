@@ -78,7 +78,7 @@ class DentistAppointmentController extends Controller
                     return [
                         'name' => $appointment->patient->name ?? 'Unknown',
                         'time' => \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A'),
-                        'service' => $appointment->service_type,
+                        'service' => $appointment->service_type_name,
                     ];
                 })->toArray();
             })
@@ -310,6 +310,11 @@ class DentistAppointmentController extends Controller
 
         $appointment = Appointment::with('patient.user')->findOrFail($id);
 
+        $serviceType = ServiceType::where(
+            'name',
+            $request->service_type
+        )->firstOrFail();
+
         $cancelledBy = Auth::user()?->name ?? 'the dentist';
 
         $appointment->update([
@@ -415,7 +420,8 @@ class DentistAppointmentController extends Controller
         $appointment->update([
             'appointment_date' => $request->new_appointment_date,
             'appointment_time' => $mysqlTime,
-            'service_type' => $request->service_type,
+            'service_type_id' => $serviceType->id,
+            'service_type' => $serviceType->name,
             'status' => 'rescheduled',
         ]);
 
@@ -516,7 +522,9 @@ class DentistAppointmentController extends Controller
         $followUpAppointment = Appointment::create([
             'patient_id' => $originalAppointment->patient_id,
             'dentist_id' => auth()->id(),
-            'service_type' => 'Follow-up',
+            'service_type_id' => $originalAppointment->service_type_id,
+            'service_type' => $originalAppointment->service_type_name
+                ?? $originalAppointment->service_type,
             'appointment_date' => $request->followup_appointment_date,
             'appointment_time' => $mysqlTime,
             'status' => 'upcoming',
@@ -547,7 +555,7 @@ class DentistAppointmentController extends Controller
                 $originalAppointment->patient?->name
                     ?? 'Unknown Patient',
 
-                'service_type' => $followUpAppointment->service_type,
+                'service_type' => $followUpAppointment->service_type_name,
 
                 'appointment_date' =>
                 Carbon::parse(

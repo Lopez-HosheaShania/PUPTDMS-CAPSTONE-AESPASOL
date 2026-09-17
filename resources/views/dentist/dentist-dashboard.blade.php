@@ -2456,6 +2456,15 @@ Medicine inventory records will appear here once items are available.
 
                 closeStatusModal();
 
+                if (
+                    newStatus === 'out' &&
+                    Array.isArray(data.cancelled_appointment_ids) &&
+                    data.cancelled_appointment_ids.length > 0
+                ) {
+                    window.location.reload();
+                    return;
+                }
+
             } catch (error) {
                 console.error(error);
                 alert(error.message || "Something went wrong while updating clinic status.");

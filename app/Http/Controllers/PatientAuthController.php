@@ -96,7 +96,6 @@ class PatientAuthController extends Controller
                 'phone' => $validated['phone'],
                 'birthdate' => $validated['birthdate'],
                 'gender' => $validated['gender'],
-                // Keep patient password synced for compatibility, but users.password is the source of truth.
                 'password' => $hashedPassword,
             ]);
         });

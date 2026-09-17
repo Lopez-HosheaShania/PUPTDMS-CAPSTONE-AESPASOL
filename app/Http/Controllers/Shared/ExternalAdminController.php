@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Shared;
 
 use App\Http\Controllers\Controller;
 use App\Models\ExternalAdminAccess;
+use App\Models\ExternalAdminProfile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -35,6 +37,7 @@ class ExternalAdminController extends Controller
             'office' => 'nullable|string|max:255',
             'address' => 'nullable|string',
             'age' => 'nullable|integer',
+            'senior_pwd' => 'nullable|string|max:255',
             'gender' => 'nullable|string|max:50',
             'contact_number' => 'nullable|string|max:50',
             'cms_role' => 'required|in:admin,patient,dentist',
@@ -42,22 +45,32 @@ class ExternalAdminController extends Controller
         ]);
 
         try {
-            ExternalAdminAccess::updateOrCreate(
-                ['external_admin_id' => $validated['external_admin_id']],
-                [
-                    'fname' => $validated['fname'] ?? null,
-                    'lname' => $validated['lname'] ?? null,
-                    'email' => $validated['email'] ?? null,
-                    'office' => $validated['office'] ?? null,
-                    'address' => $validated['address'] ?? null,
-                    'age' => $validated['age'] ?? null,
-                    'gender' => $validated['gender'] ?? null,
-                    'contact_number' => $validated['contact_number'] ?? null,
-                    'has_cms_access' => true,
-                    'cms_role' => $validated['cms_role'],
-                    'cms_status' => $validated['cms_status'],
-                ]
-            );
+            DB::transaction(function () use ($validated) {
+                $profileValues = [];
+                foreach (
+                    [
+                        'fname',
+                        'lname',
+                        'email',
+                        'office',
+                        'address',
+                        'age',
+                        'gender',
+                        'contact_number',
+                        'senior_pwd',
+                    ] as $field
+                ) {
+                    $profileValues[$field] = $validated[$field] ?? null;
+                }
+                $profile = ExternalAdminProfile::updateOrCreate(
+                    ['external_admin_id' => $validated['external_admin_id']],
+                    $profileValues
+                );
+                ExternalAdminAccess::updateOrCreate(
+                    ['external_admin_profile_id' => $profile->id],
+                    ['has_cms_access' => true, 'cms_role' => $validated['cms_role'], 'cms_status' => $validated['cms_status']]
+                );
+            });
 
             return redirect()
                 ->route(request()->routeIs('dentist.*') ? 'dentist.assign-cms-access' : 'admin.assign-cms-access')

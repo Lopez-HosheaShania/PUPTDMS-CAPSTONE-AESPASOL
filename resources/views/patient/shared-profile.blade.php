@@ -135,8 +135,7 @@ $odontogramMetaVisit = $lastVisit ?? ($appointment ?? ($nextAppointment ?? null)
 $odontogramMetaDate = $odontogramMetaVisit?->appointment_date
 ? Carbon::parse($odontogramMetaVisit->appointment_date)->format('M d, Y')
 : 'Recorded visit';
-$odontogramMetaService = $odontogramMetaVisit?->service_type ?: 'Dental Treatment';
-@endphp
+$odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Treatment';@endphp
 
 <main id="mainContent" class="patient-profile-page pt-[100px] px-3 md:px-6 py-6 min-h-screen flex-1">
     <div class="w-full fade-in">
@@ -995,13 +994,13 @@ $procedureAppointment->appointment_time
 );
 
 $startProcedureService =
-($procedureAppointment->service_type ?? '') === 'Others'
+($procedureAppointment->service_type_name ?? '') === 'Others'
 ? (
 $procedureAppointment->other_services
 ?: 'Others'
 )
 : (
-$procedureAppointment->service_type
+$procedureAppointment->service_type_name
 ?: 'Appointment'
 );
 @endphp

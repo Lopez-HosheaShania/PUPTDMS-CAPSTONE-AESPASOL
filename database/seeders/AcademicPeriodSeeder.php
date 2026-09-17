@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\AcademicPeriod;
+use App\Models\AcademicYear;
+use App\Models\AcademicTerm;
 
 class AcademicPeriodSeeder extends Seeder
 {
@@ -37,12 +39,29 @@ class AcademicPeriodSeeder extends Seeder
         ];
 
         foreach ($periods as $period) {
+            $academicYear = AcademicYear::firstOrCreate([
+                'name' => $period['academic_year'],
+            ]);
+
+            $termCode = match ($period['semester']) {
+                '1st Semester' => 'first_semester',
+                '2nd Semester' => 'second_semester',
+                'Summer' => 'summer',
+            };
+
+            $academicTerm = AcademicTerm::where('code', $termCode)->firstOrFail();
+
             AcademicPeriod::updateOrCreate(
                 [
-                    'academic_year' => $period['academic_year'],
-                    'semester' => $period['semester'],
+                    'academic_year_id' => $academicYear->id,
+                    'academic_term_id' => $academicTerm->id,
                 ],
-                $period
+                [
+                    'start_date' => $period['start_date'],
+                    'end_date' => $period['end_date'],
+                    'description' => $period['description'],
+                    'is_active' => $period['is_active'],
+                ]
             );
         }
     }

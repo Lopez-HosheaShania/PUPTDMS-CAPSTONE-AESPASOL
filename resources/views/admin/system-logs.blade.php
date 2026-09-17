@@ -377,6 +377,9 @@
                                         </td>
                                         <td><span
                                                 class="sl-desc">{{ $log->description ?? 'No description provided.' }}</span>
+                                            @if ($log->full_description !== $log->description)
+                                                <details><summary>Full details</summary>{{ $log->full_description }}</details>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -522,10 +525,13 @@
                                                     Description
                                                 </span>
 
-                                                <span class="table-record-value">
-                                                    {{ $log->description ?? 'No description provided.' }}
-                                                </span>
-                                            </div>
+                                            <span class="table-record-value">
+                                                {{ $log->description ?? 'No description provided.' }}
+                                                @if ($log->full_description !== $log->description)
+                                                    <details><summary>Full details</summary>{{ $log->full_description }}</details>
+                                                @endif
+                                            </span>
+                                        </div>
 
                                         </div>
 
@@ -3165,6 +3171,8 @@
                         '';
                     var actorName = escapeSlHtml(log.actor_name ?? log.actor_identifier ?? 'Unknown User');
                     var description = escapeSlHtml(log.description || 'No description provided.');
+                    var fullDetails = log.full_description && log.full_description !== log.description
+                        ? '<details><summary>Full details</summary>' + escapeSlHtml(log.full_description) + '</details>' : '';
                     var createdDay = escapeSlHtml(log.created_at_day || '');
                     var createdTime = escapeSlHtml(log.created_at_time || '');
 
@@ -3222,7 +3230,7 @@
                         '</span>' +
                         '</td>';
                     tableHtml += '<td><span class="sl-desc" title="' + description + '">' + description +
-                        '</span></td>';
+                        '</span>' + fullDetails + '</td>';
                     tableHtml += '</tr>';
 
                     gridHtml += `
@@ -3315,6 +3323,7 @@
 
                     <span class="table-record-value">
                         ${description}
+                        ${fullDetails}
                     </span>
                 </div>
 

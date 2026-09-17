@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Models\DocumentTemplate;
 use App\Models\DocumentTemplateField;
-use App\Models\DailyTreatmentRecord;
-use App\Models\DentalServiceRecord;
 use App\Models\Inventory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -76,13 +74,11 @@ class DocumentTemplateRenderer
         $currentMonth = now();
         $clinicName = setting('clinic_name', 'Taguig Dental Clinic');
 
-        $records = DailyTreatmentRecord::query()
-            ->whereYear('treatment_date', $currentMonth->year)
-            ->whereMonth('treatment_date', $currentMonth->month)
-            ->select('office_type', 'treatment_done', DB::raw('COUNT(*) as total'))
-            ->groupBy('office_type', 'treatment_done')
-            ->orderByDesc('total')
-            ->get();
+        $records = app(AppointmentReportRecords::class)->between($currentMonth->copy()->startOfMonth(), $currentMonth->copy()->endOfMonth())
+            ->groupBy(fn ($row) => json_encode([$row->office_type, $row->treatment_done]))
+            ->map(fn ($rows) => (object) ['office_type' => $rows->first()->office_type,
+                'treatment_done' => $rows->first()->treatment_done, 'total' => $rows->count()])
+            ->sortByDesc('total')->values();
 
         $groups = [
             'students' => [
@@ -156,9 +152,7 @@ class DocumentTemplateRenderer
         $monthYear = $this->formatGadReportPeriod($from, $to);
         $campusName = strtoupper(setting('clinic_name', 'Taguig Dental Clinic'));
 
-        $records = DentalServiceRecord::query()
-            ->whereBetween('time_in', [$from, $to])
-            ->get();
+        $records = app(AppointmentReportRecords::class)->between($from, $to);
 
         $departmentLabels = [
             'students' => ['student'],
@@ -397,14 +391,7 @@ class DocumentTemplateRenderer
         $currentMonth = now();
         $clinicName = setting('clinic_name', 'Taguig Dental Clinic');
 
-        $records = DailyTreatmentRecord::query()
-            ->whereYear('treatment_date', $currentMonth->year)
-            ->whereMonth('treatment_date', $currentMonth->month)
-            ->orderByDesc('treatment_date')
-            ->orderByDesc('id')
-            ->take(12)
-            ->get()
-            ->values();
+        $records = app(AppointmentReportRecords::class)->between($currentMonth->copy()->startOfMonth(), $currentMonth->copy()->endOfMonth())->take(12)->values();
 
         $context = [
             'pup_logo' => asset('images/PUP.png'),
@@ -447,14 +434,7 @@ class DocumentTemplateRenderer
     {
         $currentMonth = now();
 
-        $records = DentalServiceRecord::query()
-            ->whereYear('time_in', $currentMonth->year)
-            ->whereMonth('time_in', $currentMonth->month)
-            ->orderByDesc('time_in')
-            ->orderByDesc('id')
-            ->take(15)
-            ->get()
-            ->values();
+        $records = app(AppointmentReportRecords::class)->between($currentMonth->copy()->startOfMonth(), $currentMonth->copy()->endOfMonth())->take(15)->values();
 
         $context = [
             'pup_logo' => asset('images/PUP.png'),
@@ -467,14 +447,7 @@ class DocumentTemplateRenderer
         for ($i = 1; $i <= 15; $i++) {
             $record = $records->get($i - 1);
 
-            $middleInitial = '';
-            if ($record?->patient_middle_name && trim((string) $record->patient_middle_name) !== '') {
-                $middleInitial = strtoupper(substr((string) $record->patient_middle_name, 0, 1)) . '.';
-            }
-
-            $name = $record
-                ? trim(($record->patient_last_name ?? '') . ', ' . ($record->patient_first_name ?? '') . ' ' . $middleInitial)
-                : '—';
+            $name = $record?->patient_name ?? '—';
 
             $courseSectionDepartment = '—';
             if ($record) {
@@ -495,7 +468,7 @@ class DocumentTemplateRenderer
 
             $processingTime = '—';
             if ($record?->time_in && $record?->time_out) {
-                $processingTime = (string) $record->time_in->diffInMinutes($record->time_out);
+                $processingTime = (string) $record->minutes_processed;
             }
 
             $context['date_' . $i] = $record?->time_in?->format('m/d/y') ?? '—';

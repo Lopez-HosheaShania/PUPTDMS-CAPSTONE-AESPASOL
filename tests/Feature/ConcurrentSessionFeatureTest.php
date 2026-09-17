@@ -114,7 +114,7 @@ class ConcurrentSessionFeatureTest extends TestCase
             ->assertOk()
             ->assertJson(['expired' => true]);
 
-        $this->assertDatabaseHas('audit_logs', [
+        $this->assertAuditLogHas([
             'actor_id' => $patient->id,
             'actor_role' => 'patient',
             'action' => 'logout',
@@ -134,7 +134,7 @@ class ConcurrentSessionFeatureTest extends TestCase
 
         $this->assertGuest();
         $this->assertSame(1, $this->logoutCountFor($dentist));
-        $this->assertDatabaseHas('audit_logs', [
+        $this->assertAuditLogHas([
             'actor_id' => $dentist->id,
             'actor_role' => 'dentist',
             'action' => 'logout',
@@ -195,14 +195,14 @@ class ConcurrentSessionFeatureTest extends TestCase
             ->post(route('logout'))
             ->assertOk();
 
-        $this->assertDatabaseHas('audit_logs', [
+        $this->assertAuditLogHas([
             'actor_id' => $dentist->id,
             'actor_role' => 'dentist',
             'action' => 'logout',
             'description' => 'Clinical user (dentist) logged out',
         ]);
 
-        $this->assertDatabaseHas('audit_logs', [
+        $this->assertAuditLogHas([
             'actor_id' => $intern->id,
             'actor_role' => 'dental_intern',
             'action' => 'logout',
@@ -244,7 +244,7 @@ class ConcurrentSessionFeatureTest extends TestCase
         $this->assertGuest();
         $this->assertSame(0, DB::table('sessions')->where('user_id', $dentist->id)->count());
         $this->assertSame(1, $this->logoutCountFor($dentist));
-        $this->assertDatabaseHas('audit_logs', [
+        $this->assertAuditLogHas([
             'actor_id' => $dentist->id,
             'action' => 'sessions_revoked',
             'module' => 'authentication',
@@ -342,10 +342,24 @@ class ConcurrentSessionFeatureTest extends TestCase
 
     private function logoutCountFor(User $user): int
     {
-        return DB::table('audit_logs')
-            ->where('actor_id', $user->id)
+        return AuditLog::whereHas('actorSnapshot', fn ($actor) => $actor->where('actor_id', $user->id))
             ->where('action', 'logout')
             ->count();
+    }
+
+    private function assertAuditLogHas(array $attributes): void
+    {
+        $query = AuditLog::query();
+        foreach ($attributes as $field => $value) {
+            if (in_array($field, AuditLog::ACTOR_FIELDS, true)) {
+                $query->whereHas('actorSnapshot', fn ($actor) => $actor->where($field, $value));
+            } elseif ($field === 'description') {
+                $query->withDescription($value);
+            } else {
+                $query->where($field, $value);
+            }
+        }
+        $this->assertTrue($query->exists(), 'Expected audit event and its actor snapshot were not found.');
     }
 
     private function insertAuditLog(

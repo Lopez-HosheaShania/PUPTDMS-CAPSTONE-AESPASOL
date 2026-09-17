@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -208,7 +209,13 @@ class WalkInController extends Controller
                     default => null,
                 };
 
-            $patients = collect()
+            $patients = collect(
+                $this->searchLocalPatients(
+                    $search,
+                    $sourceLimit,
+                    $localClassifications
+                )
+            )
                 ->merge(
                     $loadStudents
                         ? $this->searchOgosPatients(
@@ -234,13 +241,6 @@ class WalkInController extends Controller
                             $sourceLimit
                         )
                         : []
-                )
-                ->merge(
-                    $this->searchLocalPatients(
-                        $search,
-                        $sourceLimit,
-                        $localClassifications
-                    )
                 )
                 ->filter()
                 ->unique(
@@ -329,7 +329,7 @@ class WalkInController extends Controller
                 'to' => $to,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Walk-in student API search failed', [
+            Log::error('Walk-in unified patient search failed', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -348,7 +348,7 @@ class WalkInController extends Controller
     ) {
         $patient = $this->resolveWalkInSourcePatient($patient);
 
-        $this->backfillConnectedPatientMedicalHistory(
+        $personalInfo = $this->backfillConnectedPatientMedicalHistory(
             $patient,
             $studentApiService
         );
@@ -356,6 +356,7 @@ class WalkInController extends Controller
         $patient->refresh();
         $patient->load([
             'user',
+            'information',
             'dentalHistory',
             'dentalHistoryDates',
             'dentalHistoryConcerns',
@@ -364,10 +365,7 @@ class WalkInController extends Controller
             'medicalHistory.diseaseAnswers.disease',
         ]);
 
-        $ogosEmergencyDefaults = $this->resolveConnectedPatientEmergencyDefaults(
-            $patient,
-            $studentApiService
-        );
+        $ogosEmergencyDefaults = $this->resolveConnectedPatientEmergencyDefaults($personalInfo);
 
         /*
     |--------------------------------------------------------------------------
@@ -569,7 +567,7 @@ class WalkInController extends Controller
             $hasAutofillData,
 
             'last_service_type' =>
-            $latestAppointment?->service_type,
+            $latestAppointment?->service_type_name,
 
             'has_reusable_signature' =>
             $hasReusableSignature,
@@ -593,10 +591,12 @@ class WalkInController extends Controller
                     ?? '',
 
                 'phone' =>
-                $patient->phone ?? '',
+                $patient->information?->phone
+                    ?? '',
 
                 'address' =>
-                $patient->address ?? '',
+                $patient->information?->address
+                    ?? '',
             ],
         ]);
     }
@@ -646,201 +646,178 @@ class WalkInController extends Controller
         return false;
     }
 
-    private function resolveConnectedPatientEmergencyDefaults(
-        Patient $patient,
-        StudentApiService $studentApiService
-    ): array {
-        $classification = strtolower(trim((string) ($patient->classification ?? '')));
-        $isStudent =
-            ! empty($patient->student_no) ||
-            (! empty($patient->email) && ! empty($patient->course_code)) ||
-            $classification === 'student';
-
-        if (! $isStudent) {
+    private function resolveConnectedPatientEmergencyDefaults(array $personalInfo): array
+    {
+        if ($personalInfo === []) {
             return [];
         }
 
-        $studentNumber = trim((string) ($patient->student_no ?? ''));
-        $studentProfile = [];
+        return array_filter([
+            'emergency_person' =>
+            $this->cleanStringValue(
+                $personalInfo['emergencyContactName']
+                    ?? $personalInfo['emergency_contact_name']
+                    ?? data_get(
+                        $personalInfo,
+                        'emergencyContact.name'
+                    )
+                    ?? data_get(
+                        $personalInfo,
+                        'emergency_contact.name'
+                    )
+                    ?? data_get(
+                        $personalInfo,
+                        'emergency_contact.contact_name'
+                    )
+                    ?? data_get(
+                        $personalInfo,
+                        'emergencyContact.contactName'
+                    )
+                    ?? null
+            ),
 
-        try {
-            if (! empty($patient->email)) {
-                $studentProfileResponse = $studentApiService->getStudentByEmail((string) $patient->email);
-                $studentProfile = is_array($studentProfileResponse['data'] ?? null)
-                    ? $studentProfileResponse['data']
-                    : [];
-            }
-
-            $studentNumber = $studentNumber
-                ?: data_get($studentProfile, 'studentNumber')
-                ?: data_get($studentProfile, 'student_number');
-
-            if ($studentNumber === '') {
-                return [];
-            }
-
-            $personalInfoResponse = $studentApiService->getPersonalInfoByStudentNumber($studentNumber);
-            $personalInfo = is_array($personalInfoResponse['data'] ?? null)
-                ? $personalInfoResponse['data']
-                : [];
-
-            if ($personalInfo === []) {
-                return [];
-            }
-
-            return array_filter([
-                'emergency_person' => $this->cleanStringValue(
-                    $personalInfo['emergencyContactName']
-                        ?? $personalInfo['emergency_contact_name']
-                        ?? data_get($personalInfo, 'emergencyContact.name')
-                        ?? data_get($personalInfo, 'emergency_contact.name')
-                        ?? data_get($personalInfo, 'emergency_contact.contact_name')
-                        ?? data_get($personalInfo, 'emergencyContact.contactName')
+            'emergency_number' =>
+            $this->normalizePhilippineMobile(
+                $this->cleanStringValue(
+                    $personalInfo['emergencyContactNumber']
+                        ?? $personalInfo['emergency_contact_number']
+                        ?? data_get(
+                            $personalInfo,
+                            'emergencyContact.number'
+                        )
+                        ?? data_get(
+                            $personalInfo,
+                            'emergencyContact.contactNumber'
+                        )
+                        ?? data_get(
+                            $personalInfo,
+                            'emergency_contact.number'
+                        )
+                        ?? data_get(
+                            $personalInfo,
+                            'emergency_contact.contact_number'
+                        )
                         ?? null
-                ),
-                'emergency_number' => $this->normalizePhilippineMobile(
-                    $this->cleanStringValue(
-                        $personalInfo['emergencyContactNumber']
-                            ?? $personalInfo['emergency_contact_number']
-                            ?? data_get($personalInfo, 'emergencyContact.number')
-                            ?? data_get($personalInfo, 'emergencyContact.contactNumber')
-                            ?? data_get($personalInfo, 'emergency_contact.number')
-                            ?? data_get($personalInfo, 'emergency_contact.contact_number')
-                            ?? null
-                    )
-                ),
-                'emergency_relation' => $this->normalizeEmergencyRelation(
-                    $this->cleanStringValue(
-                        $personalInfo['emergencyContactRelationship']
-                            ?? $personalInfo['emergency_contact_relationship']
-                            ?? $personalInfo['emergencyContactRelation']
-                            ?? $personalInfo['emergency_contact_relation']
-                            ?? data_get($personalInfo, 'emergencyContact.relationship')
-                            ?? data_get($personalInfo, 'emergencyContact.relation')
-                            ?? data_get($personalInfo, 'emergency_contact.relationship')
-                            ?? data_get($personalInfo, 'emergency_contact.relation')
-                            ?? data_get($personalInfo, 'emergency_contact.relationship_name')
-                            ?? data_get($personalInfo, 'emergencyContact.relationshipName')
-                            ?? data_get($personalInfo, 'emergencyContactRelationship.name')
-                            ?? data_get($personalInfo, 'emergency_contact_relationship.name')
-                            ?? null
-                    )
-                ),
-            ], fn($value) => filled($value));
-        } catch (\Throwable $e) {
-            Log::warning('Walk-in OGOS emergency defaults fetch failed', [
-                'patient_id' => $patient->id,
-                'student_no' => $studentNumber,
-                'email' => $patient->email,
-                'message' => $e->getMessage(),
-            ]);
+                )
+            ),
 
-            return [];
-        }
+            'emergency_relation' =>
+            $this->normalizeEmergencyRelation(
+                $this->cleanStringValue(
+                    $personalInfo['emergencyContactRelationship']
+                        ?? $personalInfo['emergency_contact_relationship']
+                        ?? $personalInfo['emergencyContactRelation']
+                        ?? $personalInfo['emergency_contact_relation']
+                        ?? data_get(
+                            $personalInfo,
+                            'emergencyContact.relationship'
+                        )
+                        ?? data_get(
+                            $personalInfo,
+                            'emergencyContact.relation'
+                        )
+                        ?? data_get(
+                            $personalInfo,
+                            'emergency_contact.relationship'
+                        )
+                        ?? data_get(
+                            $personalInfo,
+                            'emergency_contact.relation'
+                        )
+                        ?? null
+                )
+            ),
+        ], fn($value) => filled($value));
     }
 
     private function resolveWalkInSourcePatient(Patient $patient): Patient
     {
-        $patient->loadMissing([
+        $candidateRelations = [
+            'information',
             'dentalHistory',
             'dentalHistoryDates',
             'dentalHistoryConcerns',
             'dentalHistoryAnswers',
             'medicalHistory.answers',
             'medicalHistory.diseaseAnswers',
-        ]);
+        ];
+
+        $patient->loadMissing($candidateRelations);
 
         $candidates = collect([$patient]);
 
+
         if ($patient->user_id) {
             $candidates = $candidates->merge(
-                Patient::with([
-                    'dentalHistory',
-                    'dentalHistoryDates',
-                    'dentalHistoryConcerns',
-                    'dentalHistoryAnswers',
-                    'medicalHistory.answers',
-                    'medicalHistory.diseaseAnswers',
-                ])
+                Patient::with($candidateRelations)
                     ->where('id', '!=', $patient->id)
                     ->where('user_id', $patient->user_id)
                     ->get()
             );
         }
 
-        $email = strtolower(trim((string) ($patient->email ?? '')));
+        $email = strtolower(
+            trim((string) ($patient->email ?? ''))
+        );
 
-        if ($email !== '' && Schema::hasColumn('patients', 'email')) {
+        if ($email !== '') {
             $candidates = $candidates->merge(
-                Patient::with([
-                    'dentalHistory',
-                    'dentalHistoryDates',
-                    'dentalHistoryConcerns',
-                    'dentalHistoryAnswers',
-                    'medicalHistory.answers',
-                    'medicalHistory.diseaseAnswers',
-                ])
+                Patient::with($candidateRelations)
                     ->where('id', '!=', $patient->id)
-                    ->whereRaw('LOWER(email) = ?', [$email])
+                    ->whereRaw(
+                        'LOWER(email) = ?',
+                        [$email]
+                    )
                     ->get()
             );
         }
 
-        $studentNumbers = collect([
-            trim((string) ($patient->student_no ?? '')),
-            Schema::hasColumn('patients', 'student_number')
-                ? trim((string) ($patient->student_number ?? ''))
-                : '',
-        ])->filter()->unique()->values();
+        $studentNumber = trim(
+            (string) (
+                $patient->studentInformation?->student_no
+                ?? $patient->student_no
+                ?? ''
+            )
+        );
 
-        foreach ($studentNumbers as $studentNumber) {
-            if (Schema::hasColumn('patients', 'student_no')) {
-                $candidates = $candidates->merge(
-                    Patient::with([
-                        'dentalHistory',
-                        'dentalHistoryDates',
-                        'dentalHistoryConcerns',
-                        'dentalHistoryAnswers',
-                        'medicalHistory.answers',
-                        'medicalHistory.diseaseAnswers',
-                    ])
-                        ->where('id', '!=', $patient->id)
-                        ->where('student_no', $studentNumber)
-                        ->get()
-                );
-            }
-
-            if (Schema::hasColumn('patients', 'student_number')) {
-                $candidates = $candidates->merge(
-                    Patient::with([
-                        'dentalHistory',
-                        'dentalHistoryDates',
-                        'dentalHistoryConcerns',
-                        'dentalHistoryAnswers',
-                        'medicalHistory.answers',
-                        'medicalHistory.diseaseAnswers',
-                    ])
-                        ->where('id', '!=', $patient->id)
-                        ->where('student_number', $studentNumber)
-                        ->get()
-                );
-            }
+        if ($studentNumber !== '') {
+            $candidates = $candidates->merge(
+                Patient::with($candidateRelations)
+                    ->where('id', '!=', $patient->id)
+                    ->whereHas(
+                        'studentInformation',
+                        function ($query) use ($studentNumber) {
+                            $query->where(
+                                'student_no',
+                                $studentNumber
+                            );
+                        }
+                    )
+                    ->get()
+            );
         }
 
-        $facultyCode = trim((string) ($patient->faculty_code ?? ''));
+        $facultyCode = trim(
+            (string) (
+                $patient->facultyInformation?->faculty_code
+                ?? $patient->faculty_code
+                ?? ''
+            )
+        );
 
-        if ($facultyCode !== '' && Schema::hasColumn('patients', 'faculty_code')) {
+        if ($facultyCode !== '') {
             $candidates = $candidates->merge(
-                Patient::with([
-                    'dentalHistory',
-                    'dentalHistoryDates',
-                    'dentalHistoryConcerns',
-                    'dentalHistoryAnswers',
-                    'medicalHistory.answers',
-                    'medicalHistory.diseaseAnswers',
-                ])
+                Patient::with($candidateRelations)
                     ->where('id', '!=', $patient->id)
-                    ->where('faculty_code', $facultyCode)
+                    ->whereHas(
+                        'facultyInformation',
+                        function ($query) use ($facultyCode) {
+                            $query->where(
+                                'faculty_code',
+                                $facultyCode
+                            );
+                        }
+                    )
                     ->get()
             );
         }
@@ -858,19 +835,42 @@ class WalkInController extends Controller
                     $score += 8;
                 }
 
-                if (Appointment::where('patient_id', $candidate->id)->exists()) {
+                if (
+                    Appointment::where(
+                        'patient_id',
+                        $candidate->id
+                    )->exists()
+                ) {
                     $score += 10;
                 }
 
-                if (filled($candidate->medicalHistory?->emergency_person)) {
+                if (
+                    filled(
+                        $candidate
+                            ->medicalHistory
+                            ?->emergency_person
+                    )
+                ) {
                     $score += 4;
                 }
 
-                if (filled($candidate->medicalHistory?->emergency_number)) {
+                if (
+                    filled(
+                        $candidate
+                            ->medicalHistory
+                            ?->emergency_number
+                    )
+                ) {
                     $score += 4;
                 }
 
-                if (filled($candidate->medicalHistory?->emergency_relation)) {
+                if (
+                    filled(
+                        $candidate
+                            ->medicalHistory
+                            ?->emergency_relation
+                    )
+                ) {
                     $score += 4;
                 }
 
@@ -879,8 +879,15 @@ class WalkInController extends Controller
                 }
 
                 if (
-                    filled($candidate->medicalHistory?->patient_signature) &&
-                    $candidate->medicalHistory?->signature_review_status !== 'invalid_reupload_required'
+                    filled(
+                        $candidate
+                            ->medicalHistory
+                            ?->patient_signature
+                    ) &&
+                    $candidate
+                    ->medicalHistory
+                    ?->signature_review_status !==
+                    'invalid_reupload_required'
                 ) {
                     $score += 6;
                 }
@@ -889,116 +896,207 @@ class WalkInController extends Controller
             })
             ->first();
 
-        return $bestMatch instanceof Patient ? $bestMatch : $patient;
+        return $bestMatch instanceof Patient
+            ? $bestMatch
+            : $patient;
     }
 
     private function backfillConnectedPatientMedicalHistory(
         Patient $patient,
         StudentApiService $studentApiService
-    ): void {
+    ): array {
+        $patient->loadMissing([
+            'information',
+            'medicalHistory',
+        ]);
+
+        $information =
+            $patient->information;
+
         $classification = strtolower(
-            trim((string) ($patient->classification ?? ''))
+            trim(
+                (string) (
+                    $patient->classification
+                    ?? ''
+                )
+            )
         );
 
         $isStudent =
-            ! empty($patient->student_no) ||
-            (! empty($patient->email) && ! empty($patient->course_code)) ||
+            filled(
+                $patient->student_no
+            ) ||
+            (
+                filled($patient->email) &&
+                filled(
+                    $patient->course_code
+                )
+            ) ||
             $classification === 'student';
 
         if (! $isStudent) {
-            return;
+            return [];
         }
 
-        $medicalHistory = $patient->medicalHistory;
+        $medicalHistory =
+            $patient->medicalHistory;
 
         $needsBackfill =
-            blank($patient->birthdate) ||
-            blank($patient->gender) ||
-            blank($patient->address) ||
-            blank($medicalHistory?->emergency_person) ||
-            blank($medicalHistory?->emergency_number) ||
-            blank($medicalHistory?->emergency_relation);
+            blank($information?->birthdate) ||
+            blank($information?->gender) ||
+            blank($information?->address) ||
+            blank(
+                $medicalHistory
+                    ?->emergency_person
+            ) ||
+            blank(
+                $medicalHistory
+                    ?->emergency_number
+            ) ||
+            blank(
+                $medicalHistory
+                    ?->emergency_relation
+            );
 
         if (! $needsBackfill) {
-            return;
+            return [];
         }
 
-        $studentNumber = trim((string) ($patient->student_no ?? ''));
+        $studentNumber = trim(
+            (string) (
+                $patient->student_no
+                ?? ''
+            )
+        );
+
         $studentProfile = [];
         $personalInfo = [];
         $addresses = [];
 
         try {
-            if (! empty($patient->email)) {
+            if (filled($patient->email) && ($studentNumber === '' || blank($information?->gender))) {
                 $studentProfileResponse =
-                    $studentApiService->getStudentByEmail(
+                    $studentApiService
+                    ->getStudentByEmail(
                         (string) $patient->email
                     );
 
-                $studentProfile = is_array($studentProfileResponse['data'] ?? null)
+                $studentProfile =
+                    is_array(
+                        $studentProfileResponse['data'] ?? null
+                    )
                     ? $studentProfileResponse['data']
                     : [];
             }
 
-            $studentNumber = $studentNumber
-                ?: data_get($studentProfile, 'studentNumber')
-                ?: data_get($studentProfile, 'student_number');
+            $studentNumber =
+                $studentNumber
+                ?: data_get(
+                    $studentProfile,
+                    'studentNumber'
+                )
+                ?: data_get(
+                    $studentProfile,
+                    'student_number'
+                )
+                ?: '';
 
             if (
                 $studentNumber !== '' &&
-                blank($patient->student_no) &&
-                Schema::hasColumn('patients', 'student_no')
+                blank(
+                    $patient->student_no
+                )
             ) {
-                $patient->student_no = $studentNumber;
-            }
-
-            if (
-                $studentNumber !== '' &&
-                blank($patient->student_number) &&
-                Schema::hasColumn('patients', 'student_number')
-            ) {
-                $patient->student_number = $studentNumber;
+                $patient->student_no =
+                    $studentNumber;
             }
 
             if ($studentNumber !== '') {
                 $personalInfoResponse =
-                    $studentApiService->getPersonalInfoByStudentNumber(
+                    $studentApiService
+                    ->getPersonalInfoByStudentNumber(
                         $studentNumber
                     );
 
-                $personalInfo = is_array($personalInfoResponse['data'] ?? null)
+                $personalInfo =
+                    is_array(
+                        $personalInfoResponse['data'] ?? null
+                    )
                     ? $personalInfoResponse['data']
                     : [];
 
-                $addressResponse =
-                    $studentApiService->getAddressesByStudentNumber(
-                        $studentNumber
-                    );
+                if (blank($information?->address)) {
+                    $addressResponse =
+                        $studentApiService
+                        ->getAddressesByStudentNumber(
+                            $studentNumber
+                        );
 
-                $addresses = is_array($addressResponse['data'] ?? null)
-                    ? $addressResponse['data']
-                    : [];
+                    $addresses =
+                        is_array(
+                            $addressResponse['data'] ?? null
+                        )
+                        ? $addressResponse['data']
+                        : [];
+                }
             }
 
-            $birthdate = $this->normalizeDate(
-                $personalInfo['dateOfBirth']
-                    ?? $personalInfo['birthdate']
-                    ?? null
-            );
+            $birthdate =
+                $this->normalizeDate(
+                    $personalInfo['dateOfBirth']
+                        ?? $personalInfo['birthdate']
+                        ?? null
+                );
 
-            $gender = $this->normalizeGenderLabel(
-                $personalInfo['gender']['name']
-                    ?? $personalInfo['gender']
-                    ?? data_get($studentProfile, 'gender.name')
-                    ?? data_get($studentProfile, 'gender')
-                    ?? null
-            );
+            $gender =
+                $this->normalizeGenderLabel(
+                    $personalInfo['gender']['name']
+                        ?? $personalInfo['gender']
+                        ?? data_get(
+                            $studentProfile,
+                            'gender.name'
+                        )
+                        ?? data_get(
+                            $studentProfile,
+                            'gender'
+                        )
+                        ?? null
+                );
 
-            $address = $this->formatStudentAddress($addresses);
+            $address =
+                $this->formatStudentAddress(
+                    $addresses
+                );
 
-            $patient->birthdate = $patient->birthdate ?: $birthdate;
-            $patient->gender = $patient->gender ?: $gender;
-            $patient->address = $patient->address ?: $address;
+            if (
+                blank(
+                    $information?->birthdate
+                ) &&
+                filled($birthdate)
+            ) {
+                $patient->birthdate =
+                    $birthdate;
+            }
+
+            if (
+                blank(
+                    $information?->gender
+                ) &&
+                filled($gender)
+            ) {
+                $patient->gender =
+                    $gender;
+            }
+
+            if (
+                blank(
+                    $information?->address
+                ) &&
+                filled($address)
+            ) {
+                $patient->address =
+                    $address;
+            }
 
             if ($patient->isDirty()) {
                 $patient->save();
@@ -1011,15 +1109,26 @@ class WalkInController extends Controller
                 );
             }
         } catch (\Throwable $e) {
-            Log::warning('Walk-in OGOS medical history backfill failed', [
-                'patient_id' => $patient->id,
-                'student_no' => $studentNumber,
-                'email' => $patient->email,
-                'message' => $e->getMessage(),
-            ]);
-        }
-    }
+            Log::warning(
+                'Walk-in OGOS medical history backfill failed',
+                [
+                    'patient_id' =>
+                    $patient->id,
 
+                    'student_no' =>
+                    $studentNumber,
+
+                    'email' =>
+                    $patient->email,
+
+                    'message' =>
+                    $e->getMessage(),
+                ]
+            );
+        }
+        // Reuse even a partial result; do not repeat a failed external request.
+        return $personalInfo;
+    }
     private function syncStudentMedicalHistory(
         Patient $patient,
         array $personalInfo
@@ -1212,88 +1321,210 @@ class WalkInController extends Controller
         };
     }
 
-    private function searchOgosPatients(string $search, int $limit, StudentApiService $studentApiService): array
-    {
+    private function makeExternalPatientResult(
+        string $source,
+        array $data
+    ): array {
+        $identity = strtolower(trim((string) (
+            $data['email']
+            ?? $data['student_number']
+            ?? $data['faculty_code']
+            ?? $data['external_id']
+            ?? $data['name']
+            ?? Str::uuid()->toString()
+        )));
+
+        $selectionToken = Crypt::encryptString(
+            json_encode(
+                [
+                    'source' => $source,
+                    'data' => $data,
+                ],
+                JSON_THROW_ON_ERROR
+            )
+        );
+
+        return [
+            'id' => 'external:' . $source . ':' . sha1($identity),
+
+            'name' => $data['name'] ?? 'Patient',
+            'gender' => $data['gender'] ?? null,
+            'birthdate' => $data['birthdate'] ?? null,
+            'email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
+
+            'type' => $data['type'] ?? ucfirst($source),
+
+            'student_number' =>
+            $data['student_number'] ?? null,
+
+            'program' =>
+            $data['program'] ?? null,
+
+            'department' =>
+            $data['department'] ?? null,
+
+            'faculty_code' =>
+            $data['faculty_code'] ?? null,
+
+            'faculty_type' =>
+            $data['faculty_type'] ?? null,
+
+            'year_level' =>
+            $data['year_level'] ?? null,
+
+            'section' =>
+            $data['section'] ?? null,
+
+            'is_pwd' =>
+            $data['is_pwd'] ?? false,
+
+            'is_local' => false,
+            'source' => $source,
+            'selection_token' => $selectionToken,
+
+            'record_url' => null,
+            'avatar_url' => null,
+        ];
+    }
+
+    private function searchOgosPatients(
+        string $search,
+        int $limit,
+        StudentApiService $studentApiService
+    ): array {
         try {
-            $students = $studentApiService->searchStudents(
-                search: $search !== '' ? $search : null,
-                limit: $limit
-            );
+            $students =
+                $studentApiService->searchStudents(
+                    search: $search !== ''
+                        ? $search
+                        : null,
+
+                    limit: $limit
+                );
 
             return collect($students)
-                ->map(fn($student) => $studentApiService->normalizeStudent((array) $student))
+                ->map(
+                    fn($student) =>
+                    $studentApiService->normalizeStudent(
+                        (array) $student
+                    )
+                )
                 ->filter()
                 ->map(function (array $student) {
-                    $user = $this->syncWalkInUser($student);
-                    $patient = $this->syncWalkInPatient($user, $student, 'Student');
-                    $displayName = $patient->name ?: $student['name'];
+                    $name = trim(
+                        (string) (
+                            $student['name']
+                            ?? 'Student'
+                        )
+                    );
 
-                    return [
-                        'id' =>
-                        $patient->id,
+                    $email = strtolower(
+                        trim(
+                            (string) (
+                                $student['email']
+                                ?? ''
+                            )
+                        )
+                    );
 
-                        'name' =>
-                        $displayName,
+                    $studentNumber = trim(
+                        (string) (
+                            $student['student_number']
+                            ?? ''
+                        )
+                    );
 
-                        'gender' =>
-                        $student['gender']
-                            ?? $patient->gender,
+                    if ($email === '') {
+                        $identity =
+                            $studentNumber !== ''
+                            ? $studentNumber
+                            : $name;
 
-                        'birthdate' =>
-                        $student['birthdate']
-                            ?? $patient->birthdate,
+                        $email =
+                            'student_' .
+                            sha1(strtolower($identity)) .
+                            '@walkin.local';
+                    }
 
-                        'email' =>
-                        $student['email'],
+                    $data = [
+                        'name' => $name,
+
+                        'first_name' =>
+                        $student['first_name']
+                            ?? null,
+
+                        'middle_name' =>
+                        $student['middle_name']
+                            ?? null,
+
+                        'last_name' =>
+                        $student['last_name']
+                            ?? null,
+
+                        'suffix_name' =>
+                        $student['suffix_name']
+                            ?? null,
+
+                        'email' => $email,
 
                         'phone' =>
                         $student['phone']
-                            ?? $patient->phone,
+                            ?? null,
 
-                        'type' =>
-                        'Student',
+                        'gender' =>
+                        $student['gender']
+                            ?? null,
+
+                        'birthdate' =>
+                        $student['birthdate']
+                            ?? null,
 
                         'student_number' =>
-                        $student['student_number']
-                            ?? null,
+                        $studentNumber !== ''
+                            ? $studentNumber
+                            : null,
 
                         'program' =>
                         $student['program']
-                            ?? $patient->course_name,
+                            ?? null,
 
                         'year_level' =>
                         $student['year_level']
-                            ?? $patient->year_level,
+                            ?? null,
 
                         'section' =>
                         $student['section']
-                            ?? $patient->section,
+                            ?? null,
 
                         'is_pwd' =>
                         $student['is_pwd']
-                            ?? $patient->is_pwd,
+                            ?? false,
 
-                        'record_url' =>
-                        route(
-                            'dentist.odontogram.existing-appointment.create',
-                            [
-                                'patient' =>
-                                $patient->id,
-                            ]
-                        ),
+                        'faculty_code' => null,
 
-                        'avatar_url' =>
-                        $this->getPatientAvatarUrl(
-                            $patient,
-                            $displayName
-                        ),
+                        'classification' =>
+                        'student',
+
+                        'type' =>
+                        'Student',
                     ];
+
+                    return $this
+                        ->makeExternalPatientResult(
+                            'student',
+                            $data
+                        );
                 })
                 ->all();
         } catch (\Throwable $e) {
-            Log::warning('Walk-in OGOS search failed', [
-                'message' => $e->getMessage(),
-            ]);
+            Log::warning(
+                'Walk-in OGOS search failed',
+                [
+                    'message' =>
+                    $e->getMessage(),
+                ]
+            );
 
             return [];
         }
@@ -1393,10 +1624,6 @@ class WalkInController extends Controller
         $userColumns = [
             'id',
             'name',
-            'first_name',
-            'middle_name',
-            'last_name',
-            'suffix_name',
             'email',
         ];
 
@@ -1409,16 +1636,7 @@ class WalkInController extends Controller
             'user_id',
             'name',
             'email',
-            'phone',
-            'gender',
-            'birthdate',
-            'student_no',
-            'course_name',
-            'faculty_code',
             'classification',
-            'year_level',
-            'section',
-            'is_pwd',
         ];
 
         if (Schema::hasColumn('patients', 'profile_image')) {
@@ -1429,6 +1647,48 @@ class WalkInController extends Controller
             ->with([
                 'user' => function ($query) use ($userColumns) {
                     $query->select($userColumns);
+                },
+
+                'user.profile' => function ($query) {
+                    $query->select([
+                        'id',
+                        'user_id',
+                        'first_name',
+                        'middle_name',
+                        'last_name',
+                        'suffix_name',
+                    ]);
+                },
+
+                'information' => function ($query) {
+                    $query->select([
+                        'id',
+                        'patient_id',
+                        'phone',
+                        'gender',
+                        'birthdate',
+                        'is_pwd',
+                    ]);
+                },
+
+                'studentInformation' => function ($query) {
+                    $query->select([
+                        'id',
+                        'patient_id',
+                        'student_no',
+                        'course_code',
+                        'course_name',
+                        'year_level',
+                        'section',
+                    ]);
+                },
+
+                'facultyInformation' => function ($query) {
+                    $query->select([
+                        'id',
+                        'patient_id',
+                        'faculty_code',
+                    ]);
                 },
             ])
             ->select($patientColumns)
@@ -1443,11 +1703,50 @@ class WalkInController extends Controller
 
         if ($search !== '') {
             $query->where(function ($builder) use ($search) {
-                $builder->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('student_no', 'like', "%{$search}%")
-                    ->orWhere('course_name', 'like', "%{$search}%")
-                    ->orWhere('faculty_code', 'like', "%{$search}%");
+
+                $builder
+                    ->where(
+                        'name',
+                        'like',
+                        "%{$search}%"
+                    )
+                    ->orWhere(
+                        'email',
+                        'like',
+                        "%{$search}%"
+                    )
+
+                    ->orWhereHas(
+                        'studentInformation',
+                        function ($studentQuery) use ($search) {
+                            $studentQuery
+                                ->where(
+                                    'student_no',
+                                    'like',
+                                    "%{$search}%"
+                                )
+                                ->orWhere(
+                                    'course_name',
+                                    'like',
+                                    "%{$search}%"
+                                )
+                                ->orWhere(
+                                    'course_code',
+                                    'like',
+                                    "%{$search}%"
+                                );
+                        }
+                    )
+                    ->orWhereHas(
+                        'facultyInformation',
+                        function ($facultyQuery) use ($search) {
+                            $facultyQuery->where(
+                                'faculty_code',
+                                'like',
+                                "%{$search}%"
+                            );
+                        }
+                    );
             });
         }
 
@@ -1456,23 +1755,36 @@ class WalkInController extends Controller
             ->get()
             ->map(function (Patient $patient) {
                 $user = $patient->user;
+                $userProfile = $user?->profile;
+                $information = $patient->information;
+                $studentInformation = $patient->studentInformation;
+                $facultyInformation = $patient->facultyInformation;
+
                 $suffixName = $this->normalizeNameSuffix(
-                    $user?->suffix_name
+                    $userProfile?->suffix_name
                 );
 
-                $patientName = trim(collect([
-                    $user?->first_name,
-                    $user?->middle_name,
-                    $user?->last_name,
-                    $suffixName,
-                ])->filter(fn($value) => filled($value))->implode(' '));
+                $patientName = trim(
+                    collect([
+                        $userProfile?->first_name,
+                        $userProfile?->middle_name,
+                        $userProfile?->last_name,
+                        $suffixName,
+                    ])
+                        ->filter(fn($value) => filled($value))
+                        ->implode(' ')
+                );
 
                 if ($patientName === '') {
-                    $patientName = trim((string) ($user?->name ?? ''));
+                    $patientName = trim(
+                        (string) ($user?->name ?? '')
+                    );
                 }
 
                 if ($patientName === '') {
-                    $patientName = trim((string) ($patient->name ?? ''));
+                    $patientName = trim(
+                        (string) ($patient->name ?? '')
+                    );
                 }
 
                 $patientType = match ($patient->classification) {
@@ -1489,43 +1801,54 @@ class WalkInController extends Controller
                     'id' =>
                     $patient->id,
 
+                    'is_local' =>
+                    true,
+
+                    'source' =>
+                    'local',
+
+                    'selection_token' =>
+                    null,
+
                     'name' =>
                     $patientName !== ''
                         ? $patientName
                         : 'Patient',
 
                     'gender' =>
-                    $patient->gender,
+                    $information?->gender,
 
                     'birthdate' =>
-                    $patient->birthdate,
+                    $information?->birthdate,
 
                     'email' =>
                     $patient->email
                         ?? $user?->email,
 
                     'phone' =>
-                    $patient->phone,
+                    $information?->phone,
 
-                    'type' => $patientType,
+                    'type' =>
+                    $patientType,
+
                     'student_number' =>
-                    $patient->student_no,
+                    $studentInformation?->student_no,
 
                     'program' =>
-                    $patient->course_name
-                        ?? $patient->faculty_code,
+                    $studentInformation?->course_name
+                        ?? $studentInformation?->course_code,
 
                     'faculty_code' =>
-                    $patient->faculty_code,
+                    $facultyInformation?->faculty_code,
 
                     'year_level' =>
-                    $patient->year_level,
+                    $studentInformation?->year_level,
 
                     'section' =>
-                    $patient->section,
+                    $studentInformation?->section,
 
                     'is_pwd' =>
-                    $patient->is_pwd,
+                    $information?->is_pwd,
 
                     'avatar_url' =>
                     $this->getPatientAvatarUrl(
@@ -1537,8 +1860,7 @@ class WalkInController extends Controller
                     route(
                         'dentist.odontogram.existing-appointment.create',
                         [
-                            'patient' =>
-                            $patient->id,
+                            'patient' => $patient->id,
                         ]
                     ),
                 ];
@@ -1546,96 +1868,200 @@ class WalkInController extends Controller
             ->all();
     }
 
-    private function searchFacultyPatients(string $search, int $limit, FacultyApiService $facultyApiService): array
-    {
-        $faculties = collect($facultyApiService->getFaculties())
+    private function searchFacultyPatients(
+        string $search,
+        int $limit,
+        FacultyApiService $facultyApiService
+    ): array {
+        $faculties = collect(
+            $facultyApiService->getFaculties()
+        )
             ->filter(function ($faculty) use ($search) {
                 if ($search === '') {
                     return true;
                 }
 
-                $haystack = strtolower(implode(' ', array_filter([
-                    (string) ($faculty['name'] ?? ''),
-                    (string) ($faculty['first_name'] ?? ''),
-                    (string) ($faculty['middle_name'] ?? ''),
-                    (string) ($faculty['last_name'] ?? ''),
-                    (string) ($faculty['suffix_name'] ?? ''),
-                    (string) ($faculty['email'] ?? ''),
-                    (string) ($faculty['faculty_code'] ?? ''),
-                    (string) ($faculty['department'] ?? ''),
-                    (string) data_get($faculty, 'profile.department'),
-                ])));
+                $haystack = strtolower(
+                    implode(
+                        ' ',
+                        array_filter([
+                            (string) (
+                                $faculty['name']
+                                ?? ''
+                            ),
 
-                return str_contains($haystack, strtolower($search));
+                            (string) (
+                                $faculty['first_name']
+                                ?? ''
+                            ),
+
+                            (string) (
+                                $faculty['middle_name']
+                                ?? ''
+                            ),
+
+                            (string) (
+                                $faculty['last_name']
+                                ?? ''
+                            ),
+
+                            (string) (
+                                $faculty['suffix_name']
+                                ?? ''
+                            ),
+
+                            (string) (
+                                $faculty['email']
+                                ?? ''
+                            ),
+
+                            (string) (
+                                $faculty['faculty_code']
+                                ?? ''
+                            ),
+
+                            (string) (
+                                $faculty['department']
+                                ?? ''
+                            ),
+                        ])
+                    )
+                );
+
+                return str_contains(
+                    $haystack,
+                    strtolower($search)
+                );
             })
             ->take($limit)
             ->map(function (array $faculty) {
-                $firstName = trim((string) ($faculty['first_name'] ?? ''));
-                $middleName = trim((string) ($faculty['middle_name'] ?? ''));
-                $lastName = trim((string) ($faculty['last_name'] ?? ''));
-                $suffixName = trim((string) ($faculty['suffix_name'] ?? ''));
-                $name = trim((string) ($faculty['name'] ?? ''));
+                $firstName = trim(
+                    (string) (
+                        $faculty['first_name']
+                        ?? ''
+                    )
+                );
+
+                $middleName = trim(
+                    (string) (
+                        $faculty['middle_name']
+                        ?? ''
+                    )
+                );
+
+                $lastName = trim(
+                    (string) (
+                        $faculty['last_name']
+                        ?? ''
+                    )
+                );
+
+                $suffixName = trim(
+                    (string) (
+                        $faculty['suffix_name']
+                        ?? ''
+                    )
+                );
+
+                $name = trim(
+                    (string) (
+                        $faculty['name']
+                        ?? ''
+                    )
+                );
 
                 if ($name === '') {
-                    $name = trim(collect([$firstName, $middleName, $lastName, $suffixName])->filter()->implode(' '));
+                    $name = trim(
+                        collect([
+                            $firstName,
+                            $middleName,
+                            $lastName,
+                            $suffixName,
+                        ])
+                            ->filter()
+                            ->implode(' ')
+                    );
                 }
 
                 if ($name === '') {
                     $name = 'Faculty Member';
                 }
 
-                $email = strtolower((string) ($faculty['email'] ?? ('faculty_' . Str::uuid() . '@walkin.local')));
+                $facultyCode = trim(
+                    (string) (
+                        $faculty['faculty_code']
+                        ?? ''
+                    )
+                );
 
-                $user = $this->syncWalkInUser([
-                    'name' => $name,
-                    'email' => $email,
-                ]);
+                $email = strtolower(
+                    trim(
+                        (string) (
+                            $faculty['email']
+                            ?? ''
+                        )
+                    )
+                );
 
-                $patient = $this->syncWalkInPatient($user, [
+                if ($email === '') {
+                    $identity =
+                        $facultyCode !== ''
+                        ? $facultyCode
+                        : (
+                            $faculty['faculty_id']
+                            ?? $name
+                        );
+
+                    $email =
+                        'faculty_' .
+                        sha1(
+                            strtolower(
+                                (string) $identity
+                            )
+                        ) .
+                        '@walkin.local';
+                }
+
+                $department =
+                    $faculty['department']
+                    ?? data_get(
+                        $faculty,
+                        'profile.department'
+                    );
+
+                $data = [
                     'name' => $name,
+
+                    'first_name' =>
+                    $firstName !== ''
+                        ? $firstName
+                        : null,
+
+                    'middle_name' =>
+                    $middleName !== ''
+                        ? $middleName
+                        : null,
+
+                    'last_name' =>
+                    $lastName !== ''
+                        ? $lastName
+                        : null,
+
+                    'suffix_name' =>
+                    $suffixName !== ''
+                        ? $suffixName
+                        : null,
+
                     'email' => $email,
 
                     'phone' =>
-                    $faculty['contact_number']
-                        ?? null,
+                    $faculty['contact_number'] ?? null,
 
                     'gender' =>
-                    data_get($faculty, 'profile.gender'),
-
-                    'birthdate' =>
-                    $faculty['birthdate']
-                        ?? $faculty['birthday']
-                        ?? data_get($faculty, 'profile.birthdate'),
-
-                    'student_number' =>
-                    null,
-
-                    'program' =>
-                    $faculty['department']
-                        ?? data_get($faculty, 'profile.department'),
-
-                    'faculty_code' =>
-                    $faculty['faculty_code']
-                        ?? null,
-
-                    'faculty_type' =>
-                    $faculty['faculty_type']
-                        ?? null,
-                ], 'Faculty');
-
-                return [
-                    'id' =>
-                    $patient->id,
-
-                    'name' =>
-                    $patient->name,
-
-                    'gender' =>
-                    $patient->gender
-                        ?? data_get(
-                            $faculty,
-                            'profile.gender'
-                        ),
+                    data_get(
+                        $faculty,
+                        'profile.gender'
+                    ),
 
                     'birthdate' =>
                     $faculty['birthdate']
@@ -1645,153 +2071,466 @@ class WalkInController extends Controller
                             'profile.birthdate'
                         ),
 
-                    'email' =>
-                    $patient->email,
+                    'student_number' => null,
 
-                    'phone' =>
-                    $faculty['contact_number']
-                        ?? $patient->phone,
+                    'program' =>
+                    $department,
+
+                    'department' =>
+                    $department,
+
+                    'faculty_code' =>
+                    $facultyCode !== ''
+                        ? $facultyCode
+                        : null,
+
+                    'faculty_type' =>
+                    $faculty['faculty_type'] ?? null,
+
+                    'classification' =>
+                    'faculty',
 
                     'type' =>
                     'Faculty',
-
-                    'student_number' =>
-                    null,
-
-                    'program' =>
-                    $faculty['department']
-                        ?? data_get(
-                            $faculty,
-                            'profile.department'
-                        ),
-
-                    'department' =>
-                    $faculty['department']
-                        ?? data_get(
-                            $faculty,
-                            'profile.department'
-                        ),
-
-                    'faculty_code' =>
-                    $faculty['faculty_code']
-                        ?? null,
-
-                    'faculty_type' =>
-                    $faculty['faculty_type']
-                        ?? null,
-
-                    'record_url' =>
-                    route(
-                        'dentist.odontogram.existing-appointment.create',
-                        [
-                            'patient' =>
-                            $patient->id,
-                        ]
-                    ),
-
-                    'avatar_url' =>
-                    $this->getPatientAvatarUrl(
-                        $patient,
-                        $patient->name
-                    ),
                 ];
+
+                return $this
+                    ->makeExternalPatientResult(
+                        'faculty',
+                        $data
+                    );
             });
 
         return $faculties->all();
     }
 
-    private function searchExternalAdminPatients(string $search, int $limit): array
-    {
-        $baseUrl = rtrim((string) env('OCMS_EXTERNAL_API_URL'), '/');
-        $apiKey = (string) env('OCMS_EXTERNAL_API_KEY');
+    private function searchExternalAdminPatients(
+        string $search,
+        int $limit
+    ): array {
+        $baseUrl = rtrim(
+            (string) env(
+                'OCMS_EXTERNAL_API_URL'
+            ),
+            '/'
+        );
 
-        if ($baseUrl === '' || $apiKey === '') {
+        $apiKey = (string) env(
+            'OCMS_EXTERNAL_API_KEY'
+        );
+
+        if (
+            $baseUrl === '' ||
+            $apiKey === ''
+        ) {
             return [];
         }
 
-        $response = Http::timeout(15)
-            ->acceptJson()
-            ->withHeaders([
-                'X-External-Api-Key' => $apiKey,
-            ])
-            ->get($baseUrl . '/external/admins', array_filter([
-                'search' => $search !== '' ? $search : null,
-            ]));
+        try {
+            $response = Http::timeout(15)
+                ->acceptJson()
+                ->withHeaders([
+                    'X-External-Api-Key' =>
+                    $apiKey,
+                ])
+                ->get(
+                    $baseUrl .
+                        '/external/admins',
 
-        if ($response->failed()) {
-            Log::error('OCMS external admin search failed during walk-in', [
-                'status' => $response->status(),
-                'body' => $response->body(),
+                    array_filter([
+                        'search' =>
+                        $search !== ''
+                            ? $search
+                            : null,
+                    ])
+                );
+
+            if ($response->failed()) {
+                Log::error(
+                    'OCMS external admin search failed during walk-in',
+                    [
+                        'status' =>
+                        $response->status(),
+
+                        'body' =>
+                        $response->body(),
+                    ]
+                );
+
+                return [];
+            }
+
+            return collect(
+                is_array(
+                    $response->json('data')
+                )
+                    ? $response->json('data')
+                    : []
+            )
+                ->take($limit)
+                ->map(function (array $admin) {
+                    $name = trim(
+                        (string) (
+                            ($admin['name'] ?? '')
+                            ?: trim(
+                                ((string) (
+                                    $admin['first_name']
+                                    ?? ''
+                                )) .
+                                    ' ' .
+                                    ((string) (
+                                        $admin['last_name']
+                                        ?? ''
+                                    ))
+                            )
+                        )
+                    );
+
+                    if ($name === '') {
+                        $name =
+                            'Administrative Patient';
+                    }
+
+                    $externalId =
+                        $admin['external_admin_id']
+                        ?? $admin['id']
+                        ?? null;
+
+                    $email = strtolower(
+                        trim(
+                            (string) (
+                                $admin['email']
+                                ?? ''
+                            )
+                        )
+                    );
+
+                    if ($email === '') {
+                        $identity =
+                            $externalId
+                            ?? $name;
+
+                        $email =
+                            'admin_' .
+                            sha1(
+                                strtolower(
+                                    (string) $identity
+                                )
+                            ) .
+                            '@walkin.local';
+                    }
+
+                    $office = trim(
+                        (string) (
+                            $admin['office']
+                            ?? ''
+                        )
+                    );
+
+                    $data = [
+                        'name' => $name,
+
+                        'first_name' =>
+                        $admin['first_name'] ?? null,
+
+                        'middle_name' =>
+                        $admin['middle_name'] ?? null,
+
+                        'last_name' =>
+                        $admin['last_name'] ?? null,
+
+                        'suffix_name' =>
+                        $admin['suffix_name'] ?? null,
+
+                        'email' => $email,
+
+                        'phone' =>
+                        $admin['emergency_contact_no'] ?? null,
+
+                        'gender' =>
+                        $admin['gender'] ?? null,
+
+                        'birthdate' =>
+                        $admin['birthday']
+                            ?? $admin['birthdate']
+                            ?? null,
+
+                        'student_number' =>
+                        null,
+
+                        'faculty_code' =>
+                        null,
+
+                        'program' =>
+                        $office !== ''
+                            ? $office
+                            : null,
+
+                        'department' =>
+                        $office !== ''
+                            ? $office
+                            : null,
+
+                        'external_id' =>
+                        $externalId,
+
+                        'classification' =>
+                        'administrative',
+
+                        'type' =>
+                        'Administrative Personnel',
+                    ];
+
+                    return $this
+                        ->makeExternalPatientResult(
+                            'administrative',
+                            $data
+                        );
+                })
+                ->all();
+        } catch (\Throwable $e) {
+            Log::warning(
+                'OCMS external admin search unavailable during walk-in',
+                [
+                    'message' =>
+                    $e->getMessage(),
+
+                    'base_url' =>
+                    $baseUrl,
+                ]
+            );
+
+            return [];
+        }
+    }
+
+    public function resolveExternalPatient(Request $request)
+    {
+        $validated = $request->validate([
+            'selection_token' => [
+                'required',
+                'string',
+            ],
+        ]);
+
+        try {
+            $decrypted = Crypt::decryptString(
+                $validated['selection_token']
+            );
+
+            $payload = json_decode(
+                $decrypted,
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+        } catch (\Throwable $e) {
+            Log::warning(
+                'Invalid walk-in external patient selection token',
+                [
+                    'message' => $e->getMessage(),
+                ]
+            );
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                'The selected external patient could not be verified. Please search for the patient again.',
+            ], 422);
+        }
+
+        if (
+            ! is_array($payload) ||
+            ! isset($payload['source']) ||
+            ! isset($payload['data']) ||
+            ! is_array($payload['data'])
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' =>
+                'The selected external patient information is invalid.',
+            ], 422);
+        }
+
+        $source = strtolower(
+            trim(
+                (string) $payload['source']
+            )
+        );
+
+        if (
+            ! in_array(
+                $source,
+                [
+                    'student',
+                    'faculty',
+                    'administrative',
+                ],
+                true
+            )
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' =>
+                'Unsupported external patient source.',
+            ], 422);
+        }
+
+        $data = $payload['data'];
+
+        $type = match ($source) {
+            'student' => 'Student',
+            'faculty' => 'Faculty',
+            'administrative' => 'Administrative',
+        };
+
+        $data['classification'] = match ($source) {
+            'student' => 'student',
+            'faculty' => 'faculty',
+            'administrative' => 'administrative',
+        };
+
+        try {
+            $patient = DB::transaction(
+                function () use (
+                    $data,
+                    $type
+                ) {
+
+
+                    $user =
+                        $this->syncWalkInUser(
+                            $data
+                        );
+
+                    return $this->syncWalkInPatient(
+                        $user,
+                        $data,
+                        $type
+                    );
+                }
+            );
+
+            $patient->loadMissing([
+                'user.profile',
+                'information',
+                'studentInformation',
+                'facultyInformation',
             ]);
 
-            return [];
-        }
+            $information = $patient->information;
+            $studentInformation = $patient->studentInformation;
+            $facultyInformation = $patient->facultyInformation;
 
-        $records = collect(is_array($response->json('data')) ? $response->json('data') : [])
-            ->take($limit)
-            ->map(function (array $admin) {
-                $name = trim((string) (($admin['name'] ?? '') ?: trim(((string) ($admin['first_name'] ?? '')) . ' ' . ((string) ($admin['last_name'] ?? '')))));
-                $email = strtolower((string) (($admin['email'] ?? '') ?: ('admin_' . Str::uuid() . '@walkin.local')));
-                $office = (string) ($admin['office'] ?? '');
+            return response()->json([
+                'success' => true,
 
-                $user = $this->syncWalkInUser([
-                    'name' => $name !== '' ? $name : 'Administrative Patient',
-                    'email' => $email,
-                ]);
-
-                $patient = $this->syncWalkInPatient($user, [
-                    'name' => $name !== '' ? $name : 'Administrative Patient',
-                    'email' => $email,
-                    'phone' => $admin['emergency_contact_no'] ?? null,
-                    'gender' => $admin['gender'] ?? null,
-                    'student_number' => null,
-                    'program' => $office !== '' ? $office : null,
-                    'faculty_code' => null,
-                ], 'Administrative');
-
-                return [
+                'patient' => [
                     'id' =>
                     $patient->id,
 
                     'name' =>
-                    $patient->name,
-
-                    'gender' =>
-                    $patient->gender
-                        ?? ($admin['gender'] ?? null),
+                    $patient->name
+                        ?: ($data['name'] ?? 'Patient'),
 
                     'email' =>
-                    $patient->email,
+                    $patient->email
+                        ?: ($data['email'] ?? null),
 
                     'phone' =>
-                    $admin['emergency_contact_no']
-                        ?? $patient->phone,
+                    $information?->phone
+                        ?: ($data['phone'] ?? null),
 
-                    'type' =>
-                    'Administrative',
+                    'gender' =>
+                    $information?->gender
+                        ?: ($data['gender'] ?? null),
+
+                    'birthdate' =>
+                    $information?->birthdate
+                        ? $information
+                        ->birthdate
+                        ->format('Y-m-d')
+                        : ($data['birthdate'] ?? null),
 
                     'student_number' =>
-                    null,
+                    $studentInformation?->student_no
+                        ?: ($data['student_number'] ?? null),
+
+                    'faculty_code' =>
+                    $facultyInformation?->faculty_code
+                        ?: ($data['faculty_code'] ?? null),
 
                     'program' =>
-                    $office !== ''
-                        ? $office
-                        : $patient->course_name,
+                    $studentInformation?->course_name
+                        ?: $studentInformation?->course_code
+                        ?: ($data['program'] ?? null),
 
-                    'office' =>
-                    $office !== ''
-                        ? $office
-                        : $patient->course_name,
-                    'record_url' => route('dentist.odontogram.existing-appointment.create', ['patient' => $patient->id]),
+                    'year_level' =>
+                    $studentInformation?->year_level
+                        ?? ($data['year_level'] ?? null),
+
+                    'section' =>
+                    $studentInformation?->section
+                        ?: ($data['section'] ?? null),
+
+                    'is_pwd' =>
+                    $information?->is_pwd
+                        ?? ($data['is_pwd'] ?? false),
+
+                    'type' =>
+                    match ($patient->classification) {
+                        'student' =>
+                        'Student',
+
+                        'faculty' =>
+                        'Faculty',
+
+                        'administrative' =>
+                        'Administrative Personnel',
+
+                        'alumni' =>
+                        'Alumni',
+
+                        'dependent' =>
+                        'Dependent',
+
+                        'dependent_alumni' =>
+                        'Dependent & Alumni',
+
+                        default =>
+                        $type,
+                    },
+
+
+                    'is_local' => true,
+                    'source' => 'local',
+
                     'avatar_url' =>
                     $this->getPatientAvatarUrl(
                         $patient,
                         $patient->name
                     ),
-                ];
-            });
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error(
+                'Walk-in external patient resolution failed',
+                [
+                    'source' => $source,
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]
+            );
 
-        return $records->all();
+            return response()->json([
+                'success' => false,
+                'message' =>
+                config('app.debug')
+                    ? $e->getMessage()
+                    : 'Unable to prepare the selected patient for walk-in.',
+            ], 500);
+        }
     }
 
     public function storeGuest(Request $request)
@@ -1800,22 +2539,19 @@ class WalkInController extends Controller
             'guest_first_name' => [
                 'required',
                 'string',
-                'max:50',
-                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+                'max:100',
             ],
 
             'guest_middle_name' => [
                 'nullable',
                 'string',
-                'max:50',
-                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+                'max:100',
             ],
 
             'guest_last_name' => [
                 'required',
                 'string',
-                'max:50',
-                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+                'max:100',
             ],
 
             'guest_suffix' => [
@@ -1849,7 +2585,7 @@ class WalkInController extends Controller
             'guest_birthdate' => [
                 'required',
                 'date',
-                'before_or_equal:today',
+                'before:today',
             ],
 
             'guest_program' => [
@@ -1861,53 +2597,33 @@ class WalkInController extends Controller
             'guest_student_number' => [
                 'nullable',
                 'string',
-                'max:15',
+                'max:100',
                 'required_if:guest_patient_type,student',
-                'regex:/^\d{4}-\d{5}-TG-\d$/i',
             ],
 
             'guest_faculty_code' => [
                 'nullable',
                 'string',
-                'max:12',
+                'max:100',
                 'required_if:guest_patient_type,faculty',
-                'regex:/^FA\d{4}TG\d{4}$/i',
             ],
 
             'guest_year_level' => [
                 'nullable',
                 'string',
-                'max:2',
-                'regex:/^[1-9][0-9]*$/',
+                'max:50',
             ],
 
             'guest_section' => [
                 'nullable',
                 'string',
-                'max:30',
-                'regex:/^[A-Za-z0-9\s.-]+$/u',
+                'max:50',
             ],
 
             'guest_is_pwd' => [
                 'required',
                 'boolean',
             ],
-        ], [
-            'guest_first_name.regex' => 'First name may only contain letters, spaces, apostrophes, periods, and hyphens.',
-
-            'guest_middle_name.regex' => 'Middle name may only contain letters, spaces, apostrophes, periods, and hyphens.',
-
-            'guest_last_name.regex' => 'Last name may only contain letters, spaces, apostrophes, periods, and hyphens.',
-
-            'guest_birthdate.before_or_equal' => 'Birthdate cannot be in the future.',
-
-            'guest_student_number.regex' => 'Student number must follow the format 0000-00000-TG-0.',
-
-            'guest_faculty_code.regex' => 'Faculty code must follow the format FA0000TG0000.',
-
-            'guest_year_level.regex' => 'Year level must contain whole numbers only.',
-
-            'guest_section.regex' => 'Section can only contain letters, numbers, spaces, periods, and hyphens.',
         ]);
 
         $selectedPatientType = $this->normalizeGuestPatientType(
@@ -2057,8 +2773,10 @@ class WalkInController extends Controller
 
                     'program' => $patient->course_name,
 
-                    'student_number' => $patient->student_number,
-
+                    'student_number' =>
+                    $patient
+                        ->information
+                        ?->student_no,
                     'faculty_code' => $patient->faculty_code,
 
                     'year_level' => $patient->year_level,
@@ -2181,6 +2899,12 @@ class WalkInController extends Controller
 
         $now = Carbon::now();
 
+        $serviceType = ServiceType::where(
+            'name',
+            $validated['service_type']
+        )->firstOrFail();
+
+
         if ($request->hasFile('patient_signature')) {
             $signaturePath =
                 $request
@@ -2204,11 +2928,15 @@ class WalkInController extends Controller
         $appointmentData = [
             'patient_id' => $patient->id,
             'dentist_id' => Auth::id(),
-            'service_type' => $validated['service_type'],
+            'service_type_id' => $serviceType->id,
             'appointment_date' => $now->toDateString(),
             'appointment_time' => $now->format('H:i:s'),
             'status' => 'upcoming',
         ];
+
+        if (Schema::hasColumn('appointments', 'service_type')) {
+            $appointmentData['service_type'] = $serviceType->name;
+        }
 
         if (Schema::hasColumn('appointments', 'is_walk_in')) {
             $appointmentData['is_walk_in'] = true;
@@ -2967,319 +3695,336 @@ class WalkInController extends Controller
         array $data,
         string $type
     ): Patient {
-        $patient = Patient::with('medicalHistory')->where('user_id', $user->id)->first();
-        $normalizedEmail = strtolower(trim((string) ($data['email'] ?? '')));
-        $studentNumber = trim((string) ($data['student_number'] ?? ''));
-        $facultyCode = trim((string) ($data['faculty_code'] ?? ''));
+        $patient = Patient::with([
+            'medicalHistory',
+            'information',
+        ])
+            ->where('user_id', $user->id)
+            ->first();
 
-        if (! $patient && $normalizedEmail !== '' && Schema::hasColumn('patients', 'email')) {
-            $patient = Patient::with('medicalHistory')->whereRaw('LOWER(email) = ?', [$normalizedEmail])->first();
+        $normalizedEmail = strtolower(
+            trim((string) ($data['email'] ?? ''))
+        );
+
+        $studentNumber = trim(
+            (string) ($data['student_number'] ?? '')
+        );
+
+        $facultyCode = trim(
+            (string) ($data['faculty_code'] ?? '')
+        );
+
+
+
+        if (
+            ! $patient &&
+            $normalizedEmail !== ''
+        ) {
+            $patient = Patient::with([
+                'medicalHistory',
+                'information',
+            ])
+                ->whereRaw(
+                    'LOWER(email) = ?',
+                    [$normalizedEmail]
+                )
+                ->first();
         }
 
-        if (! $patient && $studentNumber !== '') {
-            if (Schema::hasColumn('patients', 'student_no')) {
-                $patient = Patient::with('medicalHistory')->where('student_no', $studentNumber)->first();
-            }
-
-            if (! $patient && Schema::hasColumn('patients', 'student_number')) {
-                $patient = Patient::with('medicalHistory')->where('student_number', $studentNumber)->first();
-            }
+        if (
+            ! $patient &&
+            $studentNumber !== ''
+        ) {
+            $patient = Patient::with([
+                'medicalHistory',
+                'information',
+                'studentInformation',
+                'facultyInformation',
+            ])
+                ->whereHas(
+                    'studentInformation',
+                    function ($query) use ($studentNumber) {
+                        $query->where(
+                            'student_no',
+                            $studentNumber
+                        );
+                    }
+                )
+                ->first();
         }
 
-        if (! $patient && $facultyCode !== '' && Schema::hasColumn('patients', 'faculty_code')) {
-            $patient = Patient::with('medicalHistory')->where('faculty_code', $facultyCode)->first();
+        if (
+            ! $patient &&
+            $facultyCode !== ''
+        ) {
+            $patient = Patient::with([
+                'medicalHistory',
+                'information',
+                'studentInformation',
+                'facultyInformation',
+            ])
+                ->whereHas(
+                    'facultyInformation',
+                    function ($query) use ($facultyCode) {
+                        $query->where(
+                            'faculty_code',
+                            $facultyCode
+                        );
+                    }
+                )
+                ->first();
         }
 
         if ($patient) {
-            $patient = $this->resolveWalkInSourcePatient($patient);
+            $patient =
+                $this->resolveWalkInSourcePatient(
+                    $patient
+                );
         }
 
-        if ($patient && empty($patient->user_id)) {
-            $patient->user_id = $user->id;
-            $patient->save();
-        }
 
         $patientData = [
             'user_id' => $user->id,
         ];
 
-
         if (
-            Schema::hasColumn('patients', 'name') &&
             array_key_exists('name', $data) &&
             filled($data['name'])
         ) {
-            $patientData['name'] = $data['name'];
+            $patientData['name'] =
+                trim((string) $data['name']);
         }
 
         if (
-            Schema::hasColumn('patients', 'email') &&
             array_key_exists('email', $data) &&
             filled($data['email'])
         ) {
-            $patientData['email'] = strtolower((string) $data['email']);
+            $patientData['email'] =
+                strtolower(
+                    trim((string) $data['email'])
+                );
         }
 
+
+
         if (
-            Schema::hasColumn('patients', 'phone') &&
             array_key_exists('phone', $data) &&
             filled($data['phone'])
         ) {
-            $patientData['phone'] = $data['phone'];
+            $patientData['phone'] =
+                $data['phone'];
         }
 
-
         if (
-            Schema::hasColumn('patients', 'gender') &&
             array_key_exists('gender', $data) &&
             filled($data['gender'])
         ) {
-            $patientData['gender'] = $data['gender'];
+            $patientData['gender'] =
+                $data['gender'];
         }
 
         if (
-            Schema::hasColumn('patients', 'birthdate') &&
             array_key_exists('birthdate', $data) &&
             filled($data['birthdate'])
         ) {
-            $patientData['birthdate'] = $data['birthdate'];
+            $patientData['birthdate'] =
+                $data['birthdate'];
         }
 
         if (
-            Schema::hasColumn('patients', 'year_level') &&
             array_key_exists('year_level', $data) &&
             filled($data['year_level'])
         ) {
-            $patientData['year_level'] = $data['year_level'];
+            $patientData['year_level'] =
+                $data['year_level'];
         }
 
         if (
-            Schema::hasColumn('patients', 'section') &&
             array_key_exists('section', $data) &&
             filled($data['section'])
         ) {
-            $patientData['section'] = $data['section'];
+            $patientData['section'] =
+                $data['section'];
         }
 
-
         if (
-            Schema::hasColumn('patients', 'is_pwd') &&
             array_key_exists('is_pwd', $data) &&
             $data['is_pwd'] !== null
         ) {
-            $patientData['is_pwd'] = (bool) $data['is_pwd'];
+            $patientData['is_pwd'] =
+                (bool) $data['is_pwd'];
         }
 
-
         if (
-            Schema::hasColumn('patients', 'course_code') &&
             array_key_exists('program', $data) &&
             filled($data['program'])
         ) {
-            $patientData['course_code'] = $data['program'];
-        }
-        if (
-            Schema::hasColumn('patients', 'course_name') &&
-            array_key_exists('program', $data) &&
-            filled($data['program'])
-        ) {
-            $patientData['course_name'] = $data['program'];
+
+            $patientData['course_code'] =
+                $data['program'];
+
+            $patientData['course_name'] =
+                $data['program'];
         }
 
         if (
-            Schema::hasColumn('patients', 'faculty_code') &&
-            array_key_exists('faculty_code', $data)
+            array_key_exists(
+                'faculty_code',
+                $data
+            )
         ) {
-            $value = trim((string) ($data['faculty_code'] ?? ''));
+            $value = trim(
+                (string) (
+                    $data['faculty_code']
+                    ?? ''
+                )
+            );
+
             $patientData['faculty_code'] =
                 $value !== ''
                 ? $value
                 : null;
         }
 
-
         if (
-            Schema::hasColumn('patients', 'student_number') &&
-            array_key_exists('student_number', $data)
+            array_key_exists(
+                'student_number',
+                $data
+            )
         ) {
-            $value = trim((string) ($data['student_number'] ?? ''));
-            $patientData['student_number'] =
-                $value !== ''
-                ? $value
-                : null;
-        }
+            $value = trim(
+                (string) (
+                    $data['student_number']
+                    ?? ''
+                )
+            );
 
-        if (
-            Schema::hasColumn('patients', 'student_no') &&
-            array_key_exists('student_number', $data)
-        ) {
-            $value = trim((string) ($data['student_number'] ?? ''));
             $patientData['student_no'] =
                 $value !== ''
                 ? $value
                 : null;
         }
 
+        $incomingClassification = trim(
+            (string) (
+                $data['classification']
+                ?? ''
+            )
+        );
+
+        if ($studentNumber !== '') {
+            $patientData['classification'] =
+                'student';
+        } elseif ($facultyCode !== '') {
+            $patientData['classification'] =
+                'faculty';
+        } elseif (
+            in_array(
+                $incomingClassification,
+                [
+                    'student',
+                    'faculty',
+                    'administrative',
+                    'alumni',
+                    'dependent',
+                    'dependent_alumni',
+                ],
+                true
+            )
+        ) {
+            $patientData['classification'] =
+                $incomingClassification;
+        } else {
+            $patientData['classification'] =
+                $this->normalizePatientClassification(
+                    $type
+                );
+        }
 
         if (
             Schema::hasColumn(
                 'patients',
-                'classification'
+                'status'
             )
         ) {
-            $studentNumber =
-                trim(
-                    (string) (
-                        $data['student_number']
-                        ?? ''
-                    )
-                );
-
-            $facultyCode =
-                trim(
-                    (string) (
-                        $data['faculty_code']
-                        ?? ''
-                    )
-                );
-
-            $incomingClassification =
-                trim(
-                    (string) (
-                        $data['classification']
-                        ?? ''
-                    )
-                );
-
-            if ($studentNumber !== '') {
-                $patientData['classification'] =
-                    'student';
-            } elseif ($facultyCode !== '') {
-                $patientData['classification'] =
-                    'faculty';
-            } elseif (
-                in_array(
-                    $incomingClassification,
-                    [
-                        'student',
-                        'faculty',
-                        'administrative',
-                        'alumni',
-                        'dependent',
-                        'dependent_alumni',
-                    ],
-                    true
-                )
-            ) {
-                $patientData['classification'] =
-                    $incomingClassification;
-            } else {
-                $patientData['classification'] =
-                    $this->normalizePatientClassification(
-                        $type
-                    );
-            }
-        }
-
-        if (Schema::hasColumn('patients', 'status')) {
-            $patientData['status'] = 'active';
-        }
-
-        if (Schema::hasColumn('patients', 'role')) {
-            $patientData['role'] = 'patient';
-        }
-
-
-        if (! $patient) {
-
-            if (
-                Schema::hasColumn('patients', 'phone') &&
-                array_key_exists('phone', $data) &&
-                ! array_key_exists('phone', $patientData)
-            ) {
-                $patientData['phone'] = $data['phone'];
-            }
-
-            if (
-                Schema::hasColumn('patients', 'course_code') &&
-                array_key_exists('program', $data) &&
-                ! array_key_exists('course_code', $patientData)
-            ) {
-                $patientData['course_code'] =
-                    $data['program'];
-            }
-
-            if (
-                Schema::hasColumn('patients', 'course_name') &&
-                array_key_exists('program', $data) &&
-                ! array_key_exists('course_name', $patientData)
-            ) {
-                $patientData['course_name'] =
-                    $data['program'];
-            }
-
-            if (
-                Schema::hasColumn('patients', 'faculty_code') &&
-                array_key_exists('faculty_code', $data) &&
-                ! array_key_exists('faculty_code', $patientData)
-            ) {
-                $patientData['faculty_code'] =
-                    $data['faculty_code'];
-            }
-
-            if (
-                Schema::hasColumn('patients', 'year_level') &&
-                array_key_exists('year_level', $data) &&
-                ! array_key_exists('year_level', $patientData)
-            ) {
-                $patientData['year_level'] =
-                    $data['year_level'];
-            }
-
-            if (
-                Schema::hasColumn('patients', 'section') &&
-                array_key_exists('section', $data) &&
-                ! array_key_exists('section', $patientData)
-            ) {
-                $patientData['section'] =
-                    $data['section'];
-            }
-
-            if (
-                Schema::hasColumn('patients', 'is_pwd') &&
-                array_key_exists('is_pwd', $data) &&
-                ! array_key_exists('is_pwd', $patientData)
-            ) {
-                $patientData['is_pwd'] =
-                    (bool) $data['is_pwd'];
-            }
-
-            if (
-                Schema::hasColumn('patients', 'password')
-            ) {
-                $patientData['password'] =
-                    bcrypt(Str::random(32));
-            }
-
-            $patient = new Patient();
-            $patient->forceFill($patientData);
-            $patient->save();
-
-            return $patient;
+            $patientData['status'] =
+                'active';
         }
 
         if (
-            Schema::hasColumn('patients', 'password') &&
+            Schema::hasColumn(
+                'patients',
+                'role'
+            )
+        ) {
+            $patientData['role'] =
+                'patient';
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Create patient
+    |--------------------------------------------------------------------------
+    */
+
+        if (! $patient) {
+            if (
+                Schema::hasColumn(
+                    'patients',
+                    'password'
+                )
+            ) {
+                $patientData['password'] =
+                    bcrypt(
+                        Str::random(32)
+                    );
+            }
+
+            $patient = new Patient();
+
+            $patient->forceFill(
+                $patientData
+            );
+
+            $patient->save();
+
+            return $patient->loadMissing(
+                'information'
+            );
+        }
+
+
+        if (empty($patient->user_id)) {
+            $patientData['user_id'] =
+                $user->id;
+        }
+
+        if (
+            Schema::hasColumn(
+                'patients',
+                'password'
+            ) &&
             empty($patient->password)
         ) {
             $patientData['password'] =
-                bcrypt(Str::random(32));
+                bcrypt(
+                    Str::random(32)
+                );
         }
 
-        $patient->forceFill($patientData);
+        $patient->forceFill(
+            $patientData
+        );
+
         $patient->save();
 
-        return $patient;
+        $patient->unsetRelation(
+            'information'
+        );
+
+        return $patient->loadMissing(
+            'information'
+        );
     }
 
     private function getPatientAvatarUrl(

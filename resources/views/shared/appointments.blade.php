@@ -15,7 +15,6 @@
     @php
         use Carbon\Carbon;
         use Illuminate\Support\Str;
-        use App\Services\AppointmentOdontogramSnapshotService;
 
         $layoutRole = $layoutRole ?? 'admin';
         $pageTitle = $pageTitle ?? 'Appointments';
@@ -71,11 +70,6 @@
 
         $upcomingAppointments = collect($upcomingAppointments ?? []);
         $pastAppointments = collect($pastAppointments ?? []);
-        $odontogramSnapshotService = app(AppointmentOdontogramSnapshotService::class);
-
-        $previousOdontogramByAppointmentId = $odontogramSnapshotService->previousSnapshotsByAppointment(
-            $pastAppointments,
-        );
         $today = $today ?? Carbon::today()->toDateString();
         $todayAppts = $upcomingAppointments->filter(fn($a) => ($a->appointment_date ?? null) === $today);
         $todayCount = $todayAppts->count();
@@ -91,10 +85,10 @@
                 : null;
 
         $firstTodayService = $firstTodayAppt
-            ? (($firstTodayAppt->service_type ?? '') === 'Others'
+            ? (($firstTodayAppt->service_type_name ?? '') === 'Others'
                 ? ($firstTodayAppt->other_services ?:
                 'Others')
-                : $firstTodayAppt->service_type ?? 'Appointment')
+                : $firstTodayAppt->service_type_name ?? 'Appointment')
             : null;
 
         $nextAppt = $upcomingAppointments
@@ -115,10 +109,10 @@
         $nextDate = $nextAppt ? \Carbon\Carbon::parse($nextAppt->appointment_date)->format('F j, Y') : null;
 
         $nextService = $nextAppt
-            ? (($nextAppt->service_type ?? '') === 'Others'
+            ? (($nextAppt->service_type_name ?? '') === 'Others'
                 ? ($nextAppt->other_services ?:
                 'Others')
-                : $nextAppt->service_type ?? 'Appointment')
+                : $nextAppt->service_type_name ?? 'Appointment')
             : null;
 
         $nextIsToday = $nextAppt && ($nextAppt->appointment_date ?? null) === $today;
@@ -300,7 +294,6 @@
                         </span>
                     </div>
 
-
                     <div class="today-snapshot-content">
 
                         <div class="today-snapshot-primary">
@@ -341,9 +334,7 @@
                             </div>
                         </div>
 
-
                         <div class="today-snapshot-divider"></div>
-
 
                         <div class="today-snapshot-next-block">
                             <div class="today-snapshot-next-heading">
@@ -584,10 +575,6 @@
 
                                         $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('F j, Y');
 
-                                        $compactDateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format(
-                                            'M j, Y',
-                                        );
-
                                         $mobileDateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format(
                                             'F j, Y',
                                         );
@@ -599,10 +586,10 @@
                                             : '—';
 
                                         $serviceLabel =
-                                            ($appt->service_type ?? '') === 'Others'
+                                            ($appt->service_type_name ?? '') === 'Others'
                                                 ? ($appt->other_services ?:
                                                 'Others')
-                                                : $appt->service_type ?? '—';
+                                                : $appt->service_type_name ?? '—';
 
                                         $serviceLower = strtolower($serviceLabel);
 
@@ -734,7 +721,7 @@
                                                     )
                                                     : 'N/A',
 
-                                                'service' => $recordFollowUp->service_type ?? 'Follow-up',
+                                                'service' => $recordFollowUp->service_type_name ?? 'Follow-up',
 
                                                 'status' => $recordFollowUp->status ?? 'upcoming',
 
@@ -742,10 +729,7 @@
                                             ]
                                             : null;
 
-                                        $recordOdontogramData = $odontogramSnapshotService->appointmentSnapshot(
-                                            $recordProcedure?->odontogram_data ?? [],
-                                            $previousOdontogramByAppointmentId[$appt->id] ?? [],
-                                        );
+                                        $recordOdontogramData = $recordProcedure?->odontogram_data ?? [];
                                     @endphp
 
                                     <div class="appt-card {{ $shouldHighlightToday ? 'is-today' : '' }}"
@@ -767,13 +751,7 @@
 
                                             <div class="appt-row-date">
                                                 <p class="date-main">
-                                                    <span class="date-main-full">
-                                                        {{ $dateLabel }}
-                                                    </span>
-
-                                                    <span class="date-main-compact">
-                                                        {{ $compactDateLabel }}
-                                                    </span>
+                                                    {{ $dateLabel }}
                                                 </p>
 
                                                 <p class="date-sub">
@@ -924,7 +902,7 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canStartProcedure && $isActiveAppointment)
+                                                @if ($canStartProcedure)
                                                     <button type="button"
                                                         class="ui-action-btn
                                                            ui-action-success
@@ -943,7 +921,7 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canRescheduleAppointment && $isActiveAppointment && !$appt->reserved_booking_period_id)
+                                                @if ($canRescheduleAppointment && !$appt->reserved_booking_period_id)
                                                     <button type="button"
                                                         class="ui-action-btn ui-action-warning {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                         data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
@@ -954,14 +932,14 @@
                                                         id: '{{ $appt->id }}',
                                                         name: @js($patientName),
                                                         datetime: @js($modalDatetime),
-                                                        serviceType: @js($appt->service_type),
+                                                        serviceType: @js($appt->service_type_name),
                                                         updateUrl: '{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}'
                                                     }) @endif">
                                                         <i class="fa-solid fa-rotate-right"></i>
                                                     </button>
                                                 @endif
 
-                                                @if ($canCancelAppointment && $isActiveAppointment)
+                                                @if ($canCancelAppointment)
                                                     <button type="button"
                                                         class="ui-action-btn ui-action-delete {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                         data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
@@ -1050,10 +1028,10 @@
                                         : '—';
 
                                     $serviceLabel =
-                                        ($appt->service_type ?? '') === 'Others'
+                                        ($appt->service_type_name ?? '') === 'Others'
                                             ? ($appt->other_services ?:
                                             'Others')
-                                            : $appt->service_type ?? '—';
+                                            : $appt->service_type_name ?? '—';
 
                                     $serviceLower = strtolower($serviceLabel);
 
@@ -1146,10 +1124,7 @@
 
                                     $recordProcedure = $appt->procedure;
 
-                                    $recordOdontogramData = $odontogramSnapshotService->appointmentSnapshot(
-                                        $recordProcedure?->odontogram_data ?? [],
-                                        $previousOdontogramByAppointmentId[$appt->id] ?? [],
-                                    );
+                                    $recordOdontogramData = $recordProcedure?->odontogram_data ?? [];
 
                                     $recordFollowUp = $appt->followUpAppointments
                                         ?->sortBy('appointment_date')
@@ -1169,7 +1144,7 @@
                                                 )
                                                 : 'N/A',
 
-                                            'service' => $recordFollowUp->service_type ?? 'Follow-up',
+                                            'service' => $recordFollowUp->service_type_name ?? 'Follow-up',
 
                                             'status' => $recordFollowUp->status ?? 'upcoming',
 
@@ -1330,7 +1305,7 @@
                                             </a>
                                         @endif
 
-                                        @if ($canStartProcedure && $isActiveAppointment)
+                                        @if ($canStartProcedure)
                                             <button type="button"
                                                 class="ui-action-btn
                                                    ui-action-success
@@ -1348,7 +1323,7 @@
                                             </button>
                                         @endif
 
-                                        @if ($canRescheduleAppointment && $isActiveAppointment && !$appt->reserved_booking_period_id)
+                                        @if ($canRescheduleAppointment && !$appt->reserved_booking_period_id)
                                             <button type="button"
                                                 class="ui-action-btn ui-action-warning {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                 data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
@@ -1358,14 +1333,14 @@
                                                 id: '{{ $appt->id }}',
                                                 name: @js($patientName),
                                                 datetime: @js($modalDatetime),
-                                                serviceType: @js($appt->service_type),
+                                                serviceType: @js($appt->service_type_name),
                                                 updateUrl: '{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}'
                                             }) @endif">
                                                 <i class="fa-solid fa-rotate-right"></i>
                                             </button>
                                         @endif
 
-                                        @if ($canCancelAppointment && $isActiveAppointment)
+                                        @if ($canCancelAppointment)
                                             <button type="button"
                                                 class="ui-action-btn ui-action-delete {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                 data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
@@ -2704,3 +2679,4 @@
         }
     </script>
 @endsection
+

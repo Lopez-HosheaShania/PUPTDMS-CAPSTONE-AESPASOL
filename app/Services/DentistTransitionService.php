@@ -38,61 +38,125 @@ class DentistTransitionService
     public function createTransition(array $payload, User $actor): DentistTransition
     {
         return DB::transaction(function () use ($payload, $actor) {
+            $accessEndsAt = Carbon::parse($payload['last_working_date'])->endOfDay();
+
             $transition = DentistTransition::create([
                 'dentist_id' => $payload['dentist_id'],
                 'transition_type' => $payload['transition_type'],
-                'default_successor_dentist_id' => $payload['default_successor_dentist_id'] ?? null,
+                'default_successor_dentist_id' => $payload['default_successor_dentist_id'],
                 'last_working_date' => $payload['last_working_date'],
-                'access_ends_at' => $payload['access_ends_at'],
-                'status' => 'draft',
+                'access_ends_at' => $accessEndsAt,
+                'status' => $accessEndsAt->isFuture() ? 'scheduled' : 'completed',
                 'handover_notes' => $payload['handover_notes'] ?? null,
-                'remarks' => $payload['remarks'] ?? null,
+                'remarks' => null,
                 'initiated_by' => $actor->id,
+                'reviewed_by' => $actor->id,
+                'approved_by' => $actor->id,
+                'completed_at' => $accessEndsAt->isFuture() ? null : now(),
             ]);
 
-            $this->createChecklistItems($transition);
-            $this->generateTransitionItems($transition);
-            $this->syncDentistAccountMarkers($transition, 'for_transition', 'active');
-            $this->notifyTransitionParticipants($transition, 'created');
+            $transition = $this->generateTransitionItems($transition);
+
+            $this->transferResponsibilities($transition, $actor);
+
+            if ($accessEndsAt->isFuture()) {
+                $this->syncDentistAccountMarkers(
+                    $transition,
+                    'for_transition',
+                    'active'
+                );
+            } else {
+                $this->deactivateDentistAccount(
+                    $transition->dentist,
+                    $transition,
+                    $actor->id,
+                    false
+                );
+            }
+
+            $this->notifyTransitionParticipants($transition, 'finalized');
 
             $this->writeAuditEntry(
-                'transition_created',
+                'transition_finalized',
                 sprintf(
-                    'Created dentist transition #%d for dentist #%d (%s).',
+                    'Confirmed dentist handover #%d from dentist #%d to dentist #%d.',
                     $transition->id,
                     $transition->dentist_id,
-                    $transition->transition_type
+                    $transition->default_successor_dentist_id
                 )
             );
 
-            return $transition->load(['dentist.role', 'defaultSuccessor', 'items.patient', 'checklistItems']);
+            return $transition->fresh([
+                'dentist.role',
+                'defaultSuccessor',
+                'items.patient',
+                'items.successorDentist',
+                'items.documentRequest',
+            ]);
         });
     }
 
-    public function updateTransition(DentistTransition $transition, array $payload, User $actor): DentistTransition
-    {
+    public function updateTransition(
+        DentistTransition $transition,
+        array $payload,
+        User $actor
+    ): DentistTransition {
         return DB::transaction(function () use ($transition, $payload, $actor) {
+            $accessEndsAt = Carbon::parse($payload['last_working_date'])->endOfDay();
+
             $transition->fill([
                 'transition_type' => $payload['transition_type'],
-                'default_successor_dentist_id' => $payload['default_successor_dentist_id'] ?? null,
+                'default_successor_dentist_id' => $payload['default_successor_dentist_id'],
                 'last_working_date' => $payload['last_working_date'],
-                'access_ends_at' => $payload['access_ends_at'],
+                'access_ends_at' => $accessEndsAt,
                 'handover_notes' => $payload['handover_notes'] ?? null,
-                'remarks' => $payload['remarks'] ?? null,
             ]);
 
-            if ($transition->status === 'draft') {
-                $transition->status = 'handover_in_progress';
-            }
+            $transition->status = $accessEndsAt->isFuture()
+                ? 'scheduled'
+                : 'completed';
 
             $transition->reviewed_by = $actor->id;
+            $transition->approved_by = $actor->id;
+            $transition->completed_at = $accessEndsAt->isFuture()
+                ? null
+                : now();
+
             $transition->save();
 
-            $this->generateTransitionItems($transition->fresh());
-            $this->notifyTransitionParticipants($transition, 'updated');
-            $this->writeAuditEntry('transition_updated', "Updated dentist transition #{$transition->id}.");
+            $transition = $this->generateTransitionItems($transition->fresh());
 
-            return $transition->fresh(['dentist.role', 'defaultSuccessor', 'items.patient', 'items.successorDentist', 'items.documentRequest', 'checklistItems']);
+            $this->transferResponsibilities($transition, $actor);
+
+            if ($accessEndsAt->isFuture()) {
+                $this->syncDentistAccountMarkers(
+                    $transition,
+                    'for_transition',
+                    'active'
+                );
+            } else {
+                $this->deactivateDentistAccount(
+                    $transition->dentist,
+                    $transition,
+                    $actor->id,
+                    false
+                );
+            }
+
+            $this->notifyTransitionParticipants($transition, 'finalized');
+
+            $this->writeAuditEntry(
+                'transition_updated',
+                "Updated and confirmed dentist transition #{$transition->id}."
+            );
+
+            return $transition->fresh([
+                'dentist.role',
+                'defaultSuccessor',
+                'items.patient',
+                'items.successorDentist',
+                'items.documentRequest',
+            ]);
         });
     }
 
@@ -118,22 +182,29 @@ class DentistTransitionService
                 ->with(['patient', 'dentist'])
                 ->get();
 
-            $documentRequests = DocumentRequest::query()
-                ->where('status', 'pending')
+            $documentRequests = DocumentRequest::withStateColumns()
+                ->where('document_request_states.status', 'pending')
+                ->where(
+                    'document_requests.assigned_dentist_id',
+                    $transition->dentist_id
+                )
+                ->select('document_requests.*')
                 ->with('patient')
                 ->get();
 
             $existingKeys = $transition->items()
                 ->get()
-                ->keyBy(fn (DentistTransitionItem $item) => $item->item_type.':'.$item->record_id);
+                ->keyBy(fn(DentistTransitionItem $item) => $item->item_type . ':' . $item->record_id);
 
             foreach ($appointments as $appointment) {
-                $key = 'appointment:'.$appointment->id;
+                $key = 'appointment:' . $appointment->id;
                 $item = $existingKeys->get($key) ?? new DentistTransitionItem([
                     'dentist_transition_id' => $transition->id,
                     'item_type' => 'appointment',
                     'record_id' => $appointment->id,
                 ]);
+
+
 
                 $item->fill([
                     'patient_id' => $appointment->patient_id,
@@ -146,38 +217,40 @@ class DentistTransitionService
                 $item->save();
             }
 
-            $patientIdsWithDepartingAppointments = Appointment::query()
-                ->where('dentist_id', $transition->dentist_id)
-                ->whereNotNull('dentist_id')
-                ->distinct()
-                ->pluck('patient_id');
 
             foreach ($documentRequests as $documentRequest) {
-                $originalDentistId = $documentRequest->assigned_dentist_id;
+                $originalDentistId = $transition->dentist_id;
 
-                if ($originalDentistId && $originalDentistId != $transition->dentist_id) {
-                    continue;
-                }
-
-                if (! $originalDentistId && ! $patientIdsWithDepartingAppointments->contains($documentRequest->patient_id)) {
-                    continue;
-                }
-
-                $key = 'document_request:'.$documentRequest->id;
+                $key = 'document_request:' . $documentRequest->id;
                 $item = $existingKeys->get($key) ?? new DentistTransitionItem([
                     'dentist_transition_id' => $transition->id,
                     'item_type' => 'document_request',
                     'record_id' => $documentRequest->id,
                 ]);
 
+                $isResolved = in_array(
+                    $item->transfer_status,
+                    ['transferred', 'excluded', 'manually_resolved'],
+                    true
+                );
+
+                $successorDentistId = $isResolved
+                    ? $item->successor_dentist_id
+                    : $transition->default_successor_dentist_id;
+
+                $transferStatus = $isResolved
+                    ? $item->transfer_status
+                    : ($successorDentistId ? 'ready' : 'pending');
+
                 $item->fill([
                     'patient_id' => $documentRequest->patient_id,
-                    'original_dentist_id' => $originalDentistId ?: $transition->dentist_id,
-                    'successor_dentist_id' => $item->successor_dentist_id ?: $transition->default_successor_dentist_id,
-                    'transfer_status' => $item->successor_dentist_id || $transition->default_successor_dentist_id ? 'ready' : 'pending',
+                    'original_dentist_id' => $originalDentistId,
+                    'successor_dentist_id' => $successorDentistId,
+                    'transfer_status' => $transferStatus,
                     'is_critical' => true,
                     'remarks' => $item->remarks,
                 ]);
+
                 $item->save();
             }
 
@@ -272,23 +345,23 @@ class DentistTransitionService
 
     public function validateTransitionReadiness(DentistTransition $transition): array
     {
-        $transition->loadMissing(['items', 'checklistItems']);
+        $transition->loadMissing('items');
 
-        $missingChecklist = $transition->checklistItems
-            ->where('is_required', true)
-            ->where('is_completed', false)
-            ->pluck('label')
+        $unresolvedCriticalItems = $transition->items
+            ->filter(function (DentistTransitionItem $item) {
+                return $item->is_critical
+                    && ! in_array(
+                        $item->transfer_status,
+                        ['transferred', 'excluded', 'manually_resolved'],
+                        true
+                    )
+                    && ! $item->successor_dentist_id;
+            })
             ->values();
 
-        $unresolvedCriticalItems = $transition->items->filter(function (DentistTransitionItem $item) {
-            return $item->is_critical
-                && ! in_array($item->transfer_status, ['transferred', 'excluded', 'manually_resolved'], true)
-                && ! $item->successor_dentist_id;
-        })->values();
-
         return [
-            'ready' => $missingChecklist->isEmpty() && $unresolvedCriticalItems->isEmpty(),
-            'missing_checklist' => $missingChecklist,
+            'ready' => $unresolvedCriticalItems->isEmpty(),
+            'missing_checklist' => collect(),
             'unresolved_critical_items' => $unresolvedCriticalItems,
         ];
     }
@@ -298,7 +371,9 @@ class DentistTransitionService
         $readiness = $this->validateTransitionReadiness($transition);
 
         if (! $readiness['ready']) {
-            throw new \RuntimeException('This transition cannot be finalized until all required checklist items and critical assignments are complete.');
+            throw new \RuntimeException(
+                'This transition cannot be finalized until all affected responsibilities have a valid successor dentist.'
+            );
         }
 
         return DB::transaction(function () use ($transition, $actor) {
@@ -425,60 +500,138 @@ class DentistTransitionService
         }
     }
 
-    private function transferResponsibilities(DentistTransition $transition, User $actor): void
-    {
+    private function transferResponsibilities(
+        DentistTransition $transition,
+        User $actor
+    ): void {
         foreach ($transition->items as $item) {
-            if ($item->item_type !== 'appointment' || $item->transfer_status !== 'ready' || ! $item->successor_dentist_id) {
+            if (
+                $item->transfer_status !== 'ready'
+                || ! $item->successor_dentist_id
+            ) {
                 continue;
             }
 
-            $appointment = Appointment::query()->lockForUpdate()->find($item->record_id);
+            if ($item->item_type === 'appointment') {
+                $appointment = Appointment::query()
+                    ->lockForUpdate()
+                    ->find($item->record_id);
 
-            if (! $appointment) {
-                $item->transfer_status = 'failed';
-                $item->resolution_type = 'missing_record';
-                $item->remarks = trim(($item->remarks ? $item->remarks.' ' : '').'Appointment not found during transfer.');
+                if (! $appointment) {
+                    $item->transfer_status = 'failed';
+                    $item->resolution_type = 'missing_record';
+                    $item->remarks = trim(
+                        ($item->remarks ? $item->remarks . ' ' : '')
+                            . 'Appointment not found during transfer.'
+                    );
+                    $item->save();
+
+                    throw new \RuntimeException(
+                        "Appointment {$item->record_id} could not be transferred because it no longer exists."
+                    );
+                }
+
+                $currentStatus = strtolower((string) $appointment->status);
+
+                if (
+                    ! in_array(
+                        $currentStatus,
+                        self::ACTIVE_APPOINTMENT_STATUSES,
+                        true
+                    )
+                ) {
+                    $item->transfer_status = 'manually_resolved';
+                    $item->resolution_type = 'no_longer_active';
+                    $item->save();
+
+                    continue;
+                }
+
+                $appointment->original_dentist_id =
+                    $appointment->original_dentist_id
+                    ?: $transition->dentist_id;
+
+                $appointment->dentist_id =
+                    $item->successor_dentist_id;
+
+                $appointment->transferred_by = $actor->id;
+                $appointment->transferred_at = now();
+                $appointment->transfer_reason =
+                    $transition->transition_type;
+
+                $appointment->save();
+
+                $item->transfer_status = 'transferred';
+                $item->transferred_by = $actor->id;
+                $item->transferred_at = now();
                 $item->save();
 
-                throw new \RuntimeException("Appointment {$item->record_id} could not be transferred because it no longer exists.");
-            }
-
-            $currentStatus = strtolower((string) $appointment->status);
-            if (! in_array($currentStatus, self::ACTIVE_APPOINTMENT_STATUSES, true)) {
-                $item->transfer_status = 'manually_resolved';
-                $item->resolution_type = 'no_longer_active';
-                $item->save();
+                $this->writeAuditEntry(
+                    'transition_item_transferred',
+                    "Transferred appointment #{$appointment->id} from dentist #{$transition->dentist_id} to dentist #{$item->successor_dentist_id}."
+                );
 
                 continue;
             }
 
-            $appointment->original_dentist_id = $appointment->original_dentist_id ?: $transition->dentist_id;
-            $appointment->dentist_id = $item->successor_dentist_id;
-            $appointment->transferred_by = $actor->id;
-            $appointment->transferred_at = now();
-            $appointment->transfer_reason = $transition->transition_type;
-            $appointment->save();
+            if ($item->item_type === 'document_request') {
+                $documentRequest = DocumentRequest::query()
+                    ->lockForUpdate()
+                    ->find($item->record_id);
 
-            $item->transfer_status = 'transferred';
-            $item->transferred_by = $actor->id;
-            $item->transferred_at = now();
-            $item->save();
+                if (! $documentRequest) {
+                    $item->transfer_status = 'failed';
+                    $item->resolution_type = 'missing_record';
+                    $item->save();
 
-            $this->writeAuditEntry(
-                'transition_item_transferred',
-                "Transferred appointment #{$appointment->id} from dentist #{$transition->dentist_id} to dentist #{$item->successor_dentist_id}."
-            );
+                    throw new \RuntimeException(
+                        "Document request {$item->record_id} could not be transferred because it no longer exists."
+                    );
+                }
+
+                if (
+                    (int) $documentRequest->assigned_dentist_id
+                    !== (int) $transition->dentist_id
+                ) {
+                    $item->transfer_status = 'manually_resolved';
+                    $item->resolution_type = 'no_longer_assigned';
+                    $item->save();
+
+                    continue;
+                }
+
+                $documentRequest->assigned_dentist_id =
+                    $item->successor_dentist_id;
+
+                $documentRequest->save();
+
+                $item->transfer_status = 'transferred';
+                $item->transferred_by = $actor->id;
+                $item->transferred_at = now();
+                $item->save();
+
+                $this->writeAuditEntry(
+                    'transition_item_transferred',
+                    "Transferred document request #{$documentRequest->id} from dentist #{$transition->dentist_id} to dentist #{$item->successor_dentist_id}."
+                );
+            }
         }
     }
-
     private function eligibleAppointmentsQuery(DentistTransition $transition)
     {
         return Appointment::query()
-            ->when(Schema::hasColumn('appointments', 'dentist_id'), function ($query) use ($transition) {
-                $query->where('dentist_id', $transition->dentist_id);
-            })
+            ->when(
+                Schema::hasColumn('appointments', 'dentist_id'),
+                function ($query) use ($transition) {
+                    $query->where('dentist_id', $transition->dentist_id);
+                }
+            )
             ->whereIn('status', self::ACTIVE_APPOINTMENT_STATUSES)
-            ->whereDate('appointment_date', '>=', Carbon::today()->toDateString());
+            ->whereDate(
+                'appointment_date',
+                '>',
+                $transition->last_working_date->toDateString()
+            );
     }
 
     private function syncDentistAccountMarkers(DentistTransition $transition, string $employmentStatus, string $accountStatus): void

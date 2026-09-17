@@ -260,6 +260,16 @@ Route::get(
     ])
     ->name('shared.existing-record.search-patient');
 
+Route::post(
+    '/clinical/patients/resolve-external',
+    [WalkInController::class, 'resolveExternalPatient']
+)
+    ->middleware([
+        'auth',
+        'permission:manage_existing_records,manage_walk_in_patients',
+    ])
+    ->name('shared.existing-record.resolve-external-patient');
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN / SUPER ADMIN ROUTES
@@ -474,9 +484,32 @@ Route::prefix('admin')
             if (! $user || ! $user->hasPermission('view_patient_profiles')) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
-            $patients = Patient::select('id', 'name', 'email', 'phone')
+            $patients = Patient::query()
+                ->with([
+                    'information' => function ($query) {
+                        $query->select([
+                            'id',
+                            'patient_id',
+                            'phone',
+                        ]);
+                    },
+                ])
+                ->select([
+                    'id',
+                    'name',
+                    'email',
+                ])
                 ->orderBy('name')
-                ->get();
+                ->get()
+                ->map(function (Patient $patient) {
+                    return [
+                        'id' => $patient->id,
+                        'name' => $patient->name,
+                        'email' => $patient->email,
+                        'phone' => $patient->information?->phone,
+                    ];
+                })
+                ->values();
 
             return response()->json($patients);
         })->name('admin.patients.list');
@@ -1132,6 +1165,10 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.medicine-inventory-download');
 
+    Route::post('/report/dpt-download', [\App\Http\Controllers\Dentist\DptReportController::class, 'download'])
+        ->middleware('permission:create_report_files')
+        ->name('dentist.dentist.report.dpt-download');
+
     Route::post('/report/daily-treatment-record-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDailyTreatmentRecordReport'])
         ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.daily-treatment-record-download');
@@ -1172,9 +1209,7 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:create_report_files')
         ->name('dentist.dentist.reports.daily-treatment-record.list');
 
-    Route::post('/report/daily-treatment-record/store', [\App\Http\Controllers\Dentist\DentistReportController::class, 'storeDailyTreatmentRecord'])
-        ->middleware('permission:create_report_files')
-        ->name('dentist.dentist.reports.daily-treatment-record.store');
+
 
     Route::get('/report/templates/{template}/print', [\App\Http\Controllers\Dentist\DentistReportController::class, 'printTemplate'])
         ->middleware('permission:create_report_files')
@@ -1202,6 +1237,13 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
     Route::post('/walk-in/start', [WalkInController::class, 'startWalkIn'])
         ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.start');
+
+    Route::post(
+        '/walk-in/resolve-external-patient',
+        [WalkInController::class, 'resolveExternalPatient']
+    )
+        ->middleware('permission:manage_walk_in_patients')
+        ->name('dentist.walk-in.external.resolve');
 
     Route::get('/add-existing-record', [\App\Http\Controllers\Shared\ExistingRecordController::class, 'index'])
         ->middleware('permission:manage_existing_records')

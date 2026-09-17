@@ -13,12 +13,6 @@
     @php
         $notifications = collect($notifications ?? []);
         $notifCount = $notifications->count();
-
-        $hasActiveAppointment = collect($appointments ?? [])->contains(function ($appointment) {
-            $status = strtolower(trim((string) ($appointment->status ?? '')));
-
-            return in_array($status, ['upcoming', 'rescheduled'], true);
-        });
         $odontogramSnapshotService = app(\App\Services\AppointmentOdontogramSnapshotService::class);
 
         $previousOdontogramByAppointment = $previousOdontogramByAppointment ?? [];
@@ -42,7 +36,7 @@
                     ?->first();
                 return [
                     'id' => $r->id,
-                    'service' => $r->service_type,
+                    'service' => $r->service_type_name,
                     'date' => $r->appointment_date ? \Carbon\Carbon::parse($r->appointment_date)->format('F d, Y') : '',
                     'time' => $r->appointment_time ?? '',
                     'status' => strtolower($r->status ?? ''),
@@ -59,7 +53,7 @@
                                 ? \Carbon\Carbon::parse($followUp->appointment_time)->format('g:i A')
                                 : null,
 
-                            'service' => $followUp->service_type ?? 'Follow-up',
+                            'service' => $followUp->service_type_name ?? 'Follow-up',
 
                             'status' => $followUp->status ?? 'upcoming',
 
@@ -84,6 +78,12 @@
             })
             ->values();
 
+        $hasActiveAppointment = collect($appointments ?? [])->contains(function ($appt) {
+            $status = strtolower((string) ($appt->status ?? ''));
+
+            return in_array($status, ['upcoming', 'rescheduled'], true);
+        });
+
         $calendarAppointments = [];
         foreach (
             collect($appointments ?? [])->filter(function ($appt) {
@@ -94,7 +94,7 @@
         ) {
             $calendarAppointments[\Carbon\Carbon::parse($appt->appointment_date)->format('Y-m-d')] =
                 'My Appointment: ' .
-                $appt->service_type .
+                $appt->service_type_name .
                 ' • ' .
                 \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A');
         }
@@ -121,7 +121,7 @@
             $completedCalendarAppointments[$dateKey] ??= [];
 
             $completedCalendarAppointments[$dateKey][] = [
-                'service' => $record->service_type ?? 'Dental Appointment',
+                'service' => $record->service_type_name ?? 'Dental Appointment',
 
                 'time' => !empty($record->appointment_time)
                     ? \Carbon\Carbon::parse($record->appointment_time)->format('g:i A')
@@ -698,32 +698,32 @@
         'renderStyle' => 'patient',
         'calendarContainerId' => 'calendarSkeletonContainer',
         'hasActiveAppointment' => $hasActiveAppointment,
-    
+
         'dateInputId' => null,
         'timeInputId' => null,
-    
+
         'slotEndpoint' => route('book.appointment.slots'),
         'bookingUrl' => route('patient.book.appointment'),
-    
+
         'scheduleRules' => isset($schedules)
             ? $schedules
             : (isset($scheduleRules)
                 ? $scheduleRules
                 : \App\Models\ClinicSchedule::active()->get()->values()->toArray()),
-    
+
         'blockedDates' => $unavailableDates ?? [],
         'appointmentCountsPerDay' => $appointmentCountsPerDay ?? [],
         'philippineHolidays' => $philippineHolidays ?? [],
         'personalAppointments' => $calendarAppointments ?? [],
         'completedAppointments' => $completedCalendarAppointments ?? [],
-    
+
         'useDynamicScheduleRules' => true,
         'disallowToday' => true,
         'allowToggleOffDate' => false,
-    
+
         'maxFutureMonths' => 6,
         'historyMonths' => 12,
-    
+
         'appointmentHistoryUrl' => route('patient.record'),
     ])
 @endsection
@@ -849,7 +849,7 @@
                 $uT = \Carbon\Carbon::parse($upcomingAppointment->appointment_time);
                 $upcomingJs = [
                     'exists' => true,
-                    'service' => $upcomingAppointment->service_type ?? '—',
+                    'service' => $upcomingAppointment->service_type_name ?? '—',
                     'date' => $uD->format('M d, Y'),
                     'time_raw' => $upcomingAppointment->appointment_time,
                     'time_fmt' => $uT->format('g:i A'),

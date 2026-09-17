@@ -58,7 +58,7 @@
                     </td>
                     <td>{{ ucwords(str_replace('_', ' ', $log->action ?? '')) }}</td>
                     <td>{{ ucwords(str_replace('_', ' ', $log->module ?? '')) }}</td>
-                    <td>{{ $log->description ?? 'No description provided.' }}</td>
+                    <td>{{ $log->full_description ?? 'No description provided.' }}</td>
                     <td>
                         @if ($log->is_archived)
                             Archived<br>

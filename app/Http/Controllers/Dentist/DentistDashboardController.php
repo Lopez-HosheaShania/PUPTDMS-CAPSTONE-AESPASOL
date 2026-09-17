@@ -9,6 +9,7 @@ use App\Models\BlockedDate;
 use App\Models\ClinicSchedule;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Services\DentistDutyService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -86,9 +87,11 @@ class DentistDashboardController extends Controller
                         ? Carbon::parse($appointment->appointment_time)->format('h:i A')
                         : '—';
 
-                    $service = $appointment->service_type === 'others'
+                    $serviceTypeName = $appointment->service_type_name;
+
+                    $service = $serviceTypeName === 'others'
                         ? ($appointment->other_services ?? 'Other Service')
-                        : ($appointment->service_type ?? 'General Service');
+                        : ($serviceTypeName ?? 'General Service');
 
                     return [
                         'id' => $appointment->id,
@@ -124,7 +127,9 @@ class DentistDashboardController extends Controller
         $dashboardAppointmentWindow = Appointment::with([
             'patient',
             'reservedBookingPeriod',
+            'serviceType',
         ])
+
             ->whereBetween('appointment_date', [
                 Carbon::today()->toDateString(),
                 Carbon::today()->addDays(90)->toDateString(),
@@ -149,9 +154,11 @@ class DentistDashboardController extends Controller
                         ? Carbon::parse($appointment->appointment_time)->format('h:i A')
                         : '—';
 
-                    $service = $appointment->service_type === 'others'
+                    $serviceTypeName = $appointment->service_type_name;
+
+                    $service = $serviceTypeName === 'others'
                         ? ($appointment->other_services ?? 'Other Service')
-                        : ($appointment->service_type ?? 'General Service');
+                        : ($serviceTypeName ?? 'General Service');
 
                     return [
                         'id' => $appointment->id,
@@ -261,16 +268,11 @@ class DentistDashboardController extends Controller
             ->limit(3)
             ->get();
 
-        $gadRaw = DB::table('daily_treatment_records')
-            ->whereYear('treatment_date', $now->year)
-            ->whereMonth('treatment_date', $now->month)
-            ->select(
-                'office_type',
-                'gender',
-                DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('office_type', 'gender')
-            ->get();
+        $gadRaw = app(\App\Services\AppointmentReportRecords::class)
+            ->between($now->copy()->startOfMonth(), $now->copy()->endOfMonth())
+            ->groupBy(fn ($row) => json_encode([$row->office_type, $row->gender]))
+            ->map(fn ($rows) => (object) ['office_type' => $rows->first()->office_type,
+                'gender' => $rows->first()->gender, 'total' => $rows->count()])->values();
 
         $gadLabels = [
             'Student',
@@ -318,12 +320,7 @@ class DentistDashboardController extends Controller
             })
             ->toArray();
 
-        $clinicStatus = strtolower(
-            (string) SystemSetting::getSetting(
-                'clinic_status',
-                'in'
-            )
-        );
+        $clinicStatus = app(DentistDutyService::class)->currentStatusFor(auth()->user());
 
         $notifications = collect([]);
 
@@ -358,7 +355,8 @@ class DentistDashboardController extends Controller
             'status' => ['required', 'in:in,out'],
         ]);
 
-        $oldStatus = SystemSetting::getSetting('clinic_status', 'in');
+        $dutyService = app(DentistDutyService::class);
+        $oldStatus = $dutyService->currentStatusFor($request->user());
         $newStatus = strtolower($request->status);
 
         SystemSetting::setSetting(
@@ -383,12 +381,26 @@ class DentistDashboardController extends Controller
             );
         }
 
+        if ($newStatus === 'out') {
+            $summary = $dutyService->clockOut($request->user(), Carbon::now(), false);
+        } else {
+            $dutyService->clockIn($request->user(), Carbon::now());
+            $summary = [
+                'appointments_cancelled' => 0,
+                'cancelled_appointment_ids' => [],
+                'notifications_created' => 0,
+            ];
+        }
+
         return response()->json([
             'success' => true,
             'status' => $newStatus,
             'message' => $newStatus === 'out'
                 ? 'Clinic marked as closed.'
                 : 'Clinic marked as open.',
+            'appointments_cancelled' => $summary['appointments_cancelled'],
+            'cancelled_appointment_ids' => $summary['cancelled_appointment_ids'],
+            'notifications_created' => $summary['notifications_created'],
         ]);
     }
 

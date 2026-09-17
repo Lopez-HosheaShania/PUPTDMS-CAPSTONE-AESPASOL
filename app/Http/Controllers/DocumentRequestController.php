@@ -74,7 +74,7 @@ class DocumentRequestController extends Controller
                     }
                 }
 
-                $hasSamePendingRequest = DocumentRequest::query()
+                $hasSamePendingRequest = DocumentRequest::withStateColumns()
                     ->where('patient_id', $lockedPatient->id)
                     ->whereRaw('LOWER(status) = ?', ['pending'])
                     ->get(['document_type'])
@@ -88,7 +88,7 @@ class DocumentRequestController extends Controller
                     ]);
                 }
 
-                $todayRequestCount = DocumentRequest::query()
+                $todayRequestCount = DocumentRequest::withStateColumns()
                     ->where('patient_id', $lockedPatient->id)
                     ->whereDate('request_date', now()->toDateString())
                     ->count();
@@ -184,7 +184,7 @@ class DocumentRequestController extends Controller
 
     public function index()
     {
-        $requests = DocumentRequest::where('patient_id', session('patient_id'))
+        $requests = DocumentRequest::withStateColumns()->where('patient_id', session('patient_id'))
             ->orderByDesc('created_at')
             ->get();
 
@@ -283,7 +283,7 @@ class DocumentRequestController extends Controller
 
                 'stats' => $stats,
 
-                'types' => DocumentRequest::query()
+                'types' => DocumentRequest::withStateColumns()
                     ->whereNotNull('document_type')
                     ->pluck('document_type')
                     ->filter()
@@ -302,7 +302,7 @@ class DocumentRequestController extends Controller
             ->get()
             : collect();
 
-        $refreshItems = DocumentRequest::query()
+        $refreshItems = DocumentRequest::withStateColumns()
             ->select('id')
             ->orderByDesc('id')
             ->get()
@@ -384,7 +384,7 @@ class DocumentRequestController extends Controller
             'stats' =>
             $this->getDocumentRequestStats(),
 
-            'types' => DocumentRequest::query()
+            'types' => DocumentRequest::withStateColumns()
                 ->whereNotNull('document_type')
                 ->where('document_type', '!=', '')
                 ->pluck('document_type')
@@ -405,7 +405,7 @@ class DocumentRequestController extends Controller
 
         try {
             $docRequest = DB::transaction(function () use ($id) {
-                $documentRequest = DocumentRequest::with('patient.user')->findOrFail($id);
+                $documentRequest = DocumentRequest::withStateColumns()->with('patient.user')->findOrFail($id);
 
                 $documentRequest->update([
                     'status' => 'approved',
@@ -473,7 +473,7 @@ class DocumentRequestController extends Controller
             'reason' => 'nullable|string|max:255',
         ]);
 
-        $docRequest = DocumentRequest::with('patient.user')->findOrFail($id);
+        $docRequest = DocumentRequest::withStateColumns()->with('patient.user')->findOrFail($id);
 
         $docRequest->update([
             'status' => 'rejected',
@@ -568,7 +568,7 @@ class DocumentRequestController extends Controller
         $dateTo = trim((string) $request->get('date_to', ''));
         $sort = trim((string) $request->get('sort', 'newest'));
 
-        $query = DocumentRequest::with('patient');
+        $query = DocumentRequest::withStateColumns()->with('patient');
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -579,9 +579,15 @@ class DocumentRequestController extends Controller
                     ->orWhereHas('patient', function ($patientQuery) use ($search) {
                         $patientQuery
                             ->where('name', 'like', "%{$search}%")
-                            ->orWhere('student_no', 'like', "%{$search}%")
-                            ->orWhere('faculty_code', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhereHas(
+                                'information',
+                                function ($informationQuery) use ($search) {
+                                    $informationQuery
+                                        ->where('student_no', 'like', "%{$search}%")
+                                        ->orWhere('faculty_code', 'like', "%{$search}%");
+                                }
+                            );
                     });
             });
         }
@@ -653,7 +659,7 @@ class DocumentRequestController extends Controller
 
     private function getDocumentRequestStats(): array
     {
-        $counts = DocumentRequest::query()
+        $counts = DocumentRequest::withStateColumns()
             ->selectRaw('LOWER(status) as status_key, COUNT(*) as total')
             ->groupBy('status_key')
             ->pluck('total', 'status_key')
@@ -684,13 +690,12 @@ class DocumentRequestController extends Controller
         $patient = $documentRequest->patient;
         $createdAt = $documentRequest->created_at;
 
+        $patient?->loadMissing('information');
+
         $patientIdentifier =
-            optional($patient)->student_no
-            ?? optional($patient)->student_number
-            ?? optional($patient)->student_id
-            ?? optional($patient)->faculty_code
-            ?? optional($patient)->employee_no
-            ?? optional($patient)->id
+            $patient?->information?->student_no
+            ?? $patient?->information?->faculty_code
+            ?? $patient?->id
             ?? 'No ID set';
 
         return [

@@ -26,6 +26,7 @@ class ReservedBookingPeriodSlot extends Model
 
     public function appointment()
     {
-        return $this->hasOne(Appointment::class);
+        return $this->hasOneThrough(Appointment::class, AppointmentReservedBooking::class,
+            'reserved_booking_period_slot_id', 'id', 'id', 'appointment_id');
     }
 }

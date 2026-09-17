@@ -1607,47 +1607,40 @@
             }
 
             if (slotGrid) {
-                slotGrid.style.display =
-                    'grid';
+                slotGrid.style.display = 'grid';
 
                 slotGrid.className =
                     'appointment-slot-grid slot-grid-ui';
 
+                const loadingSkeleton = Array.from({
+                    length: 4
+                }).map(() => `
+        <div class="px-4 py-3 rounded-xl border border-gray-100 bg-gray-50">
+            <div class="h-4 w-20 skeleton-block rounded"></div>
+        </div>
+    `).join('');
+
                 slotGrid.innerHTML = `
-                    <div class="appointment-slot-period">
-                        <div class="appointment-slot-period-heading">
-                            AM
-                        </div>
+        <div class="appointment-slot-period">
+            <div class="appointment-slot-period-heading">
+                AM
+            </div>
 
-                        <div class="appointment-slot-period-grid">
-                            ${Array.from({
-                    length: 4
-                }).map(() => ` <
-                    div class = "px-4 py-3 rounded-xl border border-gray-100 bg-gray-50" >
-                    <
-                    div class = "h-4 w-20 skeleton-block rounded" > < /div> < /
-                div >
-                    `).join('')}
-                        </div>
-                    </div>
+            <div class="appointment-slot-period-grid">
+                ${loadingSkeleton}
+            </div>
+        </div>
 
-                    <div class="appointment-slot-period">
-                        <div class="appointment-slot-period-heading">
-                            PM
-                        </div>
+        <div class="appointment-slot-period">
+            <div class="appointment-slot-period-heading">
+                PM
+            </div>
 
-                        <div class="appointment-slot-period-grid">
-                            ${Array.from({
-                    length: 4
-                }).map(() => ` <
-                    div class = "px-4 py-3 rounded-xl border border-gray-100 bg-gray-50" >
-                    <
-                    div class = "h-4 w-20 skeleton-block rounded" > < /div> < /
-                div >
-                    `).join('')}
-                        </div>
-                    </div>
-                `;
+            <div class="appointment-slot-period-grid">
+                ${loadingSkeleton}
+            </div>
+        </div>
+    `;
             }
         }
 
