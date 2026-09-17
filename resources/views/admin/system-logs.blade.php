@@ -525,10 +525,13 @@
                                                     Description
                                                 </span>
 
-                                                <span class="table-record-value">
-                                                    {{ $log->description ?? 'No description provided.' }}
-                                                </span>
-                                            </div>
+                                            <span class="table-record-value">
+                                                {{ $log->description ?? 'No description provided.' }}
+                                                @if ($log->full_description !== $log->description)
+                                                    <details><summary>Full details</summary>{{ $log->full_description }}</details>
+                                                @endif
+                                            </span>
+                                        </div>
 
                                         </div>
 

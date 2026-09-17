@@ -117,7 +117,23 @@
                             setFieldError('ruleDaysError', @json($errors->first('days')), null, 'ruleDaysGroup');
                         @endif
                         @if ($errors->has('is_active'))
-                            setFieldError('ruleStateError', @json($errors->first('is_active')), 'ruleActivationState');
+                            const activeScheduleError =
+                                @json($errors->first('is_active'));
+
+                            setFieldError(
+                                'ruleStateError',
+                                activeScheduleError,
+                                'ruleActivationState'
+                            );
+
+                            window.setTimeout(() => {
+                                window.showToast?.({
+                                    type: 'warning',
+                                    title: 'Schedule cannot be activated',
+                                    message: activeScheduleError,
+                                    duration: 5000
+                                });
+                            }, 100);
                         @endif
                         @if ($errors->has('status'))
                             setFieldError('ruleStatusError', @json($errors->first('status')), 'ruleStatus');
@@ -1918,8 +1934,9 @@
                                     </select>
 
                                     <div class="field-help">
-                                        New schedule rules start as Inactive. To activate a replacement rule,
-                                        set the current active rule for the same day(s) to Inactive first.
+                                        New schedule rules start as Inactive. Only one clinic schedule can be Active
+                                        at a time. Set the current Active schedule to Inactive before activating
+                                        another schedule.
                                     </div>
 
                                     <div id="ruleStateError" class="global-field-error"
@@ -2541,9 +2558,10 @@
                                 <i class="fa-solid fa-tooth"></i>
                             </div>
                             <div>
-                                <h4>Allowed Dental Services</h4>
-                                <p>Select every service patients may choose during this
-                                    reserved period.</p>
+                                <div class="modal-section-title">Allowed Dental Services</div>
+                                <div class="modal-section-sub">
+                                    Select every service patients may choose during this reserved period.
+                                </div>
                             </div>
                         </div>
 
@@ -2861,36 +2879,82 @@
 
         const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const DAY_ABBRS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const TIME_ROWS = [{
-                h: 9,
-                l: '9:00 AM'
-            }, {
-                h: 10,
-                l: '10:00 AM'
-            },
-            {
-                h: 11,
-                l: '11:00 AM'
-            }, {
-                h: 12,
-                l: '12:00 PM'
-            },
-            {
-                h: 13,
-                l: '1:00 PM'
-            }, {
-                h: 14,
-                l: '2:00 PM'
-            },
-            {
-                h: 15,
-                l: '3:00 PM'
-            }, {
-                h: 16,
-                l: '4:00 PM'
-            }
-        ];
+        const DEFAULT_CALENDAR_OPEN_HOUR = 9;
+        const DEFAULT_CALENDAR_CLOSE_HOUR = 17;
 
+        function formatCalendarHour(hour) {
+            const normalizedHour =
+                ((hour % 24) + 24) % 24;
+
+            const suffix =
+                normalizedHour >= 12 ? 'PM' : 'AM';
+
+            const displayHour =
+                normalizedHour % 12 || 12;
+
+            return `${displayHour}:00 ${suffix}`;
+        }
+
+        function getActiveCalendarSchedule() {
+            return (scheduleRules || []).find(rule => {
+                return (
+                    rule &&
+                    rule.is_active &&
+                    rule.status !== 'closed' &&
+                    rule.open_time &&
+                    rule.close_time
+                );
+            }) || null;
+        }
+
+        function getCalendarTimeRows() {
+            const activeSchedule =
+                getActiveCalendarSchedule();
+
+            let openHour =
+                DEFAULT_CALENDAR_OPEN_HOUR;
+
+            let closeHour =
+                DEFAULT_CALENDAR_CLOSE_HOUR;
+
+            if (activeSchedule) {
+                openHour = parseInt(
+                    String(activeSchedule.open_time).substring(0, 2),
+                    10
+                );
+
+                closeHour = parseInt(
+                    String(activeSchedule.close_time).substring(0, 2),
+                    10
+                );
+            }
+
+            if (
+                !Number.isFinite(openHour) ||
+                !Number.isFinite(closeHour) ||
+                closeHour <= openHour
+            ) {
+                openHour =
+                    DEFAULT_CALENDAR_OPEN_HOUR;
+
+                closeHour =
+                    DEFAULT_CALENDAR_CLOSE_HOUR;
+            }
+
+            return Array.from({
+                    length: closeHour - openHour
+                },
+                (_, index) => {
+                    const hour =
+                        openHour + index;
+
+                    return {
+                        h: hour,
+                        l: formatCalendarHour(hour)
+                    };
+                }
+            );
+        }
         let weekOffset = 0;
 
         function weekStart(offset) {
@@ -3052,7 +3116,7 @@
                 </div>`;
             });
 
-            TIME_ROWS.forEach(({
+            getCalendarTimeRows().forEach(({
                 h,
                 l
             }) => {
@@ -3323,9 +3387,19 @@
             const timeFields = document.getElementById('ruleTimeFields');
             const defaultBreak = document.querySelector('.break-chip[data-val="12:00-13:00"]');
 
-            if (!backdrop || !form || !methodField || !title || !activationState || !status || !openTime || !closeTime || !
-                maxSlots || !notes ||
-                !timeFields) {
+            if (
+                !backdrop ||
+                !form ||
+                !methodField ||
+                !title ||
+                !activationState ||
+                !status ||
+                !openTime ||
+                !closeTime ||
+                !maxSlots ||
+                !notes ||
+                !timeFields
+            ) {
                 console.error('Rule modal elements not found.');
                 return;
             }
@@ -3403,9 +3477,11 @@
 
             selectedBreak = '12:00-13:00';
             setCustomSelectValue(activationState, '0');
-            setCustomSelectValue(status, 'open');
+            setCustomSelectValue(status,
+                'open');
             setCustomSelectValue(openTime, '09:00');
-            setCustomSelectValue(closeTime, '17:00');
+            setCustomSelectValue(closeTime,
+                '17:00');
             toggleStatusFields('open');
             maxSlots.value = '5';
             notes.value = '';
@@ -3438,7 +3514,7 @@
                 }
 
                 if (submitBtn) {
-                    submitBtn.className = 'ui-btn ui-btn-edit';
+                    submitBtn.className = 'ui-btn ui-btn-primary';
                 }
 
                 if (submitText) {
@@ -3570,25 +3646,21 @@
             );
         }
 
-        function sortScheduleDays(days) {
-            const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            return [...new Set(days)].sort((a, b) => order.indexOf(a) - order.indexOf(b));
-        }
+        function findOtherActiveSchedule() {
+            return (scheduleRules || []).find(rule => {
+                if (!rule || !rule.is_active) {
+                    return false;
+                }
 
-        function findConflictingScheduleDays(activeDays) {
-            const selected = new Set(activeDays);
-            const conflicts = [];
+                if (
+                    editingId !== null &&
+                    String(rule.id) === String(editingId)
+                ) {
+                    return false;
+                }
 
-            (scheduleRules || []).forEach(rule => {
-                if (!rule || !rule.is_active) return;
-                if (editingId !== null && String(rule.id) === String(editingId)) return;
-
-                (rule.days || []).forEach(day => {
-                    if (selected.has(day)) conflicts.push(day);
-                });
-            });
-
-            return sortScheduleDays(conflicts);
+                return true;
+            }) || null;
         }
 
         function registerClinicScheduleValidation() {
@@ -3609,8 +3681,11 @@
                         form.querySelectorAll('.day-toggle.active')
                     ).map(day => day.dataset.day);
 
+                    const activationStateField =
+                        document.getElementById('ruleActivationState');
+
                     const activationState =
-                        document.getElementById('ruleActivationState')?.value || '0';
+                        activationStateField?.value || '0';
 
                     const status =
                         document.getElementById('ruleStatus')?.value || '';
@@ -3624,9 +3699,14 @@
                     const maxSlotsField =
                         document.getElementById('ruleMaxSlots');
 
-                    const openTime = openTimeField?.value || '';
-                    const closeTime = closeTimeField?.value || '';
-                    const maxSlots = Number(maxSlotsField?.value || 0);
+                    const openTime =
+                        openTimeField?.value || '';
+
+                    const closeTime =
+                        closeTimeField?.value || '';
+
+                    const maxSlots =
+                        Number(maxSlotsField?.value || 0);
 
                     let valid = true;
                     let firstInvalid = null;
@@ -3634,6 +3714,11 @@
                     window.clearGlobalGroupError?.(
                         daysGroup,
                         'rule-days'
+                    );
+
+                    clearFieldError(
+                        'ruleStateError',
+                        'ruleActivationState'
                     );
 
                     window.showFormInputValidationMessage?.(
@@ -3658,18 +3743,28 @@
                     }
 
                     if (activationState === '1') {
-                        const conflicts =
-                            findConflictingScheduleDays(activeDays);
+                        const otherActiveSchedule =
+                            findOtherActiveSchedule();
 
-                        if (conflicts.length) {
-                            window.showGlobalGroupError?.(
-                                daysGroup,
-                                'rule-days',
-                                `An active schedule already exists for ${conflicts.join(', ')}. Set the current active schedule to Inactive before activating this rule.`
+                        if (otherActiveSchedule) {
+                            const message =
+                                'Set the current active schedule to Inactive before activating this schedule.';
+
+                            setFieldError(
+                                'ruleStateError',
+                                message,
+                                'ruleActivationState'
                             );
 
+                            window.showToast?.({
+                                type: 'warning',
+                                title: 'Schedule cannot be activated',
+                                message: message,
+                                duration: 5000
+                            });
+
                             valid = false;
-                            firstInvalid ||= daysGroup;
+                            firstInvalid ||= activationStateField;
                         }
                     }
 
@@ -3753,12 +3848,14 @@
         function submitRule() {
             const form = document.getElementById('ruleForm');
 
-            if (!form) return;
+            if (!form) {
+                return;
+            }
 
             const validation =
                 window.validateGlobalForm?.(form);
 
-            if (!validation || !validation.valid) {
+            if (validation && !validation.valid) {
                 return;
             }
 
@@ -3769,19 +3866,19 @@
             ).map(day => day.dataset.day);
 
             const activationState =
-                document.getElementById('ruleActivationState').value;
+                document.getElementById('ruleActivationState')?.value || '0';
 
             const status =
-                document.getElementById('ruleStatus').value;
+                document.getElementById('ruleStatus')?.value || 'open';
 
             const openTime =
-                document.getElementById('ruleOpenTime').value;
+                document.getElementById('ruleOpenTime')?.value || '';
 
             const closeTime =
-                document.getElementById('ruleCloseTime').value;
+                document.getElementById('ruleCloseTime')?.value || '';
 
             const maxSlots =
-                document.getElementById('ruleMaxSlots').value;
+                document.getElementById('ruleMaxSlots')?.value || '';
 
             form
                 .querySelectorAll('.injected-hidden')
@@ -3817,9 +3914,11 @@
 
             inject(
                 'notes',
-                document.getElementById('ruleNotes').value
+                document.getElementById('ruleNotes')?.value || ''
             );
-            window.DiscardChanges?.markSubmitting(form);
+
+            window.DiscardChanges?.markSubmitting?.(form);
+
             form.requestSubmit();
         }
 
@@ -3976,7 +4075,8 @@
                 clearFieldError('ruleMaxSlotsError', 'ruleMaxSlots');
             });
 
-            document.getElementById('blockDate')?.addEventListener('input', () => clearFieldError('blockDateError',
+            document.getElementById('blockDate')?.addEventListener('input', () => clearFieldError(
+                'blockDateError',
                 'blockDate'));
 
             document
@@ -4000,7 +4100,8 @@
                 });
             document.getElementById('blockReason')?.addEventListener('change', () => clearFieldError(
                 'blockReasonError', 'blockReason'));
-            document.getElementById('blockNote')?.addEventListener('input', () => clearFieldError('blockNoteError',
+            document.getElementById('blockNote')?.addEventListener('input', () => clearFieldError(
+                'blockNoteError',
                 'blockNote'));
         });
 
@@ -4376,7 +4477,7 @@
                 modalTitle.textContent = 'Edit Reserved Booking Period';
                 modalSubtitle.textContent = 'Update the window, target group, booking mode, or capacity.';
                 modalIcon.className = 'fa-solid fa-pen-to-square';
-                submitButton.className = 'ui-btn ui-btn-edit';
+                submitButton.className = 'ui-btn ui-btn-primary';
                 submitText.textContent = 'Update Reserved Period';
             }
 
