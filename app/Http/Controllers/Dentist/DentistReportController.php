@@ -3080,9 +3080,18 @@ class DentistReportController extends Controller
 
         $validated = $request->validate([
             'treatment_date' => ['required', 'date', 'before_or_equal:today'],
-            'patient_name' => ['required', 'string', 'max:150'],
+            'patient_name' => [
+                'required',
+                'string',
+                'max:150',
+                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+            ],
             'patient_email' => ['nullable', 'email', 'max:190'],
-            'patient_phone' => ['nullable', 'string', 'max:30'],
+            'patient_phone' => [
+                'nullable',
+                'string',
+                'regex:/^09\d{9}$/',
+            ],
             'office_type' => ['nullable', Rule::in(['Administrative', 'Faculty', 'Dependent', 'Alumni'])],
             'program_code' => ['nullable', 'string', 'max:50'],
             'gender' => ['nullable', Rule::in(['Male', 'Female', 'Other'])],
@@ -3091,6 +3100,9 @@ class DentistReportController extends Controller
             'time_in' => ['nullable', 'date'],
             'time_out' => ['nullable', 'date', 'after_or_equal:time_in'],
             'patient_signature' => ['nullable', 'file', 'image', 'mimes:png,jpg,jpeg', 'max:5120'],
+        ], [
+            'patient_name.regex' => 'Patient name may only contain letters, spaces, apostrophes, periods, and hyphens.',
+            'patient_phone.regex' => 'Contact number must start with 09 and contain exactly 11 digits.',
         ]);
 
         $timeIn = ! empty($validated['time_in']) ? Carbon::parse($validated['time_in']) : null;

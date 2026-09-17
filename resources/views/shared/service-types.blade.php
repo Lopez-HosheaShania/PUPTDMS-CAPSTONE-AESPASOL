@@ -145,10 +145,12 @@
 
                                                     <input type="text" id="serviceNameInput" name="name"
                                                         value="{{ old('name') }}"
-                                                        class="form-input-custom global-control-with-icon"
+                                                        class="form-input-custom global-form-icon global-control-with-action"
                                                         placeholder="e.g. Tooth Extraction" autocomplete="off"
+                                                        maxlength="255" pattern="[A-Za-zÑñ ]+"
                                                         data-field-label="Service Name"
                                                         data-required-message="Please enter a service name."
+                                                        data-pattern-message="Service name can only contain letters and spaces."
                                                         data-clearable-input required>
 
                                                     <button type="button" class="search-clear field-clear-btn"
@@ -254,7 +256,7 @@
                                 </thead>
 
                                 <tbody id="serviceTypeTableBody">
-                                    @forelse ($services as $service)
+                                    @forelse ($services->sortBy('id') as $service)
                                         <tr data-service-id="{{ $service->id }}">
                                             <td>
                                                 <span class="table-tag table-tag-neutral">
@@ -338,7 +340,7 @@
                         <div id="serviceTypeGridView" class="service-type-view table-grid-view" hidden>
                             @if ($services->count())
                                 <div id="serviceTypeGridContainer" class="table-record-grid">
-                                    @foreach ($services as $service)
+                                    @foreach ($services->sortBy('id') as $service)
                                         <article class="table-record-card" data-service-id="{{ $service->id }}">
                                             <div class="service-grid-card">
                                                 <div class="service-grid-topline">
@@ -492,9 +494,10 @@
                                     <i class="fa-solid fa-tag global-control-icon"></i>
 
                                     <input type="text" id="manageServiceName" name="name"
-                                        class="form-input-custom global-control-with-icon" maxlength="255"
-                                        autocomplete="off" data-field-label="Service Name"
-                                        data-required-message="Please enter a service name." required>
+                                        class="form-input-custom global-form-icon global-control-with-action" maxlength="255"
+                                        autocomplete="off" pattern="[A-Za-zÑñ ]+" data-field-label="Service Name"
+                                        data-required-message="Please enter a service name."
+                                        data-pattern-message="Service name can only contain letters and spaces." required>
 
                                 </div>
                             </div>
@@ -963,7 +966,9 @@
                 id));
 
             function sortServices() {
-                serviceTypeServices.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+                serviceTypeServices.sort(
+                    (a, b) => Number(a.id) - Number(b.id)
+                );
             }
 
             function updateServiceCounts() {

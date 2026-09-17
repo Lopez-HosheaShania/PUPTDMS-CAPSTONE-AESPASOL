@@ -18,7 +18,7 @@
 }
 
 .view-toggle-container[data-global-view-toggle] {
-    --view-toggle-height: 36px;
+    --view-toggle-height: var(--toolbar-control-height);
     --view-toggle-padding: 3px;
     --view-toggle-gap: 2px;
     --view-toggle-button-size:
@@ -161,7 +161,6 @@
 
 @media (min-width: 768px) and (max-width: 1024px) {
     .view-toggle-container[data-global-view-toggle] {
-        --view-toggle-height: 40px;
         border-radius: 12px;
     }
 
@@ -179,7 +178,6 @@
 
 @media (max-width: 767px) {
     .view-toggle-container[data-global-view-toggle] {
-        --view-toggle-height: 38px;
         --view-toggle-padding: 3px;
         margin-left: auto;
         flex: 0 0 auto;
@@ -200,7 +198,6 @@
 
 @media (max-width: 380px) {
     .view-toggle-container[data-global-view-toggle] {
-        --view-toggle-height: 36px;
         border-radius: 10px;
     }
 

@@ -10,7 +10,7 @@ class ServiceTypeController extends Controller
 {
     public function index()
     {
-        $services = ServiceType::orderBy('name')->get();
+        $services = ServiceType::orderBy('id')->get();
 
         $layoutRole = request()->routeIs('dentist.*')
             ? 'dentist'
@@ -25,8 +25,20 @@ class ServiceTypeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:service_types,name',
-            'description' => 'nullable|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[A-Za-zÑñ\s]+$/u',
+                'unique:service_types,name',
+            ],
+            'description' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+        ], [
+            'name.regex' => 'Service name can only contain letters and spaces.',
         ]);
 
         $service = ServiceType::create([
@@ -52,8 +64,20 @@ class ServiceTypeController extends Controller
         $service = ServiceType::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:service_types,name,' . $service->id,
-            'description' => 'nullable|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[A-Za-zÑñ\s]+$/u',
+                'unique:service_types,name,' . $service->id,
+            ],
+            'description' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+        ], [
+            'name.regex' => 'Service name can only contain letters and spaces.',
         ]);
 
         $service->update([

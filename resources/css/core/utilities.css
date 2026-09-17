@@ -1626,9 +1626,22 @@
 
 [data-theme="dark"] .ui-action-reset,
 .dark .ui-action-reset {
-    --action-bg: var(--surface);
-    --action-color: var(--text-2);
-    --action-border: var(--border);
+    --action-bg:
+        color-mix(in srgb,
+            var(--violet-600) 18%,
+            transparent);
+
+    --action-color: var(--violet-300);
+
+    --action-border:
+        color-mix(in srgb,
+            var(--violet-600) 28%,
+            transparent);
+
+    --action-hover-bg: var(--violet-600);
+    --action-hover-color: var(--color-white);
+    --action-hover-border: var(--violet-600);
+    --action-tooltip-bg: var(--violet-700);
 }
 
 [data-theme="dark"] .ui-action-view,
@@ -1675,16 +1688,18 @@
 
 [data-theme="dark"] .ui-btn-reset-password,
 .dark .ui-btn-reset-password {
-    background: var(--alpha-violet-600-22);
-    border-color: var(--alpha-violet-400-34);
-    color: var(--violet-300);
+    background: var(--violet-600);
+    border-color: var(--violet-600);
+    color: var(--color-white);
+    box-shadow: 0 8px 18px var(--alpha-violet-600-22);
 }
 
 [data-theme="dark"] .ui-btn-reset-password:hover,
 .dark .ui-btn-reset-password:hover {
-    background: var(--alpha-violet-600-34);
-    border-color: var(--alpha-violet-300-48);
-    color: var(--violet-100);
+    background: var(--violet-700);
+    border-color: var(--violet-700);
+    color: var(--color-white);
+    transform: translateY(-1px);
 }
 
 [data-theme="dark"] .ui-btn-success,
@@ -2165,10 +2180,9 @@
 .global-info-subvalue {
     display: block;
     margin-top: 2px;
-
     color: var(--text-2);
     font-size: 11px;
-    font-weight: 650;
+    font-weight: 500;
     line-height: 1.25;
 
     overflow-wrap: anywhere;

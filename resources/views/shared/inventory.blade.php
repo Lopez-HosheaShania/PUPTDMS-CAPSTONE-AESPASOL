@@ -297,8 +297,8 @@
 
                 <div class="filter-date-input-wrap">
 
-                    <input id="fp_dateFrom" type="text" class="js-flatpickr-date-range-from" placeholder="Start date"
-                        readonly autocomplete="off">
+                    <input id="fp_dateFrom" type="text" class="form-input-custom js-flatpickr-date-range-from"
+                        placeholder="Start date" readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
 
@@ -306,8 +306,8 @@
 
                 <div class="filter-date-input-wrap">
 
-                    <input id="fp_dateTo" type="text" class="js-flatpickr-date-range-to" placeholder="End date"
-                        readonly autocomplete="off">
+                    <input id="fp_dateTo" type="text" class="form-input-custom js-flatpickr-date-range-to"
+                        placeholder="End date" readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
 
@@ -407,8 +407,6 @@
                                 data-field-label="Date Received" data-required-message="Please select a date."
                                 data-validation-rule="notFutureDate" data-flatpickr-append-to-body
                                 placeholder="Select date" required readonly>
-
-                            <i class="fa-regular fa-calendar inventory-date-icon"></i>
                         </div>
                     </div>
 
@@ -421,8 +419,6 @@
                             <input id="addExpirationDate" name="expiration_date" type="text"
                                 class="field-input form-input-custom js-flatpickr-date" data-field-label="Expiration Date"
                                 data-flatpickr-append-to-body placeholder="Optional" readonly>
-
-                            <i class="fa-regular fa-calendar inventory-date-icon"></i>
                         </div>
                     </div>
 
@@ -439,7 +435,7 @@
                                     maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
                                     data-required-message="Please enter a stock number."
                                     data-pattern-message="Stock number must use the format 00-000."
-                                    oninput="formatStockNo(this)" required>
+                                    data-validation-rule="uniqueInventoryStock" oninput="formatStockNo(this)" required>
                             </div>
 
                             <x-voice-input target="#addStock" status-id="addStockVoiceStatus"
@@ -639,8 +635,6 @@
                                 class="field-input form-input-custom js-flatpickr-date" data-field-label="Date Received"
                                 data-required-message="Please select a date." data-validation-rule="notFutureDate"
                                 required data-flatpickr-append-to-body readonly>
-
-                            <i class="fa-regular fa-calendar inventory-date-icon"></i>
                         </div>
                     </div>
 
@@ -653,8 +647,6 @@
                             <input id="editExpirationDate" name="expiration_date" type="text"
                                 class="field-input form-input-custom js-flatpickr-date" data-field-label="Expiration Date"
                                 data-flatpickr-append-to-body placeholder="Optional" readonly>
-
-                            <i class="fa-regular fa-calendar inventory-date-icon"></i>
                         </div>
                     </div>
 
@@ -673,7 +665,8 @@
                                     maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
                                     data-required-message="Please enter a stock number."
                                     data-pattern-message="Stock number must use the format 00-000."
-                                    oninput="formatStockNo(this)" required>
+                                    data-validation-rule="uniqueInventoryStockEdit" oninput="formatStockNo(this)"
+                                    required>
                             </div>
 
                             <x-voice-input target="#editStock" status-id="editStockVoiceStatus"
@@ -739,7 +732,7 @@
                                 </button>
 
                                 <input id="editQty" name="qty" type="number" class="global-number-stepper-input"
-                                    min="0" max="99999" step="1" inputmode="numeric"
+                                    min="1" max="99999" step="1" inputmode="numeric"
                                     data-number-stepper-input data-field-label="Quantity"
                                     data-required-message="Please enter a quantity." data-validation-rule="wholeNumber"
                                     oninput="computeEditBalance()" required>
@@ -861,6 +854,93 @@
         var inventory = [];
         var activeTab = 'all';
 
+        function normalizeInventoryStockNo(value) {
+            return String(value || '')
+                .replace(/\D/g, '');
+        }
+
+        function findDuplicateInventoryStock(
+            stockNo,
+            ignoreId = null
+        ) {
+            const normalizedStock =
+                normalizeInventoryStockNo(stockNo);
+
+            if (normalizedStock.length !== 5) {
+                return null;
+            }
+
+            return inventory.find(function(item) {
+                const isCurrentItem =
+                    ignoreId !== null &&
+                    Number(item.id) === Number(ignoreId);
+
+                if (isCurrentItem) {
+                    return false;
+                }
+
+                return (
+                    normalizeInventoryStockNo(
+                        item.stock_no
+                    ) === normalizedStock
+                );
+            }) || null;
+        }
+
+        function registerInventoryStockValidationRules() {
+            if (
+                typeof window.registerGlobalValidationRule !==
+                'function'
+            ) {
+                return;
+            }
+
+            window.registerGlobalValidationRule(
+                'uniqueInventoryStock',
+                function(field) {
+                    const duplicate =
+                        findDuplicateInventoryStock(
+                            field.value
+                        );
+
+                    return duplicate ?
+                        'This stock number is already assigned to another inventory item.' :
+                        '';
+                }
+            );
+
+            window.registerGlobalValidationRule(
+                'uniqueInventoryStockEdit',
+                function(field) {
+                    const duplicate =
+                        findDuplicateInventoryStock(
+                            field.value,
+                            typeof editId !== 'undefined' ?
+                            editId :
+                            null
+                        );
+
+                    return duplicate ?
+                        'This stock number is already assigned to another inventory item.' :
+                        '';
+                }
+            );
+        }
+
+        if (
+            typeof window.registerGlobalValidationRule ===
+            'function'
+        ) {
+            registerInventoryStockValidationRules();
+        } else {
+            window.addEventListener(
+                'global-validation-ready',
+                registerInventoryStockValidationRules, {
+                    once: true
+                }
+            );
+        }
+
         var inventoryCurrentPage = 1;
         var inventoryEntriesPerPage = 10;
 
@@ -911,7 +991,7 @@
                 key: @json($inventoryWatcherKey),
                 url: INVENTORY_DATA_URL,
                 initialItems: inventory,
-                anchorSelector: '#mainContent.inventory-page .inventory-table-card',
+                anchorSelector: '#mainContent.inventory-page .table-card',
                 itemLabel: 'inventory item',
                 getItems: (payload) => Array.isArray(payload) ? payload : [],
                 getItemId: (item) => item?.id,
@@ -2029,7 +2109,7 @@ aria-label="Delete inventory item"
 
                     document
                         .querySelector(
-                            '.inventory-table-card'
+                            '#mainContent.inventory-page .table-card'
                         )
                         ?.scrollIntoView({
                             behavior: 'smooth',
