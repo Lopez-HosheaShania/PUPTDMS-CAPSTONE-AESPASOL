@@ -53,7 +53,7 @@ class RecordController extends Controller
 
         $completedOdontogramVisits = Appointment::query()
             ->with([
-                'procedure:id,appointment_id,odontogram_data',
+                'procedure:id,appointment_id',
             ])
             ->where('patient_id', $patient->id)
             ->where('status', 'completed')

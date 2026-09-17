@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Dentist\DentistReportController;
 use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\AcademicPeriod;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminDashboardController extends Controller
 {
-    public function index()
+    public function index(DentistReportController $dentistReportController)
     {
         $user = Auth::user();
 
@@ -30,6 +31,13 @@ class AdminDashboardController extends Controller
         );
 
         $now = Carbon::now();
+
+        // Reuse the exact same GAD computation used by Dentist Reports.
+        // No second query implementation and no separate dashboard endpoint.
+        $gadDashboardData = $dentistReportController->gadChartDataForPeriod(
+            $now->year,
+            $now->month
+        );
 
         $totalPatients = Patient::count();
 
@@ -101,7 +109,8 @@ class AdminDashboardController extends Controller
             'inventoryLowStock',
             'inventoryOutOfStock',
             'inventoryInStock',
-            'inventoryCriticalItems'
+            'inventoryCriticalItems',
+            'gadDashboardData'
         ));
     }
 }

@@ -60,7 +60,7 @@
     "src": "node_modules/flatpickr/dist/flatpickr.min.css"
   },
   "resources/css/app.css": {
-    "file": "assets/app-QCn2ih2M.css",
+    "file": "assets/app-CG5cwCkQ.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -87,7 +87,7 @@
     ]
   },
   "resources/css/pages/admin/admin-shared.css": {
-    "file": "assets/admin-shared-DUNNe797.css",
+    "file": "assets/admin-shared-BMZ2nkNj.css",
     "src": "resources/css/pages/admin/admin-shared.css",
     "isEntry": true,
     "name": "admin-shared",
@@ -102,15 +102,6 @@
     "name": "ai-generated-report",
     "names": [
       "ai-generated-report.css"
-    ]
-  },
-  "resources/css/pages/admin/cms-access.css": {
-    "file": "assets/cms-access-Tot7sgP1.css",
-    "src": "resources/css/pages/admin/cms-access.css",
-    "isEntry": true,
-    "name": "cms-access",
-    "names": [
-      "cms-access.css"
     ]
   },
   "resources/css/pages/admin/dentist-continuity.css": {
@@ -129,15 +120,6 @@
     "name": "document-templates",
     "names": [
       "document-templates.css"
-    ]
-  },
-  "resources/css/pages/admin/faculty-integration.css": {
-    "file": "assets/faculty-integration-DoGXW7OP.css",
-    "src": "resources/css/pages/admin/faculty-integration.css",
-    "isEntry": true,
-    "name": "faculty-integration",
-    "names": [
-      "faculty-integration.css"
     ]
   },
   "resources/css/pages/admin/role-permissions.css": {
@@ -231,7 +213,7 @@
     ]
   },
   "resources/css/pages/dentist/dentist-dashboard.css": {
-    "file": "assets/dentist-dashboard-Bbt8gb1n.css",
+    "file": "assets/dentist-dashboard-Bfy14yCN.css",
     "src": "resources/css/pages/dentist/dentist-dashboard.css",
     "isEntry": true,
     "name": "dentist-dashboard",
@@ -240,7 +222,7 @@
     ]
   },
   "resources/css/pages/dentist/dentist-shared.css": {
-    "file": "assets/dentist-shared-Cg3LzImf.css",
+    "file": "assets/dentist-shared-DjOAV3Dd.css",
     "src": "resources/css/pages/dentist/dentist-shared.css",
     "isEntry": true,
     "name": "dentist-shared",
@@ -258,7 +240,7 @@
     ]
   },
   "resources/css/pages/dentist/odontogram.css": {
-    "file": "assets/odontogram-DrDA3w5R.css",
+    "file": "assets/odontogram-Aq5cDvct.css",
     "src": "resources/css/pages/dentist/odontogram.css",
     "isEntry": true,
     "name": "odontogram",
@@ -285,7 +267,7 @@
     ]
   },
   "resources/css/pages/patient/appointment.css": {
-    "file": "assets/appointment-CSTtpvr1.css",
+    "file": "assets/appointment-CwvQPE0y.css",
     "src": "resources/css/pages/patient/appointment.css",
     "isEntry": true,
     "name": "appointment",
@@ -303,7 +285,7 @@
     ]
   },
   "resources/css/pages/patient/dashboard.css": {
-    "file": "assets/dashboard-DvxHEovm.css",
+    "file": "assets/dashboard-C1lov9uw.css",
     "src": "resources/css/pages/patient/dashboard.css",
     "isEntry": true,
     "name": "dashboard",
@@ -357,7 +339,7 @@
     ]
   },
   "resources/css/pages/shared/appointments.css": {
-    "file": "assets/appointments-Bz5SbNCv.css",
+    "file": "assets/appointments-hgYZIe02.css",
     "src": "resources/css/pages/shared/appointments.css",
     "isEntry": true,
     "name": "appointments",
@@ -366,7 +348,7 @@
     ]
   },
   "resources/css/pages/shared/clinic-schedule.css": {
-    "file": "assets/clinic-schedule-D6NnFjaj.css",
+    "file": "assets/clinic-schedule-DtnFySdb.css",
     "src": "resources/css/pages/shared/clinic-schedule.css",
     "isEntry": true,
     "name": "clinic-schedule",
@@ -375,7 +357,7 @@
     ]
   },
   "resources/css/pages/shared/dental-records.css": {
-    "file": "assets/dental-records-Ce0rQKj-.css",
+    "file": "assets/dental-records-CMqChDsP.css",
     "src": "resources/css/pages/shared/dental-records.css",
     "isEntry": true,
     "name": "dental-records",
@@ -393,7 +375,7 @@
     ]
   },
   "resources/css/pages/shared/inventory.css": {
-    "file": "assets/inventory-Dz0DTyls.css",
+    "file": "assets/inventory-4KvE6puM.css",
     "src": "resources/css/pages/shared/inventory.css",
     "isEntry": true,
     "name": "inventory",
@@ -402,7 +384,7 @@
     ]
   },
   "resources/css/pages/shared/patient-list.css": {
-    "file": "assets/patient-list-DtO-s-2G.css",
+    "file": "assets/patient-list-tF-g64Sk.css",
     "src": "resources/css/pages/shared/patient-list.css",
     "isEntry": true,
     "name": "patient-list",
@@ -411,7 +393,7 @@
     ]
   },
   "resources/css/pages/shared/reports.css": {
-    "file": "assets/reports-B2kWLNNo.css",
+    "file": "assets/reports-BonMe0bo.css",
     "src": "resources/css/pages/shared/reports.css",
     "isEntry": true,
     "name": "reports",
@@ -420,7 +402,7 @@
     ]
   },
   "resources/css/pages/shared/service-types.css": {
-    "file": "assets/service-types-PkVATLht.css",
+    "file": "assets/service-types-NS7LoQR1.css",
     "src": "resources/css/pages/shared/service-types.css",
     "isEntry": true,
     "name": "service-types",
@@ -429,14 +411,14 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DGaA6wXT.js",
+    "file": "assets/app-CbrHsD8Q.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "dynamicImports": [
       "resources/js/records/patient-record-modal.js",
       "resources/js/odontogram/odontogram-preview.js",
-      "resources/js/odontogram/odontogram-three.js",
+      "resources/js/odontogram/odontogram-primary-stacked-three.js",
       "resources/js/ui/voice-logic.js",
       "resources/js/forms/booking-workflow.js",
       "resources/js/ui/skeleton.js",
@@ -488,7 +470,7 @@
     "isDynamicEntry": true
   },
   "resources/js/odontogram/odontogram-preview.js": {
-    "file": "assets/odontogram-preview-CJ5EIC82.js",
+    "file": "assets/odontogram-preview-DxmMALhd.js",
     "name": "odontogram-preview",
     "src": "resources/js/odontogram/odontogram-preview.js",
     "isDynamicEntry": true,
@@ -496,13 +478,13 @@
       "resources/js/app.js"
     ],
     "dynamicImports": [
-      "resources/js/odontogram/odontogram-three.js"
+      "resources/js/odontogram/odontogram-primary-stacked-three.js"
     ]
   },
-  "resources/js/odontogram/odontogram-three.js": {
-    "file": "assets/odontogram-three-DQsxUi57.js",
-    "name": "odontogram-three",
-    "src": "resources/js/odontogram/odontogram-three.js",
+  "resources/js/odontogram/odontogram-primary-stacked-three.js": {
+    "file": "assets/odontogram-primary-stacked-three-DXQeOMzH.js",
+    "name": "odontogram-primary-stacked-three",
+    "src": "resources/js/odontogram/odontogram-primary-stacked-three.js",
     "isDynamicEntry": true
   },
   "resources/js/records/patient-record-modal.js": {
@@ -524,7 +506,7 @@
     "isDynamicEntry": true
   },
   "resources/js/ui/date-picker.js": {
-    "file": "assets/date-picker-BoRehzAF.js",
+    "file": "assets/date-picker-CZG_Xreo.js",
     "name": "date-picker",
     "src": "resources/js/ui/date-picker.js",
     "isDynamicEntry": true,
