@@ -2459,10 +2459,10 @@ class DentistReportController extends Controller
                 $this->drawPdfImageInBox(
                     $pdf,
                     $signaturePath,
-                    737.6,
-                    $y,
-                    44,
-                    12
+                    163,
+                    537,
+                    105,
+                    10
                 );
             }
         }
