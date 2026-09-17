@@ -257,13 +257,16 @@
                                     <div class="card-header-icon"><i class="fa-solid fa-chart-pie"></i></div>
                                     <span class="card-title">GAD Analytics</span>
                                 </div>
-                                <a href="#" class="card-link">
+                                <a href="{{ route('admin.reports') }}" class="card-link">
                                     View
                                     <i class="fa-solid fa-arrow-right"></i>
                                 </a>
                             </div>
-                            <div class="dashboard-empty-state-wrap">
-                                <div id="dashboardGadEmptyState" class="empty-state-host"></div>
+                            <div id="dashboardGadChartWrap" class="dashboard-empty-state-wrap relative p-4"
+                                style="height: 260px;">
+                                <canvas id="dashboardGadChart"></canvas>
+                                <div id="dashboardGadEmptyState"
+                                    class="empty-state-host absolute inset-0 pointer-events-none"></div>
                             </div>
                         </div>
 
@@ -468,6 +471,192 @@
 
     <script>
         let adminInventoryOverviewChart = null;
+        let adminGadChart = null;
+        let adminGadChartData = null;
+
+        const ADMIN_GAD_DATA = @json($gadDashboardData ?? null);
+
+        function isAdminDashboardDark() {
+            return document.documentElement.getAttribute('data-theme') === 'dark' ||
+                document.documentElement.classList.contains('dark');
+        }
+
+        function adminDashboardChartTextColor() {
+            return isAdminDashboardDark() ? '#C9D1D9' : '#374151';
+        }
+
+        function adminDashboardChartGridColor() {
+            return isAdminDashboardDark()
+                ? 'rgba(255,255,255,0.10)'
+                : 'rgba(148,163,184,0.22)';
+        }
+
+        function setDashboardGadEmptyState(message, isError = false) {
+            const canvas = document.getElementById('dashboardGadChart');
+            const emptyState = document.getElementById('dashboardGadEmptyState');
+
+            if (adminGadChart) {
+                adminGadChart.destroy();
+                adminGadChart = null;
+            }
+
+            if (canvas) {
+                canvas.style.display = 'none';
+            }
+
+            if (!emptyState) {
+                return;
+            }
+
+            window.EmptyState?.render({
+                host: emptyState,
+                icon: isError ? 'fa-triangle-exclamation' : 'fa-venus-mars',
+                title: isError ? 'Unable to load GAD analytics' : 'No GAD analytics data yet',
+                message: message || (
+                    isError
+                        ? 'Gender and development data could not be loaded right now.'
+                        : 'Gender and development insights will appear once completed records are available.'
+                )
+            });
+        }
+
+        function renderAdminGadChart(data) {
+            const canvas = document.getElementById('dashboardGadChart');
+            const labels = Array.isArray(data?.labels) ? data.labels : [];
+            const female = Array.isArray(data?.female) ? data.female.map(Number) : [];
+            const male = Array.isArray(data?.male) ? data.male.map(Number) : [];
+            const hasData = female.reduce((sum, value) => sum + Number(value || 0), 0) +
+                male.reduce((sum, value) => sum + Number(value || 0), 0) > 0;
+
+            adminGadChartData = { labels, female, male };
+
+            if (!canvas) {
+                return;
+            }
+
+            if (!hasData) {
+                setDashboardGadEmptyState(
+                    'No completed GAD records are available for the current month.',
+                    false
+                );
+                return;
+            }
+
+            if (!window.Chart) {
+                setDashboardGadEmptyState(
+                    'The chart library is still loading. Please refresh if this message remains visible.',
+                    true
+                );
+                return;
+            }
+
+            window.EmptyState?.hide('#dashboardGadEmptyState');
+            canvas.style.display = 'block';
+
+            if (adminGadChart) {
+                adminGadChart.destroy();
+            }
+
+            const textColor = adminDashboardChartTextColor();
+            const gridColor = adminDashboardChartGridColor();
+
+            adminGadChart = new window.Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Female',
+                            data: female,
+                            backgroundColor: '#EC4899',
+                            borderColor: '#EC4899',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Male',
+                            data: male,
+                            backgroundColor: '#60A5FA',
+                            borderColor: '#60A5FA',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: textColor,
+                                font: { size: 11 },
+                                usePointStyle: true,
+                                boxWidth: 8
+                            }
+                        },
+                        tooltip: window.getGlobalChartTooltipOptions?.({
+                            label(context) {
+                                return `${context.dataset.label}: ${context.parsed.x} cases`;
+                            }
+                        }) || {}
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                borderDash: [4, 4],
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textColor,
+                                precision: 0
+                            },
+                            title: {
+                                display: true,
+                                text: 'Number of Cases',
+                                color: textColor,
+                                font: { size: 10 }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                color: textColor,
+                                font: { size: 10 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function initializeAdminGadChart() {
+            const data = ADMIN_GAD_DATA;
+            const female = Array.isArray(data?.female) ? data.female.map(Number) : [];
+            const male = Array.isArray(data?.male) ? data.male.map(Number) : [];
+            const hasData = female.reduce((sum, value) => sum + Number(value || 0), 0) +
+                male.reduce((sum, value) => sum + Number(value || 0), 0) > 0;
+
+            if (!hasData) {
+                renderAdminGadChart(data);
+                return;
+            }
+
+            try {
+                if (!window.Chart && typeof window.loadChartJs === 'function') {
+                    await window.loadChartJs();
+                }
+
+                renderAdminGadChart(data);
+            } catch (error) {
+                console.error('Admin Dashboard: Unable to load Chart.js for GAD analytics.', error);
+                setDashboardGadEmptyState(
+                    'Gender and development data is available, but the chart could not be loaded.',
+                    true
+                );
+            }
+        }
 
         function buildInventoryOverviewHtml(values) {
             return `
@@ -785,6 +974,16 @@
             }
         }
 
+        window.addEventListener('global-theme-change', function() {
+            if (adminGadChartData) {
+                if (window.Chart) {
+                    renderAdminGadChart(adminGadChartData);
+                } else {
+                    initializeAdminGadChart();
+                }
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
 
             if (typeof window.setDashboardLoadingStatus === 'function') {
@@ -808,20 +1007,7 @@
                 });
             }
 
-            const gadEmptyState =
-                document.getElementById(
-                    'dashboardGadEmptyState'
-                );
-
-            if (gadEmptyState) {
-                window.EmptyState?.render({
-                    host: gadEmptyState,
-                    icon: 'fa-venus-mars',
-                    title: 'No GAD analytics data yet',
-                    message: 'Gender and development insights will appear once records are available.'
-                });
-            }
-
+            initializeAdminGadChart();
             loadAdminDashboardInventoryOverview();
         });
     </script>

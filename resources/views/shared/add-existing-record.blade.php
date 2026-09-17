@@ -130,11 +130,18 @@ $existingAppointmentRoute ??=
                 $existingAppointmentRoute,
                 ['patient' => '__PATIENT__']));
 
+        const resolveExternalPatientEndpoint =
+            @json(route('shared.existing-record.resolve-external-patient'));
+
+        const csrfToken =
+            @json(csrf_token());
+
     window.initGlobalSearchBars?.();
     window.initGlobalVoiceInputs?.();
 
     let activeRequestId = 0;
     let patientFetchController = null;
+    let renderedPatients = [];
 
     const patientResponseCache = new Map();
     let patientCurrentPage = 1;
@@ -669,10 +676,175 @@ $existingAppointmentRoute ??=
         );
     }
 
+    async function openExistingRecord(patient, button) {
+        if (!patient) {
+            return;
+        }
+
+        const isExternal =
+            patient.is_local === false ||
+            String(patient.id || '')
+                .startsWith('external:');
+
+        if (!isExternal) {
+            window.location.href =
+                buildRecordUrl(patient);
+
+            return;
+        }
+
+        if (!patient.selection_token) {
+            window.showToast?.({
+                type: 'error',
+                title: 'Unable to Select Patient',
+                message:
+                    'The selected patient could not be verified. Please search for the patient again.',
+            });
+
+            return;
+        }
+
+        const originalButtonHtml =
+            button?.innerHTML || '';
+
+        if (button) {
+            button.disabled = true;
+            button.setAttribute(
+                'aria-busy',
+                'true'
+            );
+
+            button.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <span>Preparing...</span>
+            `;
+        }
+
+        try {
+            const response =
+                await fetch(
+                    resolveExternalPatientEndpoint,
+                    {
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type':
+                                'application/json',
+
+                            Accept:
+                                'application/json',
+
+                            'X-Requested-With':
+                                'XMLHttpRequest',
+
+                            'X-CSRF-TOKEN':
+                                csrfToken,
+                        },
+
+                        body: JSON.stringify({
+                            selection_token:
+                                patient.selection_token,
+                        }),
+                    }
+                );
+
+            let result = {};
+
+            try {
+                result =
+                    await response.json();
+            } catch (_) {
+                result = {};
+            }
+
+            if (
+                !response.ok ||
+                !result.success ||
+                !result.patient?.id
+            ) {
+                throw new Error(
+                    result.message ||
+                    'Unable to prepare the selected patient.'
+                );
+            }
+
+            window.location.href =
+                buildRecordUrl(
+                    result.patient
+                );
+
+        } catch (error) {
+            console.error(
+                'Existing-record patient resolution error:',
+                error
+            );
+
+            window.showToast?.({
+                type: 'error',
+                title:
+                    'Unable to Select Patient',
+
+                message:
+                    error.message ||
+                    'Unable to prepare the selected patient right now.',
+            });
+
+            if (button) {
+                button.disabled = false;
+                button.removeAttribute(
+                    'aria-busy'
+                );
+
+                button.innerHTML =
+                    originalButtonHtml;
+            }
+        }
+    }
+
+    patientGrid?.addEventListener(
+        'click',
+        function (event) {
+            const button =
+                event.target.closest(
+                    '[data-existing-record-patient-index]'
+                );
+
+            if (
+                !button ||
+                !patientGrid.contains(button)
+            ) {
+                return;
+            }
+
+            const index =
+                Number(
+                    button.dataset
+                        .existingRecordPatientIndex
+                );
+
+            const patient =
+                renderedPatients[index];
+
+            if (!patient) {
+                return;
+            }
+
+            openExistingRecord(
+                patient,
+                button
+            );
+        }
+    );
+
     function renderPatients(patients) {
         if (!patientGrid) return;
 
-        if (!patients.length) {
+        renderedPatients =
+            Array.isArray(patients)
+                ? patients
+                : [];
+
+        if (!renderedPatients.length) {
             const query =
                 input.value.trim();
 
@@ -714,7 +886,7 @@ $existingAppointmentRoute ??=
             '#existingRecordEmptyState'
         );
 
-        const html = patients.map(function (patient) {
+        const html = renderedPatients.map(function (patient, index) {
             const patientName = patient.name || 'Patient';
             const patientEmail = patient.email || '';
             const patientType =
@@ -825,11 +997,13 @@ $existingAppointmentRoute ??=
                 }
 
             <div class="global-record-footer">
-                <a href="${escapeHtml(buildRecordUrl(patient))}"
-                    class="ui-btn ui-btn-primary ui-btn-sm">
+                <button
+                    type="button"
+                    class="ui-btn ui-btn-primary ui-btn-sm"
+                    data-existing-record-patient-index="${index}">
                     <i class="fa-solid fa-file-circle-plus"></i>
                     <span>Add Existing Appointment</span>
-                </a>
+                </button>
             </div>
 
         </div>
