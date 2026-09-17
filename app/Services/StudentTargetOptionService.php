@@ -11,9 +11,7 @@ class StudentTargetOptionService
 {
     private const CACHE_KEY = 'clinic_schedule_student_target_options_v2';
 
-    public function __construct(private readonly StudentApiService $studentApiService)
-    {
-    }
+    public function __construct(private readonly StudentApiService $studentApiService) {}
 
     public function get(): Collection
     {
@@ -22,37 +20,71 @@ class StudentTargetOptionService
 
             try {
                 $options = collect($this->studentApiService->getAllStudents())
-                    ->map(fn ($student) => is_array($student) ? $this->fromExternalStudent($student) : null)
+                    ->map(fn($student) => is_array($student) ? $this->fromExternalStudent($student) : null)
                     ->filter();
             } catch (\Throwable $exception) {
                 Log::warning('Student targeting options are using the local fallback.', [
                     'message' => $exception->getMessage(),
                 ]);
             }
-
             $localOptions = Patient::query()
+                ->with([
+                    'studentInformation' => function ($query) {
+                        $query->select([
+                            'id',
+                            'patient_id',
+                            'course_code',
+                            'course_name',
+                            'year_level',
+                            'section',
+                        ]);
+                    },
+                ])
                 ->where('classification', 'student')
-                ->whereNotNull('course_code')
-                ->select('course_code', 'course_name', 'year_level', 'section')
+                ->whereHas('studentInformation', function ($query) {
+                    $query->whereNotNull('course_code');
+                })
+                ->select([
+                    'id',
+                    'classification',
+                ])
                 ->get()
-                ->map(fn (Patient $patient) => [
-                    'course_code' => trim((string) $patient->course_code),
-                    'course_name' => trim((string) ($patient->course_name ?: $patient->course_code)),
-                    'year_level' => (int) $patient->year_level,
-                    'section' => trim((string) $patient->section),
-                ]);
+                ->map(function (Patient $patient) {
+                    $studentInformation = $patient->studentInformation;
+
+                    return [
+                        'course_code' => trim(
+                            (string) $studentInformation?->course_code
+                        ),
+
+                        'course_name' => trim(
+                            (string) (
+                                $studentInformation?->course_name
+                                ?: $studentInformation?->course_code
+                            )
+                        ),
+
+                        'year_level' => (int) (
+                            $studentInformation?->year_level ?? 0
+                        ),
+
+                        'section' => trim(
+                            (string) $studentInformation?->section
+                        ),
+                    ];
+                });
 
             return $options
                 ->concat($localOptions)
-                ->filter(fn ($option) => filled($option['course_code'])
+                ->filter(fn($option) => filled($option['course_code'])
                     && filled($option['year_level'])
                     && filled($option['section']))
-                ->unique(fn ($option) => strtolower(implode('|', [
+                ->unique(fn($option) => strtolower(implode('|', [
                     $option['course_code'],
                     $option['year_level'],
                     $option['section'],
                 ])))
-                ->sortBy(fn ($option) => sprintf(
+                ->sortBy(fn($option) => sprintf(
                     '%s|%02d|%s',
                     strtolower($option['course_code']),
                     $option['year_level'],

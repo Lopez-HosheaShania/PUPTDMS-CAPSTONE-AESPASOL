@@ -2,107 +2,48 @@
 
 namespace App\Http\Controllers\Dentist;
 
-use App\Http\Controllers\Controller;
-use App\Models\Inventory;
-use App\Services\InventoryExpirationNotifier;
-use Illuminate\Http\Request;
-use App\Helpers\AuditLogger;
+use App\Http\Controllers\Shared\InventoryController as SharedInventoryController;
 
-class InventoryController extends Controller
+class InventoryController extends SharedInventoryController
 {
-    public function index()
+    protected function actorLabel(): string
     {
-        AuditLogger::log(
-            'view',
-            'inventory',
-            'Dentist viewed inventory page'
-        );
-
-        return view('shared.inventory', [
-            'notifications' => collect([]),
-
-            'layoutRole' => 'dentist',
-            'pageShellClass' => 'app-page-shell',
-            'isDentistView' => true,
-
-            'inventoryRouteNames' => [
-                'data' => 'dentist.dentist.inventory.data',
-                'store' => 'dentist.dentist.inventory.store',
-                'update' => 'dentist.dentist.inventory.update',
-                'destroy' => 'dentist.dentist.inventory.destroy',
-            ],
-
-            'inventoryWatcherKey' => 'dentist-inventory',
-        ]);
+        return 'Dentist';
     }
 
-    public function fetch()
+
+    protected function layoutRole(): string
     {
-        return Inventory::orderBy('date_received', 'desc')->get();
+        return 'dentist';
     }
 
-    public function store(Request $request)
+
+    protected function isDentistView(): bool
     {
-        $data = $request->validate([
-            'category' => 'required|in:Medicine,Supplies',
-            'date_received' => 'required|date',
-            'expiration_date' => 'nullable|date',
-            'stock_no' => 'required|unique:inventory_items,stock_no',
-            'name' => 'required|string|max:255',
-            'unit' => 'required|string|max:50',
-            'qty' => 'required|integer|min:0',
-            'used' => 'required|integer|min:0',
-        ]);
-
-        $data['unit'] = ucwords(strtolower(trim($data['unit'])));
-
-        $inventory = Inventory::create($data);
-        app(InventoryExpirationNotifier::class)->notify($inventory);
-
-        AuditLogger::log(
-            'create_inventory',
-            'inventory',
-            'Dentist added inventory item: ' . $request->name
-        );
-
-        return response()->json(['success' => true]);
+        return true;
     }
 
-    public function update(Request $request, Inventory $inventory)
+
+    protected function inventoryRouteNames(): array
     {
-        $data = $request->validate([
-            'category' => 'required|in:Medicine,Supplies',
-            'date_received' => 'required|date',
-            'expiration_date' => 'nullable|date',
-            'stock_no' => 'required|unique:inventory_items,stock_no,' . $inventory->id,
-            'name' => 'required|string|max:255',
-            'unit' => 'required|string|max:50',
-            'qty' => 'required|integer|min:0',
-            'used' => 'required|integer|min:0',
-        ]);
+        return [
+            'data' =>
+            'dentist.dentist.inventory.data',
 
-        $data['unit'] = ucwords(strtolower(trim($data['unit'])));
+            'store' =>
+            'dentist.dentist.inventory.store',
 
-        $inventory->update($data);
-        app(InventoryExpirationNotifier::class)->notify($inventory->fresh());
+            'update' =>
+            'dentist.dentist.inventory.update',
 
-        AuditLogger::log(
-            'update_inventory',
-            'inventory',
-            'Dentist updated inventory item ID ' . $inventory->id
-        );
-
-        return response()->json(['success' => true]);
+            'destroy' =>
+            'dentist.dentist.inventory.destroy',
+        ];
     }
 
-    public function destroy(Inventory $inventory)
+
+    protected function inventoryWatcherKey(): string
     {
-        $inventory->delete();
-        AuditLogger::log(
-            'delete_inventory',
-            'inventory',
-            'Dentist deleted inventory item ID ' . $inventory->id
-        );
-        return response()->json(['success' => true]);
+        return 'dentist-inventory';
     }
 }

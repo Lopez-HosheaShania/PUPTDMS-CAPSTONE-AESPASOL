@@ -13,14 +13,11 @@ export default defineConfig({
                 'resources/css/pages/auth/backup-login.css',
 
                 // Admin
-                'resources/css/pages/admin/academic-period.css',
                 'resources/css/pages/admin/admin-dashboard.css',
                 'resources/css/pages/admin/admin-shared.css',
                 'resources/css/pages/admin/ai-generated-report.css',
-                'resources/css/pages/admin/cms-access.css',
                 'resources/css/pages/admin/dentist-continuity.css',
                 'resources/css/pages/admin/document-templates.css',
-                'resources/css/pages/admin/faculty-integration.css',
                 'resources/css/pages/admin/role-permissions.css',
                 'resources/css/pages/admin/session-management.css',
                 'resources/css/pages/admin/system-logs.css',
@@ -46,6 +43,7 @@ export default defineConfig({
                 'resources/css/pages/patient/records.css',
 
                 // Shared
+                'resources/css/pages/shared/academic-period.css',
                 'resources/css/pages/shared/active-sessions.css',
                 'resources/css/pages/shared/add-existing-record.css',
                 'resources/css/pages/shared/appointments.css',

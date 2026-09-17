@@ -95,11 +95,23 @@ class AdminReportController extends Controller
         $returningPatients = $patientVisitCounts->where('total_visits', '>', 1)->count();
         $newPatients = $patientVisitCounts->where('total_visits', 1)->count();
 
-        $topServices = Appointment::whereYear('appointment_date', $thisYear)
-            ->whereMonth('appointment_date', $thisMonth)
-            ->whereNotNull('service_type')
-            ->select('service_type as name', DB::raw('COUNT(*) as total'))
-            ->groupBy('service_type')
+        $topServices = Appointment::query()
+            ->join(
+                'service_types',
+                'appointments.service_type_id',
+                '=',
+                'service_types.id'
+            )
+            ->whereYear('appointments.appointment_date', $thisYear)
+            ->whereMonth('appointments.appointment_date', $thisMonth)
+            ->select(
+                'service_types.name as name',
+                DB::raw('COUNT(*) as total')
+            )
+            ->groupBy(
+                'service_types.id',
+                'service_types.name'
+            )
             ->orderByDesc('total')
             ->limit(5)
             ->get();
@@ -131,6 +143,8 @@ class AdminReportController extends Controller
             ->get();
 
         $customReportTypes = [
+            'dpt_emergency',
+            'dpt_non_emergency',
             'dental_services',
             'daily_treatment_record',
             'dental_health_record',
@@ -246,11 +260,23 @@ class AdminReportController extends Controller
         ];
 
         $treatmentRaw = DB::table('appointments')
-            ->select('service_type', DB::raw('COUNT(*) as total'))
-            ->whereMonth('appointment_date', $now->month)
-            ->whereYear('appointment_date', $now->year)
-            ->where('status', 'completed')
-            ->groupBy('service_type')
+            ->join(
+                'service_types',
+                'appointments.service_type_id',
+                '=',
+                'service_types.id'
+            )
+            ->select(
+                'service_types.name as service_type',
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereMonth('appointments.appointment_date', $now->month)
+            ->whereYear('appointments.appointment_date', $now->year)
+            ->where('appointments.status', 'completed')
+            ->groupBy(
+                'service_types.id',
+                'service_types.name'
+            )
             ->get()
             ->map(function ($item) {
                 return (object) [
@@ -381,7 +407,7 @@ class AdminReportController extends Controller
         $docStart = now()->copy()->startOfMonth()->toDateString();
         $docEnd = now()->copy()->endOfMonth()->toDateString();
 
-        $docBaseQuery = DocumentRequest::query()
+        $docBaseQuery = DocumentRequest::withStateColumns()
             ->whereBetween('request_date', [$docStart, $docEnd]);
 
         $docTotal = (clone $docBaseQuery)->count();
@@ -498,11 +524,23 @@ class AdminReportController extends Controller
         // TREATMENT ANALYSIS
         // ---------------------------
         $topTreatment = DB::table('appointments')
-            ->select('service_type', DB::raw('COUNT(*) as total'))
-            ->where('status', 'completed')
-            ->whereMonth('appointment_date', $now->month)
-            ->whereYear('appointment_date', $now->year)
-            ->groupBy('service_type')
+            ->join(
+                'service_types',
+                'appointments.service_type_id',
+                '=',
+                'service_types.id'
+            )
+            ->select(
+                'service_types.name as service_type',
+                DB::raw('COUNT(*) as total')
+            )
+            ->where('appointments.status', 'completed')
+            ->whereMonth('appointments.appointment_date', $now->month)
+            ->whereYear('appointments.appointment_date', $now->year)
+            ->groupBy(
+                'service_types.id',
+                'service_types.name'
+            )
             ->orderByDesc('total')
             ->first();
 
@@ -513,18 +551,32 @@ class AdminReportController extends Controller
             ->count();
 
         $breakdown = DB::table('appointments')
-            ->select('service_type', DB::raw('COUNT(*) as total'))
-            ->where('status', 'completed')
-            ->whereMonth('appointment_date', $now->month)
-            ->whereYear('appointment_date', $now->year)
-            ->groupBy('service_type')
+            ->join(
+                'service_types',
+                'appointments.service_type_id',
+                '=',
+                'service_types.id'
+            )
+            ->select(
+                'service_types.name as service_type',
+                DB::raw('COUNT(*) as total')
+            )
+            ->where('appointments.status', 'completed')
+            ->whereMonth('appointments.appointment_date', $now->month)
+            ->whereYear('appointments.appointment_date', $now->year)
+            ->groupBy(
+                'service_types.id',
+                'service_types.name'
+            )
             ->orderByDesc('total')
             ->get()
             ->map(function ($item) use ($totalTreatments) {
                 return [
                     'name' => ucfirst($item->service_type ?? 'Other'),
                     'count' => (int) $item->total,
-                    'pct' => $totalTreatments > 0 ? round((((int) $item->total / $totalTreatments) * 100), 1) : 0,
+                    'pct' => $totalTreatments > 0
+                        ? round((((int) $item->total / $totalTreatments) * 100), 1)
+                        : 0,
                 ];
             });
 
@@ -574,7 +626,7 @@ class AdminReportController extends Controller
         $docStart = $now->copy()->startOfMonth()->toDateString();
         $docEnd = $now->copy()->endOfMonth()->toDateString();
 
-        $docBaseQuery = DocumentRequest::query()
+        $docBaseQuery = DocumentRequest::withStateColumns()
             ->whereBetween('request_date', [$docStart, $docEnd]);
 
         $docTotal = (clone $docBaseQuery)->count();

@@ -15,7 +15,6 @@
     @php
         use Carbon\Carbon;
         use Illuminate\Support\Str;
-        use App\Services\AppointmentOdontogramSnapshotService;
 
         $layoutRole = $layoutRole ?? 'admin';
         $pageTitle = $pageTitle ?? 'Appointments';
@@ -71,11 +70,6 @@
 
         $upcomingAppointments = collect($upcomingAppointments ?? []);
         $pastAppointments = collect($pastAppointments ?? []);
-        $odontogramSnapshotService = app(AppointmentOdontogramSnapshotService::class);
-
-        $previousOdontogramByAppointmentId = $odontogramSnapshotService->previousSnapshotsByAppointment(
-            $pastAppointments,
-        );
         $today = $today ?? Carbon::today()->toDateString();
         $todayAppts = $upcomingAppointments->filter(fn($a) => ($a->appointment_date ?? null) === $today);
         $todayCount = $todayAppts->count();
@@ -91,10 +85,10 @@
                 : null;
 
         $firstTodayService = $firstTodayAppt
-            ? (($firstTodayAppt->service_type ?? '') === 'Others'
+            ? (($firstTodayAppt->service_type_name ?? '') === 'Others'
                 ? ($firstTodayAppt->other_services ?:
                 'Others')
-                : $firstTodayAppt->service_type ?? 'Appointment')
+                : $firstTodayAppt->service_type_name ?? 'Appointment')
             : null;
 
         $nextAppt = $upcomingAppointments
@@ -115,10 +109,10 @@
         $nextDate = $nextAppt ? \Carbon\Carbon::parse($nextAppt->appointment_date)->format('F j, Y') : null;
 
         $nextService = $nextAppt
-            ? (($nextAppt->service_type ?? '') === 'Others'
+            ? (($nextAppt->service_type_name ?? '') === 'Others'
                 ? ($nextAppt->other_services ?:
                 'Others')
-                : $nextAppt->service_type ?? 'Appointment')
+                : $nextAppt->service_type_name ?? 'Appointment')
             : null;
 
         $nextIsToday = $nextAppt && ($nextAppt->appointment_date ?? null) === $today;
@@ -300,7 +294,6 @@
                         </span>
                     </div>
 
-
                     <div class="today-snapshot-content">
 
                         <div class="today-snapshot-primary">
@@ -341,9 +334,7 @@
                             </div>
                         </div>
 
-
                         <div class="today-snapshot-divider"></div>
-
 
                         <div class="today-snapshot-next-block">
                             <div class="today-snapshot-next-heading">
@@ -419,7 +410,8 @@
                     <div class="appointment-controls-actions">
 
                         <x-filter-select id="appointmentStatusFilter" name="appointment_status" label="Status"
-                            value="all" :options="$appointmentStatusOptions" callback="handleAppointmentStatusSelect" />
+                            value="" :options="$appointmentStatusOptions" callback="handleAppointmentStatusSelect" searchable multiple
+                            search-placeholder="Search status..." />
 
                         <div class="appointment-filter-actions">
                             <button id="appointmentFilterBtn" type="button" class="global-filter-btn"
@@ -583,10 +575,6 @@
 
                                         $dateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format('F j, Y');
 
-                                        $compactDateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format(
-                                            'M j, Y',
-                                        );
-
                                         $mobileDateLabel = \Carbon\Carbon::parse($appt->appointment_date)->format(
                                             'F j, Y',
                                         );
@@ -598,10 +586,10 @@
                                             : '—';
 
                                         $serviceLabel =
-                                            ($appt->service_type ?? '') === 'Others'
+                                            ($appt->service_type_name ?? '') === 'Others'
                                                 ? ($appt->other_services ?:
                                                 'Others')
-                                                : $appt->service_type ?? '—';
+                                                : $appt->service_type_name ?? '—';
 
                                         $serviceLower = strtolower($serviceLabel);
 
@@ -733,7 +721,7 @@
                                                     )
                                                     : 'N/A',
 
-                                                'service' => $recordFollowUp->service_type ?? 'Follow-up',
+                                                'service' => $recordFollowUp->service_type_name ?? 'Follow-up',
 
                                                 'status' => $recordFollowUp->status ?? 'upcoming',
 
@@ -741,10 +729,7 @@
                                             ]
                                             : null;
 
-                                        $recordOdontogramData = $odontogramSnapshotService->appointmentSnapshot(
-                                            $recordProcedure?->odontogram_data ?? [],
-                                            $previousOdontogramByAppointmentId[$appt->id] ?? [],
-                                        );
+                                        $recordOdontogramData = $recordProcedure?->odontogram_data ?? [];
                                     @endphp
 
                                     <div class="appt-card {{ $shouldHighlightToday ? 'is-today' : '' }}"
@@ -766,13 +751,7 @@
 
                                             <div class="appt-row-date">
                                                 <p class="date-main">
-                                                    <span class="date-main-full">
-                                                        {{ $dateLabel }}
-                                                    </span>
-
-                                                    <span class="date-main-compact">
-                                                        {{ $compactDateLabel }}
-                                                    </span>
+                                                    {{ $dateLabel }}
                                                 </p>
 
                                                 <p class="date-sub">
@@ -923,7 +902,7 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canStartProcedure && $isActiveAppointment)
+                                                @if ($canStartProcedure)
                                                     <button type="button"
                                                         class="ui-action-btn
                                                            ui-action-success
@@ -942,7 +921,7 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canRescheduleAppointment && $isActiveAppointment && !$appt->reserved_booking_period_id)
+                                                @if ($canRescheduleAppointment && !$appt->reserved_booking_period_id)
                                                     <button type="button"
                                                         class="ui-action-btn ui-action-warning {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                         data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
@@ -953,14 +932,14 @@
                                                         id: '{{ $appt->id }}',
                                                         name: @js($patientName),
                                                         datetime: @js($modalDatetime),
-                                                        serviceType: @js($appt->service_type),
+                                                        serviceType: @js($appt->service_type_name),
                                                         updateUrl: '{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}'
                                                     }) @endif">
                                                         <i class="fa-solid fa-rotate-right"></i>
                                                     </button>
                                                 @endif
 
-                                                @if ($canCancelAppointment && $isActiveAppointment)
+                                                @if ($canCancelAppointment)
                                                     <button type="button"
                                                         class="ui-action-btn ui-action-delete {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                         data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
@@ -1049,10 +1028,10 @@
                                         : '—';
 
                                     $serviceLabel =
-                                        ($appt->service_type ?? '') === 'Others'
+                                        ($appt->service_type_name ?? '') === 'Others'
                                             ? ($appt->other_services ?:
                                             'Others')
-                                            : $appt->service_type ?? '—';
+                                            : $appt->service_type_name ?? '—';
 
                                     $serviceLower = strtolower($serviceLabel);
 
@@ -1145,10 +1124,7 @@
 
                                     $recordProcedure = $appt->procedure;
 
-                                    $recordOdontogramData = $odontogramSnapshotService->appointmentSnapshot(
-                                        $recordProcedure?->odontogram_data ?? [],
-                                        $previousOdontogramByAppointmentId[$appt->id] ?? [],
-                                    );
+                                    $recordOdontogramData = $recordProcedure?->odontogram_data ?? [];
 
                                     $recordFollowUp = $appt->followUpAppointments
                                         ?->sortBy('appointment_date')
@@ -1168,7 +1144,7 @@
                                                 )
                                                 : 'N/A',
 
-                                            'service' => $recordFollowUp->service_type ?? 'Follow-up',
+                                            'service' => $recordFollowUp->service_type_name ?? 'Follow-up',
 
                                             'status' => $recordFollowUp->status ?? 'upcoming',
 
@@ -1329,7 +1305,7 @@
                                             </a>
                                         @endif
 
-                                        @if ($canStartProcedure && $isActiveAppointment)
+                                        @if ($canStartProcedure)
                                             <button type="button"
                                                 class="ui-action-btn
                                                    ui-action-success
@@ -1347,7 +1323,7 @@
                                             </button>
                                         @endif
 
-                                        @if ($canRescheduleAppointment && $isActiveAppointment && !$appt->reserved_booking_period_id)
+                                        @if ($canRescheduleAppointment && !$appt->reserved_booking_period_id)
                                             <button type="button"
                                                 class="ui-action-btn ui-action-warning {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                 data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
@@ -1357,14 +1333,14 @@
                                                 id: '{{ $appt->id }}',
                                                 name: @js($patientName),
                                                 datetime: @js($modalDatetime),
-                                                serviceType: @js($appt->service_type),
+                                                serviceType: @js($appt->service_type_name),
                                                 updateUrl: '{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}'
                                             }) @endif">
                                                 <i class="fa-solid fa-rotate-right"></i>
                                             </button>
                                         @endif
 
-                                        @if ($canCancelAppointment && $isActiveAppointment)
+                                        @if ($canCancelAppointment)
                                             <button type="button"
                                                 class="ui-action-btn ui-action-delete {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                 data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
@@ -1490,14 +1466,14 @@
 
             <div class="filter-date-grid">
                 <div class="filter-date-input-wrap">
-                    <input id="fromDate" type="text" class="js-flatpickr-date-range-from" placeholder="Start date"
+                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date"
                         readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
                 </div>
 
                 <div class="filter-date-input-wrap">
-                    <input id="toDate" type="text" class="js-flatpickr-date-range-to" placeholder="End date"
+                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date"
                         readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
@@ -1614,7 +1590,7 @@
         let apptSearchInput = null;
 
         let appointmentPeriodFilter = 'all';
-        let appointmentStatusFilter = 'all';
+        let appointmentStatusFilter = ['all'];
         let appointmentStatusFilterSource = 'dropdown';
         let appointmentSortFilter = 'nearest';
         let appointmentFromDate = '';
@@ -1670,6 +1646,40 @@
             }
         };
 
+        function normalizeAppointmentStatusValues(value) {
+            const rawValues = Array.isArray(value) ?
+                value :
+                String(value || 'all').split(',');
+
+            const values = rawValues
+                .map(item => String(item || '').trim().toLowerCase())
+                .filter(item => item && apptStatusMeta[item]);
+
+            if (!values.length || values.includes('all')) {
+                return ['all'];
+            }
+
+            return [...new Set(values)];
+        }
+
+        function getAppointmentPeriodFromStatuses(values) {
+            const statuses = normalizeAppointmentStatusValues(values);
+
+            if (statuses.includes('all')) {
+                return 'all';
+            }
+
+            const hasUpcoming = statuses.some(status => ['upcoming', 'rescheduled'].includes(status));
+
+            const hasPast = statuses.some(status => ['completed', 'cancelled'].includes(status));
+
+            if (hasUpcoming && hasPast) {
+                return 'all';
+            }
+
+            return hasPast ? 'past' : 'upcoming';
+        }
+
         const statusEmptyCopy = {
             all: {
                 icon: 'fa-filter-circle-xmark',
@@ -1707,34 +1717,33 @@
             shouldApply = true,
             source = 'dropdown'
         ) {
-            const nextValue =
-                apptStatusMeta[value] ?
-                value :
-                'all';
+            const nextValues =
+                normalizeAppointmentStatusValues(
+                    value
+                );
 
             appointmentStatusFilter =
-                nextValue;
+                nextValues;
 
             appointmentStatusFilterSource =
                 source;
 
-
             if (source === 'dropdown') {
                 appointmentPeriodFilter =
-                    nextValue === 'all' ?
-                    'all' : ['completed', 'cancelled']
-                    .includes(nextValue) ?
-                    'past' :
-                    'upcoming';
+                    getAppointmentPeriodFromStatuses(
+                        nextValues
+                    );
             }
 
-            window.setGlobalFilterSelectValue?.(
-                'appointmentStatusFilter',
-                nextValue, {
-                    callback: false,
-                    focus: false
-                }
-            );
+            if (nextValues.length === 1) {
+                window.setGlobalFilterSelectValue?.(
+                    'appointmentStatusFilter',
+                    nextValues[0], {
+                        callback: false,
+                        focus: false
+                    }
+                );
+            }
 
             if (shouldApply) {
                 applyAppointmentFilters();
@@ -1743,10 +1752,10 @@
 
         window.handleAppointmentStatusSelect =
             function(value) {
-                const nextValue =
-                    apptStatusMeta[value] ?
-                    value :
-                    'all';
+                const nextValues =
+                    normalizeAppointmentStatusValues(
+                        value
+                    );
 
                 if (apptSearchInput) {
                     apptSearchInput.value = '';
@@ -1757,18 +1766,11 @@
                 }
 
                 appointmentStatusFilter =
-                    nextValue;
+                    nextValues;
 
                 appointmentPeriodFilter =
-                    nextValue === 'all' ?
-                    'all' :
-                    (
-                        [
-                            'completed',
-                            'cancelled'
-                        ].includes(nextValue) ?
-                        'past' :
-                        'upcoming'
+                    getAppointmentPeriodFromStatuses(
+                        nextValues
                     );
 
                 applyAppointmentFilters();
@@ -1782,8 +1784,9 @@
 
                 if (
                     query &&
-                    appointmentStatusFilter !==
-                    'all'
+                    !appointmentStatusFilter.includes(
+                        'all'
+                    )
                 ) {
                     setAppointmentStatusFilter(
                         'all',
@@ -1855,25 +1858,13 @@
                     )?.value || 'all';
 
                 appointmentStatusFilter =
-                    apptStatusMeta[
+                    normalizeAppointmentStatusValues(
                         initialStatus
-                    ] ?
-                    initialStatus :
-                    'all';
+                    );
 
                 appointmentPeriodFilter =
-                    appointmentStatusFilter ===
-                    'all' ?
-                    'all' :
-                    (
-                        [
-                            'completed',
-                            'cancelled'
-                        ].includes(
-                            appointmentStatusFilter
-                        ) ?
-                        'past' :
-                        'upcoming'
+                    getAppointmentPeriodFromStatuses(
+                        appointmentStatusFilter
                     );
 
                 applyAppointmentFilters();
@@ -2001,9 +1992,14 @@
                 appliedFilters.period === 'all' ||
                 period === appliedFilters.period;
 
+            const selectedStatuses =
+                normalizeAppointmentStatusValues(
+                    appliedFilters.status
+                );
+
             const matchesStatus =
-                appliedFilters.status === 'all' ||
-                status === appliedFilters.status;
+                selectedStatuses.includes('all') ||
+                selectedStatuses.includes(status);
 
             let matchesDate = true;
 
@@ -2216,9 +2212,9 @@
             const hasSearch =
                 rawSearchValue !== '';
 
-            const hasStatusFilter =
-                appointmentStatusFilter !==
-                'all';
+            const hasStatusFilter = !appointmentStatusFilter.includes(
+                'all'
+            );
 
             const hasAdvancedFilters =
                 appointmentSortFilter !==
@@ -2305,9 +2301,10 @@
 
             if (hasStatusFilter) {
                 const copy =
+                    appointmentStatusFilter.length === 1 ?
                     statusEmptyCopy[
-                        appointmentStatusFilter
-                    ] ||
+                        appointmentStatusFilter[0]
+                    ] || statusEmptyCopy.all :
                     statusEmptyCopy.all;
 
                 window.EmptyState?.render({
@@ -2537,8 +2534,7 @@
                 );
             }
 
-            appointmentStatusFilter =
-                'all';
+            appointmentStatusFilter = ['all'];
 
             appointmentPeriodFilter =
                 'all';
@@ -2683,3 +2679,4 @@
         }
     </script>
 @endsection
+

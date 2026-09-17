@@ -15,13 +15,12 @@ use Illuminate\Support\Carbon;
 
 class DentistClinicScheduleController extends Controller
 {
-    private const ALL_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
     public function index(StudentTargetOptionService $studentTargetOptionService)
     {
         $schedules = ClinicSchedule::query()->orderByDesc('is_active')->orderBy('id')->get();
         $blockedDates = BlockedDate::orderBy('date')->get();
         $reservedBookingPeriods = ReservedBookingPeriod::query()
+            ->withScheduleColumns()
             ->with(['creator:id,name', 'slots'])
             ->orderBy('reserved_date')
             ->orderBy('start_time')
@@ -42,11 +41,13 @@ class DentistClinicScheduleController extends Controller
             ->pluck('cnt', 'appointment_date')
             ->toArray();
 
-        $weeklyAppointments = Appointment::with('patient')
-            ->whereBetween('appointment_date', [
-                $startDate->toDateString(),
-                $endDate->toDateString(),
-            ])
+        $weeklyAppointments = Appointment::with([
+            'patient',
+            'serviceType',
+        ])->whereBetween('appointment_date', [
+            $startDate->toDateString(),
+            $endDate->toDateString(),
+        ])
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->orderBy('appointment_date')
             ->orderBy('appointment_time')
@@ -57,7 +58,7 @@ class DentistClinicScheduleController extends Controller
                     'appointment_date' => Carbon::parse($appointment->appointment_date)->toDateString(),
                     'appointment_time' => Carbon::parse($appointment->appointment_time)->format('H:i'),
                     'display_time' => Carbon::parse($appointment->appointment_time)->format('g:i A'),
-                    'service_type' => $appointment->service_type,
+                    'service_type' => $appointment->service_type_name,
                     'other_services' => $appointment->other_services,
                     'status' => $appointment->status,
                     'patient_name' => optional($appointment->patient)->name ?? 'Unknown Patient',
@@ -101,7 +102,7 @@ class DentistClinicScheduleController extends Controller
         $validated = $this->validateRule($request);
 
         if ((bool) $validated['is_active']) {
-            $this->ensureDaysAreAvailable($request, $validated['days']);
+            $this->ensureNoOtherActiveSchedule($request);
         }
 
         ClinicSchedule::create($this->prepareRule($validated));
@@ -114,7 +115,10 @@ class DentistClinicScheduleController extends Controller
         $validated = $this->validateRule($request);
 
         if ((bool) $validated['is_active']) {
-            $this->ensureDaysAreAvailable($request, $validated['days'], $clinicSchedule->id);
+            $this->ensureNoOtherActiveSchedule(
+                $request,
+                $clinicSchedule->id
+            );
         }
 
         $clinicSchedule->update($this->prepareRule($validated));
@@ -277,55 +281,31 @@ class DentistClinicScheduleController extends Controller
         ]);
     }
 
-    private function ensureDaysAreAvailable(Request $request, array $days, ?int $ignoreId = null): void
-    {
-        $conflictingDays = $this->findConflictingScheduleDays($days, $ignoreId);
+    private function ensureNoOtherActiveSchedule(
+        Request $request,
+        ?int $ignoreId = null
+    ): void {
+        $query = ClinicSchedule::active();
 
-        if (empty($conflictingDays)) {
+        if ($ignoreId !== null) {
+            $query->where('id', '<>', $ignoreId);
+        }
+
+        if (! $query->exists()) {
             return;
         }
 
         $request->validate([
-            'days' => [
-                function ($attribute, $value, $fail) use ($conflictingDays) {
-                    $fail('An active schedule already exists for ' . $this->formatDays($conflictingDays) . '. Set the current active schedule to Inactive before activating this rule.');
+            'is_active' => [
+                function ($attribute, $value, $fail) {
+                    $fail(
+                        'Another clinic schedule is already active. '
+                            . 'Set the current active schedule to Inactive '
+                            . 'before activating another schedule.'
+                    );
                 },
             ],
         ]);
-    }
-
-    private function findConflictingScheduleDays(array $days, ?int $ignoreId = null): array
-    {
-        $query = ClinicSchedule::active();
-
-        if ($ignoreId !== null) {
-            $query->whereKeyNot($ignoreId);
-        }
-
-        $conflictingDays = [];
-
-        foreach ($query->get() as $schedule) {
-            $conflictingDays = array_merge(
-                $conflictingDays,
-                array_intersect($days, $schedule->days ?? [])
-            );
-        }
-
-        return $this->sortDays(array_values(array_unique($conflictingDays)));
-    }
-
-    private function sortDays(array $days): array
-    {
-        $order = array_flip(self::ALL_DAYS);
-
-        usort($days, fn($a, $b) => ($order[$a] ?? 99) <=> ($order[$b] ?? 99));
-
-        return $days;
-    }
-
-    private function formatDays(array $days): string
-    {
-        return implode(', ', $this->sortDays($days));
     }
 
     private function prepareRule(array $validated): array

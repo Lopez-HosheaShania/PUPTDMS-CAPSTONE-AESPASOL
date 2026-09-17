@@ -326,15 +326,6 @@
     min-width: 0;
 }
 
-.mode-list .desktop-appointments-table .appt-table-head {
-    background:
-        var(--table-header-surface);
-    color:
-        var(--table-heading-muted);
-    border-color:
-        var(--table-border);
-}
-
 .mode-list .desktop-appointments-table .appt-row-date .date-main {
     font-size: 13px;
     line-height: 1.15;

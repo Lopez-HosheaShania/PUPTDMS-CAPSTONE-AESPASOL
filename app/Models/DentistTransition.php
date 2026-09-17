@@ -9,6 +9,24 @@ class DentistTransition extends Model
 {
     use HasFactory;
 
+    use \App\Models\Concerns\StoresOptionalDetails;
+
+    protected function detailFields(): array
+    {
+        return ['details' => ['handover_notes', 'remarks', 'reviewed_by', 'approved_by', 'completed_at'], 'cancellation' => ['cancelled_at', 'cancellation_reason']];
+    }
+
+    public function details()
+    {
+        return $this->hasOne(DentistTransitionDetail::class, 'dentist_transition_id');
+    }
+
+    public function cancellation()
+    {
+        return $this->hasOne(DentistTransitionCancellation::class, 'dentist_transition_id');
+    }
+
+
     public const STATUSES = [
         'draft',
         'pending_review',

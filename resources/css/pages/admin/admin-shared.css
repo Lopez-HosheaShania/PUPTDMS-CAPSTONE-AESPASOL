@@ -94,14 +94,14 @@
     color: var(--crimson);
     background: var(--alpha-white-96);
     border: 1px solid var(--alpha-white-72);
-    box-shadow: 0 8px 18px var(--alpha-black-12);
+    box-shadow: 0 8px 18px var(--alpha-black-10);
     transition: transform .16s ease, background .16s ease, box-shadow .16s ease;
 }
 
 .admin-banner-action:hover {
-    background: #fff;
+    background: var(--color-white);
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, .16);
+    box-shadow: 0 12px 24px var(--alpha-black-16);
 }
 
 .admin-alert-list {
@@ -328,7 +328,7 @@
     padding: 1.75rem 2rem 2rem;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 24px rgba(139, 0, 0, .25);
+    box-shadow: 0 4px 24px var(--alpha-crimson-25);
     border-radius: 1rem;
 }
 
@@ -347,7 +347,7 @@
     width: 280px;
     height: 280px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, .04);
+    background: var(--alpha-white-5);
     pointer-events: none;
 }
 
@@ -364,7 +364,7 @@
 .page-greeting {
     font-size: .75rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, .65);
+    color: var(--alpha-white-68);
     letter-spacing: .05em;
     text-transform: uppercase;
     margin-bottom: .3rem;
@@ -388,14 +388,14 @@
 .page-title {
     font-size: 2rem;
     font-weight: 900;
-    color: #fff;
+    color: var(--text-on-brand);
     line-height: 1.1;
     letter-spacing: -.02em;
 }
 
 .page-subtitle {
     font-size: .78rem;
-    color: rgba(255, 255, 255, .6);
+    color: var(--alpha-white-60);
     margin-top: .35rem;
 }
 
@@ -404,17 +404,17 @@
     align-items: center;
     gap: .4rem;
     font-size: .75rem;
-    color: rgba(255, 255, 255, .8);
+    color: var(--alpha-white-72);
     margin-bottom: .3rem;
 }
 
 .page-banner-date i {
-    color: #fff;
+    color: var(--text-on-brand);
 }
 
 .page-banner-subtitle {
     font-size: .8rem;
-    color: rgba(255, 255, 255, .7);
+    color: var(--alpha-white-68);
     margin-top: .3rem;
 }
 
@@ -706,15 +706,6 @@
     color: #facc15;
 }
 
-@media (max-width: 360px) {
-    .app-page-shell .page-banner-inner {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .app-page-shell .admin-banner-actions {
-        justify-self: end;
-    }
-}
 
 @media (min-width: 768px) and (max-width: 1024px) {
     .app-page-shell {
@@ -731,14 +722,20 @@
 
     .app-page-shell .page-banner-inner {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-
-        align-items: center;
-
+        grid-template-columns: minmax(0, 1fr);
+        align-items: stretch;
         gap: 1rem;
-
         width: 100%;
         min-width: 0;
+    }
+
+    .app-page-shell .admin-banner-actions {
+        width: 100%;
+        min-width: 0;
+        margin-left: 0;
+        justify-self: stretch;
+        justify-content: flex-end;
+        flex-wrap: wrap;
     }
 
     .app-page-shell .page-banner-inner>div:first-child {
@@ -799,7 +796,7 @@
     .app-page-shell .period-item:nth-of-type(1),
     .app-page-shell .period-item:nth-of-type(2) {
         border-right:
-            1px solid rgba(255, 255, 255, .20);
+            1px solid var(--alpha-white-18);
     }
 
     .app-page-shell .period-label {
@@ -857,12 +854,9 @@
 
     .app-page-shell .page-banner-inner {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-
-        align-items: center;
-
+        grid-template-columns: minmax(0, 1fr);
+        align-items: stretch;
         gap: .75rem;
-
         width: 100%;
         min-width: 0;
     }
@@ -873,13 +867,12 @@
     }
 
     .app-page-shell .admin-banner-actions {
-        width: auto;
+        width: 100%;
         min-width: 0;
-
-        margin-left: auto;
-
-        justify-self: end;
+        margin-left: 0;
+        justify-self: stretch;
         justify-content: flex-end;
+        flex-wrap: wrap;
     }
 
     .app-page-shell .page-greeting {
@@ -903,7 +896,8 @@
         font-size: 1.35rem;
         line-height: 1.08;
 
-        overflow-wrap: anywhere;
+        overflow-wrap: normal;
+        word-break: normal;
     }
 
     .app-page-shell .page-subtitle {
@@ -912,7 +906,7 @@
         font-size: .68rem;
         line-height: 1.3;
 
-        color: rgba(255, 255, 255, .78);
+        color: var(--alpha-white-72);
     }
 
     .app-page-shell .period-pill {
@@ -948,7 +942,7 @@
     .app-page-shell .period-item:nth-of-type(1),
     .app-page-shell .period-item:nth-of-type(2) {
         border-right:
-            1px solid rgba(255, 255, 255, .20);
+            1px solid var(--alpha-white-18);
     }
 
     .app-page-shell .period-label {

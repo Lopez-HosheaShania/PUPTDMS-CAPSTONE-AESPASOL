@@ -2,109 +2,48 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Inventory;
-use App\Services\InventoryExpirationNotifier;
-use Illuminate\Http\Request;
-use App\Helpers\AuditLogger;
+use App\Http\Controllers\Shared\InventoryController as SharedInventoryController;
 
-class AdminInventoryController extends Controller
+class AdminInventoryController extends SharedInventoryController
 {
-    public function index()
+    protected function actorLabel(): string
     {
-        AuditLogger::log(
-            'view',
-            'inventory',
-            'Admin viewed inventory page'
-        );
-
-        return view('shared.inventory', [
-            'notifications' => collect([]),
-
-            'layoutRole' => 'admin',
-            'pageShellClass' => 'app-page-shell',
-            'isDentistView' => false,
-
-            'inventoryRouteNames' => [
-                'data' => 'admin.inventory.data',
-                'store' => 'admin.inventory.store',
-                'update' => 'admin.inventory.update',
-                'destroy' => 'admin.inventory.destroy',
-            ],
-
-            'inventoryWatcherKey' => 'admin-inventory',
-        ]);
+        return 'Admin';
     }
 
-    public function fetch()
+
+    protected function layoutRole(): string
     {
-        return Inventory::orderBy('date_received', 'desc')->get();
+        return 'admin';
     }
 
-    public function store(Request $request)
+
+    protected function isDentistView(): bool
     {
-        $data = $request->validate([
-            'category' => 'required|in:Medicine,Supplies',
-            'date_received' => 'required|date',
-            'expiration_date' => 'nullable|date',
-            'stock_no' => 'required|unique:inventory_items,stock_no',
-            'name' => 'required|string|max:255',
-            'unit' => 'required|string|max:50',
-            'qty' => 'required|integer|min:0',
-            'used' => 'required|integer|min:0',
-        ]);
-
-        $data['unit'] = ucwords(strtolower(trim($data['unit'])));
-
-        $inventory = Inventory::create($data);
-        app(InventoryExpirationNotifier::class)->notify($inventory);
-
-        AuditLogger::log(
-            'create_inventory',
-            'inventory',
-            'Admin added inventory item: ' . $request->name
-        );
-
-        return response()->json(['success' => true]);
+        return false;
     }
 
-    public function update(Request $request, Inventory $inventory)
+
+    protected function inventoryRouteNames(): array
     {
-        $data = $request->validate([
-            'category' => 'required|in:Medicine,Supplies',
-            'date_received' => 'required|date',
-            'expiration_date' => 'nullable|date',
-            'stock_no' => 'required|unique:inventory_items,stock_no,' . $inventory->id,
-            'name' => 'required|string|max:255',
-            'unit' => 'required|string|max:50',
-            'qty' => 'required|integer|min:0',
-            'used' => 'required|integer|min:0',
-        ]);
+        return [
+            'data' =>
+            'admin.inventory.data',
 
-        $data['unit'] = ucwords(strtolower(trim($data['unit'])));
+            'store' =>
+            'admin.inventory.store',
 
-        $inventory->update($data);
-        app(InventoryExpirationNotifier::class)->notify($inventory->fresh());
+            'update' =>
+            'admin.inventory.update',
 
-        AuditLogger::log(
-            'update_inventory',
-            'inventory',
-            'Admin updated inventory item ID ' . $inventory->id
-        );
-
-        return response()->json(['success' => true]);
+            'destroy' =>
+            'admin.inventory.destroy',
+        ];
     }
 
-    public function destroy(Inventory $inventory)
+
+    protected function inventoryWatcherKey(): string
     {
-        $inventory->delete();
-
-        AuditLogger::log(
-            'delete_inventory',
-            'inventory',
-            'Admin deleted inventory item ID ' . $inventory->id
-        );
-
-        return response()->json(['success' => true]);
+        return 'admin-inventory';
     }
 }

@@ -1185,16 +1185,6 @@ hr.section-divider {
     width: 100%;
 }
 
-.fp-date-icon {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9CA3AF;
-    font-size: 14px;
-    pointer-events: none;
-}
-
 #dateFrom[readonly],
 #dateTo[readonly] {
     cursor: pointer;

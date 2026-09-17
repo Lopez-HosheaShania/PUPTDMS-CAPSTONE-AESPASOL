@@ -60,9 +60,9 @@ class SystemLogController extends Controller
             ->withQueryString();
 
         $totalCount = $this->statusScopedQuery($status)->count();
-        $adminCount = $this->statusScopedQuery($status)->where('actor_role', 'admin')->count();
-        $dentistCount = $this->statusScopedQuery($status)->where('actor_role', 'dentist')->count();
-        $patientCount = $this->statusScopedQuery($status)->where('actor_role', 'patient')->count();
+        $adminCount = $this->statusScopedQuery($status)->forActorRole('admin')->count();
+        $dentistCount = $this->statusScopedQuery($status)->forActorRole('dentist')->count();
+        $patientCount = $this->statusScopedQuery($status)->forActorRole('patient')->count();
         $loginCount = $this->statusScopedQuery($status)->where('action', 'like', '%login%')->count();
         $archivedCount = AuditLog::where('is_archived', true)->count();
         $activeCount = AuditLog::where('is_archived', false)->count();
@@ -83,6 +83,7 @@ class SystemLogController extends Controller
                         'action' => $log->action ?? '',
                         'module' => $log->module ?? '',
                         'description' => $log->description ?? 'No description provided.',
+                        'full_description' => $log->full_description,
                         'is_archived' => (bool) $log->is_archived,
                         'archived_at' => optional($log->archived_at)->format('M j, Y h:i A'),
                         'created_at_day' => optional($log->created_at)->format('M j, Y'),
@@ -171,6 +172,7 @@ class SystemLogController extends Controller
                     'action' => strtolower($log->action ?? ''),
                     'module' => $log->module ?? '',
                     'description' => $log->description ?? 'No description provided.',
+                    'full_description' => $log->full_description,
                     'is_archived' => (bool) $log->is_archived,
                     'archived_at' => optional($log->archived_at)->format('M j, Y h:i A'),
                     'created_at_day' => optional($log->created_at)->format('M j, Y'),
@@ -280,9 +282,6 @@ class SystemLogController extends Controller
             )
             ->select([
                 'id',
-                'actor_role',
-                'actor_identifier',
-                'actor_name',
                 'action',
                 'module',
                 'description',
@@ -362,7 +361,7 @@ class SystemLogController extends Controller
                     ->orWhere('action', 'like', '%exception%');
             });
         } elseif (in_array($role, ['admin', 'dentist', 'patient'], true)) {
-            $query->where('actor_role', $role);
+            $query->forActorRole($role);
         }
 
         $searchId = ltrim($search, '#');
@@ -374,16 +373,11 @@ class SystemLogController extends Controller
                     $searchId
                 ) {
                     $builder
-                        ->where(
-                            'actor_identifier',
-                            'like',
-                            "%{$search}%"
-                        )
-                        ->orWhere(
-                            'actor_name',
-                            'like',
-                            "%{$search}%"
-                        )
+                        ->whereHas('actorSnapshot', function ($actor) use ($search) {
+                            $actor->where('actor_identifier', 'like', "%{$search}%")
+                                ->orWhere('actor_name', 'like', "%{$search}%")
+                                ->orWhere('actor_role', 'like', "%{$search}%");
+                        })
                         ->orWhere(
                             'action',
                             'like',
@@ -398,12 +392,9 @@ class SystemLogController extends Controller
                             'description',
                             'like',
                             "%{$search}%"
-                        )
-                        ->orWhere(
-                            'actor_role',
-                            'like',
-                            "%{$search}%"
                         );
+
+                    $builder->orWhereHas('descriptionDetails', fn ($detail) => $detail->where('full_description', 'like', "%{$search}%"));
 
                     if (
                         ctype_digit(

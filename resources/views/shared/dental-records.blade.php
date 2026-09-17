@@ -657,13 +657,13 @@
         <x-filter-group title="Custom Date Range" class="filter-group-last">
             <div class="filter-date-grid">
                 <div class="filter-date-input-wrap">
-                    <input id="dentalRecordDateFrom" type="text" class="js-flatpickr-date-range-from"
+                    <input id="dentalRecordDateFrom" type="text" class="form-input-custom js-flatpickr-date-range-from"
                         placeholder="Start date" readonly autocomplete="off">
                     <i class="fa-regular fa-calendar"></i>
                 </div>
 
                 <div class="filter-date-input-wrap">
-                    <input id="dentalRecordDateTo" type="text" class="js-flatpickr-date-range-to"
+                    <input id="dentalRecordDateTo" type="text" class="form-input-custom js-flatpickr-date-range-to"
                         placeholder="End date" readonly autocomplete="off">
                     <i class="fa-regular fa-calendar"></i>
                 </div>

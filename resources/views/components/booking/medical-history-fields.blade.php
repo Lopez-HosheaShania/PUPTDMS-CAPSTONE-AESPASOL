@@ -88,7 +88,7 @@
 
                     <input type="text" id="medicalExamDate" name="{{ $fieldName('medical_exam_date') }}"
                         value="{{ $fieldValue('medical_exam_date') }}"
-                        class="form-input-custom global-control-with-icon js-flatpickr-date-max-today"
+                        class="form-input-custom global-form-icon js-flatpickr-date-max-today"
                         placeholder="Select date" data-required-when-visible="true"
                         data-required-message="Please select the date of your last medical examination." readonly>
                 </div>

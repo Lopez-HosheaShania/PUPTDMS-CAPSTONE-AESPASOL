@@ -53,7 +53,7 @@ class RecordController extends Controller
 
         $completedOdontogramVisits = Appointment::query()
             ->with([
-                'procedure:id,appointment_id,odontogram_data',
+                'procedure:id,appointment_id',
             ])
             ->where('patient_id', $patient->id)
             ->where('status', 'completed')
@@ -115,7 +115,7 @@ class RecordController extends Controller
             $documentRequestsPerPage = 10;
         }
 
-        $documentRequests = DocumentRequest::query()
+        $documentRequests = DocumentRequest::withStateColumns()
             ->where('patient_id', $patient->id)
             ->orderByDesc('created_at')
             ->paginate(
@@ -125,7 +125,7 @@ class RecordController extends Controller
             )
             ->withQueryString();
 
-        $documentRequestStatusCounts = DocumentRequest::query()
+        $documentRequestStatusCounts = DocumentRequest::withStateColumns()
             ->where('patient_id', $patient->id)
             ->selectRaw(
                 'LOWER(status) as status_key, COUNT(*) as total'

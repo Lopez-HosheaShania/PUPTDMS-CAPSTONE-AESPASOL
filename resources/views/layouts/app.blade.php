@@ -346,8 +346,8 @@
     </div>
 
     @if (!$hideFloatingActions)
-        <script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
-            data-position="bottom-right" data-offset="{{ $accessibilityOffset }}" defer></script>
+        <script src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right"
+            data-offset="{{ $accessibilityOffset }}" defer></script>
 
         @include('partials.chatbot')
     @endif

@@ -230,7 +230,7 @@ class ReservedBookingPeriodService
 
         $hasExistingAppointments = Appointment::query()
             ->whereDate('appointment_date', $dateString)
-            ->whereNull('reserved_booking_period_id')
+            ->regularBooking()
             ->whereTime('appointment_time', '>=', $start)
             ->whereTime('appointment_time', '<', $end)
             ->whereNotIn('status', ['cancelled', 'completed'])

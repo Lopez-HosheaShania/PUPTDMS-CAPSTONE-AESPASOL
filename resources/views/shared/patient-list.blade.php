@@ -170,7 +170,8 @@
                                 <div class="patient-toolbar-actions">
                                     <div class="patient-sort-row">
                                         <x-filter-select id="patientStatusFilter" name="patient_status" label="Status"
-                                            value="all" :options="$patientStatusOptions" callback="handlePatientStatusSelect" />
+                                            value="" :options="$patientStatusOptions" callback="handlePatientStatusSelect" searchable
+                                            multiple search-placeholder="Search status..." />
                                     </div>
 
                                     <div class="patient-filter-actions">
@@ -282,40 +283,62 @@
                                     </div>
                                 </div>
 
-                                <div id="patientContainer" class="space-y-3 px-3 md:px-6 pb-6 pt-4">
+                                <div id="patientContainer">
 
-                                    @php
-                                        $appointments = collect($appointments)
-                                            ->sort(function ($a, $b) {
-                                                $aStatus = strtolower(trim((string) ($a->status ?? 'upcoming')));
-                                                $bStatus = strtolower(trim((string) ($b->status ?? 'upcoming')));
+                       @php
+                                    $appointments = collect($appointments)
+                                        ->sort(function ($a, $b) {
+                                            $aStatus = strtolower(
+                                                trim((string) ($a->status ?? 'upcoming'))
+                                            );
 
-                                                $activeStatuses = ['upcoming', 'rescheduled', 'pending', 'confirmed'];
-                                                $aIsActive = in_array($aStatus, $activeStatuses, true);
-                                                $bIsActive = in_array($bStatus, $activeStatuses, true);
+                                            $bStatus = strtolower(
+                                                trim((string) ($b->status ?? 'upcoming'))
+                                            );
 
-                                                if ($aIsActive !== $bIsActive) {
-                                                    return $aIsActive ? -1 : 1;
-                                                }
+                                            $activeStatuses = [
+                                                'upcoming',
+                                                'rescheduled',
+                                                'pending',
+                                                'confirmed',
+                                            ];
 
-                                                $aDateTime = Carbon::parse(
-                                                    ($a->appointment_date ?? '1970-01-01') .
-                                                        ' ' .
-                                                        ($a->appointment_time ?? '00:00:00'),
-                                                );
-                                                $bDateTime = Carbon::parse(
-                                                    ($b->appointment_date ?? '1970-01-01') .
-                                                        ' ' .
-                                                        ($b->appointment_time ?? '00:00:00'),
-                                                );
+                                            $aIsActive = in_array(
+                                                $aStatus,
+                                                $activeStatuses,
+                                                true
+                                            );
 
-                                                if ($aIsActive && $bIsActive) {
-                                                    return $aDateTime <=> $bDateTime;
-                                                }
-                                                return $bDateTime <=> $aDateTime;
-                                            })
-                                            ->values();
-                                    @endphp
+                                            $bIsActive = in_array(
+                                                $bStatus,
+                                                $activeStatuses,
+                                                true
+                                            );
+
+                                            if ($aIsActive !== $bIsActive) {
+                                                return $aIsActive ? -1 : 1;
+                                            }
+
+                                            $aDateTime = Carbon::parse(
+                                                ($a->appointment_date ?? '1970-01-01') .
+                                                    ' ' .
+                                                    ($a->appointment_time ?? '00:00:00')
+                                            );
+
+                                            $bDateTime = Carbon::parse(
+                                                ($b->appointment_date ?? '1970-01-01') .
+                                                    ' ' .
+                                                    ($b->appointment_time ?? '00:00:00')
+                                            );
+
+                                            if ($aIsActive && $bIsActive) {
+                                                return $aDateTime <=> $bDateTime;
+                                            }
+
+                                            return $bDateTime <=> $aDateTime;
+                                        })
+                                        ->values();
+                                @endphp
 
                                     @foreach ($appointments as $appt)
                                         @php
@@ -364,6 +387,7 @@
 
                                             $patientCourseCode = trim((string) ($patient?->course_code ?? ''));
                                             $patientCourseName = trim((string) ($patient?->course_name ?? ''));
+                                           
 
                                             $patientCourse =
                                                 $patientCourseCode !== ''
@@ -382,6 +406,7 @@
                                             if ($patientCourseFull === '') {
                                                 $patientCourseFull = 'No program';
                                             }
+                                           
 
                                             $patientYearLevel = $patient?->year_level ?? '';
                                             $patientSection = $patient?->section ?? '';
@@ -389,25 +414,24 @@
                                             $patientImage = $patient?->profile_image
                                                 ? asset('storage/' . $patient->profile_image)
                                                 : null;
+                                          
 
                                             $dateLabel = Carbon::parse($appt->appointment_date)->format('l, F j, Y');
 
-                                            $compactDateLabel = Carbon::parse($appt->appointment_date)->format(
-                                                'M j, Y',
-                                            );
-
                                             $gridDayLabel = Carbon::parse($appt->appointment_date)->format('l');
                                             $gridDateLabel = Carbon::parse($appt->appointment_date)->format('F j, Y');
+                                      
 
                                             $timeLabel = Carbon::parse($appt->appointment_time)->format('g:i A');
                                             $serviceLabel =
-                                                $appt->service_type === 'Others'
+                                                $appt->service_type_name === 'Others'
                                                     ? ($appt->other_services ?:
                                                     'Others')
-                                                    : $appt->service_type;
+                                                    : $appt->service_type_name;
 
                                             $serviceLower = strtolower($serviceLabel);
                                             $badgeClass = 'service-badge-default';
+                                          
 
                                             if (str_contains($serviceLower, 'surgery')) {
                                                 $badgeClass = 'service-badge-surgery';
@@ -560,13 +584,7 @@
                                                         </span>
 
                                                         <strong class="patient-list-detail-value">
-                                                            <span class="patient-list-date-full">
-                                                                {{ $dateLabel }}
-                                                            </span>
-
-                                                            <span class="patient-list-date-compact">
-                                                                {{ $compactDateLabel }}
-                                                            </span>
+                                                            {{ $dateLabel }}
                                                         </strong>
 
                                                         <small class="patient-list-detail-subvalue">
@@ -769,7 +787,6 @@
 
         </div>
 
-
         <x-filter-group title="Sort By">
 
             <div id="fSortGroup" class="filter-chip-row">
@@ -793,7 +810,6 @@
             </div>
 
         </x-filter-group>
-
 
         <x-filter-group title="Filter by Date Range">
 
@@ -823,14 +839,13 @@
 
         </x-filter-group>
 
-
         <x-filter-group title="Custom Date Range">
 
             <div class="filter-date-grid">
 
                 <div class="filter-date-input-wrap">
 
-                    <input id="fromDate" type="text" class="js-flatpickr-date-range-from" placeholder="Start date"
+                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date"
                         readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
@@ -839,7 +854,7 @@
 
                 <div class="filter-date-input-wrap">
 
-                    <input id="toDate" type="text" class="js-flatpickr-date-range-to" placeholder="End date"
+                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date"
                         readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
@@ -849,7 +864,6 @@
             </div>
 
         </x-filter-group>
-
 
         <x-filter-group title="Course">
 
@@ -866,7 +880,7 @@
             'BSME',
             'BSBA - MM',
             'BSED
-                    - MATH',
+                - MATH',
             'DOMT',
         ] as $course)
                     <label class="choice-chip">
@@ -888,7 +902,6 @@
             </div>
 
         </x-filter-group>
-
 
         <div class="filter-two-column-grid">
 
@@ -917,7 +930,6 @@
 
             </x-filter-group>
 
-
             <x-filter-group title="Section">
 
                 <div class="filter-chip-row">
@@ -944,7 +956,6 @@
             </x-filter-group>
 
         </div>
-
 
         <x-filter-group title="Department" class="filter-group-last">
 
@@ -1090,15 +1101,47 @@
                 patientFilterBadge = filterBadge;
                 patientExternalResetBtn = externalClearFilterBtn;
 
-                var activeTab = "all";
+                var activeTab = ["all"];
                 var searchKeyword = "";
+
+                function normalizePatientStatusValues(value) {
+                    var rawValues = Array.isArray(value)
+                        ? value
+                        : String(value || 'all').split(',');
+
+                    var allowed = [
+                        'all',
+                        'today',
+                        'upcoming',
+                        'rescheduled',
+                        'completed',
+                        'cancelled'
+                    ];
+
+                    var values = rawValues
+                        .map(function(item) {
+                            return String(item || '')
+                                .trim()
+                                .toLowerCase();
+                        })
+                        .filter(function(item) {
+                            return allowed.includes(item);
+                        });
+
+                    if (!values.length || values.includes('all')) {
+                        return ['all'];
+                    }
+
+                    return Array.from(new Set(values));
+                }
 
                 window.handlePatientStatusSelect =
                     function(value) {
                         activeTab =
-                            String(value || 'all')
-                            .trim()
-                            .toLowerCase();
+                            normalizePatientStatusValues(
+                                value
+                            );
+
                         searchKeyword = '';
 
                         if (searchInput) {
@@ -1114,7 +1157,6 @@
                         applyFilters();
                     };
 
-
                 window.handlePatientDirectorySearch =
                     function(value) {
                         searchKeyword =
@@ -1123,9 +1165,9 @@
                             .toLowerCase();
                         if (
                             searchKeyword &&
-                            activeTab !== 'all'
+                            !activeTab.includes('all')
                         ) {
-                            activeTab = 'all';
+                            activeTab = ['all'];
 
                             window.setGlobalFilterSelectValue?.(
                                 'patientStatusFilter',
@@ -1145,24 +1187,24 @@
                     status,
                     options = {}
                 ) {
-                    var nextStatus =
-                        String(
-                            status || 'all'
-                        )
-                        .trim()
-                        .toLowerCase();
+                    var nextStatuses =
+                        normalizePatientStatusValues(
+                            status
+                        );
 
                     activeTab =
-                        nextStatus;
+                        nextStatuses;
 
-                    window.setGlobalFilterSelectValue?.(
-                        'patientStatusFilter',
-                        nextStatus, {
-                            callback: options.callback === true,
+                    if (nextStatuses.length === 1) {
+                        window.setGlobalFilterSelectValue?.(
+                            'patientStatusFilter',
+                            nextStatuses[0], {
+                                callback: options.callback === true,
 
-                            focus: false
-                        }
-                    );
+                                focus: false
+                            }
+                        );
+                    }
                 }
 
                 var selectedProgram = null,
@@ -1956,7 +1998,14 @@
                 }
 
                 function getCurrentPatientStatus() {
-                    return activeTab || 'all';
+                    if (
+                        activeTab.includes('all') ||
+                        activeTab.length !== 1
+                    ) {
+                        return 'all';
+                    }
+
+                    return activeTab[0];
                 }
 
                 function getPatientStatusEmptyMeta(status) {
@@ -2196,16 +2245,20 @@
                                 allPatients.slice();
 
                             if (
-                                activeTab !== "all"
+                                !activeTab.includes('all')
                             ) {
                                 data =
                                     data.filter(
                                         function(patient) {
-                                            return patient
-                                                .classList
-                                                .contains(
-                                                    activeTab
-                                                );
+                                            return activeTab.some(
+                                                function(status) {
+                                                    return patient
+                                                        .classList
+                                                        .contains(
+                                                            status
+                                                        );
+                                                }
+                                            );
                                         }
                                     );
                             }
@@ -2439,7 +2492,7 @@
 
                 syncMutualExclusion();
 
-                activeTab = 'all';
+                activeTab = ['all'];
 
                 window.setGlobalFilterSelectValue?.(
                     'patientStatusFilter',

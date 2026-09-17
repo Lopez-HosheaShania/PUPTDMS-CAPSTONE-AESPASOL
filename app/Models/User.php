@@ -11,6 +11,50 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
+    private const AUTH_SECURITY_ATTRIBUTES = [
+        'last_login_at',
+        'failed_login_attempts',
+        'last_failed_login_at',
+        'locked_until',
+        'access_token',
+        'refresh_token',
+    ];
+
+    private const PROFILE_ATTRIBUTES = [
+        'first_name',
+        'middle_name',
+        'last_name',
+        'suffix_name',
+        'phone',
+        'birthdate',
+        'gender',
+    ];
+
+    private const EMPLOYMENT_ATTRIBUTES = [
+        'employment_status',
+        'account_status',
+        'last_working_date',
+        'access_ends_at',
+    ];
+
+    private const DEACTIVATION_ATTRIBUTES = [
+        'deactivated_at',
+        'deactivated_by',
+        'deactivation_reason',
+    ];
+
+    /** @var array<string, mixed> */
+    private array $pendingProfileAttributes = [];
+
+    /** @var array<string, mixed> */
+    private array $pendingSecurityAttributes = [];
+
+    /** @var array<string, mixed> */
+    private array $pendingEmploymentAttributes = [];
+
+    /** @var array<string, mixed> */
+    private array $pendingDeactivationAttributes = [];
+
     private const PERMISSION_ALIASES = [
         'view_patient_profiles' => ['manage_patient_profiles'],
         'view_dental_records' => ['manage_dental_records'],
@@ -198,7 +242,6 @@ class User extends Authenticatable implements JWTSubject
         'middle_name',
         'last_name',
         'suffix_name',
-        'code',
         'email',
         'phone',
         'birthdate',
@@ -239,6 +282,62 @@ class User extends Authenticatable implements JWTSubject
         'deactivated_at' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::created(function (User $user) {
+            $user->syncAuthSecurityRecord();
+            $user->syncProfileRecord();
+            $user->syncEmploymentStatusRecord();
+        });
+
+        static::saved(function (User $user) {
+            if ($user->hasPendingSecurityAttributes()) {
+                $user->syncAuthSecurityRecord();
+            }
+
+            if ($user->hasPendingProfileAttributes()) {
+                $user->syncProfileRecord();
+            }
+
+            if ($user->hasPendingEmploymentAttributes()) {
+                $user->syncEmploymentStatusRecord();
+            }
+
+            if ($user->hasPendingDeactivationAttributes()) {
+                $user->syncDeactivationRecord();
+            }
+        });
+    }
+
+    public function setAttribute($key, $value)
+    {
+        if (in_array($key, self::PROFILE_ATTRIBUTES, true)) {
+            $this->pendingProfileAttributes[$key] = $value;
+
+            return $this;
+        }
+
+        if (in_array($key, self::AUTH_SECURITY_ATTRIBUTES, true)) {
+            $this->pendingSecurityAttributes[$key] = $value;
+
+            return $this;
+        }
+
+        if (in_array($key, self::EMPLOYMENT_ATTRIBUTES, true)) {
+            $this->pendingEmploymentAttributes[$key] = $value;
+
+            return $this;
+        }
+
+        if (in_array($key, self::DEACTIVATION_ATTRIBUTES, true)) {
+            $this->pendingDeactivationAttributes[$key] = $value;
+
+            return $this;
+        }
+
+        return parent::setAttribute($key, $value);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Relationships
@@ -255,9 +354,109 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(Patient::class);
     }
 
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
     public function faculty()
     {
         return $this->hasOne(Faculty::class);
+    }
+
+    public function authSecurity()
+    {
+        return $this->hasOne(UserAuthSecurity::class);
+    }
+
+    public function employmentStatus()
+    {
+        return $this->hasOne(UserEmploymentStatus::class);
+    }
+
+    private function syncAuthSecurityRecord(): void
+    {
+        $attributes = $this->pendingSecurityAttributes;
+
+        if ($attributes === []) {
+            if ($this->authSecurity()->exists()) {
+                return;
+            }
+
+            $attributes = ['failed_login_attempts' => 0];
+        }
+
+        if (array_key_exists('failed_login_attempts', $attributes)) {
+            $attributes['failed_login_attempts'] = (int) $attributes['failed_login_attempts'];
+        }
+
+        $this->authSecurity()->updateOrCreate([], $attributes);
+        $this->pendingSecurityAttributes = [];
+        $this->unsetRelation('authSecurity');
+    }
+
+    private function syncProfileRecord(): void
+    {
+        $this->profile()->updateOrCreate([], $this->pendingProfileAttributes);
+        $this->pendingProfileAttributes = [];
+        $this->unsetRelation('profile');
+    }
+
+    private function hasPendingProfileAttributes(): bool
+    {
+        return $this->pendingProfileAttributes !== [];
+    }
+
+    private function hasPendingSecurityAttributes(): bool
+    {
+        return $this->pendingSecurityAttributes !== [];
+    }
+
+    private function syncEmploymentStatusRecord(): void
+    {
+        $this->employmentStatus()->updateOrCreate([], $this->pendingEmploymentAttributes);
+        $this->pendingEmploymentAttributes = [];
+        $this->unsetRelation('employmentStatus');
+    }
+
+    private function syncDeactivationRecord(): void
+    {
+        $attributes = $this->pendingDeactivationAttributes;
+        $this->pendingDeactivationAttributes = [];
+
+        if ($this->status !== 'inactive') {
+            return;
+        }
+
+        $employment = $this->relationLoaded('employmentStatus')
+            ? $this->getRelation('employmentStatus')
+            : $this->employmentStatus()->first();
+
+        $this->deactivationEvents()->create([
+            'deactivated_by' => $attributes['deactivated_by'] ?? null,
+            'employment_status' => $employment?->employment_status,
+            'account_status' => $employment?->account_status,
+            'last_working_date' => $employment?->last_working_date,
+            'access_ends_at' => $employment?->access_ends_at,
+            'deactivated_at' => $attributes['deactivated_at'] ?? now(),
+            'reason' => $attributes['deactivation_reason'] ?? null,
+        ]);
+        $this->unsetRelation('deactivationEvents');
+    }
+
+    private function hasPendingEmploymentAttributes(): bool
+    {
+        return $this->pendingEmploymentAttributes !== [];
+    }
+
+    private function hasPendingDeactivationAttributes(): bool
+    {
+        return $this->pendingDeactivationAttributes !== [];
+    }
+
+    public function deactivationEvents()
+    {
+        return $this->hasMany(UserDeactivation::class);
     }
 
     public function dentistTransitions()
@@ -464,6 +663,178 @@ class User extends Authenticatable implements JWTSubject
                 $this->last_name . ' ' .
                 ($this->suffix_name ?? '')
         );
+    }
+
+    public function getFirstNameAttribute(): ?string
+    {
+        return $this->profileAttribute('first_name');
+    }
+
+    public function getMiddleNameAttribute(): ?string
+    {
+        return $this->profileAttribute('middle_name');
+    }
+
+    public function getLastNameAttribute(): ?string
+    {
+        return $this->profileAttribute('last_name');
+    }
+
+    public function getSuffixNameAttribute(): ?string
+    {
+        return $this->profileAttribute('suffix_name');
+    }
+
+    public function getPhoneAttribute(): ?string
+    {
+        return $this->profileAttribute('phone');
+    }
+
+    public function getBirthdateAttribute(): mixed
+    {
+        return $this->profileAttribute('birthdate');
+    }
+
+    public function getGenderAttribute(): ?string
+    {
+        return $this->profileAttribute('gender');
+    }
+
+    public function getLastLoginAtAttribute(): mixed
+    {
+        return $this->securityAttribute('last_login_at');
+    }
+
+    public function getFailedLoginAttemptsAttribute(): int
+    {
+        return (int) ($this->securityAttribute('failed_login_attempts') ?? 0);
+    }
+
+    public function getLastFailedLoginAtAttribute(): mixed
+    {
+        return $this->securityAttribute('last_failed_login_at');
+    }
+
+    public function getLockedUntilAttribute(): mixed
+    {
+        return $this->securityAttribute('locked_until');
+    }
+
+    public function getAccessTokenAttribute(): ?string
+    {
+        return $this->securityAttribute('access_token');
+    }
+
+    public function getRefreshTokenAttribute(): ?string
+    {
+        return $this->securityAttribute('refresh_token');
+    }
+
+    public function getEmploymentStatusAttribute(): ?string
+    {
+        return $this->employmentAttribute('employment_status');
+    }
+
+    public function getAccountStatusAttribute(): ?string
+    {
+        return $this->employmentAttribute('account_status');
+    }
+
+    public function getLastWorkingDateAttribute(): mixed
+    {
+        return $this->employmentAttribute('last_working_date');
+    }
+
+    public function getAccessEndsAtAttribute(): mixed
+    {
+        return $this->employmentAttribute('access_ends_at');
+    }
+
+    public function getDeactivatedAtAttribute(): mixed
+    {
+        return $this->deactivationAttribute('deactivated_at');
+    }
+
+    public function getDeactivatedByAttribute(): ?int
+    {
+        return $this->deactivationAttribute('deactivated_by');
+    }
+
+    public function getDeactivationReasonAttribute(): ?string
+    {
+        return $this->deactivationAttribute('deactivation_reason');
+    }
+
+    private function profileAttribute(string $attribute): mixed
+    {
+        if (array_key_exists($attribute, $this->pendingProfileAttributes)) {
+            return $this->pendingProfileAttributes[$attribute];
+        }
+
+        if (! $this->exists) {
+            return null;
+        }
+
+        $profile = $this->relationLoaded('profile')
+            ? $this->getRelation('profile')
+            : $this->profile()->first();
+
+        return $profile?->{$attribute};
+    }
+
+    private function securityAttribute(string $attribute): mixed
+    {
+        if (array_key_exists($attribute, $this->pendingSecurityAttributes)) {
+            return $this->pendingSecurityAttributes[$attribute];
+        }
+
+        if (! $this->exists) {
+            return null;
+        }
+
+        $security = $this->relationLoaded('authSecurity')
+            ? $this->getRelation('authSecurity')
+            : $this->authSecurity()->first();
+
+        return $security?->{$attribute};
+    }
+
+    private function employmentAttribute(string $attribute): mixed
+    {
+        if (array_key_exists($attribute, $this->pendingEmploymentAttributes)) {
+            return $this->pendingEmploymentAttributes[$attribute];
+        }
+
+        if (! $this->exists) {
+            return null;
+        }
+
+        $employment = $this->relationLoaded('employmentStatus')
+            ? $this->getRelation('employmentStatus')
+            : $this->employmentStatus()->first();
+
+        return $employment?->{$attribute};
+    }
+
+    private function deactivationAttribute(string $attribute): mixed
+    {
+        if (array_key_exists($attribute, $this->pendingDeactivationAttributes)) {
+            return $this->pendingDeactivationAttributes[$attribute];
+        }
+
+        if (! $this->exists || $this->status !== 'inactive') {
+            return null;
+        }
+
+        $event = $this->deactivationEvents()
+            ->latest('deactivated_at')
+            ->first();
+
+        if ($attribute === 'deactivation_reason') {
+            return $event?->reason;
+        }
+
+        return $event?->{$attribute};
     }
 
     public function resolveRoleDisplayName(?string $fallbackRoleSlug = null): string

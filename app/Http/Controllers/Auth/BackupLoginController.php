@@ -265,7 +265,7 @@ class BackupLoginController extends Controller
         static $supportsColumns;
 
         if ($supportsColumns === null) {
-            $supportsColumns = Schema::hasColumns('users', [
+            $supportsColumns = Schema::hasColumns('user_auth_security', [
                 'failed_login_attempts',
                 'last_failed_login_at',
                 'locked_until',

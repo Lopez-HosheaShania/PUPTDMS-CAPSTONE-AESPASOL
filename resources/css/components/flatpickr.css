@@ -437,7 +437,8 @@ span.flatpickr-weekday {
 }
 
 .fp-date-input-wrap .form-input-custom,
-.fp-date-input-wrap .fp-date-input {
+.fp-date-input-wrap .fp-date-input,
+.fp-date-input-wrap .fp-month-input {
     width: 100%;
     padding-right: 40px !important;
 }
@@ -447,7 +448,7 @@ span.flatpickr-weekday {
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9CA3AF;
+    color: var(--text-3);
     font-size: 14px;
     pointer-events: none;
     line-height: 1;
@@ -473,10 +474,59 @@ span.flatpickr-weekday {
     cursor: pointer;
 }
 
+.fp-month-input {
+    width: 100%;
+    min-width: 0;
+
+    height: 40px;
+    padding: 0 40px 0 13px;
+
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+
+    background: var(--card);
+    color: var(--text-1);
+
+    font: inherit;
+    font-size: 13px;
+
+    outline: none;
+    cursor: pointer;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s,
+        background-color .2s;
+}
+
+.form-input-custom.fp-month-input[readonly] {
+    background: var(--card);
+    color: var(--text-1);
+    cursor: pointer;
+}
+
+.fp-month-input:hover {
+    border-color: #d3c7c7;
+    background: #fffdfd;
+}
+
+.fp-month-input:focus {
+    border-color: var(--crimson);
+    box-shadow:
+        0 0 0 3px var(--alpha-crimson-10);
+}
+
+[data-theme="dark"] .fp-month-input,
+.dark .fp-month-input {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--text-1);
+}
+
 .fp-date-input[readonly],
 .form-input-custom.js-flatpickr-date[readonly] {
-    background: #FFFFFF;
-    color: #333333;
+    background: var(--card);
+    color: var(--text-1);
     cursor: pointer;
 }
 
