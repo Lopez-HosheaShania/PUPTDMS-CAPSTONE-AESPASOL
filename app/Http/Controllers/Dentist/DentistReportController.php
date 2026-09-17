@@ -3082,6 +3082,98 @@ class DentistReportController extends Controller
         ]);
     }
 
+    public function storeDailyTreatmentRecord(Request $request)
+    {
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'treatment_date' => ['required', 'date', 'before_or_equal:today'],
+            'patient_name' => [
+                'required',
+                'string',
+                'max:150',
+                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+            ],
+            'patient_email' => ['nullable', 'email', 'max:190'],
+            'patient_phone' => [
+                'nullable',
+                'string',
+                'regex:/^09\d{9}$/',
+            ],
+            'office_type' => ['nullable', Rule::in(['Administrative', 'Faculty', 'Dependent', 'Alumni'])],
+            'program_code' => ['nullable', 'string', 'max:50'],
+            'gender' => ['nullable', Rule::in(['Male', 'Female', 'Other'])],
+            'treatment_done' => ['required', 'string', 'max:150'],
+            'minutes_processed' => ['nullable', 'integer', 'min:0', 'max:1440'],
+            'time_in' => ['nullable', 'date'],
+            'time_out' => ['nullable', 'date', 'after_or_equal:time_in'],
+            'patient_signature' => ['nullable', 'file', 'image', 'mimes:png,jpg,jpeg', 'max:5120'],
+        ], [
+            'patient_name.regex' => 'Patient name may only contain letters, spaces, apostrophes, periods, and hyphens.',
+            'patient_phone.regex' => 'Contact number must start with 09 and contain exactly 11 digits.',
+        ]);
+
+        $timeIn = ! empty($validated['time_in']) ? Carbon::parse($validated['time_in']) : null;
+        $timeOut = ! empty($validated['time_out']) ? Carbon::parse($validated['time_out']) : null;
+
+        $minutesProcessed = (int) ($validated['minutes_processed'] ?? 0);
+
+        if ($timeIn && $timeOut) {
+            $minutesProcessed = max(0, $timeIn->diffInMinutes($timeOut));
+        }
+
+        $signaturePath = null;
+        if ($request->hasFile('patient_signature')) {
+            $signaturePath = $request->file('patient_signature')->store('daily-treatment-signatures', 'public');
+        }
+
+        $record = DailyTreatmentRecord::create([
+            'treatment_date' => $validated['treatment_date'],
+            'time_in' => $timeIn?->format('H:i:s'),
+            'time_out' => $timeOut?->format('H:i:s'),
+            'patient_name' => $validated['patient_name'],
+            'patient_email' => $validated['patient_email'] ?? null,
+            'patient_phone' => $validated['patient_phone'] ?? null,
+            'office_type' => $validated['office_type'] ?? null,
+            'program_code' => $validated['program_code'] ?? null,
+            'gender' => $validated['gender'] ?? null,
+            'treatment_done' => $validated['treatment_done'],
+            'minutes_processed' => $minutesProcessed,
+            'has_signature' => ! empty($signaturePath),
+            'signature_path' => $signaturePath,
+        ]);
+
+        AuditLogger::log(
+            'create',
+            'dentist_daily_treatment_record',
+            'Dentist created a daily treatment record'
+        );
+
+        return response()->json([
+            'message' => 'Daily treatment record saved successfully.',
+            'record' => [
+                'id' => $record->id,
+                'treatment_date' => optional($record->treatment_date)->format('Y-m-d'),
+                'patient_name' => $record->patient_name,
+                'patient_email' => $record->patient_email,
+                'patient_phone' => $record->patient_phone,
+                'office_type' => $record->office_type,
+                'program_code' => $record->program_code,
+                'gender' => $record->gender,
+                'treatment_done' => $record->treatment_done,
+                'minutes_processed' => $record->minutes_processed,
+                'time_in' => $timeIn?->format('h:i A'),
+                'time_out' => $timeOut?->format('h:i A'),
+                'has_signature' => (bool) $record->has_signature,
+                'signature_path' => $record->signature_path,
+            ],
+        ], 201);
+    }
+
     public function dailyTreatmentRecordList(Request $request)
     {
         $activeRole = session('impersonated_role') ?: session('role');

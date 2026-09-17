@@ -3224,6 +3224,19 @@
                             currentStep === 4 &&
                             !editingHistoryFromReview
                         ) {
+                            const signature =
+                                window.BookingSignature
+                                    ?.get(document);
+
+                            if (
+                                !patientHasReusableSignature &&
+                                signature?.isReady?.()
+                            ) {
+                                bookingWorkflow.goTo(3);
+
+                                return false;
+                            }
+
                             bookingWorkflow.goTo(1);
 
                             return false;
@@ -3275,9 +3288,13 @@
                         ) {
                             bookingWorkflow.markComplete(1);
                             bookingWorkflow.markComplete(2);
-                            bookingWorkflow.markComplete(3);
 
-                            bookingWorkflow.goTo(4);
+                            if (patientHasReusableSignature) {
+                                bookingWorkflow.markComplete(3);
+                                bookingWorkflow.goTo(4);
+                            } else {
+                                bookingWorkflow.goTo(3);
+                            }
 
                             return false;
                         }
@@ -3564,6 +3581,17 @@
             const sigFile =
                 data.get(
                     "patient_signature"
+                );
+
+            const signatureController =
+                window.BookingSignature
+                    ?.get(document);
+
+            const canEditSignatureFromReview =
+                patientHasReusableSignature ||
+                Boolean(
+                    signatureController
+                        ?.isReady?.()
                 );
 
             let sigHTML =
@@ -4150,7 +4178,7 @@ ${summaryCard(
             "Signature",
             "fa-signature",
             sigHTML,
-            patientHasReusableSignature
+            canEditSignatureFromReview
                 ? "editSignatureFromReview()"
                 : null
         )}
