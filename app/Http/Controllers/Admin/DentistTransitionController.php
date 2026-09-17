@@ -15,9 +15,7 @@ use Illuminate\Http\Request;
 
 class DentistTransitionController extends Controller
 {
-    public function __construct(private readonly DentistTransitionService $service)
-    {
-    }
+    public function __construct(private readonly DentistTransitionService $service) {}
 
     public function index(Request $request)
     {
@@ -28,7 +26,7 @@ class DentistTransitionController extends Controller
 
         $standardTransitionTypes = array_values(array_filter(
             DentistTransition::TYPES,
-            fn ($type) => $type !== 'other'
+            fn($type) => $type !== 'other'
         ));
 
         $baseQuery = DentistTransition::query()
@@ -90,7 +88,7 @@ class DentistTransitionController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'transitions' => $transitions->getCollection()
-                    ->map(fn (DentistTransition $transition) => $this->formatTransitionForResponse($transition))
+                    ->map(fn(DentistTransition $transition) => $this->formatTransitionForResponse($transition))
                     ->values(),
                 'pagination' => [
                     'total' => $transitions->total(),
@@ -141,7 +139,10 @@ class DentistTransitionController extends Controller
 
         return redirect()
             ->route($this->routeName('show'), $transition)
-            ->with('success', 'Dentist transition created successfully.');
+            ->with(
+                'success',
+                'Dentist handover confirmed successfully.'
+            );
     }
 
     public function show(DentistTransition $transition)
@@ -233,10 +234,16 @@ class DentistTransitionController extends Controller
             'checklist.*.remarks' => ['nullable', 'string'],
         ]);
 
-        $this->service->updateChecklist($transition, $request->only('checklist'), $request->user());
-        $this->service->notifyTransitionParticipants($transition, 'checklist_updated');
+        $this->service->updateChecklist(
+            $transition,
+            $request->only('checklist'),
+            $request->user()
+        );
 
-        return back()->with('success', 'Handover checklist updated successfully.');
+        return back()->with(
+            'success',
+            'Handover checklist updated successfully.'
+        );
     }
 
     public function finalize(FinalizeDentistTransitionRequest $request, DentistTransition $transition)
@@ -322,7 +329,14 @@ class DentistTransitionController extends Controller
             'status' => $status,
             'status_label' => str_replace('_', ' ', ucfirst($status)),
             'show_url' => route($this->routeName('show'), $transition),
-            'edit_url' => !in_array($status, ['completed', 'cancelled'], true)
+            'edit_url' => (
+                $this->resolveLayoutRole() === 'admin'
+                && ! in_array(
+                    $status,
+                    ['scheduled', 'completed', 'cancelled'],
+                    true
+                )
+            )
                 ? route($this->routeName('edit'), $transition)
                 : null,
         ];
@@ -380,7 +394,7 @@ class DentistTransitionController extends Controller
         }
 
         $firstAssignedSuccessor = $transition->items
-            ->first(fn ($item) => $item->successorDentist?->name);
+            ->first(fn($item) => $item->successorDentist?->name);
 
         return $firstAssignedSuccessor?->successorDentist?->name ?? 'Not assigned';
     }

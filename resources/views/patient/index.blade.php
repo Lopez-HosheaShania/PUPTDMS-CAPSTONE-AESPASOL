@@ -13,12 +13,6 @@
     @php
         $notifications = collect($notifications ?? []);
         $notifCount = $notifications->count();
-
-        $hasActiveAppointment = collect($appointments ?? [])->contains(function ($appointment) {
-            $status = strtolower(trim((string) ($appointment->status ?? '')));
-
-            return in_array($status, ['upcoming', 'rescheduled'], true);
-        });
         $odontogramSnapshotService = app(\App\Services\AppointmentOdontogramSnapshotService::class);
 
         $previousOdontogramByAppointment = $previousOdontogramByAppointment ?? [];
@@ -692,7 +686,79 @@
             </div>
         </div>
     </div>
+                <button type="button" class="ui-btn ui-btn-primary" onclick="confirmShowPrivateInformation()">
+                    <i class="fa-regular fa-eye"></i>
+                    Show Information
+                </button>
+            </div>
+        </div>
+    </div>
 
+    @include('components.appointment-calendar-script', [
+        'mode' => 'patient-dashboard',
+        'renderStyle' => 'patient',
+        'calendarContainerId' => 'calendarSkeletonContainer',
+    
+        'dateInputId' => null,
+        'timeInputId' => null,
+    
+        'slotEndpoint' => route('book.appointment.slots'),
+        'bookingUrl' => route('patient.book.appointment'),
+    
+        'scheduleRules' => isset($schedules)
+            ? $schedules
+            : (isset($scheduleRules)
+                ? $scheduleRules
+                : \App\Models\ClinicSchedule::active()->get()->values()->toArray()),
+    
+        'blockedDates' => $unavailableDates ?? [],
+        'appointmentCountsPerDay' => $appointmentCountsPerDay ?? [],
+        'philippineHolidays' => $philippineHolidays ?? [],
+        'personalAppointments' => $calendarAppointments ?? [],
+        'completedAppointments' => $completedCalendarAppointments ?? [],
+    
+        'useDynamicScheduleRules' => true,
+        'disallowToday' => true,
+        'allowToggleOffDate' => false,
+    
+        'maxFutureMonths' => 6,
+        'historyMonths' => 12,
+    
+        'appointmentHistoryUrl' => route('patient.record'),
+    ])
+    @include('components.appointment-calendar-script', [
+        'mode' => 'patient-dashboard',
+        'renderStyle' => 'patient',
+        'calendarContainerId' => 'calendarSkeletonContainer',
+        'hasActiveAppointment' => $hasActiveAppointment,
+    
+        'dateInputId' => null,
+        'timeInputId' => null,
+    
+        'slotEndpoint' => route('book.appointment.slots'),
+        'bookingUrl' => route('patient.book.appointment'),
+    
+        'scheduleRules' => isset($schedules)
+            ? $schedules
+            : (isset($scheduleRules)
+                ? $scheduleRules
+                : \App\Models\ClinicSchedule::active()->get()->values()->toArray()),
+    
+        'blockedDates' => $unavailableDates ?? [],
+        'appointmentCountsPerDay' => $appointmentCountsPerDay ?? [],
+        'philippineHolidays' => $philippineHolidays ?? [],
+        'personalAppointments' => $calendarAppointments ?? [],
+        'completedAppointments' => $completedCalendarAppointments ?? [],
+    
+        'useDynamicScheduleRules' => true,
+        'disallowToday' => true,
+        'allowToggleOffDate' => false,
+    
+        'maxFutureMonths' => 6,
+        'historyMonths' => 12,
+    
+        'appointmentHistoryUrl' => route('patient.record'),
+    ])
     @include('components.appointment-calendar-script', [
         'mode' => 'patient-dashboard',
         'renderStyle' => 'patient',

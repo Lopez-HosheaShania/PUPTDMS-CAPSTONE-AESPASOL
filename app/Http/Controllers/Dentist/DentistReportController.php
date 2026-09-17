@@ -758,8 +758,7 @@ class DentistReportController extends Controller
         $template = $pdf->importPage(1);
         $size = $pdf->getTemplateSize($template);
 
-        $rowsPerPage = 16;
-
+        $rowsPerPage = 14;
         $recordChunks =
             $this->reportPages(
                 $records,
@@ -2460,10 +2459,10 @@ class DentistReportController extends Controller
                 $this->drawPdfImageInBox(
                     $pdf,
                     $signaturePath,
-                    163,
-                    537,
-                    105,
-                    10
+                    737.6,
+                    $y,
+                    44,
+                    12
                 );
             }
         }
@@ -4896,8 +4895,10 @@ class DentistReportController extends Controller
         float $centerX,
         float $centerY,
         float $boxWidth,
-        float $boxHeight
+        float $boxHeight,
+        bool $enhanceStroke = true
     ): void {
+
         try {
             [$imageWidth, $imageHeight] = @getimagesize($imagePath) ?: [0, 0];
 
@@ -4913,10 +4914,39 @@ class DentistReportController extends Controller
 
             $pdf->SetFillColor(255, 255, 255);
             $pdf->Rect($centerX - ($boxWidth / 2), $centerY - ($boxHeight / 2), $boxWidth, $boxHeight, 'F');
-            $pdf->Image($imagePath, $x, $y, $drawWidth, $drawHeight);
-            $pdf->Image($imagePath, $x + 0.10, $y, $drawWidth, $drawHeight);
-            $pdf->Image($imagePath, $x, $y + 0.08, $drawWidth, $drawHeight);
-            $pdf->Image($imagePath, $x + 0.10, $y + 0.08, $drawWidth, $drawHeight);
+            $pdf->Image(
+                $imagePath,
+                $x,
+                $y,
+                $drawWidth,
+                $drawHeight
+            );
+
+            if ($enhanceStroke) {
+                $pdf->Image(
+                    $imagePath,
+                    $x + 0.10,
+                    $y,
+                    $drawWidth,
+                    $drawHeight
+                );
+
+                $pdf->Image(
+                    $imagePath,
+                    $x,
+                    $y + 0.08,
+                    $drawWidth,
+                    $drawHeight
+                );
+
+                $pdf->Image(
+                    $imagePath,
+                    $x + 0.10,
+                    $y + 0.08,
+                    $drawWidth,
+                    $drawHeight
+                );
+            }
         } catch (\Throwable $e) {
             // Skip signature rendering when the stored image cannot be loaded.
         }
@@ -5180,20 +5210,40 @@ class DentistReportController extends Controller
         $pdf->SetFillColor(255, 255, 255);
         $pdf->SetTextColor(0, 0, 0);
     }
-    
+
     private function dhrOdontogramPositions(): array
     {
         $scaleX = 467.844818 / 858;
         $scaleY = 217.080017 / 413;
         $rows = [
-            ['teeth' => [[55, 54, 53, 52, 51], [61, 62, 63, 64, 65]],
-                'firstX' => [223.75, 456.75], 'y' => 78, 'statusX' => [202, 434], 'statusY' => 12],
-            ['teeth' => [[18, 17, 16, 15, 14, 13, 12, 11], [21, 22, 23, 24, 25, 26, 27, 28]],
-                'firstX' => [90.75, 456.75], 'y' => 185, 'statusX' => [69, 434], 'statusY' => 119],
-            ['teeth' => [[48, 47, 46, 45, 44, 43, 42, 41], [31, 32, 33, 34, 35, 36, 37, 38]],
-                'firstX' => [90.75, 456.75], 'y' => 220, 'statusX' => [69, 434], 'statusY' => 253],
-            ['teeth' => [[85, 84, 83, 82, 81], [71, 72, 73, 74, 75]],
-                'firstX' => [229.5, 451.5], 'y' => 327, 'statusX' => [202, 434], 'statusY' => 362],
+            [
+                'teeth' => [[55, 54, 53, 52, 51], [61, 62, 63, 64, 65]],
+                'firstX' => [223.75, 456.75],
+                'y' => 78,
+                'statusX' => [202, 434],
+                'statusY' => 12
+            ],
+            [
+                'teeth' => [[18, 17, 16, 15, 14, 13, 12, 11], [21, 22, 23, 24, 25, 26, 27, 28]],
+                'firstX' => [90.75, 456.75],
+                'y' => 185,
+                'statusX' => [69, 434],
+                'statusY' => 119
+            ],
+            [
+                'teeth' => [[48, 47, 46, 45, 44, 43, 42, 41], [31, 32, 33, 34, 35, 36, 37, 38]],
+                'firstX' => [90.75, 456.75],
+                'y' => 220,
+                'statusX' => [69, 434],
+                'statusY' => 253
+            ],
+            [
+                'teeth' => [[85, 84, 83, 82, 81], [71, 72, 73, 74, 75]],
+                'firstX' => [229.5, 451.5],
+                'y' => 327,
+                'statusX' => [202, 434],
+                'statusY' => 362
+            ],
         ];
         $positions = [];
 
