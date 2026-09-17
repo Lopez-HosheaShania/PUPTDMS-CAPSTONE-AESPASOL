@@ -2245,7 +2245,7 @@
         </form>
     </div>
 
-    <div id="reservedPeriodModalBackdrop" data-flatpickr-scope class="ui-modal modal-theme-primary" aria-hidden="true">
+    <div id="reservedPeriodModalBackdrop" class="ui-modal modal-theme-primary" aria-hidden="true">
         <div class="ui-modal-card modal-xl" onclick="event.stopPropagation()">
             <div class="modal-hd">
                 <div class="modal-heading">
@@ -4316,20 +4316,6 @@
             </div>
         `).join('');
 
-            // Hydrate only the newly rendered timeslot inputs. Keeping this
-            // local avoids re-initializing the date/start/end pickers and
-            // prevents the brief flash of their raw inputs.
-            if (reservedTimeslots.length > 0) {
-                window.loadDatePickerModule?.()
-                    .then(module => module.initGlobalDatePickers(list))
-                    .catch(error => {
-                        console.error(
-                            'Unable to initialize reserved timeslot pickers.',
-                            error
-                        );
-                    });
-            }
-
             empty.hidden = reservedTimeslots.length > 0;
             total.textContent = reservedTimeslots.length;
 
@@ -4431,7 +4417,7 @@
             }
         }
 
-        async function openReservedPeriodModal(mode = 'create', periodId = null, period = null) {
+        function openReservedPeriodModal(mode = 'create', periodId = null, period = null) {
             const modal = document.getElementById('reservedPeriodModalBackdrop');
             const form = document.getElementById('reservedPeriodForm');
             const methodField = document.getElementById('reservedPeriodMethodField');
@@ -4566,23 +4552,12 @@
                 time: String(slot.time || slot.slot_time || '').slice(0, 5),
             })).filter(slot => slot.time);
             renderReservedTimeslots();
+            updateReservedSlotDuration();
             setReservedBookingMode(values.booking_mode || 'timeslot');
 
             toggleReservedStudentFields(
                 document.getElementById('reservedPatientType').value
             );
-
-            // Initialize date/time pickers before the modal becomes visible.
-            // Otherwise the native inputs can be painted briefly and then
-            // replaced by Flatpickr after a date/time interaction.
-            try {
-                await window.initGlobalDatePickers?.(modal);
-            } catch (error) {
-                console.error(
-                    'Unable to initialize Reserved Booking Period pickers.',
-                    error
-                );
-            }
 
             window.openModal('reservedPeriodModalBackdrop');
         }
