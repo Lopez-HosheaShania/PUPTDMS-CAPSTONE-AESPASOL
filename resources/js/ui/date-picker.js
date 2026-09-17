@@ -567,14 +567,8 @@ function ensureGlobalDateInputIcons(
     });
 }
 
-function initGlobalFlatpickr(root = document) {
+function initGlobalFlatpickr() {
     if (!window.flatpickr) return;
-
-    const scope =
-        root &&
-        typeof root.querySelectorAll === 'function'
-            ? root
-            : document;
 
     const baseOptions = {
         dateFormat: "Y-m-d",
@@ -623,7 +617,7 @@ function initGlobalFlatpickr(root = document) {
     };
 
 
-    const dateInputs = scope.querySelectorAll(
+    const dateInputs = document.querySelectorAll(
         '.js-flatpickr-date, .js-flatpickr-date-min-today, .js-flatpickr-date-max-today, .js-flatpickr-date-range-from, .js-flatpickr-date-range-to'
     );
 
@@ -711,7 +705,7 @@ function initGlobalFlatpickr(root = document) {
         window.flatpickr(el, options);
     });
 
-    const timeInputs = scope.querySelectorAll('.js-flatpickr-time');
+    const timeInputs = document.querySelectorAll('.js-flatpickr-time');
 
     timeInputs.forEach(el => {
         if (el._flatpickr) return;
@@ -994,9 +988,7 @@ export async function initGlobalDatePickers(
 
     await globalDatePickerBootPromise;
 
-    initGlobalFlatpickr(
-        scope
-    );
+    initGlobalFlatpickr();
     initMonthOnlyFlatpickr(
         scope
     );
