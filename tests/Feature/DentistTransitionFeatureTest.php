@@ -178,9 +178,9 @@ class DentistTransitionFeatureTest extends TestCase
                 'completed_at' => now(),
             ]);
 
-        DB::table('dentist_transition_items')
+        \App\Models\DentistTransitionItem::query()
             ->where('dentist_transition_id', $transition->id)
-            ->update([
+            ->get()->each->update([
                 'successor_dentist_id' => $successor->id,
                 'transfer_status' => 'ready',
             ]);
@@ -208,6 +208,9 @@ class DentistTransitionFeatureTest extends TestCase
             'payload' => base64_encode('payload'),
             'last_activity' => now()->timestamp,
         ]);
+
+        // Session revocation is enabled only for the database session driver.
+        config(['session.driver' => 'database', 'concurrent-sessions.enabled' => true]);
 
         $this->artisan('dentists:deactivate-expired')
             ->expectsOutput('Processed 1 expired dentist transition(s).')

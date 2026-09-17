@@ -131,10 +131,6 @@ function createCalendarSource(config = {}) {
                 return null;
             }
 
-            /*
-             * Backward compatibility for old:
-             * date => "Holiday Name"
-             */
             if (typeof holiday === 'string') {
                 return holiday;
             }
@@ -153,16 +149,10 @@ function createCalendarSource(config = {}) {
                 return false;
             }
 
-            /*
-             * Legacy holiday maps were always treated as blocking.
-             */
             if (typeof holiday === 'string') {
                 return true;
             }
 
-            /*
-             * Prefer the booking decision normalized by Laravel.
-             */
             if (
                 typeof holiday
                     .is_blocked_for_booking ===
@@ -172,10 +162,6 @@ function createCalendarSource(config = {}) {
                     .is_blocked_for_booking;
             }
 
-            /*
-             * Defensive compatibility if an older normalized payload
-             * does not yet contain is_blocked_for_booking.
-             */
             if (
                 holiday.type ===
                 'special_working' ||
@@ -489,6 +475,98 @@ function refreshFlatpickr(instance) {
     }
 }
 
+const GLOBAL_DATE_INPUT_SELECTOR = [
+    '.js-flatpickr-date',
+    '.js-flatpickr-date-min-today',
+    '.js-flatpickr-date-max-today',
+    '.js-flatpickr-date-range-from',
+    '.js-flatpickr-date-range-to',
+    '[data-month-only-picker]',
+].join(',');
+
+function ensureGlobalDateInputIcons(
+    root = document
+) {
+    const scope =
+        root &&
+            typeof root.querySelectorAll === 'function'
+            ? root
+            : document;
+
+    const inputs = [];
+
+    if (
+        scope.matches?.(
+            GLOBAL_DATE_INPUT_SELECTOR
+        )
+    ) {
+        inputs.push(scope);
+    }
+
+    inputs.push(
+        ...scope.querySelectorAll(
+            GLOBAL_DATE_INPUT_SELECTOR
+        )
+    );
+
+    inputs.forEach(input => {
+        if (
+            input.closest(
+                '[data-flatpickr-trigger]'
+            )?.querySelector(
+                '.global-control-icon'
+            )
+        ) {
+            return;
+        }
+
+        let wrapper =
+            input.closest(
+                '.fp-date-input-wrap'
+            );
+
+        if (!wrapper) {
+            wrapper =
+                document.createElement('div');
+
+            wrapper.className =
+                'fp-date-input-wrap';
+
+            input.parentNode.insertBefore(
+                wrapper,
+                input
+            );
+
+            wrapper.appendChild(input);
+        }
+
+        input.classList.add(
+            'fp-date-input'
+        );
+
+        if (
+            wrapper.querySelector(
+                '.fp-date-icon'
+            )
+        ) {
+            return;
+        }
+
+        const icon =
+            document.createElement('i');
+
+        icon.className =
+            'fa-regular fa-calendar fp-date-icon';
+
+        icon.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+        wrapper.appendChild(icon);
+    });
+}
+
 function initGlobalFlatpickr() {
     if (!window.flatpickr) return;
 
@@ -644,9 +722,7 @@ function initGlobalFlatpickr() {
             dateFormat: "H:i",
             altInput: true,
             altFormat: "h:i K",
-            // Never copy the initializer class to Flatpickr's generated
-            // display input. Otherwise a later global/modal scan treats that
-            // display field as a new picker source and initializes it again.
+
             altInputClass: `${visibleInputClass} flatpickr-time-display form-control input`,
             time_24hr: false,
             minuteIncrement: 5,
@@ -706,7 +782,7 @@ function initMonthOnlyFlatpickr(root = document) {
             dateFormat: 'Y-m',
             altInput: true,
             altFormat: 'F Y',
-            altInputClass: 'form-input-custom service-period-input service-period-alt',
+            altInputClass: 'form-input-custom fp-month-input',
             defaultDate,
             maxDate: limitToToday ? 'today' : undefined,
             allowInput: false,
@@ -725,9 +801,73 @@ function initMonthOnlyFlatpickr(root = document) {
                     : undefined,
 
             onReady: (_dates, _str, instance) => {
-                instance.calendarContainer.classList.add('flatpickr-month-only');
+                instance.calendarContainer.classList.add(
+                    'flatpickr-month-only'
+                );
+
                 refreshFlatpickr(instance);
-                updateMonthOnlyInput(instance, { dispatch: false });
+
+                updateMonthOnlyInput(
+                    instance,
+                    {
+                        dispatch: false
+                    }
+                );
+
+                const visibleInput =
+                    instance.altInput ||
+                    instance.input;
+
+                let wrapper =
+                    visibleInput.closest(
+                        '.fp-date-input-wrap'
+                    );
+
+                if (!wrapper) {
+                    wrapper =
+                        document.createElement(
+                            'div'
+                        );
+
+                    wrapper.className =
+                        'fp-date-input-wrap';
+
+                    visibleInput.parentNode.insertBefore(
+                        wrapper,
+                        visibleInput
+                    );
+
+                    wrapper.appendChild(
+                        visibleInput
+                    );
+                }
+
+                visibleInput.classList.add(
+                    'fp-date-input'
+                );
+
+                if (
+                    !wrapper.querySelector(
+                        '.fp-date-icon'
+                    )
+                ) {
+                    const icon =
+                        document.createElement(
+                            'i'
+                        );
+
+                    icon.className =
+                        'fa-regular fa-calendar fp-date-icon';
+
+                    icon.setAttribute(
+                        'aria-hidden',
+                        'true'
+                    );
+
+                    wrapper.appendChild(
+                        icon
+                    );
+                }
             },
 
             onOpen: (_dates, _str, instance) => {
@@ -771,10 +911,24 @@ function setMonthOnlyPickerValue(inputOrSelector, value, dispatch = true) {
         return;
     }
 
-    input.value = String(value).slice(0, 7);
+    const normalizedValue =
+        String(value).slice(0, 7);
+
+    input.value =
+        normalizedValue;
+
+    input.dataset.defaultMonth =
+        normalizedValue;
 
     if (dispatch) {
-        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.dispatchEvent(
+            new Event(
+                'change',
+                {
+                    bubbles: true
+                }
+            )
+        );
     }
 }
 
@@ -818,6 +972,8 @@ export async function initGlobalDatePickers(
     if (!hasFlatpickrFields) {
         return;
     }
+
+    ensureGlobalDateInputIcons(scope);
 
     if (!globalDatePickerBootPromise) {
         globalDatePickerBootPromise =
@@ -1102,3 +1258,4 @@ window.buildFlatpickrCalendarOptions =
 
 window.initMonthOnlyFlatpickr = initMonthOnlyFlatpickr;
 window.setMonthOnlyPickerValue = setMonthOnlyPickerValue;
+window.initGlobalDatePickers = initGlobalDatePickers;

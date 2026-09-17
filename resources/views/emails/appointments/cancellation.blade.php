@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
     <title>Appointment Cancelled</title>
 </head>
 
-<body style="
+<body
+    style="
     margin: 0;
     padding: 0;
     background-color: #f4f4f5;
@@ -15,13 +17,13 @@
     color: #27272a;
 ">
 
-<table width="100%" cellpadding="0" cellspacing="0" role="presentation"
-       style="background-color:#f4f4f5;padding:40px 16px;">
-    <tr>
-        <td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+        style="background-color:#f4f4f5;padding:40px 16px;">
+        <tr>
+            <td align="center">
 
-            <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
-                   style="
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+                    style="
                        max-width:600px;
                        background:#ffffff;
                        border-radius:12px;
@@ -29,157 +31,165 @@
                        box-shadow:0 2px 8px rgba(0,0,0,0.08);
                    ">
 
-                <tr>
-                    <td style="
+                    <tr>
+                        <td
+                            style="
                         background:#5d0606;
                         padding:28px 32px;
                         text-align:center;
                         color:#ffffff;
                     ">
-                        <h1 style="margin:0;font-size:22px;">
-                            PUP Taguig Dental Clinic
-                        </h1>
+                            <h1 style="margin:0;font-size:22px;">
+                                PUP Taguig Dental Clinic
+                            </h1>
 
-                        <p style="margin:8px 0 0;font-size:14px;">
-                            Dental Clinic Management System
-                        </p>
-                    </td>
-                </tr>
+                            <p style="margin:8px 0 0;font-size:14px;">
+                                Dental Clinic Management System
+                            </p>
+                        </td>
+                    </tr>
 
-                <tr>
-                    <td style="padding:32px;">
+                    <tr>
+                        <td style="padding:32px;">
 
-                        <h2 style="
+                            <h2
+                                style="
                             margin:0 0 20px;
                             font-size:22px;
                             color:#18181b;
                         ">
-                            Appointment Cancelled
-                        </h2>
+                                Appointment Cancelled
+                            </h2>
 
-                        <p style="line-height:1.6;margin-bottom:24px;">
-                            Hello
-                            <strong>
-                                {{ $appointment->patient->name ?? 'Patient' }}
-                            </strong>,
-                        </p>
+                            <p style="line-height:1.6;margin-bottom:24px;">
+                                Hello
+                                <strong>
+                                    {{ $appointment->patient->name ?? 'Patient' }}
+                                </strong>,
+                            </p>
 
-                        <p style="line-height:1.6;margin-bottom:24px;">
-                            We regret to inform you that your dental appointment has been cancelled.
-                            Please see the appointment details and cancellation information below.
-                        </p>
+                            <p style="line-height:1.6;margin-bottom:24px;">
+                                We regret to inform you that your dental appointment has been cancelled.
+                                Please see the appointment details and cancellation information below.
+                            </p>
 
-                        <table width="100%" cellpadding="0" cellspacing="0"
-                               style="
+                            <table width="100%" cellpadding="0" cellspacing="0"
+                                style="
                                    background:#fafafa;
                                    border:1px solid #e4e4e7;
                                    border-radius:8px;
                                    margin-bottom:24px;
                                ">
 
-                            <tr>
-                                <td style="padding:14px 18px;font-weight:bold;">
-                                    Service
-                                </td>
+                                <tr>
+                                    <td style="padding:14px 18px;font-weight:bold;">
+                                        Service
+                                    </td>
 
-                                <td style="padding:14px 18px;text-align:right;">
-                                    {{ $appointment->service_type }}
-                                </td>
-                            </tr>
+                                    <td style="padding:14px 18px;text-align:right;">
+                                        {{ $appointment->service_type_name }} </td>
+                                </tr>
 
-                            <tr>
-                                <td style="
+                                <tr>
+                                    <td
+                                        style="
                                     padding:14px 18px;
                                     font-weight:bold;
                                     border-top:1px solid #e4e4e7;
                                 ">
-                                    Date
-                                </td>
+                                        Date
+                                    </td>
 
-                                <td style="
+                                    <td
+                                        style="
                                     padding:14px 18px;
                                     text-align:right;
                                     border-top:1px solid #e4e4e7;
                                 ">
-                                    {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('F d, Y') }}
-                                </td>
-                            </tr>
+                                        {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('F d, Y') }}
+                                    </td>
+                                </tr>
 
-                            <tr>
-                                <td style="
+                                <tr>
+                                    <td
+                                        style="
                                     padding:14px 18px;
                                     font-weight:bold;
                                     border-top:1px solid #e4e4e7;
                                 ">
-                                    Time
-                                </td>
+                                        Time
+                                    </td>
 
-                                <td style="
+                                    <td
+                                        style="
                                     padding:14px 18px;
                                     text-align:right;
                                     border-top:1px solid #e4e4e7;
                                 ">
-                                    {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}
-                                </td>
-                            </tr>
+                                        {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}
+                                    </td>
+                                </tr>
 
-                            <tr>
-                                <td style="
+                                <tr>
+                                    <td
+                                        style="
                                     padding:14px 18px;
                                     font-weight:bold;
                                     border-top:1px solid #e4e4e7;
                                 ">
-                                    Status
-                                </td>
+                                        Status
+                                    </td>
 
-                                <td style="
+                                    <td
+                                        style="
                                     padding:14px 18px;
                                     text-align:right;
                                     border-top:1px solid #e4e4e7;
                                 ">
-                                    Cancelled
-                                </td>
-                            </tr>
+                                        Cancelled
+                                    </td>
+                                </tr>
 
-                        </table>
+                            </table>
 
-                        @if($cancelledBy || $reason)
-                        <table width="100%" cellpadding="0" cellspacing="0"
-                               style="
+                            @if ($cancelledBy || $reason)
+                                <table width="100%" cellpadding="0" cellspacing="0"
+                                    style="
                                    background:#fef2f2;
                                    border:1px solid #fecaca;
                                    border-radius:8px;
                                    margin-bottom:24px;
                                ">
-                            <tr>
-                                <td style="padding:14px 18px;">
-                                    @if($cancelledBy)
-                                    <p style="margin:0 0 8px;line-height:1.6;">
-                                        Cancelled by: <strong>{{ $cancelledBy }}</strong>
-                                    </p>
-                                    @endif
+                                    <tr>
+                                        <td style="padding:14px 18px;">
+                                            @if ($cancelledBy)
+                                                <p style="margin:0 0 8px;line-height:1.6;">
+                                                    Cancelled by: <strong>{{ $cancelledBy }}</strong>
+                                                </p>
+                                            @endif
 
-                                    @if($reason)
-                                    <p style="margin:0;line-height:1.6;">
-                                        Reason: <strong>{{ $reason }}</strong>
-                                    </p>
-                                    @endif
-                                </td>
-                            </tr>
-                        </table>
-                        @endif
+                                            @if ($reason)
+                                                <p style="margin:0;line-height:1.6;">
+                                                    Reason: <strong>{{ $reason }}</strong>
+                                                </p>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                </table>
+                            @endif
 
-                        <p style="line-height:1.6;margin:0;">
-                            We apologize for any inconvenience this may have caused.
-                            If you would like to book a new appointment, please visit our booking page.
-                            If you have any questions, please contact the clinic.
-                        </p>
+                            <p style="line-height:1.6;margin:0;">
+                                We apologize for any inconvenience this may have caused.
+                                If you would like to book a new appointment, please visit our booking page.
+                                If you have any questions, please contact the clinic.
+                            </p>
 
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
 
-                <tr>
-                    <td style="
+                    <tr>
+                        <td
+                            style="
                         background:#fafafa;
                         border-top:1px solid #e4e4e7;
                         padding:20px 32px;
@@ -187,16 +197,17 @@
                         font-size:12px;
                         color:#71717a;
                     ">
-                        This is an automated message from the
-                        PUP Taguig Dental Clinic.
-                    </td>
-                </tr>
+                            This is an automated message from the
+                            PUP Taguig Dental Clinic.
+                        </td>
+                    </tr>
 
-            </table>
+                </table>
 
-        </td>
-    </tr>
-</table>
+            </td>
+        </tr>
+    </table>
 
 </body>
+
 </html>

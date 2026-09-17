@@ -28,12 +28,6 @@
                     <div>
                         <h1 class="page-title">System Logs</h1>
                     </div>
-
-                    <div class="flex items-center gap-3 flex-shrink-0">
-                        <span class="sl-live">
-                            <span class="sl-live-dot"></span> Live Monitoring
-                        </span>
-                    </div>
                 </div>
             </div>
 
@@ -124,131 +118,137 @@
                     <div class="card-header-left">
                         <div class="card-header-icon"><i class="fa-solid fa-clipboard-list"></i></div>
                         <span class="card-title">Audit Trail</span>
-                        <span id="entryBadge" class="entry-badge">
-                            {{ $totalCount }} {{ Str::plural('entry', $totalCount) }}
-                        </span>
                     </div>
 
-                    <div class="card-header-right sl-toolbar-actions">
-                        <div class="global-voice-row sl-search-row">
+                    <div class="card-header-right system-logs-toolbar">
 
-                            <x-search-bar id="slSearch" name="search" placeholder="Search logs…" :value="$search ?? ''"
-                                callback="handleSystemLogsSearch" :debounce="400" class="sl-search-wrap" />
+                        <div class="table-toolbar-search">
+                            <div class="global-voice-row">
 
-                            <x-voice-input target="#slSearch" status-id="slSearchVoiceStatus"
-                                label="Voice search system logs" title="Voice search" />
+                                <x-search-bar id="slSearch" name="search" placeholder="Search logs…" :value="$search ?? ''"
+                                    callback="handleSystemLogsSearch" :debounce="400" />
 
+                                <x-voice-input target="#slSearch" status-id="slSearchVoiceStatus"
+                                    label="Voice search system logs" title="Voice search" />
+
+                            </div>
                         </div>
 
-                        <div class="sl-filter-actions-wrap">
-                            <button type="button" id="slFilterBtn" class="global-filter-btn sl-filter-btn"
-                                onclick="openSlFilterPanel()" aria-pressed="false">
+                        <div class="table-toolbar-actions">
+
+                            <x-filter-select id="slStatusSelect" label="Status" :value="$status ?? 'all'"
+                                callback="handleSystemLogsStatusChange" icon="fa-wave-square" menu-align="right" searchable
+                                multiple search-placeholder="Search status..." :options="[
+                                    [
+                                        'value' => 'all',
+                                        'label' => 'All Logs',
+                                        'icon' => 'fa-layer-group',
+                                        'tone' => 's-all',
+                                        'count' => ($activeCount ?? 0) + ($archivedCount ?? 0),
+                                    ],
+                                    [
+                                        'value' => 'active',
+                                        'label' => 'Active Logs',
+                                        'icon' => 'fa-wave-square',
+                                        'tone' => 's-active',
+                                        'count' => $activeCount ?? 0,
+                                    ],
+                                    [
+                                        'value' => 'archived',
+                                        'label' => 'Archived Logs',
+                                        'icon' => 'fa-box-archive',
+                                        'tone' => 's-archived',
+                                        'count' => $archivedCount ?? 0,
+                                    ],
+                                ]" />
+
+                            <x-filter-select id="slRoleSelect" label="Role" :value="$role ?? 'all'"
+                                callback="handleSystemLogsRoleChange" icon="fa-users" menu-align="right" searchable multiple
+                                search-placeholder="Search role..." :options="[
+                                    [
+                                        'value' => 'all',
+                                        'label' => 'All Roles',
+                                        'icon' => 'fa-users',
+                                        'tone' => 's-all',
+                                        'count' => $totalCount ?? 0,
+                                    ],
+                                    [
+                                        'value' => 'admin',
+                                        'label' => 'Admin',
+                                        'icon' => 'fa-user-tie',
+                                        'tone' => 'role-admin',
+                                        'count' => $adminCount ?? 0,
+                                    ],
+                                    [
+                                        'value' => 'dentist',
+                                        'label' => 'Dentist',
+                                        'icon' => 'fa-user-doctor',
+                                        'tone' => 'role-dentist',
+                                        'count' => $dentistCount ?? 0,
+                                    ],
+                                    [
+                                        'value' => 'patient',
+                                        'label' => 'Patient',
+                                        'icon' => 'fa-user',
+                                        'tone' => 'role-patient',
+                                        'count' => $patientCount ?? 0,
+                                    ],
+                                ]" />
+
+                            <button type="button" id="slFilterBtn" class="global-filter-btn" onclick="openSlFilterPanel()"
+                                aria-pressed="false">
                                 <i class="fa-solid fa-sliders"></i>
                                 <span>Filter</span>
                                 <span id="slFilterBadge" class="filter-badge hidden"></span>
                             </button>
 
-                            <button type="button" id="slArchiveBtn" class="ui-btn ui-btn-secondary ui-btn-sm"
-                                title="Archive old active logs" onclick="openSlArchiveModal()">
-
-                                <i class="fa-solid fa-box-archive"></i>
-                                <span>Archive Old Logs</span>
+                            <button id="slExternalClearFilterBtn" type="button" onclick="clearOnlySlFilters()"
+                                class="global-filter-reset-btn hidden" title="Reset filters" aria-label="Reset filters">
+                                <i class="fa-solid fa-rotate-left"></i>
                             </button>
 
-                            <button type="button" id="slExportBtn" class="ui-btn ui-btn-primary ui-btn-sm"
-                                title="Export filtered logs to PDF" onclick="handleSlExportButtonClick()">
+                            <div id="slOverflowMenu" class="sl-overflow-menu">
+                                <button type="button" id="slOverflowTrigger" class="ui-action-btn"
+                                    aria-label="More actions" aria-haspopup="menu" aria-expanded="false"
+                                    data-tooltip="More actions" data-tooltip-tone="neutral"
+                                    onclick="toggleSlOverflowMenu(event)">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
 
-                                <i class="fa-solid fa-file-pdf"></i>
-                                <span>Export PDF</span>
-                            </button>
+                                <div id="slOverflowPanel" class="sl-overflow-panel" role="menu"
+                                    aria-label="System log actions">
+                                    <button type="button" id="slArchiveBtn" class="sl-overflow-item" role="menuitem"
+                                        onclick="closeSlOverflowMenu(); openSlArchiveModal()">
+                                        <span class="sl-overflow-item-icon">
+                                            <i class="fa-solid fa-box-archive"></i>
+                                        </span>
+
+                                        <span class="sl-overflow-item-copy">
+                                            <strong>Archive Old Logs</strong>
+                                            <small>Move older active logs to archive</small>
+                                        </span>
+                                    </button>
+
+                                    <button type="button" id="slExportBtn" class="sl-overflow-item" role="menuitem"
+                                        onclick="closeSlOverflowMenu(); handleSlExportButtonClick()">
+                                        <span class="sl-overflow-item-icon">
+                                            <i class="fa-solid fa-file-pdf"></i>
+                                        </span>
+
+                                        <span class="sl-overflow-item-copy">
+                                            <strong>Export PDF</strong>
+                                            <small>Generate a filtered system log report</small>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <x-view-toggle id="slViewToggle" storage-key="systemLogsView" list-view="#slListView"
+                                grid-view="#slGridView" />
+
                         </div>
 
-                        <x-view-toggle id="slViewToggle" class="sl-view-toggle" storage-key="systemLogsView"
-                            list-view="#slListView" grid-view="#slGridView" />
-
-                        <button type="button" id="slClearFilterBtn" class="global-filter-reset-btn hidden"
-                            onclick="clearOnlySlFilters()" title="Reset filters" aria-label="Reset filters">
-
-                            <i class="fa-solid fa-rotate-left"></i>
-                        </button>
                     </div>
-                </div>
-
-                @php $activeRole = $role ?? 'all'; @endphp
-                <div class="sl-status-tabs">
-                    @foreach ([
-            [
-                'key' => 'active',
-                'label' => 'Active',
-                'count' => $activeCount ?? 0,
-                'icon' => 'fa-wave-square',
-            ],
-            [
-                'key' => 'archived',
-                'label' => 'Archived',
-                'count' => $archivedCount ?? 0,
-                'icon' => 'fa-box-archive',
-            ],
-        ] as $statusTab)
-                        <button type="button" class="sl-status-tab {{ $status === $statusTab['key'] ? 'active' : '' }}"
-                            onclick="slSetStatus(this, '{{ $statusTab['key'] }}')">
-                            <i class="fa-solid {{ $statusTab['icon'] }}"></i>
-                            <span>{{ $statusTab['label'] }}</span>
-                            <span class="sl-status-count">{{ $statusTab['count'] }}</span>
-                        </button>
-                    @endforeach
-                </div>
-
-                <div class="sl-role-tabs">
-                    @foreach ([
-            [
-                'key' => 'all',
-                'label' => 'All',
-                'icon' => 'fa-layer-group',
-                'count' => $totalCount,
-            ],
-            [
-                'key' => 'admin',
-                'label' => 'Admin',
-                'icon' => 'fa-user-tie',
-                'count' => $adminCount,
-            ],
-            [
-                'key' => 'dentist',
-                'label' => 'Dentist',
-                'icon' => 'fa-user-doctor',
-                'count' => $dentistCount,
-            ],
-            [
-                'key' => 'patient',
-                'label' => 'Patient',
-                'icon' => 'fa-user',
-                'count' => $patientCount,
-            ],
-            [
-                'key' => 'login',
-                'label' => 'Logins',
-                'icon' => 'fa-right-to-bracket',
-                'count' => $loginCount,
-            ],
-            [
-                'key' => 'error',
-                'label' => 'Errors',
-                'icon' => 'fa-triangle-exclamation',
-                'count' => $errorCount ?? 0,
-            ],
-        ] as $tab)
-                        <button type="button" class="tab-btn {{ $activeRole === $tab['key'] ? 'active' : '' }}"
-                            onclick="slSetTab(this, '{{ $tab['key'] }}')">
-                            <i class="fa-solid {{ $tab['icon'] }} mr-1 text-[0.7rem]"></i>
-
-                            {{ $tab['label'] }}
-
-                            <span class="tab-count {{ $activeRole === $tab['key'] ? 'active' : '' }}">
-                                {{ $tab['count'] }}
-                            </span>
-                        </button>
-                    @endforeach
                 </div>
 
                 <x-pagination-bar id="systemLogsPaginationTopBar" info-id="systemLogsPageInfoTop"
@@ -256,8 +256,8 @@
                     page-size-callback="handleSystemLogsPerPageChange" :page-size-value="$perPage" page-size-label="per page"
                     label="entries" :total="$logs->total()" :from="$logs->firstItem() ?? 0" :to="$logs->lastItem() ?? 0" />
 
-                <div class="sl-view" id="slListView">
-                    <div class="sl-table-wrap">
+                <div class="table-list-view" id="slListView">
+                    <div class="table-scroll">
                         <table class="data-table" id="slTable">
                             <thead>
                                 <tr>
@@ -338,7 +338,7 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <div class="sl-user">
+                                            <div class="table-primary">
 
                                                 <span class="patient-avatar patient-avatar-sm" data-patient-avatar
                                                     data-patient-name="{{ $log->actor_name ?? 'Unknown User' }}"></span>
@@ -377,6 +377,9 @@
                                         </td>
                                         <td><span
                                                 class="sl-desc">{{ $log->description ?? 'No description provided.' }}</span>
+                                            @if ($log->full_description !== $log->description)
+                                                <details><summary>Full details</summary>{{ $log->full_description }}</details>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -443,98 +446,105 @@
                             @endphp
                             <article class="table-record-card" data-role="{{ $role }}"
                                 data-action="{{ $actionClass }}">
-                                <div class="table-record-content">
+                                <div class="table-record-card-layout">
+                                    <div class="table-record-content">
 
-                                    <div class="table-record-header">
-                                        <div class="table-primary">
-                                            <strong>
-                                                #{{ str_pad($log->id, 3, '0', STR_PAD_LEFT) }}
-                                            </strong>
-                                        </div>
+                                        <div class="table-record-header">
+                                            <div class="table-primary">
+                                                <strong>
+                                                    <span class="sl-id">
+                                                        #{{ str_pad($log->id, 3, '0', STR_PAD_LEFT) }}
+                                                    </span>
+                                                </strong>
+                                            </div>
 
-                                        <span class="status-pill {{ $actionStatusClass }}">
-                                            <span class="status-dot"></span>
+                                            <span class="status-pill {{ $actionStatusClass }}">
+                                                <span class="status-dot"></span>
 
-                                            <i
-                                                class="fa-solid {{ $actionIcon }}
+                                                <i
+                                                    class="fa-solid {{ $actionIcon }}
                         {{ $actionClass === 'error' ? 'sl-action-alert' : '' }}">
-                                            </i>
+                                                </i>
 
-                                            {{ $actionLabel }}
-                                        </span>
-                                    </div>
-
-                                    <div class="sl-user">
-                                        <span class="patient-avatar patient-avatar-sm" data-patient-avatar
-                                            data-patient-name="{{ $log->actor_name ?? 'Unknown User' }}"></span>
-
-                                        <span class="sl-username">
-                                            {{ $log->actor_name ?? 'Unknown User' }}
-                                        </span>
-                                    </div>
-
-                                    <div class="table-record-meta">
-
-                                        <div class="table-record-row">
-                                            <span class="table-record-label">
-                                                Timestamp
-                                            </span>
-
-                                            <span class="table-record-value">
-                                                {{ $log->created_at->format('M j, Y') }}
-                                                ·
-                                                {{ $log->created_at->format('h:i:s A') }}
+                                                {{ $actionLabel }}
                                             </span>
                                         </div>
 
-                                        <div class="table-record-row">
-                                            <span class="table-record-label">
-                                                Role
-                                            </span>
+                                        <div class="table-primary">
+                                            <span class="patient-avatar patient-avatar-sm" data-patient-avatar
+                                                data-patient-name="{{ $log->actor_name ?? 'Unknown User' }}"></span>
 
-                                            <span class="table-record-value">
-                                                <span class="badge-role {{ $roleBadgeClass }}">
-                                                    <i class="fa-solid {{ $roleIcon }}"></i>
-                                                    {{ ucfirst($role) }}
+                                            <span class="sl-username">
+                                                {{ $log->actor_name ?? 'Unknown User' }}
+                                            </span>
+                                        </div>
+
+                                        <div class="table-record-meta">
+
+                                            <div class="table-record-row">
+                                                <span class="table-record-label">
+                                                    Timestamp
                                                 </span>
-                                            </span>
-                                        </div>
 
-                                        <div class="table-record-row">
-                                            <span class="table-record-label">
-                                                Module
-                                            </span>
-
-                                            <span class="table-record-value">
-                                                <span class="table-tag table-tag-neutral">
-                                                    <i class="fa-solid fa-cube"></i>
-
-                                                    {{ ucfirst(str_replace('_', ' ', $log->module)) }}
+                                                <span class="table-record-value">
+                                                    {{ $log->created_at->format('M j, Y') }}
+                                                    ·
+                                                    {{ $log->created_at->format('h:i:s A') }}
                                                 </span>
-                                            </span>
-                                        </div>
+                                            </div>
 
-                                        <div class="table-record-row">
-                                            <span class="table-record-label">
-                                                Description
-                                            </span>
+                                            <div class="table-record-row">
+                                                <span class="table-record-label">
+                                                    Role
+                                                </span>
+
+                                                <span class="table-record-value">
+                                                    <span class="badge-role {{ $roleBadgeClass }}">
+                                                        <i class="fa-solid {{ $roleIcon }}"></i>
+                                                        {{ ucfirst($role) }}
+                                                    </span>
+                                                </span>
+                                            </div>
+
+                                            <div class="table-record-row">
+                                                <span class="table-record-label">
+                                                    Module
+                                                </span>
+
+                                                <span class="table-record-value">
+                                                    <span class="table-tag table-tag-neutral">
+                                                        <i class="fa-solid fa-cube"></i>
+
+                                                        {{ ucfirst(str_replace('_', ' ', $log->module)) }}
+                                                    </span>
+                                                </span>
+                                            </div>
+
+                                            <div class="table-record-row">
+                                                <span class="table-record-label">
+                                                    Description
+                                                </span>
 
                                             <span class="table-record-value">
                                                 {{ $log->description ?? 'No description provided.' }}
+                                                @if ($log->full_description !== $log->description)
+                                                    <details><summary>Full details</summary>{{ $log->full_description }}</details>
+                                                @endif
                                             </span>
                                         </div>
 
+                                        </div>
+
+                                        @if ($log->is_archived)
+                                            <span class="status-pill s-archived"
+                                                title="Archived {{ optional($log->archived_at)->format('M j, Y h:i A') }}">
+                                                <span class="status-dot"></span>
+                                                <i class="fa-solid fa-box-archive"></i>
+                                                Archived
+                                            </span>
+                                        @endif
+
                                     </div>
-
-                                    @if ($log->is_archived)
-                                        <span class="status-pill s-archived"
-                                            title="Archived {{ optional($log->archived_at)->format('M j, Y h:i A') }}">
-                                            <span class="status-dot"></span>
-                                            <i class="fa-solid fa-box-archive"></i>
-                                            Archived
-                                        </span>
-                                    @endif
-
                                 </div>
                             </article>
                         @empty
@@ -553,9 +563,10 @@
     </main>
 
     <x-filter-drawer id="filterModal" title="Filters" close-callback="closeSlFilterPanel()"
-        clear-callback="clearSlFilterPanelDraft()" clear-label="Clear Filters" cancel-id="filterCloseBtn"
-        cancel-callback="closeSlFilterPanel()" cancel-label="Cancel" apply-id="filterApplyBtn"
-        apply-callback="applySlFilters()" apply-label="Show 0 results" results-id="slShowResultsText">
+        clear-id="slClearFilterPanelBtn" clear-callback="clearSlFilterPanelDraft()" clear-label="Clear Filters"
+        cancel-id="filterCloseBtn" cancel-callback="closeSlFilterPanel()" cancel-label="Cancel"
+        apply-id="filterApplyBtn" apply-callback="applySlFilters()" apply-label="Show 0 results"
+        results-id="slShowResultsText">
 
         <div id="slActiveFiltersSection" class="filter-active-section hidden">
 
@@ -587,12 +598,10 @@
             <div id="slSortGroup" class="filter-chip-row">
 
                 <button type="button" class="ftag" data-sl-sort="desc">
-                    <i class="fa-solid fa-arrow-down-wide-short"></i>
                     Newest First
                 </button>
 
                 <button type="button" class="ftag" data-sl-sort="asc">
-                    <i class="fa-solid fa-arrow-up-wide-short"></i>
                     Oldest First
                 </button>
 
@@ -631,19 +640,15 @@
 
                 <div class="filter-date-input-wrap">
 
-                    <input type="text" id="slDateFrom" class="js-flatpickr-date-max-today" placeholder="Start date"
-                        readonly autocomplete="off">
-
-                    <i class="fa-regular fa-calendar"></i>
+                    <input type="text" id="slDateFrom" class="form-input-custom js-flatpickr-date-max-today"
+                        placeholder="Start date" readonly autocomplete="off">
 
                 </div>
 
                 <div class="filter-date-input-wrap">
 
-                    <input type="text" id="slDateTo" class="js-flatpickr-date-max-today" placeholder="End date"
-                        readonly autocomplete="off">
-
-                    <i class="fa-regular fa-calendar"></i>
+                    <input type="text" id="slDateTo" class="form-input-custom js-flatpickr-date-max-today"
+                        placeholder="End date" readonly autocomplete="off">
 
                 </div>
 
@@ -653,95 +658,24 @@
 
         <x-filter-group title="Action Type">
 
-            <input type="hidden" id="slActionType" value="">
-
-            <div id="slActionSelect" class="sl-action-select">
-
-                <button type="button" id="slActionSelectBtn" class="sl-action-select-btn" aria-expanded="false">
-                    <span class="sl-action-select-current">
-
-                        <i id="slActionSelectIcon" class="fa-solid fa-layer-group"></i>
-
-                        <span id="slActionSelectLabel">
-                            All Actions
-                        </span>
-
-                    </span>
-
-                    <i class="fa-solid fa-chevron-down sl-action-select-chevron"></i>
-                </button>
-
-                <div id="slActionSelectMenu" class="sl-action-select-menu">
-
-                    @foreach ([
-            [
-                'value' => '',
-                'label' => 'All Actions',
-                'icon' => 'fa-layer-group',
-            ],
-            [
-                'value' => 'login',
-                'label' => 'Login',
-                'icon' => 'fa-right-to-bracket',
-            ],
-            [
-                'value' => 'logout',
-                'label' => 'Logout',
-                'icon' => 'fa-right-from-bracket',
-            ],
-            [
-                'value' => 'error',
-                'label' => 'Error',
-                'icon' => 'fa-triangle-exclamation',
-            ],
-            [
-                'value' => 'create',
-                'label' => 'Create',
-                'icon' => 'fa-plus',
-            ],
-            [
-                'value' => 'update',
-                'label' => 'Update',
-                'icon' => 'fa-pen',
-            ],
-            [
-                'value' => 'delete',
-                'label' => 'Delete',
-                'icon' => 'fa-trash',
-            ],
-        ] as $action)
-                        <button type="button"
-                            class="
-                            sl-action-select-option
-                            {{ $action['value'] === '' ? 'active' : '' }}
-                        "
-                            data-value="{{ $action['value'] }}" data-label="{{ $action['label'] }}"
-                            data-icon="{{ $action['icon'] }}">
-                            <span>
-                                <i class="fa-solid {{ $action['icon'] }}"></i>
-                                {{ $action['label'] }}
-                            </span>
-
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                    @endforeach
-
-                </div>
-
-            </div>
+            <select id="slActionType" class="js-custom-select">
+                <option value="">All Actions</option>
+                <option value="login">Login</option>
+                <option value="logout">Logout</option>
+                <option value="error">Error</option>
+                <option value="create">Create</option>
+                <option value="update">Update</option>
+                <option value="delete">Delete</option>
+            </select>
 
         </x-filter-group>
 
         <x-filter-group title="Module" class="filter-group-last">
-
-            <div class="filter-date-input-wrap">
-
-                <input type="text" id="slModuleFilter" placeholder="e.g. appointments">
-
-                <i class="fa-solid fa-cube"></i>
-
+            <div class="global-control-wrap">
+                <i class="fa-solid fa-cube global-control-icon"></i>
+                <input type="text" id="slModuleFilter" class="form-input-custom global-form-icon"
+                    placeholder="e.g. appointments">
             </div>
-
         </x-filter-group>
 
     </x-filter-drawer>
@@ -838,7 +772,6 @@
 
                 <div class="modal-ft">
                     <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="slArchiveModal">
-                        <i class="fa-solid fa-xmark"></i>
                         <span>Cancel</span>
                     </button>
 
@@ -1017,16 +950,12 @@
                                         </span>
                                     </label>
 
-                                    <div class="fp-date-input-wrap">
+                                    <input id="slExportDateFrom" name="date_from" type="text"
+                                        class="form-input-custom js-flatpickr-date-max-today"
+                                        placeholder="Select start date" data-field-label="From Date"
+                                        data-required-message="Please select a start date."
+                                        data-validation-rule="notFutureDate" readonly autocomplete="off" required>
 
-                                        <input id="slExportDateFrom" name="date_from" type="text"
-                                            class="form-input-custom js-flatpickr-date-max-today"
-                                            placeholder="Select start date" data-field-label="From Date"
-                                            data-required-message="Please select a start date."
-                                            data-validation-rule="notFutureDate" readonly autocomplete="off" required>
-
-                                        <i class="fa-regular fa-calendar fp-date-icon" aria-hidden="true"></i>
-                                    </div>
                                     <div class="global-field-error" data-error-for="slExportDateFrom" aria-live="polite"
                                         aria-hidden="true"></div>
                                 </div>
@@ -1041,16 +970,11 @@
                                         </span>
                                     </label>
 
-                                    <div class="fp-date-input-wrap">
+                                    <input id="slExportDateTo" name="date_to" type="text"
+                                        class="form-input-custom js-flatpickr-date-max-today"
+                                        placeholder="Select end date" data-field-label="To Date"
+                                        data-validation-rule="notFutureDate" readonly autocomplete="off">
 
-                                        <input id="slExportDateTo" name="date_to" type="text"
-                                            class="form-input-custom js-flatpickr-date-max-today"
-                                            placeholder="Select end date" data-field-label="To Date"
-                                            data-validation-rule="notFutureDate" readonly autocomplete="off">
-
-                                        <i class="fa-regular fa-calendar fp-date-icon" aria-hidden="true"></i>
-
-                                    </div>
                                     <div class="global-field-error" data-error-for="slExportDateTo" aria-live="polite"
                                         aria-hidden="true"></div>
                                 </div>
@@ -1700,7 +1624,7 @@
                 });
             });
 
-            ['slModuleFilter'].forEach(function(id) {
+            ['slModuleFilter', 'slActionType'].forEach(function(id) {
                 var el = document.getElementById(id);
                 if (!el) return;
 
@@ -1729,7 +1653,6 @@
                 });
             });
 
-            initSlActionDropdown();
             syncSlFilterChoiceControls();
             updateSlShowResultsButton();
 
@@ -1975,9 +1898,23 @@
                 });
 
             async function initializeSystemLogsRefreshWatcher() {
+                const selectedStatuses =
+                    String(
+                        slState.status || 'all'
+                    )
+                    .split(',')
+                    .map(value =>
+                        value.trim().toLowerCase()
+                    )
+                    .filter(Boolean);
+
+                const includesActive =
+                    selectedStatuses.includes('all') ||
+                    selectedStatuses.includes('active');
+
                 if (
                     !systemLogsRefreshWatcher ||
-                    slState.status === 'archived'
+                    !includesActive
                 ) {
                     systemLogsRefreshWatcher?.stop();
                     return;
@@ -2020,8 +1957,90 @@
                 }
             }
 
+            window.handleSystemLogsStatusChange =
+                function(values) {
+                    const selectedStatuses =
+                        (
+                            Array.isArray(values) ?
+                            values :
+                            String(values || '')
+                            .split(',')
+                        )
+                        .map(value =>
+                            String(value || '')
+                            .trim()
+                            .toLowerCase()
+                        )
+                        .filter(Boolean);
+
+                    const effectiveStatuses =
+                        selectedStatuses.includes('all') ||
+                        !selectedStatuses.length ? ['all'] :
+                        selectedStatuses;
+
+                    slState.status =
+                        effectiveStatuses.join(',');
+
+                    slState.page = 1;
+
+                    const includesActive =
+                        effectiveStatuses.includes('all') ||
+                        effectiveStatuses.includes('active');
+
+                    if (includesActive) {
+                        initializeSystemLogsRefreshWatcher();
+                    } else {
+                        systemLogsRefreshWatcher?.stop();
+                    }
+
+                    return slFetch();
+                };
+
+            window.handleSystemLogsRoleChange =
+                function(values) {
+                    const selectedRoles =
+                        (
+                            Array.isArray(values) ?
+                            values :
+                            String(values || '')
+                            .split(',')
+                        )
+                        .map(value =>
+                            String(value || '')
+                            .trim()
+                            .toLowerCase()
+                        )
+                        .filter(Boolean);
+
+                    const effectiveRoles =
+                        selectedRoles.includes('all') ||
+                        !selectedRoles.length ? ['all'] :
+                        selectedRoles;
+
+                    slState.role =
+                        effectiveRoles.join(',');
+
+                    slState.page = 1;
+
+                    return slFetch();
+                };
+
             initializeSystemLogsRefreshWatcher();
-            if (slState.status === 'archived') {
+
+            const initialStatuses =
+                String(
+                    slState.status || 'all'
+                )
+                .split(',')
+                .map(value =>
+                    value.trim().toLowerCase()
+                )
+                .filter(Boolean);
+
+            if (
+                !initialStatuses.includes('all') &&
+                !initialStatuses.includes('active')
+            ) {
                 systemLogsRefreshWatcher?.stop();
             }
 
@@ -2033,6 +2052,92 @@
                     .replaceAll('"', '&quot;')
                     .replaceAll("'", '&#039;');
             }
+
+            function closeSlOverflowMenu() {
+                const menu =
+                    document.getElementById(
+                        'slOverflowMenu'
+                    );
+
+                const trigger =
+                    document.getElementById(
+                        'slOverflowTrigger'
+                    );
+
+                menu?.classList.remove(
+                    'is-open'
+                );
+
+                trigger?.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+            }
+
+            function toggleSlOverflowMenu(event) {
+                event?.preventDefault();
+                event?.stopPropagation();
+
+                const menu =
+                    document.getElementById(
+                        'slOverflowMenu'
+                    );
+
+                const trigger =
+                    document.getElementById(
+                        'slOverflowTrigger'
+                    );
+
+                if (!menu) {
+                    return;
+                }
+
+                const willOpen = !menu.classList.contains(
+                    'is-open'
+                );
+
+                menu.classList.toggle(
+                    'is-open',
+                    willOpen
+                );
+
+                trigger?.setAttribute(
+                    'aria-expanded',
+                    willOpen ? 'true' : 'false'
+                );
+            }
+
+            document.addEventListener(
+                'click',
+                function(event) {
+                    const menu =
+                        document.getElementById(
+                            'slOverflowMenu'
+                        );
+
+                    if (
+                        menu &&
+                        !menu.contains(event.target)
+                    ) {
+                        closeSlOverflowMenu();
+                    }
+                }
+            );
+
+            document.addEventListener(
+                'keydown',
+                function(event) {
+                    if (event.key === 'Escape') {
+                        closeSlOverflowMenu();
+                    }
+                }
+            );
+
+            window.toggleSlOverflowMenu =
+                toggleSlOverflowMenu;
+
+            window.closeSlOverflowMenu =
+                closeSlOverflowMenu;
 
             window.handleSystemLogsSearch =
                 function(value) {
@@ -2059,7 +2164,21 @@
                     return;
                 }
 
-                if (slState.status === "archived") {
+                const selectedStatuses =
+                    String(
+                        slState.status || 'all'
+                    )
+                    .split(',')
+                    .map(value =>
+                        value.trim().toLowerCase()
+                    )
+                    .filter(Boolean);
+
+                const includesActive =
+                    selectedStatuses.includes('all') ||
+                    selectedStatuses.includes('active');
+
+                if (!includesActive) {
                     window.showToast?.({
                         type: 'warning',
                         title: 'Archive unavailable',
@@ -2296,94 +2415,17 @@
                     });
             }
 
-            function syncSlRoleTab(role = 'all') {
-                document
-                    .querySelectorAll(
-                        '.sl-role-tabs .tab-btn'
-                    )
-                    .forEach(function(button) {
-                        const onclick =
-                            button.getAttribute(
-                                'onclick'
-                            ) || '';
-
-                        const active =
-                            onclick.includes(
-                                "'" + role + "'"
-                            );
-
-                        button.classList.toggle(
-                            'active',
-                            active
-                        );
-
-                        const count =
-                            button.querySelector(
-                                '.tab-count'
-                            );
-
-                        count?.classList.toggle(
-                            'active',
-                            active
-                        );
-                    });
-            }
-
-            function slSetTab(el, role) {
-                slState.role =
-                    role || 'all';
-
-                slState.page = 1;
-
-                syncSlRoleTab(
-                    slState.role
-                );
-
-                return slFetch();
-            }
-
-            function slSetStatus(el, status) {
-                slState.status =
-                    status || 'active';
-
-                slState.role =
-                    'all';
-
-                slState.page =
-                    1;
-
-                syncSlRoleTab(
-                    'all'
-                );
-
-                document
-                    .querySelectorAll('.sl-status-tab')
-                    .forEach(function(button) {
-                        button.classList.remove(
-                            'active'
-                        );
-                    });
-
-                el?.classList.add(
-                    'active'
-                );
-
-                if (
-                    slState.status ===
-                    'archived'
-                ) {
-                    systemLogsRefreshWatcher?.stop();
-                } else {
-                    initializeSystemLogsRefreshWatcher();
-                }
-
-                return slFetch();
-            }
-
             function hasActiveSlFilters() {
-                return (slState.sort && slState.sort !== 'desc') ||
-                    !!slState.dateFrom || !!slState.dateTo ||
-                    !!slState.actionType || !!slState.module;
+                return (
+                    (
+                        slState.sort &&
+                        slState.sort !== 'desc'
+                    ) ||
+                    !!slState.dateFrom ||
+                    !!slState.dateTo ||
+                    !!slState.actionType ||
+                    !!slState.module
+                );
             }
 
             function detectSlDatePreset(from, to) {
@@ -2428,91 +2470,6 @@
                 return '';
             }
 
-            function getSlActionOption(value) {
-                var options = Array.from(document.querySelectorAll('#slActionSelectMenu .sl-action-select-option'));
-
-                return options.find(function(option) {
-                    return String(option.dataset.value || '') === String(value || '');
-                }) || options[0] || null;
-            }
-
-            function syncSlActionDropdownLabel(value) {
-                var option = getSlActionOption(value);
-                var label = document.getElementById('slActionSelectLabel');
-                var icon = document.getElementById('slActionSelectIcon');
-
-                if (!option) return;
-
-                if (label) {
-                    label.textContent = option.dataset.label || 'All Actions';
-                }
-
-                if (icon) {
-                    icon.className = 'fa-solid ' + (option.dataset.icon || 'fa-layer-group');
-                }
-
-                document.querySelectorAll('#slActionSelectMenu .sl-action-select-option').forEach(function(button) {
-                    button.classList.toggle('active', button === option);
-                });
-            }
-
-            function closeSlActionDropdown() {
-                var select = document.getElementById('slActionSelect');
-                var button = document.getElementById('slActionSelectBtn');
-
-                select?.classList.remove('is-open');
-                button?.setAttribute('aria-expanded', 'false');
-            }
-
-            function setSlActionType(value) {
-                var action = document.getElementById('slActionType');
-
-                if (action) {
-                    action.value = value || '';
-                }
-
-                syncSlFilterChoiceControls();
-                renderSlFilterChips();
-                updateSlShowResultsButton();
-            }
-
-            function initSlActionDropdown() {
-                var select = document.getElementById('slActionSelect');
-                var button = document.getElementById('slActionSelectBtn');
-                var menu = document.getElementById('slActionSelectMenu');
-
-                if (!select || !button || !menu || select.dataset.bound === '1') return;
-
-                select.dataset.bound = '1';
-
-                button.addEventListener('click', function(event) {
-                    event.stopPropagation();
-
-                    var isOpen = select.classList.toggle('is-open');
-                    button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                });
-
-                menu.querySelectorAll('.sl-action-select-option').forEach(function(option) {
-                    option.addEventListener('click', function(event) {
-                        event.stopPropagation();
-                        setSlActionType(this.dataset.value || '');
-                        closeSlActionDropdown();
-                    });
-                });
-
-                document.addEventListener('click', function(event) {
-                    if (!select.contains(event.target)) {
-                        closeSlActionDropdown();
-                    }
-                });
-
-                document.addEventListener('keydown', function(event) {
-                    if (event.key === 'Escape') {
-                        closeSlActionDropdown();
-                    }
-                });
-            }
-
             function syncSlQuickDateChips() {
                 var preset = document.getElementById('slDatePreset')?.value || '';
 
@@ -2527,8 +2484,10 @@
                 var sortEl = document.getElementById('slSortOrder');
                 var actionEl = document.getElementById('slActionType');
 
-                var sortValue = sortEl ? sortEl.value || 'desc' : slState.sort || 'desc';
-                var actionValue = actionEl ? actionEl.value || '' : slState.actionType || '';
+                var sortValue =
+                    sortEl ?
+                    sortEl.value || 'desc' :
+                    slState.sort || 'desc';
 
                 document.querySelectorAll('#slSortGroup [data-sl-sort]').forEach(function(button) {
                     button.classList.toggle('ftag-active', String(button.dataset.slSort || '') === String(
@@ -2536,7 +2495,7 @@
                         'desc'));
                 });
 
-                syncSlActionDropdownLabel(actionValue);
+                window.syncCustomSelect?.(actionEl?.closest('.custom-select'));
                 syncSlQuickDateChips();
             }
 
@@ -2562,19 +2521,53 @@
                 return document.getElementById('filterModal');
             }
 
-            function openSlFilterPanel() {
+            async function openSlFilterPanel() {
                 syncSlFilterInputs();
                 renderSlFilterChips();
 
-                if (typeof window.openFilterDrawer === 'function') {
-                    window.openFilterDrawer('filterModal');
+                const filterModal =
+                    document.getElementById(
+                        'filterModal'
+                    );
+
+                if (
+                    typeof window.openFilterDrawer ===
+                    'function'
+                ) {
+                    await window.openFilterDrawer(
+                        'filterModal'
+                    );
                 } else {
-                    document.getElementById('filterModal')?.classList.add('open');
-                    document.documentElement.classList.add('filter-lock');
-                    document.body.classList.add('filter-lock');
+                    filterModal?.classList.add(
+                        'open'
+                    );
+
+                    document.documentElement
+                        .classList.add(
+                            'filter-lock'
+                        );
+
+                    document.body
+                        .classList.add(
+                            'filter-lock'
+                        );
                 }
 
-                document.getElementById('filterModal')?.setAttribute('aria-hidden', 'false');
+                filterModal?.setAttribute(
+                    'aria-hidden',
+                    'false'
+                );
+
+                window.initCustomSelects?.(filterModal);
+
+                const datePickerModule =
+                    await window
+                    .loadDatePickerModule?.();
+
+                await datePickerModule
+                    ?.initGlobalDatePickers(
+                        filterModal
+                    );
             }
 
             function closeSlFilterPanel() {
@@ -2592,36 +2585,82 @@
             function updateSlClearFilterButton() {
                 var count = 0;
 
-                if (slState.sort && slState.sort !== 'desc') count++;
-                if (slState.dateFrom || slState.dateTo) count++;
-                if (slState.actionType) count++;
-                if (slState.module) count++;
-
-                if (typeof window.setGlobalFilterButtonState === 'function') {
-                    window.setGlobalFilterButtonState({
-                        buttonId: 'slFilterBtn',
-                        badgeId: 'slFilterBadge',
-                        resetId: 'slClearFilterBtn',
-                        count: count
-                    });
-
-                    return;
+                if (
+                    slState.sort &&
+                    slState.sort !== 'desc'
+                ) {
+                    count++;
                 }
 
-                var has = count > 0;
-                var btn = document.getElementById('slClearFilterBtn');
-                var badge = document.getElementById('slFilterBadge');
-                var filterBtn = document.getElementById('slFilterBtn');
+                if (
+                    slState.dateFrom ||
+                    slState.dateTo
+                ) {
+                    count++;
+                }
 
-                btn?.classList.toggle('hidden', !has);
-                btn?.classList.toggle('show', has);
+                if (slState.actionType) {
+                    count++;
+                }
 
-                filterBtn?.classList.toggle('has-filters', has);
-                filterBtn?.setAttribute('aria-pressed', has ? 'true' : 'false');
+                if (slState.module) {
+                    count++;
+                }
 
-                if (badge) {
-                    badge.classList.toggle('show', has);
-                    badge.textContent = has ? String(count) : '';
+                var has =
+                    count > 0;
+
+                var filterBtn =
+                    document.getElementById(
+                        'slFilterBtn'
+                    );
+
+                var filterBadge =
+                    document.getElementById(
+                        'slFilterBadge'
+                    );
+
+                var externalClearFilterBtn =
+                    document.getElementById(
+                        'slExternalClearFilterBtn'
+                    );
+
+                if (filterBtn) {
+                    filterBtn.classList.toggle(
+                        'has-filters',
+                        has
+                    );
+
+                    filterBtn.setAttribute(
+                        'aria-pressed',
+                        has ? 'true' : 'false'
+                    );
+                }
+
+                if (filterBadge) {
+                    filterBadge.classList.toggle(
+                        'show',
+                        has
+                    );
+
+                    filterBadge.textContent =
+                        has ?
+                        String(count) :
+                        '';
+                }
+
+                if (externalClearFilterBtn) {
+                    externalClearFilterBtn
+                        .classList.toggle(
+                            'hidden',
+                            !has
+                        );
+
+                    externalClearFilterBtn
+                        .classList.toggle(
+                            'show',
+                            has
+                        );
                 }
             }
 
@@ -2637,6 +2676,7 @@
                 renderSlFilterChips();
                 updateSlClearFilterButton();
                 closeSlFilterPanel();
+
                 slFetch();
             }
 
@@ -2780,8 +2820,8 @@
 
             function getSlDraftFilterParams() {
                 return new URLSearchParams({
-                    role: slState.role || 'all',
                     search: slState.search || '',
+                    role: slState.role || 'all',
                     status: slState.status || 'active',
                     per_page: 1,
                     page: 1,
@@ -2919,10 +2959,6 @@
 
                         slRenderPagebar(
                             data.pagination
-                        );
-
-                        slRenderCounts(
-                            data.counts
                         );
 
                         updateSlClearFilterButton();
@@ -3135,6 +3171,8 @@
                         '';
                     var actorName = escapeSlHtml(log.actor_name ?? log.actor_identifier ?? 'Unknown User');
                     var description = escapeSlHtml(log.description || 'No description provided.');
+                    var fullDetails = log.full_description && log.full_description !== log.description
+                        ? '<details><summary>Full details</summary>' + escapeSlHtml(log.full_description) + '</details>' : '';
                     var createdDay = escapeSlHtml(log.created_at_day || '');
                     var createdTime = escapeSlHtml(log.created_at_time || '');
 
@@ -3159,7 +3197,7 @@
                         '</td>';
                     tableHtml +=
                         '<td>' +
-                        '<div class="sl-user">' +
+                        '<div class="table-primary">' +
 
                         '<span ' +
                         'class="patient-avatar patient-avatar-sm" ' +
@@ -3192,21 +3230,24 @@
                         '</span>' +
                         '</td>';
                     tableHtml += '<td><span class="sl-desc" title="' + description + '">' + description +
-                        '</span></td>';
+                        '</span>' + fullDetails + '</td>';
                     tableHtml += '</tr>';
 
                     gridHtml += `
     <article
-        class="table-record-card"
-        data-role="${escapeSlHtml(role)}"
-        data-action="${escapeSlHtml(actionClass)}"
-    >
+    class="table-record-card"
+    data-role="${escapeSlHtml(role)}"
+    data-action="${escapeSlHtml(actionClass)}"
+>
+    <div class="table-record-card-layout">
         <div class="table-record-content">
 
             <div class="table-record-header">
                 <div class="table-primary">
                     <strong>
-                        ${idPadded}
+                        <span class="sl-id">
+                            ${idPadded}
+                        </span>
                     </strong>
                 </div>
 
@@ -3219,7 +3260,7 @@
                 </span>
             </div>
 
-            <div class="sl-user">
+            <div class="table-primary">
 
                 <span
                     class="patient-avatar patient-avatar-sm"
@@ -3282,13 +3323,14 @@
 
                     <span class="table-record-value">
                         ${description}
+                        ${fullDetails}
                     </span>
                 </div>
 
             </div>
 
             ${archiveBadge}
-
+</div>
         </div>
     </article>
 `;
@@ -3401,59 +3443,6 @@
                 }
             }
 
-            function slRenderCounts(counts) {
-                if (!counts) return;
-
-                slOverallTotal = Number(counts.total || 0);
-
-                if (document.getElementById('statTotal')) document.getElementById('statTotal').textContent = counts
-                    .total ?? 0;
-                if (document.getElementById('statAdmin')) document.getElementById('statAdmin').textContent = counts
-                    .admin ?? 0;
-                if (document.getElementById('statDentist')) document.getElementById('statDentist').textContent =
-                    counts
-                    .dentist ?? 0;
-                if (document.getElementById('statPatient')) document.getElementById('statPatient').textContent =
-                    counts
-                    .patient ?? 0;
-
-                var badge = document.getElementById('entryBadge');
-                if (badge) badge.textContent = slOverallTotal + ' ' + (slOverallTotal === 1 ? 'entry' : 'entries');
-
-                updateTabCount('all', counts.total);
-                updateTabCount('admin', counts.admin);
-                updateTabCount('dentist', counts.dentist);
-                updateTabCount('patient', counts.patient);
-                updateTabCount('login', counts.login);
-                updateTabCount('error', counts.error);
-                updateStatusCount('active', counts.active);
-                updateStatusCount('archived', counts.archived);
-            }
-
-            function updateTabCount(role, value) {
-                var buttons = document.querySelectorAll('.sl-role-tabs .tab-btn');
-
-                buttons.forEach(function(button) {
-                    if (!button.getAttribute('onclick')?.includes("'" + role + "'")) return;
-
-                    var count = button.querySelector('.tab-count');
-                    if (count && value !== undefined && value !== null) {
-                        count.textContent = value;
-                    }
-                });
-            }
-
-            function updateStatusCount(status, value) {
-                document.querySelectorAll('.sl-status-tab').forEach(function(button) {
-                    if (!button.getAttribute('onclick')?.includes("'" + status + "'")) return;
-
-                    var count = button.querySelector('.sl-status-count');
-                    if (count && value !== undefined && value !== null) {
-                        count.textContent = value;
-                    }
-                });
-            }
-
             function showEmptyState(query) {
                 var listView =
                     document.getElementById(
@@ -3487,10 +3476,37 @@
                     return;
                 }
 
+                const emptyStatuses =
+                    String(
+                        slState.status || 'all'
+                    )
+                    .split(',')
+                    .map(value =>
+                        value.trim().toLowerCase()
+                    )
+                    .filter(Boolean);
+
+                const emptyRoles =
+                    String(
+                        slState.role || 'all'
+                    )
+                    .split(',')
+                    .map(value =>
+                        value.trim().toLowerCase()
+                    )
+                    .filter(Boolean);
+
+                const archivedOnly =
+                    emptyStatuses.length === 1 &&
+                    emptyStatuses[0] === 'archived';
+
+                const allRoles =
+                    emptyRoles.includes('all');
+
                 if (
-                    slState.status === 'archived' &&
+                    archivedOnly &&
                     !hasActiveSlFilters() &&
-                    slState.role === 'all'
+                    allRoles
                 ) {
                     window.EmptyState?.render({
                         host: '#emptyState',
@@ -3539,95 +3555,6 @@
                     return;
                 }
 
-                if (slState.role !== 'all') {
-                    var labels = {
-                        admin: 'Admin',
-                        dentist: 'Dentist',
-                        patient: 'Patient',
-                        login: 'Login',
-                        error: 'Error',
-                    };
-
-                    window.EmptyState?.render({
-                        host: '#emptyState',
-
-                        icon: 'fa-filter',
-
-                        title: 'No ' +
-                            (
-                                labels[
-                                    slState.role
-                                ] ||
-                                slState.role
-                            ) +
-                            ' logs found',
-
-                        message: 'There are no logs matching this tab yet.',
-
-                        actionHtml: `
-                <button
-                    type="button"
-                    class="empty-state-btn"
-                    data-empty-action="show-all"
-                >
-                    <i class="fa-solid fa-layer-group"></i>
-                    Show all logs
-                </button>
-            `,
-                    });
-
-                    document
-                        .querySelector(
-                            '#emptyState [data-empty-action="show-all"]'
-                        )
-                        ?.addEventListener(
-                            'click',
-                            function() {
-                                const allTab =
-                                    document.querySelector(
-                                        '.sl-role-tabs .tab-btn'
-                                    );
-
-                                slState.role = 'all';
-                                slState.page = 1;
-
-                                document
-                                    .querySelectorAll(
-                                        '.sl-role-tabs .tab-btn'
-                                    )
-                                    .forEach(button => {
-                                        button.classList.remove(
-                                            'active'
-                                        );
-
-                                        button
-                                            .querySelector(
-                                                '.tab-count'
-                                            )
-                                            ?.classList.remove(
-                                                'active'
-                                            );
-                                    });
-
-                                allTab?.classList.add(
-                                    'active'
-                                );
-
-                                allTab
-                                    ?.querySelector(
-                                        '.tab-count'
-                                    )
-                                    ?.classList.add(
-                                        'active'
-                                    );
-
-                                slFetch();
-                            }
-                        );
-
-                    return;
-                }
-
                 window.EmptyState?.render({
                     host: '#emptyState',
 
@@ -3639,8 +3566,6 @@
                 });
             }
 
-            window.slSetTab = slSetTab;
-            window.slSetStatus = slSetStatus;
             window.openSlFilterPanel = openSlFilterPanel;
             window.closeSlFilterPanel = closeSlFilterPanel;
             window.applySlFilters = applySlFilters;

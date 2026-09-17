@@ -13,6 +13,12 @@
     @php
         $calendarAppointments = [];
 
+        $hasActiveAppointment = collect($appointments ?? [])->contains(function ($appointment) {
+            $status = strtolower(trim((string) ($appointment->status ?? '')));
+
+            return in_array($status, ['upcoming', 'rescheduled'], true);
+        });
+
         foreach (
             collect($appointments ?? [])->filter(function ($appt) {
                 $status = strtolower($appt->status ?? '');
@@ -27,7 +33,7 @@
 
             $calendarAppointments[\Carbon\Carbon::parse($appt->appointment_date)->format('Y-m-d')] =
                 'My Appointment: ' .
-                ($appt->service_type ?? 'Dental Appointment') .
+                ($appt->service_type_name ?? 'Dental Appointment') .
                 ' • ' .
                 (!empty($appt->appointment_time)
                     ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
@@ -62,7 +68,7 @@
             );
 
             $completedCalendarAppointments[$dateKey][] = [
-                'service' => $appt->service_type ?? 'Dental Appointment',
+                'service' => $appt->service_type_name ?? 'Dental Appointment',
 
                 'time' => !empty($appt->appointment_time)
                     ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
@@ -119,7 +125,7 @@
 
                 $serviceStats = $completedRegularVisits
                     ->groupBy(function ($appt) {
-                        return trim((string) ($appt->service_type ?? 'General Consultation'));
+                        return trim((string) ($appt->service_type_name ?? 'General Consultation'));
                     })
                     ->map(fn($group) => $group->count())
                     ->sortDesc();
@@ -674,9 +680,10 @@
     </main>
 
     @include('components.appointment-calendar-script', [
-        'mode' => 'patient-dashboard',
+        'mode' => 'patient-appointment',
         'renderStyle' => 'patient',
         'calendarContainerId' => 'calendarSkeletonContainer',
+        'hasActiveAppointment' => $hasActiveAppointment,
     
         'dateInputId' => null,
         'timeInputId' => null,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Dentist\DentistReportController;
 use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\AcademicPeriod;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminDashboardController extends Controller
 {
-    public function index()
+    public function index(DentistReportController $dentistReportController)
     {
         $user = Auth::user();
 
@@ -28,8 +29,15 @@ class AdminDashboardController extends Controller
             'admin_dashboard',
             'Admin viewed the dashboard'
         );
-        
+
         $now = Carbon::now();
+
+        // Reuse the exact same GAD computation used by Dentist Reports.
+        // No second query implementation and no separate dashboard endpoint.
+        $gadDashboardData = $dentistReportController->gadChartDataForPeriod(
+            $now->year,
+            $now->month
+        );
 
         $totalPatients = Patient::count();
 
@@ -37,26 +45,26 @@ class AdminDashboardController extends Controller
             ->whereMonth('appointment_date', $now->month)
             ->count();
 
-        $documentsThisMonth = \App\Models\DocumentRequest::whereYear('request_date', $now->year)
+        $documentsThisMonth = \App\Models\DocumentRequest::withStateColumns()->whereYear('request_date', $now->year)
             ->whereMonth('request_date', $now->month)
             ->where('status', 'approved')
             ->count();
 
         $inventoryItems = Inventory::get();
 
-            $inventoryTotal = $inventoryItems->count();
-            $inventoryMedicine = $inventoryItems->where('category', 'Medicine')->count();
-            $inventorySupplies = $inventoryItems->where('category', 'Supplies')->count();
-            $inventoryLowStock = $inventoryItems->filter(fn($item) => $item->balance > 0 && $item->balance <= 5)->count();
-            $inventoryOutOfStock = $inventoryItems->filter(fn($item) => $item->balance <= 0)->count();
-            $inventoryInStock = $inventoryItems->filter(fn($item) => $item->balance > 5)->count();
+        $inventoryTotal = $inventoryItems->count();
+        $inventoryMedicine = $inventoryItems->where('category', 'Medicine')->count();
+        $inventorySupplies = $inventoryItems->where('category', 'Supplies')->count();
+        $inventoryLowStock = $inventoryItems->filter(fn($item) => $item->balance > 0 && $item->balance <= 5)->count();
+        $inventoryOutOfStock = $inventoryItems->filter(fn($item) => $item->balance <= 0)->count();
+        $inventoryInStock = $inventoryItems->filter(fn($item) => $item->balance > 5)->count();
 
-            $inventoryCriticalItems = $inventoryItems
-                ->filter(fn($item) => $item->balance <= 5)
-                ->sortBy('balance')
-                ->take(5)
-                ->values();
-        
+        $inventoryCriticalItems = $inventoryItems
+            ->filter(fn($item) => $item->balance <= 5)
+            ->sortBy('balance')
+            ->take(5)
+            ->values();
+
         $notifications = [];
 
         $recentLogs = AuditLog::latest()->take(5)->get()->map(function ($log) {
@@ -73,7 +81,11 @@ class AdminDashboardController extends Controller
 
         $logErrors = AuditLog::where('action', 'error')->count();
 
-        $activePeriod = AcademicPeriod::where('is_active', true)
+        $activePeriod = AcademicPeriod::with([
+            'academicYear',
+            'academicTerm',
+        ])
+            ->where('is_active', true)
             ->orderByDesc('start_date')
             ->first();
 
@@ -97,7 +109,8 @@ class AdminDashboardController extends Controller
             'inventoryLowStock',
             'inventoryOutOfStock',
             'inventoryInStock',
-            'inventoryCriticalItems'
+            'inventoryCriticalItems',
+            'gadDashboardData'
         ));
     }
 }

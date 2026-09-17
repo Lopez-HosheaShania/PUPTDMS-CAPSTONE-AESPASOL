@@ -6,7 +6,6 @@ use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Schema;
 use App\Support\BrowserDetection;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
@@ -60,21 +59,13 @@ class AuditLogger
             'description' => $description,
             'ip_address' => $request?->ip(),
             'user_agent' => $request?->userAgent(),
-            'browser_name' => self::supportsBrowserNameColumn()
-                ? $deviceDetails['browser_name']
-                : null,
+            'browser_name' => $deviceDetails['browser_name'],
 
-            'device_type' => self::supportsDeviceColumns()
-                ? $deviceDetails['device_type']
-                : null,
+            'device_type' => $deviceDetails['device_type'],
 
-            'device_name' => self::supportsDeviceColumns()
-                ? $deviceDetails['device_name']
-                : null,
+            'device_name' => $deviceDetails['device_name'],
 
-            'os_name' => self::supportsDeviceColumns()
-                ? $deviceDetails['os_name']
-                : null,
+            'os_name' => $deviceDetails['os_name'],
         ]);
     }
 
@@ -142,29 +133,4 @@ class AuditLogger
         return mb_substr($description, 0, $limit - 3) . '...';
     }
 
-    private static function supportsBrowserNameColumn(): bool
-    {
-        static $supportsColumn;
-
-        if ($supportsColumn === null) {
-            $supportsColumn = Schema::hasColumn('audit_logs', 'browser_name');
-        }
-
-        return $supportsColumn;
-    }
-
-    private static function supportsDeviceColumns(): bool
-    {
-        static $supportsColumns;
-
-        if ($supportsColumns === null) {
-            $supportsColumns = Schema::hasColumns('audit_logs', [
-                'device_type',
-                'device_name',
-                'os_name',
-            ]);
-        }
-
-        return $supportsColumns;
-    }
 }

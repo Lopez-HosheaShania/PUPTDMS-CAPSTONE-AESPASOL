@@ -64,8 +64,8 @@ class ReservedBookingPeriodRequest extends FormRequest
         ];
 
         if ($isActive) {
-            $reservedDateRules[] = Rule::unique('reserved_booking_periods', 'active_reserved_date')
-                ->ignore($reservedBookingPeriod?->id);
+            $reservedDateRules[] = Rule::unique('reserved_booking_period_schedules', 'active_reserved_date')
+                ->ignore($reservedBookingPeriod?->id, 'reserved_booking_period_id');
         }
 
         return [

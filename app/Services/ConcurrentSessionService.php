@@ -259,7 +259,7 @@ class ConcurrentSessionService
         ])));
 
         return AuditLog::query()
-            ->where(function ($query) use ($user, $identifiers, $roleSlug) {
+            ->whereHas('actorSnapshot', function ($query) use ($user, $identifiers, $roleSlug) {
                 $query->where(function ($strictQuery) use ($user, $roleSlug) {
                     $strictQuery->where('actor_id', $user->id);
 

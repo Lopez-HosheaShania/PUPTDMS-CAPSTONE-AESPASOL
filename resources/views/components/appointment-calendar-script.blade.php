@@ -95,6 +95,7 @@
 
         const calendarConfig = {
             mode: @json($mode ?? 'booking'),
+            hasActiveAppointment: @json($hasActiveAppointment ?? false),
             calendarContainerId: @json($calendarContainerId ?? 'calendarSkeletonContainer'),
             calGridId: @json($calGridId ?? 'calGrid'),
             calMonthLabelId: @json($calMonthLabelId ?? 'calMonthLabel'),
@@ -141,6 +142,10 @@
             enableMonthYearShortcut: @json($enableMonthYearShortcut ?? false),
         };
 
+        const isPatientCalendarOverview =
+            calendarConfig.mode === 'patient-dashboard' ||
+            calendarConfig.mode === 'patient-appointment';
+
         const calendarInstanceKey = calendarConfig.calendarContainerId;
 
         window.__appointmentCalendars = window.__appointmentCalendars || {};
@@ -158,7 +163,7 @@
             if (
                 !sharedCalendarSource &&
                 typeof window.createCalendarSource ===
-                    'function'
+                'function'
             ) {
                 sharedCalendarSource =
                     window.createCalendarSource(
@@ -169,12 +174,11 @@
                     calendarConfig.dateInputId
                 ) {
                     window.__appCalendarSources =
-                        window.__appCalendarSources ||
-                        {};
+                        window.__appCalendarSources || {};
 
                     window.__appCalendarSources[
-                        calendarConfig.dateInputId
-                    ] =
+                            calendarConfig.dateInputId
+                        ] =
                         sharedCalendarSource;
                 }
             }
@@ -234,7 +238,7 @@
 
             if (
                 !calendarConfig
-                    .useDynamicScheduleRules
+                .useDynamicScheduleRules
             ) {
                 return null;
             }
@@ -245,8 +249,7 @@
                 );
 
             return (
-                calendarConfig.scheduleRules ||
-                []
+                calendarConfig.scheduleRules || []
             ).find(rule => {
                 const days =
                     normalizeDays(
@@ -296,7 +299,7 @@
         function getHolidayName(iso) {
             if (
                 sharedCalendarSource
-                    ?.getHolidayName
+                ?.getHolidayName
             ) {
                 return sharedCalendarSource
                     .getHolidayName(iso);
@@ -351,7 +354,7 @@
 
             if (
                 typeof holiday
-                    .is_blocked_for_booking ===
+                .is_blocked_for_booking ===
                 'boolean'
             ) {
                 return holiday
@@ -360,9 +363,9 @@
 
             if (
                 holiday.type ===
-                    'special_working' ||
+                'special_working' ||
                 holiday.is_working_day ===
-                    true
+                true
             ) {
                 return false;
             }
@@ -382,7 +385,7 @@
         ) {
             if (
                 !calendarConfig
-                    .workingHolidayNoticeId
+                .workingHolidayNoticeId
             ) {
                 return;
             }
@@ -390,7 +393,7 @@
             const notice =
                 document.getElementById(
                     calendarConfig
-                        .workingHolidayNoticeId
+                    .workingHolidayNoticeId
                 );
 
             if (!notice) {
@@ -399,11 +402,10 @@
 
             const holiday =
                 iso ?
-                    getHolidayRecord(iso) :
-                    null;
+                getHolidayRecord(iso) :
+                null;
 
-            const isWorkingHoliday =
-                !!holiday &&
+            const isWorkingHoliday = !!holiday &&
                 !holidayBlocksBooking(iso);
 
             notice.classList.toggle(
@@ -414,8 +416,8 @@
             notice.setAttribute(
                 'aria-hidden',
                 isWorkingHoliday ?
-                    'false' :
-                    'true'
+                'false' :
+                'true'
             );
         }
 
@@ -489,8 +491,8 @@
         function getAppointmentSlotPeriod(timeValue = '') {
             const value =
                 String(timeValue)
-                    .trim()
-                    .toUpperCase();
+                .trim()
+                .toUpperCase();
 
             if (
                 /\bAM\b/.test(value)
@@ -524,39 +526,29 @@
         function getLegendItemsForMode(mode) {
             if (calendarConfig.allowAllDatesExceptHolidays) {
                 return calendarConfig
-                .disableWeekends
-                ? [
-                    'today',
-                    'workingHoliday',
-                    'holiday',
-                    'clinicClosed'
-                ]
-                : [
-                    'today',
-                    'workingHoliday',
-                    'holiday'
-                ];
+                    .disableWeekends ? [
+                        'today',
+                        'workingHoliday',
+                        'holiday',
+                        'clinicClosed'
+                    ] : [
+                        'today',
+                        'workingHoliday',
+                        'holiday'
+                    ];
             }
 
             if (mode === 'dentist' || mode === 'dentist-dashboard') {
-                return ['today', 'hasPatients', 'fullyBooked', 'workingHoliday', 'holiday','clinicClosed'];
+                return ['today', 'hasPatients', 'fullyBooked', 'workingHoliday', 'holiday', 'clinicClosed'];
             }
 
-            if (mode === 'patient-dashboard') {
+            if (
+                mode === 'patient-dashboard' ||
+                mode === 'patient-appointment'
+            ) {
                 return [
                     'myAppointment',
                     'completedAppointment',
-                    'today',
-                    'fullyBooked',
-                    'workingHoliday',
-                    'holiday',
-                    'clinicClosed'
-                ];
-            }
-
-            if (mode === 'patient-appointment') {
-                return [
-                    'myAppointment',
                     'today',
                     'fullyBooked',
                     'workingHoliday',
@@ -683,8 +675,7 @@
                 workingHoliday: {
                     key: "workingHoliday",
                     label: "Working Holiday · Regular Schedule",
-                    tooltipClass:
-                        "calendar-tooltip-working-holiday",
+                    tooltipClass: "calendar-tooltip-working-holiday",
 
                     legendIcon: `
                         <span class="cal-pill cal-pill-working-holiday">
@@ -699,8 +690,7 @@
                 holiday: {
                     key: "holiday",
                     label: "Non-Working Holiday · Clinic Closed",
-                    tooltipClass:
-                        "calendar-tooltip-holiday",
+                    tooltipClass: "calendar-tooltip-holiday",
 
                     legendIcon: `
                         <span class="cal-pill cal-pill-yellow">
@@ -767,11 +757,10 @@
             const isHoliday = !!holiday;
             const isHolidayBlocked = holidayBlocksBooking(iso);
 
-            const isClosed =
-                !isDateSchedulable(
-                    cellDate,
-                    iso
-                );
+            const isClosed = !isDateSchedulable(
+                cellDate,
+                iso
+            );
 
             const maxPerDay = calendarConfig.useDynamicScheduleRules ? getMaxPerDay(cellDate) : 0;
             const count = calendarConfig.apptCounts?.[iso] ?? 0;
@@ -792,16 +781,16 @@
 
             if (
                 calendarConfig
-                    .allowAllDatesExceptHolidays
+                .allowAllDatesExceptHolidays
             ) {
                 const holidayBlocked =
                     isHolidayBlocked &&
                     !calendarConfig
-                        .allowHolidaySelection;
+                    .allowHolidaySelection;
 
                 const weekendBlocked =
                     calendarConfig
-                        .disableWeekends ===
+                    .disableWeekends ===
                     true &&
                     isWeekend;
 
@@ -819,7 +808,7 @@
                     (
                         isHolidayBlocked &&
                         !calendarConfig
-                            .allowHolidaySelection
+                        .allowHolidaySelection
                     ) ||
                     isClosed ||
                     isFull;
@@ -860,10 +849,131 @@
             };
         }
 
+        function openCalendarActiveAppointmentModal(
+            event = null
+        ) {
+            event?.preventDefault();
+
+            window.openModal?.(
+                'activeAppointmentModal'
+            );
+        }
+
+        function renderDashboardActiveAppointmentState(
+            iso = null
+        ) {
+            const panel =
+                getDashboardAvailabilityPanel();
+
+            if (!panel) {
+                return;
+            }
+
+            const selectedDateMarkup =
+                iso ?
+                `
+            <div class="dashboard-calendar-side-top">
+                <div>
+                    <span class="dashboard-calendar-eyebrow">
+                        Selected date
+                    </span>
+
+                    <strong class="dashboard-calendar-side-date">
+                        ${formatCalendarDateLabel(iso)}
+                    </strong>
+                </div>
+
+                <span class="dashboard-calendar-status unavailable">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    Booking unavailable
+                </span>
+            </div>
+        ` :
+                `
+            <div class="dashboard-calendar-side-top">
+                <div>
+                    <span class="dashboard-calendar-eyebrow">
+                        Appointment booking
+                    </span>
+
+                    <strong class="dashboard-calendar-side-date">
+                        Active appointment
+                    </strong>
+                </div>
+            </div>
+        `;
+
+            panel.innerHTML = `
+        <div class="dashboard-calendar-side-content">
+
+            ${selectedDateMarkup}
+
+            <div
+                class="
+                    dashboard-calendar-side-state
+                    unavailable
+                "
+            >
+                <i class="fa-regular fa-calendar-check"></i>
+
+                <p>
+                    You already have an active appointment.
+                    Available appointment times will become
+                    available after your current appointment
+                    is completed.
+                </p>
+            </div>
+
+            ${
+                iso ?
+                `
+                    <div class="dashboard-calendar-side-footer">
+                        <span>
+                            Complete your current appointment
+                            before booking another schedule.
+                        </span>
+
+                        <a
+                            href="#"
+                            class="dashboard-calendar-book-btn"
+                            data-active-appointment-book
+                        >
+                            <i class="fa-solid fa-calendar-plus"></i>
+                            Book this date
+                        </a>
+                    </div>
+                ` :
+                ''
+            }
+
+        </div>
+    `;
+
+            panel
+                .querySelector(
+                    '[data-active-appointment-book]'
+                )
+                ?.addEventListener(
+                    'click',
+                    openCalendarActiveAppointmentModal
+                );
+
+            if (iso) {
+                scrollSelectedCalendarDetailsIntoView();
+            }
+        }
+
         function resetDashboardAvailabilityPanel() {
             const panel = getDashboardAvailabilityPanel();
 
             if (!panel) return;
+
+            if (
+                calendarConfig.hasActiveAppointment
+            ) {
+                renderDashboardActiveAppointmentState();
+                return;
+            }
 
             panel.innerHTML = `
                 <div class="dashboard-calendar-side-empty">
@@ -892,11 +1002,11 @@
 
             const allowAllDatesExceptHolidays =
                 calendarConfig
-                    .allowAllDatesExceptHolidays === true;
+                .allowAllDatesExceptHolidays === true;
 
             const disableWeekends =
                 calendarConfig
-                    .disableWeekends ===
+                .disableWeekends ===
                 true;
 
             const ignoreAvailabilityRestrictions =
@@ -923,9 +1033,9 @@
                     !allowAllDates
                 ) {
                     cellClass +=
-                        state.isHolidayBlocked
-                            ? " holiday holiday-closed"
-                            : " holiday holiday-working";
+                        state.isHolidayBlocked ?
+                        " holiday holiday-closed" :
+                        " holiday holiday-working";
 
                     if (
                         state.isHolidayBlocked
@@ -994,14 +1104,14 @@
                     !allowAllDates
                 ) {
                     cellClass +=
-                        state.isHolidayBlocked
-                            ? " holiday holiday-closed"
-                            : " holiday holiday-working";
+                        state.isHolidayBlocked ?
+                        " holiday holiday-closed" :
+                        " holiday holiday-working";
 
                     if (
                         state.isHolidayBlocked &&
                         !calendarConfig
-                            .allowHolidaySelection
+                        .allowHolidaySelection
                     ) {
                         cellClass +=
                             " disabled";
@@ -1082,14 +1192,14 @@
                     !allowAllDates
                 ) {
                     cellClass +=
-                        state.isHolidayBlocked
-                            ? " holiday holiday-closed"
-                            : " holiday holiday-working";
+                        state.isHolidayBlocked ?
+                        " holiday holiday-closed" :
+                        " holiday holiday-working";
 
                     if (
                         state.isHolidayBlocked &&
                         !calendarConfig
-                            .allowHolidaySelection
+                        .allowHolidaySelection
                     ) {
                         cellClass +=
                             " disabled";
@@ -1117,14 +1227,14 @@
             if (state.myAppointment && !state.isBookingMode) {
                 badgeHtml += CALENDAR_THEME.statuses.myAppointment.badge(
                     String(state.myAppointment)
-                        .toLowerCase()
-                        .includes('follow-up')
+                    .toLowerCase()
+                    .includes('follow-up')
                 );
 
                 const isFollowUp =
                     String(state.myAppointment)
-                        .toLowerCase()
-                        .includes('follow-up');
+                    .toLowerCase()
+                    .includes('follow-up');
 
                 const appointmentIcon = isFollowUp ?
                     'fa-solid fa-calendar-plus' :
@@ -1141,7 +1251,7 @@
 
             if (
                 state.hasCompletedAppointment &&
-                calendarConfig.mode === 'patient-dashboard'
+                isPatientCalendarOverview
             ) {
                 badgeHtml +=
                     CALENDAR_THEME.statuses.completedAppointment.badge();
@@ -1162,13 +1272,13 @@
 
             if (state.isHoliday && !allowAllDates) {
                 const holidayTheme =
-                    state.isHolidayBlocked
-                        ? CALENDAR_THEME
-                            .statuses
-                            .holiday
-                        : CALENDAR_THEME
-                            .statuses
-                            .workingHoliday;
+                    state.isHolidayBlocked ?
+                    CALENDAR_THEME
+                    .statuses
+                    .holiday :
+                    CALENDAR_THEME
+                    .statuses
+                    .workingHoliday;
 
                 badgeHtml +=
                     holidayTheme.badge();
@@ -1202,7 +1312,7 @@
 
                     tooltipClass =
                         holidayTheme
-                            .tooltipClass;
+                        .tooltipClass;
                 }
             } else if (
                 !ignoreAvailabilityRestrictions &&
@@ -1210,17 +1320,17 @@
                 !state.isToday
             ) {
                 if (!state.myAppointment && !state.isClosed) {
-                    badgeHtml += variant === 'dentist'
-                        ? CALENDAR_THEME.statuses.fullyBooked.badge()
-                        : makeCalendarDot(
+                    badgeHtml += variant === 'dentist' ?
+                        CALENDAR_THEME.statuses.fullyBooked.badge() :
+                        makeCalendarDot(
                             CALENDAR_THEME.statuses.fullyBooked.dotClass
                         );
                 }
 
                 if (!tooltip) {
-                    tooltip = state.isBookingMode
-                        ? "Full Slot"
-                        : "Fully Booked";
+                    tooltip = state.isBookingMode ?
+                        "Full Slot" :
+                        "Fully Booked";
 
                     tooltipClass =
                         CALENDAR_THEME.statuses.fullyBooked.tooltipClass;
@@ -1304,7 +1414,7 @@
             } else if (
                 state.isHoliday &&
                 !allowAllDates
-            ) { } else if (
+            ) {} else if (
                 !state.myAppointment &&
                 !ignoreAvailabilityRestrictions &&
                 state.isToday &&
@@ -1357,9 +1467,9 @@
 
                 tooltipClass =
                     CALENDAR_THEME
-                        .statuses
-                        .today
-                        .tooltipClass;
+                    .statuses
+                    .today
+                    .tooltipClass;
             }
 
             if (
@@ -1497,45 +1607,40 @@
             }
 
             if (slotGrid) {
-                slotGrid.style.display =
-                    'grid';
+                slotGrid.style.display = 'grid';
 
                 slotGrid.className =
                     'appointment-slot-grid slot-grid-ui';
 
+                const loadingSkeleton = Array.from({
+                    length: 4
+                }).map(() => `
+        <div class="px-4 py-3 rounded-xl border border-gray-100 bg-gray-50">
+            <div class="h-4 w-20 skeleton-block rounded"></div>
+        </div>
+    `).join('');
+
                 slotGrid.innerHTML = `
-                    <div class="appointment-slot-period">
-                        <div class="appointment-slot-period-heading">
-                            AM
-                        </div>
+        <div class="appointment-slot-period">
+            <div class="appointment-slot-period-heading">
+                AM
+            </div>
 
-                        <div class="appointment-slot-period-grid">
-                            ${Array.from({
-                    length: 4
-                }).map(() => `
-                                <div class="px-4 py-3 rounded-xl border border-gray-100 bg-gray-50">
-                                    <div class="h-4 w-20 skeleton-block rounded"></div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
+            <div class="appointment-slot-period-grid">
+                ${loadingSkeleton}
+            </div>
+        </div>
 
-                    <div class="appointment-slot-period">
-                        <div class="appointment-slot-period-heading">
-                            PM
-                        </div>
+        <div class="appointment-slot-period">
+            <div class="appointment-slot-period-heading">
+                PM
+            </div>
 
-                        <div class="appointment-slot-period-grid">
-                            ${Array.from({
-                    length: 4
-                }).map(() => `
-                                <div class="px-4 py-3 rounded-xl border border-gray-100 bg-gray-50">
-                                    <div class="h-4 w-20 skeleton-block rounded"></div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
+            <div class="appointment-slot-period-grid">
+                ${loadingSkeleton}
+            </div>
+        </div>
+    `;
             }
         }
 
@@ -1545,8 +1650,7 @@
 
 
         function getMonthBounds() {
-            const isDashboard =
-                calendarConfig.mode === 'patient-dashboard';
+            const isDashboard = isPatientCalendarOverview;
 
             const minimum = (isDashboard || calendarConfig.allowPastDates) ?
                 new Date(
@@ -1565,14 +1669,14 @@
                 Number.isFinite(
                     Number(
                         calendarConfig
-                            .maxFutureMonths
+                        .maxFutureMonths
                     )
                 ) ?
-                    Number(
-                        calendarConfig
-                            .maxFutureMonths
-                    ) :
-                    6;
+                Number(
+                    calendarConfig
+                    .maxFutureMonths
+                ) :
+                6;
 
             const maximum =
                 new Date(
@@ -1603,9 +1707,9 @@
                     month: cursor.getMonth(),
                     label: cursor.toLocaleDateString(
                         'en-US', {
-                        month: 'long',
-                        year: 'numeric'
-                    }
+                            month: 'long',
+                            year: 'numeric'
+                        }
                     )
                 });
 
@@ -1686,7 +1790,8 @@
                 return;
             }
 
-            const nextIso = `${candidate.getFullYear()}-${pad(candidate.getMonth() + 1)}-${pad(candidate.getDate())}`;
+            const nextIso =
+                `${candidate.getFullYear()}-${pad(candidate.getMonth() + 1)}-${pad(candidate.getDate())}`;
 
             if (
                 candidate.getFullYear() !== currentYear ||
@@ -1748,7 +1853,8 @@
                 maximum
             } = getMonthBounds();
             const endDate = new Date(maximum.getFullYear(), maximum.getMonth() + 1, 0);
-            const cursor = new Date(calendarConfig.allowPastDates ? minimum.getTime() : Math.max(todayDate.getTime(),
+            const cursor = new Date(calendarConfig.allowPastDates ? minimum.getTime() : Math.max(todayDate
+                .getTime(),
                 minimum.getTime()));
 
             try {
@@ -1910,8 +2016,7 @@
                 );
 
             for (
-                const wrapper
-                of calendarSelectWrappers
+                const wrapper of calendarSelectWrappers
             ) {
                 if (
                     typeof window.syncCustomSelect ===
@@ -1930,34 +2035,34 @@
             bindCalendarToolbar();
 
             calendarContainer
-            .querySelectorAll(
-                '[data-calendar-nav]'
-            )
-            .forEach(button => {
-                if (
-                    button.dataset
+                .querySelectorAll(
+                    '[data-calendar-nav]'
+                )
+                .forEach(button => {
+                    if (
+                        button.dataset
                         .calendarNavBound ===
-                    'true'
-                ) {
-                    return;
-                }
-
-                button.dataset
-                    .calendarNavBound =
-                    'true';
-
-                button.addEventListener(
-                    'click',
-                    () => {
-                        changeCalendarMonth(
-                            Number(
-                                button.dataset
-                                    .calendarNav
-                            )
-                        );
+                        'true'
+                    ) {
+                        return;
                     }
-                );
-            });
+
+                    button.dataset
+                        .calendarNavBound =
+                        'true';
+
+                    button.addEventListener(
+                        'click',
+                        () => {
+                            changeCalendarMonth(
+                                Number(
+                                    button.dataset
+                                    .calendarNav
+                                )
+                            );
+                        }
+                    );
+                });
 
             if (
                 calendarConfig.mode ===
@@ -1989,7 +2094,7 @@
             const DAYS_DENTIST = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
             const isDentist = calendarConfig.renderStyle === 'dentist';
-            const isDashboard = calendarConfig.mode === 'patient-dashboard';
+            const isDashboard = isPatientCalendarOverview;
             const showMonthYearShortcut = isDashboard || calendarConfig.enableMonthYearShortcut === true;
             const dayLabels = isDentist ? DAYS_DENTIST : DAYS_PATIENT;
 
@@ -2046,15 +2151,14 @@
                     isDentistDashboard &&
                     Array.isArray(
                         calendarConfig
-                            .appointmentDetails?.[
-                                state.iso
-                            ]
-                    )
-                        ? calendarConfig
-                            .appointmentDetails[
-                                state.iso
-                            ]
-                        : [];
+                        .appointmentDetails?.[
+                            state.iso
+                        ]
+                    ) ?
+                    calendarConfig
+                    .appointmentDetails[
+                        state.iso
+                    ] : [];
 
                 const hasDayAppointments =
                     dayAppointments.length > 0;
@@ -2071,8 +2175,8 @@
                     hasDayAppointments &&
                     !state.isHolidayBlocked &&
                     isHoverDevice &&
-                    typeof window.buildDayHoverCard
-                        === 'function'
+                    typeof window.buildDayHoverCard ===
+                    'function'
                 ) {
                     const column =
                         (
@@ -2102,9 +2206,9 @@
                         );
 
                     const placement =
-                        calendarRow >= 3
-                            ? 'hover-top'
-                            : 'hover-bottom';
+                        calendarRow >= 3 ?
+                        'hover-top' :
+                        'hover-bottom';
 
                     dashboardHoverHtml =
                         window.buildDayHoverCard(
@@ -2391,13 +2495,13 @@
         function bindCalendarClicks(selector) {
             const canSelectWithoutInput =
                 calendarConfig.mode ===
-                    'patient-dashboard' ||
+                'patient-dashboard' ||
                 calendarConfig.mode ===
-                    'patient-appointment' ||
+                'patient-appointment' ||
                 calendarConfig.mode ===
-                    'dentist' ||
+                'dentist' ||
                 calendarConfig.mode ===
-                    'dentist-dashboard';
+                'dentist-dashboard';
 
             if (!calendarConfig.dateInputId && !canSelectWithoutInput) {
                 return;
@@ -2417,33 +2521,32 @@
 
                 const dayAppointments =
                     calendarConfig.mode ===
-                        'dentist-dashboard' &&
+                    'dentist-dashboard' &&
                     Array.isArray(
                         calendarConfig
-                            .appointmentDetails?.[
-                                state?.iso
-                            ]
-                    )
-                        ? calendarConfig
-                            .appointmentDetails[
-                                state.iso
-                            ]
-                        : [];
+                        .appointmentDetails?.[
+                            state?.iso
+                        ]
+                    ) ?
+                    calendarConfig
+                    .appointmentDetails[
+                        state.iso
+                    ] : [];
 
                 const hasDashboardAppointments =
                     dayAppointments.length > 0;
 
                 const isInteractive =
                     calendarConfig.mode ===
-                        'dentist-dashboard'
-                        ? hasDashboardAppointments
-                        : (
-                            !isDisabled ||
-                            Boolean(
-                                state?.myAppointment
-                            ) ||
-                            isCompletedAppointment
-                        );
+                    'dentist-dashboard' ?
+                    hasDashboardAppointments :
+                    (
+                        !isDisabled ||
+                        Boolean(
+                            state?.myAppointment
+                        ) ||
+                        isCompletedAppointment
+                    );
 
                 el.setAttribute(
                     'tabindex',
@@ -2462,24 +2565,24 @@
 
                 const activateDate = () => {
                     if (
-                            calendarConfig.mode ===
-                            'dentist-dashboard'
+                        calendarConfig.mode ===
+                        'dentist-dashboard'
+                    ) {
+                        if (
+                            !hasDashboardAppointments
                         ) {
-                            if (
-                                !hasDashboardAppointments
-                            ) {
-                                return;
-                            }
-
-                            window.openDayAppointmentsModal?.(
-                                state.iso,
-                                JSON.stringify(
-                                    dayAppointments
-                                )
-                            );
-
                             return;
                         }
+
+                        window.openDayAppointmentsModal?.(
+                            state.iso,
+                            JSON.stringify(
+                                dayAppointments
+                            )
+                        );
+
+                        return;
+                    }
 
                     if (state?.myAppointment) {
                         selectedDate = state.iso;
@@ -2487,7 +2590,7 @@
 
                         renderCalendar();
 
-                        if (calendarConfig.mode === 'patient-dashboard') {
+                        if (isPatientCalendarOverview) {
                             selectDate(state.iso);
                         }
 
@@ -2609,11 +2712,27 @@
         }
 
         async function selectDate(iso) {
-            if (calendarConfig.mode === 'patient-dashboard') {
+            if (isPatientCalendarOverview) {
                 selectedDate = iso;
                 selectedTime = null;
 
                 renderCalendar();
+
+                if (
+                    calendarConfig.hasActiveAppointment
+                ) {
+                    clearTimeout(
+                        dashboardLoadingTimer
+                    );
+
+                    dashboardLoadingTimer = null;
+
+                    renderDashboardActiveAppointmentState(
+                        iso
+                    );
+
+                    return;
+                }
 
                 clearTimeout(dashboardLoadingTimer);
 
@@ -2655,10 +2774,6 @@
                 return;
             }
 
-            if (calendarConfig.mode === 'patient-appointment') {
-                return;
-            }
-
             if (calendarConfig.mode === 'dentist') {
                 selectedDate = iso;
                 selectedTime = null;
@@ -2695,8 +2810,8 @@
                 dateInput.dispatchEvent(
                     new Event(
                         'change', {
-                        bubbles: true
-                    }
+                            bubbles: true
+                        }
                     )
                 );
             }
@@ -2708,8 +2823,8 @@
                 timeInput.dispatchEvent(
                     new Event(
                         'change', {
-                        bubbles: true
-                    }
+                            bubbles: true
+                        }
                     )
                 );
             }
@@ -2837,12 +2952,12 @@
 
                 const headerHeight =
                     header?.getBoundingClientRect()
-                        .height || 0;
+                    .height || 0;
 
                 const extraOffset =
                     window.innerWidth <= 640 ?
-                        10 :
-                        18;
+                    10 :
+                    18;
 
                 const targetTop =
                     target.getBoundingClientRect().top +
@@ -2864,7 +2979,7 @@
 
             const appointments =
                 Array.isArray(state.completedAppointments) ?
-                    state.completedAppointments : [];
+                state.completedAppointments : [];
 
             if (!appointments.length) {
                 resetDashboardAvailabilityPanel();
@@ -3019,12 +3134,21 @@
 
             if (!panel) return;
 
+            if (
+                calendarConfig.hasActiveAppointment
+            ) {
+                renderDashboardActiveAppointmentState(
+                    iso
+                );
+
+                return;
+            }
+
             dashboardSlotCache.set(iso, payload);
 
             const slots =
-                Array.isArray(payload?.slots)
-                    ? payload.slots
-                    : [];
+                Array.isArray(payload?.slots) ?
+                payload.slots : [];
 
             const availableSlots =
                 slots.filter(slot => {
@@ -3041,13 +3165,13 @@
                 });
 
             const earliestSlot =
-                availableSlots.length
-                    ? (
-                        typeof availableSlots[0] === 'string'
-                            ? availableSlots[0]
-                            : availableSlots[0]?.time
-                    )
-                    : null;
+                availableSlots.length ?
+                (
+                    typeof availableSlots[0] === 'string' ?
+                    availableSlots[0] :
+                    availableSlots[0]?.time
+                ) :
+                null;
 
             if (!availableSlots.length) {
                 panel.innerHTML = `
@@ -3292,7 +3416,7 @@
                         const time =
                             String(
                                 button.dataset
-                                    .dashboardTime || ''
+                                .dashboardTime || ''
                             ).trim();
 
                         if (!time) return;
@@ -3481,8 +3605,8 @@
                 } else {
                     const slotAvailabilityClass =
                         remaining <= 2 ?
-                            "slot-availability-low" :
-                            "slot-availability-good";
+                        "slot-availability-low" :
+                        "slot-availability-good";
                     banner.innerHTML = `
                         <i class="fa-regular fa-calendar mr-2"></i>
                         ${MONTHS[parseInt(m) - 1]} ${parseInt(d)}, ${y}
@@ -3540,22 +3664,22 @@
             const slotPeriodLists = {};
 
             [{
-                key: 'am',
-                label: 'AM'
-            },
-            {
-                key: 'pm',
-                label: 'PM'
-            }
+                    key: 'am',
+                    label: 'AM'
+                },
+                {
+                    key: 'pm',
+                    label: 'PM'
+                }
             ].forEach(period => {
 
                 const hasSlots =
                     slots.some(slot => {
                         const timeValue =
                             typeof slot ===
-                                'string' ?
-                                slot :
-                                slot.time;
+                            'string' ?
+                            slot :
+                            slot.time;
 
                         return (
                             getAppointmentSlotPeriod(
@@ -3627,26 +3751,26 @@
                     chip.className = "slot-chip border " +
                         (
                             disabled ?
-                                "disabled line-through opacity-60 cursor-not-allowed pointer-events-none" :
-                                "cursor-pointer"
+                            "disabled line-through opacity-60 cursor-not-allowed pointer-events-none" :
+                            "cursor-pointer"
                         );
 
                     chip.innerHTML =
                         disabled ?
-                            `<i class="fa-solid fa-ban "></i><span>${timeValue}</span>` :
-                            `<i class="fa-regular fa-clock "></i><span>${timeValue}</span>`;
+                        `<i class="fa-solid fa-ban "></i><span>${timeValue}</span>` :
+                        `<i class="fa-regular fa-clock "></i><span>${timeValue}</span>`;
                 } else {
                     chip.className = "slot-chip border " +
                         (
                             disabled ?
-                                "disabled line-through opacity-60 cursor-not-allowed" :
-                                "cursor-pointer"
+                            "disabled line-through opacity-60 cursor-not-allowed" :
+                            "cursor-pointer"
                         );
 
                     chip.innerHTML =
                         disabled ?
-                            `<i class=" opacity-70 fa-solid fa-ban"></i><span>${timeValue}</span>` :
-                            `<i class=" opacity-70 fa-regular fa-clock"></i><span>${timeValue}</span>`;
+                        `<i class=" opacity-70 fa-solid fa-ban"></i><span>${timeValue}</span>` :
+                        `<i class=" opacity-70 fa-regular fa-clock"></i><span>${timeValue}</span>`;
                 }
 
                 chip.dataset.time = timeValue;
@@ -3654,43 +3778,45 @@
                 if (!disabled) {
                     chip.addEventListener("click", () => {
                         const calendarWrap =
-                        document.querySelector(
-                            calendarConfig
+                            document.querySelector(
+                                calendarConfig
                                 .calendarWrapSelector
-                        );
+                            );
 
-                    const slotsWrap =
-                        document.querySelector(
-                            calendarConfig
+                        const slotsWrap =
+                            document.querySelector(
+                                calendarConfig
                                 .slotsWrapSelector
-                        );
+                            );
 
-                    const dateErrorKey =
-                        calendarWrap
+                        const dateErrorKey =
+                            calendarWrap
                             ?.dataset
                             .globalErrorKey ||
-                        calendarConfig
+                            calendarConfig
                             .dateInputId;
 
-                    const timeErrorKey =
-                        slotsWrap
+                        const timeErrorKey =
+                            slotsWrap
                             ?.dataset
                             .globalErrorKey ||
-                        calendarConfig
+                            calendarConfig
                             .timeInputId;
 
-                    const timeInput =
-                        document.getElementById(
-                            calendarConfig.timeInputId
-                        );
+                        const timeInput =
+                            document.getElementById(
+                                calendarConfig.timeInputId
+                            );
 
                         const currentDisplay = document.getElementById(calendarConfig
                             .selectedSlotDisplayId || "selectedSlotDisplay");
                         const currentDisplayTxt = document.getElementById(calendarConfig
                             .selectedSlotTextId || "selectedSlotText");
-                        const currentTimePill = document.getElementById(calendarConfig.selectedTimePillId ||
+                        const currentTimePill = document.getElementById(calendarConfig
+                            .selectedTimePillId ||
                             "selectedTimePill");
-                        const currentTimeText = document.getElementById(calendarConfig.selectedTimeTextId ||
+                        const currentTimeText = document.getElementById(calendarConfig
+                            .selectedTimeTextId ||
                             "selectedTimeText");
 
                         if (!hasSelectedDateValue()) {
@@ -3850,8 +3976,8 @@
             if (currentPanel) {
                 const outgoingClass =
                     direction > 0 ?
-                        'global-carousel-out-left' :
-                        'global-carousel-out-right';
+                    'global-carousel-out-left' :
+                    'global-carousel-out-right';
 
                 currentPanel.classList.add(
                     outgoingClass
@@ -3897,8 +4023,8 @@
 
                 const incomingClass =
                     direction > 0 ?
-                        'global-carousel-in-right' :
-                        'global-carousel-in-left';
+                    'global-carousel-in-right' :
+                    'global-carousel-in-left';
 
                 nextPanel.classList.add(
                     incomingClass
@@ -3919,8 +4045,7 @@
                 calendarInstanceKey
             ] || {}),
 
-            changeMonth:
-                changeCalendarMonth,
+            changeMonth: changeCalendarMonth,
         };
 
         function monthHasBookableDate(
@@ -3947,8 +4072,8 @@
                     todayDate.getDate() +
                     (
                         calendarConfig.disallowToday ?
-                            1 :
-                            0
+                        1 :
+                        0
                     );
             }
 
@@ -4024,11 +4149,11 @@
             return null;
         }
 
-        document.addEventListener("DOMContentLoaded", async function () {
+        document.addEventListener("DOMContentLoaded", async function() {
             try {
                 if (
                     typeof window
-                        .loadDatePickerModule ===
+                    .loadDatePickerModule ===
                     'function'
                 ) {
                     await window
@@ -4059,11 +4184,11 @@
                 );
 
             const queryDateState =
-                queryDate
-                    ? getCalendarDateStateFromIso(
-                        queryDate
-                    )
-                    : null;
+                queryDate ?
+                getCalendarDateStateFromIso(
+                    queryDate
+                ) :
+                null;
 
             if (
                 calendarConfig.mode ===
@@ -4086,13 +4211,13 @@
                 ) {
                     currentYear =
                         queryDateState
-                            .cellDate
-                            .getFullYear();
+                        .cellDate
+                        .getFullYear();
 
                     currentMonth =
                         queryDateState
-                            .cellDate
-                            .getMonth();
+                        .cellDate
+                        .getMonth();
 
                     selectedDate = null;
 
@@ -4121,61 +4246,58 @@
 
             setTimeout(
                 async () => {
-                    renderCalendar();
+                        renderCalendar();
 
-                   if (
-                        calendarConfig.mode ===
-                        'booking' &&
-                        queryDateState &&
-                        !queryDateState.isDisabled
-                    ) {
-                        await selectDate(
-                            queryDateState.iso
-                        );
+                        if (
+                            calendarConfig.mode ===
+                            'booking' &&
+                            queryDateState &&
+                            !queryDateState.isDisabled
+                        ) {
+                            await selectDate(
+                                queryDateState.iso
+                            );
 
-                        if (queryTime) {
-                            const queryTimeChip =
-                                Array.from(
-                                    document.querySelectorAll(
-                                        `#${calendarConfig.slotGridId} .slot-chip`
-                                    )
-                                )
-                                .find(chip => {
-                                    return (
-                                        String(
-                                            chip.dataset.time || ''
-                                        ).trim() ===
-                                        String(
-                                            queryTime
-                                        ).trim()
-                                        &&
-                                        !chip.classList.contains(
-                                            'disabled'
+                            if (queryTime) {
+                                const queryTimeChip =
+                                    Array.from(
+                                        document.querySelectorAll(
+                                            `#${calendarConfig.slotGridId} .slot-chip`
                                         )
-                                    );
-                                });
+                                    )
+                                    .find(chip => {
+                                        return (
+                                            String(
+                                                chip.dataset.time || ''
+                                            ).trim() ===
+                                            String(
+                                                queryTime
+                                            ).trim() &&
+                                            !chip.classList.contains(
+                                                'disabled'
+                                            )
+                                        );
+                                    });
 
-                            if (queryTimeChip) {
-                                queryTimeChip.click();
+                                if (queryTimeChip) {
+                                    queryTimeChip.click();
 
-                            } else {
-                                window.showToast?.({
-                                    type: 'info',
-                                    title: 'Time slot unavailable',
-                                    message:
-                                        'The time you selected is no longer available. Please choose another available slot.',
-                                    duration: 4000,
-                                });
+                                } else {
+                                    window.showToast?.({
+                                        type: 'info',
+                                        title: 'Time slot unavailable',
+                                        message: 'The time you selected is no longer available. Please choose another available slot.',
+                                        duration: 4000,
+                                    });
+                                }
                             }
                         }
-                    }
-                },
-                calendarConfig.mode ===
-                    'booking'
-                    ? 0
-                    : 650
+                    },
+                    calendarConfig.mode ===
+                    'booking' ?
+                    0 :
+                    650
             );
-        }
-    );
+        });
     })();
 </script>

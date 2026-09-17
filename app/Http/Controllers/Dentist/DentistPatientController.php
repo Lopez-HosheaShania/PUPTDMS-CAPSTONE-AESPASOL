@@ -6,89 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\ReservedBookingPeriod;
+use App\Services\DentistDutyService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Helpers\PhilippineHolidays;
 use App\Helpers\AuditLogger;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use App\Models\SystemSetting;
 
 class DentistPatientController extends Controller
 {
-
-    private function syncOverdueAppointmentsToCancelled(): void
+    private function syncDutyEndAppointments(): void
     {
-        $now = Carbon::now();
-        $clinicStatus = strtolower((string) SystemSetting::getSetting('clinic_status', 'in'));
+        $dentist = Auth::user();
 
-        if ($clinicStatus !== 'out') {
-            return;
-        }
-
-        $outAtValue = SystemSetting::getSetting('clinic_status_out_at');
-        $cutoff = filled($outAtValue)
-            ? Carbon::parse($outAtValue)
-            : $now->copy();
-
-        $updatePayload = [
-            'status' => 'cancelled',
-            'updated_at' => $now,
-        ];
-
-        if (Schema::hasColumn('appointments', 'cancellation_reason')) {
-            $updatePayload['cancellation_reason'] = DB::raw(
-                "COALESCE(
-                NULLIF(cancellation_reason, ''),
-                'Appointment was not started before the dentist checked out.'
-            )"
-            );
-        }
-
-        Appointment::query()
-            ->whereIn('status', ['upcoming', 'rescheduled'])
-            ->whereNull('reserved_booking_period_id')
-            ->where(function ($query) use ($cutoff) {
-                $query
-                    ->whereDate(
-                        'appointment_date',
-                        '<',
-                        $cutoff->toDateString()
-                    )
-                    ->orWhere(function ($sameDay) use ($cutoff) {
-                        $sameDay
-                            ->whereDate(
-                                'appointment_date',
-                                $cutoff->toDateString()
-                            )
-                            ->whereTime(
-                                'appointment_time',
-                                '<',
-                                $cutoff->format('H:i:s')
-                            );
-                    });
-            })
-            ->update($updatePayload);
-
-        $expiredReservedPeriodIds = ReservedBookingPeriod::query()
-            ->where(function ($query) use ($cutoff) {
-                $query->whereDate('reserved_date', '<', $cutoff->toDateString())
-                    ->orWhere(function ($sameDay) use ($cutoff) {
-                        $sameDay->whereDate('reserved_date', $cutoff->toDateString())
-                            ->whereTime('end_time', '<', $cutoff->format('H:i:s'));
-                    });
-            })
-            ->pluck('id');
-
-        if ($expiredReservedPeriodIds->isNotEmpty()) {
-            Appointment::query()
-                ->whereIn('status', ['upcoming', 'rescheduled'])
-                ->whereIn('reserved_booking_period_id', $expiredReservedPeriodIds)
-                ->update([
-                    ...$updatePayload,
-                    'reserved_booking_period_slot_id' => null,
-                ]);
+        if ($dentist) {
+            app(DentistDutyService::class)->syncOutDentistAppointments($dentist);
         }
     }
 
@@ -100,7 +32,7 @@ class DentistPatientController extends Controller
             return redirect('/login');
         }
 
-        $this->syncOverdueAppointmentsToCancelled();
+        $this->syncDutyEndAppointments();
         $today = Carbon::today()->toDateString();
 
         $appointments = Appointment::with('patient')
@@ -190,7 +122,7 @@ class DentistPatientController extends Controller
             return redirect('/login');
         }
 
-        $this->syncOverdueAppointmentsToCancelled();
+        $this->syncDutyEndAppointments();
 
         $patient->loadMissing([
             'user',

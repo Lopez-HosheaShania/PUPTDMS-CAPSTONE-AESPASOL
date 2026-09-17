@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class AcademicPeriod extends Model
 {
     protected $fillable = [
-        'academic_year',
-        'semester',
+        'academic_year_id',
+        'academic_term_id',
         'start_date',
         'end_date',
         'description',
@@ -83,5 +83,15 @@ class AcademicPeriod extends Model
         $elapsedDays = $start->diffInDays($today);
 
         return (int) round(($elapsedDays / $totalDays) * 100);
+    }
+
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function academicTerm()
+    {
+        return $this->belongsTo(AcademicTerm::class);
     }
 }

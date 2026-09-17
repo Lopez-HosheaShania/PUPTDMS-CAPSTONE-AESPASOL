@@ -58,7 +58,13 @@ class ChatbotController extends Controller
         $isLoginPage = str_contains($context, '/login');
 
         $user = Auth::user();
-        $role = session('impersonated_role') ?? optional($user?->role)->slug ?? 'guest';
+
+        $role = $this->normalizeChatbotRole(
+            session('impersonated_role')
+                ?? session('role')
+                ?? optional($user?->role)->slug
+                ?? 'guest'
+        );
 
         $patient = null;
 
@@ -70,6 +76,8 @@ class ChatbotController extends Controller
 
         $appointment = $patient?->appointments?->sortByDesc('created_at')->first();
         $record = $patient?->dentalHistory;
+
+        $chatbotDisplayName = $this->resolveChatbotDisplayName($patient);
 
         $roleContext = match ($role) {
             'admin' => "
@@ -104,7 +112,7 @@ class ChatbotController extends Controller
             'patient' => "
     User Role: Patient
     Patient Information:
-    - Name: " . ($patient?->name ?? optional($user)->name ?? 'Unknown') . "
+    - Name: " . $chatbotDisplayName . "
     - Latest Appointment Date: " . ($appointment->appointment_date ?? 'None') . "
     - Latest Appointment Time: " . ($appointment->appointment_time ?? 'None') . "
     - Latest Appointment Status: " . ($appointment->status ?? 'None') . "
@@ -128,11 +136,41 @@ class ChatbotController extends Controller
     ",
         };
 
-        $localReply = $this->getLocalSystemReply($request->message, $context, $patient, $isLoginPage, $role);
+        $roleRestrictionReply = $this->getRoleRestrictionReply(
+            $request->message,
+            $role,
+            $isLoginPage
+        );
+
+        if ($roleRestrictionReply) {
+            return response()->json([
+                'reply' => $roleRestrictionReply,
+            ]);
+        }
+
+        $documentRequestResponse = $this->getDocumentRequestChatResponse(
+            $request->message,
+            $role
+        );
+
+        if ($documentRequestResponse) {
+            return response()->json($documentRequestResponse);
+        }
+
+        $localReply = $this->getLocalSystemReply(
+            $request->message,
+            $context,
+            $patient,
+            $isLoginPage,
+            $role
+        );
 
         if ($localReply) {
             return response()->json([
-                'reply' => $localReply,
+                'reply' => $this->sanitizeChatbotReply(
+                    $localReply,
+                    $patient
+                ),
             ]);
         }
 
@@ -191,10 +229,26 @@ Patient:
 - /record = own dental records
 - /document-requests = own document requests
 
-Answer only based on the user's role. Do not tell admins/dentists to use patient-only booking features unless explaining that it is a patient feature.
+ROLE ENFORCEMENT RULES:
+- Treat the User Role above as authoritative.
+- Only explain features and navigation that are available to that role.
+- Never instruct the user to access another role's protected pages or actions.
+- If the user asks about a feature belonging to another role, clearly state that the feature is not available to their current role.
+- Admins and dentists must not be instructed to use patient-only booking or personal document-request features.
+- Patients must not be instructed to use administrative, dentist-only, user-management, approval, inventory, audit, or system-settings features.
+- Guests must only receive login and SSO assistance until they sign in.
+- Never imply that a restricted action can be bypassed.
+- Never claim that a document request was successfully submitted unless the application itself confirms the submission.
+- Document-request creation is handled by the application's deterministic action flow, not by the AI model.
+
+FORMATTING RULES:
+- Use plain text only.
+- Do not use Markdown formatting.
+- Do not use asterisks for bold text.
+- Never wrap words or headings with **.
+
 Keep answers short but complete. Use 1 to 3 complete sentences. Do not cut off mid-sentence.
 If the user asks something unrelated to the PUP Taguig Dental Clinic Management System, politely refuse and redirect them to system-related topics only.
-
 User message: {$userMessage}
 PROMPT;
 
@@ -220,14 +274,28 @@ PROMPT;
                 ]);
 
             if ($response->successful()) {
-                $reply = $this->extractOutputText($response->json());
+                $reply = $this->extractOutputText(
+                    $response->json()
+                );
 
-                $aiServiceManager->recordSuccess('chatbot', 'OpenAI chatbot response generated.', [
-                    'user_id' => Auth::id(),
-                ]);
+                $reply =
+                    $this->sanitizeChatbotReply(
+                        $reply,
+                        $patient
+                    );
+
+                $aiServiceManager->recordSuccess(
+                    'chatbot',
+                    'OpenAI chatbot response generated.',
+                    [
+                        'user_id' => Auth::id(),
+                    ]
+                );
 
                 return response()->json([
-                    'reply' => $reply ?: 'Sorry, walang response mula sa AI.',
+                    'reply' => $reply !== ''
+                        ? $reply
+                        : 'Sorry, walang response mula sa AI.',
                 ]);
             }
 
@@ -270,6 +338,149 @@ PROMPT;
         }
     }
 
+    private function resolveChatbotDisplayName(?Patient $patient = null): string
+    {
+        $rawName = trim((string) (
+            $patient?->name
+            ?? optional(Auth::user())->name
+            ?? ''
+        ));
+
+        if ($rawName === '') {
+            return 'there';
+        }
+
+        $name = preg_replace('/\s+/', ' ', $rawName) ?? $rawName;
+
+        $parts = preg_split('/\s+/', $name) ?: [];
+        $count = count($parts);
+
+        if ($count >= 2 && $count % 2 === 0) {
+            $half = (int) ($count / 2);
+
+            $firstHalf = array_slice(
+                $parts,
+                0,
+                $half
+            );
+
+            $secondHalf = array_slice(
+                $parts,
+                $half
+            );
+
+            $normalizeParts = static function (array $values): array {
+                return array_map(
+                    static fn($value) => mb_strtolower(
+                        trim((string) $value)
+                    ),
+                    $values
+                );
+            };
+
+            if (
+                $normalizeParts($firstHalf) ===
+                $normalizeParts($secondHalf)
+            ) {
+                $name = implode(
+                    ' ',
+                    $firstHalf
+                );
+            }
+        }
+
+        return trim($name);
+    }
+
+    private function sanitizeChatbotReply(
+        ?string $reply,
+        ?Patient $patient = null
+    ): string {
+        $reply = trim((string) $reply);
+
+        if ($reply === '') {
+            return '';
+        }
+
+        $displayName =
+            $this->resolveChatbotDisplayName(
+                $patient
+            );
+
+        if (
+            $displayName === '' ||
+            $displayName === 'there'
+        ) {
+            return $reply;
+        }
+
+
+        $nameCandidates = [
+            $displayName,
+        ];
+
+        $firstName =
+            preg_split(
+                '/\s+/',
+                $displayName
+            )[0] ?? '';
+
+        if (
+            $firstName !== '' &&
+            mb_strlen($firstName) >= 2
+        ) {
+            $nameCandidates[] =
+                $firstName;
+        }
+
+        $nameCandidates =
+            array_values(
+                array_unique(
+                    $nameCandidates
+                )
+            );
+
+        foreach ($nameCandidates as $name) {
+            $escapedName =
+                preg_quote(
+                    $name,
+                    '/'
+                );
+
+            $reply = preg_replace(
+                '/\b(' .
+                    $escapedName .
+                    ')(?:\s*[,!:\-–—]?\s*\1)\b/iu',
+                '$1',
+                $reply
+            ) ?? $reply;
+        }
+
+        return trim($reply);
+    }
+
+    private function normalizeChatbotRole(?string $role): string
+    {
+        $normalizedRole = strtolower(trim((string) $role));
+
+        return match ($normalizedRole) {
+            'admin',
+            'super_admin',
+            'super-admin',
+            'superadmin' => 'admin',
+
+            'dentist',
+            'dentist_role',
+            'dentist-role' => 'dentist',
+
+            'patient',
+            'patient_role',
+            'patient-role' => 'patient',
+
+            default => 'guest',
+        };
+    }
+
     private function extractOutputText(array $payload): ?string
     {
         if (!empty($payload['output_text']) && is_string($payload['output_text'])) {
@@ -285,6 +496,473 @@ PROMPT;
         }
 
         return null;
+    }
+
+    private function getRoleRestrictionReply(
+        string $message,
+        string $role,
+        bool $isLoginPage = false
+    ): ?string {
+        $text = strtolower(trim($message));
+
+        $containsAny = function (array $phrases) use ($text): bool {
+            foreach ($phrases as $phrase) {
+                if (str_contains($text, $phrase)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        if ($role === 'guest') {
+            $protectedFeatures = [
+                'appointment',
+                'book appointment',
+                'dental record',
+                'odontogram',
+                'document request',
+                'clearance',
+                'patient directory',
+                'dashboard',
+                'inventory',
+                'report',
+                'system settings',
+                'user management',
+                'walk-in',
+                'walk in',
+            ];
+
+            if (!$isLoginPage && $containsAny($protectedFeatures)) {
+                return 'Please sign in first to access clinic system features. I can currently help you with login and SSO assistance.';
+            }
+
+            return null;
+        }
+
+        if ($role === 'patient') {
+            $restrictedPatientTopics = [
+                'admin dashboard',
+                'dentist dashboard',
+                'patient directory',
+                'manage patient',
+                'manage patients',
+                'user management',
+                'manage users',
+                'role permission',
+                'roles and permissions',
+                'system settings',
+                'system logs',
+                'audit trail',
+                'approve document',
+                'reject document',
+                'approve request',
+                'reject request',
+                'manage document request',
+                'inventory',
+                'walk-in',
+                'walk in patient',
+                'clinic reports',
+                'reports and analytics',
+            ];
+
+            if ($containsAny($restrictedPatientTopics)) {
+                return 'That feature is not available to the Patient role. I can help you with your own appointments, dental records, odontogram, document requests, clinic schedules, and available booking dates.';
+            }
+
+            return null;
+        }
+
+
+        if ($role === 'dentist') {
+            $patientOnlyTopics = [
+                'book an appointment for me',
+                'book my appointment',
+                'book from the patient dashboard',
+                'patient dashboard booking',
+                'request my dental clearance',
+                'request my document',
+                'submit my document request',
+            ];
+
+            if ($containsAny($patientOnlyTopics)) {
+                return 'That action is a Patient feature. As a Dentist, you can manage clinic appointments, patient records, odontograms, walk-ins, follow-ups, schedules, reports, inventory, and document requests available to your role.';
+            }
+
+            return null;
+        }
+
+
+        if ($role === 'admin') {
+            $patientOnlyTopics = [
+                'book an appointment for me',
+                'book my appointment',
+                'book from the patient dashboard',
+                'patient dashboard booking',
+                'request my dental clearance',
+                'request my document',
+                'submit my document request',
+            ];
+
+            if ($containsAny($patientOnlyTopics)) {
+                return 'That action is a Patient feature. As an Admin, you can manage patients, appointments, document requests, reports, inventory, system settings, users, roles, and permissions.';
+            }
+
+            return null;
+        }
+
+        return null;
+    }
+
+    private function getDocumentRequestChatResponse(
+        string $message,
+        string $role
+    ): ?array {
+        $text = strtolower(trim($message));
+
+        $pending = session(
+            'chatbot_pending_document_request',
+            []
+        );
+
+        $pending = is_array($pending)
+            ? $pending
+            : [];
+
+        if (
+            $pending !== [] &&
+            $this->chatbotContainsAnyPhrase(
+                $text,
+                [
+                    'cancel request',
+                    'cancel this request',
+                    'never mind',
+                    'nevermind',
+                    'stop request',
+                ]
+            )
+        ) {
+            session()->forget(
+                'chatbot_pending_document_request'
+            );
+
+            return [
+                'reply' => 'Okay, the unfinished document request was cancelled.',
+            ];
+        }
+
+        $documentType =
+            $this->extractChatbotDocumentType(
+                $text
+            );
+
+        $purpose =
+            $this->extractChatbotDocumentPurpose(
+                $text
+            );
+
+        $hasDocumentKeyword =
+            $documentType !== null ||
+            str_contains($text, 'document') ||
+            str_contains($text, 'clearance') ||
+            str_contains($text, 'dental record') ||
+            str_contains($text, 'health record');
+
+        $hasSubmitIntent =
+            preg_match(
+                '/\b(request|submit|apply|need|want|obtain)\b/i',
+                $message
+            ) === 1;
+
+        $isInformationalQuestion =
+            $this->chatbotContainsAnyPhrase(
+                $text,
+                [
+                    'where can i',
+                    'where do i',
+                    'how can i',
+                    'how do i',
+                    'where is',
+                    'what is',
+                ]
+            );
+
+        if (
+            $pending === [] &&
+            (
+                !$hasDocumentKeyword ||
+                !$hasSubmitIntent ||
+                $isInformationalQuestion
+            )
+        ) {
+            return null;
+        }
+
+        if (
+            $pending !== [] &&
+            !$hasSubmitIntent &&
+            $documentType === null &&
+            $purpose === null
+        ) {
+            return null;
+        }
+
+
+        if ($role !== 'patient') {
+            session()->forget(
+                'chatbot_pending_document_request'
+            );
+
+            return [
+                'reply' => 'Document submission through the chatbot is available only to patients. I can still help you find the document-request tools available to your current role.',
+            ];
+        }
+
+
+        if (session()->has('impersonated_patient_id')) {
+            session()->forget(
+                'chatbot_pending_document_request'
+            );
+
+            return [
+                'reply' => 'Document requests cannot be submitted through the chatbot while using patient impersonation. Please use a real patient session to submit the request.',
+            ];
+        }
+
+        $documentType =
+            $documentType
+            ?? ($pending['document_type'] ?? null);
+
+        $purpose =
+            $purpose
+            ?? ($pending['purpose'] ?? null);
+
+        if (!$documentType) {
+            session([
+                'chatbot_pending_document_request' => [
+                    'purpose' => $purpose,
+                ],
+            ]);
+
+            return [
+                'reply' => 'Which document would you like to request: Dental Clearance, Annual Dental Clearance, or Dental Health Record?',
+            ];
+        }
+
+        if (!$purpose) {
+            session([
+                'chatbot_pending_document_request' => [
+                    'document_type' => $documentType,
+                ],
+            ]);
+
+            $purposeChoices =
+                $this->chatbotDocumentPurposeChoices(
+                    $documentType
+                );
+
+            return [
+                'reply' => "What is the purpose of your {$documentType} request? You can choose: {$purposeChoices}.",
+            ];
+        }
+
+        $allowedPurposes =
+            $this->chatbotAllowedDocumentPurposes(
+                $documentType
+            );
+
+        if (
+            !in_array(
+                $purpose,
+                $allowedPurposes,
+                true
+            )
+        ) {
+            session([
+                'chatbot_pending_document_request' => [
+                    'document_type' => $documentType,
+                ],
+            ]);
+
+            return [
+                'reply' => "That purpose is not available for {$documentType}. Please choose: " .
+                    implode(', ', $allowedPurposes) .
+                    '.',
+            ];
+        }
+
+        session()->forget(
+            'chatbot_pending_document_request'
+        );
+
+        return [
+            'action' => [
+                'type' => 'submit_document_request',
+                'document_type' => $documentType,
+                'purpose' => $purpose,
+            ],
+        ];
+    }
+
+    private function extractChatbotDocumentType(
+        string $text
+    ): ?string {
+        if (
+            str_contains(
+                $text,
+                'annual dental clearance'
+            ) ||
+            str_contains(
+                $text,
+                'annual clearance'
+            )
+        ) {
+            return 'Annual Dental Clearance';
+        }
+
+        if (
+            str_contains(
+                $text,
+                'dental clearance'
+            ) ||
+            str_contains(
+                $text,
+                'clearance'
+            )
+        ) {
+            return 'Dental Clearance';
+        }
+
+        if (
+            str_contains(
+                $text,
+                'all dental records'
+            ) ||
+            str_contains(
+                $text,
+                'dental health record'
+            ) ||
+            str_contains(
+                $text,
+                'health record'
+            )
+        ) {
+            return 'All Dental Records';
+        }
+
+        return null;
+    }
+
+    private function extractChatbotDocumentPurpose(
+        string $text
+    ): ?string {
+        if (
+            str_contains($text, 'ojt') ||
+            str_contains(
+                $text,
+                'on-the-job training'
+            ) ||
+            str_contains(
+                $text,
+                'on the job training'
+            ) ||
+            str_contains(
+                $text,
+                'internship'
+            )
+        ) {
+            return 'On-the-Job Training (OJT)';
+        }
+
+        if (
+            str_contains(
+                $text,
+                'employment'
+            ) ||
+            str_contains(
+                $text,
+                'job requirement'
+            )
+        ) {
+            return 'Employment Requirement';
+        }
+
+        if (
+            str_contains(
+                $text,
+                'academic'
+            ) ||
+            str_contains(
+                $text,
+                'school requirement'
+            )
+        ) {
+            return 'Academic Requirement';
+        }
+
+        if (
+            str_contains(
+                $text,
+                'personal record'
+            ) ||
+            str_contains(
+                $text,
+                'personal use'
+            ) ||
+            str_contains(
+                $text,
+                'my own record'
+            )
+        ) {
+            return 'Personal Record';
+        }
+
+        return null;
+    }
+
+    private function chatbotAllowedDocumentPurposes(
+        string $documentType
+    ): array {
+        return match ($documentType) {
+            'Dental Clearance',
+            'Annual Dental Clearance' => [
+                'On-the-Job Training (OJT)',
+                'Employment Requirement',
+                'Academic Requirement',
+            ],
+
+            'All Dental Records' => [
+                'Personal Record',
+                'Academic Requirement',
+                'Employment Requirement',
+            ],
+
+            default => [],
+        };
+    }
+
+    private function chatbotDocumentPurposeChoices(
+        string $documentType
+    ): string {
+        return implode(
+            ', ',
+            $this->chatbotAllowedDocumentPurposes(
+                $documentType
+            )
+        );
+    }
+
+    private function chatbotContainsAnyPhrase(
+        string $text,
+        array $phrases
+    ): bool {
+        foreach ($phrases as $phrase) {
+            if (str_contains($text, $phrase)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function getLocalSystemReply(string $message, ?string $context = null, ?Patient $patient = null, bool $isLoginPage = false, string $role = 'guest'): ?string
@@ -312,7 +990,10 @@ PROMPT;
         }
 
         if (str_contains($text, 'hello') || str_contains($text, 'hi')) {
-            $name = $patient?->name ?? optional(Auth::user())->name ?? 'there';
+            $name =
+                $this->resolveChatbotDisplayName(
+                    $patient
+                );
 
             return "Hello {$name}! How can I assist you today regarding appointments, dental records, or system features?";
         }
@@ -533,15 +1214,52 @@ PROMPT;
             'reschedule',
             'cancel',
             'notification',
+            'notifications',
             'system',
             'medical history',
             'dental history',
             'profile',
             'session',
+            'sessions',
             'admin',
             'homepage',
             'time slot',
             'available date',
+            'academic period',
+            'academic periods',
+            'service type',
+            'service types',
+            'document template',
+            'document templates',
+            'user management',
+            'user account',
+            'user role',
+            'role',
+            'roles',
+            'permission',
+            'permissions',
+            'custom role',
+            'system log',
+            'system logs',
+            'audit',
+            'cms',
+            'cms access',
+            'faculty',
+            'faculty integration',
+            'dentist continuity',
+            'continuity',
+            'transition',
+            'successor',
+            'report files',
+            'ai report',
+            'ai reports',
+            'settings',
+            'block date',
+            'stock',
+            'medicine',
+            'supply',
+            'supplies',
+            'signature',
         ];
 
         foreach ($allowedKeywords as $keyword) {

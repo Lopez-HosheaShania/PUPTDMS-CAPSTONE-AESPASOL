@@ -41,11 +41,7 @@ class DentalRecordController extends Controller
         );
 
         $totalRecords = $statsCollection->count();
-        $recordsToday = $statsCollection->filter(
-            fn($record) =>
-            $record->created_date_iso === Carbon::today()->toDateString()
-        )->count();
-
+        $recordsToday = $statsCollection->filter(fn($record) => $record->date_iso === Carbon::today()->toDateString())->count();
         $scheduledCount = $statsCollection->where('status', 'scheduled')->count();
         $completedCount = $statsCollection->where('status', 'completed')->count();
         $topProcedure = $statsCollection
@@ -75,12 +71,7 @@ class DentalRecordController extends Controller
                 );
             })
             ->count();
-
-        $patientsForFollowUp = $statsCollection
-            ->filter(fn($record) => $record->has_follow_up)
-            ->pluck('patient_id')
-            ->unique()
-            ->count();
+        $patientsForFollowUp = $statsCollection->filter(fn($record) => $record->has_follow_up)->count();
 
         $recordsPaginator = $this->applyRecordFilters(
             $this->buildRecordAppointmentsQuery(),
@@ -96,7 +87,6 @@ class DentalRecordController extends Controller
         $recordItems = $this->summarizeAppointments(
             $recordsPaginator->getCollection()
         );
-
         $recordsPaginator->setCollection($recordItems);
         $records = $recordsPaginator;
 
@@ -154,6 +144,7 @@ class DentalRecordController extends Controller
         }
 
         $appointment->load([
+            'serviceType',
             'dentist:id,name',
             'procedure',
 
@@ -167,6 +158,9 @@ class DentalRecordController extends Controller
                     ->orderBy('appointment_time', 'asc');
             },
 
+            'patient.information',
+            'patient.studentInformation',
+            'patient.facultyInformation',
             'patient.medicalHistory.answers.question',
             'patient.medicalHistory.diseaseAnswers.disease',
             'patient.dentalHistory',
@@ -220,6 +214,7 @@ class DentalRecordController extends Controller
             ])
             ->whereHas('patient')
             ->with([
+                'serviceType',
                 'dentist:id,name',
                 'procedure',
 
@@ -233,9 +228,11 @@ class DentalRecordController extends Controller
                         ->orderBy('appointment_time', 'asc');
                 },
 
+                'patient.information',
+                'patient.studentInformation',
+                'patient.facultyInformation',
                 'patient.medicalHistory.answers.question',
                 'patient.medicalHistory.diseaseAnswers.disease',
-
                 'patient.dentalHistory',
                 'patient.dentalHistoryDates',
                 'patient.dentalHistoryConcerns',
@@ -257,19 +254,24 @@ class DentalRecordController extends Controller
         if ($search !== '') {
             $query->where(function (Builder $searchQuery) use ($search) {
                 $searchQuery
-                    ->where('service_type', 'like', "%{$search}%")
+                    ->whereHas('serviceType', function (Builder $serviceTypeQuery) use ($search) {
+                        $serviceTypeQuery->where('name', 'like', "%{$search}%");
+                    })
                     ->orWhere('status', 'like', "%{$search}%")
-
                     ->orWhereHas('patient', function (Builder $patientQuery) use ($search) {
                         $patientQuery
                             ->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('phone', 'like', "%{$search}%");
+                            ->orWhereHas('information', function (Builder $informationQuery) use ($search) {
+                                $informationQuery->where(
+                                    'phone',
+                                    'like',
+                                    "%{$search}%"
+                                );
+                            });
                     })
-
                     ->orWhereHas('dentist', function (Builder $dentistQuery) use ($search) {
-                        $dentistQuery
-                            ->where('name', 'like', "%{$search}%");
+                        $dentistQuery->where('name', 'like', "%{$search}%");
                     });
             });
         }
@@ -424,8 +426,7 @@ class DentalRecordController extends Controller
         $patient = $appointment->patient;
         $procedure = $appointment->procedure;
 
-        $followUpAppointment =
-            $appointment
+        $followUpAppointment = $appointment
             ->followUpAppointments
             ->sortBy(function ($followUp) {
                 return trim(
@@ -451,207 +452,98 @@ class DentalRecordController extends Controller
             );
         }
 
-        $appointmentStatus = strtolower(trim((string) $appointment->status));
-        $status = $appointmentStatus === 'completed' ? 'completed' : 'scheduled';
+        $appointmentStatus = strtolower(
+            trim((string) $appointment->status)
+        );
+
+        $status = $appointmentStatus === 'completed'
+            ? 'completed'
+            : 'scheduled';
 
         return (object) [
-
             'id' => $appointment->id,
             'appointment_id' => $appointment->id,
             'patient_id' => $patient->id,
             'patient_name' => $patient->name ?: 'Unknown Patient',
 
-            'procedure' =>
-            filled($appointment->service_type)
-                ? $appointment->service_type
+            'procedure' => filled($appointment->service_type_name)
+                ? $appointment->service_type_name
                 : 'No service recorded',
 
             'dentist_name' => $appointment->dentist?->name ?: '—',
             'status' => $status,
 
-            'date' =>
-            $appointmentDateTime
+            'date' => $appointmentDateTime
                 ? $appointmentDateTime->format('M d, Y')
                 : '—',
 
-            'date_iso' =>
-            $appointmentDateTime
+            'date_iso' => $appointmentDateTime
                 ? $appointmentDateTime->toDateString()
                 : '',
 
-            'date_sort' =>
-            $appointmentDateTime
-                ? $appointmentDateTime->format(
-                    'Y-m-d H:i:s'
-                )
+            'date_sort' => $appointmentDateTime
+                ? $appointmentDateTime->format('Y-m-d H:i:s')
                 : '',
 
-            'created_date_iso' =>
-            $appointment->created_at
+            'created_date_iso' => $appointment->created_at
                 ? $appointment->created_at->toDateString()
                 : '',
 
-            'completed_date_iso' =>
-            $procedure?->procedure_completed_at
-                ? $procedure
-                ->procedure_completed_at
-                ->toDateString()
+            'completed_date_iso' => $procedure?->procedure_completed_at
+                ? $procedure->procedure_completed_at->toDateString()
                 : '',
 
-            'time' =>
-            $appointment->appointment_time
-                ? Carbon::parse(
-                    $appointment->appointment_time
-                )->format('g:i A')
+            'time' => $appointment->appointment_time
+                ? Carbon::parse($appointment->appointment_time)->format('g:i A')
                 : '',
 
-            'notes' =>
-            $this->buildTreatmentSummary(
-                $procedure
-            ),
-
+            'notes' => $this->buildTreatmentSummary($procedure),
             'visit_count' => 1,
-
-            'services_count' =>
-            filled($appointment->service_type)
-                ? 1
-                : 0,
-
-            'profile_fields' =>
-            $this->buildPatientProfileFields(
-                $patient
-            ),
+            'services_count' => filled($appointment->service_type_name) ? 1 : 0,
+            'profile_fields' => $this->buildPatientProfileFields($patient),
 
             'emergency_contact' => [
-                'name' =>
-                $patient
-                    ->medicalHistory
-                    ?->emergency_person
-                    ?: 'N/A',
-
-                'number' =>
-                $patient
-                    ->medicalHistory
-                    ?->emergency_number
-                    ?: 'N/A',
-
-                'relation' =>
-                $patient
-                    ->medicalHistory
-                    ?->emergency_relation
-                    ?: 'N/A',
+                'name' => $patient->medicalHistory?->emergency_person ?: 'N/A',
+                'number' => $patient->medicalHistory?->emergency_number ?: 'N/A',
+                'relation' => $patient->medicalHistory?->emergency_relation ?: 'N/A',
             ],
 
-            'dental_history_summary' =>
-            $this->buildDentalHistorySummary(
-                $patient
-            ),
-
-            'medical_history_summary' =>
-            $this->buildMedicalHistorySummary(
-                $patient
-            ),
-
-            'dental_history_fields' =>
-            $this->buildDentalHistoryFields(
-                $patient
-            ),
-
-            'dental_symptoms' =>
-            $this->buildDentalSymptoms(
-                $patient
-            ),
-
-            'medical_history_fields' =>
-            $this->buildMedicalHistoryFields(
-                $patient
-            ),
-
-            'medical_conditions' =>
-            $this->buildMedicalConditions(
-                $patient
-            ),
-
-            'record_sections' =>
-            $this->buildRecordSections(
+            'dental_history_summary' => $this->buildDentalHistorySummary($patient),
+            'medical_history_summary' => $this->buildMedicalHistorySummary($patient),
+            'dental_history_fields' => $this->buildDentalHistoryFields($patient),
+            'dental_symptoms' => $this->buildDentalSymptoms($patient),
+            'medical_history_fields' => $this->buildMedicalHistoryFields($patient),
+            'medical_conditions' => $this->buildMedicalConditions($patient),
+            'record_sections' => $this->buildRecordSections(
                 $patient,
                 $appointment,
                 $procedure,
                 $followUpAppointment
             ),
-
-            'follow_up_summary' =>
-            $this->buildFollowUpSummary(
-                $followUpAppointment
-            ),
-
-            'follow_up' =>
-            $followUpAppointment
-                ? [
-                    'date' =>
-                    $followUpAppointment
-                        ->appointment_date
-                        ? Carbon::parse(
-                            $followUpAppointment
-                                ->appointment_date
-                        )->format('d M Y')
-                        : null,
-
-                    'time' =>
-                    $followUpAppointment
-                        ->appointment_time
-                        ? Carbon::parse(
-                            $followUpAppointment
-                                ->appointment_time
-                        )->format('g:i A')
-                        : null,
-
-                    'service' =>
-                    $followUpAppointment
-                        ->service_type
-                        ?: 'Follow-up',
-
-                    'status' =>
-                    $followUpAppointment
-                        ->status
-                        ?: 'upcoming',
-
-                    'reason' =>
-                    $followUpAppointment
-                        ->follow_up_reason,
-                ]
-                : null,
-
-            'has_follow_up' =>
-            (bool) $followUpAppointment,
-
-            'oral' =>
-            $procedure?->oral_examination
-                ?: 'No oral examination record yet.',
-
-            'diagnosis' =>
-            $procedure?->diagnosis
-                ?: 'No diagnosis record yet.',
-
-            'prescription' =>
-            $procedure?->prescriptions
-                ?: 'No prescription recorded.',
-
-            'odontogram_data' =>
-            $procedure?->odontogram_data
-                ?: [],
-
-            'full_record_url' =>
-            route(
+            'follow_up_summary' => $this->buildFollowUpSummary($followUpAppointment),
+            'follow_up' => $followUpAppointment ? [
+                'date' => $followUpAppointment->appointment_date
+                    ? Carbon::parse($followUpAppointment->appointment_date)->format('d M Y')
+                    : null,
+                'time' => $followUpAppointment->appointment_time
+                    ? Carbon::parse($followUpAppointment->appointment_time)->format('g:i A')
+                    : null,
+                'service' => $followUpAppointment->service_type_name ?: 'Follow-up',
+                'status' => $followUpAppointment->status ?: 'upcoming',
+                'reason' => $followUpAppointment->follow_up_reason,
+            ] : null,
+            'has_follow_up' => (bool) $followUpAppointment,
+            'oral' => $procedure?->oral_examination ?: 'No oral examination record yet.',
+            'diagnosis' => $procedure?->diagnosis ?: 'No diagnosis record yet.',
+            'prescription' => $procedure?->prescriptions ?: 'No prescription recorded.',
+            'odontogram_data' => $procedure?->odontogram_data ?: [],
+            'full_record_url' => route(
                 $this->resolveLayoutRole() === 'dentist'
                     ? 'dentist.dentist.patient.profile'
                     : 'admin.admin.patient.profile',
                 [
-                    'patient' =>
-                    $patient->id,
-
-                    'from' =>
-                    'patients',
+                    'patient' => $patient->id,
+                    'from' => 'patients',
                 ]
             ),
         ];
@@ -686,20 +578,21 @@ class DentalRecordController extends Controller
             return 'No treatment recorded.';
         }
 
-        $treatments = collect($odontogramData)->flatMap(function ($entry) {
-            $labels = collect([
-                data_get($entry, 'status.label'),
-                data_get($entry, 'threeD.label'),
-            ]);
+        $treatments = collect($odontogramData)
+            ->flatMap(function ($entry) {
+                $labels = collect([
+                    data_get($entry, 'status.label'),
+                    data_get($entry, 'threeD.label'),
+                ]);
 
-            foreach ((array) data_get($entry, 'surfaces', []) as $surface) {
-                $labels->push(
-                    data_get($surface, 'label')
-                );
-            }
+                foreach ((array) data_get($entry, 'surfaces', []) as $surface) {
+                    $labels->push(
+                        data_get($surface, 'label')
+                    );
+                }
 
-            return $labels;
-        })
+                return $labels;
+            })
             ->filter(fn($label) => filled($label))
             ->unique()
             ->values();
@@ -742,6 +635,7 @@ class DentalRecordController extends Controller
     private function buildPatientProfileFields(Patient $patient): array
     {
         $program = trim((string) ($patient->course_code ?? ''));
+
         if ($program === '') {
             $program = filled($patient->classification)
                 ? $this->formatHistoryLabel($patient->classification)
@@ -759,7 +653,11 @@ class DentalRecordController extends Controller
 
         $identity = filled($patient->student_no)
             ? $patient->student_no
-            : (filled($patient->faculty_code) ? 'Faculty: ' . $patient->faculty_code : 'No identity number');
+            : (
+                filled($patient->faculty_code)
+                ? 'Faculty: ' . $patient->faculty_code
+                : 'No identity number'
+            );
 
         $emergencyContact = collect([
             $patient->medicalHistory?->emergency_person,
@@ -907,7 +805,11 @@ class DentalRecordController extends Controller
     private function buildMedicalConditions(Patient $patient): array
     {
         return collect($patient->medicalHistory?->diseaseAnswers ?? [])
-            ->map(fn($answer) => $this->formatHistoryLabel($answer->disease?->label))
+            ->map(
+                fn($answer) => $this->formatHistoryLabel(
+                    $answer->disease?->label
+                )
+            )
             ->filter()
             ->values()
             ->all();
@@ -918,7 +820,9 @@ class DentalRecordController extends Controller
         $sections = [];
 
         $appointmentRows = [
-            ['label' => 'Service', 'value' => filled($latestAppointment?->service_type) ? $latestAppointment->service_type : 'No service recorded'],
+            ['label' => 'Service', 'value' => filled($latestAppointment?->service_type_name)
+                ? $latestAppointment->service_type_name
+                : 'No service recorded'],
             ['label' => 'Date', 'value' => $latestAppointment?->appointment_date ? Carbon::parse($latestAppointment->appointment_date)->format('F d, Y') : 'N/A'],
             ['label' => 'Time', 'value' => $latestAppointment?->appointment_time ? Carbon::parse($latestAppointment->appointment_time)->format('g:i A') : 'N/A'],
             ['label' => 'Duration', 'value' => $this->formatProcedureDurationForDisplay($latestProcedure?->procedure_duration_seconds)],
@@ -936,10 +840,22 @@ class DentalRecordController extends Controller
             [
                 'title' => 'Basic Info',
                 'rows' => array_values(array_filter([
-                    ['label' => 'Last Dental Visit', 'value' => $patient->dentalHistory?->last_dental_visit ? Carbon::parse($patient->dentalHistory->last_dental_visit)->format('F d, Y') : 'N/A'],
-                    ['label' => 'Previous Dentist', 'value' => $patient->dentalHistory?->previous_dentist ?: 'N/A'],
+                    [
+                        'label' => 'Last Dental Visit',
+                        'value' => $patient->dentalHistory?->last_dental_visit
+                            ? Carbon::parse(
+                                $patient->dentalHistory->last_dental_visit
+                            )->format('F d, Y')
+                            : 'N/A',
+                    ],
+                    [
+                        'label' => 'Previous Dentist',
+                        'value' => $patient->dentalHistory?->previous_dentist
+                            ?: 'N/A',
+                    ],
                 ], fn($row) => true)),
             ],
+
             [
                 'title' => 'Dental Symptoms & Procedures',
                 'rows' => collect($patient->dentalHistoryAnswers ?? [])

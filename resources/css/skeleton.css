@@ -38,8 +38,10 @@
 .skeleton-block,
 .skeleton-circle,
 .skeleton-pill {
+    display: block;
     position: relative;
     overflow: hidden;
+    box-sizing: border-box;
     background: linear-gradient(90deg, #eceff3 0%, #f7f8fa 50%, #eceff3 100%);
     background-size: 220% 100%;
     animation: skeletonShimmer 1.1s linear infinite;

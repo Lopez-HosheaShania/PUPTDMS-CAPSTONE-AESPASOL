@@ -845,7 +845,6 @@
 
 #mainContent .patient-search-row .search-wrap.global-search,
 #mainContent .patient-search-row .search-input,
-#mainContent #filterBtn,
 #mainContent #externalClearFilterBtn {
     height: var(--pd-toolbar-h);
     min-height: var(--pd-toolbar-h);
@@ -881,16 +880,6 @@
     align-items: center;
     gap: 10px;
     flex: 0 0 auto;
-}
-
-#mainContent #filterBtn {
-    border-radius: 16px;
-    padding-top: 0;
-    padding-bottom: 0;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 }
 
 #mainContent #externalClearFilterBtn {
@@ -1498,21 +1487,11 @@
 
 #mainContent.shared-patient-page.mode-list .card-col-header {
     display: grid;
-
     grid-template-columns:
         minmax(220px, 1.45fr) minmax(160px, .85fr) minmax(180px, 1fr) 40px;
-
     align-items: center;
-
     gap: 18px;
-
-    padding:
-        .65rem 1rem;
-
-    background: var(--table-header-surface);
-    border-bottom: 1px solid var(--table-border);
-
-    color: var(--table-heading-muted);
+    padding: .65rem 1rem;
 }
 
 #mainContent.shared-patient-page.mode-list #patientContainer {

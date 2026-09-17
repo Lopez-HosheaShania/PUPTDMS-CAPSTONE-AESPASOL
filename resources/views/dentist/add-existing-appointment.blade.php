@@ -110,7 +110,7 @@ $patientProfileBackUrl = $isAdminView
                                                             aria-hidden="true"></i>
 
                                                         <input type="text" id="existing_time_input"
-                                                            class="form-input-custom global-control-with-icon js-flatpickr-time"
+                                                            class="form-input-custom global-form-icon js-flatpickr-time"
                                                             placeholder="Select time" readonly>
                                                     </div>
 
@@ -135,7 +135,7 @@ $patientProfileBackUrl = $isAdminView
                                                             value="{{ old('procedure_duration_hms', $defaults['procedure_duration_hms'] ?? '') }}"
                                                             placeholder="HH:MM:SS" class="
                 form-input-custom
-                global-control-with-icon
+                global-form-icon
             " inputmode="numeric" maxlength="8" data-validation-rule="bookingDuration" data-required-message="
                 Please enter the procedure duration.
             " required>

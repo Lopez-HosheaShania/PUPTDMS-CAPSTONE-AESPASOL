@@ -15,10 +15,12 @@ class SyncAcademicYearFromFlss extends Command
     {
         try {
             $academicPeriod = $facultyApiService->syncActiveAcademicYearSemester();
+            $academicYear = $academicPeriod->academicYear()->first();
+            $academicTerm = $academicPeriod->academicTerm()->first();
 
             $this->info('Academic year synced successfully.');
-            $this->line('Academic Year: ' . $academicPeriod->academic_year);
-            $this->line('Semester: ' . $academicPeriod->semester);
+            $this->line('Academic Year: ' . ($academicYear?->name ?? 'Not Set'));
+            $this->line('Semester: ' . ($academicTerm?->name ?? 'Not Set'));
             $this->line('Start Date: ' . $academicPeriod->start_date?->format('Y-m-d'));
             $this->line('End Date: ' . $academicPeriod->end_date?->format('Y-m-d'));
 

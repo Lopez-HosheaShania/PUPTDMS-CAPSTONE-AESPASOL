@@ -51,19 +51,19 @@
 }
 
 .global-label-row .global-form-label {
-    margin: 0 !important;
+    margin: 0;
 }
 
 .global-label-row .char-counter {
     flex: 0 0 auto;
-    margin: 0 !important;
+    margin: 0;
     white-space: nowrap;
 }
 
 .global-label-row>label,
 .global-label-row>.ap-label-text {
     min-width: 0;
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
 }
 
 .global-label-main {
@@ -87,12 +87,6 @@
     margin-left: auto;
 }
 
-.global-label-row .char-counter {
-    flex: 0 0 auto;
-    margin: 0 !important;
-    white-space: nowrap;
-}
-
 .global-control-wrap {
     position: relative;
     display: flex;
@@ -104,16 +98,21 @@
 .global-control-icon {
     position: absolute;
     top: 50%;
-    left: 12px;
+    left: 13px;
     z-index: 2;
-    color: #9ca3af;
-    font-size: 12px;
+
+    width: 14px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--text-3);
+    font-size: 11px;
+    line-height: 1;
+
     pointer-events: none;
     transform: translateY(-50%);
-}
-
-.global-control-with-icon {
-    padding-left: 34px !important;
 }
 
 .global-form-textarea {
@@ -130,6 +129,13 @@
     position: relative;
     width: 100%;
     min-width: 0;
+}
+
+.global-form-textarea-wrap>.char-counter {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    text-align: right;
 }
 
 [data-theme="dark"] .global-form-label,
@@ -150,9 +156,9 @@
     margin-top: .42rem;
     color: var(--crimson-1);
     font-family: inherit;
-    font-size: .72rem;
+    font-size: .65rem;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.3;
 }
 
 .global-field-error.show {
@@ -182,17 +188,17 @@
 .form-select-custom.is-invalid,
 .access-input.is-invalid,
 .access-select.is-invalid {
-    border-color: #dc2626 !important;
-    background-color: #fff8f8 !important;
-    color: var(--text-1, #111827) !important;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, .08) !important;
+    border-color: #dc2626;
+    background-color: #fff8f8;
+    color: var(--text-1, #111827);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .08);
 }
 
 .custom-select.is-invalid .custom-select-button {
-    border-color: #dc2626 !important;
-    background: #fff8f8 !important;
-    color: #991b1b !important;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, .08) !important;
+    border-color: #dc2626;
+    background: #fff8f8;
+    color: #991b1b;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .08);
 }
 
 .global-field-error.is-success {
@@ -224,18 +230,18 @@
 .dark .form-select-custom.is-invalid,
 .dark .access-input.is-invalid,
 .dark .access-select.is-invalid {
-    border-color: rgba(252, 165, 165, .42) !important;
-    background: rgba(220, 38, 38, .12) !important;
-    color: var(--text-1) !important;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, .10) !important;
+    border-color: rgba(252, 165, 165, .42);
+    background: rgba(220, 38, 38, .12);
+    color: var(--text-1);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, .10);
 }
 
 [data-theme="dark"] .custom-select.is-invalid .custom-select-button,
 .dark .custom-select.is-invalid .custom-select-button {
-    border-color: rgba(252, 165, 165, .42) !important;
-    background: rgba(220, 38, 38, .12) !important;
-    color: #fca5a5 !important;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, .10) !important;
+    border-color: rgba(252, 165, 165, .42);
+    background: rgba(220, 38, 38, .12);
+    color: #fca5a5;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, .10);
 }
 
 .form-grid-2 {
@@ -255,7 +261,7 @@
     background: var(--card);
     color: var(--text-1);
 
-    font-size: 13px;
+    font-size: 12px;
 
     outline: none;
 
@@ -265,6 +271,14 @@
 
     width: 100%;
     min-width: 0;
+}
+
+.form-input-custom.global-form-icon {
+    padding-left: 40px;
+}
+
+.form-input-custom.global-control-with-action {
+    padding-right: 44px;
 }
 
 .form-input-custom::placeholder,
@@ -277,7 +291,7 @@ textarea.form-input-custom.global-form-textarea {
     width: 100%;
     height: auto;
     min-height: 110px;
-    padding: 10px 14px 26px !important;
+    padding: 10px 14px 26px;
     box-sizing: border-box;
     line-height: 1.45;
     resize: none;
@@ -291,15 +305,15 @@ textarea.form-input-custom.global-form-textarea {
 
 .form-input-custom.is-invalid,
 .form-select-custom.is-invalid {
-    border-color: #C0392B !important;
-    box-shadow: 0 0 0 3px rgba(192, 57, 43, .12) !important;
-    background: #FFF8F7 !important;
+    border-color: #C0392B;
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, .12);
+    background: #FFF8F7;
 }
 
 .form-input-custom.is-valid,
 .form-select-custom.is-valid {
-    border-color: #2E7D32 !important;
-    box-shadow: 0 0 0 3px rgba(46, 125, 50, .1) !important;
+    border-color: #2E7D32;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, .1);
 }
 
 .form-input-custom:focus,
@@ -310,8 +324,8 @@ textarea.form-input-custom.global-form-textarea {
 
 .form-ctrl.is-invalid,
 .form-sel.is-invalid {
-    border-color: #dc2626 !important;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, .08) !important;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .08);
 }
 
 .field-group {
@@ -328,15 +342,15 @@ textarea.form-input-custom.global-form-textarea {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #8B0000;
+    color: var(--crimson-1);
     margin-bottom: .3rem;
 }
 
 .field-help {
-    margin-top: .45rem;
-    font-size: .79rem;
-    color: #7c7c89;
-    line-height: 1.4;
+    margin-top: .35rem;
+    font-size: .68rem;
+    color: var(--text-3);
+    line-height: 1.3;
 }
 
 .access-input {
@@ -412,7 +426,7 @@ textarea.form-input-custom.global-form-textarea {
 
 .field-input:focus {
     outline: none;
-    border-color: #8B0000 !important;
+    border-color: #8B0000;
     box-shadow: 0 0 0 3px rgba(139, 0, 0, .1);
 }
 
@@ -430,9 +444,9 @@ textarea.form-input-custom.global-form-textarea {
 
 [data-theme="dark"] .field-input,
 .dark .field-input {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-    color: var(--text-1) !important;
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--text-1);
 }
 
 [data-theme="dark"] .access-input,
@@ -446,45 +460,14 @@ textarea.form-input-custom.global-form-textarea {
 
 [data-theme="dark"] .field-help,
 .dark .field-help {
-    color: var(--text-3) !important;
+    color: var(--text-3);
 }
 
 [data-theme="dark"] .access-input[readonly],
 .dark .access-input[readonly] {
-    background: var(--surface) !important;
-    border-color: var(--border) !important;
-    color: var(--text-2) !important;
-}
-
-@media (max-width:767px) {
-
-    .access-input,
-    .access-select {
-        height: 46px;
-        padding-top: .55rem;
-        padding-bottom: .55rem;
-        border-radius: 10px;
-    }
-
-    .form-grid-2 {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-}
-
-@media (max-width: 480px) {
-    .form-label-custom {
-        font-size: 9px;
-        letter-spacing: .07em;
-    }
-
-    .form-input-custom,
-    .form-select-custom {
-        height: 42px;
-        padding: 0 12px;
-        font-size: 14px;
-        border-radius: 10px;
-    }
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-2);
 }
 
 .custom-select {
@@ -522,7 +505,7 @@ textarea.form-input-custom.global-form-textarea {
     background: var(--card);
     color: var(--text-1);
     font: inherit;
-    font-size: .84rem;
+    font-size: .72rem;
     font-weight: 700;
     text-align: left;
     cursor: pointer;
@@ -615,7 +598,7 @@ textarea.form-input-custom.global-form-textarea {
     background: transparent;
     color: var(--text-2);
     font: inherit;
-    font-size: .8rem;
+    font-size: .70rem;
     font-weight: 700;
     text-align: left;
     cursor: pointer;
@@ -635,23 +618,23 @@ textarea.form-input-custom.global-form-textarea {
 }
 
 .custom-select-option .custom-select-check {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
+    display: none;
+    opacity: 0;
+    visibility: hidden;
     flex: 0 0 auto;
 }
 
 .custom-select-option.is-active .custom-select-check,
 .custom-select-option[aria-selected="true"] .custom-select-check {
-    display: inline-flex !important;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    opacity: 1 !important;
-    visibility: visible !important;
+    opacity: 1;
+    visibility: visible;
 }
 
 .custom-select-option:not(.is-active)[aria-selected="false"] .custom-select-check {
-    display: none !important;
+    display: none;
 }
 
 .custom-select.is-disabled {
@@ -660,30 +643,30 @@ textarea.form-input-custom.global-form-textarea {
 }
 
 .global-select-compact {
-    width: 180px !important;
-    min-width: 180px !important;
-    max-width: 180px !important;
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
 
-    flex: 0 0 180px !important;
+    flex: 0 0 180px;
 
-    margin-left: auto !important;
+    margin-left: auto;
 
-    align-items: center !important;
-    justify-content: flex-end !important;
+    align-items: center;
+    justify-content: flex-end;
 
-    align-self: center !important;
+    align-self: center;
 }
 
 .global-select-compact .custom-select {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
 
-    flex: 0 0 100% !important;
+    flex: 0 0 100%;
 }
 
 .global-select-compact .custom-select-button {
-    width: 100% !important;
+    width: 100%;
     min-height: 38px;
 
     padding: 0 .8rem;
@@ -757,14 +740,26 @@ textarea.form-input-custom.global-form-textarea {
 .global-choice-input:checked+.global-choice-indicator {
     border-color: var(--crimson);
     background: var(--crimson);
-    color: #fff;
+    color: var(--color-white);
     box-shadow: 0 5px 12px rgba(139, 0, 0, .18);
 }
 
 .global-choice-card:has(.global-choice-input:checked) {
-    border-color: rgba(139, 0, 0, .34);
-    background: #fff7f7;
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, .07);
+    border-color:
+        var(--status-border, var(--crimson));
+
+    background:
+        var(--status-bg, var(--crimson-light));
+}
+
+.global-choice-input:checked+.global-info-icon {
+    background:
+        var(--status-solid, var(--crimson));
+
+    border-color:
+        var(--status-solid, var(--crimson));
+
+    color: var(--text-on-brand);
 }
 
 .global-choice-input:focus-visible+.global-choice-indicator {
@@ -820,15 +815,24 @@ textarea.form-input-custom.global-form-textarea {
     color: var(--text-3);
 }
 
-[data-theme="dark"] .global-choice-card:has(.global-choice-input:checked) {
-    border-color: rgba(252, 165, 165, .35);
-    background: rgba(139, 0, 0, .16);
+[data-theme="dark"] .global-choice-card:has(.global-choice-input:checked),
+.dark .global-choice-card:has(.global-choice-input:checked) {
+    border-color:
+        color-mix(in srgb,
+            var(--status-solid, var(--crimson)) 36%,
+            var(--border));
+
+    background:
+        color-mix(in srgb,
+            var(--status-solid, var(--crimson)) 12%,
+            var(--card));
 }
 
-@media (max-width: 640px) {
-    .global-choice-group {
-        grid-template-columns: 1fr;
-    }
+[data-theme="dark"] .global-choice-input:checked+.global-info-icon,
+.dark .global-choice-input:checked+.global-info-icon {
+    background: var(--crimson);
+    border-color: var(--crimson);
+    color: var(--text-on-brand);
 }
 
 [data-clearable-field] {
@@ -838,130 +842,130 @@ textarea.form-input-custom.global-form-textarea {
 }
 
 [data-clearable-field] [data-clearable-input] {
-    padding-right: 3.25rem !important;
+    padding-right: 3.25rem;
 }
 
 [data-clearable-field] .search-clear.field-clear-btn {
-    position: absolute !important;
-    top: 50% !important;
-    right: 10px !important;
-    z-index: 10 !important;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    z-index: 10;
 
-    width: 30px !important;
-    height: 30px !important;
-    min-width: 30px !important;
-    min-height: 30px !important;
-    max-width: 30px !important;
-    max-height: 30px !important;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    max-width: 30px;
+    max-height: 30px;
 
-    padding: 0 !important;
-    margin: 0 !important;
+    padding: 0;
+    margin: 0;
 
-    display: none !important;
-    align-items: center !important;
-    justify-content: center !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
 
     border:
-        1px solid var(--border, #e5e7eb) !important;
+        1px solid var(--border, #e5e7eb);
 
-    border-radius: 10px !important;
+    border-radius: 10px;
 
     background:
-        var(--card, #ffffff) !important;
+        var(--card, #ffffff);
 
     color:
-        var(--text-3, #94a3b8) !important;
+        var(--text-3, #94a3b8);
 
-    cursor: pointer !important;
+    cursor: pointer;
 
     box-shadow:
-        0 4px 12px rgba(15, 23, 42, .08) !important;
+        0 4px 12px rgba(15, 23, 42, .08);
 
     transform:
-        translateY(-50%) !important;
+        translateY(-50%);
 
     transition:
         color .18s ease,
         background-color .18s ease,
         border-color .18s ease,
         transform .18s ease,
-        box-shadow .18s ease !important;
+        box-shadow .18s ease;
 }
 
 [data-clearable-field] .search-clear.field-clear-btn.show {
-    display: inline-flex !important;
+    display: inline-flex;
 }
 
 [data-clearable-field] .search-clear.field-clear-btn i {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    color: currentColor !important;
-    font-size: 12px !important;
-    line-height: 1 !important;
+    color: currentColor;
+    font-size: 12px;
+    line-height: 1;
     pointer-events: none;
 }
 
 [data-clearable-field] .search-clear.field-clear-btn:hover {
     background:
-        var(--crimson-light, #fef2f2) !important;
+        var(--crimson-light, #fef2f2);
 
     border-color:
-        var(--crimson-mid, #fecaca) !important;
+        var(--crimson-mid, #fecaca);
 
     color:
-        var(--crimson, #8b0000) !important;
+        var(--crimson, #8b0000);
 
     transform:
-        translateY(-50%) translateY(-1px) !important;
+        translateY(-50%) translateY(-1px);
 
     box-shadow:
-        0 8px 18px rgba(139, 0, 0, .12) !important;
+        0 8px 18px rgba(139, 0, 0, .12);
 }
 
 [data-clearable-field] .search-clear.field-clear-btn--textarea {
-    top: 10px !important;
-    transform: none !important;
+    top: 10px;
+    transform: none;
 }
 
 [data-clearable-field] .search-clear.field-clear-btn--textarea:hover {
     transform:
-        translateY(-1px) !important;
+        translateY(-1px);
 }
 
 [data-clearable-field] .search-clear.field-clear-btn:active {
     transform:
-        translateY(-50%) scale(.96) !important;
+        translateY(-50%) scale(.96);
 }
 
 [data-clearable-field] .search-clear.field-clear-btn--textarea:active {
     transform:
-        scale(.96) !important;
+        scale(.96);
 }
 
 [data-theme="dark"] [data-clearable-field] .search-clear.field-clear-btn,
 .dark [data-clearable-field] .search-clear.field-clear-btn {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-    color: var(--text-3) !important;
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--text-3);
 }
 
 [data-theme="dark"] [data-clearable-field] .search-clear.field-clear-btn:hover,
 .dark [data-clearable-field] .search-clear.field-clear-btn:hover {
     background:
-        rgba(139, 0, 0, .18) !important;
+        rgba(139, 0, 0, .18);
 
     border-color:
-        rgba(252, 165, 165, .24) !important;
+        rgba(252, 165, 165, .24);
 
-    color: #fca5a5 !important;
+    color: #fca5a5;
 }
 
 .field-optional {
-    margin-left: .25rem;
-    color: #9ca3af;
-    font-size: .72rem;
+    margin-left: 0;
+    color: var(--text-3);
+    font-size: .65rem;
     font-weight: 600;
 }
 
@@ -1023,8 +1027,8 @@ textarea.form-input-custom.global-form-textarea {
 }
 
 .global-switch-input:checked+.global-switch-track {
-    background: var(--crimson, #8b0000) !important;
-    border-color: var(--crimson, #8b0000) !important;
+    background: var(--crimson, #8b0000);
+    border-color: var(--crimson, #8b0000);
 
     box-shadow:
         0 0 0 3px rgba(139, 0, 0, .10),
@@ -1123,20 +1127,20 @@ textarea.form-input-custom.global-form-textarea {
 }
 
 .global-number-stepper-input {
-    width: 100% !important;
-    min-width: 0 !important;
-    height: 38px !important;
-    padding: 0 .5rem !important;
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+    padding: 0 .5rem;
 
-    border: 0 !important;
-    outline: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    box-shadow: none;
 
-    color: var(--text-1, #111827) !important;
-    font-size: .95rem !important;
-    font-weight: 850 !important;
-    line-height: 1 !important;
+    color: var(--text-1, #111827);
+    font-size: .95rem;
+    font-weight: 850;
+    line-height: 1;
     text-align: center;
 }
 
@@ -1166,7 +1170,7 @@ textarea.form-input-custom.global-form-textarea {
 
 [data-theme="dark"] .global-number-stepper-input,
 .dark .global-number-stepper-input {
-    color: var(--text-1) !important;
+    color: var(--text-1);
 }
 
 .form-input-custom[class*="js-flatpickr-"][readonly],
@@ -1176,39 +1180,39 @@ textarea.form-input-custom.global-form-textarea {
 .form-input-custom.js-flatpickr-date-max-today[readonly],
 .form-input-custom.js-flatpickr-date-range-from[readonly],
 .form-input-custom.js-flatpickr-date-range-to[readonly] {
-    background: #ffffff !important;
-    border-color: #e0ddd8 !important;
-    color: #333333 !important;
-    cursor: pointer !important;
+    background: #ffffff;
+    border-color: #e0ddd8;
+    color: #333333;
+    cursor: pointer;
 }
 
 .form-input-custom[class*="js-flatpickr-"][readonly]:hover {
-    border-color: #d3c7c7 !important;
-    background: #fffdfd !important;
+    border-color: #d3c7c7;
+    background: #fffdfd;
 }
 
 .form-input-custom.flatpickr-time-display[readonly]:hover {
-    border-color: #d3c7c7 !important;
-    background: #fffdfd !important;
+    border-color: #d3c7c7;
+    background: #fffdfd;
 }
 
 .form-input-custom[class*="js-flatpickr-"][readonly]:focus {
-    border-color: var(--crimson, #8b0000) !important;
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, .10) !important;
+    border-color: var(--crimson, #8b0000);
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, .10);
 }
 
 .form-input-custom.flatpickr-time-display[readonly]:focus {
-    border-color: var(--crimson, #8b0000) !important;
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, .10) !important;
+    border-color: var(--crimson, #8b0000);
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, .10);
 }
 
 [data-theme="dark"] .form-input-custom[class*="js-flatpickr-"][readonly],
 .dark .form-input-custom.flatpickr-time-display[readonly],
 [data-theme="dark"] .form-input-custom.flatpickr-time-display[readonly],
 .dark .form-input-custom[class*="js-flatpickr-"][readonly] {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-    color: var(--text-1) !important;
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--text-1);
 }
 
 .global-readonly-field {
@@ -1219,6 +1223,7 @@ textarea.form-input-custom.global-form-textarea {
     align-items: center;
     gap: .65rem;
     border: 1.5px solid var(--border);
+    border-radius: 9px;
     background: var(--surface);
     color: var(--text-2);
     font-size: 13px;
@@ -1227,7 +1232,7 @@ textarea.form-input-custom.global-form-textarea {
 
 .global-readonly-field i {
     flex: 0 0 auto;
-    color: #9ca3af;
+    color: var(--text-3);
     font-size: 12px;
 }
 
@@ -1246,10 +1251,6 @@ textarea.form-input-custom.global-form-textarea {
 [data-theme="dark"] .global-readonly-field i,
 .dark .global-readonly-field i {
     color: var(--text-3);
-}
-
-.global-control-with-action {
-    padding-right: 44px !important;
 }
 
 .global-input-action {
@@ -1557,26 +1558,6 @@ textarea.form-input-custom.global-form-textarea {
         #fca5a5;
 }
 
-@media (max-width: 768px) {
-    .global-question-row {
-        grid-template-columns: 1fr;
-        align-items: stretch;
-        row-gap: .55rem;
-    }
-
-    .global-question-options {
-        width: 100%;
-        min-width: 0;
-
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-    }
-
-    .global-question-row[data-global-field]>.global-field-error {
-        grid-column: 1;
-    }
-}
-
 .global-checkbox-input {
     appearance: none;
     -webkit-appearance: none;
@@ -1764,10 +1745,64 @@ textarea.form-input-custom.global-form-textarea {
     margin-top: .85rem;
 }
 
+@media (max-width: 768px) {
+    .global-question-row {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+        row-gap: .55rem;
+    }
+
+    .global-question-options {
+        width: 100%;
+        min-width: 0;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .global-question-row[data-global-field]>.global-field-error {
+        grid-column: 1;
+    }
+}
+
+@media (max-width:767px) {
+
+    .access-input,
+    .access-select {
+        height: 46px;
+        padding-top: .55rem;
+        padding-bottom: .55rem;
+        border-radius: 10px;
+    }
+
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
 @media (max-width: 640px) {
+    .global-choice-group {
+        grid-template-columns: 1fr;
+    }
 
     .medical-condition-grid,
     .booking-two-field-stack {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-label-custom {
+        font-size: 9px;
+        letter-spacing: .07em;
+    }
+
+    .form-input-custom,
+    .form-select-custom {
+        height: 42px;
+        padding: 0 12px;
+        font-size: 14px;
+        border-radius: 10px;
     }
 }
