@@ -50,8 +50,8 @@
         };
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
-        data-position="bottom-right" data-offset="18,118" defer></script>
+    <script src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right" data-offset="18,118"
+        defer></script>
 
     @include('partials.chatbot')
     @include('partials.footer')

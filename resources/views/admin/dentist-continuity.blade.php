@@ -892,7 +892,7 @@
                                 <input
                                     id="dtExtendAccessDate"
                                     type="text"
-                                    class="form-input-custom global-control-with-icon js-flatpickr-date"
+                                    class="form-input-custom global-form-icon js-flatpickr-date"
                                     value="{{ optional($transition->access_ends_at)->format('Y-m-d') }}"
                                     placeholder="Select date"
                                     readonly
@@ -904,7 +904,7 @@
                                 <input
                                     id="dtExtendAccessTime"
                                     type="text"
-                                    class="form-input-custom global-control-with-icon js-flatpickr-time"
+                                    class="form-input-custom global-form-icon js-flatpickr-time"
                                     value="{{ optional($transition->access_ends_at)->format('H:i') }}"
                                     placeholder="Select time"
                                     readonly
@@ -1056,7 +1056,7 @@
                                             <label class="dt-label" for="last_working_date">Last Working Date <span class="required-mark">*</span></label>
                                             <div class="global-control-wrap dt-form-control-wrap">
                                                 <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
-                                                <input id="last_working_date" type="text" name="last_working_date" class="form-input-custom global-control-with-icon js-flatpickr-date"
+                                                <input id="last_working_date" type="text" name="last_working_date" class="form-input-custom global-form-icon js-flatpickr-date"
                                                     data-field-label="Last Working Date" data-required-message="Please select the last working date."
                                                     value="{{ $formLastWorkingDate }}" placeholder="Select date" readonly required>
                                             </div>
@@ -1070,12 +1070,12 @@
                                             <div class="dt-form-datetime">
                                                 <div class="global-control-wrap dt-form-control-wrap dt-stage-control dt-stage-control-calendar">
                                                     <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
-                                                    <input id="dtFormAccessDate" type="text" class="form-input-custom global-control-with-icon js-flatpickr-date"
+                                                    <input id="dtFormAccessDate" type="text" class="form-input-custom global-form-icon js-flatpickr-date"
                                                         value="{{ $formAccessDate }}" placeholder="Select date" readonly required>
                                                 </div>
                                                 <div class="global-control-wrap dt-form-control-wrap dt-stage-control dt-stage-control-clock">
                                                     <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
-                                                    <input id="dtFormAccessTime" type="text" class="form-input-custom global-control-with-icon js-flatpickr-time"
+                                                    <input id="dtFormAccessTime" type="text" class="form-input-custom global-form-icon js-flatpickr-time"
                                                         value="{{ $formAccessTime }}" placeholder="Select time" readonly required>
                                                 </div>
                                             </div>

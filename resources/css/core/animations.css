@@ -686,6 +686,11 @@
     }
 }
 
+.slide-down-fade-in {
+    animation:
+        appointmentAccordionExpand .26s cubic-bezier(.22, 1, .36, 1) both;
+}
+
 @keyframes appointmentAccordionCollapse {
     from {
         opacity: 1;
@@ -1206,6 +1211,7 @@
     .fade-in,
     .content-fade-in,
     .content-fade-out,
+    .slide-down-fade-in,
     .spin,
     .dot-pulse,
     .upcoming-carousel-out-left,

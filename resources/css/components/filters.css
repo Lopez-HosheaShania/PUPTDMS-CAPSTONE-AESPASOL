@@ -324,32 +324,8 @@
 
 .filter-drawer-wrapper .filter-date-input-wrap {
     position: relative;
-    min-width: 0;
-}
-
-.filter-drawer-wrapper .filter-date-input-wrap input,
-.filter-drawer-wrapper .filter-date-input-wrap select {
     width: 100%;
-    height: 42px;
-    border-radius: 999px;
-    border: 1px solid var(--filter-input-border);
-    background: var(--filter-input-bg);
-    color: var(--filter-input-text);
-    padding: 0 42px 0 16px;
-    font-size: 13px;
-    font-weight: 800;
-    outline: none;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
-}
-
-.filter-drawer-wrapper .filter-date-input-wrap input::placeholder {
-    color: var(--filter-input-placeholder);
-}
-
-.filter-drawer-wrapper .filter-date-input-wrap input:focus,
-.filter-drawer-wrapper .filter-date-input-wrap select:focus {
-    border-color: rgba(139, 0, 0, .35);
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, .08);
+    min-width: 0;
 }
 
 .filter-drawer-wrapper .filter-date-input-wrap i {
@@ -489,12 +465,12 @@
 .global-filter-btn {
     position: relative;
 
-    width: 42px;
-    min-width: 42px;
-    max-width: 42px;
+    width: var(--toolbar-control-height);
+    min-width: var(--toolbar-control-height);
+    max-width: var(--toolbar-control-height);
 
-    height: 42px;
-    min-height: 42px;
+    height: var(--toolbar-control-height);
+    min-height: var(--toolbar-control-height);
 
     padding: 0;
 
@@ -502,7 +478,9 @@
     border: 1px solid var(--filter-btn-border, #E5E7EB);
     background: var(--filter-btn-bg, #FFFFFF);
     color: var(--filter-btn-text, #4B5563);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.05);
 
     display: inline-flex;
     align-items: center;
@@ -513,9 +491,10 @@
     font-size: 13px;
     font-weight: 850;
     line-height: 1;
+
     white-space: nowrap;
 
-    flex: 0 0 42px;
+    flex: 0 0 var(--toolbar-control-height);
     flex-shrink: 0;
 
     cursor: pointer;
@@ -713,11 +692,16 @@ body:has(#filterModal.closing) .ai-help-popover {
 }
 
 .global-filter-reset-btn {
-    min-width: 38px;
-    width: 38px;
-    height: 38px;
-    min-height: 38px;
-    border-radius: 12px;
+    width: var(--toolbar-control-height);
+    min-width: var(--toolbar-control-height);
+    max-width: var(--toolbar-control-height);
+
+    height: var(--toolbar-control-height);
+    min-height: var(--toolbar-control-height);
+
+    flex: 0 0 var(--toolbar-control-height);
+
+    border-radius: 10px;
     border: 1px solid #E5E7EB;
     background: #FFFFFF;
     color: #DC2626;
@@ -1211,15 +1195,6 @@ body:has(#filterModal.closing) .ai-help-popover {
 
     .global-filter-btn,
     .global-filter-reset-btn {
-        width: 34px;
-        min-width: 34px;
-        max-width: 34px;
-
-        height: 34px;
-        min-height: 34px;
-
-        flex-basis: 34px;
-
         border-radius: 10px;
     }
 
@@ -1309,19 +1284,9 @@ body:has(#filterModal.closing) .ai-help-popover {
     }
 
     .global-filter-btn {
-        width: 36px;
-        min-width: 36px;
-        max-width: 36px;
-
-        height: 36px;
-        min-height: 36px;
-
         flex: 0 0 36px;
-
         padding: 0;
-
         border-radius: 11px;
-
         font-size: 11px;
     }
 
@@ -1330,17 +1295,7 @@ body:has(#filterModal.closing) .ai-help-popover {
     }
 
     .global-filter-reset-btn {
-        width: 36px;
-        min-width: 36px;
-        max-width: 36px;
-
-        height: 36px;
-        min-height: 36px;
-
-        flex: 0 0 36px;
-
         padding: 0;
-
         border-radius: 11px;
     }
 

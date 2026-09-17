@@ -341,48 +341,49 @@
                                     @foreach ($blockedDates as $blocked)
                                         @php
                                             $bd = \Carbon\Carbon::parse($blocked->date);
-                                            $blockedReasonClass = match ($blocked->reason) {
-                                                'Holiday' => 'status-all',
-                                                'Dentist Unavailable' => 'status-pending',
-                                                default => 'status-inactive',
-                                            };
+
+                                            $blockedDisplayName = $bd->format('D, M j, Y') . ' — ' . $blocked->reason;
                                         @endphp
 
                                         <div class="table-list-row">
+
                                             <div class="flex items-start gap-3 px-4 py-3">
-                                                <div class="global-info-icon status-cancelled" aria-hidden="true">
-                                                    {{ $bd->day }}
-                                                </div>
 
                                                 <div class="min-w-0 flex-1">
+
                                                     <div class="table-record-title">
                                                         {{ $bd->format('D, M j, Y') }}
                                                     </div>
 
-                                                    <div class="global-info-group mt-2">
-                                                        <span class="status-pill {{ $blockedReasonClass }}">
-                                                            {{ $blocked->reason }}
-                                                        </span>
-                                                    </div>
+                                                    <span class="global-info-subvalue">
+                                                        {{ $blocked->reason }}
+                                                    </span>
 
                                                     @if ($blocked->note)
-                                                        <span class="global-info-subvalue mt-2">
+                                                        <span class="global-info-subvalue mt-1">
                                                             {{ $blocked->note }}
                                                         </span>
                                                     @endif
+
                                                 </div>
 
-                                                <form action="{{ route($clinicScheduleRouteNames['unblock'], $blocked) }}"
-                                                    method="POST">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                <span class="status-pill status-pending">
+                                                    Blocked
+                                                </span>
 
-                                                    <button type="submit" class="ui-action-btn ui-action-delete"
-                                                        data-tooltip="Remove blocked date" aria-label="Remove blocked date">
-                                                        <i class="fa-solid fa-xmark"></i>
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="ui-action-btn ui-action-delete"
+                                                    data-tooltip="Remove blocked date" aria-label="Remove blocked date"
+                                                    onclick='openBlockedDateDeleteModal(
+                    @json(route($clinicScheduleRouteNames['unblock'], $blocked)),
+                    @json($blockedDisplayName)
+                )'>
+
+                                                    <i class="fa-solid fa-trash"></i>
+
+                                                </button>
+
                                             </div>
+
                                         </div>
                                     @endforeach
                                 </div>
@@ -401,34 +402,49 @@
 
                     <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
                         <section id="weeklyAppointmentCard" class="card xl:col-span-2">
-                            <div class="card-header">
+                            <div class="card-header weekly-appointment-header">
+
                                 <div class="card-header-left">
                                     <span class="card-header-icon" aria-hidden="true">
                                         <i class="fa-solid fa-calendar-week"></i>
                                     </span>
 
-                                    <h2 class="card-title">Weekly Appointment View</h2>
+                                    <h2 class="card-title">
+                                        Weekly Appointment View
+                                    </h2>
                                 </div>
 
-                                <div class="card-header-right">
-                                    <button type="button" id="prevWeek" class="ui-icon-btn neutral"
-                                        data-tooltip="Previous week" data-tooltip-tone="neutral"
-                                        aria-label="Previous week">
-                                        <i class="fa-solid fa-chevron-left"></i>
-                                    </button>
+                                <div class="card-header-right weekly-appointment-header-actions">
 
-                                    <span id="weekRangeLabel" class="ui-muted-text text-center"></span>
+                                    <div class="weekly-week-nav">
 
-                                    <button type="button" id="nextWeek" class="ui-icon-btn neutral"
-                                        data-tooltip="Next week" data-tooltip-tone="neutral" aria-label="Next week">
-                                        <i class="fa-solid fa-chevron-right"></i>
-                                    </button>
+                                        <button type="button" id="prevWeek" class="ui-icon-btn neutral"
+                                            data-tooltip="Previous week" data-tooltip-tone="neutral"
+                                            aria-label="Previous week">
+
+                                            <i class="fa-solid fa-chevron-left"></i>
+                                        </button>
+
+                                        <span id="weekRangeLabel" class="ui-muted-text text-center">
+                                        </span>
+
+                                        <button type="button" id="nextWeek" class="ui-icon-btn neutral"
+                                            data-tooltip="Next week" data-tooltip-tone="neutral" aria-label="Next week">
+
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </button>
+
+                                    </div>
 
                                     <button type="button" id="todayBtn" class="ui-btn ui-btn-secondary ui-btn-sm">
+
                                         <i class="fa-solid fa-calendar-day"></i>
                                         <span>Today</span>
+
                                     </button>
+
                                 </div>
+
                             </div>
 
                             <div class="card-body">
@@ -454,16 +470,7 @@
                             </div>
                         </section>
 
-                        <section id="holidaysCard" class="card flex flex-col">
-                            <div class="card-header">
-                                <div class="card-header-left">
-                                    <span class="card-header-icon" aria-hidden="true">
-                                        <i class="fa-solid fa-umbrella-beach"></i>
-                                    </span>
-
-                                    <h2 class="card-title">Upcoming Holidays</h2>
-                                </div>
-                            </div>
+                        <section id="holidaysCard" class="card flex flex-col xl:self-start">
 
                             @php
                                 $today = now()->startOfDay();
@@ -483,213 +490,231 @@
                                     'Dec',
                                 ];
 
-                                $upcoming = collect($philippineHolidays)
+                                $allUpcomingHolidays = collect($philippineHolidays)
                                     ->filter(
                                         fn($holiday, $date) => \Carbon\Carbon::parse($date)->startOfDay()->gte($today),
                                     )
-                                    ->sortKeys()
-                                    ->take(5);
+                                    ->sortKeys();
 
-                                $nonWorkingHolidayCount = $upcoming
-                                    ->filter(function ($holiday) {
-                                        return is_array($holiday) ? $holiday['is_blocked_for_booking'] ?? true : true;
-                                    })
-                                    ->count();
-
-                                $workingHolidayCount = $upcoming->count() - $nonWorkingHolidayCount;
-
-                                $nextHolidayDate = $upcoming->keys()->first();
-
-                                $nextHoliday = $nextHolidayDate ? \Carbon\Carbon::parse($nextHolidayDate) : null;
-
-                                $nextHolidayData = $nextHolidayDate ? $upcoming->get($nextHolidayDate) : null;
-
-                                $nextHolidayName = is_array($nextHolidayData)
-                                    ? $nextHolidayData['name'] ?? 'Philippine Holiday'
-                                    : (string) $nextHolidayData;
-
-                                $nextHolidayIsBlocked = is_array($nextHolidayData)
-                                    ? $nextHolidayData['is_blocked_for_booking'] ?? true
-                                    : true;
+                                $upcoming = $allUpcomingHolidays->take(5);
                             @endphp
 
+                            <div class="card-header card-header-inline">
+
+                                <div class="card-header-left">
+                                    <span class="card-header-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-umbrella-beach"></i>
+                                    </span>
+
+                                    <h2 class="card-title">
+                                        Upcoming Holidays
+                                    </h2>
+                                </div>
+
+                                <span class="card-header-badge">
+                                    {{ $upcoming->count() }} upcoming
+                                </span>
+
+                            </div>
+
                             @if ($upcoming->count())
+
                                 <div class="table-list-view">
+
                                     @foreach ($upcoming as $hDate => $holiday)
                                         @php
                                             $hC = \Carbon\Carbon::parse($hDate);
+
                                             $diff = (int) $today->diffInDays($hC, false);
+
                                             $holidayName = is_array($holiday)
                                                 ? $holiday['name'] ?? 'Philippine Holiday'
                                                 : (string) $holiday;
+
                                             $isBlockedHoliday = is_array($holiday)
                                                 ? $holiday['is_blocked_for_booking'] ?? true
                                                 : true;
                                         @endphp
 
-                                        <div class="table-list-row">
-                                            <div class="flex items-center gap-3 px-4 py-3">
+                                        <div class="table-list-row {{ $loop->first ? 'status-cancelled' : '' }}"
+                                            @if ($loop->first) style="
+                            background: var(--status-bg);
+                            border-left: 3px solid var(--crimson);
+                        " @endif>
+
+                                            <div class="flex items-start gap-3 px-4 py-3">
+
                                                 <div class="w-11 shrink-0 text-center">
-                                                    <div class="global-info-label">
-                                                        {{ strtoupper($MONTHS_SHORT[$hC->month - 1]) }}
+
+                                                    <div class="appt-visit-month">
+                                                        {{ $MONTHS_SHORT[$hC->month - 1] }}
                                                     </div>
 
-                                                    <div class="mt-0.5 text-xl font-extrabold leading-none"
+                                                    <div class="text-xl font-extrabold leading-none"
                                                         style="color: var(--text-1);">
+
                                                         {{ $hC->day }}
+
                                                     </div>
+
                                                 </div>
 
                                                 <div class="min-w-0 flex-1">
-                                                    <div class="truncate text-[.76rem] font-bold leading-tight"
-                                                        style="color: var(--text-1);" title="{{ $holidayName }}">
+
+                                                    <div class="appt-visit-title">
                                                         {{ $holidayName }}
                                                     </div>
 
-                                                    <div class="mt-1 text-[.68rem] font-medium leading-none"
-                                                        style="color: var(--text-3);">
+                                                    <span class="global-info-subvalue">
                                                         {{ $diff === 0 ? 'Today' : ($diff === 1 ? 'Tomorrow' : "In $diff days") }}
-                                                    </div>
+                                                    </span>
+
+                                                    @if ($loop->first)
+                                                        @if ($isBlockedHoliday)
+                                                            <div class="global-info-subvalue status-cancelled mt-2"
+                                                                style="color: var(--status-text);">
+
+                                                                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                                                                Bookings unavailable on this date
+
+                                                            </div>
+                                                        @else
+                                                            <div class="global-info-subvalue status-active mt-2"
+                                                                style="color: var(--status-text);">
+
+                                                                <i class="fa-solid fa-circle-check"></i>
+
+                                                                Clinic remains open on this date
+
+                                                            </div>
+                                                        @endif
+                                                    @endif
+
                                                 </div>
 
-                                                <div class="shrink-0">
+                                                <div class="shrink-0 pt-1">
+
                                                     @if ($isBlockedHoliday)
-                                                        <span class="cal-pill cal-pill-yellow">
-                                                            <i class="fa-solid fa-star text-[10px]"></i>
-                                                            Non-Working
-                                                        </span>
+                                                        <div class="global-info-group status-pending flex-nowrap"
+                                                            style="color: var(--status-text);">
+
+                                                            <i class="fa-solid fa-star text-[9px]"></i>
+
+                                                            <span class="text-[.66rem] font-bold whitespace-nowrap">
+                                                                Non-Working
+                                                            </span>
+
+                                                        </div>
                                                     @else
-                                                        <span class="cal-pill cal-pill-working-holiday">
-                                                            <i class="fa-solid fa-briefcase text-[10px]"></i>
-                                                            Working Holiday
-                                                        </span>
+                                                        <div class="global-info-group status-all flex-nowrap"
+                                                            style="color: var(--status-text);">
+
+                                                            <i class="fa-solid fa-briefcase text-[9px]"></i>
+
+                                                            <span class="text-[.66rem] font-bold whitespace-nowrap">
+                                                                Working
+                                                            </span>
+
+                                                        </div>
                                                     @endif
+
                                                 </div>
+
                                             </div>
+
                                         </div>
                                     @endforeach
+
+                                </div>
+
+                                <div class="border-t px-4 py-4" style="border-color: var(--border);">
+
+                                    <div class="table-record-label mb-3">
+                                        Good to Know
+                                    </div>
+
+                                    <div class="space-y-3">
+
+                                        <div class="flex items-start gap-2">
+                                            <span class="global-info-icon status-active"
+                                                style="width:20px;height:20px;min-width:20px;" aria-hidden="true">
+
+                                                <i class="fa-solid fa-check text-[9px]"></i>
+                                            </span>
+
+                                            <span class="global-info-subvalue">
+                                                Non-working holidays auto-block regular bookings for that date.
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-start gap-2">
+                                            <span class="global-info-icon status-active"
+                                                style="width:20px;height:20px;min-width:20px;" aria-hidden="true">
+
+                                                <i class="fa-solid fa-check text-[9px]"></i>
+                                            </span>
+
+                                            <span class="global-info-subvalue">
+                                                Working holidays keep the clinic open on its normal hours.
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-start gap-2">
+                                            <span class="global-info-icon status-active"
+                                                style="width:20px;height:20px;min-width:20px;" aria-hidden="true">
+
+                                                <i class="fa-solid fa-check text-[9px]"></i>
+                                            </span>
+
+                                            <span class="global-info-subvalue">
+                                                Reserved periods aren't cancelled automatically — check for conflicts.
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="border-t px-4 py-3" style="border-color: var(--border);">
+
+                                    <button type="button" class="ui-btn ui-btn-secondary w-full"
+                                        onclick="window.openModal('holidayListModal')">
+
+                                        <i class="fa-regular fa-calendar-days"></i>
+
+                                        <span>
+                                            View Full List
+                                        </span>
+                                    </button>
+
                                 </div>
                             @else
                                 <div class="card-body">
+
                                     <div class="flex flex-col items-center justify-center gap-2 py-8 text-center">
+
                                         <span class="global-info-icon status-default" aria-hidden="true">
+
                                             <i class="fa-solid fa-calendar"></i>
+
                                         </span>
-                                        <span class="ui-muted-text">No upcoming holidays.</span>
-                                    </div>
-                                </div>
-                            @endif
 
-                            @if ($upcoming->count())
-                                <div class="flex flex-1 items-center px-5 py-8">
-
-                                    <div class="w-full">
-
-                                        <div class="table-record-label mb-3">
-                                            Next Holiday
-                                        </div>
-
-                                        <div class="flex items-center gap-3">
-
-                                            <div class="w-11 shrink-0 text-center">
-                                                <div class="global-info-label">
-                                                    {{ strtoupper($MONTHS_SHORT[$nextHoliday->month - 1]) }}
-                                                </div>
-
-                                                <div class="mt-0.5 text-xl font-extrabold leading-none"
-                                                    style="color: var(--text-1);">
-                                                    {{ $nextHoliday->day }}
-                                                </div>
-                                            </div>
-
-                                            <div class="min-w-0 flex-1">
-                                                <div class="truncate text-[.76rem] font-bold leading-tight"
-                                                    style="color: var(--text-1);" title="{{ $nextHolidayName }}">
-                                                    {{ $nextHolidayName }}
-                                                </div>
-
-                                                <div class="mt-1 text-[.68rem] font-medium leading-none"
-                                                    style="color: var(--text-3);">
-                                                    {{ $nextHoliday->format('M d, Y') }}
-                                                </div>
-                                            </div>
-
-                                            <div class="shrink-0">
-                                                @if ($nextHolidayIsBlocked)
-                                                    <span class="cal-pill cal-pill-yellow">
-                                                        <i class="fa-solid fa-star text-[10px]"></i>
-                                                        Non-Working
-                                                    </span>
-                                                @else
-                                                    <span class="cal-pill cal-pill-working-holiday">
-                                                        <i class="fa-solid fa-briefcase text-[10px]"></i>
-                                                        Working Holiday
-                                                    </span>
-                                                @endif
-                                            </div>
-
-                                        </div>
-
-                                        <div class="mt-4">
-
-                                            @if ($nextHolidayIsBlocked)
-                                                <div class="global-info-item global-info-item-compact">
-
-                                                    <span class="global-info-icon status-pending" aria-hidden="true">
-                                                        <i class="fa-solid fa-calendar-xmark"></i>
-                                                    </span>
-
-                                                    <div class="global-info-copy">
-                                                        <span class="global-info-label">
-                                                            Booking Availability
-                                                        </span>
-
-                                                        <span class="global-info-value">
-                                                            Regular bookings unavailable
-                                                        </span>
-
-                                                        <span class="global-info-subvalue">
-                                                            Appointments cannot be booked on this non-working holiday.
-                                                        </span>
-                                                    </div>
-
-                                                </div>
-                                            @else
-                                                <div class="global-info-item global-info-item-compact">
-
-                                                    <span class="global-info-icon status-active" aria-hidden="true">
-                                                        <i class="fa-solid fa-calendar-check"></i>
-                                                    </span>
-
-                                                    <div class="global-info-copy">
-                                                        <span class="global-info-label">
-                                                            Booking Availability
-                                                        </span>
-
-                                                        <span class="global-info-value">
-                                                            Regular bookings available
-                                                        </span>
-
-                                                        <span class="global-info-subvalue">
-                                                            The clinic follows the active schedule on this working holiday.
-                                                        </span>
-                                                    </div>
-
-                                                </div>
-                                            @endif
-
-                                        </div>
+                                        <span class="ui-muted-text">
+                                            No upcoming holidays.
+                                        </span>
 
                                     </div>
 
                                 </div>
+
                             @endif
 
                         </section>
                     </div>
 
                     <section id="scheduleRulesCard" class="card">
-                        <div class="card-header">
+                        <div class="card-header schedule-rules-header">
                             <div class="card-header-left">
                                 <span class="card-header-icon" aria-hidden="true">
                                     <i class="fa-solid fa-list-check"></i>
@@ -698,7 +723,7 @@
                                 <h2 class="card-title">Schedule Rules</h2>
                             </div>
 
-                            <div class="card-header-right">
+                            <div class="card-header-right schedule-rules-header-actions">
 
                                 <x-view-toggle id="scheduleRulesViewToggle" storage-key="scheduleRulesView"
                                     list-view="#scheduleRulesListView" grid-view="#scheduleRulesGridView" />
@@ -1066,28 +1091,39 @@
                     </section>
 
                     <section id="reservedPeriodsCard" class="card">
-                        <div class="card-header">
+                        <div class="card-header reserved-periods-header">
+
                             <div class="card-header-left">
                                 <span class="card-header-icon" aria-hidden="true">
                                     <i class="fa-solid fa-calendar-check"></i>
                                 </span>
 
-                                <h2 class="card-title">Reserved Booking Periods</h2>
+                                <h2 class="card-title">
+                                    Reserved Booking Periods
+                                </h2>
                             </div>
 
-                            <div class="card-header-right">
+                            <div class="card-header-right reserved-periods-header-actions">
 
                                 <x-view-toggle id="reservedPeriodsViewToggle" storage-key="reservedPeriodsView"
                                     list-view="#reservedPeriodsListView" grid-view="#reservedPeriodsGridView" />
 
                                 @if ($canCreateReservedPeriods)
                                     <button type="button" onclick="openReservedPeriodModal()"
-                                        class="ui-btn ui-btn-primary">
+                                        class="ui-btn ui-btn-primary ui-btn-sm" data-tooltip="Add reserved booking period"
+                                        aria-label="Add reserved booking period">
+
                                         <i class="fa-solid fa-plus"></i>
-                                        <span>Add Period</span>
+
+                                        <span class="reserved-period-add-label">
+                                            Add Period
+                                        </span>
+
                                     </button>
                                 @endif
+
                             </div>
+
                         </div>
 
                         @if ($reservedBookingPeriods->count())
@@ -1202,18 +1238,23 @@
                                                             </span>
                                                         </td>
                                                         <td data-label="Booking">
-                                                            {{ $period->booking_mode === 'timeslot' ? 'Date + timeslot' : 'Date only' }}
                                                             @if ($period->booking_mode === 'timeslot')
                                                                 <span class="global-info-subvalue">
                                                                     {{ $period->slots->count() }} selectable
                                                                     {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
                                                                     · {{ $period->timeslot_duration_minutes }} min each
                                                                 </span>
+                                                            @else
+                                                                Date only
                                                             @endif
                                                         </td>
+
                                                         <td data-label="Capacity">
                                                             <strong>{{ $period->max_capacity }}</strong>
-                                                            <span class="global-info-subvalue">patients</span>
+
+                                                            <span class="global-info-subvalue">
+                                                                {{ \Illuminate\Support\Str::plural('patient', $period->max_capacity) }}
+                                                            </span>
                                                         </td>
                                                         <td data-label="Status">
                                                             <span class="status-pill {{ $periodStatusClass }}">
@@ -1343,22 +1384,24 @@
 
                                                     <div class="reserved-periods-list-detail">
                                                         <span class="reserved-periods-list-key">Booking</span>
+
                                                         <span class="reserved-periods-list-value">
-                                                            {{ $period->booking_mode === 'timeslot' ? 'Date + timeslot' : 'Date only' }}
                                                             @if ($period->booking_mode === 'timeslot')
-                                                                <span class="reserved-periods-list-subvalue">
-                                                                    {{ $period->slots->count() }} selectable
-                                                                    {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
-                                                                    · {{ $period->timeslot_duration_minutes }} min each
-                                                                </span>
+                                                                {{ $period->slots->count() }} selectable
+                                                                {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
+                                                                · {{ $period->timeslot_duration_minutes }} min each
+                                                            @else
+                                                                Date only
                                                             @endif
                                                         </span>
                                                     </div>
 
                                                     <div class="reserved-periods-list-detail">
                                                         <span class="reserved-periods-list-key">Capacity</span>
+
                                                         <span class="reserved-periods-list-value">
-                                                            <strong>{{ $period->max_capacity }}</strong> patients
+                                                            <strong>{{ $period->max_capacity }}</strong>
+                                                            {{ \Illuminate\Support\Str::plural('patient', $period->max_capacity) }}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -1489,23 +1532,24 @@
 
                                                         <div class="table-record-row">
                                                             <span class="table-record-label">Booking</span>
+
                                                             <span class="table-record-value">
-                                                                {{ $period->booking_mode === 'timeslot' ? 'Date + timeslot' : 'Date only' }}
                                                                 @if ($period->booking_mode === 'timeslot')
-                                                                    <span class="global-info-subvalue">
-                                                                        {{ $period->slots->count() }} selectable
-                                                                        {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
-                                                                        · {{ $period->timeslot_duration_minutes }} min
-                                                                        each
-                                                                    </span>
+                                                                    {{ $period->slots->count() }} selectable
+                                                                    {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
+                                                                    · {{ $period->timeslot_duration_minutes }} min each
+                                                                @else
+                                                                    Date only
                                                                 @endif
                                                             </span>
                                                         </div>
 
                                                         <div class="table-record-row">
                                                             <span class="table-record-label">Capacity</span>
+
                                                             <span class="table-record-value">
-                                                                {{ $period->max_capacity }} patients
+                                                                {{ $period->max_capacity }}
+                                                                {{ \Illuminate\Support\Str::plural('patient', $period->max_capacity) }}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -1559,8 +1603,94 @@
         </div>
     </main>
 
+    <div id="holidayListModal" class="ui-modal" aria-hidden="true">
+        <div class="ui-modal-card modal-md" role="dialog" aria-modal="true" aria-labelledby="holidayListModalTitle"
+            onclick="event.stopPropagation()">
+            <div class="modal-hd">
+                <div class="modal-heading">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-umbrella-beach"></i>
+                    </div>
+                    <div class="modal-copy">
+                        <h3 id="holidayListModalTitle" class="modal-title">
+                            Upcoming Holidays
+                        </h3>
+                        <p class="modal-subtitle">
+                            Working and non-working holidays
+                        </p>
+                    </div>
+                </div>
+                <button type="button" class="modal-x" onclick="window.closeModal('holidayListModal')"
+                    aria-label="Close holiday list">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="modal-bd modal-scroll-body">
+                <div class="table-list-view">
+                    @foreach ($allUpcomingHolidays as $hDate => $holiday)
+                        @php
+                            $hC = \Carbon\Carbon::parse($hDate);
+
+                            $diff = (int) $today->diffInDays($hC, false);
+
+                            $holidayName = is_array($holiday)
+                                ? $holiday['name'] ?? 'Philippine Holiday'
+                                : (string) $holiday;
+
+                            $isBlockedHoliday = is_array($holiday) ? $holiday['is_blocked_for_booking'] ?? true : true;
+                        @endphp
+
+                        <div class="table-list-row">
+                            <div class="flex items-center gap-3 px-4 py-3">
+                                <div class="w-11 shrink-0 text-center">
+                                    <div class="appt-visit-month">
+                                        {{ $MONTHS_SHORT[$hC->month - 1] }}
+                                    </div>
+
+                                    <div class="text-xl font-extrabold leading-none" style="color: var(--text-1);">
+                                        {{ $hC->day }}
+                                    </div>
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <div class="appt-visit-title">
+                                        {{ $holidayName }}
+                                    </div>
+                                    <span class="global-info-subvalue">
+                                        {{ $diff === 0 ? 'Today' : ($diff === 1 ? 'Tomorrow' : "In $diff days") }}
+                                    </span>
+                                </div>
+
+                                <div class="shrink-0">
+                                    @if ($isBlockedHoliday)
+                                        <span class="cal-pill cal-pill-yellow">
+                                            <i class="fa-solid fa-star text-[10px]"></i>
+                                            Non-Working
+                                        </span>
+                                    @else
+                                        <span class="cal-pill cal-pill-working-holiday">
+                                            <i class="fa-solid fa-briefcase text-[10px]"></i>
+                                            Working Holiday
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="modal-ft">
+                <button type="button" class="ui-btn ui-btn-secondary" onclick="window.closeModal('holidayListModal')">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="appointmentDetailModal" class="ui-modal">
-        <div class="ui-modal-card appointment-detail-modal-card" onclick="event.stopPropagation()">
+        <div class="ui-modal-card modal-md" onclick="event.stopPropagation()">
             <div class="modal-hd">
                 <div class="modal-heading">
                     <div class="modal-icon">
@@ -1579,8 +1709,8 @@
                 </button>
             </div>
 
-            <div class="modal-bd">
-                <div class="space-y-4">
+            <div class="modal-bd modal-scroll-body">
+                <div class="modal-form-grid">
                     <div>
                         <label class="form-label">Patient Name</label>
                         <div id="detailPatientName" class="global-readonly-field">—</div>
@@ -1596,18 +1726,18 @@
                         <div id="detailSchedule" class="global-readonly-field">—</div>
                     </div>
                 </div>
+            </div>
 
-                <div class="flex justify-end gap-3 pt-4 mt-4 border-t border-gray-100">
-                    <button type="button" onclick="closeAppointmentDetailModal()" class="ui-btn ui-btn-primary">
-                        Close
-                    </button>
-                </div>
+            <div class="modal-ft">
+                <button type="button" onclick="closeAppointmentDetailModal()" class="ui-btn ui-btn-primary">
+                    Close
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="ruleModalBackdrop" class="ui-modal schedule-rule-modal modal-theme-primary">
-        <div class="ui-modal-card schedule-rule-modal-card" onclick="event.stopPropagation()">
+    <div id="ruleModalBackdrop" class="ui-modal modal-theme-primary">
+        <div class="ui-modal-card modal-xl" onclick="event.stopPropagation()">
 
             <div class="modal-hd">
                 <div class="modal-heading">
@@ -1633,39 +1763,39 @@
                 </button>
             </div>
 
-            <div class="modal-bd modal-form-body">
-                <form id="ruleForm" method="POST" action="{{ route($clinicScheduleRouteNames['store']) }}"
-                    data-global-validation data-discard-form data-form-validation-rule="clinicScheduleRule" novalidate>
-                    @csrf
-                    <div id="ruleMethodField"></div>
-                    <div class="rule-modal-layout">
-                        <div class="flex flex-col gap-4">
+            <form id="ruleForm" method="POST" action="{{ route($clinicScheduleRouteNames['store']) }}"
+                class="modal-card-form" data-global-validation data-discard-form
+                data-form-validation-rule="clinicScheduleRule" novalidate>
+                @csrf
+                <div id="ruleMethodField"></div>
+                <div class="modal-bd modal-scroll-body modal-form-grid-2">
+                    <div class="flex flex-col gap-4">
 
-                            <div class="modal-section m-0">
-                                <div class="modal-section-head">
-                                    <div class="modal-section-icon">
-                                        <i class="fa-solid fa-calendar-days"></i>
-                                    </div>
-
-                                    <div>
-                                        <div class="modal-section-title">
-                                            Applicable Days
-                                        </div>
-
-                                        <div class="modal-section-sub">
-                                            Select one or more days for this rule.
-                                        </div>
-                                    </div>
+                        <div class="info-card modal-form-section m-0">
+                            <div class="modal-section-heading">
+                                <div class="modal-section-icon">
+                                    <i class="fa-solid fa-calendar-days"></i>
                                 </div>
 
-                                <div data-global-field>
-                                    <label class="form-label">
-                                        Select Days
-                                        <span class="text-red-400">*</span>
-                                    </label>
+                                <div>
+                                    <h4>
+                                        Applicable Days
+                                    </h4>
 
-                                    <div id="ruleDaysGroup" class="day-toggle-group mt-1" tabindex="-1">
-                                        @foreach ([
+                                    <p>
+                                        Select one or more days for this rule.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div data-global-field>
+                                <label class="form-label">
+                                    Select Days
+                                    <span class="text-red-400">*</span>
+                                </label>
+
+                                <div id="ruleDaysGroup" class="day-toggle-group mt-1" tabindex="-1">
+                                    @foreach ([
             'Mon' => 'M',
             'Tue' => 'T',
             'Wed' => 'W',
@@ -1674,109 +1804,109 @@
             'Sat' => 'S',
             'Sun' => 'Su',
         ] as $abbr => $lbl)
-                                            <button type="button" class="day-toggle" data-day="{{ $abbr }}"
-                                                data-discard-track data-discard-key="schedule-day-{{ $abbr }}"
-                                                data-discard-value="false" onclick="toggleDay(this)"
-                                                aria-pressed="false">
+                                        <button type="button" class="day-toggle" data-day="{{ $abbr }}"
+                                            data-discard-track data-discard-key="schedule-day-{{ $abbr }}"
+                                            data-discard-value="false" onclick="toggleDay(this)" aria-pressed="false">
 
-                                                <span class="day-toggle-label">
-                                                    {{ $lbl }}
-                                                </span>
-
-                                                <span class="day-toggle-check" aria-hidden="true">
-                                                    <i class="fa-solid fa-check"></i>
-                                                </span>
-                                            </button>
-                                        @endforeach
-                                    </div>
-
-                                    <div class="field-help">
-                                        You can apply one schedule to multiple weekdays.
-                                    </div>
-                                    <div id="ruleDaysError" class="global-field-error" data-error-for="ruleDaysGroup"
-                                        aria-hidden="true">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="modal-section rule-notes-section m-0 flex-1 flex flex-col" data-global-field>
-
-                                <div class="modal-section-head">
-                                    <div class="modal-section-icon">
-                                        <i class="fa-solid fa-note-sticky"></i>
-                                    </div>
-
-                                    <div>
-                                        <div class="modal-section-title">
-                                            Additional Notes
-                                        </div>
-
-                                        <div class="modal-section-sub">
-                                            Optional reminder or exception.
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="global-label-row">
-                                    <label class="form-label" for="ruleNotes">
-                                        Notes
-                                        <span class="field-optional">optional</span>
-                                    </label>
-                                </div>
-
-                                <div class="global-voice-row is-textarea rule-notes-field mb-2" data-voice-field>
-
-                                    <div class="global-voice-control" data-clearable-field>
-
-                                        <div class="global-form-textarea-wrap rule-notes-textarea-wrap">
-
-                                            <textarea id="ruleNotes" name="notes" class="form-input-custom global-form-textarea rule-notes-textarea"
-                                                maxlength="150" data-char-limit="150" data-char-counter="#ruleNotesCount"
-                                                placeholder="e.g. Reduced operations due to holiday program." data-clearable-input></textarea>
-
-                                            <button type="button" id="ruleNotesClearBtn"
-                                                class="search-clear field-clear-btn field-clear-btn--textarea"
-                                                data-field-clear aria-label="Clear notes" title="Clear notes">
-                                                <i class="fa-solid fa-xmark"></i>
-                                            </button>
-
-                                            <span id="ruleNotesCount" class="char-counter">
-                                                0 / 150 characters
+                                            <span class="day-toggle-label">
+                                                {{ $lbl }}
                                             </span>
 
-                                        </div>
-                                    </div>
-
-                                    <x-voice-input target="#ruleNotes" status-id="ruleNotesVoiceStatus"
-                                        label="Voice input for schedule notes" title="Voice input" />
-
+                                            <span class="day-toggle-check" aria-hidden="true">
+                                                <i class="fa-solid fa-check"></i>
+                                            </span>
+                                        </button>
+                                    @endforeach
                                 </div>
 
-                                <div id="ruleNotesError" class="global-field-error" data-error-for="ruleNotes"
+                                <div class="field-help">
+                                    You can apply one schedule to multiple weekdays.
+                                </div>
+                                <div id="ruleDaysError" class="global-field-error" data-error-for="ruleDaysGroup"
                                     aria-hidden="true">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex flex-col h-full">
-                            <div class="modal-section m-0 flex-1">
-                                <div class="modal-section-head">
-                                    <div class="modal-section-icon">
-                                        <i class="fa-solid fa-hospital-user"></i>
-                                    </div>
+                        <div class="info-card modal-form-section m-0 flex-1" data-global-field>
 
-                                    <div>
-                                        <div class="modal-section-title">
-                                            Clinic Availability
-                                        </div>
+                            <div class="modal-section-heading">
+                                <div class="modal-section-icon">
+                                    <i class="fa-solid fa-note-sticky"></i>
+                                </div>
 
-                                        <div class="modal-section-sub">
-                                            Define whether the clinic is open, closed, or limited.
-                                        </div>
+                                <div>
+                                    <h4>
+                                        Additional Notes
+                                    </h4>
+
+                                    <p>
+                                        Optional reminder or exception.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="global-label-row">
+                                <label class="form-label" for="ruleNotes">
+                                    Notes
+                                    <span class="field-optional">optional</span>
+                                </label>
+                            </div>
+
+                            <div class="global-voice-row is-textarea rule-notes-field mb-2" data-voice-field>
+
+                                <div class="global-voice-control" data-clearable-field>
+
+                                    <div class="global-form-textarea-wrap rule-notes-textarea-wrap">
+
+                                        <textarea id="ruleNotes" name="notes" class="form-input-custom global-form-textarea rule-notes-textarea"
+                                            maxlength="150" data-char-limit="150" data-char-counter="#ruleNotesCount"
+                                            placeholder="e.g. Reduced operations due to holiday program." data-clearable-input></textarea>
+
+                                        <button type="button" id="ruleNotesClearBtn"
+                                            class="search-clear field-clear-btn field-clear-btn--textarea" data-field-clear
+                                            aria-label="Clear notes" title="Clear notes">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+
+                                        <span id="ruleNotesCount" class="char-counter">
+                                            0 / 150 characters
+                                        </span>
+
                                     </div>
                                 </div>
 
-                                <div class="mb-5" data-global-field>
+                                <x-voice-input target="#ruleNotes" status-id="ruleNotesVoiceStatus"
+                                    label="Voice input for schedule notes" title="Voice input" />
+
+                            </div>
+
+                            <div id="ruleNotesError" class="global-field-error" data-error-for="ruleNotes"
+                                aria-hidden="true">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col h-full">
+                        <div class="info-card modal-form-section m-0 flex-1">
+                            <div class="modal-section-heading">
+                                <div class="modal-section-icon">
+                                    <i class="fa-solid fa-hospital-user"></i>
+                                </div>
+
+                                <div>
+                                    <h4>
+                                        Clinic Availability
+                                    </h4>
+
+                                    <p>
+                                        Define whether the clinic is open, closed, or limited.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="modal-form-grid">
+                                <div data-global-field>
                                     <label class="form-label" for="ruleActivationState">
                                         Schedule State
                                     </label>
@@ -1797,7 +1927,7 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-5" data-global-field>
+                                <div data-global-field>
                                     <label class="form-label" for="ruleStatus">
                                         Clinic Status
                                     </label>
@@ -1813,87 +1943,96 @@
                                     </div>
                                 </div>
 
-                                <div id="ruleTimeFields" class="rule-availability-grid">
+                                <div id="ruleTimeFields" class="modal-form-grid">
 
-                                    <div class="space-y-5">
-                                        <div class="rule-time-select-grid">
-
-                                            <div data-global-field>
-                                                <label class="form-label" for="ruleOpenTime">
-                                                    Opening Time
-                                                </label>
-
-                                                <select id="ruleOpenTime" class="form-select-custom js-custom-select"
-                                                    data-placeholder="Select opening time">
-                                                    <option value="07:00">7:00 AM</option>
-                                                    <option value="08:00">8:00 AM</option>
-                                                    <option value="09:00" selected>9:00 AM</option>
-                                                    <option value="10:00">10:00 AM</option>
-                                                </select>
-                                                <div id="ruleOpenTimeError" class="global-field-error"
-                                                    data-error-for="ruleOpenTime" aria-hidden="true">
-                                                </div>
-                                            </div>
-
-                                            <div class="rule-closing-time-field" data-global-field>
-                                                <label class="form-label" for="ruleCloseTime">
-                                                    Closing Time
-                                                </label>
-
-                                                <select id="ruleCloseTime" class="form-select-custom js-custom-select"
-                                                    data-placeholder="Select closing time">
-                                                    <option value="15:00">3:00 PM</option>
-                                                    <option value="16:00">4:00 PM</option>
-                                                    <option value="17:00" selected>5:00 PM</option>
-                                                    <option value="18:00">6:00 PM</option>
-                                                </select>
-                                                <div id="ruleCloseTimeError" class="global-field-error"
-                                                    data-error-for="ruleCloseTime" aria-hidden="true"></div>
-                                            </div>
-                                        </div>
+                                    <div class="modal-form-grid-2">
 
                                         <div data-global-field>
-                                            <label class="form-label" for="ruleMaxSlots">
-                                                Max Appointments / Day
+                                            <label class="form-label" for="ruleOpenTime">
+                                                Opening Time
                                             </label>
 
-                                            <div class="global-number-stepper mt-1" data-global-number-stepper>
+                                            <select id="ruleOpenTime" class="form-select-custom js-custom-select"
+                                                data-placeholder="Select opening time">
 
-                                                <button type="button" class="global-number-stepper-btn"
-                                                    data-number-step="-1" aria-label="Decrease maximum appointments">
+                                                <option value="07:00">7:00 AM</option>
+                                                <option value="08:00">8:00 AM</option>
+                                                <option value="09:00" selected>9:00 AM</option>
+                                                <option value="10:00">10:00 AM</option>
 
-                                                    <i class="fa-solid fa-minus"></i>
-                                                </button>
+                                            </select>
 
-                                                <input type="number" id="ruleMaxSlots"
-                                                    class="global-number-stepper-input" value="5" min="1"
-                                                    max="30" step="1" inputmode="numeric" autocomplete="off"
-                                                    data-number-stepper-input data-field-label="Max Appointments"
-                                                    data-validation-rule="wholeNumber">
-
-                                                <button type="button" class="global-number-stepper-btn"
-                                                    data-number-step="1" aria-label="Increase maximum appointments">
-
-                                                    <i class="fa-solid fa-plus"></i>
-                                                </button>
-                                            </div>
-
-                                            <div id="ruleMaxSlotsError" class="global-field-error"
-                                                data-error-for="ruleMaxSlots" aria-hidden="true">
-                                            </div>
-
-                                            <div class="field-help">
-                                                Set how many appointments may be accepted per day, from 1 to 30.
+                                            <div id="ruleOpenTimeError" class="global-field-error"
+                                                data-error-for="ruleOpenTime" aria-hidden="true">
                                             </div>
                                         </div>
+
+
+                                        <div data-global-field>
+                                            <label class="form-label" for="ruleCloseTime">
+                                                Closing Time
+                                            </label>
+
+                                            <select id="ruleCloseTime" class="form-select-custom js-custom-select"
+                                                data-placeholder="Select closing time">
+
+                                                <option value="15:00">3:00 PM</option>
+                                                <option value="16:00">4:00 PM</option>
+                                                <option value="17:00" selected>5:00 PM</option>
+                                                <option value="18:00">6:00 PM</option>
+
+                                            </select>
+
+                                            <div id="ruleCloseTimeError" class="global-field-error"
+                                                data-error-for="ruleCloseTime" aria-hidden="true">
+                                            </div>
+                                        </div>
+
                                     </div>
+
+
+                                    <div data-global-field>
+                                        <label class="form-label" for="ruleMaxSlots">
+                                            Max Appointments / Day
+                                        </label>
+
+                                        <div class="global-number-stepper mt-1" data-global-number-stepper>
+
+                                            <button type="button" class="global-number-stepper-btn"
+                                                data-number-step="-1" aria-label="Decrease maximum appointments">
+
+                                                <i class="fa-solid fa-minus"></i>
+                                            </button>
+
+                                            <input type="number" id="ruleMaxSlots" class="global-number-stepper-input"
+                                                value="5" min="1" max="30" step="1"
+                                                inputmode="numeric" autocomplete="off" data-number-stepper-input
+                                                data-field-label="Max Appointments" data-validation-rule="wholeNumber">
+
+                                            <button type="button" class="global-number-stepper-btn" data-number-step="1"
+                                                aria-label="Increase maximum appointments">
+
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+
+                                        </div>
+
+                                        <div id="ruleMaxSlotsError" class="global-field-error"
+                                            data-error-for="ruleMaxSlots" aria-hidden="true">
+                                        </div>
+
+                                        <div class="field-help">
+                                            Set how many appointments may be accepted per day, from 1 to 30.
+                                        </div>
+                                    </div>
+
 
                                     <div data-global-field>
                                         <label class="form-label">
                                             Lunch Break
                                         </label>
 
-                                        <div id="ruleBreakGroup" class="break-chip-group break-chip-stack">
+                                        <div id="ruleBreakGroup" class="break-chip-group">
 
                                             <button type="button" class="break-chip selected" data-val="12:00-13:00"
                                                 data-discard-track data-discard-key="schedule-break-12-13"
@@ -1910,32 +2049,35 @@
                                             <button type="button" class="break-chip" data-val="none" data-discard-track
                                                 data-discard-key="schedule-break-none" data-discard-value="false"
                                                 onclick="selectBreak(this)">
+
                                                 <i class="fa-solid fa-ban text-[10px]"></i>
                                                 No Break
                                             </button>
+
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="modal-ft rule-modal-footer">
-                        <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="ruleModalBackdrop">
-                            Cancel
-                        </button>
+                <div class="modal-ft modal-sticky-footer">
+                    <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="ruleModalBackdrop">
+                        Cancel
+                    </button>
 
-                        <button type="button" onclick="submitRule()" id="ruleSubmitBtn" class="ui-btn ui-btn-primary">
-                            <i class="fa-solid fa-floppy-disk"></i>
-                            <span id="ruleSubmitText">Save Rule</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+                    <button type="button" onclick="submitRule()" id="ruleSubmitBtn" class="ui-btn ui-btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span id="ruleSubmitText">Save Rule</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <div id="blockModalBackdrop" class="ui-modal modal-theme-danger block-date-modal" aria-hidden="true">
+    <div id="blockModalBackdrop" class="ui-modal modal-theme-danger" aria-hidden="true">
 
         <form id="blockDateForm" action="{{ route($clinicScheduleRouteNames['block']) }}" method="POST"
             class="ui-modal-card modal-md modal-card-form" role="dialog" aria-modal="true"
@@ -1969,21 +2111,21 @@
                 </button>
             </div>
 
-            <div class="modal-bd">
-                <div class="modal-section">
-                    <div class="modal-section-head">
+            <div class="modal-bd modal-scroll-body">
+                <div class="info-card modal-form-section">
+                    <div class="modal-section-heading">
                         <div class="modal-section-icon">
                             <i class="fa-solid fa-calendar-xmark"></i>
                         </div>
 
                         <div>
-                            <div class="modal-section-title">
+                            <h4>
                                 Date Details
-                            </div>
+                            </h4>
 
-                            <div class="modal-section-sub">
+                            <p>
                                 Choose the blocked date and specify the reason.
-                            </div>
+                            </p>
                         </div>
                     </div>
 
@@ -2073,7 +2215,7 @@
                 </div>
             </div>
 
-            <div class="modal-ft">
+            <div class="modal-ft modal-sticky-footer">
                 <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="blockModalBackdrop">
                     Cancel
                 </button>
@@ -2087,7 +2229,7 @@
     </div>
 
     <div id="reservedPeriodModalBackdrop" class="ui-modal modal-theme-primary" aria-hidden="true">
-        <div class="ui-modal-card reserved-period-modal-card" onclick="event.stopPropagation()">
+        <div class="ui-modal-card modal-xl" onclick="event.stopPropagation()">
             <div class="modal-hd">
                 <div class="modal-heading">
                     <div class="modal-icon">
@@ -2112,21 +2254,21 @@
                 action="{{ route($clinicScheduleRouteNames['reserved_store']) }}" class="modal-card-form"
                 data-global-validation data-form-validation-rule="reservedBookingPeriod" data-discard-form novalidate>
 
-                <div class="modal-bd modal-form-body modal-scroll-body">
+                <div class="modal-bd modal-scroll-body">
                     @csrf
                     <div id="reservedPeriodMethodField"></div>
                     <input id="reservedPeriodId" type="hidden" name="reserved_period_id">
                     <input type="hidden" name="allowed_services_present" value="1">
 
-                    <div class="reserved-period-form-grid">
-                        <div class="modal-section">
-                            <div class="modal-section-head">
+                    <div class="modal-form-grid-2">
+                        <div class="info-card modal-form-section">
+                            <div class="modal-section-heading">
                                 <div class="modal-section-icon">
                                     <i class="fa-solid fa-calendar-day"></i>
                                 </div>
                                 <div>
-                                    <div class="modal-section-title">Period Details</div>
-                                    <div class="modal-section-sub">Set the purpose, date, and reserved hours.</div>
+                                    <h4>Period Details</h4>
+                                    <p>Set the purpose, date, and reserved hours.</p>
                                 </div>
                             </div>
 
@@ -2155,17 +2297,20 @@
                                 </div>
 
                                 <div data-global-field>
-                                    <label for="reservedDate" class="form-label">Date <span
-                                            class="text-red-500">*</span></label>
-                                    <div class="global-control-wrap" data-flatpickr-trigger>
-                                        <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
+                                    <label for="reservedDate" class="form-label">
+                                        Date
+                                        <span class="text-red-500">*</span>
+                                    </label>
+
+                                    <div class="fp-date-input-wrap" data-flatpickr-trigger>
                                         <input id="reservedDate" name="reserved_date" type="text" required readonly
                                             data-field-label="Date"
-                                            class="form-input-custom global-control-with-icon js-flatpickr-date-min-today @error('reserved_date', 'reservedPeriod') is-invalid @enderror"
+                                            class="form-input-custom fp-date-input js-flatpickr-date-min-today @error('reserved_date', 'reservedPeriod') is-invalid @enderror"
                                             data-flatpickr-append-to-body
                                             data-flatpickr-disabled-date-tooltip="This date already has an active reserved booking period"
                                             data-flatpickr-disabled-dates='[]' placeholder="Select date">
                                     </div>
+
                                     <div class="global-field-error @error('reserved_date', 'reservedPeriod') show @enderror"
                                         data-error-for="reservedDate"
                                         aria-hidden="{{ $reservedErrors->has('reserved_date') ? 'false' : 'true' }}">
@@ -2175,7 +2320,7 @@
                                     </div>
                                 </div>
 
-                                <div class="reserved-time-grid">
+                                <div class="modal-form-grid-2">
                                     <div data-global-field>
                                         <label for="reservedStartTime" class="form-label">Start Time <span
                                                 class="text-red-500">*</span></label>
@@ -2183,7 +2328,7 @@
                                             <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
                                             <input id="reservedStartTime" name="start_time" type="text" required
                                                 readonly data-field-label="Start Time"
-                                                class="form-input-custom global-control-with-icon js-flatpickr-time @error('start_time', 'reservedPeriod') is-invalid @enderror"
+                                                class="form-input-custom global-form-icon js-flatpickr-time @error('start_time', 'reservedPeriod') is-invalid @enderror"
                                                 placeholder="Select start time">
                                         </div>
                                         <div class="global-field-error @error('start_time', 'reservedPeriod') show @enderror"
@@ -2202,7 +2347,7 @@
                                             <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
                                             <input id="reservedEndTime" name="end_time" type="text" required readonly
                                                 data-field-label="End Time"
-                                                class="form-input-custom global-control-with-icon js-flatpickr-time @error('end_time', 'reservedPeriod') is-invalid @enderror"
+                                                class="form-input-custom global-form-icon js-flatpickr-time @error('end_time', 'reservedPeriod') is-invalid @enderror"
                                                 placeholder="Select end time">
                                         </div>
                                         <div class="global-field-error @error('end_time', 'reservedPeriod') show @enderror"
@@ -2273,15 +2418,15 @@
                             </div>
                         </div>
 
-                        <div class="modal-section">
-                            <div class="modal-section-head">
+                        <div class="info-card modal-form-section">
+                            <div class="modal-section-heading">
                                 <div class="modal-section-icon">
                                     <i class="fa-solid fa-users"></i>
                                 </div>
                                 <div>
-                                    <div class="modal-section-title">Target & Capacity</div>
-                                    <div class="modal-section-sub">Choose who may book and limit the available places.
-                                    </div>
+                                    <h4>Target & Capacity</h4>
+                                    <p>Choose who may book and limit the available places.
+                                    </p>
                                 </div>
                             </div>
 
@@ -2303,7 +2448,7 @@
                                     @enderror
                                 </div>
 
-                                <div id="reservedStudentFields" class="reserved-student-fields">
+                                <div id="reservedStudentFields" class="info-card modal-form-grid">
                                     <div data-global-field>
                                         <label for="reservedProgramCode" class="form-label">Program <span
                                                 class="text-red-500">*</span></label>
@@ -2324,7 +2469,7 @@
                                         @enderror
                                     </div>
 
-                                    <div class="reserved-student-row">
+                                    <div class="modal-form-grid-2">
                                         <div data-global-field>
                                             <label for="reservedYearLevel" class="form-label">Year Level <span
                                                     class="text-red-500">*</span></label>
@@ -2390,15 +2535,15 @@
                         </div>
                     </div>
 
-                    <div class="modal-section mt-5" data-global-field>
-                        <div class="modal-section-head">
+                    <div class="info-card modal-form-section mt-5" data-global-field>
+                        <div class="modal-section-heading">
                             <div class="modal-section-icon">
                                 <i class="fa-solid fa-tooth"></i>
                             </div>
                             <div>
-                                <div class="modal-section-title">Allowed Dental Services</div>
-                                <div class="modal-section-sub">Select every service patients may choose during this
-                                    reserved period.</div>
+                                <h4>Allowed Dental Services</h4>
+                                <p>Select every service patients may choose during this
+                                    reserved period.</p>
                             </div>
                         </div>
 
@@ -2431,20 +2576,20 @@
                         </div>
                     </div>
 
-                    <div class="modal-section reserved-notes-section mt-5" data-global-field>
-                        <div class="modal-section-head">
+                    <div class="info-card modal-form-section mt-5" data-global-field>
+                        <div class="modal-section-heading">
                             <div class="modal-section-icon">
                                 <i class="fa-solid fa-note-sticky"></i>
                             </div>
 
                             <div>
-                                <div class="modal-section-title">
+                                <h4>
                                     Additional Notes
-                                </div>
+                                </h4>
 
-                                <div class="modal-section-sub">
+                                <p>
                                     Add optional instructions for this reserved booking period.
-                                </div>
+                                </p>
                             </div>
                         </div>
 
@@ -2481,16 +2626,16 @@
                         </div>
                     </div>
 
-                    <div id="reservedTimeslotBuilder" class="modal-section reserved-timeslot-section mt-5">
-                        <div class="modal-section-head reserved-timeslot-heading">
+                    <div id="reservedTimeslotBuilder" class="info-card modal-form-section mt-5">
+                        <div class="modal-section-heading reserved-timeslot-heading">
                             <div class="modal-section-icon">
                                 <i class="fa-solid fa-clock"></i>
                             </div>
                             <div>
-                                <div class="modal-section-title">Selectable Timeslots</div>
-                                <div class="modal-section-sub">Create up to
+                                <h4>Selectable Timeslots</h4>
+                                <p>Create up to
                                     {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }} times patients can choose. Each
-                                    timeslot is for one patient.</div>
+                                    timeslot is for one patient.</p>
                             </div>
                             <div class="reserved-timeslot-total">
                                 <span id="reservedTimeslotTotal">0</span>
@@ -2500,14 +2645,28 @@
 
                         <div class="reserved-timeslot-add-row">
                             <div data-global-field>
-                                <label for="reservedSlotDuration" class="form-label">Duration (minutes)</label>
-                                <input id="reservedSlotDuration" name="timeslot_duration_minutes" type="number"
-                                    min="5" max="240" step="5" required class="form-input-custom"
-                                    data-field-label="Duration" value="30" inputmode="numeric"
-                                    onchange="updateReservedSlotDuration()">
-                                @error('timeslot_duration_minutes', 'reservedPeriod')
-                                    <p class="global-field-error show">{{ $message }}</p>
-                                @enderror
+                                <label for="reservedSlotDuration" class="form-label">
+                                    Duration (minutes)
+                                </label>
+
+                                <div class="global-number-stepper" data-global-number-stepper>
+                                    <button type="button" class="global-number-stepper-btn" data-number-step="-1"
+                                        aria-label="Decrease duration">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+
+                                    <input id="reservedSlotDuration" name="timeslot_duration_minutes" type="number"
+                                        min="5" max="240" step="5" required
+                                        class="global-number-stepper-input" data-field-label="Duration"
+                                        data-validation-rule="wholeNumber" value="30" inputmode="numeric"
+                                        autocomplete="off" data-number-stepper-input
+                                        onchange="updateReservedSlotDuration()">
+
+                                    <button type="button" class="global-number-stepper-btn" data-number-step="1"
+                                        aria-label="Increase duration">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div data-global-field>
                                 <label for="reservedNewSlotTime" class="form-label">
@@ -2518,8 +2677,8 @@
                                     <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
 
                                     <input id="reservedNewSlotTime" type="text" readonly
-                                        class="form-input-custom global-control-with-icon js-flatpickr-time"
-                                        value="09:00" placeholder="Select timeslot">
+                                        class="form-input-custom global-form-icon js-flatpickr-time" value="09:00"
+                                        placeholder="Select timeslot">
                                 </div>
                             </div>
                             <button id="reservedAddTimeslotButton" type="button" class="ui-btn ui-btn-primary"
@@ -2565,6 +2724,11 @@
 
     <x-delete-confirm-modal id="scheduleDeleteModal" form-id="scheduleDeleteForm" name-id="scheduleDeleteName"
         title="Delete Schedule Rule" helper="This schedule rule will be permanently removed." />
+
+    <x-delete-confirm-modal id="blockedDateDeleteModal" form-id="blockedDateDeleteForm"
+        name-id="blockedDateDeleteName" title="Remove Blocked Date" subtitle="This action requires confirmation"
+        message="Are you sure you want to remove"
+        helper="Removing this record will allow the date to follow the applicable clinic schedule again." />
 
     <x-delete-confirm-modal id="reservedPeriodDeleteModal" form-id="reservedPeriodDeleteForm"
         name-id="reservedPeriodDeleteName" title="Remove Reserved Booking Period"
@@ -3751,10 +3915,7 @@
             return true;
         }
 
-        function openScheduleDeleteModal(
-            actionUrl,
-            scheduleName
-        ) {
+        function openScheduleDeleteModal(actionUrl, scheduleName) {
             window.openDeleteConfirmModal?.({
                 modalId: 'scheduleDeleteModal',
 
@@ -3765,6 +3926,20 @@
                 action: actionUrl,
 
                 itemName: scheduleName,
+            });
+        }
+
+        function openBlockedDateDeleteModal(actionUrl, blockedDateName) {
+            window.openDeleteConfirmModal?.({
+                modalId: 'blockedDateDeleteModal',
+
+                formId: 'blockedDateDeleteForm',
+
+                nameId: 'blockedDateDeleteName',
+
+                action: actionUrl,
+
+                itemName: blockedDateName,
             });
         }
 
@@ -4025,7 +4200,7 @@
                     <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
                         <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
                         <input id="reservedSlotTime${index}" name="timeslots[${index}][time]" type="text"
-                            required readonly class="form-input-custom global-control-with-icon js-flatpickr-time"
+                            required readonly class="form-input-custom global-form-icon js-flatpickr-time"
                             value="${slot.time}" placeholder="Select time"
                             onchange="updateReservedTimeslot(${index}, 'time', this.value)">
                     </div>

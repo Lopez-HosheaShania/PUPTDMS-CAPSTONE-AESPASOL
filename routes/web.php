@@ -2,7 +2,6 @@
 
 use App\Helpers\AuditLogger;
 use App\Helpers\PhilippineHolidays;
-use App\Http\Controllers\Admin\AcademicPeriodController;
 use App\Http\Controllers\Admin\AdminAppointmentController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminInventoryController;
@@ -30,6 +29,7 @@ use App\Http\Controllers\Dentist\DentistPatientController;
 use App\Http\Controllers\Dentist\InventoryController;
 use App\Http\Controllers\Dentist\OdontogramController;
 use App\Http\Controllers\Dentist\WalkInController;
+use App\Http\Controllers\Shared\AcademicPeriodController;
 use App\Http\Controllers\Shared\DentalRecordController;
 use App\Http\Controllers\Shared\ExternalAdminController;
 use App\Http\Controllers\Shared\FacultyController;
@@ -1334,11 +1334,11 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
 
     // Inventory
     Route::get('/inventory', [InventoryController::class, 'index'])
-        ->middleware('permission:view_inventory,add_inventory,update_inventory,delete_inventory')
+        ->middleware('permission:view_inventory')
         ->name('dentist.dentist.inventory');
 
     Route::get('/inventory/data', [InventoryController::class, 'fetch'])
-        ->middleware('permission:view_inventory,add_inventory,update_inventory,delete_inventory')
+        ->middleware('permission:view_inventory')
         ->name('dentist.dentist.inventory.data');
 
     Route::post('/inventory', [InventoryController::class, 'store'])

@@ -18,8 +18,9 @@
     width: 100%;
     min-width: 0;
 
-    height: 40px;
-    min-height: 40px;
+    height: var(--toolbar-control-height);
+    min-height: var(--toolbar-control-height);
+
     padding: 4px 10px;
     gap: 9px;
 
@@ -104,7 +105,7 @@
 }
 
 .global-filter-select-icon i {
-    color: currentColor !important;
+    color: currentColor;
 }
 
 .global-filter-select-copy {
@@ -183,12 +184,12 @@
 }
 
 .global-filter-select-count.hidden {
-    display: none !important;
+    display: none;
 }
 
 .global-filter-select-chevron {
     flex: 0 0 auto;
-    color: var(--text-3, #94a3b8) !important;
+    color: var(--text-3, #94a3b8);
     font-size: 0.56rem;
     transition:
         transform .18s ease,
@@ -198,7 +199,7 @@
 .global-filter-select.is-open .global-filter-select-chevron {
     transform: rotate(180deg);
 
-    color: var(--crimson, #8B0000) !important;
+    color: var(--crimson, #8B0000);
 }
 
 .global-filter-select-menu {
@@ -264,6 +265,143 @@
 .global-filter-select.drop-up.is-open .global-filter-select-menu {
     transform:
         translateY(0) scale(1);
+}
+
+.global-filter-select-search {
+    position: relative;
+    width: 100%;
+    padding: 3px;
+    margin-bottom: 3px;
+}
+
+.global-filter-select-search>i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+
+    color: var(--text-3);
+    font-size: 10px;
+
+    pointer-events: none;
+
+    transform: translateY(-50%);
+}
+
+.global-filter-select-search-input {
+    width: 100%;
+    height: 34px;
+
+    padding: 0 38px 0 32px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: var(--surface);
+    color: var(--text-1);
+
+    font: inherit;
+    font-size: 11px;
+    font-weight: 650;
+
+    outline: none;
+
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease,
+        background-color .18s ease;
+}
+
+.global-filter-select-search-input::placeholder {
+    color: var(--text-3);
+}
+
+.global-filter-select-search-input:focus {
+    border-color: var(--crimson);
+
+    box-shadow:
+        0 0 0 3px var(--alpha-crimson-8);
+}
+
+.global-filter-select-search-clear {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    z-index: 2;
+
+    transform: translateY(-50%);
+}
+
+.global-filter-select-search-clear:hover {
+    transform: translateY(-50%);
+}
+
+.global-filter-select-search-clear:active {
+    transform: translateY(-50%) scale(.96);
+}
+
+.global-filter-select-checkbox {
+    width: 17px;
+    height: 17px;
+    min-width: 17px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+
+    background: var(--card);
+    color: transparent;
+
+    font-size: 8px;
+
+    transition:
+        border-color .16s ease,
+        background-color .16s ease,
+        color .16s ease,
+        box-shadow .16s ease;
+}
+
+.global-filter-select-option:hover .global-filter-select-checkbox {
+    border-color:
+        color-mix(in srgb,
+            var(--crimson) 35%,
+            var(--border));
+}
+
+.global-filter-select-option.is-active .global-filter-select-checkbox,
+.global-filter-select-option[aria-selected="true"] .global-filter-select-checkbox {
+    border-color: var(--crimson);
+    background: var(--crimson);
+    color: var(--text-on-brand);
+}
+
+.global-filter-select-option.is-active .global-filter-select-checkbox i,
+.global-filter-select-option[aria-selected="true"] .global-filter-select-checkbox i {
+    color: currentColor;
+}
+
+[data-theme="dark"] .global-filter-select-search-input,
+.dark .global-filter-select-search-input {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-1);
+}
+
+[data-theme="dark"] .global-filter-select-checkbox,
+.dark .global-filter-select-checkbox {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .global-filter-select-option.is-active .global-filter-select-checkbox,
+[data-theme="dark"] .global-filter-select-option[aria-selected="true"] .global-filter-select-checkbox,
+.dark .global-filter-select-option.is-active .global-filter-select-checkbox,
+.dark .global-filter-select-option[aria-selected="true"] .global-filter-select-checkbox {
+    background: var(--crimson);
+    border-color: var(--crimson);
+    color: var(--text-on-brand);
 }
 
 .global-filter-select-option {
@@ -350,7 +488,7 @@
 }
 
 .global-filter-select-option-icon i {
-    color: currentColor !important;
+    color: currentColor;
 }
 
 .global-filter-select-option-label {
@@ -406,10 +544,10 @@
 }
 
 .global-filter-select-check {
-    display: none !important;
+    display: none;
 
     color:
-        var(--status-text, var(--crimson, #8B0000)) !important;
+        var(--status-text, var(--crimson, #8B0000));
 
     font-size: 9px;
 }
@@ -431,7 +569,7 @@
 
 .global-filter-select-option.is-active .global-filter-select-check,
 .global-filter-select-option[aria-selected="true"] .global-filter-select-check {
-    display: inline-flex !important;
+    display: inline-flex;
 }
 
 .global-filter-select-trigger:focus-visible,
@@ -535,20 +673,27 @@
 }
 
 @media (max-width: 767px) {
+    .global-filter-select-search-input {
+        height: 32px;
+        font-size: 10px;
+    }
+
+    .global-filter-select-checkbox {
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+    }
 
     .global-filter-select {
-        width: auto !important;
-        min-width: 0 !important;
-        max-width: none !important;
+        width: auto;
+        min-width: 0;
+        max-width: none;
 
-        flex: 1 1 auto !important;
+        flex: 1 1 auto;
     }
 
     .global-filter-select-trigger {
-        width: 100% !important;
-
-        height: 36px;
-        min-height: 36px;
+        width: 100%;
 
         padding: 3px 8px;
         gap: 7px;
@@ -598,12 +743,12 @@
     }
 
     .global-filter-select-menu {
-        width: max(100%, 190px) !important;
-        min-width: 190px !important;
+        width: max(100%, 190px);
+        min-width: 190px;
 
         max-width:
             min(250px,
-                calc(100vw - 24px)) !important;
+                calc(100vw - 24px));
 
         padding: 4px;
 
@@ -643,9 +788,6 @@
 @media (max-width: 380px) {
 
     .global-filter-select-trigger {
-        height: 34px;
-        min-height: 34px;
-
         border-radius: 10px;
     }
 
