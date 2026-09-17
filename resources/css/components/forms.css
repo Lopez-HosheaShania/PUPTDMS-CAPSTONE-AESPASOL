@@ -115,10 +115,6 @@
     transform: translateY(-50%);
 }
 
-.global-control-with-icon {
-    padding-left: 40px;
-}
-
 .global-form-textarea {
     display: block;
     width: 100%;
@@ -160,9 +156,9 @@
     margin-top: .42rem;
     color: var(--crimson-1);
     font-family: inherit;
-    font-size: .72rem;
+    font-size: .65rem;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.3;
 }
 
 .global-field-error.show {
@@ -265,7 +261,7 @@
     background: var(--card);
     color: var(--text-1);
 
-    font-size: 13px;
+    font-size: 12px;
 
     outline: none;
 
@@ -275,6 +271,14 @@
 
     width: 100%;
     min-width: 0;
+}
+
+.form-input-custom.global-form-icon {
+    padding-left: 40px;
+}
+
+.form-input-custom.global-control-with-action {
+    padding-right: 44px;
 }
 
 .form-input-custom::placeholder,
@@ -343,10 +347,10 @@ textarea.form-input-custom.global-form-textarea {
 }
 
 .field-help {
-    margin-top: .45rem;
-    font-size: .79rem;
-    color: #7c7c89;
-    line-height: 1.4;
+    margin-top: .35rem;
+    font-size: .68rem;
+    color: var(--text-3);
+    line-height: 1.3;
 }
 
 .access-input {
@@ -501,7 +505,7 @@ textarea.form-input-custom.global-form-textarea {
     background: var(--card);
     color: var(--text-1);
     font: inherit;
-    font-size: .84rem;
+    font-size: .72rem;
     font-weight: 700;
     text-align: left;
     cursor: pointer;
@@ -594,7 +598,7 @@ textarea.form-input-custom.global-form-textarea {
     background: transparent;
     color: var(--text-2);
     font: inherit;
-    font-size: .8rem;
+    font-size: .70rem;
     font-weight: 700;
     text-align: left;
     cursor: pointer;
@@ -961,7 +965,7 @@ textarea.form-input-custom.global-form-textarea {
 .field-optional {
     margin-left: 0;
     color: var(--text-3);
-    font-size: .72rem;
+    font-size: .65rem;
     font-weight: 600;
 }
 
@@ -1247,10 +1251,6 @@ textarea.form-input-custom.global-form-textarea {
 [data-theme="dark"] .global-readonly-field i,
 .dark .global-readonly-field i {
     color: var(--text-3);
-}
-
-.global-control-with-action {
-    padding-right: 44px;
 }
 
 .global-input-action {

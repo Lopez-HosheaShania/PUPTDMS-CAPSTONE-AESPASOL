@@ -1288,10 +1288,10 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
 
 .form-label {
     display: block;
-    font-size: .75rem;
+    font-size: .68rem;
     font-weight: 700;
-    color: #555;
-    margin-bottom: .3rem;
+    color: var(--text-2);
+    margin-bottom: .25rem;
     letter-spacing: .03em;
 }
 
@@ -1845,20 +1845,16 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     color: #e5e7eb;
 }
 
+.ui-modal .global-confirm-panel {
+    margin-top: .65rem;
+}
+
 .ui-modal .modal-box-inner.ui-modal-card,
 .ui-modal .ui-modal-card.modal-box-inner {
     display: flex;
     flex-direction: column;
     width: min(94vw, 520px);
     max-height: min(90dvh, 640px);
-}
-
-.ui-modal .modal-bd {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: visible;
-    -webkit-overflow-scrolling: touch;
 }
 
 .modal-btn-primary {

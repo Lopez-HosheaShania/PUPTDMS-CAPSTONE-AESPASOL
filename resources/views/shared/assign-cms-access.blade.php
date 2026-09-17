@@ -165,8 +165,7 @@
                                                 </div>
                                             </div>
                                             <div class="flex flex-wrap gap-2 sm:ml-auto sm:justify-end">
-                                                <span id="summary_office"
-                                                    class="status-pill hidden"></span>
+                                                <span id="summary_office" class="status-pill hidden"></span>
                                                 <span id="summary_access_level"
                                                     class="status-pill status-all hidden"></span>
                                             </div>
@@ -297,8 +296,7 @@
                                         <label class="global-choice-card">
                                             <input type="radio" name="cms_role" value="patient"
                                                 class="global-choice-input" @checked(old('cms_role') === 'patient')>
-                                            <span class="global-info-icon"><i
-                                                    class="fa-solid fa-user"></i></span>
+                                            <span class="global-info-icon"><i class="fa-solid fa-user"></i></span>
                                             <span class="global-choice-copy">
                                                 <span class="global-choice-title">Patient</span>
                                                 <span class="global-choice-description">Standard patient access</span>
@@ -308,8 +306,7 @@
                                         <label class="global-choice-card">
                                             <input type="radio" name="cms_role" value="dentist"
                                                 class="global-choice-input" @checked(old('cms_role') === 'dentist')>
-                                            <span class="global-info-icon"><i
-                                                    class="fa-solid fa-tooth"></i></span>
+                                            <span class="global-info-icon"><i class="fa-solid fa-tooth"></i></span>
                                             <span class="global-choice-copy">
                                                 <span class="global-choice-title">Dentist</span>
                                                 <span class="global-choice-description">Clinical CMS access</span>
@@ -319,8 +316,7 @@
                                         <label class="global-choice-card">
                                             <input type="radio" name="cms_role" value="admin"
                                                 class="global-choice-input" @checked(old('cms_role') === 'admin')>
-                                            <span class="global-info-icon"><i
-                                                    class="fa-solid fa-user-gear"></i></span>
+                                            <span class="global-info-icon"><i class="fa-solid fa-user-gear"></i></span>
                                             <span class="global-choice-copy">
                                                 <span class="global-choice-title">Admin</span>
                                                 <span class="global-choice-description">Administrative CMS access</span>
@@ -985,27 +981,21 @@
 
                 const query = this.value.trim();
 
-                if (!query) {
-                    const users = await fetchAllUsers();
-                    users.length ?
-                        renderResults(users) :
-                        renderNoResults('No users available.');
-                    return;
-                }
-
-                const requestId = ++searchRequestSerial;
-
                 try {
-                    const users = await fetchUsers(query);
-                    if (requestId !== searchRequestSerial) return;
-
+                    const users = await fetchAllUsers();
                     const filtered = rankUsers(users, query);
-                    filtered.length ?
-                        renderResults(filtered) :
-                        renderNoResults('No matching users found.');
+
+                    if (filtered.length) {
+                        renderResults(filtered);
+                    } else {
+                        renderNoResults(
+                            query ?
+                            'No matching users found.' :
+                            'No users available.'
+                        );
+                    }
                 } catch (error) {
                     console.error('User search error:', error);
-                    if (requestId !== searchRequestSerial) return;
                     renderNoResults('Unable to search users right now.');
                 }
             });

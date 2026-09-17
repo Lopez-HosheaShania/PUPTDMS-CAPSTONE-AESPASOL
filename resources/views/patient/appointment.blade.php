@@ -16,6 +16,12 @@
     @php
         $calendarAppointments = [];
 
+        $hasActiveAppointment = collect($appointments ?? [])->contains(function ($appointment) {
+            $status = strtolower(trim((string) ($appointment->status ?? '')));
+
+            return in_array($status, ['upcoming', 'rescheduled'], true);
+        });
+
         foreach (
             collect($appointments ?? [])->filter(function ($appt) {
                 $status = strtolower($appt->status ?? '');
@@ -932,9 +938,10 @@
     </main>
 
     @include('components.appointment-calendar-script', [
-        'mode' => 'patient-dashboard',
+        'mode' => 'patient-appointment',
         'renderStyle' => 'patient',
         'calendarContainerId' => 'calendarSkeletonContainer',
+        'hasActiveAppointment' => $hasActiveAppointment,
     
         'dateInputId' => null,
         'timeInputId' => null,

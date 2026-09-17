@@ -1,5 +1,5 @@
 :root {
-    --voice-mic-size: 42px;
+    --voice-mic-size: var(--toolbar-control-height);
     --voice-mic-radius: 10px;
 
     --voice-mic-bg: var(--card);
@@ -506,29 +506,6 @@
     background: #fca5a5;
 }
 
-.inventory-page .table-card,
-.inventory-page .inventory-toolbar-shell,
-.inventory-page .toolbar-actions,
-
-.document-templates-page .table-card,
-.document-templates-page .table-toolbar,
-.document-templates-page .table-toolbar-actions,
-
-.system-logs-page .card,
-.system-logs-page .card-header,
-.system-logs-page .sl-toolbar-actions,
-
-.academic-period-page .table-card,
-.academic-period-page .table-toolbar,
-.academic-period-page .table-toolbar-actions,
-
-.role-permission-toolbar-card,
-.role-permission-toolbar-card .card-header,
-.role-permission-toolbar,
-.role-permission-toolbar-row {
-    overflow: visible;
-}
-
 @media (max-width: 575px) {
     .global-voice-waveform {
         width: 42px;
@@ -553,7 +530,6 @@
 @media (max-width: 767px) {
 
     :root {
-        --voice-mic-size: 36px;
         --voice-mic-radius: 11px;
     }
 
@@ -576,7 +552,6 @@
 @media (max-width: 380px) {
 
     :root {
-        --voice-mic-size: 34px;
         --voice-mic-radius: 10px;
     }
 

@@ -22,23 +22,6 @@ class PhilippineHolidayService
     public const TYPE_ISLAMIC =
     'islamic';
 
-    /**
-     * Return normalized Philippine holiday records keyed by date.
-     *
-     * Example:
-     *
-     * [
-     *     '2026-12-25' => [
-     *         'date' => '2026-12-25',
-     *         'name' => 'Christmas Day',
-     *         'type' => 'regular',
-     *         'types' => ['regular'],
-     *         'is_working_day' => false,
-     *         'is_blocked_for_booking' => true,
-     *         ...
-     *     ],
-     * ]
-     */
     public function forYear(
         int $year,
         bool $forceRefresh = false
@@ -153,12 +136,12 @@ class PhilippineHolidayService
         }
 
         /*
- * Laravel's cache may have been cleared during deployment.
- *
- * Recover the most recent successfully retrieved MCP dataset
- * from the persistent database snapshot before falling back
- * to locally generated/provisional holidays.
- */
+        * Laravel's cache may have been cleared during deployment.
+        *
+        * Recover the most recent successfully retrieved MCP dataset
+        * from the persistent database snapshot before falling back
+        * to locally generated/provisional holidays.
+        */
         $databaseSnapshot =
             $this->loadDatabaseSnapshot(
                 $year
@@ -175,9 +158,9 @@ class PhilippineHolidayService
                 );
 
             /*
-     * Rehydrate both cache layers so subsequent requests
-     * return to the fast cache path.
-     */
+            * Rehydrate both cache layers so subsequent requests
+            * return to the fast cache path.
+            */
             Cache::put(
                 $freshCacheKey,
                 $databaseSnapshot,
@@ -197,7 +180,6 @@ class PhilippineHolidayService
         }
 
         /*
-         * Cold-start fallback.
          *
          * This preserves calendar functionality when:
          * - the external source is unavailable;

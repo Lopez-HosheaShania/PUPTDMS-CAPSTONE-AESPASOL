@@ -1,25 +1,3 @@
-.sl-live {
-    display: inline-flex;
-    align-items: center;
-    gap: .4rem;
-    font-size: .72rem;
-    font-weight: 600;
-    color: #059669;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    padding: .3rem .7rem;
-    border-radius: 99px;
-    white-space: nowrap;
-}
-
-.sl-live-dot {
-    width: 7px;
-    height: 7px;
-    background: #10b95c;
-    border-radius: 50%;
-    animation: sl-pulse 2s infinite;
-}
-
 .system-logs-page {
     width: 100%;
     max-width: 100%;
@@ -27,18 +5,280 @@
     overflow-x: clip;
 }
 
-.sl-table-wrap {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
+.system-logs-page .card-header {
+    overflow: visible;
+    z-index: 20;
 }
 
-#slTable {
-    width: 100%;
-    max-width: 100%;
+.system-logs-page .card {
+    overflow: visible;
+}
+
+.system-logs-page .system-logs-toolbar {
+    flex: 1 1 auto;
     min-width: 0;
 
-    table-layout: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: .6rem;
+    flex-wrap: nowrap;
+}
+
+.system-logs-page .system-logs-toolbar .table-toolbar-search {
+    flex: 1 1 260px;
+    min-width: 220px;
+    max-width: none;
+}
+
+.system-logs-page .system-logs-toolbar .table-toolbar-actions {
+    width: auto;
+    max-width: none;
+
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: .5rem;
+    flex-wrap: nowrap;
+
+    overflow: visible;
+}
+
+.system-logs-page .system-logs-toolbar .global-filter-select {
+    flex: 0 0 auto;
+}
+
+.system-logs-page .sl-overflow-menu {
+    position: relative;
+
+    flex: 0 0 auto;
+
+    z-index: 30;
+}
+
+.system-logs-page .sl-overflow-menu.is-open {
+    z-index: 300;
+}
+
+.system-logs-page .sl-overflow-panel {
+    position: absolute;
+
+    top: calc(100% + 7px);
+    right: 0;
+
+    width: 230px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+    padding: 6px;
+
+    border: 1px solid var(--border);
+    border-radius: 13px;
+
+    background: var(--card);
+
+    box-shadow:
+        0 18px 38px var(--alpha-slate-900-14);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transform:
+        translateY(-5px) scale(.985);
+
+    transform-origin: top right;
+
+    transition:
+        opacity .16s ease,
+        visibility .16s ease,
+        transform .16s ease;
+}
+
+.system-logs-page .sl-overflow-menu.is-open .sl-overflow-panel {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+
+    transform:
+        translateY(0) scale(1);
+}
+
+.system-logs-page .sl-overflow-item {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+
+    padding: 7px 9px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    background: transparent;
+    color: var(--text-2);
+
+    text-align: left;
+    font: inherit;
+
+    cursor: pointer;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+}
+
+.system-logs-page .sl-overflow-item:hover,
+.system-logs-page .sl-overflow-item:focus-visible {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-1);
+}
+
+.system-logs-page .sl-overflow-item-icon {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: var(--status-default-bg);
+    border: 1px solid var(--status-default-border);
+    color: var(--status-default-text);
+}
+
+.system-logs-page .sl-overflow-item-icon i {
+    color: currentColor;
+    font-size: 11px;
+}
+
+.system-logs-page .sl-overflow-item-copy {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.system-logs-page .sl-overflow-item-copy strong {
+    color: var(--text-1);
+
+    font-size: 11px;
+    font-weight: 850;
+    line-height: 1.15;
+}
+
+.system-logs-page .sl-overflow-item-copy small {
+    color: var(--text-3);
+
+    font-size: 9.5px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.system-logs-page .sl-overflow-menu {
+    position: relative;
+
+    flex: 0 0 auto;
+
+    margin-left: .2rem;
+    padding-left: .65rem;
+
+    z-index: 30;
+}
+
+.system-logs-page .sl-overflow-menu::before {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    top: 50%;
+
+    width: 1px;
+    height: 24px;
+
+    background: var(--border);
+
+    transform: translateY(-50%);
+}
+
+.system-logs-page .sl-overflow-trigger {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border:
+        1px solid color-mix(in srgb,
+            var(--crimson) 24%,
+            var(--border));
+
+    border-radius: 11px;
+
+    background:
+        color-mix(in srgb,
+            var(--crimson) 5%,
+            var(--card));
+
+    color: var(--crimson);
+
+    box-shadow:
+        0 2px 6px color-mix(in srgb,
+            var(--crimson) 8%,
+            transparent);
+
+    transition:
+        background-color .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
+}
+
+.system-logs-page .sl-overflow-trigger i {
+    color: currentColor;
+    font-size: 13px;
+}
+
+.system-logs-page .sl-overflow-trigger:hover,
+.system-logs-page .sl-overflow-menu.is-open .sl-overflow-trigger {
+    border-color:
+        color-mix(in srgb,
+            var(--crimson) 42%,
+            var(--border));
+
+    background:
+        color-mix(in srgb,
+            var(--crimson) 10%,
+            var(--card));
+
+    box-shadow:
+        0 0 0 3px color-mix(in srgb,
+            var(--crimson) 8%,
+            transparent);
+
+    transform: translateY(-1px);
 }
 
 .sl-col-id {
@@ -66,11 +306,21 @@
 }
 
 .sl-skeleton {
-    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-    background-size: 200% 100%;
-    animation: sl-shimmer 1.2s infinite;
-    border-radius: 6px;
     display: inline-block;
+
+    border-radius: 6px;
+
+    background:
+        linear-gradient(90deg,
+            var(--surface) 25%,
+            color-mix(in srgb,
+                var(--surface) 78%,
+                var(--text-3) 22%) 50%,
+            var(--surface) 75%);
+
+    background-size: 200% 100%;
+
+    animation: sl-shimmer 1.2s infinite;
 }
 
 .sl-skeleton-check {
@@ -104,78 +354,69 @@
     height: 14px;
 }
 
-.sl-view[hidden] {
-    display: none !important;
-}
-
 .sl-id {
-    font-size: .7rem;
-    font-weight: 500;
-    color: #757575;
-    background: #f3f4f6;
+    display: inline-block;
+
     padding: .18rem .48rem;
     border-radius: 6px;
-    display: inline-block;
+
+    background: var(--status-default-bg);
+    color: var(--status-default-text);
+
+    font-size: .7rem;
+    font-weight: 500;
 }
 
 .sl-date-day {
-    font-weight: 600;
-    color: #333333;
-    font-size: .78rem;
     display: block;
+
     margin-right: 8px;
+
+    color: var(--text-1);
+
+    font-size: .78rem;
+    font-weight: 600;
 }
 
 .sl-date-time {
-    font-size: .65rem;
-    color: #757575;
     display: block;
+
     margin-top: 1px;
+
+    color: var(--text-3);
+
+    font-size: .65rem;
 }
 
-.sl-user {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
+.sl-username {
+    color: var(--text-1);
+
+    font-size: .78rem;
+    font-weight: 600;
+
+    white-space: nowrap;
 }
 
-.system-logs-page #slTable .sl-user {
-    width: 100%;
-    min-width: 0;
-    overflow: hidden;
+.sl-desc {
+    max-width: 240px;
+
+    color: var(--text-2);
+
+    font-size: .76rem;
+    line-height: 1.45;
+
+    white-space: normal;
+    word-break: break-word;
 }
 
-.system-logs-page #slTable .patient-avatar {
-    flex: 0 0 auto;
+.sl-desc strong {
+    color: var(--text-1);
+    font-weight: 600;
 }
 
 .system-logs-page #slTable td:nth-child(3),
 .system-logs-page #slTable th:nth-child(3) {
     text-align: center;
-}
-
-.system-logs-page #slTable td:nth-child(3) .badge-role,
-.system-logs-page #slGridView .table-record-row .badge-role {
-    min-height: 30px;
-    padding: .38rem .82rem;
-    border-radius: 999px;
-    font-size: .74rem;
-    font-weight: 800;
-    white-space: nowrap;
-    vertical-align: middle;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, .04);
-}
-
-.system-logs-page #slTable td:nth-child(3) .badge-role i,
-.system-logs-page #slGridView .table-record-row .badge-role i {
-    font-size: .72rem;
-}
-
-.sl-username {
-    font-weight: 600;
-    color: #333333;
-    font-size: .78rem;
-    white-space: nowrap;
 }
 
 .system-logs-page #slTable .sl-username {
@@ -185,15 +426,23 @@
 }
 
 .sl-action-alert {
-    width: 12px !important;
-    min-width: 12px !important;
-    height: 12px !important;
-    font-size: .68rem !important;
-    line-height: 1 !important;
-    color: currentColor !important;
+    width: 12px;
+    min-width: 12px;
+    height: 12px;
+
+    color: currentColor;
+
+    font-size: .68rem;
+    line-height: 1;
+
     transform-origin: center;
+
     animation: sl-error-alert-pulse 1.05s ease-in-out infinite;
-    filter: drop-shadow(0 0 5px rgba(220, 38, 38, .36));
+
+    filter:
+        drop-shadow(0 0 5px color-mix(in srgb,
+                var(--status-failed-solid) 36%,
+                transparent));
 }
 
 @keyframes sl-error-alert-pulse {
@@ -202,1286 +451,67 @@
     100% {
         transform: scale(1);
         opacity: 1;
-        filter: drop-shadow(0 0 4px rgba(220, 38, 38, .28));
+
+        filter:
+            drop-shadow(0 0 4px color-mix(in srgb,
+                    var(--status-failed-solid) 28%,
+                    transparent));
     }
 
     50% {
         transform: scale(1.16);
         opacity: .86;
-        filter: drop-shadow(0 0 10px rgba(220, 38, 38, .52));
+
+        filter:
+            drop-shadow(0 0 10px color-mix(in srgb,
+                    var(--status-failed-solid) 52%,
+                    transparent));
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .sl-action-alert {
-        animation: none !important;
+        animation: none;
     }
-}
-
-.sl-desc {
-    color: #333;
-    font-size: .76rem;
-    max-width: 240px;
-    line-height: 1.45;
-    white-space: normal;
-    word-break: break-word;
-}
-
-.sl-desc strong {
-    color: #333333;
-    font-weight: 600;
-}
-
-.sl-row-new {
-    animation: none !important;
-}
-
-.sl-active-filters-section {
-    margin-bottom: 22px;
-}
-
-.sl-active-filters-section.hidden {
-    display: none !important;
-}
-
-.sl-active-filters-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-
-.sl-active-filters-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #333;
-}
-
-.sl-active-filters-clear-all {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: #8B0000;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.sl-active-filters-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #F3F4F6;
-}
-
-@media (max-width: 767px) {
-
-    .flex.gap-1.px-5.py-2 {
-        padding-left: .75rem !important;
-        padding-right: .75rem !important;
-    }
-
-    .sl-desc {
-        max-width: 100%;
-        font-size: .72rem;
-        color: #6b7280;
-    }
-
-    #slTable {
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-    .flex.items-center.gap-3.flex-wrap {
-        gap: .4rem;
-    }
-
-    #entryBadge {
-        white-space: nowrap;
-    }
-
-    #slListView {
-        display: none !important;
-    }
-
-    #slGridView {
-        display: block !important;
-    }
-
-    #slViewToggle {
-        display: none !important;
-    }
-}
-
-@media (max-width: 480px) {
-
-    .tab-btn .tab-count-label {
-        display: none;
-    }
-
-}
-
-#mainContent .sl-toolbar-actions {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    gap: 12px !important;
-    flex-wrap: wrap !important;
-}
-
-.system-logs-page .sl-search-row {
-    width: min(360px, 100%) !important;
-    max-width: 360px !important;
-    min-width: 0 !important;
-
-    flex: 1 1 280px !important;
-}
-
-.system-logs-page .sl-filter-actions-wrap,
-.system-logs-page .sl-view-toggle,
-.system-logs-page #slClearFilterBtn {
-    flex: 0 0 auto !important;
-}
-
-#mainContent .sl-view-toggle {
-    flex: 0 0 auto;
-}
-
-.sl-filter-actions-wrap {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    flex: 0 0 auto;
-}
-
-.sl-status-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: .55rem;
-    padding: .9rem 1.25rem 0;
-}
-
-.sl-status-tab {
-    min-height: 38px;
-    display: inline-flex;
-    align-items: center;
-    gap: .45rem;
-    border-radius: 999px;
-    border: 1px solid #e5e7eb;
-    background: #fff;
-    color: #475569;
-    padding: 0 .9rem;
-    font-size: .72rem;
-    font-weight: 800;
-    box-shadow: 0 3px 10px rgba(15, 23, 42, .05);
-}
-
-.sl-status-tab.active {
-    background: linear-gradient(135deg, #8B0000, #6b0000);
-    border-color: #8B0000;
-    color: #fff;
 }
 
 .sl-status-count {
     min-width: 20px;
     height: 20px;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     padding: 0 6px;
     border-radius: 999px;
-    background: rgba(148, 163, 184, .16);
+
+    background:
+        color-mix(in srgb,
+            currentColor 12%,
+            transparent);
+
     font-size: .62rem;
-}
-
-.sl-status-tab.active .sl-status-count {
-    background: rgba(255, 255, 255, .18);
-}
-
-.sl-grid-top-badges {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: .4rem;
-}
-
-.sl-role-tabs {
-    display: flex;
-    gap: 5px;
-    padding: .55rem 1rem;
-    border-bottom: 1px solid #f3f4f6;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.sl-role-tabs .tab-btn {
-    position: relative;
-    flex: 0 0 auto;
-    min-height: 33px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    border-radius: 999px;
-    padding: 0 12px;
-    border: 1px solid transparent;
-    background: #f5f5f5;
-    color: #6b7280;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.104);
-    transform: none;
-    font-size: .88rem;
-    font-weight: 700;
-}
-
-.sl-role-tabs .tab-btn:hover:not(.active) {
-    background: #fff5f5;
-    color: #8B0000;
-    border-color: rgba(139, 0, 0, .12);
-    transform: none;
-    box-shadow: none;
-}
-
-.sl-role-tabs .tab-btn.active {
-    background: linear-gradient(135deg, #8B0000, #6b0000);
-    color: #fff;
-    box-shadow: 0 8px 18px rgba(139, 0, 0, .18);
-}
-
-.sl-role-tabs .tab-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 6px;
-    margin-left: 2px;
-    border-radius: 999px;
-    background: #f3f4f6;
-    color: #6b7280;
-    font-size: 9px;
-    font-weight: 900;
-    line-height: 1;
-}
-
-.sl-role-tabs .tab-btn.active .tab-count,
-.sl-role-tabs .tab-count.active {
-    background: rgba(255, 255, 255, .22) !important;
-    color: #fff !important;
-}
-
-[data-theme="dark"] .sl-live,
-.dark .sl-live {
-    background: rgba(16, 185, 129, .13) !important;
-    border-color: rgba(119, 229, 189, 0.686) !important;
-    color: #9bfac0 !important;
-}
-
-[data-theme="dark"] #entryBadge,
-.dark #entryBadge {
-    background: rgba(139, 0, 0, .32) !important;
-    color: #fecaca !important;
-    border-color: rgba(252, 165, 165, .24) !important;
-}
-
-[data-theme="dark"] .sl-role-tabs,
-.dark .sl-role-tabs {
-    border-color: rgba(255, 255, 255, .10) !important;
-    background: rgba(13, 17, 23, .45) !important;
-}
-
-[data-theme="dark"] .sl-role-tabs .tab-btn,
-.dark .sl-role-tabs .tab-btn {
-    color: #9ca3af !important;
-}
-
-[data-theme="dark"] .sl-role-tabs .tab-btn:hover:not(.active),
-.dark .sl-role-tabs .tab-btn:hover:not(.active) {
-    background: rgba(139, 0, 0, .18) !important;
-    color: #fca5a5 !important;
-    border-color: rgba(252, 165, 165, .18) !important;
-}
-
-[data-theme="dark"] .sl-role-tabs .tab-btn.active,
-.dark .sl-role-tabs .tab-btn.active {
-    background: linear-gradient(135deg, #8B0000, #C1121F) !important;
-    color: #fff !important;
-}
-
-[data-theme="dark"] .sl-role-tabs .tab-count,
-.dark .sl-role-tabs .tab-count {
-    background: rgba(255, 255, 255, .08) !important;
-    color: #cbd5e1 !important;
-}
-
-[data-theme="dark"] .sl-status-tab,
-.dark .sl-status-tab {
-    background: rgba(15, 23, 42, .74) !important;
-    color: #cbd5e1 !important;
-    border-color: rgba(148, 163, 184, .18) !important;
-}
-
-[data-theme="dark"] .sl-status-tab.active,
-.dark .sl-status-tab.active {
-    background: linear-gradient(135deg, #8B0000, #C1121F) !important;
-    color: #fff !important;
-    border-color: rgba(252, 165, 165, .28) !important;
-}
-
-[data-theme="dark"] .sl-username,
-[data-theme="dark"] .sl-date-day,
-[data-theme="dark"] .sl-module,
-[data-theme="dark"] .sl-desc,
-[data-theme="dark"] .sl-desc strong,
-.dark .sl-username,
-.dark .sl-date-day,
-.dark .sl-module,
-.dark .sl-desc,
-.dark .sl-desc strong {
-    color: #E5E7EB !important;
-}
-
-[data-theme="dark"] .sl-date-time,
-.dark .sl-date-time {
-    color: #8B949E !important;
-}
-
-[data-theme="dark"] .sl-id,
-.dark .sl-id {
-    background: rgba(255, 255, 255, .07) !important;
-    color: #C9D1D9 !important;
-}
-
-[data-theme="dark"] .sl-skeleton,
-.dark .sl-skeleton {
-    background: linear-gradient(90deg, rgba(255, 255, 255, .06) 25%, rgba(255, 255, 255, .12) 50%, rgba(255, 255, 255, .06) 75%) !important;
-    background-size: 200% 100% !important;
-}
-
-@media (max-width: 900px) {
-    #mainContent .sl-toolbar-actions {
-        justify-content: flex-start !important;
-    }
-
-    .sl-filter-actions-wrap {
-        flex-wrap: wrap;
-    }
-}
-
-@media (max-width: 767px) {
-
-    .sl-status-tabs {
-        padding: .75rem .85rem 0;
-        overflow-x: auto;
-        flex-wrap: nowrap;
-    }
-
-    .sl-status-tab {
-        flex: 0 0 auto;
-    }
-
-    .sl-role-tabs {
-        padding: .65rem .85rem;
-    }
-
-    #slGridView[hidden],
-    #slListView[hidden] {
-        display: none !important;
-    }
-}
-
-@media (max-width: 480px) {
-
-    #mainContent .sl-toolbar-actions {
-        gap: 10px !important;
-    }
-
-    .sl-filter-actions-wrap,
-    .sl-filter-actions-wrap .ui-btn {
-        width: 100%;
-    }
-
-    .sl-filter-actions-wrap {
-        display: grid;
-        grid-template-columns: 1fr;
-    }
 }
 
 .system-logs-page .page-banner,
 .system-logs-page .stat-card {
-    animation: none !important;
-}
-
-.system-logs-page .sl-toolbar-actions {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    gap: 10px !important;
-    flex-wrap: nowrap !important;
-}
-
-.system-logs-page .sl-filter-actions-wrap {
-    order: 2 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    flex: 0 0 auto !important;
-}
-
-.system-logs-page .sl-view-toggle {
-    order: 3 !important;
-    flex: 0 0 auto !important;
-    margin-left: 0 !important;
+    animation: none;
 }
 
 .system-logs-page #emptyState.empty-state-host {
-    display: none !important;
-    width: 100% !important;
-}
-
-.system-logs-page #slClearFilterBtn {
-    order: 4 !important;
-    flex: 0 0 auto !important;
+    display: none;
+    width: 100%;
 }
 
 .system-logs-page #emptyState.empty-state-host.show,
 .system-logs-page #emptyState.empty-state-host.is-visible {
-    display: block !important;
+    display: block;
 }
 
 .system-logs-page #emptyState .empty-state {
-    min-height: 340px !important;
-    padding: 56px 20px 64px !important;
-}
-
-@media (max-width: 767px) {
-
-    .system-logs-page .sl-toolbar-actions {
-        width: 100% !important;
-        max-width: none !important;
-        min-width: 0 !important;
-    }
-
-    .system-logs-page .sl-filter-actions-wrap {
-        order: 2 !important;
-        width: auto !important;
-    }
-
-    .system-logs-page .sl-view-toggle {
-        order: 3 !important;
-    }
-
-    .system-logs-page #slClearFilterBtn {
-        order: 4 !important;
-    }
-}
-
-#filterModal.open .filter-drawer-overlay {
-    opacity: 1 !important;
-}
-
-#filterModal.closing .filter-drawer-overlay {
-    opacity: 0 !important;
-}
-
-.system-logs-page~#filterModal .filter-drawer-panel {
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-.system-logs-page~#filterModal .filter-drawer-body {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-}
-
-.system-logs-page~#filterModal .filter-drawer-title h2 {
-    line-height: 1 !important;
-}
-
-.system-logs-page~#filterModal .filter-chip-row {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 10px 12px !important;
-}
-
-.system-logs-page~#filterModal .ftag i,
-.system-logs-page~#filterModal .quick-date-chip i {
-    color: currentColor !important;
-}
-
-.system-logs-page~#filterModal .quick-date-chip.active {
-    background: var(--filter-chip-active-bg) !important;
-    border-color: var(--filter-chip-active-border) !important;
-    color: var(--filter-chip-active-text) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45) !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select {
-    position: relative !important;
-    width: 100% !important;
-    z-index: 60 !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select.is-open {
-    z-index: 120 !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-btn {
-    width: 100% !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    padding: 0 13px 0 15px !important;
-    border-radius: 999px !important;
-    border: 1px solid var(--filter-input-border) !important;
-    background: var(--filter-input-bg) !important;
-    color: var(--filter-input-text) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 10px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    line-height: 1 !important;
-    text-align: left !important;
-    cursor: pointer !important;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
-    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-btn:hover,
-.system-logs-page~#filterModal .sl-action-select.is-open .sl-action-select-btn {
-    border-color: rgba(139, 0, 0, .35) !important;
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, .08) !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-current {
-    min-width: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    gap: 8px !important;
-    overflow: hidden !important;
-    white-space: nowrap !important;
-    text-overflow: ellipsis !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-current span,
-.system-logs-page~#filterModal #slActionSelectLabel {
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    line-height: 1 !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-current i,
-.system-logs-page~#filterModal .sl-action-select-chevron {
-    font-size: 11px !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-menu {
-    max-height: 174px !important;
-    overflow-y: auto !important;
-    overscroll-behavior: contain !important;
-    gap: 3px !important;
-    padding: 5px !important;
-    border-radius: 14px !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-chevron {
-    transition: transform .18s ease !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select.is-open .sl-action-select-chevron {
-    transform: rotate(180deg) !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-menu {
-    position: absolute !important;
-    left: 0 !important;
-    right: 0 !important;
-    top: calc(100% + 6px) !important;
-    z-index: 130 !important;
-
-    display: grid !important;
-    gap: 4px !important;
-
-    padding: 6px !important;
-    border-radius: 16px !important;
-    border: 1px solid #E5E7EB !important;
-    background: #FFFFFF !important;
-    box-shadow: 0 18px 38px rgba(15, 23, 42, .16) !important;
-
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transform: translateY(-4px) scale(.985) !important;
-    pointer-events: none !important;
-
-    transition: opacity .16s ease, visibility .16s ease, transform .16s ease !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select.is-open .sl-action-select-menu {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: translateY(0) scale(1) !important;
-    pointer-events: auto !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-option {
-    width: 100% !important;
-    min-height: 36px !important;
-    padding: 0 12px !important;
-    border: 1px solid transparent !important;
-    border-radius: 12px !important;
-    background: transparent !important;
-    color: #374151 !important;
-
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 10px !important;
-
-    font-size: 13px !important;
-    font-weight: 850 !important;
-    line-height: 1 !important;
-    text-align: left !important;
-    cursor: pointer !important;
-    transition: background .16s ease, border-color .16s ease, color .16s ease !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-option span {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 9px !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-option i {
-    color: currentColor !important;
-    font-size: 12px !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-option>i:last-child {
-    opacity: 0 !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-option:hover,
-.system-logs-page~#filterModal .sl-action-select-option.active {
-    background: #FEF2F2 !important;
-    border-color: #FECACA !important;
-    color: #8B0000 !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-option.active>i:last-child {
-    opacity: 1 !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-option {
-    min-height: 31px !important;
-    padding: 0 10px !important;
-    border-radius: 10px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    gap: 8px !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-option span {
-    gap: 8px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-option i {
-    font-size: 11px !important;
-}
-
-.system-logs-page~#filterModal .sl-action-select-menu::-webkit-scrollbar {
-    width: 5px !important;
-}
-
-[data-theme="dark"] .system-logs-page~#filterModal .sl-action-select-btn,
-.dark .system-logs-page~#filterModal .sl-action-select-btn {
-    background: #0D1117 !important;
-    border-color: #30363D !important;
-    color: #F8FAFC !important;
-}
-
-[data-theme="dark"] .system-logs-page~#filterModal .sl-action-select-current i,
-[data-theme="dark"] .system-logs-page~#filterModal .sl-action-select-chevron,
-.dark .system-logs-page~#filterModal .sl-action-select-current i,
-.dark .system-logs-page~#filterModal .sl-action-select-chevron {
-    color: #C9D1D9 !important;
-}
-
-[data-theme="dark"] .system-logs-page~#filterModal .sl-action-select-menu,
-.dark .system-logs-page~#filterModal .sl-action-select-menu {
-    background: #0D1117 !important;
-    border-color: #30363D !important;
-    box-shadow:
-        0 18px 36px rgba(0, 0, 0, .45),
-        inset 0 1px 0 rgba(255, 255, 255, .05) !important;
-}
-
-[data-theme="dark"] .system-logs-page~#filterModal .sl-action-select-option,
-.dark .system-logs-page~#filterModal .sl-action-select-option {
-    color: #CBD5E1 !important;
-}
-
-[data-theme="dark"] .system-logs-page~#filterModal .sl-action-select-option:hover,
-[data-theme="dark"] .system-logs-page~#filterModal .sl-action-select-option.active,
-.dark .system-logs-page~#filterModal .sl-action-select-option:hover,
-.dark .system-logs-page~#filterModal .sl-action-select-option.active {
-    background: rgba(139, 0, 0, .22) !important;
-    border-color: rgba(252, 165, 165, .24) !important;
-    color: #FCA5A5 !important;
-}
-
-@media (max-width: 767px) {
-    .system-logs-page~#filterModal .sl-action-select-menu {
-        max-height: 220px !important;
-        overflow-y: auto !important;
-    }
-}
-
-#mainContent.system-logs-page .sl-view-toggle,
-.system-logs-page .sl-view-toggle,
-#mainContent.system-logs-page .sl-filter-actions-wrap,
-.system-logs-page .sl-filter-actions-wrap {
-    flex: 0 0 auto !important;
-}
-
-@media (max-width: 900px) {
-
-    #mainContent.system-logs-page .sl-toolbar-actions,
-    .system-logs-page .sl-toolbar-actions {
-        flex-wrap: wrap !important;
-        justify-content: flex-start !important;
-    }
-}
-
-[data-theme="dark"] .sl-action i,
-.dark .sl-action i {
-    color: currentColor !important;
-}
-
-[data-theme="dark"] .system-logs-page .table-action-btn,
-.dark .system-logs-page .table-action-btn,
-[data-theme="dark"] .system-logs-page .action-btn,
-.dark .system-logs-page .action-btn {
-    color: #CBD5E1 !important;
-}
-
-[data-theme="dark"] .system-logs-page .table-action-btn i,
-.dark .system-logs-page .table-action-btn i,
-[data-theme="dark"] .system-logs-page .action-btn i,
-.dark .system-logs-page .action-btn i {
-    color: currentColor !important;
-}
-
-@media (max-width: 1280px) {
-
-    .system-logs-page .page-banner,
-    .system-logs-page .stat-card {
-        min-width: 0 !important;
-        max-width: 100% !important;
-    }
-
-    .system-logs-page .sl-role-tabs,
-    .system-logs-page .sl-table-wrap {
-        -webkit-overflow-scrolling: touch !important;
-    }
-}
-
-@media (min-width: 1025px) and (max-width: 1280px) {
-
-    .system-logs-page .page-banner {
-        padding: 1.25rem 1.35rem !important;
-        border-radius: 20px !important;
-        margin-bottom: 1rem !important;
-    }
-
-    .system-logs-page .page-banner-inner {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 1rem !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .page-title {
-        font-size: 1.75rem !important;
-        line-height: 1.08 !important;
-        margin: 0 !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .sl-live {
-        height: 36px !important;
-        padding: 0 .85rem !important;
-        font-size: .7rem !important;
-    }
-
-    .system-logs-page #slTable th,
-    .system-logs-page #slTable td,
-    .system-logs-page .data-table th,
-    .system-logs-page .data-table td {
-        padding-left: .7rem !important;
-        padding-right: .7rem !important;
-        vertical-align: middle !important;
-    }
-
-    .system-logs-page .sl-desc {
-        display: block !important;
-        max-width: none !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        font-size: .72rem !important;
-        line-height: 1.4 !important;
-        white-space: normal !important;
-        word-break: normal !important;
-        overflow-wrap: break-word !important;
-    }
-
-    .system-logs-page .sl-table-wrap {
-        overflow-x: auto !important;
-    }
-}
-
-@media (min-width: 901px) and (max-width: 1024px) {
-
-    .system-logs-page .page-banner {
-        padding: 1.1rem 1.15rem !important;
-        border-radius: 18px !important;
-        margin-bottom: .9rem !important;
-    }
-
-    .system-logs-page .page-banner-inner {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: .9rem !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .page-title {
-        font-size: 1.6rem !important;
-        line-height: 1.06 !important;
-        margin: 0 !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .sl-live {
-        height: 34px !important;
-        padding: 0 .8rem !important;
-        font-size: .68rem !important;
-    }
-
-    .system-logs-page .sl-toolbar-actions {
-        width: 100% !important;
-        display: grid !important;
-        grid-template-columns: 1fr auto auto auto !important;
-        grid-template-areas:
-            "search search search search"
-            "filter toggle reset ." !important;
-        gap: .6rem !important;
-        justify-content: start !important;
-    }
-
-    .system-logs-page .sl-filter-actions-wrap {
-        grid-area: filter !important;
-        justify-self: start !important;
-    }
-
-    .system-logs-page #slViewToggle,
-    .system-logs-page .sl-view-toggle {
-        grid-area: toggle !important;
-        justify-self: start !important;
-        margin: 0 !important;
-    }
-
-    .system-logs-page #slClearFilterBtn {
-        grid-area: reset !important;
-        justify-self: start !important;
-    }
-
-    .system-logs-page .sl-table-wrap {
-        overflow-x: auto !important;
-    }
-}
-
-@media (min-width: 768px) and (max-width: 900px) {
-
-    .system-logs-page .page-banner {
-        padding: 1rem !important;
-        border-radius: 18px !important;
-        margin-bottom: .85rem !important;
-    }
-
-    .system-logs-page .page-banner-inner {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        justify-content: flex-start !important;
-        gap: .7rem !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .page-title {
-        font-size: 1.45rem !important;
-        line-height: 1.05 !important;
-        margin: 0 !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .sl-live {
-        height: 32px !important;
-        min-height: 32px !important;
-        padding: 0 .75rem !important;
-        font-size: .66rem !important;
-    }
-
-    .system-logs-page #entryBadge {
-        min-height: 25px !important;
-        padding: 0 .65rem !important;
-        font-size: .58rem !important;
-    }
-
-    .system-logs-page .sl-toolbar-actions {
-        width: 100% !important;
-        display: grid !important;
-        grid-template-columns: 1fr auto auto !important;
-        grid-template-areas:
-            "search search search"
-            "filter toggle reset" !important;
-        align-items: center !important;
-        justify-content: start !important;
-        gap: .6rem !important;
-    }
-
-    .system-logs-page .sl-filter-actions-wrap {
-        grid-area: filter !important;
-        justify-self: start !important;
-    }
-
-    .system-logs-page .sl-role-tabs {
-        padding: .65rem .75rem !important;
-        gap: .45rem !important;
-        overflow-x: auto !important;
-        scrollbar-width: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs::-webkit-scrollbar {
-        display: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs .tab-btn {
-        min-height: 32px !important;
-        padding: 0 .75rem !important;
-        font-size: .64rem !important;
-        white-space: nowrap !important;
-        flex: 0 0 auto !important;
-    }
-
-    .system-logs-page .sl-role-tabs .tab-count {
-        min-width: 18px !important;
-        height: 18px !important;
-        padding: 0 5px !important;
-        font-size: .52rem !important;
-    }
-
-    .system-logs-page #slListView {
-        display: none !important;
-    }
-
-    .system-logs-page #slGridView,
-    .system-logs-page #slGridView[hidden] {
-        display: block !important;
-    }
-
-    .system-logs-page .sl-username {
-        font-size: .68rem !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }
-}
-
-@media (min-width: 481px) and (max-width: 767px) {
-
-    .system-logs-page .page-banner {
-        padding: 1rem !important;
-        border-radius: 16px !important;
-        margin-bottom: 1rem !important;
-    }
-
-    .system-logs-page .page-banner-inner {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: .75rem !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .page-title {
-        font-size: 1.45rem !important;
-        line-height: 1.05 !important;
-        margin: 0 !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .sl-live {
-        min-height: 32px !important;
-        padding: 0 .75rem !important;
-        font-size: .68rem !important;
-    }
-
-    .system-logs-page .sl-toolbar-actions {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: .65rem !important;
-    }
-
-    .system-logs-page .sl-filter-actions-wrap {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        width: 100% !important;
-        gap: .55rem !important;
-    }
-
-    .system-logs-page #slFilterBtn {
-        width: 100% !important;
-        height: 40px !important;
-        justify-content: center !important;
-    }
-
-    .system-logs-page #slViewToggle,
-    .system-logs-page .sl-view-toggle {
-        display: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs {
-        padding: .7rem .85rem !important;
-        gap: .5rem !important;
-        overflow-x: auto !important;
-        scrollbar-width: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs::-webkit-scrollbar {
-        display: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs .tab-btn {
-        min-height: 34px !important;
-        padding: 0 .8rem !important;
-        font-size: .68rem !important;
-        flex: 0 0 auto !important;
-    }
-
-    .system-logs-page #slListView {
-        display: none !important;
-    }
-
-    .system-logs-page #slGridView,
-    .system-logs-page #slGridView[hidden] {
-        display: block !important;
-    }
-}
-
-@media (min-width: 361px) and (max-width: 480px) {
-
-    .system-logs-page .page-banner {
-        padding: .95rem !important;
-        border-radius: 15px !important;
-    }
-
-    .system-logs-page .page-banner-inner {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: .7rem !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .page-title {
-        font-size: 1.35rem !important;
-        line-height: 1.05 !important;
-        margin: 0 !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .sl-live {
-        min-height: 31px !important;
-        padding: 0 .7rem !important;
-        font-size: .64rem !important;
-    }
-
-    .system-logs-page .sl-toolbar-actions {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: .6rem !important;
-    }
-
-    .system-logs-page .sl-filter-actions-wrap {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: .5rem !important;
-        width: 100% !important;
-    }
-
-    .system-logs-page #slFilterBtn {
-        width: 100% !important;
-        height: 39px !important;
-        justify-content: center !important;
-        font-size: .7rem !important;
-    }
-
-    .system-logs-page #slClearFilterBtn {
-        width: 39px !important;
-        height: 39px !important;
-        min-width: 39px !important;
-    }
-
-    .system-logs-page #slViewToggle,
-    .system-logs-page .sl-view-toggle {
-        display: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs {
-        padding: .65rem .75rem !important;
-        overflow-x: auto !important;
-        scrollbar-width: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs::-webkit-scrollbar {
-        display: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs .tab-btn {
-        min-height: 32px !important;
-        padding: 0 .72rem !important;
-        font-size: .64rem !important;
-        flex: 0 0 auto !important;
-    }
-
-    .system-logs-page #slListView {
-        display: none !important;
-    }
-
-    .system-logs-page #slGridView,
-    .system-logs-page #slGridView[hidden] {
-        display: block !important;
-    }
-}
-
-@media (max-width: 360px) {
-
-    .system-logs-page .page-banner {
-        padding: .85rem !important;
-        border-radius: 14px !important;
-        margin-bottom: .75rem !important;
-    }
-
-    .system-logs-page .page-banner-inner {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: .65rem !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .page-title {
-        font-size: 1.22rem !important;
-        line-height: 1.05 !important;
-        margin: 0 !important;
-        text-align: left !important;
-    }
-
-    .system-logs-page .sl-live {
-        min-height: 30px !important;
-        padding: 0 .65rem !important;
-        font-size: .6rem !important;
-    }
-
-    .system-logs-page #entryBadge {
-        font-size: .54rem !important;
-        min-height: 24px !important;
-        padding: 0 .6rem !important;
-    }
-
-    .system-logs-page .sl-toolbar-actions {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: .55rem !important;
-    }
-
-    .system-logs-page .sl-filter-actions-wrap {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: .45rem !important;
-        width: 100% !important;
-    }
-
-    .system-logs-page #slFilterBtn {
-        width: 100% !important;
-        height: 38px !important;
-        font-size: .68rem !important;
-        justify-content: center !important;
-    }
-
-    .system-logs-page #slClearFilterBtn {
-        width: 38px !important;
-        height: 38px !important;
-        min-width: 38px !important;
-    }
-
-    .system-logs-page #slViewToggle,
-    .system-logs-page .sl-view-toggle {
-        display: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs {
-        padding: .6rem .65rem !important;
-        gap: .42rem !important;
-        overflow-x: auto !important;
-        scrollbar-width: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs::-webkit-scrollbar {
-        display: none !important;
-    }
-
-    .system-logs-page .sl-role-tabs .tab-btn {
-        min-height: 31px !important;
-        padding: 0 .68rem !important;
-        font-size: .6rem !important;
-        flex: 0 0 auto !important;
-    }
-
-    .system-logs-page .sl-role-tabs .tab-count {
-        min-width: 17px !important;
-        height: 17px !important;
-        font-size: .5rem !important;
-    }
-
-    .system-logs-page #slListView {
-        display: none !important;
-    }
-
-    .system-logs-page #slGridView,
-    .system-logs-page #slGridView[hidden] {
-        display: block !important;
-    }
-
-    .system-logs-page .sl-username {
-        font-size: .66rem !important;
-    }
-
-    .system-logs-page .sl-action,
-    .system-logs-page .sl-role {
-        min-height: 22px !important;
-        padding: 0 .45rem !important;
-        font-size: .54rem !important;
-    }
-}
-
-.system-logs-page #slGridBody>.table-record-card>.table-record-content {
-    padding: 1rem;
+    min-height: 340px;
+    padding: 56px 20px 64px;
 }
 
 .system-logs-page .table-record-value {
@@ -1493,68 +523,6 @@
     align-items: start;
 }
 
-#slExportModal .ui-modal-card {
-    width: min(92vw, 950px) !important;
-    max-width: 950px !important;
-    max-height: 90dvh !important;
-}
-
-#slExportModal .modal-hd,
-#slExportModal .modal-bd,
-#slExportModal .modal-ft {
-    background: #ffffff;
-}
-
-#slExportModal .modal-hd {
-    padding: 1.05rem 1.2rem .85rem;
-}
-
-#slExportModal .modal-bd {
-    padding: 1.1rem 1.4rem 1.2rem;
-}
-
-#slExportModal .modal-ft {
-    padding: 1rem 1.4rem 1.25rem;
-}
-
-#slExportModal .modal-heading {
-    gap: .75rem;
-    align-items: center;
-}
-
-#slExportModal .modal-icon {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    border-radius: 13px;
-}
-
-#slExportModal .modal-icon i {
-    font-size: 1.05rem;
-}
-
-#slExportModal .modal-title {
-    font-size: 1.05rem;
-    line-height: 1.1;
-}
-
-#slExportModal .modal-subtitle {
-    margin-top: .14rem;
-    font-size: .74rem;
-    line-height: 1.35;
-}
-
-#slExportModal .modal-x {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    border-radius: 12px;
-}
-
-#slExportModal .modal-x i {
-    font-size: 1rem;
-}
-
 #slExportModal .report-date-range-section {
     display: flex;
     flex-direction: column;
@@ -1563,77 +531,12 @@
 
 @media (min-width: 768px) {
     #slExportModal .ui-modal-card {
-        width: min(94vw, 620px) !important;
-        max-width: 620px !important;
+        width: min(94vw, 620px);
+        max-width: 620px;
 
-        height: auto !important;
-        max-height: min(88dvh, 640px) !important;
+        height: auto;
+        max-height: min(88dvh, 640px);
     }
-}
-
-#slExportModal .report-export-scope {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-
-    width: 100% !important;
-    max-width: 100% !important;
-
-    gap: .45rem !important;
-    flex-wrap: nowrap !important;
-    overflow: visible !important;
-}
-
-#slExportModal .report-export-scope-chip {
-    flex: 1 1 0 !important;
-    justify-content: center !important;
-    min-width: 0 !important;
-    min-height: 27px;
-    padding: 0 .54rem;
-    border-radius: 999px;
-    border: 1px solid #EEF2F7;
-    background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFE 100%);
-    color: #667085;
-    display: inline-flex;
-    align-items: center;
-    gap: .3rem;
-    box-shadow: 0 6px 14px rgba(15, 23, 42, .06);
-    font-size: .64rem;
-    font-weight: 800;
-    line-height: 1;
-    white-space: nowrap;
-}
-
-#slExportModal .report-export-scope-chip i {
-    color: currentColor;
-    font-size: .56rem;
-}
-
-#slExportModal .report-export-scope-chip.active {
-    background: linear-gradient(135deg, #8B0000, #6B0000);
-    border-color: #8B0000;
-    color: #FFFFFF;
-    box-shadow: 0 12px 26px rgba(139, 0, 0, .2);
-}
-
-#slExportModal .report-export-scope-count {
-    min-width: 15px;
-    height: 15px;
-    padding: 0 4px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #F1F5F9;
-    color: #667085;
-    font-size: .5rem;
-    font-weight: 900;
-    line-height: 1;
-}
-
-#slExportModal .report-export-scope-chip.active .report-export-scope-count {
-    background: rgba(255, 255, 255, .18);
-    color: #FFFFFF;
 }
 
 #slExportModal .report-date-range-heading {
@@ -1715,23 +618,393 @@
 }
 
 #slExportModal .modal-ft .ui-btn {
-    min-height: 46px !important;
-    padding: 0.55rem 1rem !important;
-    border-radius: 14px !important;
-    font-size: 0.95rem !important;
-    font-weight: 800 !important;
-    gap: 0.4rem !important;
+    min-height: 46px;
+    padding: 0.55rem 1rem;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    gap: 0.4rem;
 }
 
 #slExportModal .modal-ft .ui-btn i {
-    font-size: 0.75rem !important;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 1280px) {
+
+    .system-logs-page .page-banner,
+    .system-logs-page .stat-card {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+
+    .system-logs-page .page-banner {
+        padding: 1.25rem 1.35rem;
+        border-radius: 20px;
+        margin-bottom: 1rem;
+    }
+
+    .system-logs-page .page-banner-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        text-align: left;
+    }
+
+    .system-logs-page .page-title {
+        font-size: 1.75rem;
+        line-height: 1.08;
+        margin: 0;
+        text-align: left;
+    }
+
+    .system-logs-page #slTable th,
+    .system-logs-page #slTable td,
+    .system-logs-page .data-table th,
+    .system-logs-page .data-table td {
+        padding-left: .7rem;
+        padding-right: .7rem;
+        vertical-align: middle;
+    }
+
+    .system-logs-page .sl-desc {
+        display: block;
+        max-width: none;
+        width: 100%;
+        min-width: 0;
+        font-size: .72rem;
+        line-height: 1.4;
+        white-space: normal;
+        word-break: normal;
+        overflow-wrap: break-word;
+    }
+}
+
+@media (max-width: 1024px) {
+
+    .system-logs-page .card-header {
+        align-items: stretch;
+    }
+
+    .system-logs-page .card-header-right.system-logs-toolbar {
+        width: 100%;
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: .65rem;
+    }
+
+    .system-logs-page .system-logs-toolbar .table-toolbar-search {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+
+        flex: 0 0 auto;
+    }
+
+    .system-logs-page .system-logs-toolbar .global-voice-row {
+        width: 100%;
+        min-width: 0;
+
+        display: flex;
+        align-items: center;
+
+        gap: .5rem;
+    }
+
+    .system-logs-page .system-logs-toolbar .global-voice-row> :first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .system-logs-page .system-logs-toolbar .table-toolbar-actions {
+        width: 100%;
+        min-width: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+
+        gap: .5rem;
+        flex-wrap: wrap;
+
+        overflow: visible;
+    }
+
+    .system-logs-page #slStatusSelect,
+    .system-logs-page #slRoleSelect {
+        flex: 1 1 calc(50% - .25rem);
+
+        width: auto;
+        min-width: 160px;
+        max-width: none;
+    }
+
+    .system-logs-page #slStatusSelect .global-filter-select-trigger,
+    .system-logs-page #slRoleSelect .global-filter-select-trigger {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .system-logs-page #slExternalClearFilterBtn {
+        flex: 0 0 auto;
+        width: auto;
+    }
+
+    .system-logs-page #slOverflowMenu {
+        flex: 0 0 auto;
+
+        width: auto;
+        min-width: 0;
+
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    .system-logs-page #slOverflowMenu::before {
+        display: none;
+    }
+
+    .system-logs-page #slOverflowTrigger {
+        width: var(--ui-action-size, 32px);
+        min-width: var(--ui-action-size, 32px);
+    }
+
+    .system-logs-page #slViewToggle {
+        flex: 0 0 auto;
+
+        width: auto;
+        min-width: 0;
+    }
+
+    .system-logs-page .table-record-meta {
+        display: grid;
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: .7rem .85rem;
+
+        width: 100%;
+        min-width: 0;
+    }
+
+    .system-logs-page .table-record-row {
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        gap: .25rem;
+    }
+
+    .system-logs-page .table-record-row:nth-child(3) {
+        grid-column: 1;
+    }
+
+    .system-logs-page .table-record-row:nth-child(4) {
+        grid-column: 1 / -1;
+    }
+
+    .system-logs-page .table-record-label {
+        width: auto;
+
+        font-size: .58rem;
+        line-height: 1;
+
+        letter-spacing: .065em;
+        text-transform: uppercase;
+    }
+
+    .system-logs-page .table-record-value {
+        width: 100%;
+        min-width: 0;
+
+        font-size: .72rem;
+        line-height: 1.3;
+
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .system-logs-page #slStatusSelect,
+    .system-logs-page #slRoleSelect {
+        min-width: 0;
+        flex-basis: calc(50% - .25rem);
+    }
+
+    .system-logs-page .system-logs-toolbar .table-toolbar-actions {
+        row-gap: .5rem;
+    }
+
+    .system-logs-page .table-record-meta {
+        gap: .55rem .65rem;
+    }
+
+    .system-logs-page .table-record-value {
+        font-size: .68rem;
+    }
+
+    .system-logs-page .table-record-label {
+        font-size: .54rem;
+    }
+}
+
+
+@media (min-width: 901px) and (max-width: 1024px) {
+
+    .system-logs-page .page-banner {
+        padding: 1.1rem 1.15rem;
+        border-radius: 18px;
+        margin-bottom: .9rem;
+    }
+
+    .system-logs-page .page-banner-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .9rem;
+        text-align: left;
+    }
+
+    .system-logs-page .page-title {
+        font-size: 1.6rem;
+        line-height: 1.06;
+        margin: 0;
+        text-align: left;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+
+    .system-logs-page .page-banner {
+        padding: 1rem;
+        border-radius: 18px;
+        margin-bottom: .85rem;
+    }
+
+    .system-logs-page .page-banner-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: .7rem;
+        text-align: left;
+    }
+
+    .system-logs-page .page-title {
+        font-size: 1.45rem;
+        line-height: 1.05;
+        margin: 0;
+        text-align: left;
+    }
+
+    .system-logs-page .sl-username {
+        font-size: .68rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+
+    .system-logs-page .page-banner {
+        padding: 1rem;
+        border-radius: 16px;
+        margin-bottom: 1rem;
+    }
+
+    .system-logs-page .page-banner-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .75rem;
+        text-align: left;
+    }
+
+    .system-logs-page .page-title {
+        font-size: 1.45rem;
+        line-height: 1.05;
+        margin: 0;
+        text-align: left;
+    }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+
+    .system-logs-page .page-banner {
+        padding: .95rem;
+        border-radius: 15px;
+    }
+
+    .system-logs-page .page-banner-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .7rem;
+        text-align: left;
+    }
+
+    .system-logs-page .page-title {
+        font-size: 1.35rem;
+        line-height: 1.05;
+        margin: 0;
+        text-align: left;
+    }
+
+    .tab-btn .tab-count-label {
+        display: none;
+    }
+}
+
+@media (max-width: 360px) {
+
+    .system-logs-page .page-banner {
+        padding: .85rem;
+        border-radius: 14px;
+        margin-bottom: .75rem;
+    }
+
+    .system-logs-page .page-banner-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .65rem;
+        text-align: left;
+    }
+
+    .system-logs-page .page-title {
+        font-size: 1.22rem;
+        line-height: 1.05;
+        margin: 0;
+        text-align: left;
+    }
+
+    .system-logs-page .sl-username {
+        font-size: .66rem;
+    }
+
+    .system-logs-page .sl-action,
+    .system-logs-page .sl-role {
+        min-height: 22px;
+        padding: 0 .45rem;
+        font-size: .54rem;
+    }
 }
 
 @media (max-width: 640px) {
     #slExportModal .ui-modal-card {
-        width: min(100%, 430px) !important;
-        max-width: 430px !important;
-        max-height: calc(100dvh - 24px) !important;
+        width: min(100%, 430px);
+        max-width: 430px;
+        max-height: calc(100dvh - 24px);
     }
 
     #slExportModal .modal-hd {
@@ -1747,28 +1020,6 @@
         flex-direction: column;
     }
 
-    #slExportModal .report-export-scope {
-        gap: .24rem !important;
-    }
-
-    #slExportModal .report-export-scope-chip {
-        min-height: 25px;
-        padding: 0 .48rem;
-        gap: .26rem;
-        font-size: .6rem;
-    }
-
-    #slExportModal .report-export-scope-chip i {
-        font-size: .5rem;
-    }
-
-    #slExportModal .report-export-scope-count {
-        min-width: 14px;
-        height: 14px;
-        padding: 0 4px;
-        font-size: .48rem;
-    }
-
     #slExportModal .report-date-range-grid {
         grid-template-columns: 1fr;
     }
@@ -1782,59 +1033,76 @@
 @media (min-width: 641px) {
 
     #slExportModal .sl-export-filter-section {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: .8rem !important;
+        display: flex;
+        flex-direction: column;
+        gap: .8rem;
 
-        width: 100% !important;
+        width: 100%;
 
-        padding-bottom: 1rem !important;
-        margin-bottom: .35rem !important;
+        padding-bottom: 1rem;
+        margin-bottom: .35rem;
 
-        border-bottom: 1px solid var(--border) !important;
+        border-bottom: 1px solid var(--border);
     }
 
     #slExportModal .sl-export-filter-grid {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 
-        width: 100% !important;
-        gap: .75rem !important;
+        width: 100%;
+        gap: .75rem;
 
-        align-items: start !important;
+        align-items: start;
     }
 
     #slExportModal .sl-export-filter-field {
-        display: block !important;
+        display: block;
 
-        width: 100% !important;
-        min-width: 0 !important;
+        width: 100%;
+        min-width: 0;
 
-        margin: 0 !important;
+        margin: 0;
     }
 
     #slExportModal .sl-export-filter-field .global-form-label {
-        display: flex !important;
-        align-items: center !important;
-        gap: .25rem !important;
+        display: flex;
+        align-items: center;
+        gap: .25rem;
 
-        margin: 0 0 .38rem !important;
+        margin: 0 0 .38rem;
+    }
+}
+
+@media (max-width: 360px) {
+
+    .system-logs-page .page-banner {
+        padding: .85rem;
+        border-radius: 14px;
+        margin-bottom: .75rem;
     }
 
-    #slExportModal .sl-export-filter-field .custom-select {
-        width: 100% !important;
-        min-width: 0 !important;
+    .system-logs-page .page-banner-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .65rem;
+        text-align: left;
     }
 
-    #slExportModal .sl-export-filter-field .custom-select-button {
-        width: 100% !important;
-        min-width: 0 !important;
-        min-height: 44px !important;
-
-        border-radius: 12px !important;
+    .system-logs-page .page-title {
+        font-size: 1.22rem;
+        line-height: 1.05;
+        margin: 0;
+        text-align: left;
     }
 
-    #slExportModal .sl-export-filter-field .custom-select-menu {
-        width: 100% !important;
+    .system-logs-page .sl-username {
+        font-size: .66rem;
+    }
+
+    .system-logs-page .sl-action,
+    .system-logs-page .sl-role {
+        min-height: 22px;
+        padding: 0 .45rem;
+        font-size: .54rem;
     }
 }

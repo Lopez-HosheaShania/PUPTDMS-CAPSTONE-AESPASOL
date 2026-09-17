@@ -335,7 +335,7 @@
                                     {{ $recordCount > 0
                                         ? 'Last Visit: ' . ($latestRecordDate ?? 'Available')
                                         : 'No dental
-                                                                                                                                                                                                                                                        record yet' }}
+                                                                                                                                                                                                                                                                                                                                record yet' }}
                                 </span>
 
                             </div>
@@ -1048,6 +1048,39 @@
         'mode' => 'patient-dashboard',
         'renderStyle' => 'patient',
         'calendarContainerId' => 'calendarSkeletonContainer',
+    
+        'dateInputId' => null,
+        'timeInputId' => null,
+    
+        'slotEndpoint' => route('book.appointment.slots'),
+        'bookingUrl' => route('patient.book.appointment'),
+    
+        'scheduleRules' => isset($schedules)
+            ? $schedules
+            : (isset($scheduleRules)
+                ? $scheduleRules
+                : \App\Models\ClinicSchedule::active()->get()->values()->toArray()),
+    
+        'blockedDates' => $unavailableDates ?? [],
+        'appointmentCountsPerDay' => $appointmentCountsPerDay ?? [],
+        'philippineHolidays' => $philippineHolidays ?? [],
+        'personalAppointments' => $calendarAppointments ?? [],
+        'completedAppointments' => $completedCalendarAppointments ?? [],
+    
+        'useDynamicScheduleRules' => true,
+        'disallowToday' => true,
+        'allowToggleOffDate' => false,
+    
+        'maxFutureMonths' => 6,
+        'historyMonths' => 12,
+    
+        'appointmentHistoryUrl' => route('patient.record'),
+    ])
+    @include('components.appointment-calendar-script', [
+        'mode' => 'patient-dashboard',
+        'renderStyle' => 'patient',
+        'calendarContainerId' => 'calendarSkeletonContainer',
+        'hasActiveAppointment' => $hasActiveAppointment,
     
         'dateInputId' => null,
         'timeInputId' => null,
