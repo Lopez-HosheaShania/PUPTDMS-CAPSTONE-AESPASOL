@@ -419,7 +419,8 @@
                     <div class="appointment-controls-actions">
 
                         <x-filter-select id="appointmentStatusFilter" name="appointment_status" label="Status"
-                            value="all" :options="$appointmentStatusOptions" callback="handleAppointmentStatusSelect" />
+                            value="" :options="$appointmentStatusOptions" callback="handleAppointmentStatusSelect" searchable multiple
+                            search-placeholder="Search status..." />
 
                         <div class="appointment-filter-actions">
                             <button id="appointmentFilterBtn" type="button" class="global-filter-btn"
@@ -1490,14 +1491,14 @@
 
             <div class="filter-date-grid">
                 <div class="filter-date-input-wrap">
-                    <input id="fromDate" type="text" class="js-flatpickr-date-range-from" placeholder="Start date"
+                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date"
                         readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
                 </div>
 
                 <div class="filter-date-input-wrap">
-                    <input id="toDate" type="text" class="js-flatpickr-date-range-to" placeholder="End date"
+                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date"
                         readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
@@ -1614,7 +1615,7 @@
         let apptSearchInput = null;
 
         let appointmentPeriodFilter = 'all';
-        let appointmentStatusFilter = 'all';
+        let appointmentStatusFilter = ['all'];
         let appointmentStatusFilterSource = 'dropdown';
         let appointmentSortFilter = 'nearest';
         let appointmentFromDate = '';
@@ -1670,6 +1671,40 @@
             }
         };
 
+        function normalizeAppointmentStatusValues(value) {
+            const rawValues = Array.isArray(value) ?
+                value :
+                String(value || 'all').split(',');
+
+            const values = rawValues
+                .map(item => String(item || '').trim().toLowerCase())
+                .filter(item => item && apptStatusMeta[item]);
+
+            if (!values.length || values.includes('all')) {
+                return ['all'];
+            }
+
+            return [...new Set(values)];
+        }
+
+        function getAppointmentPeriodFromStatuses(values) {
+            const statuses = normalizeAppointmentStatusValues(values);
+
+            if (statuses.includes('all')) {
+                return 'all';
+            }
+
+            const hasUpcoming = statuses.some(status => ['upcoming', 'rescheduled'].includes(status));
+
+            const hasPast = statuses.some(status => ['completed', 'cancelled'].includes(status));
+
+            if (hasUpcoming && hasPast) {
+                return 'all';
+            }
+
+            return hasPast ? 'past' : 'upcoming';
+        }
+
         const statusEmptyCopy = {
             all: {
                 icon: 'fa-filter-circle-xmark',
@@ -1707,34 +1742,33 @@
             shouldApply = true,
             source = 'dropdown'
         ) {
-            const nextValue =
-                apptStatusMeta[value] ?
-                value :
-                'all';
+            const nextValues =
+                normalizeAppointmentStatusValues(
+                    value
+                );
 
             appointmentStatusFilter =
-                nextValue;
+                nextValues;
 
             appointmentStatusFilterSource =
                 source;
 
-
             if (source === 'dropdown') {
                 appointmentPeriodFilter =
-                    nextValue === 'all' ?
-                    'all' : ['completed', 'cancelled']
-                    .includes(nextValue) ?
-                    'past' :
-                    'upcoming';
+                    getAppointmentPeriodFromStatuses(
+                        nextValues
+                    );
             }
 
-            window.setGlobalFilterSelectValue?.(
-                'appointmentStatusFilter',
-                nextValue, {
-                    callback: false,
-                    focus: false
-                }
-            );
+            if (nextValues.length === 1) {
+                window.setGlobalFilterSelectValue?.(
+                    'appointmentStatusFilter',
+                    nextValues[0], {
+                        callback: false,
+                        focus: false
+                    }
+                );
+            }
 
             if (shouldApply) {
                 applyAppointmentFilters();
@@ -1743,10 +1777,10 @@
 
         window.handleAppointmentStatusSelect =
             function(value) {
-                const nextValue =
-                    apptStatusMeta[value] ?
-                    value :
-                    'all';
+                const nextValues =
+                    normalizeAppointmentStatusValues(
+                        value
+                    );
 
                 if (apptSearchInput) {
                     apptSearchInput.value = '';
@@ -1757,18 +1791,11 @@
                 }
 
                 appointmentStatusFilter =
-                    nextValue;
+                    nextValues;
 
                 appointmentPeriodFilter =
-                    nextValue === 'all' ?
-                    'all' :
-                    (
-                        [
-                            'completed',
-                            'cancelled'
-                        ].includes(nextValue) ?
-                        'past' :
-                        'upcoming'
+                    getAppointmentPeriodFromStatuses(
+                        nextValues
                     );
 
                 applyAppointmentFilters();
@@ -1782,8 +1809,9 @@
 
                 if (
                     query &&
-                    appointmentStatusFilter !==
-                    'all'
+                    !appointmentStatusFilter.includes(
+                        'all'
+                    )
                 ) {
                     setAppointmentStatusFilter(
                         'all',
@@ -1855,25 +1883,13 @@
                     )?.value || 'all';
 
                 appointmentStatusFilter =
-                    apptStatusMeta[
+                    normalizeAppointmentStatusValues(
                         initialStatus
-                    ] ?
-                    initialStatus :
-                    'all';
+                    );
 
                 appointmentPeriodFilter =
-                    appointmentStatusFilter ===
-                    'all' ?
-                    'all' :
-                    (
-                        [
-                            'completed',
-                            'cancelled'
-                        ].includes(
-                            appointmentStatusFilter
-                        ) ?
-                        'past' :
-                        'upcoming'
+                    getAppointmentPeriodFromStatuses(
+                        appointmentStatusFilter
                     );
 
                 applyAppointmentFilters();
@@ -2001,9 +2017,14 @@
                 appliedFilters.period === 'all' ||
                 period === appliedFilters.period;
 
+            const selectedStatuses =
+                normalizeAppointmentStatusValues(
+                    appliedFilters.status
+                );
+
             const matchesStatus =
-                appliedFilters.status === 'all' ||
-                status === appliedFilters.status;
+                selectedStatuses.includes('all') ||
+                selectedStatuses.includes(status);
 
             let matchesDate = true;
 
@@ -2216,9 +2237,9 @@
             const hasSearch =
                 rawSearchValue !== '';
 
-            const hasStatusFilter =
-                appointmentStatusFilter !==
-                'all';
+            const hasStatusFilter = !appointmentStatusFilter.includes(
+                'all'
+            );
 
             const hasAdvancedFilters =
                 appointmentSortFilter !==
@@ -2305,9 +2326,10 @@
 
             if (hasStatusFilter) {
                 const copy =
+                    appointmentStatusFilter.length === 1 ?
                     statusEmptyCopy[
-                        appointmentStatusFilter
-                    ] ||
+                        appointmentStatusFilter[0]
+                    ] || statusEmptyCopy.all :
                     statusEmptyCopy.all;
 
                 window.EmptyState?.render({
@@ -2537,8 +2559,7 @@
                 );
             }
 
-            appointmentStatusFilter =
-                'all';
+            appointmentStatusFilter = ['all'];
 
             appointmentPeriodFilter =
                 'all';

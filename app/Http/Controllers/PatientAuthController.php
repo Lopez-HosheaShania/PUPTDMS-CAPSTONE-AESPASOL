@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\AuditLogger;
+use Illuminate\Validation\Rules\Password;
 
 class PatientAuthController extends Controller
 {
@@ -25,14 +26,56 @@ class PatientAuthController extends Controller
 
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:patients,email|unique:users,email',
-            'phone' => 'required|string|max:20',
-            'birthdate' => 'required|date',
-            'gender' => 'required|string|in:Male,Female',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        $validated =
+            $request->validate(
+                [
+                    'name' => [
+                        'required',
+                        'string',
+                        'max:255',
+                        'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+                    ],
+
+                    'email' =>
+                    'required|email|unique:patients,email|unique:users,email',
+
+                    'phone' => [
+                        'required',
+                        'string',
+                        'regex:/^09\d{9}$/',
+                    ],
+
+                    'birthdate' => [
+                        'required',
+                        'date',
+                        'before_or_equal:today',
+                    ],
+
+                    'gender' =>
+                    'required|string|in:Male,Female',
+
+                    'password' => [
+                        'required',
+                        'string',
+                        'confirmed',
+
+                        Password::min(8)
+                            ->mixedCase()
+                            ->numbers()
+                            ->symbols(),
+                    ],
+                ],
+                [
+                    'name.regex' =>
+                    'Full name may only contain letters, spaces, apostrophes, periods, and hyphens.',
+
+                    'phone.regex' =>
+                    'Phone number must start with 09 and contain exactly 11 digits.',
+
+                    'birthdate.before_or_equal' =>
+                    'Birthdate cannot be in the future.',
+                ]
+            );
 
         DB::transaction(function () use ($validated) {
             $hashedPassword = Hash::make($validated['password']);

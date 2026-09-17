@@ -170,7 +170,8 @@
                                 <div class="patient-toolbar-actions">
                                     <div class="patient-sort-row">
                                         <x-filter-select id="patientStatusFilter" name="patient_status" label="Status"
-                                            value="all" :options="$patientStatusOptions" callback="handlePatientStatusSelect" />
+                                            value="" :options="$patientStatusOptions" callback="handlePatientStatusSelect" searchable
+                                            multiple search-placeholder="Search status..." />
                                     </div>
 
                                     <div class="patient-filter-actions">
@@ -830,7 +831,7 @@
 
                 <div class="filter-date-input-wrap">
 
-                    <input id="fromDate" type="text" class="js-flatpickr-date-range-from" placeholder="Start date"
+                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date"
                         readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
@@ -839,7 +840,7 @@
 
                 <div class="filter-date-input-wrap">
 
-                    <input id="toDate" type="text" class="js-flatpickr-date-range-to" placeholder="End date"
+                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date"
                         readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
@@ -866,7 +867,7 @@
             'BSME',
             'BSBA - MM',
             'BSED
-                    - MATH',
+                        - MATH',
             'DOMT',
         ] as $course)
                     <label class="choice-chip">
@@ -1090,15 +1091,47 @@
                 patientFilterBadge = filterBadge;
                 patientExternalResetBtn = externalClearFilterBtn;
 
-                var activeTab = "all";
+                var activeTab = ["all"];
                 var searchKeyword = "";
+
+                function normalizePatientStatusValues(value) {
+                    var rawValues = Array.isArray(value)
+                        ? value
+                        : String(value || 'all').split(',');
+
+                    var allowed = [
+                        'all',
+                        'today',
+                        'upcoming',
+                        'rescheduled',
+                        'completed',
+                        'cancelled'
+                    ];
+
+                    var values = rawValues
+                        .map(function(item) {
+                            return String(item || '')
+                                .trim()
+                                .toLowerCase();
+                        })
+                        .filter(function(item) {
+                            return allowed.includes(item);
+                        });
+
+                    if (!values.length || values.includes('all')) {
+                        return ['all'];
+                    }
+
+                    return Array.from(new Set(values));
+                }
 
                 window.handlePatientStatusSelect =
                     function(value) {
                         activeTab =
-                            String(value || 'all')
-                            .trim()
-                            .toLowerCase();
+                            normalizePatientStatusValues(
+                                value
+                            );
+
                         searchKeyword = '';
 
                         if (searchInput) {
@@ -1123,9 +1156,9 @@
                             .toLowerCase();
                         if (
                             searchKeyword &&
-                            activeTab !== 'all'
+                            !activeTab.includes('all')
                         ) {
-                            activeTab = 'all';
+                            activeTab = ['all'];
 
                             window.setGlobalFilterSelectValue?.(
                                 'patientStatusFilter',
@@ -1145,24 +1178,24 @@
                     status,
                     options = {}
                 ) {
-                    var nextStatus =
-                        String(
-                            status || 'all'
-                        )
-                        .trim()
-                        .toLowerCase();
+                    var nextStatuses =
+                        normalizePatientStatusValues(
+                            status
+                        );
 
                     activeTab =
-                        nextStatus;
+                        nextStatuses;
 
-                    window.setGlobalFilterSelectValue?.(
-                        'patientStatusFilter',
-                        nextStatus, {
-                            callback: options.callback === true,
+                    if (nextStatuses.length === 1) {
+                        window.setGlobalFilterSelectValue?.(
+                            'patientStatusFilter',
+                            nextStatuses[0], {
+                                callback: options.callback === true,
 
-                            focus: false
-                        }
-                    );
+                                focus: false
+                            }
+                        );
+                    }
                 }
 
                 var selectedProgram = null,
@@ -1956,7 +1989,14 @@
                 }
 
                 function getCurrentPatientStatus() {
-                    return activeTab || 'all';
+                    if (
+                        activeTab.includes('all') ||
+                        activeTab.length !== 1
+                    ) {
+                        return 'all';
+                    }
+
+                    return activeTab[0];
                 }
 
                 function getPatientStatusEmptyMeta(status) {
@@ -2196,16 +2236,20 @@
                                 allPatients.slice();
 
                             if (
-                                activeTab !== "all"
+                                !activeTab.includes('all')
                             ) {
                                 data =
                                     data.filter(
                                         function(patient) {
-                                            return patient
-                                                .classList
-                                                .contains(
-                                                    activeTab
-                                                );
+                                            return activeTab.some(
+                                                function(status) {
+                                                    return patient
+                                                        .classList
+                                                        .contains(
+                                                            status
+                                                        );
+                                                }
+                                            );
                                         }
                                     );
                             }
@@ -2439,7 +2483,7 @@
 
                 syncMutualExclusion();
 
-                activeTab = 'all';
+                activeTab = ['all'];
 
                 window.setGlobalFilterSelectValue?.(
                     'patientStatusFilter',

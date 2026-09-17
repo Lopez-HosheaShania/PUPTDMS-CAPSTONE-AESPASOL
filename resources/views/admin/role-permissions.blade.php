@@ -530,7 +530,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                             <i class="fa-solid fa-tag global-control-icon"></i>
 
                             <input type="text" id="newRoleName" name="name"
-                                class="form-input-custom global-control-with-icon" placeholder="e.g. Dental Intern"
+                                class="form-input-custom global-form-icon" placeholder="e.g. Dental Intern"
                                 data-field-label="Role Name" data-required-message="Please enter a role name." required
                                 autocomplete="off">
                         </div>
@@ -546,7 +546,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                             <i class="fa-solid fa-link global-control-icon"></i>
 
                             <input type="text" id="newRoleSlug" name="slug"
-                                class="form-input-custom global-control-with-icon" placeholder="e.g. dental-intern"
+                                class="form-input-custom global-form-icon" placeholder="e.g. dental-intern"
                                 data-field-label="Role Slug" data-required-message="Please enter a role slug."
                                 data-pattern-message="Use lowercase letters, numbers, and hyphens only."
                                 pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required autocomplete="off">

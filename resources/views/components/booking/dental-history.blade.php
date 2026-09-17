@@ -58,11 +58,9 @@
                         </label>
 
                         <div class="global-control-wrap">
-                            <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
-
                             <input type="text" id="lastDentalVisit" name="last_dental_visit"
                                 value="{{ $lastDentalVisit }}"
-                                class="form-input-custom global-control-with-icon js-flatpickr-date-max-today"
+                                class="form-input-custom js-flatpickr-date-max-today"
                                 placeholder="Select date" readonly>
                         </div>
                     </div>
@@ -133,11 +131,9 @@
                                 </label>
 
                                 <div class="global-control-wrap">
-                                    <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
-
                                     <input type="text" id="extractionDate" name="extraction_date"
                                         value="{{ old('extraction_date', $defaults['extraction_date'] ?? '') }}"
-                                        class="form-input-custom global-control-with-icon js-flatpickr-date-max-today"
+                                        class="form-input-custom js-flatpickr-date-max-today"
                                         placeholder="Select date"
                                         data-required-message="Please select the date of extraction."
                                         data-conditional-required readonly>
@@ -157,11 +153,9 @@
                                 </label>
 
                                 <div class="global-control-wrap">
-                                    <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
-
                                     <input type="text" id="denturesDate" name="dentures_date"
                                         value="{{ old('dentures_date', $defaults['dentures_date'] ?? '') }}"
-                                        class="form-input-custom global-control-with-icon js-flatpickr-date-max-today"
+                                        class="form-input-custom js-flatpickr-date-max-today"
                                         placeholder="Select date"
                                         data-required-message="Please select the dentures placement date."
                                         data-conditional-required readonly>
@@ -181,11 +175,9 @@
                                 </label>
 
                                 <div class="global-control-wrap">
-                                    <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
-
                                     <input type="text" id="orthoDate" name="ortho_date"
                                         value="{{ old('ortho_date', $defaults['ortho_date'] ?? '') }}"
-                                        class="form-input-custom global-control-with-icon js-flatpickr-date-max-today"
+                                        class="form-input-custom js-flatpickr-date-max-today"
                                         placeholder="Select date"
                                         data-required-message="Please select the orthodontic treatment completion date."
                                         data-conditional-required readonly>

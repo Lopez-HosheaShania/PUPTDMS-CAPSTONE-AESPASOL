@@ -53,6 +53,16 @@ function getGlobalFilterSelectParts(root) {
                 '[data-filter-select-count]'
             ),
 
+        searchInput:
+            root.querySelector(
+                '[data-filter-select-search]'
+            ),
+
+        searchClear:
+            root.querySelector(
+                '[data-filter-select-search-clear]'
+            ),
+
         options:
             Array.from(
                 root.querySelectorAll(
@@ -60,6 +70,234 @@ function getGlobalFilterSelectParts(root) {
                 )
             ),
     };
+}
+
+function isGlobalFilterSelectMultiple(root) {
+    return (
+        root?.dataset
+            .filterSelectMultiple ===
+        'true'
+    );
+}
+
+function getGlobalFilterSelectSelectedValues(root) {
+
+    return Array.from(
+        root.querySelectorAll(
+            '[data-filter-select-option].is-active'
+        )
+    ).map(option =>
+        String(
+            option.dataset.value ?? ''
+        )
+    );
+}
+
+function toggleGlobalFilterSelectOption(
+    root,
+    option
+) {
+    const {
+        input,
+        label,
+        count,
+        options,
+    } =
+        getGlobalFilterSelectParts(
+            root
+        );
+
+    const value =
+        String(
+            option.dataset.value ?? ''
+        );
+
+    const allOption =
+        options.find(
+            item =>
+                String(
+                    item.dataset.value ?? ''
+                ) === 'all'
+        );
+
+    if (value === 'all') {
+        options.forEach(item => {
+            const isAll =
+                String(
+                    item.dataset.value ?? ''
+                ) === 'all';
+
+            item.classList.toggle(
+                'is-active',
+                isAll
+            );
+
+            item.setAttribute(
+                'aria-selected',
+                isAll
+                    ? 'true'
+                    : 'false'
+            );
+        });
+    } else {
+        if (allOption) {
+            allOption.classList.remove(
+                'is-active'
+            );
+
+            allOption.setAttribute(
+                'aria-selected',
+                'false'
+            );
+        }
+
+        const active =
+            !option.classList.contains(
+                'is-active'
+            );
+
+        option.classList.toggle(
+            'is-active',
+            active
+        );
+
+        option.setAttribute(
+            'aria-selected',
+            active
+                ? 'true'
+                : 'false'
+        );
+
+        const hasSpecificSelection =
+            options.some(item => {
+                const itemValue =
+                    String(
+                        item.dataset.value ?? ''
+                    );
+
+                return (
+                    itemValue !== 'all' &&
+                    item.classList.contains(
+                        'is-active'
+                    )
+                );
+            });
+
+        if (
+            !hasSpecificSelection &&
+            allOption
+        ) {
+            allOption.classList.add(
+                'is-active'
+            );
+
+            allOption.setAttribute(
+                'aria-selected',
+                'true'
+            );
+        }
+    }
+
+    const values =
+        getGlobalFilterSelectSelectedValues(
+            root
+        );
+
+    const effectiveValues =
+        values.includes('all')
+            ? ['all']
+            : values;
+
+    if (input) {
+        input.value =
+            effectiveValues.join(',');
+    }
+
+    root.dataset.filterSelectValue =
+        effectiveValues.join(',');
+
+    if (label) {
+        if (
+            effectiveValues.length === 1 &&
+            effectiveValues[0] === 'all'
+        ) {
+            label.textContent =
+                allOption?.dataset.label ||
+                'All';
+        } else if (
+            effectiveValues.length === 1
+        ) {
+            const selected =
+                root.querySelector(
+                    '[data-filter-select-option].is-active'
+                );
+
+            label.textContent =
+                selected?.dataset.label ||
+                '1 selected';
+        } else {
+            label.textContent =
+                `${effectiveValues.length} selected`;
+        }
+    }
+
+    if (count) {
+        const specificCount =
+            effectiveValues.includes('all')
+                ? 0
+                : effectiveValues.length;
+
+        count.textContent =
+            specificCount
+                ? specificCount
+                : '';
+
+        count.classList.toggle(
+            'hidden',
+            !specificCount
+        );
+    }
+
+    input?.dispatchEvent(
+        new Event(
+            'change',
+            {
+                bubbles: true,
+            }
+        )
+    );
+
+    root.dispatchEvent(
+        new CustomEvent(
+            'global-filter-select:change',
+            {
+                bubbles: true,
+
+                detail: {
+                    id:
+                        root.id,
+
+                    values:
+                        effectiveValues,
+                },
+            }
+        )
+    );
+
+    const callback =
+        resolveGlobalFilterSelectCallback(
+            root.dataset
+                .filterSelectCallback
+        );
+
+    callback?.(
+        effectiveValues,
+        {
+            root,
+            input,
+            option,
+        }
+    );
 }
 
 function removeGlobalFilterSelectTone(
@@ -213,6 +451,7 @@ function openGlobalFilterSelect(
 
     const {
         trigger,
+        searchInput,
     } =
         getGlobalFilterSelectParts(
             root
@@ -236,6 +475,12 @@ function openGlobalFilterSelect(
     trigger?.setAttribute(
         'aria-expanded',
         'true'
+    );
+
+    window.requestAnimationFrame(
+        () => {
+            searchInput?.focus();
+        }
     );
 }
 
@@ -560,10 +805,7 @@ function initGlobalFilterSelect(
         return;
     }
 
-    const {
-        trigger,
-        options,
-    } =
+    const { trigger, options, searchInput, searchClear, } =
         getGlobalFilterSelectParts(
             root
         );
@@ -576,7 +818,6 @@ function initGlobalFilterSelect(
         .filterSelectInitialized =
         'true';
 
-
     trigger.addEventListener(
         'click',
         event => {
@@ -587,7 +828,6 @@ function initGlobalFilterSelect(
             );
         }
     );
-
 
     trigger.addEventListener(
         'keydown',
@@ -628,6 +868,85 @@ function initGlobalFilterSelect(
         }
     );
 
+    function syncGlobalFilterSelectSearchClear() {
+        if (
+            !searchInput ||
+            !searchClear
+        ) {
+            return;
+        }
+
+        const hasValue =
+            searchInput.value
+                .trim()
+                .length > 0;
+
+        searchClear.classList.toggle(
+            'show',
+            hasValue
+        );
+
+        searchClear.hidden =
+            !hasValue;
+    }
+
+    function filterGlobalFilterSelectOptions() {
+        if (!searchInput) {
+            return;
+        }
+
+        const query =
+            searchInput.value
+                .trim()
+                .toLowerCase();
+
+        options.forEach(option => {
+            const optionLabel =
+                String(
+                    option.dataset.label ||
+                    ''
+                ).toLowerCase();
+
+            option.hidden =
+                Boolean(
+                    query &&
+                    !optionLabel.includes(
+                        query
+                    )
+                );
+        });
+
+        syncGlobalFilterSelectSearchClear();
+    }
+
+    searchInput?.addEventListener(
+        'input',
+        filterGlobalFilterSelectOptions
+    );
+
+    searchClear?.addEventListener(
+        'click',
+        event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (!searchInput) {
+                return;
+            }
+
+            searchInput.value = '';
+
+            options.forEach(option => {
+                option.hidden = false;
+            });
+
+            syncGlobalFilterSelectSearchClear();
+
+            searchInput.focus();
+        }
+    );
+
+    syncGlobalFilterSelectSearchClear();
 
     options.forEach(option => {
         option.addEventListener(
@@ -635,10 +954,21 @@ function initGlobalFilterSelect(
             event => {
                 event.preventDefault();
 
-                selectGlobalFilterSelectOption(
-                    root,
-                    option
-                );
+                if (
+                    isGlobalFilterSelectMultiple(
+                        root
+                    )
+                ) {
+                    toggleGlobalFilterSelectOption(
+                        root,
+                        option
+                    );
+                } else {
+                    selectGlobalFilterSelectOption(
+                        root,
+                        option
+                    );
+                }
             }
         );
 
@@ -673,10 +1003,21 @@ function initGlobalFilterSelect(
                 ) {
                     event.preventDefault();
 
-                    selectGlobalFilterSelectOption(
-                        root,
-                        option
-                    );
+                    if (
+                        isGlobalFilterSelectMultiple(
+                            root
+                        )
+                    ) {
+                        toggleGlobalFilterSelectOption(
+                            root,
+                            option
+                        );
+                    } else {
+                        selectGlobalFilterSelectOption(
+                            root,
+                            option
+                        );
+                    }
 
                     return;
                 }
