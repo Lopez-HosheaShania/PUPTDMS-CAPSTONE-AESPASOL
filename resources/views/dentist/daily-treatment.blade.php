@@ -433,11 +433,12 @@
 @endsection
 
 @section('scripts')
-<script>
-  const DTR_LIST_URL = "{{ route('dentist.dentist.reports.daily-treatment-record.list') }}";
-  const DTR_DOWNLOAD_URL = "{{ route('dentist.dentist.report.daily-treatment-record-download') }}";
-  const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
-    "{{ csrf_token() }}";
+    <script>
+        const DTR_LIST_URL = "{{ route('dentist.dentist.reports.daily-treatment-record.list') }}";
+        const DTR_STORE_URL = "{{ route('dentist.dentist.reports.daily-treatment-record.store') }}";
+        const DTR_DOWNLOAD_URL = "{{ route('dentist.dentist.report.daily-treatment-record-download') }}";
+        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+            "{{ csrf_token() }}";
 
         const dtrState = {
             search: '',
@@ -451,12 +452,15 @@
             total: 0,
         };
 
-  let dtrDraft = {
-    ...dtrState
-  };
-  let dtrListController = null;
-  let dtrDraftCountController = null;
-  let dtrDraftCountTimer = null;
+        let dtrDraft = {
+            ...dtrState
+        };
+        let dtrListController = null;
+        let dtrDraftCountController = null;
+        let dtrDraftCountTimer = null;
+        let dailyTimerInterval = null;
+        let dailyTimerStartedAt = null;
+        let dailyTimerStoppedAt = null;
 
         function escapeDtrHtml(value) {
             return String(value ?? '')
@@ -948,7 +952,13 @@
         </span>
       `).join('');
         }
+        }
 
+        function removeDailyDraftChip(key) {
+            dtrDraft[key] = '';
+            renderDailyFilterDraft();
+            updateDailyDraftCount();
+        }
         function removeDailyDraftChip(key) {
             dtrDraft[key] = '';
             renderDailyFilterDraft();
@@ -1142,12 +1152,188 @@
         window.closeDownloadModal =
             closeDownloadModal;
 
-  function formatDailyElapsedTime(totalSeconds) {
-    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const seconds = String(totalSeconds % 60).padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
-  }
+        function formatDailyElapsedTime(totalSeconds) {
+            const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function getDailyTimerElements() {
+            return {
+                display: document.getElementById('dailyTimerDisplay'),
+                status: document.getElementById('dailyTimerStatus'),
+                timeIn: document.getElementById('recordTimeIn'),
+                timeOut: document.getElementById('recordTimeOut'),
+                timeInDisplay: document.getElementById('recordTimeInDisplay'),
+                timeOutDisplay: document.getElementById('recordTimeOutDisplay'),
+                minutes: document.getElementById('recordMinutesProcessed'),
+                startBtn: document.getElementById('dailyTimerStartBtn'),
+                stopBtn: document.getElementById('dailyTimerStopBtn'),
+            };
+        }
+
+        function syncDailyTimerButtons(isRunning) {
+            const {
+                startBtn,
+                stopBtn
+            } = getDailyTimerElements();
+            startBtn?.classList.toggle('opacity-60', isRunning);
+            startBtn?.classList.toggle('cursor-not-allowed', isRunning);
+            stopBtn?.classList.toggle('opacity-60', !isRunning && !dailyTimerStartedAt);
+            stopBtn?.classList.toggle('cursor-not-allowed', !isRunning && !dailyTimerStartedAt);
+
+            if (startBtn) startBtn.disabled = isRunning;
+            if (stopBtn) stopBtn.disabled = !isRunning;
+        }
+
+        function updateDailyTimerDisplay() {
+            const elements = getDailyTimerElements();
+            if (!elements.display || !elements.minutes) return;
+
+            if (!dailyTimerStartedAt) {
+                elements.display.textContent = '00:00:00';
+                elements.minutes.value = 0;
+                elements.status.textContent = 'Timer has not started yet.';
+                syncDailyTimerButtons(false);
+                return;
+            }
+
+            const endDate = dailyTimerStoppedAt || new Date();
+            const elapsedSeconds = Math.max(0, Math.floor((endDate.getTime() - dailyTimerStartedAt.getTime()) / 1000));
+            elements.display.textContent = formatDailyElapsedTime(elapsedSeconds);
+            elements.minutes.value = Math.floor(elapsedSeconds / 60);
+            elements.status.textContent = dailyTimerStoppedAt ?
+                'Procedure timer stopped and ready to save.' :
+                'Procedure is running live.';
+            syncDailyTimerButtons(!dailyTimerStoppedAt);
+        }
+
+        function startDailyProcedureTimer() {
+            if (dailyTimerInterval) {
+                clearInterval(dailyTimerInterval);
+                dailyTimerInterval = null;
+            }
+
+            dailyTimerStartedAt = new Date();
+            dailyTimerStoppedAt = null;
+
+            const elements = getDailyTimerElements();
+            if (elements.timeIn) elements.timeIn.value = toLocalDateInputValue(dailyTimerStartedAt);
+            if (elements.timeOut) elements.timeOut.value = '';
+            if (elements.timeInDisplay) elements.timeInDisplay.value = formatDtrDateTimeDisplay(dailyTimerStartedAt);
+            if (elements.timeOutDisplay) elements.timeOutDisplay.value = '';
+
+            updateDailyTimerDisplay();
+            dailyTimerInterval = setInterval(updateDailyTimerDisplay, 1000);
+        }
+
+        function stopDailyProcedureTimer() {
+            if (!dailyTimerStartedAt) return;
+
+            dailyTimerStoppedAt = new Date();
+
+            const elements = getDailyTimerElements();
+            if (elements.timeOut) elements.timeOut.value = toLocalDateInputValue(dailyTimerStoppedAt);
+            if (elements.timeOutDisplay) elements.timeOutDisplay.value = formatDtrDateTimeDisplay(dailyTimerStoppedAt);
+
+            if (dailyTimerInterval) {
+                clearInterval(dailyTimerInterval);
+                dailyTimerInterval = null;
+            }
+
+            updateDailyTimerDisplay();
+        }
+
+        function resetDailyRecordForm() {
+            const form =
+                document.getElementById(
+                    'dailyRecordForm'
+                );
+
+            const today =
+                new Date();
+
+            form?.reset();
+
+            dailyTimerStartedAt =
+                null;
+
+            dailyTimerStoppedAt =
+                null;
+
+            if (dailyTimerInterval) {
+                clearInterval(
+                    dailyTimerInterval
+                );
+
+                dailyTimerInterval =
+                    null;
+            }
+
+            const elements =
+                getDailyTimerElements();
+
+            if (elements.timeIn) {
+                elements.timeIn.value = '';
+            }
+
+            if (elements.timeOut) {
+                elements.timeOut.value = '';
+            }
+
+            if (elements.timeInDisplay) {
+                elements.timeInDisplay.value = '';
+            }
+
+            if (elements.timeOutDisplay) {
+                elements.timeOutDisplay.value = '';
+            }
+
+            const dateInput =
+                document.getElementById(
+                    'recordTreatmentDate'
+                );
+
+            if (dateInput) {
+                dateInput.value =
+                    today
+                    .toISOString()
+                    .split('T')[0];
+            }
+
+            const banner =
+                document.getElementById(
+                    'dailyRecordErrorBanner'
+                );
+
+            banner?.classList.add(
+                'hidden'
+            );
+
+            banner?.classList.remove(
+                'flex'
+            );
+
+            [
+                'recordTreatmentDate',
+                'recordPatientName',
+                'recordTreatmentDone',
+            ].forEach(id => {
+                const input =
+                    document.getElementById(id);
+
+                input?.classList.remove(
+                    'border-red-400'
+                );
+
+                input?.classList.add(
+                    'border-gray-300'
+                );
+            });
+
+            updateDailyTimerDisplay();
+        }
 
         function resetDailyReportForm() {
             const form =
@@ -1666,29 +1852,104 @@
             }
         }
 
-  document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener(
+            'DOMContentLoaded',
+            async () => {
+                resetDailyRecordForm();
 
-    const monthPicker = document.getElementById('monthPicker');
-    const now = new Date();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const currentMonthValue = `${year}-${month}`;
+                const monthPicker =
+                    document.getElementById(
+                        'monthPicker'
+                    );
 
-    if (window.setMonthOnlyPickerValue) {
-      window.setMonthOnlyPickerValue(monthPicker, currentMonthValue, false);
-    } else if (monthPicker) {
-      monthPicker.value = currentMonthValue;
-    }
+                const now =
+                    new Date();
 
-    dtrState.month = currentMonthValue;
+                const month =
+                    String(
+                        now.getMonth() + 1
+                    ).padStart(
+                        2,
+                        '0'
+                    );
 
-    monthPicker?.addEventListener('change', event => {
-      dtrState.month = event.target.value || '';
-      dtrState.page = 1;
-      fetchDailyRecords();
-    });
+                const year =
+                    now.getFullYear();
 
-    document.getElementById('downloadReportBtn')?.addEventListener('click', downloadDailyReport);
+                const currentMonthValue =
+                    `${year}-${month}`;
+
+                const datePickerModule =
+                    await window.loadDatePickerModule?.();
+
+                await datePickerModule
+                    ?.initGlobalDatePickers(
+                        document
+                    );
+
+                if (
+                    monthPicker?._flatpickr &&
+                    typeof window.setMonthOnlyPickerValue ===
+                    'function'
+                ) {
+                    window.setMonthOnlyPickerValue(
+                        monthPicker,
+                        currentMonthValue,
+                        false
+                    );
+                }
+
+                dtrState.month =
+                    currentMonthValue;
+
+                monthPicker
+                    ?.addEventListener(
+                        'change',
+                        event => {
+                            dtrState.month =
+                                event.target.value || '';
+
+                            dtrState.page = 1;
+
+                            fetchDailyRecords();
+                        }
+                    );
+
+                document
+                    .getElementById(
+                        'dailyTimerStartBtn'
+                    )
+                    ?.addEventListener(
+                        'click',
+                        startDailyProcedureTimer
+                    );
+
+                document
+                    .getElementById(
+                        'dailyTimerStopBtn'
+                    )
+                    ?.addEventListener(
+                        'click',
+                        stopDailyProcedureTimer
+                    );
+
+                document
+                    .getElementById(
+                        'saveDailyRecordBtn'
+                    )
+                    ?.addEventListener(
+                        'click',
+                        saveDailyRecord
+                    );
+
+                document
+                    .getElementById(
+                        'downloadReportBtn'
+                    )
+                    ?.addEventListener(
+                        'click',
+                        downloadDailyReport
+                    );
 
                 bindDailyChoiceChipFilters();
 

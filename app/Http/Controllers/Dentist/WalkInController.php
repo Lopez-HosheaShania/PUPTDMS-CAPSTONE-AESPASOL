@@ -508,7 +508,8 @@ class WalkInController extends Controller
             $latestAppointment !== null;
 
         $hasExistingBookingInformation =
-            $hasExistingAppointment;
+            $hasExistingDentalHistory &&
+            $hasExistingMedicalHistory;
 
         $hasAutofillData =
             $hasExistingAppointment ||
@@ -2538,22 +2539,19 @@ class WalkInController extends Controller
             'guest_first_name' => [
                 'required',
                 'string',
-                'max:50',
-                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+                'max:100',
             ],
 
             'guest_middle_name' => [
                 'nullable',
                 'string',
-                'max:50',
-                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+                'max:100',
             ],
 
             'guest_last_name' => [
                 'required',
                 'string',
-                'max:50',
-                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+                'max:100',
             ],
 
             'guest_suffix' => [
@@ -2587,7 +2585,7 @@ class WalkInController extends Controller
             'guest_birthdate' => [
                 'required',
                 'date',
-                'before_or_equal:today',
+                'before:today',
             ],
 
             'guest_program' => [
@@ -2599,53 +2597,33 @@ class WalkInController extends Controller
             'guest_student_number' => [
                 'nullable',
                 'string',
-                'max:15',
+                'max:100',
                 'required_if:guest_patient_type,student',
-                'regex:/^\d{4}-\d{5}-TG-\d$/i',
             ],
 
             'guest_faculty_code' => [
                 'nullable',
                 'string',
-                'max:12',
+                'max:100',
                 'required_if:guest_patient_type,faculty',
-                'regex:/^FA\d{4}TG\d{4}$/i',
             ],
 
             'guest_year_level' => [
                 'nullable',
                 'string',
-                'max:2',
-                'regex:/^[1-9][0-9]*$/',
+                'max:50',
             ],
 
             'guest_section' => [
                 'nullable',
                 'string',
-                'max:30',
-                'regex:/^[A-Za-z0-9\s.-]+$/u',
+                'max:50',
             ],
 
             'guest_is_pwd' => [
                 'required',
                 'boolean',
             ],
-        ], [
-            'guest_first_name.regex' => 'First name may only contain letters, spaces, apostrophes, periods, and hyphens.',
-
-            'guest_middle_name.regex' => 'Middle name may only contain letters, spaces, apostrophes, periods, and hyphens.',
-
-            'guest_last_name.regex' => 'Last name may only contain letters, spaces, apostrophes, periods, and hyphens.',
-
-            'guest_birthdate.before_or_equal' => 'Birthdate cannot be in the future.',
-
-            'guest_student_number.regex' => 'Student number must follow the format 0000-00000-TG-0.',
-
-            'guest_faculty_code.regex' => 'Faculty code must follow the format FA0000TG0000.',
-
-            'guest_year_level.regex' => 'Year level must contain whole numbers only.',
-
-            'guest_section.regex' => 'Section can only contain letters, numbers, spaces, periods, and hyphens.',
         ]);
 
         $selectedPatientType = $this->normalizeGuestPatientType(

@@ -332,10 +332,12 @@ class AcademicPeriodController extends Controller
                 'sync',
                 'academic_periods',
                 $alreadySynced
-                    ? "Admin checked FLSS sync; academic period was already synced: "
-                    . "{$academicPeriod->academicYear?->name} - {$academicPeriod->academicTerm?->name}"
-                    : "Admin synced academic period from FLSS: "
-                    . "{$academicPeriod->academicYear?->name} - {$academicPeriod->academicTerm?->name}"
+                    ? $this->auditActorLabel() . " checked FLSS sync; academic period was already synced: "
+                    . "{$academicPeriod->academic_year} - "
+                    . "{$academicPeriod->semester}"
+                    : $this->auditActorLabel() . " synced academic period from FLSS: "
+                    . "{$academicPeriod->academic_year} - "
+                    . "{$academicPeriod->semester}"
             );
 
             $payload = [
@@ -438,6 +440,11 @@ class AcademicPeriodController extends Controller
             'set_active' => 'admin.academic_periods.set_active',
             'sync_flss' => 'admin.academic_periods.sync_flss',
         };
+    }
+
+    private function auditActorLabel(): string
+    {
+        return $this->resolveLayoutRole() === 'dentist' ? 'Dentist' : 'Admin';
     }
 
     private function ensureAcademicPeriodIsUnique(

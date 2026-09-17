@@ -310,28 +310,18 @@ class DentistAppointmentController extends Controller
 
         $appointment = Appointment::with('patient.user')->findOrFail($id);
 
-        if (! in_array($appointment->status, ['upcoming', 'rescheduled'], true)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only upcoming or rescheduled appointments can be cancelled.',
-            ], 422);
-        }
+        $serviceType = ServiceType::where(
+            'name',
+            $request->service_type
+        )->firstOrFail();
 
         $cancelledBy = Auth::user()?->name ?? 'the dentist';
 
-        $updates = [
+        $appointment->update([
             'status' => 'cancelled',
-            'cancellation_reason' => trim((string) $request->reason),
-        ];
-
-        // Release a reserved slot only when this appointment actually owns one.
-        // Appointment::setAttribute() persists this normalized detail field through
-        // appointment_reserved_bookings.
-        if ($appointment->reserved_booking_period_slot_id) {
-            $updates['reserved_booking_period_slot_id'] = null;
-        }
-
-        $appointment->update($updates);
+            'cancellation_reason' => $request->reason,
+            'reserved_booking_period_slot_id' => null,
+        ]);
 
         $patientUser = optional($appointment->patient)->user;
 
@@ -382,6 +372,7 @@ class DentistAppointmentController extends Controller
         $request->validate([
             'new_appointment_date' => 'required|date|after:today',
             'new_appointment_time' => 'required',
+            'service_type' => 'required|string',
         ]);
 
         if (Carbon::parse($request->new_appointment_date)->isToday()) {
@@ -400,13 +391,6 @@ class DentistAppointmentController extends Controller
         }
 
         $appointment = Appointment::with('patient.user')->findOrFail($id);
-
-        if (! in_array($appointment->status, ['upcoming', 'rescheduled'], true)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only upcoming or rescheduled appointments can be rescheduled.',
-            ], 422);
-        }
 
         if ($appointment->reserved_booking_period_id) {
             return response()->json([
@@ -436,8 +420,8 @@ class DentistAppointmentController extends Controller
         $appointment->update([
             'appointment_date' => $request->new_appointment_date,
             'appointment_time' => $mysqlTime,
-            // Rescheduling changes only the schedule. Keep the appointment's
-            // existing normalized service_type_id/service type unchanged.
+            'service_type_id' => $serviceType->id,
+            'service_type' => $serviceType->name,
             'status' => 'rescheduled',
         ]);
 
@@ -535,16 +519,12 @@ class DentistAppointmentController extends Controller
             ], 422);
         }
 
-        $followUpServiceType = ServiceType::where(
-            'name',
-            'Follow-up'
-        )->firstOrFail();
-
         $followUpAppointment = Appointment::create([
             'patient_id' => $originalAppointment->patient_id,
             'dentist_id' => auth()->id(),
-            'service_type_id' => $followUpServiceType->id,
-            'service_type' => $followUpServiceType->name,
+            'service_type_id' => $originalAppointment->service_type_id,
+            'service_type' => $originalAppointment->service_type_name
+                ?? $originalAppointment->service_type,
             'appointment_date' => $request->followup_appointment_date,
             'appointment_time' => $mysqlTime,
             'status' => 'upcoming',
