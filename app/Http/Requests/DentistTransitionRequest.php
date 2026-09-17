@@ -35,9 +35,7 @@ class DentistTransitionRequest extends FormRequest
             'transition_type_other' => ['nullable', 'string', 'max:40'],
             'default_successor_dentist_id' => ['required', 'integer', 'exists:users,id'],
             'last_working_date' => ['required', 'date'],
-            'access_ends_at' => ['required', 'date', 'after_or_equal:last_working_date'],
-            'handover_notes' => ['required', 'string'],
-            'remarks' => ['required', 'string'],
+            'handover_notes' => ['nullable', 'string', 'max:5000'],
         ];
 
         if ($this->isCreateRequest()) {
@@ -102,6 +100,9 @@ class DentistTransitionRequest extends FormRequest
 
     private function isCreateRequest(): bool
     {
-        return $this->routeIs('admin.dentist-transitions.store');
+        return $this->routeIs(
+            'admin.dentist-transitions.store',
+            'dentist.dentist.transitions.store'
+        );
     }
 }

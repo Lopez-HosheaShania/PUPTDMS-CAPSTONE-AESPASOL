@@ -4,18 +4,19 @@
 
     'label' => 'Filter',
     'value' => '',
-
     'options' => [],
 
     'callback' => null,
 
     'icon' => 'fa-filter',
-
     'placeholder' => null,
 
     'class' => '',
-
     'menuAlign' => 'left',
+
+    'searchable' => false,
+    'multiple' => false,
+    'searchPlaceholder' => 'Search options...',
 ])
 
 @php
@@ -80,7 +81,9 @@
     'class' => 'global-filter-select ' . $class,
 ]) }}
     data-global-filter-select data-filter-select-callback="{{ $callback }}"
-    data-filter-select-value="{{ $selectedValue }}" data-menu-align="{{ $menuAlign }}">
+    data-filter-select-value="{{ $selectedValue }}" data-menu-align="{{ $menuAlign }}"
+    data-filter-select-searchable="{{ $searchable ? 'true' : 'false' }}"
+    data-filter-select-multiple="{{ $multiple ? 'true' : 'false' }}">
     <input type="hidden" id="{{ $id }}Input" name="{{ $fieldName }}" value="{{ $selectedValue }}"
         data-filter-select-input>
 
@@ -122,6 +125,21 @@
 
     <div id="{{ $id }}Menu" class="global-filter-select-menu" data-filter-select-menu role="listbox"
         aria-label="{{ $label }}">
+
+        @if ($searchable)
+            <div class="global-filter-select-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input type="text" class="global-filter-select-search-input" placeholder="{{ $searchPlaceholder }}"
+                    autocomplete="off" data-filter-select-search>
+
+                <button type="button" class="search-clear global-filter-select-search-clear"
+                    data-filter-select-search-clear aria-label="Clear search" title="Clear search" hidden>
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+        @endif
+
         @foreach ($normalizedOptions as $option)
             @php
                 $isSelected = (string) $option['value'] === $selectedValue;
@@ -152,17 +170,13 @@
 
                 <span class="global-filter-select-option-meta">
 
-                    @if ($option['count'] !== null)
-                        <span class="global-filter-select-option-count">
-                            {{ $option['count'] }}
+                    @if ($multiple)
+                        <span class="global-filter-select-checkbox" aria-hidden="true">
+                            <i class="fa-solid fa-check"></i>
                         </span>
+                    @else
+                        <i class="fa-solid fa-check global-filter-select-check"></i>
                     @endif
-
-                    <i
-                        class="
-                            fa-solid fa-check
-                            global-filter-select-check
-                        "></i>
 
                 </span>
             </button>

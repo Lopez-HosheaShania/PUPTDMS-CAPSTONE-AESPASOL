@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use App\Helpers\AuditLogger;
+use Illuminate\Validation\Rules\Password;
 
 class UserManagementController extends Controller
 {
@@ -191,15 +192,35 @@ class UserManagementController extends Controller
         ]);
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+            ],
             'email' => 'required|email|unique:users,email|unique:patients,email',
             'role_id' => 'nullable|exists:roles,id',
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
             'status' => 'required|in:active,inactive',
             'phone' => ['nullable', 'regex:/^09\d{9}$/'],
-            'birthdate' => 'nullable|date',
+            'birthdate' => [
+                'nullable',
+                'date',
+                'before_or_equal:today',
+            ],
             'gender' => 'nullable|in:Male,Female',
         ], [
+            'name.regex' => 'Full name may only contain letters, spaces, apostrophes, periods, and hyphens.',
+            'birthdate.before_or_equal' => 'Birthdate cannot be in the future.',
             'phone.regex' => 'Phone number must start with 09 and contain exactly 11 digits.',
         ]);
 
@@ -262,7 +283,12 @@ class UserManagementController extends Controller
         ]);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+            ],
             'email' => [
                 'required',
                 'email',
@@ -274,10 +300,16 @@ class UserManagementController extends Controller
             'role_id' => 'nullable|exists:roles,id',
             'status' => 'required|in:active,inactive',
             'phone' => ['nullable', 'regex:/^09\d{9}$/'],
-            'birthdate' => 'nullable|date',
+            'birthdate' => [
+                'nullable',
+                'date',
+                'before_or_equal:today',
+            ],
             'gender' => 'nullable|in:Male,Female',
         ], [
             'phone.regex' => 'Phone number must start with 09 and contain exactly 11 digits.',
+            'name.regex' => 'Full name may only contain letters, spaces, apostrophes, periods, and hyphens.',
+            'birthdate.before_or_equal' => 'Birthdate cannot be in the future.',
         ]);
 
         $originalRole = $user->role;
@@ -411,7 +443,15 @@ class UserManagementController extends Controller
         $this->authorizeManagedUserAccount($user);
 
         $request->validate([
-            'password' => 'required|min:8|confirmed',
+            'password' => [
+                'required',
+                'confirmed',
+
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
         ]);
 
         DB::transaction(function () use ($request, $user) {
@@ -471,8 +511,16 @@ class UserManagementController extends Controller
         $this->authorizeUserManagementAccess('view_account_details');
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+            ],
             'email' => 'required|email|unique:patients,email,' . $patient->id,
+        ], [
+            'name.regex' =>
+            'Full name may only contain letters, spaces, apostrophes, periods, and hyphens.',
         ]);
 
         $patient->update([
@@ -489,7 +537,15 @@ class UserManagementController extends Controller
         $this->authorizeUserManagementAccess('update_user_password');
 
         $request->validate([
-            'password' => 'required|min:8|confirmed',
+            'password' => [
+                'required',
+                'confirmed',
+
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
         ]);
 
         $hashedPassword = Hash::make($request->password);
@@ -498,7 +554,6 @@ class UserManagementController extends Controller
             'password' => $hashedPassword,
         ]);
 
-        // If the patient is linked to a user, also update the user's password (consistency)
         if ($patient->user) {
             $patient->user->update([
                 'password' => $hashedPassword,

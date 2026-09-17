@@ -14,6 +14,10 @@ $isDentist = $role === 'dentist';
 
 @section('title', 'Document Requests')
 
+@section('styles')
+@vite('resources/css/pages/shared/document-requests.css')
+@endsection
+
 @section('content')
 
 @php
@@ -220,8 +224,9 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 </div>
 
                 <div class="table-toolbar-actions">
-                    <x-filter-select id="docreqStatusFilter" name="document_request_status" label="Status" value="all"
-                        :options="$docRequestStatusOptions" callback="handleDocumentRequestStatusSelect" />
+                    <x-filter-select id="docreqStatusFilter" name="document_request_status" label="Status" value=""
+                        :options="$docRequestStatusOptions" callback="handleDocumentRequestStatusSelect" searchable
+                        multiple search-placeholder="Search status..." />
 
                     <button id="filterBtn" type="button" onclick="openFilterModal()" class="global-filter-btn"
                         data-tooltip="Filter" data-tooltip-tone="neutral" aria-label="Filter requests">
@@ -249,7 +254,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 :from="$docRequestPagination['from']" :to="$docRequestPagination['to']" />
 
             <div id="requestListView" class="table-list-view">
-                <div class="table-scroll-wrapper">
+                <div class="table-scroll-wrapper docreq-desktop-list-table">
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -268,6 +273,8 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                         </tbody>
                     </table>
                 </div>
+
+                <div id="requestResponsiveListContainer" class="docreq-responsive-list" aria-live="polite"></div>
             </div>
 
             <div id="requestGridView" class="table-grid-view" hidden>
@@ -374,14 +381,14 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         <div class="filter-date-grid">
 
             <div class="filter-date-input-wrap">
-                <input type="text" id="fDateFrom" class="js-flatpickr-date-range-from" placeholder="Start date" readonly
+                <input type="text" id="fDateFrom" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date" readonly
                     autocomplete="off">
 
                 <i class="fa-regular fa-calendar"></i>
             </div>
 
             <div class="filter-date-input-wrap">
-                <input type="text" id="fDateTo" class="js-flatpickr-date-range-to" placeholder="End date" readonly
+                <input type="text" id="fDateTo" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date" readonly
                     autocomplete="off">
 
                 <i class="fa-regular fa-calendar"></i>
@@ -632,7 +639,38 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     const DOCREQ_DEFAULT_DOC_TYPES = @json($defaultDocumentTypes -> values());
 
     let allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
-    let activeFilter = @json(request('status', 'all') ?: 'all');
+
+    function normalizeDocreqStatusValues(value) {
+        const rawValues = Array.isArray(value)
+            ? value
+            : String(value || 'all').split(',');
+
+        const allowed = [
+            'all',
+            'pending',
+            'approved',
+            'rejected'
+        ];
+
+        const values = rawValues
+            .map(item => String(item || '').trim().toLowerCase())
+            .filter(item => allowed.includes(item));
+
+        if (!values.length || values.includes('all')) {
+            return ['all'];
+        }
+
+        return [...new Set(values)];
+    }
+
+    function serializeDocreqStatusValues(value) {
+        const values = normalizeDocreqStatusValues(value);
+        return values.includes('all') ? 'all' : values.join(',');
+    }
+
+    let activeFilter = normalizeDocreqStatusValues(
+        @json(request('status', 'all') ?: 'all')
+    );
 
     const DOCREQ_DATA_URL = `${window.location.pathname.replace(/\/$/, '')}/data`;
 
@@ -664,7 +702,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
     let docreqPerPage = Number(docreqPagination.per_page || 10);
     let currentPage = Number(docreqPagination.current_page || 1);
-    let filterStatus = activeFilter;
+    let filterStatus = [...activeFilter];
     let filterDocType = '';
     let filterDateFrom = '';
     let filterDateTo = '';
@@ -962,18 +1000,146 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         return Array.from(
             { length: count },
             () => `
-            <tr>
-                <td colspan="6">
-                    <div
+        <tr class="docreq-skeleton-table-row" aria-hidden="true">
+
+            <td class="table-cell-main">
+                <div class="docreq-skeleton-table-patient">
+
+                    <span
                         class="
-                            skeleton-shell
-                            docreq-skeleton-row
-                        "
-                    >
+                            skeleton-circle
+                            docreq-skeleton-table-avatar
+                        ">
+                    </span>
+
+                    <div class="docreq-skeleton-table-copy">
+                        <span
+                            class="
+                                skeleton-line
+                                docreq-skeleton-table-name
+                            ">
+                        </span>
+
+                        <span
+                            class="
+                                skeleton-pill
+                                docreq-skeleton-table-id
+                            ">
+                        </span>
                     </div>
-                </td>
-            </tr>
-        `
+
+                </div>
+            </td>
+
+            <td>
+                <div class="docreq-skeleton-table-date">
+                    <span class="skeleton-line"></span>
+                    <span class="skeleton-line"></span>
+                </div>
+            </td>
+
+            <td>
+                <span
+                    class="
+                        skeleton-block
+                        docreq-skeleton-table-document
+                    ">
+                </span>
+            </td>
+
+            <td>
+                <span
+                    class="
+                        skeleton-block
+                        docreq-skeleton-table-purpose
+                    ">
+                </span>
+            </td>
+
+            <td>
+                <span
+                    class="
+                        skeleton-block
+                        docreq-skeleton-table-status
+                    ">
+                </span>
+            </td>
+
+            <td class="table-action-cell">
+                <div class="docreq-skeleton-table-actions">
+
+                    <span
+                        class="
+                            skeleton-circle
+                            docreq-skeleton-table-action
+                        ">
+                    </span>
+
+                    <span
+                        class="
+                            skeleton-circle
+                            docreq-skeleton-table-action
+                        ">
+                    </span>
+
+                </div>
+            </td>
+
+        </tr>
+    `
+        ).join('');
+    }
+
+    function buildDocRequestResponsiveListSkeletonHtml(
+        count = 4
+    ) {
+        return Array.from(
+            { length: count },
+            () => `
+        <article class="docreq-responsive-record docreq-responsive-skeleton" aria-hidden="true">
+            <div class="docreq-responsive-record-head">
+                <div class="table-primary docreq-responsive-patient">
+                    <span class="skeleton-circle docreq-skeleton-table-avatar"></span>
+
+                    <div class="docreq-responsive-patient-copy">
+                        <span class="skeleton-line docreq-skeleton-table-name"></span>
+                        <span class="skeleton-pill docreq-skeleton-table-id"></span>
+                    </div>
+                </div>
+
+                <span class="skeleton-pill docreq-skeleton-table-status"></span>
+            </div>
+
+            <div class="docreq-responsive-meta">
+                <div class="docreq-responsive-field">
+                    <span class="skeleton-line docreq-responsive-skeleton-label"></span>
+                    <span class="skeleton-block docreq-responsive-skeleton-value"></span>
+                </div>
+
+                <div class="docreq-responsive-field">
+                    <span class="skeleton-line docreq-responsive-skeleton-label"></span>
+                    <span class="skeleton-block docreq-responsive-skeleton-value"></span>
+                </div>
+
+                <div class="docreq-responsive-field">
+                    <span class="skeleton-line docreq-responsive-skeleton-label"></span>
+                    <span class="skeleton-block docreq-responsive-skeleton-value docreq-responsive-skeleton-value-short"></span>
+                </div>
+
+                <div class="docreq-responsive-field">
+                    <span class="skeleton-line docreq-responsive-skeleton-label"></span>
+                    <span class="skeleton-block docreq-responsive-skeleton-value"></span>
+                </div>
+            </div>
+
+            <div class="docreq-responsive-actions">
+                <div class="docreq-skeleton-table-actions">
+                    <span class="skeleton-circle docreq-skeleton-table-action"></span>
+                    <span class="skeleton-circle docreq-skeleton-table-action"></span>
+                </div>
+            </div>
+        </article>
+    `
         ).join('');
     }
 
@@ -987,6 +1153,9 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         const listContainer =
             document.getElementById('requestListContainer');
 
+        const responsiveListContainer =
+            document.getElementById('requestResponsiveListContainer');
+
         const gridContainer =
             document.getElementById('requestGridContainer');
 
@@ -995,12 +1164,6 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 .getElementById('mainContent')
                 ?.classList
                 .contains('mode-grid');
-
-
-        const skeletonHtml =
-            buildDocRequestSkeletonHtml(
-                isGrid ? 6 : 4
-            );
 
         if (listView) {
             listView.hidden = isGrid;
@@ -1015,6 +1178,13 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 isGrid
                     ? ''
                     : buildDocRequestListSkeletonHtml(4);
+        }
+
+        if (responsiveListContainer) {
+            responsiveListContainer.innerHTML =
+                isGrid
+                    ? ''
+                    : buildDocRequestResponsiveListSkeletonHtml(4);
         }
 
         if (gridContainer) {
@@ -1054,7 +1224,14 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
     function getFiltered() {
         let data = allRequests;
-        if (activeFilter !== 'all') data = data.filter(r => r.status === activeFilter);
+
+        if (!activeFilter.includes('all')) {
+            data = data.filter(r =>
+                activeFilter.includes(
+                    normalizeDocreqStatus(r.status)
+                )
+            );
+        }
         if (searchQuery) {
             const q = searchQuery.toLowerCase();
             data = data.filter(r => {
@@ -1103,7 +1280,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     }
 
     function hasActiveFilters() {
-        return searchQuery !== '' || activeFilter !== 'all' || filterDocType !== '' || filterDateFrom !== '' ||
+        return searchQuery !== '' || !activeFilter.includes('all') || filterDocType !== '' || filterDateFrom !== '' ||
             filterDateTo !== '' || filterSort !== 'newest';
     }
 
@@ -1137,7 +1314,13 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     function buildClearFilterBtn() {
         const parts = [];
         if (searchQuery) parts.push(`"${esc(searchQuery)}"`);
-        if (activeFilter !== 'all') parts.push(activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1));
+        if (!activeFilter.includes('all')) {
+            parts.push(
+                activeFilter
+                    .map(status => status.charAt(0).toUpperCase() + status.slice(1))
+                    .join(', ')
+            );
+        }
         if (filterDocType) parts.push(filterDocType);
         if (filterDateFrom || filterDateTo) parts.push('Date range');
         if (filterSort !== 'newest') parts.push('Sort');
@@ -1161,8 +1344,18 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
         searchQuery = '';
 
-        activeFilter = 'all';
-        filterStatus = 'all';
+        activeFilter = ['all'];
+        filterStatus = ['all'];
+
+        window.setGlobalFilterSelectValue?.(
+            'docreqStatusFilter',
+            'all',
+            {
+                callback: false,
+                focus: false
+            }
+        );
+
         filterDocType = '';
         filterDateFrom = '';
         filterDateTo = '';
@@ -1220,7 +1413,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     function getDocreqFetchParams() {
         return new URLSearchParams({
             search: searchQuery || '',
-            status: activeFilter || 'all',
+            status: serializeDocreqStatusValues(activeFilter),
             type: filterDocType || '',
             date_from: filterDateFrom || '',
             date_to: filterDateTo || '',
@@ -1300,7 +1493,9 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
             const activeContainer =
                 currentViewMode === 'grid'
                     ? document.getElementById('requestGridContainer')
-                    : document.getElementById('requestListContainer');
+                    : window.matchMedia('(max-width: 1023px)').matches
+                        ? document.getElementById('requestResponsiveListContainer')
+                        : document.getElementById('requestListContainer');
 
             if (activeContainer) {
                 activeContainer.classList.remove('content-reveal');
@@ -1341,6 +1536,9 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         const listContainer =
             document.getElementById('requestListContainer');
 
+        const responsiveListContainer =
+            document.getElementById('requestResponsiveListContainer');
+
         const gridContainer =
             document.getElementById('requestGridContainer');
 
@@ -1363,6 +1561,10 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 listContainer.innerHTML = '';
             }
 
+            if (responsiveListContainer) {
+                responsiveListContainer.innerHTML = '';
+            }
+
             if (gridContainer) {
                 gridContainer.innerHTML = '';
             }
@@ -1374,16 +1576,21 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
         window.EmptyState?.hide('#docreqEmptyState');
 
-
         /*
-         * Render BOTH views.
-         * Do not destroy the inactive view.
+         * Render every responsive representation.
+         * CSS decides whether desktop list, compact list, or grid is visible.
          */
-
         if (listContainer) {
             listContainer.innerHTML =
                 page
                     .map(request => buildDesktopRow(request))
+                    .join('');
+        }
+
+        if (responsiveListContainer) {
+            responsiveListContainer.innerHTML =
+                page
+                    .map(request => buildResponsiveListRecord(request))
                     .join('');
         }
 
@@ -1393,7 +1600,6 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                     .map(request => buildGridCard(request))
                     .join('');
         }
-
 
         syncDocumentRequestView();
     }
@@ -1636,6 +1842,107 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     `;
     }
 
+    function buildResponsiveListRecord(r) {
+        const badgeCls =
+            getStatusBadgeClass(r.status);
+
+        const statusLabel =
+            getStatusLabel(r.status);
+
+        const displayName =
+            getPatientDisplayName(
+                r.patient_name
+            );
+
+        const avatarHtml =
+            buildPatientAvatar(
+                r,
+                'sm'
+            );
+
+        const identifier =
+            r.sub_label
+                ? esc(r.sub_label)
+                : 'No ID set';
+
+        const isPending =
+            normalizeDocreqStatus(r.status) === 'pending';
+
+        return `
+        <article
+            class="docreq-responsive-record"
+            id="row-m-${r.id}"
+            onclick="selectDocumentCard('m', ${r.id})"
+        >
+            <div class="docreq-responsive-record-head">
+                <div class="table-primary docreq-responsive-patient">
+                    ${avatarHtml}
+
+                    <div class="docreq-responsive-patient-copy">
+                        <strong data-patient-name>
+                            ${esc(displayName)}
+                        </strong>
+
+                        <span class="global-info-pill docreq-responsive-identifier">
+                            <i class="fa-regular fa-id-card"></i>
+                            ${identifier}
+                        </span>
+                    </div>
+                </div>
+
+                <span class="status-badge ${badgeCls}">
+                    ${statusLabel}
+                </span>
+            </div>
+
+            <div class="docreq-responsive-meta">
+                <div class="docreq-responsive-field">
+                    <span class="table-record-label">Document</span>
+                    <span class="table-record-value">
+                        ${esc(r.document_type)}
+                    </span>
+                </div>
+
+                <div class="docreq-responsive-field">
+                    <span class="table-record-label">Date Requested</span>
+                    <span class="table-record-value">
+                        <span class="table-date">
+                            <i class="fa-regular fa-calendar"></i>
+                            ${esc(r.request_date)}
+                        </span>
+                    </span>
+                </div>
+
+                <div class="docreq-responsive-field">
+                    <span class="table-record-label">Time</span>
+                    <span class="table-record-value">
+                        <span class="table-date">
+                            <i class="fa-regular fa-clock"></i>
+                            ${esc(r.request_time)}
+                        </span>
+                    </span>
+                </div>
+
+                <div class="docreq-responsive-field docreq-responsive-purpose">
+                    <span class="table-record-label">Purpose</span>
+                    <span class="table-record-value">
+                        ${esc(r.purpose)}
+                    </span>
+                </div>
+            </div>
+
+            ${isPending
+                ? `
+                    <div class="docreq-responsive-actions">
+                        ${buildRequestActions(r)}
+                    </div>
+                `
+                : ''
+            }
+        </article>
+    `;
+    }
+
     function buildGridCard(r) {
         const badgeCls =
             getStatusBadgeClass(r.status);
@@ -1659,9 +1966,12 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 ? esc(r.sub_label)
                 : 'No ID set';
 
+        const isPending =
+            normalizeDocreqStatus(r.status) === 'pending';
+
         return `
         <article
-            class="table-record-card"
+            class="table-record-card docreq-grid-card"
             id="row-g-${r.id}"
             onclick="selectDocumentCard('g', ${r.id})"
         >
@@ -1669,16 +1979,23 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
                 <div class="table-record-content">
 
-                    <div class="table-record-header">
+                    <div class="table-record-header docreq-grid-header">
 
-                        <div class="table-primary">
+                        <div class="table-primary docreq-grid-patient">
                             ${avatarHtml}
 
-                            <div
-                                class="table-record-title"
-                                data-patient-name
-                            >
-                                ${esc(displayName)}
+                            <div class="docreq-grid-patient-copy">
+                                <div
+                                    class="table-record-title"
+                                    data-patient-name
+                                >
+                                    ${esc(displayName)}
+                                </div>
+
+                                <span class="global-info-pill docreq-grid-identifier">
+                                    <i class="fa-regular fa-id-card"></i>
+                                    ${identifier}
+                                </span>
                             </div>
                         </div>
 
@@ -1688,12 +2005,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
                     </div>
 
-                    <span class="global-info-pill">
-                        <i class="fa-regular fa-id-card"></i>
-                        ${identifier}
-                    </span>
-
-                    <div class="table-record-meta">
+                    <div class="table-record-meta docreq-grid-meta">
 
                         <div class="table-record-row">
                             <span class="table-record-label">
@@ -1707,40 +2019,52 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
                         <div class="table-record-row">
                             <span class="table-record-label">
-                                Requested
+                                Purpose
                             </span>
 
                             <span class="table-record-value">
-                                <span class="table-date">
-                                    <i class="fa-regular fa-calendar"></i>
-                                    ${esc(r.request_date)}
-                                </span>
+                                ${esc(r.purpose)}
                             </span>
                         </div>
 
-                        <div class="table-record-row">
-                            <span class="table-record-label">
-                                Time
-                            </span>
-
-                            <span class="table-record-value">
-                                <span class="table-date">
-                                    <i class="fa-regular fa-clock"></i>
-                                    ${esc(r.request_time)}
+                        <div class="docreq-grid-datetime">
+                            <div class="table-record-row docreq-grid-date-field">
+                                <span class="table-record-label">
+                                    Date Requested
                                 </span>
-                            </span>
+
+                                <span class="table-record-value">
+                                    <span class="table-date">
+                                        <i class="fa-regular fa-calendar"></i>
+                                        ${esc(r.request_date)}
+                                    </span>
+                                </span>
+                            </div>
+
+                            <div class="table-record-row docreq-grid-time-field">
+                                <span class="table-record-label">
+                                    Time
+                                </span>
+
+                                <span class="table-record-value">
+                                    <span class="table-date">
+                                        <i class="fa-regular fa-clock"></i>
+                                        ${esc(r.request_time)}
+                                    </span>
+                                </span>
+                            </div>
                         </div>
 
                     </div>
 
                 </div>
 
-                ${normalizeDocreqStatus(r.status) === 'pending'
+                ${isPending
                 ? `
-                            <div class="table-record-actions">
-                                ${buildRequestActions(r)}
-                            </div>
-                        `
+                        <div class="table-record-actions docreq-grid-actions">
+                            ${buildRequestActions(r)}
+                        </div>
+                    `
                 : ''
             }
 
@@ -1809,20 +2133,31 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
             },
         };
 
-        if (activeFilter !== 'all') {
+        if (!activeFilter.includes('all')) {
             const copy =
-                statusEmptyCopy[
-                activeFilter
-                ] || {
-                    icon:
-                        'fa-filter-circle-xmark',
+                activeFilter.length === 1
+                    ? statusEmptyCopy[
+                    activeFilter[0]
+                    ] || {
+                        icon:
+                            'fa-filter-circle-xmark',
 
-                    title:
-                        'No matching requests found',
+                        title:
+                            'No matching requests found',
 
-                    message:
-                        'No document requests are available for this status.',
-                };
+                        message:
+                            'No document requests are available for this status.',
+                    }
+                    : {
+                        icon:
+                            'fa-filter-circle-xmark',
+
+                        title:
+                            'No matching requests found',
+
+                        message:
+                            'No document requests are available for the selected statuses.',
+                    };
 
             window.EmptyState?.render({
                 host:
@@ -2025,23 +2360,16 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
     window.handleDocumentRequestStatusSelect =
         function (value) {
-            const nextStatus =
-                ['all', 'pending', 'approved', 'rejected']
-                    .includes(
-                        String(value || '')
-                            .trim()
-                            .toLowerCase()
-                    )
-                    ? String(value)
-                        .trim()
-                        .toLowerCase()
-                    : 'all';
+            const nextStatuses =
+                normalizeDocreqStatusValues(
+                    value
+                );
 
             activeFilter =
-                nextStatus;
+                nextStatuses;
 
             filterStatus =
-                nextStatus;
+                [...nextStatuses];
 
             searchQuery = '';
 
@@ -2356,7 +2684,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     }
 
     function applyFilterModal() {
-        filterStatus = activeFilter;
+        filterStatus = [...activeFilter];
         const sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
         filterSort = sortActive ? sortActive.getAttribute('data-val') : 'newest';
         filterDocType = document.getElementById('fDocType').value;
@@ -2374,7 +2702,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         const sortActive = document.querySelector('#fSortGroup .ftag.ftag-active');
 
         return {
-            status: activeFilter,
+            status: serializeDocreqStatusValues(activeFilter),
             docType: document.getElementById('fDocType')?.value || '',
             dateFrom: document.getElementById('fDateFrom')?.value || '',
             dateTo: document.getElementById('fDateTo')?.value || '',
@@ -2383,8 +2711,8 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     }
 
     function getDraftFilteredDocRequests() {
-        const oldActiveFilter = activeFilter;
-        const oldFilterStatus = filterStatus;
+        const oldActiveFilter = [...activeFilter];
+        const oldFilterStatus = [...filterStatus];
         const oldFilterDocType = filterDocType;
         const oldFilterDateFrom = filterDateFrom;
         const oldFilterDateTo = filterDateTo;
@@ -2392,8 +2720,8 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
         const draft = getDraftDocRequestFilters();
 
-        activeFilter = draft.status;
-        filterStatus = draft.status;
+        activeFilter = normalizeDocreqStatusValues(draft.status);
+        filterStatus = [...activeFilter];
         filterDocType = draft.docType;
         filterDateFrom = draft.dateFrom;
         filterDateTo = draft.dateTo;
@@ -2565,14 +2893,16 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
             }
         );
 
-        window.setGlobalFilterSelectValue?.(
-            'docreqStatusFilter',
-            activeFilter,
-            {
-                callback: false,
-                focus: false
-            }
-        );
+        if (activeFilter.length === 1) {
+            window.setGlobalFilterSelectValue?.(
+                'docreqStatusFilter',
+                activeFilter[0],
+                {
+                    callback: false,
+                    focus: false
+                }
+            );
+        }
 
         window.addEventListener('resize', syncDocumentRequestView);
 
