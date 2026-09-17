@@ -97,7 +97,12 @@
                     $date = \Illuminate\Support\Carbon::parse($expirationDate);
                     $message = str_replace($date->format('M d, Y'), $date->format('F d, Y'), (string) $message);
                 }
-                $actionUrl = $resolveNotificationUrl($payload, $role);
+                $isDentistContinuityNotification = str_ends_with(
+                    (string) $notification->type,
+                    'DentistTransitionNotification',
+                );
+
+                $actionUrl = $isDentistContinuityNotification ? '#' : $resolveNotificationUrl($payload, $role);
 
                 return [
                     'id' => $notification->id,
