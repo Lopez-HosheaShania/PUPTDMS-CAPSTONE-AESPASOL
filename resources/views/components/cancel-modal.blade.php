@@ -307,9 +307,9 @@
                 })
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => null);
 
-            if (response.ok && data.success) {
+            if (response.ok && data?.success) {
                 closeCancelAppointmentModal({
                     force: true
                 });
@@ -331,6 +331,8 @@
                 btn.innerHTML = `
         <span>Cancel Appointment</span>
     `;
+
+                alert(data?.message ?? 'Unable to cancel the appointment. Please try again.');
             }
         } catch (error) {
             console.error('Cancel appointment failed:', error);
@@ -340,6 +342,8 @@
             btn.innerHTML = `
         <span>Cancel Appointment</span>
     `;
+
+            alert('Server error while cancelling the appointment. Please try again.');
         }
     }
 

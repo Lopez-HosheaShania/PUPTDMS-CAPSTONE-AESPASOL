@@ -354,9 +354,7 @@ class DentistReportController extends Controller
         $parsed = Carbon::createFromFormat('M Y', $request->input('period'))
             ?? Carbon::createFromFormat('F Y', $request->input('period'));
 
-        [$labels, $female, $male] = $this->buildGadData($parsed->year, $parsed->month);
-
-        $hasData = array_sum($female) + array_sum($male) > 0;
+        $data = $this->gadChartDataForPeriod($parsed->year, $parsed->month);
 
         AuditLogger::log(
             'view',
@@ -364,12 +362,23 @@ class DentistReportController extends Controller
             'Dentist viewed GAD chart data'
         );
 
-        return response()->json([
+        return response()->json($data);
+    }
+
+    /**
+     * Shared source of truth for GAD chart data.
+     * Used by Dentist Reports and the Admin Dashboard.
+     */
+    public function gadChartDataForPeriod(int $year, int $month): array
+    {
+        [$labels, $female, $male] = $this->buildGadData($year, $month);
+
+        return [
             'labels' => $labels,
             'female' => $female,
             'male' => $male,
-            'empty' => ! $hasData,
-        ]);
+            'empty' => array_sum($female) + array_sum($male) <= 0,
+        ];
     }
 
     public function weeklyData(Request $request)
