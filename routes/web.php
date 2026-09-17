@@ -260,6 +260,16 @@ Route::get(
     ])
     ->name('shared.existing-record.search-patient');
 
+Route::post(
+    '/clinical/patients/resolve-external',
+    [WalkInController::class, 'resolveExternalPatient']
+)
+    ->middleware([
+        'auth',
+        'permission:manage_existing_records,manage_walk_in_patients',
+    ])
+    ->name('shared.existing-record.resolve-external-patient');
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN / SUPER ADMIN ROUTES
