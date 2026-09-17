@@ -692,6 +692,19 @@ function loadDatePickerModule() {
 
 window.loadDatePickerModule = loadDatePickerModule;
 
+// Warm the date-picker module as soon as a page contains date/time fields.
+// This prevents the first user interaction from being the moment Flatpickr
+// and its CSS are loaded, which can cause a visible one-frame flash.
+if (hasAny(flatpickrSelectors)) {
+    loadDatePickerModule()
+        .catch(error => {
+            console.error(
+                'Unable to initialize date pickers.',
+                error
+            );
+        });
+}
+
 async function ensureDatePickerReady(
     input
 ) {
@@ -700,9 +713,20 @@ async function ensureDatePickerReady(
     const module =
         await loadDatePickerModule();
 
+    // Only hydrate the picker group the user is interacting with.
+    // Initializing the whole document here used to rebuild unrelated time
+    // pickers when a date field received focus, causing the side panel flash.
+    const scope =
+        input?.closest?.(
+            '[data-flatpickr-scope], dialog, .ui-modal, .modal-overlay'
+        ) ||
+        input?.closest?.('form') ||
+        input?.parentElement ||
+        document;
+
     await module
         .initGlobalDatePickers(
-            document
+            scope
         );
 
     const instance =

@@ -1620,14 +1620,11 @@
                         </div>
 
                         <div class="appointment-slot-period-grid">
-                            ${Array.from({
-                    length: 4
-                }).map(() => ` <
-                    div class = "px-4 py-3 rounded-xl border border-gray-100 bg-gray-50" >
-                    <
-                    div class = "h-4 w-20 skeleton-block rounded" > < /div> < /
-                div >
-                    `).join('')}
+                            ${Array.from({ length: 4 }).map(() => `
+                                <div class="px-4 py-3 rounded-xl border border-gray-100 bg-gray-50">
+                                    <div class="h-4 w-20 skeleton-block rounded"></div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
 
@@ -1637,14 +1634,11 @@
                         </div>
 
                         <div class="appointment-slot-period-grid">
-                            ${Array.from({
-                    length: 4
-                }).map(() => ` <
-                    div class = "px-4 py-3 rounded-xl border border-gray-100 bg-gray-50" >
-                    <
-                    div class = "h-4 w-20 skeleton-block rounded" > < /div> < /
-                div >
-                    `).join('')}
+                            ${Array.from({ length: 4 }).map(() => `
+                                <div class="px-4 py-3 rounded-xl border border-gray-100 bg-gray-50">
+                                    <div class="h-4 w-20 skeleton-block rounded"></div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 `;
