@@ -13,6 +13,12 @@
     @php
         $notifications = collect($notifications ?? []);
         $notifCount = $notifications->count();
+
+        $hasActiveAppointment = collect($appointments ?? [])->contains(function ($appointment) {
+            $status = strtolower(trim((string) ($appointment->status ?? '')));
+
+            return in_array($status, ['upcoming', 'rescheduled'], true);
+        });
         $odontogramSnapshotService = app(\App\Services\AppointmentOdontogramSnapshotService::class);
 
         $previousOdontogramByAppointment = $previousOdontogramByAppointment ?? [];
@@ -245,7 +251,7 @@
                                     {{ $recordCount > 0
                                         ? 'Last Visit: ' . ($latestRecordDate ?? 'Available')
                                         : 'No dental
-                                                                                                                                                                                                                                                        record yet' }}
+                                                                                                                                                                                                                                                                                                                                record yet' }}
                                 </span>
 
                             </div>
@@ -691,6 +697,7 @@
         'mode' => 'patient-dashboard',
         'renderStyle' => 'patient',
         'calendarContainerId' => 'calendarSkeletonContainer',
+        'hasActiveAppointment' => $hasActiveAppointment,
     
         'dateInputId' => null,
         'timeInputId' => null,

@@ -3,362 +3,278 @@
 }
 
 .daily-treatment-page .dtr-card {
-    overflow: visible !important;
+    overflow: visible;
 }
 
 .daily-treatment-page .dtr-card-header {
-    align-items: center !important;
-    gap: 1rem !important;
+    align-items: center;
+    gap: 1rem;
 }
 
 .daily-treatment-page .dtr-toolbar {
-    display: grid !important;
-    grid-template-columns: 210px minmax(280px, 360px) auto !important;
-    align-items: center !important;
-    justify-content: end !important;
-    gap: 10px !important;
-    width: auto !important;
-    min-width: 0 !important;
+    display: grid;
+    grid-template-columns: 210px minmax(280px, 360px) auto;
+    align-items: center;
+    justify-content: end;
+    gap: 10px;
+    width: auto;
+    min-width: 0;
 }
 
 .daily-treatment-page .dtr-toolbar,
 .daily-treatment-page .dtr-card-header,
 .daily-treatment-page .voice-search-row,
 .daily-treatment-page .voice-input-toggle,
-.daily-treatment-page .dtr-month-picker{
-    position: relative !important;
-    overflow: visible !important;
+.daily-treatment-page .dtr-month-picker {
+    position: relative;
+    overflow: visible;
 }
 
 .daily-treatment-page .voice-input-toggle {
-    z-index:200 !important;
+    z-index: 200;
 }
 
 .daily-treatment-page .voice-status {
-    z-index: 9999 !important;
+    z-index: 9999;
 }
 
 .daily-treatment-page .dtr-month-picker,
 .daily-treatment-page .global-search {
-    width: 100% !important;
-    min-width: 0 !important;
+    width: 100%;
+    min-width: 0;
 }
 
 .daily-treatment-page .dtr-filter-actions {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    flex: 0 0 auto !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
 }
 
 .daily-treatment-page .global-filter-reset-btn {
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    padding: 0 !important;
-    justify-content: center !important;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    padding: 0;
+    justify-content: center;
 }
 
 .daily-treatment-page .dtr-table {
-    min-width: var(--service-table-min) !important;
+    min-width: var(--service-table-min);
 }
 
 .daily-treatment-page .dtr-card-body {
-    padding: 0 !important;
+    padding: 0;
 }
 
 .daily-treatment-page .dtr-table-wrap {
-    padding: 0 !important;
-    overflow-x: auto !important;
+    padding: 0;
+    overflow-x: auto;
 }
 
 .daily-treatment-page .dtr-table th,
 .daily-treatment-page .dtr-table td {
-    vertical-align: middle !important;
-    text-align: center !important;
+    vertical-align: middle;
+    text-align: center;
 }
 
-.daily-treatment-page .dtr-table td > div,
-.daily-treatment-page .dtr-table td > span,
-.daily-treatment-page .dtr-table td > p {
-    margin-left: auto !important;
-    margin-right: auto !important;
-    text-align: center !important;
+.daily-treatment-page .dtr-table td>div,
+.daily-treatment-page .dtr-table td>span,
+.daily-treatment-page .dtr-table td>p {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
 }
 
 .daily-treatment-page .dtr-table th:nth-child(4),
 .daily-treatment-page .dtr-table td:nth-child(4) {
-    min-width: 150px !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    min-width: 150px;
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 
 .daily-treatment-page .dtr-signature {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 5px !important;
-    min-height: 26px !important;
-    padding: 0 .6rem !important;
-    border-radius: 999px !important;
-    font-size: .68rem !important;
-    font-weight: 850 !important;
-    line-height: 1 !important;
-    white-space: nowrap !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 26px;
+    padding: 0 .6rem;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 850;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .daily-treatment-page .dtr-signature.yes {
-    background: #ECFDF5 !important;
-    color: #059669 !important;
-    border: 1px solid #A7F3D0 !important;
+    background: var(--status-completed-bg);
+    color: var(--status-completed-text);
+    border: 1px solid var(--status-completed-border);
 }
 
 .daily-treatment-page .dtr-signature.no {
-    background: #F9FAFB !important;
-    color: #9CA3AF !important;
-    border: 1px solid #E5E7EB !important;
+    background: var(--status-default-bg);
+    color: var(--status-default-text);
+    border: 1px solid var(--status-default-border);
 }
 
 .daily-treatment-page .dtr-signature-preview {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 92px !important;
-    min-width: 92px !important;
-    height: 38px !important;
-    padding: 4px 8px !important;
-    border-radius: 12px !important;
-    background: #FFFFFF !important;
-    border: 1px solid #DDE7E2 !important;
-    box-shadow: 0 6px 16px rgba(15, 23, 42, .06) !important;
-    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 92px;
+    min-width: 92px;
+    height: 38px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 16px var(--alpha-slate-900-6);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 
 .daily-treatment-page .dtr-signature-preview:hover {
-    transform: translateY(-1px) !important;
-    border-color: #86EFAC !important;
-    box-shadow: 0 10px 24px rgba(22, 163, 74, .12) !important;
+    transform: translateY(-1px);
+    border-color: var(--status-completed-border);
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--status-completed-solid) 12%, transparent);
 }
 
 .daily-treatment-page .dtr-signature-image {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
-#createReportModal .fp-date-input-wrap {
-    position: relative !important;
-    width: 100% !important;
-}
-
-#createReportModal .fp-date-icon {
-    position: absolute !important;
-    right: 14px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    color: #9CA3AF !important;
-    font-size: 14px !important;
-    pointer-events: none !important;
-}
 
 .daily-treatment-page .dtr-month-picker {
-    position: relative !important;
-    width: 210px !important;
-    min-width: 210px !important;
-    flex: 0 0 210px !important;
-}
-
-.daily-treatment-page .dtr-month-picker .fp-date-input,
-.daily-treatment-page .dtr-month-picker .service-period-input,
-.daily-treatment-page .dtr-month-picker .service-period-alt {
-    width: 100% !important;
-    min-width: 0 !important;
-    height: 42px !important;
-    padding: 0 42px 0 16px !important;
-
-    border-radius: 13px !important;
-    border: 1px solid rgba(139, 0, 0, .18) !important;
-
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, .96),
-        rgba(255, 245, 245, .90)
-    ) !important;
-
-    color: #374151 !important;
-    font-family: inherit !important;
-    font-size: .82rem !important;
-    font-weight: 900 !important;
-    letter-spacing: -.01em !important;
-
-    box-shadow: 0 8px 20px rgba(139, 0, 0, .08) !important;
-    cursor: pointer !important;
-}
-
-.daily-treatment-page .dtr-month-picker .fp-date-input[readonly],
-.daily-treatment-page .dtr-month-picker .service-period-input[readonly],
-.daily-treatment-page .dtr-month-picker .service-period-alt[readonly] {
-    cursor: pointer !important;
-}
-
-.daily-treatment-page .dtr-month-picker .fp-date-icon {
-    position: absolute !important;
-    right: 15px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-
-    color: #8B0000 !important;
-    font-size: .82rem !important;
-
-    pointer-events: none !important;
-    z-index: 4 !important;
+    position: relative;
+    width: 210px;
+    min-width: 210px;
+    flex: 0 0 210px;
 }
 
 @media only screen and (max-width: 1024px) {
     .daily-treatment-page .dtr-card-header {
-        flex-direction: column !important;
-        align-items: stretch !important;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .daily-treatment-page .card-header-left,
     .daily-treatment-page .card-header-right {
-        width: 100% !important;
-        min-width: 0 !important;
+        width: 100%;
+        min-width: 0;
     }
 
     .daily-treatment-page .dtr-toolbar {
-        width: 100% !important;
-        grid-template-columns: 210px minmax(0, 1fr) auto !important;
+        width: 100%;
+        grid-template-columns: 210px minmax(0, 1fr) auto;
     }
 }
 
-@media only screen and (max-width: 900px){
+@media only screen and (max-width: 900px) {
     .daily-treatment-page {
-        padding-left: 12px !important;
-        padding-right: 12px !important;
+        padding-left: 12px;
+        padding-right: 12px;
         --service-table-min: 900px;
     }
 
     .daily-treatment-page .dentist-hero {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: .85rem !important;
+        flex-direction: column;
+        align-items: stretch;
+        gap: .85rem;
     }
 
     .daily-treatment-page .dentist-hero-content {
-        width: 100% !important;
-        min-width: 0 !important;
-        padding-right: 0 !important;
-        gap: .7rem !important;
+        width: 100%;
+        min-width: 0;
+        padding-right: 0;
+        gap: .7rem;
     }
 
     .daily-treatment-page .dentist-hero-actions {
-        width: 100% !important;
-        min-width: 0 !important;
-        margin-left: 0 !important;
-        display: flex !important;
-        align-items: center !important;
+        width: 100%;
+        min-width: 0;
+        margin-left: 0;
+        display: flex;
+        align-items: center;
     }
 
     .daily-treatment-page .dentist-hero-actions .ui-btn {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        flex: 1 1 auto !important;
-        justify-content: center !important;
-        white-space: nowrap !important;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        flex: 1 1 auto;
+        justify-content: center;
+        white-space: nowrap;
     }
 
     .daily-treatment-page .dtr-card-header {
-        flex-direction: column !important;
-        align-items: stretch !important;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .daily-treatment-page .card-header-right.dtr-toolbar {
-        width: 100% !important;
-        min-width: 0 !important;
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: .6rem !important;
+        width: 100%;
+        min-width: 0;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: .6rem;
     }
 
     .daily-treatment-page .voice-search-row {
-        width: 100% !important;
-        min-width: 0 !important;
+        width: 100%;
+        min-width: 0;
     }
 
     .daily-treatment-page .global-search {
-        width: 100% !important;
-        min-width: 0 !important;
+        width: 100%;
+        min-width: 0;
     }
 
     .daily-treatment-page .dtr-filter-actions {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) 38px !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        gap: 8px !important;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 38px;
+        width: 100%;
+        min-width: 0;
+        gap: 8px;
     }
 
     .daily-treatment-page .global-filter-btn {
-        width: 100% !important;
-        min-width: 0 !important;
-        justify-content: center !important;
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
     }
 
     .daily-treatment-page .global-filter-reset-btn {
-        width: 38px !important;
-        min-width: 38px !important;
+        width: 38px;
+        min-width: 38px;
     }
 
     .daily-treatment-page .dtr-table th,
     .daily-treatment-page .dtr-table td {
-        font-size: .68rem !important;
-        padding: .55rem .45rem !important;
+        font-size: .68rem;
+        padding: .55rem .45rem;
     }
 }
 
 @media only screen and (max-width: 480px) {
-     .daily-treatment-page .dentist-hero-title {
-        font-size: 1.15rem !important;
+    .daily-treatment-page .dentist-hero-title {
+        font-size: 1.15rem;
     }
 
     .daily-treatment-page .dentist-hero-actions .ui-btn {
-        min-height: 42px !important;
-        padding-inline: 12px !important;
-        font-size: 12px !important;
+        min-height: 42px;
+        padding-inline: 12px;
+        font-size: 12px;
     }
 
     .daily-treatment-page .dtr-toolbar {
-        gap: .5rem !important;
+        gap: .5rem;
     }
 
     .daily-treatment-page .voice-search-row {
-        gap: .45rem !important;
+        gap: .45rem;
     }
-}
-
-[data-theme="dark"] #downloadCompleteModal .ui-modal-card,
-.dark #downloadCompleteModal .ui-modal-card {
-    background: #161B22 !important;
-    color: #E5E7EB !important;
-}
-
-[data-theme="dark"] #createReportModal .modal-ft,
-.dark #createReportModal .modal-ft {
-    background: #161B22 !important;
-    border-color: rgba(255, 255, 255, .10) !important;
-}
-
-[data-theme="dark"] .daily-treatment-page .dtr-month-picker .fp-date-input,
-[data-theme="dark"] .daily-treatment-page .dtr-month-picker .service-period-input,
-[data-theme="dark"] .daily-treatment-page .dtr-month-picker .service-period-alt,
-.dark .daily-treatment-page .dtr-month-picker .fp-date-input,
-.dark .daily-treatment-page .dtr-month-picker .service-period-input,
-.dark .daily-treatment-page .dtr-month-picker .service-period-alt {
-    background: rgba(13, 17, 23, .86) !important;
-    border-color: rgba(255, 255, 255, .12) !important;
-    color: #E5E7EB !important;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, .28) !important;
 }

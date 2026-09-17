@@ -3,27 +3,27 @@
 }
 
 .dental-services-page .service-dental-table {
-    min-width: var(--service-table-min) !important;
-    width: max-content !important;
-    table-layout: auto !important;
+    min-width: var(--service-table-min);
+    width: max-content;
+    table-layout: auto;
 }
 
 .dental-services-page .service-dental-table th,
 .dental-services-page .service-dental-table td {
-    text-align: center !important;
+    text-align: center;
     vertical-align: middle;
 }
 
 .dental-services-page .service-dental-table th {
-    white-space: nowrap !important;
+    white-space: nowrap;
 }
 
-.dental-services-page .service-dental-table td > div,
-.dental-services-page .service-dental-table td > span,
-.dental-services-page .service-dental-table td > p {
-    margin-left: auto !important;
-    margin-right: auto !important;
-    text-align: center !important;
+.dental-services-page .service-dental-table td>div,
+.dental-services-page .service-dental-table td>span,
+.dental-services-page .service-dental-table td>p {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
 }
 
 .dental-services-page .service-dental-table th:nth-child(1),
@@ -42,13 +42,13 @@
 }
 
 .dental-services-page .service-dental-table .name-cell {
-    min-width: 0 !important;
-    max-width: 260px !important;
-    width: 260px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    text-align: center !important;
+    min-width: 0;
+    max-width: 260px;
+    width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
 }
 
 .dental-services-page .service-dental-table th:nth-child(4),
@@ -59,16 +59,16 @@
 .dental-services-page .service-dental-table .program-cell,
 .dental-services-page .service-dental-table .email-cell,
 .dental-services-page .service-dental-table .contact-cell {
-    min-width: 0 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    text-align: center !important;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
 }
 
 .dental-services-page .service-dental-table .program-cell {
-    max-width: 150px !important;
-    width: 150px !important;
+    max-width: 150px;
+    width: 150px;
 }
 
 .dental-services-page .service-dental-table th:nth-child(5),
@@ -104,13 +104,13 @@
 }
 
 .dental-services-page .service-dental-table .email-cell {
-    max-width: 260px !important;
-    width: 260px !important;
+    max-width: 260px;
+    width: 260px;
 }
 
 .dental-services-page .service-dental-table .contact-cell {
-    max-width: 124px !important;
-    width: 124px !important;
+    max-width: 124px;
+    width: 124px;
 }
 
 .dental-services-page .service-dental-table th:nth-child(12),
@@ -141,42 +141,27 @@
     text-align: center;
 }
 
-.dental-services-page .service-records-card {
-    position: relative !important;
-    z-index: 50 !important;
-    overflow: visible !important;
-}
-
-.dental-services-page .service-card-header,
 .dental-services-page .service-toolbar,
 .dental-services-page .service-search-row,
 .dental-services-page .voice-input-toggle {
-    position: relative !important;
-    overflow: visible !important;
+    position: relative;
+    overflow: visible;
 }
 
 .dental-services-page .service-toolbar {
-    z-index: 100 !important;
+    z-index: 100;
 }
 
 .dental-services-page .service-search-row {
-    z-index: 150 !important;
+    z-index: 150;
 }
 
 .dental-services-page .voice-input-toggle {
-    z-index: 200 !important;
+    z-index: 200;
 }
 
 .dental-services-page .voice-status {
-    z-index: 9999 !important;
-}
-
-.service-table-wrap {
-    border: 1px solid rgba(139, 0, 0, 0.10);
-    border-radius: 14px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    background: #ffffff;
+    z-index: 9999;
 }
 
 .dental-services-page .service-signature-link {
@@ -188,9 +173,9 @@
     min-height: 40px;
     padding: 4px 6px;
     border-radius: 12px;
-    border: 1px solid rgba(16, 185, 129, 0.26);
-    background: linear-gradient(135deg, rgba(236, 253, 245, 0.95), rgba(209, 250, 229, 0.78));
-    box-shadow: 0 8px 18px rgba(16, 185, 129, 0.12);
+    border: 1px solid var(--status-completed-border);
+    background: linear-gradient(135deg, var(--status-completed-bg), var(--status-completed-soft));
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--status-completed-solid) 12%, transparent);
 }
 
 .dental-services-page .service-signature-image {
@@ -210,31 +195,17 @@
     min-height: 36px;
     padding: 0 12px;
     border-radius: 999px;
-    border: 1px solid rgba(203, 213, 225, 0.95);
-    background: #F8FAFC;
-    color: #94A3B8;
+    border: 1px solid var(--status-default-border);
+    background: var(--status-default-bg);
+    color: var(--status-default-text);
     font-size: 0.72rem;
     font-weight: 900;
     line-height: 1;
     white-space: nowrap;
 }
 
-[data-theme="dark"] .dental-services-page .name-cell,
-.dark .dental-services-page .name-cell {
-    color: #F8FAFC !important;
-}
 
-[data-theme="dark"] .dental-services-page .muted-cell,
-.dark .dental-services-page .muted-cell {
-    color: #C9D1D9 !important;
-}
 
-[data-theme="dark"] .dental-services-page .service-signature-link,
-.dark .dental-services-page .service-signature-link {
-    border-color: rgba(52, 211, 153, 0.28);
-    background: linear-gradient(135deg, rgba(6, 78, 59, 0.92), rgba(20, 83, 45, 0.84));
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
-}
 
 [data-theme="dark"] .dental-services-page .service-signature-image,
 .dark .dental-services-page .service-signature-image {
@@ -242,12 +213,6 @@
     mix-blend-mode: screen;
 }
 
-[data-theme="dark"] .dental-services-page .service-signature-empty,
-.dark .dental-services-page .service-signature-empty {
-    background: #111827;
-    border-color: #334155;
-    color: #94A3B8;
-}
 
 .service-record-grid {
     display: grid;
@@ -256,11 +221,11 @@
 }
 
 .service-record-card {
-    border: 1px solid #f0e1e1;
+    border: 1px solid var(--crimson-mid);
     border-radius: 18px;
-    background: #ffffff;
+    background: var(--card);
     padding: 1rem;
-    box-shadow: 0 10px 24px rgba(139, 0, 0, 0.06);
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--crimson) 6%, transparent);
 }
 
 .service-record-card-head {
@@ -273,7 +238,7 @@
 
 .service-record-card-head h3 {
     margin: 0;
-    color: #111827;
+    color: var(--text-1);
     font-size: 0.92rem;
     font-weight: 900;
     line-height: 1.15;
@@ -281,7 +246,7 @@
 
 .service-record-card-head p {
     margin: 0.2rem 0 0;
-    color: #6b7280;
+    color: var(--status-default-text);
     font-size: 0.72rem;
     font-weight: 700;
 }
@@ -290,9 +255,9 @@
     flex-shrink: 0;
     border-radius: 999px;
     padding: 0.32rem 0.55rem;
-    background: #fef2f2;
-    color: #8B0000;
-    border: 1px solid #fecaca;
+    background: var(--crimson-light);
+    color: var(--crimson);
+    border: 1px solid var(--red-200);
     font-size: 0.66rem;
     font-weight: 900;
 }
@@ -300,7 +265,7 @@
 .service-record-meta {
     display: grid;
     gap: 0.45rem;
-    color: #4b5563;
+    color: var(--text-2);
     font-size: 0.74rem;
     font-weight: 650;
 }
@@ -314,7 +279,7 @@
 }
 
 .service-record-meta i {
-    color: #8B0000;
+    color: var(--crimson);
     width: 14px;
     text-align: center;
 }
@@ -322,27 +287,9 @@
 .service-record-footer {
     margin-top: 0.85rem;
     justify-content: space-between;
-    color: #8B0000;
+    color: var(--crimson);
     font-size: 0.72rem;
     font-weight: 900;
-}
-
-[data-theme="dark"] .service-record-card,
-.dark .service-record-card {
-    background: #111827 !important;
-    border-color: #30363D !important;
-}
-
-[data-theme="dark"] .service-record-card-head h3,
-.dark .service-record-card-head h3 {
-    color: #F8FAFC !important;
-}
-
-[data-theme="dark"] .service-record-card-head p,
-[data-theme="dark"] .service-record-meta,
-.dark .service-record-card-head p,
-.dark .service-record-meta{
-    color: #C9D1D9 !important;
 }
 
 .dental-services-page .service-month-picker {
@@ -352,222 +299,142 @@
     flex: 0 0 168px;
 }
 
-.dental-services-page .service-month-picker .service-period-input{
-    width: 100% !important;
-    min-width: 0 !important;
-    height: 38px !important;
-    padding: 0 38px 0 14px !important;
-    border-radius: 13px !important;
-    border: 1px solid rgba(139, 0, 0, .18) !important;
-    background:
-        linear-gradient(135deg, rgba(255, 255, 255, .96), rgba(255, 245, 245, .9)) !important;
-    color: #374151 !important;
-    font-size: .78rem !important;
-    font-weight: 900 !important;
-    letter-spacing: -.01em !important;
-    box-shadow: 0 8px 20px rgba(139, 0, 0, .08) !important;
-    cursor: pointer !important;
-}
-
-.dental-services-page .service-month-picker .service-period-input[readonly]{
-    cursor: pointer !important;
-}
-
-.dental-services-page .service-month-icon {
-    position: absolute;
-    right: 13px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #8B0000;
-    font-size: .78rem;
-    pointer-events: none;
-    z-index: 4;
-}
-
-[data-theme="dark"] .dental-services-page .service-month-picker .service-period-input,
-.dark .dental-services-page .service-month-picker .service-period-input{
-    background: rgba(13, 17, 23, .86) !important;
-    border-color: rgba(255, 255, 255, .12) !important;
-    color: #E5E7EB !important;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, .28) !important;
-}
-
-[data-theme="dark"] .dental-services-page .service-month-icon,
-.dark .dental-services-page .service-month-icon {
-    color: #FCA5A5;
-}
-
-.dental-services-page .service-card-header {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 1rem !important;
-    padding: 1rem 1.15rem !important;
-}
-
 .dental-services-page .service-toolbar {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    gap: .65rem !important;
-    flex-wrap: nowrap !important;
-    min-width: 0 !important;
-    width: auto !important;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .65rem;
+    flex-wrap: nowrap;
+    min-width: 0;
+    width: auto;
 }
 
 .dental-services-page .service-search-row {
-    width: clamp(260px, 28vw, 380px) !important;
-    min-width: 260px !important;
-    max-width: 380px !important;
-    flex: 0 1 380px !important;
+    width: clamp(260px, 28vw, 380px);
+    min-width: 260px;
+    max-width: 380px;
+    flex: 0 1 380px;
 }
 
 .dental-services-page .service-toolbar .global-filter-btn,
 .dental-services-page .service-toolbar .global-filter-reset-btn {
-    flex: 0 0 auto !important;
+    flex: 0 0 auto;
 }
 
 @media (max-width: 1199px) {
-    .dental-services-page .service-card-header {
-        flex-direction: column !important;
-        align-items: stretch !important;
-    }
 
     .dental-services-page .service-toolbar {
-        width: 100% !important;
+        width: 100%;
     }
 }
 
 @media (max-width: 980px) {
     .dental-services-page .service-toolbar {
-        display: grid !important;
-        grid-template-columns: 168px minmax(0, 1fr) auto auto !important;
-        align-items: center !important;
-        justify-content: stretch !important;
-        gap: .65rem !important;
+        display: grid;
+        grid-template-columns: 168px minmax(0, 1fr) auto auto;
+        align-items: center;
+        justify-content: stretch;
+        gap: .65rem;
     }
 
     .dental-services-page .service-toolbar-month-picker {
-        width: 168px !important;
-        min-width: 168px !important;
+        width: 168px;
+        min-width: 168px;
     }
 
     .dental-services-page .service-search-row {
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: none !important;
-        flex: none !important;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        flex: none;
     }
 }
 
 @media (max-width: 767px) {
     .dental-services-page {
-        padding-left: 12px !important;
-        padding-right: 12px !important;
+        padding-left: 12px;
+        padding-right: 12px;
         --service-table-min: 1080px;
     }
 
     .dental-services-page .dentist-hero {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: .8rem !important;
-        padding: .9rem !important;
+        flex-direction: column;
+        align-items: stretch;
+        gap: .8rem;
+        padding: .9rem;
     }
 
     .dental-services-page .dentist-hero-content {
-        width: 100% !important;
-        min-width: 0 !important;
+        width: 100%;
+        min-width: 0;
     }
 
     .dental-services-page .dentist-hero-actions {
-        width: 100% !important;
+        width: 100%;
     }
 
     .dental-services-page .dentist-hero-actions .ui-btn {
-        width: 100% !important;
-        justify-content: center !important;
-    }
-
-    .dental-services-page .service-card-header {
-        padding: .85rem !important;
-        gap: .8rem !important;
+        width: 100%;
+        justify-content: center;
     }
 
     .dental-services-page .service-toolbar {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) 44px !important;
-        width: 100% !important;
-        gap: .6rem !important;
-        align-items: stretch !important;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 44px;
+        width: 100%;
+        gap: .6rem;
+        align-items: stretch;
     }
 
     .dental-services-page .service-toolbar-month-picker {
-        grid-column: 1 / -1 !important;
-        width: 100% !important;
-        min-width: 0 !important;
+        grid-column: 1 / -1;
+        width: 100%;
+        min-width: 0;
     }
 
     .dental-services-page .service-search-row {
-        grid-column: 1 / -1 !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: none !important;
+        grid-column: 1 / -1;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
     }
 
     .dental-services-page .service-toolbar .global-filter-btn {
-        grid-column: 1 !important;
-        width: 100% !important;
-        min-width: 0 !important;
+        grid-column: 1;
+        width: 100%;
+        min-width: 0;
     }
 
     .dental-services-page .service-toolbar .global-filter-reset-btn {
-        grid-column: 2 !important;
-        width: 44px !important;
-        min-width: 44px !important;
-        max-width: 44px !important;
+        grid-column: 2;
+        width: 44px;
+        min-width: 44px;
+        max-width: 44px;
     }
 
-    .dental-services-page
-        .service-toolbar:not(:has(.global-filter-reset-btn:not(.hidden)))
-        .global-filter-btn {
-        grid-column: 1 / -1 !important;
+    .dental-services-page .service-toolbar:not(:has(.global-filter-reset-btn:not(.hidden))) .global-filter-btn {
+        grid-column: 1 / -1;
     }
 
     .dental-services-page .data-table th,
     .dental-services-page .data-table td {
-        font-size: .62rem !important;
-        padding: .5rem .4rem !important;
+        font-size: .62rem;
+        padding: .5rem .4rem;
     }
 }
 
 @media (max-width: 380px) {
     .dental-services-page {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
+        padding-left: 8px;
+        padding-right: 8px;
     }
 
-    .dental-services-page .dentist-hero,
-    .dental-services-page .service-card-header {
-        padding: .75rem !important;
+    .dental-services-page .dentist-hero {
+        padding: .75rem;
     }
 }
 
 #createReportModal,
 #downloadCompleteModal {
-    z-index: 99999 !important;
-}
-
-#createReportModal .fp-date-input-wrap {
-    position: relative !important;
-    width: 100% !important;
-}
-
-#createReportModal .fp-date-icon {
-    position: absolute !important;
-    right: 14px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    color: #9CA3AF !important;
-    font-size: 14px !important;
-    pointer-events: none !important;
+    z-index: 99999;
 }

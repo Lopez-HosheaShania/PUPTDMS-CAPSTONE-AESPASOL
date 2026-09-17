@@ -1,15 +1,36 @@
 @extends('layouts.app')
 
 @php
-$layoutRole ??= 'dentist';
+    $layoutRole ??= 'dentist';
 
-$isAdminView = $layoutRole === 'admin';
+    $isAdminView = $layoutRole === 'admin';
 
-$patientSearchRoute ??=
-'dentist.walk-in.search-patient';
+    $patientSearchRoute ??= 'dentist.walk-in.search-patient';
 
-$existingAppointmentRoute ??=
-'dentist.odontogram.existing-appointment.create';
+    $existingAppointmentRoute ??= 'dentist.odontogram.existing-appointment.create';
+
+    $patientRoleFilterOptions = [
+        [
+            'value' => 'all',
+            'label' => 'All Patients',
+            'icon' => 'fa-users',
+        ],
+        [
+            'value' => 'patient',
+            'label' => 'Patient',
+            'icon' => 'fa-user-graduate',
+        ],
+        [
+            'value' => 'faculty',
+            'label' => 'Faculty',
+            'icon' => 'fa-chalkboard-user',
+        ],
+        [
+            'value' => 'admin',
+            'label' => 'Administrative',
+            'icon' => 'fa-user-tie',
+        ],
+    ];
 @endphp
 
 @section('layout-role', $layoutRole)
@@ -17,118 +38,110 @@ $existingAppointmentRoute ??=
 @section('title', 'Add Existing Record')
 
 @section('styles')
-@vite('resources/css/pages/shared/add-existing-record.css')
+    @vite('resources/css/pages/shared/add-existing-record.css')
 @endsection
 
 @section('content')
-<main id="mainContent" class="app-page-shell existing-record-page page-enter">
-    <div class="w-full">
-        @if ($isAdminView)
-        <div class="page-banner mb-6">
-            <div class="page-banner-inner">
-                <div class="min-w-0">
-                    <h1 class="page-title">
-                        Add Existing Record
-                    </h1>
+    <main id="mainContent" class="app-page-shell existing-record-page page-enter">
+        <div class="w-full">
+            @if ($isAdminView)
+                <div class="page-banner mb-6">
+                    <div class="page-banner-inner">
+                        <div class="min-w-0">
+                            <h1 class="page-title">
+                                Add Existing Record
+                            </h1>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        @else
-        <div class="dentist-hero page-title-row mb-6">
-            <div class="dentist-hero-content">
+            @else
+                <div class="dentist-hero page-title-row mb-6">
+                    <div class="dentist-hero-content">
 
-                <div class="dentist-hero-icon">
-                    <i class="fa-solid fa-folder-open"></i>
+                        <div class="dentist-hero-icon">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+
+                        <div class="min-w-0">
+
+                            <div class="dentist-hero-eyebrow">
+                                <i class="fa-solid fa-tooth"></i>
+                                Existing Records
+                            </div>
+
+                            <h2 class="dentist-hero-title">
+                                Add Existing Record
+                            </h2>
+
+                        </div>
+
+                    </div>
                 </div>
+            @endif
 
-                <div class="min-w-0">
-
-                    <div class="dentist-hero-eyebrow">
-                        <i class="fa-solid fa-tooth"></i>
-                        Existing Records
+            <div class="existing-record-directory mb-5">
+                <div class="existing-record-directory-copy">
+                    <div class="global-icon-box global-icon-box-sm">
+                        <i class="fa-solid fa-database"></i>
                     </div>
 
-                    <h2 class="dentist-hero-title">
-                        Add Existing Record
-                    </h2>
-
-                </div>
-
-            </div>
-        </div>
-        @endif
-
-        <div class="existing-record-directory mb-5">
-            <div class="existing-record-directory-copy">
-                <div class="global-icon-box global-icon-box-sm">
-                    <i class="fa-solid fa-database"></i>
-                </div>
-
-                <div>
-                    <p class="existing-record-directory-subtitle">
-                        Select a patient from student,
-                        faculty, or administrative records
-                        to encode an existing appointment.
-                    </p>
+                    <div>
+                        <p class="existing-record-directory-subtitle">
+                            Select a patient from student,
+                            faculty, or administrative records
+                            to encode an existing appointment.
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div class="tab-group" aria-label="Filter patients by role">
+            <div class="table-card">
+                <div class="table-toolbar">
+                    <div class="table-toolbar-search">
+                        <div class="voice-search-row">
+                            <x-search-bar id="patientSearchInput" placeholder="Search by name, ID, email, or program..."
+                                callback="handleExistingRecordSearch" :debounce="300" clear-label="Clear patient search"
+                                class="flex-1" />
 
-                <button type="button" class="tab-btn active" data-patient-role-filter="">
-                    All
-                </button>
+                            <x-voice-input target="#patientSearchInput" status-id="existingRecordVoiceStatus"
+                                label="Use voice search" title="Voice search" />
+                        </div>
+                    </div>
 
-                <button type="button" class="tab-btn" data-patient-role-filter="patient">
-                    Patient
-                </button>
+                    <div class="table-toolbar-actions">
+                        <x-filter-select id="existingRecordRoleFilter" name="existing_record_role" label="Role"
+                            value="all" :options="$patientRoleFilterOptions" callback="handleExistingRecordRoleFilter" icon="fa-users"
+                            menu-align="right" />
+                    </div>
+                </div>
 
-                <button type="button" class="tab-btn" data-patient-role-filter="faculty">
-                    Faculty
-                </button>
+                <x-pagination-bar id="existingRecordPaginationTopBar" info-id="existingRecordPageInfoTop"
+                    pagination-id="existingRecordPaginationTop" position="top" :show-entries="true"
+                    page-size-id="existingRecordPerPage" page-size-callback="handleExistingRecordPerPageChange"
+                    :page-size-value="10" page-size-label="per page" label="patient records" />
 
-                <button type="button" class="tab-btn" data-patient-role-filter="admin">
-                    Administrative
-                </button>
+                <div class="table-grid-view existing-record-grid-view">
+                    <div id="patientGrid" class="table-record-grid existing-record-patient-grid" aria-live="polite">
+                    </div>
+                </div>
 
+                <x-pagination-bar id="existingRecordPaginationBottomBar" info-id="existingRecordPageInfoBottom"
+                    pagination-id="existingRecordPaginationBottom" position="bottom" label="patient records" hidden />
+
+                <div id="existingRecordEmptyState" class="empty-state-host"></div>
             </div>
         </div>
+    </main>
 
-        <div class="voice-search-row">
-            <x-search-bar id="patientSearchInput" placeholder="Search by name, ID, email, or program..."
-                callback="handleExistingRecordSearch" :debounce="300" clear-label="Clear patient search"
-                class="flex-1" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('patientSearchInput');
+            const patientGrid = document.getElementById('patientGrid');
+            const searchEndpoint =
+                @json(route($patientSearchRoute));
 
-            <x-voice-input target="#patientSearchInput" status-id="existingRecordVoiceStatus" label="Use voice search"
-                title="Voice search" />
-        </div>
-
-        <x-pagination-bar id="existingRecordPaginationTopBar" info-id="existingRecordPageInfoTop"
-            pagination-id="existingRecordPaginationTop" position="top" :show-entries="true"
-            page-size-id="existingRecordPerPage" page-size-callback="handleExistingRecordPerPageChange"
-            label="patient records" />
-
-        <div id="patientGrid" class="table-record-grid existing-record-patient-grid" aria-live="polite">
-        </div>
-
-        <x-pagination-bar id="existingRecordPaginationBottomBar" info-id="existingRecordPageInfoBottom"
-            pagination-id="existingRecordPaginationBottom" position="bottom" label="patient records" hidden />
-
-        <div id="existingRecordEmptyState" class="empty-state-host"></div>
-    </div>
-</main>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const input = document.getElementById('patientSearchInput');
-        const patientGrid = document.getElementById('patientGrid');
-        const searchEndpoint =
-            @json(route($patientSearchRoute));
-
-        const recordUrlTemplate =
-            @json(route(
-                $existingAppointmentRoute,
-                ['patient' => '__PATIENT__']));
+            const recordUrlTemplate =
+                @json(route($existingAppointmentRoute, ['patient' => '__PATIENT__']));
 
         const resolveExternalPatientEndpoint =
             @json(route('shared.existing-record.resolve-external-patient'));
@@ -143,48 +156,49 @@ $existingAppointmentRoute ??=
     let patientFetchController = null;
     let renderedPatients = [];
 
-    const patientResponseCache = new Map();
-    let patientCurrentPage = 1;
-    let patientPageSize = 10;
-    let patientPaginationMeta = {
-        currentPage: 1,
-        lastPage: 1,
-        total: 0,
-        from: null,
-        to: null,
-    };
+            const patientResponseCache = new Map();
+            let patientCurrentPage = 1;
+            let patientPageSize = 10;
+            let patientPaginationMeta = {
+                currentPage: 1,
+                lastPage: 1,
+                total: 0,
+                from: null,
+                to: null,
+            };
 
-    renderPatientPagination();
-    window.handleExistingRecordSearch =
-        function (value) {
-            patientCurrentPage = 1;
+            renderPatientPagination();
+            window.handleExistingRecordSearch =
+                function(value) {
+                    patientCurrentPage = 1;
 
-            const query =
-                String(value || '')
-                    .trim();
+                    const query =
+                        String(value || '')
+                        .trim();
 
-            loadPatients(
-                query,
-                query === ''
-            );
-        };
+                    loadPatients(
+                        query,
+                        query === ''
+                    );
+                };
 
-    function buildPatientSkeletons(
-        count = patientPageSize
-    ) {
-        const skeletonCount =
-            Math.min(
-                Math.max(
-                    Number(count) || 10,
-                    4
-                ),
-                12
-            );
+            function buildPatientSkeletons(
+                count = patientPageSize
+            ) {
+                const skeletonCount =
+                    Math.min(
+                        Math.max(
+                            Number(count) || 10,
+                            4
+                        ),
+                        12
+                    );
 
-        return Array
-            .from(
-                { length: skeletonCount },
-                () => `
+                return Array
+                    .from({
+                            length: skeletonCount
+                        },
+                        () => `
                 <div
                     class="
                         skeleton-shell
@@ -264,43 +278,32 @@ $existingAppointmentRoute ??=
                     </div>
                 </div>
             `
-            )
-            .join('');
-    }
+                    )
+                    .join('');
+            }
 
-    function renderPatientSkeletons() {
-        window.EmptyState?.hide(
-            '#existingRecordEmptyState'
-        );
+            function renderPatientSkeletons() {
+                window.EmptyState?.hide(
+                    '#existingRecordEmptyState'
+                );
 
-        patientGrid.innerHTML =
-            buildPatientSkeletons();
-    }
+                patientGrid.innerHTML =
+                    buildPatientSkeletons();
+            }
 
-    const roleFilterButtons =
-        document.querySelectorAll(
-            '[data-patient-role-filter]'
-        );
+            let activeRoleFilter = '';
 
-    let activeRoleFilter = '';
+            window.handleExistingRecordRoleFilter =
+                function(value) {
+                    const selectedValue =
+                        Array.isArray(value) ?
+                        String(value[0] || 'all') :
+                        String(value || 'all');
 
-    roleFilterButtons.forEach(
-        button => {
-            button.addEventListener(
-                'click',
-                () => {
                     activeRoleFilter =
-                        button.dataset
-                            .patientRoleFilter ||
-                        '';
-
-                    roleFilterButtons
-                        .forEach(item => {
-                            item.classList.toggle(
-                                'active',
-                                item === button
-                            );
-                        });
+                        selectedValue === 'all' ?
+                        '' :
+                        selectedValue;
 
                     patientCurrentPage = 1;
 
@@ -311,361 +314,342 @@ $existingAppointmentRoute ??=
                         query,
                         query === ''
                     );
-                }
-            );
-        }
-    );
+                };
 
-    function getPatientRequestCacheKey(query = '') {
-        return [
-            String(query || '').trim().toLowerCase(),
-            activeRoleFilter || 'all',
-            patientCurrentPage,
-            patientPageSize,
-        ].join('|');
-    }
+            function getPatientRequestCacheKey(query = '') {
+                return [
+                    String(query || '').trim().toLowerCase(),
+                    activeRoleFilter || 'all',
+                    patientCurrentPage,
+                    patientPageSize,
+                ].join('|');
+            }
 
-    function applyPatientResponse(result) {
-        const normalizedPatients =
-            Array.isArray(result)
-                ? result
-                : Array.isArray(result?.data)
-                    ? result.data
-                    : [];
+            function applyPatientResponse(result) {
+                const normalizedPatients =
+                    Array.isArray(result) ?
+                    result :
+                    Array.isArray(result?.data) ?
+                    result.data :
+                    [];
 
-        patientPaginationMeta = {
-            currentPage:
-                Number(result?.current_page) || 1,
+                patientPaginationMeta = {
+                    currentPage: Number(result?.current_page) || 1,
 
-            lastPage:
-                Number(result?.last_page) || 1,
+                    lastPage: Number(result?.last_page) || 1,
 
-            total:
-                Number(result?.total) ||
-                normalizedPatients.length,
+                    total: Number(result?.total) ||
+                        normalizedPatients.length,
 
-            from:
-                result?.from ??
-                (
-                    normalizedPatients.length
-                        ? (
+                    from: result?.from ??
+                        (
+                            normalizedPatients.length ?
                             (
-                                Number(
-                                    result?.current_page ||
-                                    patientCurrentPage
-                                ) - 1
-                            ) * patientPageSize
-                        ) + 1
-                        : null
-                ),
+                                (
+                                    Number(
+                                        result?.current_page ||
+                                        patientCurrentPage
+                                    ) - 1
+                                ) * patientPageSize
+                            ) + 1 :
+                            null
+                        ),
 
-            to:
-                result?.to ??
-                (
-                    normalizedPatients.length
-                        ? (
+                    to: result?.to ??
+                        (
+                            normalizedPatients.length ?
                             (
-                                Number(
-                                    result?.current_page ||
-                                    patientCurrentPage
-                                ) - 1
-                            ) * patientPageSize
-                        ) +
-                        normalizedPatients.length
-                        : null
-                ),
-        };
+                                (
+                                    Number(
+                                        result?.current_page ||
+                                        patientCurrentPage
+                                    ) - 1
+                                ) * patientPageSize
+                            ) +
+                            normalizedPatients.length :
+                            null
+                        ),
+                };
 
-        patientCurrentPage =
-            patientPaginationMeta.currentPage;
-
-        renderPatients(
-            normalizedPatients
-        );
-
-        renderPatientPagination();
-    }
-
-    async function loadPatients(
-        query = '',
-        showAll = false,
-        options = {}
-    ) {
-        if (!patientGrid) {
-            return;
-        }
-
-        const showLoading =
-            options.showLoading !== false;
-
-        const requestId =
-            ++activeRequestId;
-
-        const cacheKey =
-            getPatientRequestCacheKey(
-                query
-            );
-
-        if (
-            patientResponseCache.has(
-                cacheKey
-            )
-        ) {
-            applyPatientResponse(
-                patientResponseCache.get(
-                    cacheKey
-                )
-            );
-
-            return;
-        }
-
-        patientFetchController?.abort();
-
-        patientFetchController =
-            new AbortController();
-
-        const params =
-            new URLSearchParams();
-
-        if (query) {
-            params.set(
-                'q',
-                query
-            );
-        }
-
-        if (showAll) {
-            params.set(
-                'show_all',
-                '1'
-            );
-        }
-
-        if (activeRoleFilter) {
-            params.set(
-                'role',
-                activeRoleFilter
-            );
-        }
-
-        params.set(
-            'page',
-            String(
-                patientCurrentPage
-            )
-        );
-
-        params.set(
-            'per_page',
-            String(
-                patientPageSize
-            )
-        );
-
-        if (showLoading) {
-            renderPatientSkeletons();
-        }
-
-        try {
-            const response =
-                await fetch(
-                    `${searchEndpoint}?${params.toString()}`,
-                    {
-                        headers: {
-                            'X-Requested-With':
-                                'XMLHttpRequest',
-
-                            Accept:
-                                'application/json',
-                        },
-
-                        signal:
-                            patientFetchController
-                                .signal,
-                    }
-                );
-
-            if (!response.ok) {
-                throw new Error(
-                    `Search failed with status ${response.status}`
-                );
-            }
-
-            const result =
-                await response.json();
-
-            if (
-                requestId !==
-                activeRequestId
-            ) {
-                return;
-            }
-
-            patientResponseCache.set(
-                cacheKey,
-                result
-            );
-
-            applyPatientResponse(
-                result
-            );
-
-        } catch (error) {
-
-            if (
-                error.name ===
-                'AbortError'
-            ) {
-                return;
-            }
-
-            if (
-                requestId !==
-                activeRequestId
-            ) {
-                return;
-            }
-
-            console.error(
-                'Existing-record patient loading error:',
-                error
-            );
-
-            patientGrid.innerHTML =
-                '';
-
-            window.EmptyState?.render({
-                host:
-                    '#existingRecordEmptyState',
-
-                icon:
-                    'fa-triangle-exclamation',
-
-                title:
-                    'Unable to load patient records',
-
-                message:
-                    'Patient records could not be loaded right now. Please try again.',
-            });
-        }
-    }
-
-    function renderPatientPagination() {
-        const top =
-            document.getElementById(
-                'existingRecordPaginationTop'
-            );
-
-        const bottom =
-            document.getElementById(
-                'existingRecordPaginationBottom'
-            );
-
-        const topBar =
-            document.getElementById(
-                'existingRecordPaginationTopBar'
-            );
-
-        const bottomBar =
-            document.getElementById(
-                'existingRecordPaginationBottomBar'
-            );
-
-        const topInfo =
-            document.getElementById(
-                'existingRecordPageInfoTop'
-            );
-
-        const bottomInfo =
-            document.getElementById(
-                'existingRecordPageInfoBottom'
-            );
-
-        window.renderGlobalPagination?.({
-            ...patientPaginationMeta,
-
-            containers: [
-                top,
-                bottom,
-            ],
-
-            bars: [
-                topBar,
-                bottomBar,
-            ],
-
-            infoElements: [
-                topInfo,
-                bottomInfo,
-            ],
-
-            itemLabel:
-                'patient records',
-
-            onPageChange(page) {
                 patientCurrentPage =
-                    page;
+                    patientPaginationMeta.currentPage;
 
-                const query =
-                    input.value.trim();
-
-                loadPatients(
-                    query,
-                    query === ''
+                renderPatients(
+                    normalizedPatients
                 );
 
-                patientGrid
-                    ?.scrollIntoView({
-                        behavior:
-                            'smooth',
+                renderPatientPagination();
+            }
 
-                        block:
-                            'start',
+            async function loadPatients(
+                query = '',
+                showAll = false,
+                options = {}
+            ) {
+                if (!patientGrid) {
+                    return;
+                }
+
+                const showLoading =
+                    options.showLoading !== false;
+
+                const requestId =
+                    ++activeRequestId;
+
+                const cacheKey =
+                    getPatientRequestCacheKey(
+                        query
+                    );
+
+                if (
+                    patientResponseCache.has(
+                        cacheKey
+                    )
+                ) {
+                    applyPatientResponse(
+                        patientResponseCache.get(
+                            cacheKey
+                        )
+                    );
+
+                    return;
+                }
+
+                patientFetchController?.abort();
+
+                patientFetchController =
+                    new AbortController();
+
+                const params =
+                    new URLSearchParams();
+
+                if (query) {
+                    params.set(
+                        'q',
+                        query
+                    );
+                }
+
+                if (showAll) {
+                    params.set(
+                        'show_all',
+                        '1'
+                    );
+                }
+
+                if (activeRoleFilter) {
+                    params.set(
+                        'role',
+                        activeRoleFilter
+                    );
+                }
+
+                params.set(
+                    'page',
+                    String(
+                        patientCurrentPage
+                    )
+                );
+
+                params.set(
+                    'per_page',
+                    String(
+                        patientPageSize
+                    )
+                );
+
+                if (showLoading) {
+                    renderPatientSkeletons();
+                }
+
+                try {
+                    const response =
+                        await fetch(
+                            `${searchEndpoint}?${params.toString()}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+
+                                    Accept: 'application/json',
+                                },
+
+                                signal: patientFetchController
+                                    .signal,
+                            }
+                        );
+
+                    if (!response.ok) {
+                        throw new Error(
+                            `Search failed with status ${response.status}`
+                        );
+                    }
+
+                    const result =
+                        await response.json();
+
+                    if (
+                        requestId !==
+                        activeRequestId
+                    ) {
+                        return;
+                    }
+
+                    patientResponseCache.set(
+                        cacheKey,
+                        result
+                    );
+
+                    applyPatientResponse(
+                        result
+                    );
+
+                } catch (error) {
+
+                    if (
+                        error.name ===
+                        'AbortError'
+                    ) {
+                        return;
+                    }
+
+                    if (
+                        requestId !==
+                        activeRequestId
+                    ) {
+                        return;
+                    }
+
+                    console.error(
+                        'Existing-record patient loading error:',
+                        error
+                    );
+
+                    patientGrid.innerHTML =
+                        '';
+
+                    window.EmptyState?.render({
+                        host: '#existingRecordEmptyState',
+
+                        icon: 'fa-triangle-exclamation',
+
+                        title: 'Unable to load patient records',
+
+                        message: 'Patient records could not be loaded right now. Please try again.',
                     });
-            },
-        });
-    }
+                }
+            }
 
-    window
-        .handleExistingRecordPerPageChange =
-        function (value) {
-            const allowed = [
-                10,
-                20,
-                50,
-                100,
-            ];
+            function renderPatientPagination() {
+                const top =
+                    document.getElementById(
+                        'existingRecordPaginationTop'
+                    );
 
-            const requested =
-                Number(value);
+                const bottom =
+                    document.getElementById(
+                        'existingRecordPaginationBottom'
+                    );
 
-            patientPageSize =
-                allowed.includes(
-                    requested
-                )
-                    ? requested
-                    : 10;
+                const topBar =
+                    document.getElementById(
+                        'existingRecordPaginationTopBar'
+                    );
 
-            patientCurrentPage = 1;
+                const bottomBar =
+                    document.getElementById(
+                        'existingRecordPaginationBottomBar'
+                    );
 
-            const query =
-                input.value.trim();
+                const topInfo =
+                    document.getElementById(
+                        'existingRecordPageInfoTop'
+                    );
 
-            loadPatients(
-                query,
-                query === ''
-            );
-        };
+                const bottomInfo =
+                    document.getElementById(
+                        'existingRecordPageInfoBottom'
+                    );
 
-    function escapeHtml(value) {
-        return String(value || '')
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#039;');
-    }
+                window.renderGlobalPagination?.({
+                    ...patientPaginationMeta,
+
+                    containers: [
+                        top,
+                        bottom,
+                    ],
+
+                    bars: [
+                        topBar,
+                        bottomBar,
+                    ],
+
+                    infoElements: [
+                        topInfo,
+                        bottomInfo,
+                    ],
+
+                    itemLabel: 'patient records',
+
+                    onPageChange(page) {
+                        patientCurrentPage =
+                            page;
+
+                        const query =
+                            input.value.trim();
+
+                        loadPatients(
+                            query,
+                            query === ''
+                        );
+
+                        patientGrid
+                            ?.scrollIntoView({
+                                behavior: 'smooth',
+
+                                block: 'start',
+                            });
+                    },
+                });
+            }
+
+            window
+                .handleExistingRecordPerPageChange =
+                function(value) {
+                    const allowed = [
+                        10,
+                        20,
+                        50,
+                        100,
+                    ];
+
+                    const requested =
+                        Number(value);
+
+                    patientPageSize =
+                        allowed.includes(
+                            requested
+                        ) ?
+                        requested :
+                        10;
+
+                    patientCurrentPage = 1;
+
+                    const query =
+                        input.value.trim();
+
+                    loadPatients(
+                        query,
+                        query === ''
+                    );
+                };
+
+            function escapeHtml(value) {
+                return String(value || '')
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll("'", '&#039;');
+            }
 
     function buildRecordUrl(patient) {
         return recordUrlTemplate.replace(
@@ -836,8 +820,8 @@ $existingAppointmentRoute ??=
         }
     );
 
-    function renderPatients(patients) {
-        if (!patientGrid) return;
+            function renderPatients(patients) {
+                if (!patientGrid) return;
 
         renderedPatients =
             Array.isArray(patients)
@@ -848,43 +832,36 @@ $existingAppointmentRoute ??=
             const query =
                 input.value.trim();
 
-            patientGrid.innerHTML = '';
+                    patientGrid.innerHTML = '';
 
-            if (query) {
-                window.EmptyState?.renderSearch({
-                    host:
-                        '#existingRecordEmptyState',
+                    if (query) {
+                        window.EmptyState?.renderSearch({
+                            host: '#existingRecordEmptyState',
 
-                    input:
-                        '#patientSearchInput',
+                            input: '#patientSearchInput',
 
-                    query,
+                            query,
 
-                    message:
-                        'Try a different name, ID, email, or program.',
-                });
-            } else {
-                window.EmptyState?.render({
-                    host:
-                        '#existingRecordEmptyState',
+                            message: 'Try a different name, ID, email, or program.',
+                        });
+                    } else {
+                        window.EmptyState?.render({
+                            host: '#existingRecordEmptyState',
 
-                    icon:
-                        'fa-user-slash',
+                            icon: 'fa-user-slash',
 
-                    title:
-                        'No patient records found',
+                            title: 'No patient records found',
 
-                    message:
-                        'No patient records are currently available.',
-                });
-            }
+                            message: 'No patient records are currently available.',
+                        });
+                    }
 
-            return;
-        }
+                    return;
+                }
 
-        window.EmptyState?.hide(
-            '#existingRecordEmptyState'
-        );
+                window.EmptyState?.hide(
+                    '#existingRecordEmptyState'
+                );
 
         const html = renderedPatients.map(function (patient, index) {
             const patientName = patient.name || 'Patient';
@@ -892,45 +869,45 @@ $existingAppointmentRoute ??=
             const patientType =
                 patient.type || 'Patient';
 
-            const avatarUrl =
-                window.PatientUI
-                    ?.safeUrl(
-                        patient.avatar_url
-                    ) || '';
+                    const avatarUrl =
+                        window.PatientUI
+                        ?.safeUrl(
+                            patient.avatar_url
+                        ) || '';
 
-            const patientInitials =
-                window.PatientUI
-                    ?.getInitials(
-                        patientName
-                    ) || 'P';
+                    const patientInitials =
+                        window.PatientUI
+                        ?.getInitials(
+                            patientName
+                        ) || 'P';
 
-            const roleClass =
-                window.PatientUI
-                    ?.getRoleClass(
-                        patientType
-                    ) || 'role-none';
+                    const roleClass =
+                        window.PatientUI
+                        ?.getRoleClass(
+                            patientType
+                        ) || 'role-none';
 
-            const tags = [];
+                    const tags = [];
 
-            if (patient.student_number) {
-                tags.push(`
+                    if (patient.student_number) {
+                        tags.push(`
     <span class="global-info-pill">
         <i class="fa-regular fa-id-card"></i>
         ${escapeHtml(patient.student_number)}
     </span>
 `);
-            }
+                    }
 
-            if (patient.program) {
-                tags.push(`
+                    if (patient.program) {
+                        tags.push(`
     <span class="global-info-pill">
         <i class="fa-solid fa-graduation-cap"></i>
         ${escapeHtml(patient.program)}
     </span>
 `);
-            }
+                    }
 
-            return `
+                    return `
     <article class="global-record-card ${roleClass}">
         <div class="global-record-card-grid">
 
@@ -939,21 +916,21 @@ $existingAppointmentRoute ??=
                 <span class="patient-avatar patient-avatar-md">
                     ${avatarUrl
                     ? `
-                                <img
-                                    src="${escapeHtml(avatarUrl)}"
-                                    alt="${escapeHtml(patientName)}"
-                                    loading="lazy"
-                                    onerror="
-                                        this.parentElement.innerHTML =
-                                        '<span>${escapeHtml(patientInitials)}</span>';
-                                    "
-                                >
-                            `
+                                    <img
+                                        src="${escapeHtml(avatarUrl)}"
+                                        alt="${escapeHtml(patientName)}"
+                                        loading="lazy"
+                                        onerror="
+                                            this.parentElement.innerHTML =
+                                            '<span>${escapeHtml(patientInitials)}</span>';
+                                        "
+                                    >
+                                `
                     : `
-                                <span>
-                                    ${escapeHtml(patientInitials)}
-                                </span>
-                            `
+                                    <span>
+                                        ${escapeHtml(patientInitials)}
+                                    </span>
+                                `
                 }
                 </span>
 
@@ -973,13 +950,13 @@ $existingAppointmentRoute ??=
 
                     ${patientEmail
                     ? `
-                            <div class="global-record-subline">
-                                <span class="ui-muted-text">
-                                    <i class="fa-regular fa-envelope"></i>
-                                    ${escapeHtml(patientEmail)}
-                                </span>
-                            </div>
-                        `
+                                <div class="global-record-subline">
+                                    <span class="ui-muted-text">
+                                        <i class="fa-regular fa-envelope"></i>
+                                        ${escapeHtml(patientEmail)}
+                                    </span>
+                                </div>
+                            `
                     : ''
                 }
 
@@ -989,10 +966,10 @@ $existingAppointmentRoute ??=
 
             ${tags.length
                     ? `
-                        <div class="global-record-subline">
-                            ${tags.join('')}
-                        </div>
-                    `
+                            <div class="global-record-subline">
+                                ${tags.join('')}
+                            </div>
+                        `
                     : ''
                 }
 
@@ -1009,31 +986,30 @@ $existingAppointmentRoute ??=
         </div>
     </article>
 `;
-        }).join('');
+                }).join('');
 
-        if (
-            typeof window
-                .swapSkeletonContent ===
-            'function'
-        ) {
-            window.swapSkeletonContent(
-                'patientGrid',
-                html
+                if (
+                    typeof window
+                    .swapSkeletonContent ===
+                    'function'
+                ) {
+                    window.swapSkeletonContent(
+                        'patientGrid',
+                        html
+                    );
+                } else {
+                    patientGrid.innerHTML =
+                        html;
+                }
+            }
+            loadPatients(
+                '',
+                true, {
+                    showLoading: true
+                }
             );
-        } else {
-            patientGrid.innerHTML =
-                html;
-        }
-    }
-    loadPatients(
-        '',
-        true,
-        {
-            showLoading: true
-        }
-    );
 
-    input.focus();
-});
-</script>
+            input.focus();
+        });
+    </script>
 @endsection

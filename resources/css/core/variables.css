@@ -46,8 +46,9 @@
     --table-text-muted: var(--text-2);
     --table-heading-muted: var(--text-3);
 
-    --table-shadow:
-        0 6px 20px var(--alpha-slate-900-6);
+    --table-shadow: 0 6px 20px var(--alpha-slate-900-6);
+
+    --toolbar-control-height: 36px;
 
     --filter-panel-bg: #FFFFFF;
     --filter-panel-soft-bg: #FAFAFA;
@@ -994,6 +995,18 @@
     }
 }
 
+@media (min-width: 768px) and (max-width: 1024px) {
+    :root {
+        --toolbar-control-height: 40px;
+    }
+}
+
+@media (max-width: 767px) {
+    :root {
+        --toolbar-control-height: 38px;
+    }
+}
+
 @media (max-width: 640px) {
     :root {
         --float-right-final: 18px;
@@ -1015,5 +1028,6 @@
         --status-pill-gap: 3px;
         --status-pill-font-size: 8px;
         --status-pill-dot-size: 4px;
+        --toolbar-control-height: 32px;
     }
 }

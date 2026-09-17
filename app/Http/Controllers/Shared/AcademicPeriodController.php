@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Shared;
 
 use App\Http\Controllers\Controller;
 use App\Models\AcademicPeriod;
@@ -120,10 +120,10 @@ class AcademicPeriodController extends Controller
         AuditLogger::log(
             'view',
             'academic_periods',
-            'Admin viewed academic periods list'
+            $this->auditActorLabel() . ' viewed academic periods list'
         );
 
-        return view('admin.academic-period', compact(
+        return view('shared.academic-period', compact(
             'academicPeriods',
             'calendarPeriods',
             'activePeriod',
@@ -187,7 +187,7 @@ class AcademicPeriodController extends Controller
         AuditLogger::log(
             'create',
             'academic_periods',
-            "Admin created an academic period"
+            $this->auditActorLabel() . ' created an academic period'
         );
 
         return redirect()
@@ -242,7 +242,7 @@ class AcademicPeriodController extends Controller
         AuditLogger::log(
             'update',
             'academic_periods',
-            "Admin updated academic period ID {$academicPeriod->id}"
+            $this->auditActorLabel() . " updated academic period ID {$academicPeriod->id}"
         );
 
         return redirect()
@@ -257,7 +257,7 @@ class AcademicPeriodController extends Controller
         AuditLogger::log(
             'delete',
             'academic_periods',
-            "Admin deleted academic period ID {$academicPeriod->id}"
+            $this->auditActorLabel() . " deleted academic period ID {$academicPeriod->id}"
         );
         return redirect()
             ->route($this->routeName('index'))
@@ -332,10 +332,12 @@ class AcademicPeriodController extends Controller
                 'sync',
                 'academic_periods',
                 $alreadySynced
-                    ? "Admin checked FLSS sync; academic period was already synced: "
-                    . "{$academicPeriod->academicYear?->name} - {$academicPeriod->academicTerm?->name}"
-                    : "Admin synced academic period from FLSS: "
-                    . "{$academicPeriod->academicYear?->name} - {$academicPeriod->academicTerm?->name}"
+                    ? $this->auditActorLabel() . " checked FLSS sync; academic period was already synced: "
+                    . "{$academicPeriod->academic_year} - "
+                    . "{$academicPeriod->semester}"
+                    : $this->auditActorLabel() . " synced academic period from FLSS: "
+                    . "{$academicPeriod->academic_year} - "
+                    . "{$academicPeriod->semester}"
             );
 
             $payload = [
@@ -374,6 +376,7 @@ class AcademicPeriodController extends Controller
                 'days_remaining' => (int) (
                     $academicPeriod->days_remaining ?? 0
                 ),
+                'update_url' => route($this->routeName('update'), $academicPeriod),
             ];
 
             if ($request->expectsJson()) {
@@ -437,6 +440,11 @@ class AcademicPeriodController extends Controller
             'set_active' => 'admin.academic_periods.set_active',
             'sync_flss' => 'admin.academic_periods.sync_flss',
         };
+    }
+
+    private function auditActorLabel(): string
+    {
+        return $this->resolveLayoutRole() === 'dentist' ? 'Dentist' : 'Admin';
     }
 
     private function ensureAcademicPeriodIsUnique(
