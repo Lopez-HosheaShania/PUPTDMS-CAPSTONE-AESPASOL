@@ -11,13 +11,19 @@
 @section('content')
 
     @php
+        $getAcademicYearName = static fn($period) => $period?->academicYear?->name ??
+            ($period?->getAttribute('academic_year') ?? '—');
+
+        $getAcademicTermName = static fn($period) => $period?->academicTerm?->name ??
+            ($period?->getAttribute('semester') ?? '—');
+
         $calendarPeriodsPayload = collect($calendarPeriods ?? [])
             ->sortBy('start_date')
-            ->map(function ($period) {
+            ->map(function ($period) use ($getAcademicYearName, $getAcademicTermName) {
                 return [
                     'id' => $period->id,
-                    'academic_year' => $period->academic_year,
-                    'semester' => $period->semester,
+                    'academic_year' => $getAcademicYearName($period),
+                    'semester' => $getAcademicTermName($period),
                     'start_date' => optional($period->start_date)->format('Y-m-d'),
                     'end_date' => optional($period->end_date)->format('Y-m-d'),
                 ];
@@ -25,28 +31,82 @@
             ->values()
             ->all();
 
-        $holidayEvents = collect($holidays ?? [])
-            ->map(function ($name, $date) {
+        // PUP calendar holiday source may be temporarily unavailable.
+        // Prefer live holidays, then use a backend-provided fallback (if any).
+        // If both are empty, the calendar still renders local academic-period dates.
+        $liveHolidays = collect($holidays ?? [])->filter();
+        $fallbackHolidaysCollection = collect($fallbackHolidays ?? [])->filter();
+
+        $usingHolidayFallback = $liveHolidays->isEmpty() && $fallbackHolidaysCollection->isNotEmpty();
+        $calendarHolidays = $liveHolidays->isNotEmpty() ? $liveHolidays : $fallbackHolidaysCollection;
+
+        $holidaySourceUnavailable = (bool) ($holidaySourceUnavailable ?? $liveHolidays->isEmpty());
+
+        // Normalize both old and new holiday payload shapes before sending them to JavaScript.
+        // Supported examples:
+        //   ['2026-01-01' => 'New Year\'s Day']
+        //   ['2026-01-01' => ['name' => 'New Year\'s Day']]
+        //   [['date' => '2026-01-01', 'name' => 'New Year\'s Day']]
+        //   collection/object items with date + name/title/label fields
+        $holidayEvents = $calendarHolidays
+            ->map(function ($holiday, $key) {
+                $date = is_string($key) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $key) ? $key : null;
+
+                $label = null;
+
+                if (is_string($holiday)) {
+                    $label = $holiday;
+                } elseif (is_array($holiday) || is_object($holiday)) {
+                    $date =
+                        data_get($holiday, 'date') ??
+                        (data_get($holiday, 'holiday_date') ??
+                            (data_get($holiday, 'start_date') ?? (data_get($holiday, 'start') ?? $date)));
+
+                    $label =
+                        data_get($holiday, 'name') ??
+                        (data_get($holiday, 'title') ??
+                            (data_get($holiday, 'label') ??
+                                (data_get($holiday, 'holiday_name') ?? data_get($holiday, 'description'))));
+
+                    // Some APIs/services return the holiday name itself as an object.
+                    if (is_array($label) || is_object($label)) {
+                        $label =
+                            data_get($label, 'name') ??
+                            (data_get($label, 'title') ??
+                                (data_get($label, 'label') ?? (data_get($label, 'en') ?? data_get($label, 'value'))));
+                    }
+                }
+
+                if (!$date || !is_scalar($label) || trim((string) $label) === '') {
+                    return null;
+                }
+
+                try {
+                    $parsedDate = \Carbon\Carbon::parse($date);
+                } catch (\Throwable $exception) {
+                    return null;
+                }
+
                 return [
-                    'date' => $date,
-                    'label' => $name,
-                    'year' => date('Y', strtotime($date)),
+                    'date' => $parsedDate->format('Y-m-d'),
+                    'label' => trim((string) $label),
+                    'year' => $parsedDate->format('Y'),
                     'type' => 'holiday',
                 ];
             })
+            ->filter()
             ->values()
             ->all();
 
         $activePeriodPayload = $activePeriod
             ? [
                 'id' => $activePeriod->id,
-                'academic_year' => $activePeriod->academic_year,
-                'semester' => $activePeriod->semester,
+                'academic_year' => $getAcademicYearName($activePeriod),
+                'semester' => $getAcademicTermName($activePeriod),
                 'start_date' => optional($activePeriod->start_date)->format('Y-m-d'),
                 'end_date' => optional($activePeriod->end_date)->format('Y-m-d'),
                 'description' => $activePeriod->description,
                 'is_active' => (bool) $activePeriod->is_active,
-
                 'update_url' => route($routeNames['update'], $activePeriod),
             ]
             : null;
@@ -155,7 +215,7 @@
                                         Semester</p>
                                 </div>
                                 <p class="text-xl font-bold" id="bannerSem">
-                                    {{ $activePeriod?->semester ?? 'No Active Period' }}
+                                    {{ $activePeriod ? $getAcademicTermName($activePeriod) : 'No Active Period' }}
                                 </p>
                             </div>
                             <div>
@@ -168,7 +228,7 @@
                                     </p>
                                 </div>
                                 <p class="text-xl font-bold" id="bannerYear">
-                                    {{ $activePeriod?->academic_year ?? '—' }}
+                                    {{ $activePeriod ? $getAcademicYearName($activePeriod) : '—' }}
                                 </p>
                             </div>
                             <div>
@@ -284,6 +344,9 @@
                                         <tbody id="academicTableBody">
                                             @forelse($academicPeriods as $index => $period)
                                                 @php
+                                                    $academicYearName = $getAcademicYearName($period);
+                                                    $semesterValue = $getAcademicTermName($period);
+
                                                     $statusClass = match ($period->status) {
                                                         'Active' => 'status-active',
                                                         'Upcoming' => 'status-upcoming',
@@ -291,23 +354,23 @@
                                                         default => 'status-pending',
                                                     };
 
-                                                    $semesterClass = match ($period->semester) {
+                                                    $semesterClass = match ($semesterValue) {
                                                         'First Semester', '1st Semester' => 'table-tag-danger',
                                                         'Second Semester', '2nd Semester' => 'table-tag-info',
                                                         'Summer' => 'table-tag-warning',
                                                         default => 'table-tag-neutral',
                                                     };
 
-                                                    $semesterLabel = match ($period->semester) {
+                                                    $semesterLabel = match ($semesterValue) {
                                                         '1st Semester' => 'First Semester',
                                                         '2nd Semester' => 'Second Semester',
-                                                        default => $period->semester,
+                                                        default => $semesterValue,
                                                     };
 
                                                     $periodPayload = [
                                                         'id' => $period->id,
-                                                        'academic_year' => $period->academic_year,
-                                                        'semester' => $period->semester,
+                                                        'academic_year' => $academicYearName,
+                                                        'semester' => $semesterValue,
                                                         'start_date' => optional($period->start_date)->format('Y-m-d'),
                                                         'end_date' => optional($period->end_date)->format('Y-m-d'),
                                                         'description' => $period->description,
@@ -316,23 +379,23 @@
                                                     ];
 
                                                     $label =
-                                                        $period->academic_year .
+                                                        $academicYearName .
                                                         ' — ' .
                                                         str_replace(
                                                             ['1st', '2nd'],
                                                             ['First', 'Second'],
-                                                            $period->semester,
+                                                            $semesterValue,
                                                         );
                                                 @endphp
 
                                                 <tr data-record-row data-period-id="{{ $period->id }}"
                                                     data-set-active-url="{{ route($routeNames['set_active'], $period) }}"
-                                                    data-semester="{{ $period->semester }}"
+                                                    data-semester="{{ $semesterValue }}"
                                                     data-status="{{ $period->status }}"
                                                     data-search="{{ strtolower(
-                                                        $period->academic_year .
+                                                        $academicYearName .
                                                             ' ' .
-                                                            $period->semester .
+                                                            $semesterValue .
                                                             ' ' .
                                                             $period->status .
                                                             ' ' .
@@ -345,14 +408,14 @@
                                                             <span
                                                                 class="table-dot {{ $period->is_active ? 'table-dot-success' : 'table-dot-muted' }}">
                                                             </span>
-                                                            <strong>{{ $period->academic_year }}</strong>
+                                                            <strong>{{ $academicYearName }}</strong>
                                                         </div>
                                                     </td>
 
                                                     <td>
                                                         <span class="table-tag {{ $semesterClass }}">
                                                             <i
-                                                                class="fa-solid {{ $period->semester === 'Summer' ? 'fa-sun' : 'fa-book' }}">
+                                                                class="fa-solid {{ $semesterValue === 'Summer' ? 'fa-sun' : 'fa-book' }}">
                                                             </i>
                                                             <span>{{ $semesterLabel }}</span>
                                                         </span>
@@ -443,6 +506,9 @@
                                 <div id="academicMobileListBody" class="xl:hidden">
                                     @forelse($academicPeriods as $index => $period)
                                         @php
+                                            $academicYearName = $getAcademicYearName($period);
+                                            $semesterValue = $getAcademicTermName($period);
+
                                             $statusClass = match ($period->status) {
                                                 'Active' => 'status-active',
                                                 'Upcoming' => 'status-upcoming',
@@ -450,23 +516,23 @@
                                                 default => 'status-pending',
                                             };
 
-                                            $semesterClass = match ($period->semester) {
+                                            $semesterClass = match ($semesterValue) {
                                                 'First Semester', '1st Semester' => 'table-tag-danger',
                                                 'Second Semester', '2nd Semester' => 'table-tag-info',
                                                 'Summer' => 'table-tag-warning',
                                                 default => 'table-tag-neutral',
                                             };
 
-                                            $semesterLabel = match ($period->semester) {
+                                            $semesterLabel = match ($semesterValue) {
                                                 '1st Semester' => 'First Semester',
                                                 '2nd Semester' => 'Second Semester',
-                                                default => $period->semester,
+                                                default => $semesterValue,
                                             };
 
                                             $periodPayload = [
                                                 'id' => $period->id,
-                                                'academic_year' => $period->academic_year,
-                                                'semester' => $period->semester,
+                                                'academic_year' => $academicYearName,
+                                                'semester' => $semesterValue,
                                                 'start_date' => optional($period->start_date)->format('Y-m-d'),
                                                 'end_date' => optional($period->end_date)->format('Y-m-d'),
                                                 'description' => $period->description,
@@ -475,19 +541,19 @@
                                             ];
 
                                             $label =
-                                                $period->academic_year .
+                                                $academicYearName .
                                                 ' — ' .
-                                                str_replace(['1st', '2nd'], ['First', 'Second'], $period->semester);
+                                                str_replace(['1st', '2nd'], ['First', 'Second'], $semesterValue);
                                         @endphp
 
                                         <div class="table-list-row" data-record-mobile
                                             data-period-id="{{ $period->id }}"
                                             data-set-active-url="{{ route($routeNames['set_active'], $period) }}"
-                                            data-semester="{{ $period->semester }}" data-status="{{ $period->status }}"
+                                            data-semester="{{ $semesterValue }}" data-status="{{ $period->status }}"
                                             data-search="{{ strtolower(
-                                                $period->academic_year .
+                                                $academicYearName .
                                                     ' ' .
-                                                    $period->semester .
+                                                    $semesterValue .
                                                     ' ' .
                                                     $period->status .
                                                     ' ' .
@@ -504,7 +570,7 @@
                                                             </span>
 
                                                             <h3 class="table-record-title">
-                                                                {{ $period->academic_year }}
+                                                                {{ $academicYearName }}
                                                             </h3>
                                                         </div>
 
@@ -521,7 +587,7 @@
 
                                                             <span class="table-tag {{ $semesterClass }}">
                                                                 <i
-                                                                    class="fa-solid {{ $period->semester === 'Summer' ? 'fa-sun' : 'fa-book' }}">
+                                                                    class="fa-solid {{ $semesterValue === 'Summer' ? 'fa-sun' : 'fa-book' }}">
                                                                 </i>
                                                                 <span>{{ $semesterLabel }}</span>
                                                             </span>
@@ -605,6 +671,8 @@
                                 <div class="table-record-grid">
                                     @forelse($academicPeriods as $index => $period)
                                         @php
+                                            $academicYearName = $getAcademicYearName($period);
+                                            $semesterValue = $getAcademicTermName($period);
                                             $statusClass = match ($period->status) {
                                                 'Active' => 'status-active',
                                                 'Upcoming' => 'status-upcoming',
@@ -612,50 +680,46 @@
                                                 default => 'status-pending',
                                             };
 
-                                            $semesterClass = match ($period->semester) {
+                                            $semesterClass = match ($semesterValue) {
                                                 'First Semester', '1st Semester' => 'table-tag-danger',
-
                                                 'Second Semester', '2nd Semester' => 'table-tag-info',
-
                                                 'Summer' => 'table-tag-warning',
-
                                                 default => 'table-tag-neutral',
                                             };
 
-                                            $semesterLabel = match ($period->semester) {
+                                            $semesterLabel = match ($semesterValue) {
                                                 '1st Semester' => 'First Semester',
                                                 '2nd Semester' => 'Second Semester',
-                                                default => $period->semester,
+                                                default => $semesterValue,
                                             };
 
                                             $periodPayload = [
                                                 'id' => $period->id,
-                                                'academic_year' => $period->academic_year,
-                                                'semester' => $period->semester,
+                                                'academic_year' => $academicYearName,
+                                                'semester' => $semesterValue,
                                                 'start_date' => optional($period->start_date)->format('Y-m-d'),
                                                 'end_date' => optional($period->end_date)->format('Y-m-d'),
                                                 'description' => $period->description,
                                                 'is_active' => (bool) $period->is_active,
-
                                                 'update_url' => route($routeNames['update'], $period),
                                             ];
 
                                             $label =
-                                                $period->academic_year .
+                                                $academicYearName .
                                                 ' — ' .
-                                                str_replace(['1st', '2nd'], ['First', 'Second'], $period->semester);
+                                                str_replace(['1st', '2nd'], ['First', 'Second'], $semesterValue);
                                         @endphp
 
                                         <article data-period-id="{{ $period->id }}"
                                             class="table-record-card table-record-card-layout
         {{ $period->is_active ? 'is-active' : '' }}"
-                                            data-record-card data-semester="{{ $period->semester }}"
+                                            data-record-card data-semester="{{ $semesterValue }}"
                                             data-set-active-url="{{ route($routeNames['set_active'], $period) }}"
                                             data-status="{{ $period->status }}"
                                             data-search="{{ strtolower(
-                                                $period->academic_year .
+                                                $academicYearName .
                                                     ' ' .
-                                                    $period->semester .
+                                                    $semesterValue .
                                                     ' ' .
                                                     $period->status .
                                                     ' ' .
@@ -663,12 +727,11 @@
                                                     ' ' .
                                                     optional($period->end_date)->format('M d, Y'),
                                             ) }}">
-
                                             <div class="table-record-content">
 
                                                 <div class="flex items-center justify-center min-w-0">
                                                     <h3 class="table-record-title text-center">
-                                                        {{ $period->academic_year }}
+                                                        {{ $academicYearName }}
                                                     </h3>
                                                 </div>
 
@@ -683,7 +746,7 @@
                                                             <span class="table-tag {{ $semesterClass }}">
                                                                 <i
                                                                     class="fa-solid
-                                                                    {{ $period->semester === 'Summer' ? 'fa-sun' : 'fa-book' }}">
+                                                                    {{ $semesterValue === 'Summer' ? 'fa-sun' : 'fa-book' }}">
                                                                 </i>
 
                                                                 {{ $semesterLabel }}
@@ -786,6 +849,23 @@
                                     </div>
                                 </div>
                             </div>
+
+                            @if ($holidaySourceUnavailable)
+                                <div class="mx-4 mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"
+                                    role="status" aria-live="polite">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fa-solid fa-circle-info mt-0.5" aria-hidden="true"></i>
+                                        <span>
+                                            The official PUP calendar source is temporarily unavailable.
+                                            @if ($usingHolidayFallback)
+                                                Showing fallback holiday data and locally saved academic-period dates.
+                                            @else
+                                                Showing locally saved academic-period dates for now.
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
 
                             <div id="calendarList" class="table-body-surface ap-calendar-list scrollbar-thin">
                             </div>
@@ -1079,8 +1159,7 @@
                                 <div class="global-control-wrap modal-inline-main" id="addAcademicYearWrap">
                                     <i class="fa-solid fa-calendar global-control-icon" aria-hidden="true"></i>
                                     <input name="academic_year" id="addYear" type="text"
-                                        placeholder="e.g. 2026-2027"
-                                        class="form-input-custom global-form-icon no-voice"
+                                        placeholder="e.g. 2026-2027" class="form-input-custom global-form-icon no-voice"
                                         data-field-label="Academic Year"
                                         data-required-message="Please enter the academic year."
                                         data-validation-rule="academicYear" required>
@@ -1272,8 +1351,8 @@
                                 <div class="global-control-wrap modal-inline-main" id="editAcademicYearWrap">
                                     <i class="fa-solid fa-calendar global-control-icon" aria-hidden="true"></i>
                                     <input type="text" name="academic_year" id="editYear"
-                                        class="form-input-custom global-form-icon no-voice"
-                                        placeholder="e.g. 2026-2027" data-field-label="Academic Year"
+                                        class="form-input-custom global-form-icon no-voice" placeholder="e.g. 2026-2027"
+                                        data-field-label="Academic Year"
                                         data-required-message="Please enter the academic year."
                                         data-validation-rule="academicYear" required>
                                 </div>
@@ -1908,7 +1987,13 @@
             const today = todayStr();
 
             if (!show.length) {
-                list.innerHTML = '<p class="text-xs text-center py-3">No events found</p>';
+                list.innerHTML = `
+                    <div class="px-4 py-6 text-center">
+                        <i class="fa-regular fa-calendar-xmark text-lg mb-2"></i>
+                        <p class="text-xs font-semibold">No calendar events available</p>
+                        <p class="text-xs mt-1">Academic-period dates will appear here once they are added.</p>
+                    </div>
+                `;
                 return;
             }
 
