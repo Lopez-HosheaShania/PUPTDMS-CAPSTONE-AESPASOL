@@ -310,11 +310,6 @@ class DentistAppointmentController extends Controller
 
         $appointment = Appointment::with('patient.user')->findOrFail($id);
 
-        $serviceType = ServiceType::where(
-            'name',
-            $request->service_type
-        )->firstOrFail();
-
         $cancelledBy = Auth::user()?->name ?? 'the dentist';
 
         $appointment->update([
@@ -372,7 +367,6 @@ class DentistAppointmentController extends Controller
         $request->validate([
             'new_appointment_date' => 'required|date|after:today',
             'new_appointment_time' => 'required',
-            'service_type' => 'required|string',
         ]);
 
         if (Carbon::parse($request->new_appointment_date)->isToday()) {
@@ -420,8 +414,6 @@ class DentistAppointmentController extends Controller
         $appointment->update([
             'appointment_date' => $request->new_appointment_date,
             'appointment_time' => $mysqlTime,
-            'service_type_id' => $serviceType->id,
-            'service_type' => $serviceType->name,
             'status' => 'rescheduled',
         ]);
 
