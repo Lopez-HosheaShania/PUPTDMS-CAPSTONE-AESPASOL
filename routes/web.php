@@ -226,6 +226,9 @@ Route::post(
     ->name('session.activity');
 
 Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/poll', [NotificationController::class, 'poll'])
+        ->name('poll');
+
     Route::post('/{notificationId}/read', [NotificationController::class, 'markAsRead'])
         ->name('mark-read');
 

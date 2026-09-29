@@ -1787,14 +1787,24 @@ class WalkInController extends Controller
                     );
                 }
 
-                $patientType = match ($patient->classification) {
+                $classification = strtolower(
+                    trim((string) $patient->classification)
+                );
+
+                if (filled($studentInformation?->student_no)) {
+                    $classification = 'student';
+                } elseif (filled($facultyInformation?->faculty_code)) {
+                    $classification = 'faculty';
+                }
+
+                $patientType = match ($classification) {
                     'student' => 'Student',
                     'faculty' => 'Faculty',
                     'administrative' => 'Administrative Personnel',
                     'alumni' => 'Alumni',
                     'dependent' => 'Dependent',
                     'dependent_alumni' => 'Dependent & Alumni',
-                    default => 'Dependent & Alumni',
+                    default => 'Patient',
                 };
 
                 return [
