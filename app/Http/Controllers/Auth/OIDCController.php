@@ -896,6 +896,8 @@ class OIDCController extends Controller
                 $section
                 ?: $information?->section;
 
+            $patient->classification = $classification;
+
             $patient->is_pwd =
                 $information?->is_pwd
                 ?? false;

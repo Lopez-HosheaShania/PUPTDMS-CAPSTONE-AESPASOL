@@ -53,17 +53,19 @@ class HomepageController extends Controller
             'patient_dashboard',
             "Patient viewed homepage"
         );
+
+        Appointment::cancelElapsedScheduledAppointments();
+
+        $now = now();
+
         $appointments = Appointment::where('patient_id', $patient->id)
-            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->activeAndNotElapsed($now)
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->get();
 
-        $today = now()->toDateString();
-
         $upcomingAppointment = Appointment::where('patient_id', $patient->id)
-            ->whereIn('status', ['upcoming', 'rescheduled'])
-            ->where('appointment_date', '>=', $today)
+            ->activeAndNotElapsed($now)
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->first();

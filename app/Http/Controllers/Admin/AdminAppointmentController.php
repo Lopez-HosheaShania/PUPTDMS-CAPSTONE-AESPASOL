@@ -15,6 +15,8 @@ class AdminAppointmentController extends Controller
         $user = Auth::user();
         $today = Carbon::today()->toDateString();
 
+        Appointment::cancelElapsedScheduledAppointments();
+
         $upcomingAppointments = Appointment::with([
             'patient',
             'procedure',

@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\Patient;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
 class SignatureReuploadRequiredNotification extends Notification
@@ -18,7 +17,7 @@ class SignatureReuploadRequiredNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database', 'broadcast'];
+        return ['database'];
     }
 
     public function toArray(object $notifiable): array
@@ -35,19 +34,4 @@ class SignatureReuploadRequiredNotification extends Notification
         ];
     }
 
-    public function toBroadcast(object $notifiable): BroadcastMessage
-    {
-        return new BroadcastMessage([
-            'title' => 'Signature Re-upload Required',
-            'message' => 'Your uploaded signature was marked invalid during manual review. Please upload a valid signature to continue using your record normally.',
-            'reason' => $this->reason,
-            'url' => route('patient.signature-review.show'),
-            'icon' => 'fa-file-signature',
-            'patient_id' => $this->patient->id,
-            'event' => 'signature.reupload_required',
-            'created_at_label' => 'Just now',
-            'state' => 'unread',
-            'recipient_role' => optional($notifiable->role)->slug,
-        ]);
-    }
 }

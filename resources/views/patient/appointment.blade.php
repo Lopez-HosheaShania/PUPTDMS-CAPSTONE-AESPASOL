@@ -13,14 +13,14 @@
     @php
         $calendarAppointments = [];
 
-        $hasActiveAppointment = collect($appointments ?? [])->contains(function ($appointment) {
+        $hasActiveAppointment = collect($futureVisits ?? [])->contains(function ($appointment) {
             $status = strtolower(trim((string) ($appointment->status ?? '')));
 
             return in_array($status, ['upcoming', 'rescheduled'], true);
         });
 
         foreach (
-            collect($appointments ?? [])->filter(function ($appt) {
+            collect($futureVisits ?? [])->filter(function ($appt) {
                 $status = strtolower($appt->status ?? '');
 
                 return !in_array($status, ['completed', 'cancelled']);

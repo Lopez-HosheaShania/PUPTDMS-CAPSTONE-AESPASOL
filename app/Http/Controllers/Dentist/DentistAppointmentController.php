@@ -34,6 +34,8 @@ class DentistAppointmentController extends Controller
 
         $today = Carbon::today()->toDateString();
 
+        Appointment::cancelElapsedScheduledAppointments();
+
         $upcomingAppointments = Appointment::with(['patient', 'procedure', 'followUpAppointments', 'reservedBookingPeriod'])
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->whereDate('appointment_date', '>=', $today)
@@ -193,6 +195,8 @@ class DentistAppointmentController extends Controller
         );
 
         $today = Carbon::today()->toDateString();
+
+        Appointment::cancelElapsedScheduledAppointments();
 
         $futureVisits = Appointment::with([
             'procedure',
