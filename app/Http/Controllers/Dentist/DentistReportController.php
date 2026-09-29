@@ -28,6 +28,10 @@ use App\Models\ServiceType;
 
 class DentistReportController extends Controller
 {
+    private const DAILY_TREATMENT_RECORD_ROWS_PER_PAGE = 10;
+    private const DENTAL_SERVICES_SIGNATURE_WIDTH = 55.0;
+    private const DENTAL_SERVICES_SIGNATURE_HEIGHT = 12.0;
+
     public function buildApprovedDocumentRequestPdfResponse(DocumentRequest $documentRequest)
     {
         $payload = $this->generateApprovedDocumentRequestPdfPayload($documentRequest);
@@ -1113,12 +1117,10 @@ class DentistReportController extends Controller
         $template = $pdf->importPage(1);
         $size = $pdf->getTemplateSize($template);
 
-        $rowsPerPage = 8;
-
         $recordChunks =
             $this->reportPages(
                 $records,
-                $rowsPerPage
+                self::DAILY_TREATMENT_RECORD_ROWS_PER_PAGE
             );
         $copies = (int) $validated['quantity'];
 
@@ -4452,8 +4454,8 @@ class DentistReportController extends Controller
                     $signaturePath,
                     737.6,
                     $y,
-                    55,
-                    18
+                    self::DENTAL_SERVICES_SIGNATURE_WIDTH,
+                    self::DENTAL_SERVICES_SIGNATURE_HEIGHT
                 );
             }
         }

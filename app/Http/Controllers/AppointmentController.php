@@ -71,6 +71,8 @@ class AppointmentController extends Controller
 
         $this->backfillStudentEmergencyContactIfNeeded($patient);
 
+        Appointment::cancelElapsedScheduledAppointments();
+
         $now = now();
         $today = $now->toDateString();
         $nowTime = $now->format('H:i:s');
@@ -95,21 +97,7 @@ class AppointmentController extends Controller
             'reservedBookingPeriod',
         ])
             ->where('patient_id', $patientId)
-            ->whereIn('status', ['upcoming', 'rescheduled'])
-            ->where(function ($q) use ($today, $nowTime) {
-                $q->whereDate('appointment_date', '>', $today)
-                    ->orWhere(function ($q2) use ($today, $nowTime) {
-                        $q2->whereDate('appointment_date', '=', $today)
-                            ->where(function ($sameDay) use ($nowTime) {
-                                $sameDay->where(function ($regular) use ($nowTime) {
-                                    $regular->regularBooking()
-                                        ->whereTime('appointment_time', '>=', $nowTime);
-                                })->orWhereHas('reservedBookingPeriod', function ($period) use ($nowTime) {
-                                    $period->withTrashed()->withScheduleColumns()->whereTime('end_time', '>=', $nowTime);
-                                });
-                            });
-                    });
-            })
+            ->activeAndNotElapsed($now)
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->get();
@@ -239,6 +227,8 @@ class AppointmentController extends Controller
 
         $patient = Patient::findOrFail($patientId);
         $availableReservedSlots = collect();
+
+        Appointment::cancelElapsedScheduledAppointments();
 
         if ($reservedBookingPeriod) {
             $reservedBookingPeriod->load(['slots.appointment']);
@@ -400,7 +390,7 @@ class AppointmentController extends Controller
 
         // DO NOT REMOVE
         $hasActiveAppointment = Appointment::where('patient_id', $patientId)
-            ->whereIn('status', ['upcoming', 'rescheduled'])
+            ->activeAndNotElapsed()
             ->exists();
 
         if ($hasActiveAppointment && ! $reservedBookingPeriod) {
@@ -731,6 +721,8 @@ class AppointmentController extends Controller
             'medicalHistory.diseaseAnswers.disease',
         ])->findOrFail($patientId);
 
+        Appointment::cancelElapsedScheduledAppointments();
+
         $reservedBookingPeriod = filled($request->input('reserved_booking_period_id'))
             ? ReservedBookingPeriod::with('slots')->find($request->integer('reserved_booking_period_id'))
             : null;
@@ -951,6 +943,17 @@ class AppointmentController extends Controller
         }
 
         if (! $reservedBookingPeriod) {
+            $matchesConfiguredSlot = collect($schedule->availableSlots($request->appointment_date))
+                ->contains(fn($slot) => ($slot['mysql_time'] ?? null) === $mysqlTime);
+
+            if (! $matchesConfiguredSlot) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Selected time does not match the configured appointment slot duration.');
+            }
+        }
+
+        if (! $reservedBookingPeriod) {
             $conflictingReservedPeriod = ReservedBookingPeriod::query()
                 ->active()
                 ->whereDate('reserved_date', $request->appointment_date)
@@ -965,12 +968,17 @@ class AppointmentController extends Controller
             }
         }
 
-        $appointmentCount = Appointment::where('appointment_date', $request->appointment_date)
-            ->regularBooking()
-            ->whereIn('status', ['upcoming', 'rescheduled'])
-            ->count();
+        $appointmentCount = $this->regularBookedCountForSchedule(
+            $schedule,
+            $request->appointment_date
+        );
 
-        if (! $reservedBookingPeriod && $appointmentCount >= $schedule->max_slots) {
+        $effectiveMaxSlots = $this->effectiveRegularCapacityForSchedule(
+            $schedule,
+            $request->appointment_date
+        );
+
+        if (! $reservedBookingPeriod && $appointmentCount >= $effectiveMaxSlots) {
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Sorry, this date is fully booked. Please select another date.');
@@ -1607,52 +1615,115 @@ class AppointmentController extends Controller
             ->pluck('cnt', 'appointment_time')
             ->toArray();
 
-        $totalBooked = array_sum($bookedSlotCounts);
+        $slots = $this->regularSlotsAfterReservedPeriods(
+            $schedule,
+            $iso,
+            $bookedSlotCounts
+        );
 
-        if ($totalBooked >= $schedule->max_slots) {
+        $effectiveMaxSlots = min((int) $schedule->max_slots, $slots->count());
+        $regularSlotTimes = $slots
+            ->pluck('mysql_time')
+            ->filter()
+            ->all();
+
+        $totalBooked = collect($bookedSlotCounts)
+            ->only($regularSlotTimes)
+            ->sum();
+
+        if ($effectiveMaxSlots <= 0 || $totalBooked >= $effectiveMaxSlots) {
             return response()->json([
                 'slots' => [],
                 'message' => 'All slots for this day are fully booked.',
-                'max_slots' => $schedule->max_slots,
+                'max_slots' => $effectiveMaxSlots,
                 'booked' => $totalBooked,
                 'remaining' => 0,
+                'slot_duration_minutes' => $schedule->slot_duration_minutes ?: 60,
             ]);
         }
 
+        return response()->json([
+            'slots'      => $slots,
+            'max_slots'  => $effectiveMaxSlots,
+            'booked'     => $totalBooked,
+            'remaining'  => max(0, $effectiveMaxSlots - $totalBooked),
+            'open_time'  => $schedule->open_time,
+            'close_time' => $schedule->close_time,
+            'break_time' => $schedule->break_time,
+            'slot_duration_minutes' => $schedule->slot_duration_minutes ?: 60,
+            'status'     => $schedule->status,
+        ]);
+    }
+
+    private function effectiveRegularCapacityForSchedule(ClinicSchedule $schedule, string $iso): int
+    {
+        return min(
+            (int) $schedule->max_slots,
+            $this->regularSlotsAfterReservedPeriods($schedule, $iso)->count()
+        );
+    }
+
+    private function regularBookedCountForSchedule(ClinicSchedule $schedule, string $iso): int
+    {
+        $bookedSlotCounts = Appointment::where('appointment_date', $iso)
+            ->regularBooking()
+            ->whereIn('status', ['upcoming', 'rescheduled'])
+            ->selectRaw('appointment_time, COUNT(*) as cnt')
+            ->groupBy('appointment_time')
+            ->pluck('cnt', 'appointment_time')
+            ->toArray();
+
+        $regularSlotTimes = $this->regularSlotsAfterReservedPeriods(
+            $schedule,
+            $iso,
+            $bookedSlotCounts
+        )
+            ->pluck('mysql_time')
+            ->filter()
+            ->all();
+
+        return (int) collect($bookedSlotCounts)
+            ->only($regularSlotTimes)
+            ->sum();
+    }
+
+    private function regularSlotsAfterReservedPeriods(
+        ClinicSchedule $schedule,
+        string $iso,
+        array $bookedSlotCounts = []
+    ) {
         $slots = collect($schedule->availableSlots($iso, $bookedSlotCounts));
 
-        $reservedPeriod = ReservedBookingPeriod::query()
+        $reservedPeriods = ReservedBookingPeriod::query()
             ->active()
             ->whereDate('reserved_date', $iso)
-            ->first();
+            ->get();
 
-        if ($reservedPeriod) {
-            $reservedStart = Carbon::parse($reservedPeriod->start_time);
-            $reservedEnd = Carbon::parse($reservedPeriod->end_time);
+        if ($reservedPeriods->isEmpty()) {
+            return $slots->values();
+        }
 
-            $slots = $slots->reject(function ($slot) use ($reservedStart, $reservedEnd) {
-                $value = is_array($slot) ? ($slot['time'] ?? null) : $slot;
+        return $slots
+            ->reject(function ($slot) use ($iso, $reservedPeriods) {
+                $value = is_array($slot)
+                    ? ($slot['mysql_time'] ?? $slot['time'] ?? null)
+                    : $slot;
 
                 if (! $value) {
                     return false;
                 }
 
-                $time = Carbon::parse($value);
+                $slotStart = Carbon::parse($iso . ' ' . $value);
 
-                return $time->greaterThanOrEqualTo($reservedStart) && $time->lessThan($reservedEnd);
-            })->values();
-        }
+                return $reservedPeriods->contains(function (ReservedBookingPeriod $period) use ($iso, $slotStart) {
+                    $reservedStart = Carbon::parse($iso . ' ' . $period->start_time);
+                    $reservedEnd = Carbon::parse($iso . ' ' . $period->end_time);
 
-        return response()->json([
-            'slots'      => $slots,
-            'max_slots'  => $schedule->max_slots,
-            'booked'     => $totalBooked,
-            'remaining'  => max(0, $schedule->max_slots - $totalBooked),
-            'open_time'  => $schedule->open_time,
-            'close_time' => $schedule->close_time,
-            'break_time' => $schedule->break_time,
-            'status'     => $schedule->status,
-        ]);
+                    return $slotStart->greaterThanOrEqualTo($reservedStart)
+                        && $slotStart->lessThan($reservedEnd);
+                });
+            })
+            ->values();
     }
 
     /* =======================

@@ -740,19 +740,54 @@
             document.addEventListener(
                 'DOMContentLoaded',
                 () => {
-                    window.openModal?.(
-                        'appointmentConfirmedModal'
-                    );
+                    const openAppointmentConfirmedModal = () => {
+                        const modal =
+                            document.getElementById(
+                                'appointmentConfirmedModal'
+                            );
 
-                    document.documentElement.classList.add(
-                        'appointment-confirmed-open',
-                        'modal-lock'
-                    );
+                        if (!modal) {
+                            return false;
+                        }
 
-                    document.body.classList.add(
-                        'appointment-confirmed-open',
-                        'modal-lock'
-                    );
+                        if (typeof window.openModal === 'function') {
+                            window.openModal(
+                                'appointmentConfirmedModal'
+                            );
+                        } else {
+                            modal.classList.remove(
+                                'closing'
+                            );
+
+                            modal.classList.add(
+                                'open'
+                            );
+
+                            modal.setAttribute(
+                                'aria-hidden',
+                                'false'
+                            );
+                        }
+
+                        document.documentElement.classList.add(
+                            'appointment-confirmed-open',
+                            'modal-lock'
+                        );
+
+                        document.body.classList.add(
+                            'appointment-confirmed-open',
+                            'modal-lock'
+                        );
+
+                        return true;
+                    };
+
+                    if (!openAppointmentConfirmedModal()) {
+                        setTimeout(
+                            openAppointmentConfirmedModal,
+                            100
+                        );
+                    }
 
                     document
                         .getElementById(

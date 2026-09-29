@@ -35,6 +35,8 @@ class DentistPatientController extends Controller
         $this->syncDutyEndAppointments();
         $today = Carbon::today()->toDateString();
 
+        Appointment::cancelElapsedScheduledAppointments();
+
         $appointments = Appointment::with('patient')
             ->whereHas('patient')
             ->orderByRaw(
@@ -136,6 +138,8 @@ class DentistPatientController extends Controller
         ]);
 
         $today = Carbon::today()->toDateString();
+
+        Appointment::cancelElapsedScheduledAppointments();
 
         $futureVisits = Appointment::with([
             'procedure',

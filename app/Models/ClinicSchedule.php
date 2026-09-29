@@ -2,23 +2,38 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\StoresOptionalDetails;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Carbon;
 
 class ClinicSchedule extends Model
 {
-    use HasFactory;
+    use HasFactory, StoresOptionalDetails;
+
+    protected function detailFields(): array
+    {
+        return [
+            'configuration' => ['slot_duration_minutes'],
+        ];
+    }
 
     protected $fillable = [
         'days_label', 'days', 'status',
         'open_time', 'close_time', 'break_time',
         'max_slots', 'notes', 'is_active',
+        'slot_duration_minutes',
     ];
 
     protected $casts = [
         'days'      => 'array',
         'is_active' => 'boolean',
     ];
+
+    public function configuration()
+    {
+        return $this->hasOne(ClinicScheduleConfiguration::class);
+    }
 
     // ── Scopes ───
 
@@ -65,38 +80,84 @@ class ClinicSchedule extends Model
      */
     
     public function availableSlots(string $isoDate, array $bookedSlotCounts = []): array
-        {
-            if ($this->status === 'closed') {
-                return [];
+    {
+        if ($this->status === 'closed' || ! $this->open_time || ! $this->close_time) {
+            return [];
+        }
+
+        $durationMinutes = max(5, (int) ($this->slot_duration_minutes ?: 60));
+        $date = Carbon::parse($isoDate)->toDateString();
+        $open = Carbon::parse($date . ' ' . $this->open_time);
+        $close = Carbon::parse($date . ' ' . $this->close_time);
+
+        $breakStart = null;
+        $breakEnd = null;
+
+        if ($this->break_time && $this->break_time !== 'none') {
+            [$bs, $be] = explode('-', $this->break_time);
+            $breakStart = Carbon::parse($date . ' ' . trim($bs));
+            $breakEnd = Carbon::parse($date . ' ' . trim($be));
+        }
+
+        $slots = [];
+
+        for ($slotStart = $open->copy(); $slotStart->copy()->addMinutes($durationMinutes)->lte($close); $slotStart->addMinutes($durationMinutes)) {
+            $slotEnd = $slotStart->copy()->addMinutes($durationMinutes);
+
+            if ($breakStart && $slotStart->lt($breakEnd) && $slotEnd->gt($breakStart)) {
+                continue;
             }
 
-            $openH  = (int) date('H', strtotime($this->open_time ?? '09:00'));
-            $closeH = (int) date('H', strtotime($this->close_time ?? '17:00'));
+            $mysqlTime = $slotStart->format('H:i:s');
+            $booked = $bookedSlotCounts[$mysqlTime] ?? 0;
 
-            $breakStart = $breakEnd = null;
-            if ($this->break_time && $this->break_time !== 'none') {
-                [$bs, $be] = explode('-', $this->break_time);
-                $breakStart = (int) substr(trim($bs), 0, 2);
-                $breakEnd   = (int) substr(trim($be), 0, 2);
-            }
+            $slots[] = [
+                'time' => $slotStart->format('g:i A'),
+                'mysql_time' => $mysqlTime,
+                'available' => $booked < 1,
+            ];
+        }
 
-            $slots = [];
-
-            for ($h = $openH; $h < $closeH; $h++) {
-                if ($breakStart !== null && $h >= $breakStart && $h < $breakEnd) {
-                    continue;
-                }
-
-                $mysqlTime = sprintf('%02d:00:00', $h);
-                $label     = date('g:i A', strtotime($mysqlTime));
-                $booked    = $bookedSlotCounts[$mysqlTime] ?? 0;
-
-                $slots[] = [
-                    'time'       => $label,
-                    'mysql_time' => $mysqlTime,
-                    'available'  => $booked < 1,
-                ];
-            }
         return $slots;
+    }
+
+    public static function possibleSlotCount(
+        string $openTime,
+        string $closeTime,
+        ?string $breakTime,
+        int $durationMinutes,
+        ?string $isoDate = null
+    ): int {
+        $durationMinutes = max(5, $durationMinutes);
+        $date = Carbon::parse($isoDate ?: now()->toDateString())->toDateString();
+        $open = Carbon::parse($date . ' ' . $openTime);
+        $close = Carbon::parse($date . ' ' . $closeTime);
+
+        if ($open->gte($close)) {
+            return 0;
+        }
+
+        $breakStart = null;
+        $breakEnd = null;
+
+        if ($breakTime && $breakTime !== 'none') {
+            [$bs, $be] = explode('-', $breakTime);
+            $breakStart = Carbon::parse($date . ' ' . trim($bs));
+            $breakEnd = Carbon::parse($date . ' ' . trim($be));
+        }
+
+        $count = 0;
+
+        for ($slotStart = $open->copy(); $slotStart->copy()->addMinutes($durationMinutes)->lte($close); $slotStart->addMinutes($durationMinutes)) {
+            $slotEnd = $slotStart->copy()->addMinutes($durationMinutes);
+
+            if ($breakStart && $slotStart->lt($breakEnd) && $slotEnd->gt($breakStart)) {
+                continue;
+            }
+
+            $count++;
+        }
+
+        return $count;
     }
 }

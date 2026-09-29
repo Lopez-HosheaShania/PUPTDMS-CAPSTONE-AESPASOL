@@ -100,6 +100,7 @@
                                     $errors->has('open_time') ||
                                     $errors->has('close_time') ||
                                     $errors->has('max_slots') ||
+                                    $errors->has('slot_duration_minutes') ||
                                     $errors->has('notes'));
 
                         const hasBlockErrors =
@@ -146,6 +147,9 @@
                         @endif
                         @if ($errors->has('max_slots'))
                             setFieldError('ruleMaxSlotsError', @json($errors->first('max_slots')), 'ruleMaxSlots');
+                        @endif
+                        @if ($errors->has('slot_duration_minutes'))
+                            setFieldError('ruleSlotDurationError', @json($errors->first('slot_duration_minutes')), 'ruleSlotDuration');
                         @endif
                         @if ($errors->has('notes'))
                             setFieldError('ruleNotesError', @json($errors->first('notes')), 'ruleNotes');
@@ -758,6 +762,7 @@
                                                     <th>Closes</th>
                                                     <th>Lunch Break</th>
                                                     <th>Max Slots</th>
+                                                    <th>Duration</th>
                                                     <th>Status</th>
                                                     <th>Rule State</th>
                                                     <th>Actions</th>
@@ -811,6 +816,9 @@
                                                                     </div>
                                                                 @endif
                                                             </div>
+                                                        </td>
+                                                        <td data-label="Duration">
+                                                            {{ $rule->status !== 'closed' ? ($rule->slot_duration_minutes ?: 60) . ' min' : '—' }}
                                                         </td>
                                                         <td data-label="Status">
                                                             <span class="status-pill {{ $ruleStatusClass }}">
@@ -1021,6 +1029,16 @@
                                                             </span>
                                                             <span class="status-pill {{ $ruleStateClass }}">
                                                                 {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Duration
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                {{ $rule->status !== 'closed' ? ($rule->slot_duration_minutes ?: 60) . ' min' : '—' }}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -1934,9 +1952,8 @@
                                     </select>
 
                                     <div class="field-help">
-                                        New schedule rules start as Inactive. Only one clinic schedule can be Active
-                                        at a time. Set the current Active schedule to Inactive before activating
-                                        another schedule.
+                                        New schedule rules start as Inactive. Active rules cannot share the same
+                                        weekday with another active rule.
                                     </div>
 
                                     <div id="ruleStateError" class="global-field-error"
@@ -2040,6 +2057,38 @@
 
                                         <div class="field-help">
                                             Set how many appointments may be accepted per day, from 1 to 30.
+                                        </div>
+                                    </div>
+
+                                    <div data-global-field>
+                                        <label class="form-label" for="ruleSlotDuration">
+                                            Slot Duration (minutes)
+                                        </label>
+
+                                        <div class="global-number-stepper mt-1" data-global-number-stepper>
+                                            <button type="button" class="global-number-stepper-btn"
+                                                data-number-step="-5" aria-label="Decrease slot duration">
+                                                <i class="fa-solid fa-minus"></i>
+                                            </button>
+
+                                            <input type="number" id="ruleSlotDuration"
+                                                class="global-number-stepper-input" value="60" min="5" max="240"
+                                                step="5" inputmode="numeric" autocomplete="off"
+                                                data-number-stepper-input data-field-label="Slot Duration"
+                                                data-validation-rule="wholeNumber">
+
+                                            <button type="button" class="global-number-stepper-btn"
+                                                data-number-step="5" aria-label="Increase slot duration">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+
+                                        <div id="ruleSlotDurationError" class="global-field-error"
+                                            data-error-for="ruleSlotDuration" aria-hidden="true">
+                                        </div>
+
+                                        <div class="field-help">
+                                            Choose how long each regular appointment slot lasts, in 5-minute increments.
                                         </div>
                                     </div>
 
@@ -3383,6 +3432,7 @@
             const openTime = document.getElementById('ruleOpenTime');
             const closeTime = document.getElementById('ruleCloseTime');
             const maxSlots = document.getElementById('ruleMaxSlots');
+            const slotDuration = document.getElementById('ruleSlotDuration');
             const notes = document.getElementById('ruleNotes');
             const timeFields = document.getElementById('ruleTimeFields');
             const defaultBreak = document.querySelector('.break-chip[data-val="12:00-13:00"]');
@@ -3397,6 +3447,7 @@
                 !openTime ||
                 !closeTime ||
                 !maxSlots ||
+                !slotDuration ||
                 !notes ||
                 !timeFields
             ) {
@@ -3484,6 +3535,7 @@
                 '17:00');
             toggleStatusFields('open');
             maxSlots.value = '5';
+            slotDuration.value = '60';
             notes.value = '';
 
             window.initCharLimitFields?.(
@@ -3559,6 +3611,7 @@
                 }
 
                 maxSlots.value = rule.max_slots || 5;
+                slotDuration.value = rule.slot_duration_minutes || 60;
                 notes.value =
                     rule.notes || '';
 
@@ -3646,7 +3699,7 @@
             );
         }
 
-        function findOtherActiveSchedule() {
+        function findOtherActiveSchedule(selectedDays = []) {
             return (scheduleRules || []).find(rule => {
                 if (!rule || !rule.is_active) {
                     return false;
@@ -3659,8 +3712,69 @@
                     return false;
                 }
 
-                return true;
+                const ruleDays =
+                    Array.isArray(rule.days) ?
+                    rule.days :
+                    [];
+
+                return selectedDays.some(day =>
+                    ruleDays.includes(day)
+                );
             }) || null;
+        }
+
+        function timeToMinutes(value) {
+            const parts = String(value || '').split(':').map(part => Number(part));
+
+            if (parts.length < 2 || parts.some(part => !Number.isFinite(part))) {
+                return null;
+            }
+
+            return (parts[0] * 60) + parts[1];
+        }
+
+        function possibleScheduleSlotCount(openTime, closeTime, breakTime, durationMinutes) {
+            const openMinutes = timeToMinutes(openTime);
+            const closeMinutes = timeToMinutes(closeTime);
+            const duration = Number(durationMinutes);
+
+            if (
+                openMinutes === null ||
+                closeMinutes === null ||
+                !Number.isFinite(duration) ||
+                duration < 5 ||
+                openMinutes >= closeMinutes
+            ) {
+                return 0;
+            }
+
+            let breakStart = null;
+            let breakEnd = null;
+
+            if (breakTime && breakTime !== 'none') {
+                const [rawStart, rawEnd] = String(breakTime).split('-');
+                breakStart = timeToMinutes(rawStart);
+                breakEnd = timeToMinutes(rawEnd);
+            }
+
+            let count = 0;
+
+            for (let start = openMinutes; start + duration <= closeMinutes; start += duration) {
+                const end = start + duration;
+
+                if (
+                    breakStart !== null &&
+                    breakEnd !== null &&
+                    start < breakEnd &&
+                    end > breakStart
+                ) {
+                    continue;
+                }
+
+                count++;
+            }
+
+            return count;
         }
 
         function registerClinicScheduleValidation() {
@@ -3699,6 +3813,9 @@
                     const maxSlotsField =
                         document.getElementById('ruleMaxSlots');
 
+                    const slotDurationField =
+                        document.getElementById('ruleSlotDuration');
+
                     const openTime =
                         openTimeField?.value || '';
 
@@ -3707,6 +3824,9 @@
 
                     const maxSlots =
                         Number(maxSlotsField?.value || 0);
+
+                    const slotDuration =
+                        Number(slotDurationField?.value || 0);
 
                     let valid = true;
                     let firstInvalid = null;
@@ -3731,6 +3851,11 @@
                         ''
                     );
 
+                    window.showFormInputValidationMessage?.(
+                        slotDurationField,
+                        ''
+                    );
+
                     if (!activeDays.length) {
                         window.showGlobalGroupError?.(
                             daysGroup,
@@ -3744,11 +3869,11 @@
 
                     if (activationState === '1') {
                         const otherActiveSchedule =
-                            findOtherActiveSchedule();
+                            findOtherActiveSchedule(activeDays);
 
                         if (otherActiveSchedule) {
                             const message =
-                                'Set the current active schedule to Inactive before activating this schedule.';
+                                'Set the overlapping active schedule to Inactive before activating this schedule.';
 
                             setFieldError(
                                 'ruleStateError',
@@ -3810,6 +3935,41 @@
                             window.showFormInputValidationMessage?.(
                                 maxSlotsField,
                                 'Max appointments must be between 1 and 30.'
+                            );
+
+                            valid = false;
+                            firstInvalid ||= maxSlotsField;
+                        }
+
+                        if (
+                            !Number.isFinite(slotDuration) ||
+                            slotDuration < 5 ||
+                            slotDuration > 240 ||
+                            slotDuration % 5 !== 0
+                        ) {
+                            window.showFormInputValidationMessage?.(
+                                slotDurationField,
+                                'Slot duration must be 5 to 240 minutes, using 5-minute increments.'
+                            );
+
+                            valid = false;
+                            firstInvalid ||= slotDurationField;
+                        }
+
+                        const possibleSlots = possibleScheduleSlotCount(
+                            openTime,
+                            closeTime,
+                            selectedBreak || 'none',
+                            slotDuration
+                        );
+
+                        if (
+                            Number.isFinite(maxSlots) &&
+                            maxSlots > possibleSlots
+                        ) {
+                            window.showFormInputValidationMessage?.(
+                                maxSlotsField,
+                                `Max appointments cannot exceed ${possibleSlots} for the selected hours, lunch break, and slot duration.`
                             );
 
                             valid = false;
@@ -3880,6 +4040,9 @@
             const maxSlots =
                 document.getElementById('ruleMaxSlots')?.value || '';
 
+            const slotDuration =
+                document.getElementById('ruleSlotDuration')?.value || '';
+
             form
                 .querySelectorAll('.injected-hidden')
                 .forEach(element => element.remove());
@@ -3906,6 +4069,7 @@
                 inject('open_time', openTime);
                 inject('close_time', closeTime);
                 inject('max_slots', maxSlots);
+                inject('slot_duration_minutes', slotDuration);
                 inject(
                     'break_time',
                     selectedBreak || 'none'
@@ -4073,6 +4237,17 @@
                 }
 
                 clearFieldError('ruleMaxSlotsError', 'ruleMaxSlots');
+            });
+
+            document.getElementById('ruleSlotDuration')?.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '').slice(0, 3);
+
+                if (this.value !== '') {
+                    const value = Math.max(5, Math.min(240, parseInt(this.value, 10)));
+                    this.value = String(value);
+                }
+
+                clearFieldError('ruleSlotDurationError', 'ruleSlotDuration');
             });
 
             document.getElementById('blockDate')?.addEventListener('input', () => clearFieldError(

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use App\Models\ServiceType;
 
 class Appointment extends Model
@@ -208,6 +209,69 @@ class Appointment extends Model
     public function scopeActiveForDutyEnd(Builder $query): Builder
     {
         return $query->whereIn('status', self::ACTIVE_DUTY_END_STATUSES);
+    }
+
+    public function scopeActiveAndNotElapsed(Builder $query, ?Carbon $now = null): Builder
+    {
+        $now ??= now();
+        $today = $now->toDateString();
+        $nowTime = $now->format('H:i:s');
+
+        return $query
+            ->whereIn('status', ['upcoming', 'rescheduled'])
+            ->where(function (Builder $query) use ($today, $nowTime) {
+                $query->whereDate('appointment_date', '>', $today)
+                    ->orWhere(function (Builder $sameDate) use ($today, $nowTime) {
+                        $sameDate->whereDate('appointment_date', $today)
+                            ->where(function (Builder $sameDay) use ($nowTime) {
+                                $sameDay->where(function (Builder $regular) use ($nowTime) {
+                                    $regular->regularBooking()
+                                        ->whereTime('appointment_time', '>=', $nowTime);
+                                })->orWhereHas('reservedBookingPeriod', function (Builder $period) use ($nowTime) {
+                                    $period->withTrashed()
+                                        ->withScheduleColumns()
+                                        ->whereTime('end_time', '>=', $nowTime);
+                                });
+                            });
+                    });
+            });
+    }
+
+    public static function cancelElapsedScheduledAppointments(?Carbon $now = null): int
+    {
+        $today = ($now ?? now())->toDateString();
+
+        return DB::transaction(function () use ($today) {
+            $appointmentIds = static::query()
+                ->whereIn('status', self::ACTIVE_DUTY_END_STATUSES)
+                ->whereDate('appointment_date', '<', $today)
+                ->pluck('id');
+
+            if ($appointmentIds->isEmpty()) {
+                return 0;
+            }
+
+            $timestamp = now();
+
+            $cancelled = static::query()
+                ->whereKey($appointmentIds)
+                ->update([
+                    'status' => 'cancelled',
+                    'cancellation_reason' => DB::raw(
+                        "COALESCE(cancellation_reason, 'Automatically cancelled because the scheduled appointment date elapsed.')"
+                    ),
+                    'updated_at' => $timestamp,
+                ]);
+
+            AppointmentReservedBooking::query()
+                ->whereIn('appointment_id', $appointmentIds)
+                ->update([
+                    'reserved_booking_period_slot_id' => null,
+                    'updated_at' => $timestamp,
+                ]);
+
+            return $cancelled;
+        });
     }
 
     public function medicalHistory()
