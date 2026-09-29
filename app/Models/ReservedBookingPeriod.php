@@ -238,7 +238,18 @@ class ReservedBookingPeriod extends Model
 
     public function isEligiblePatient(Patient $patient): bool
     {
+        $patient->loadMissing([
+            'studentInformation',
+            'facultyInformation',
+        ]);
+
         $classification = strtolower(trim((string) $patient->classification));
+
+        if (filled($patient->studentInformation?->student_no)) {
+            $classification = 'student';
+        } elseif (filled($patient->facultyInformation?->faculty_code)) {
+            $classification = 'faculty';
+        }
 
         $matchesType = $this->target_patient_type === 'guest'
             ? in_array($classification, ['guest', 'dependent_alumni'], true)
@@ -252,9 +263,11 @@ class ReservedBookingPeriod extends Model
             return true;
         }
 
-        return strtoupper(trim((string) $patient->course_code)) === strtoupper(trim((string) $this->program_code))
-            && (int) $patient->year_level === (int) $this->year_level
-            && strtoupper(trim((string) $patient->section)) === strtoupper(trim((string) $this->section));
+        $studentInformation = $patient->studentInformation;
+
+        return strtoupper(trim((string) ($studentInformation?->course_code ?? $patient->course_code))) === strtoupper(trim((string) $this->program_code))
+            && (int) ($studentInformation?->year_level ?? $patient->year_level) === (int) $this->year_level
+            && strtoupper(trim((string) ($studentInformation?->section ?? $patient->section))) === strtoupper(trim((string) $this->section));
     }
 
     public function allowsService(?string $service): bool

@@ -83,27 +83,27 @@ class SystemSetting extends Model
     public static function notificationVia(string $key): array
     {
         $defaults = [
-            'notif_new_appointment' => ['database', 'broadcast'],
-            'notif_appointment_cancelled' => ['database', 'broadcast'],
-            'notif_rescheduled' => ['database', 'broadcast'],
-            'notif_appointment_completed' => ['database', 'broadcast'],
+            'notif_new_appointment' => ['database'],
+            'notif_appointment_cancelled' => ['database'],
+            'notif_rescheduled' => ['database'],
+            'notif_appointment_completed' => ['database'],
 
-            'notif_document_request' => ['database', 'broadcast'],
-            'notif_document_approved' => ['database', 'broadcast'],
-            'notif_document_rejected' => ['database', 'broadcast'],
+            'notif_document_request' => ['database'],
+            'notif_document_approved' => ['database'],
+            'notif_document_rejected' => ['database'],
 
-            'notif_dentist_emergency_out' => ['database', 'broadcast'],
+            'notif_dentist_emergency_out' => ['database'],
 
-            'notif_dentist_transition_created' => ['database', 'broadcast'],
-            'notif_dentist_transition_updated' => ['database', 'broadcast'],
-            'notif_dentist_transition_finalized' => ['database', 'broadcast'],
+            'notif_dentist_transition_created' => ['database'],
+            'notif_dentist_transition_updated' => ['database'],
+            'notif_dentist_transition_finalized' => ['database'],
 
             // New follow-up notification toggles
-            'notif_follow_up_scheduled' => ['database', 'broadcast'],
-            'notif_follow_up_reminder' => ['database', 'broadcast'],
-            'notif_follow_up_today_reminder' => ['database', 'broadcast'],
+            'notif_follow_up_scheduled' => ['database'],
+            'notif_follow_up_reminder' => ['database'],
+            'notif_follow_up_today_reminder' => ['database'],
 
-            'notif_inventory_expiration' => ['database', 'broadcast'],
+            'notif_inventory_expiration' => ['database'],
         ];
 
         if (! static::isEnabled($key, true)) {

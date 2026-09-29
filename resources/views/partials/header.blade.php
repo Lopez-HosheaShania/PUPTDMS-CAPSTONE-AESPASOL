@@ -113,6 +113,7 @@
                     'created_at' => $notification->created_at,
                     'created_at_label' => optional($notification->created_at)->diffForHumans(),
                     'icon' => data_get($payload, 'icon') ?? 'fa-bell',
+                    'event' => $event,
                     'mark_read_url' => Route::has('notifications.mark-read')
                         ? route('notifications.mark-read', ['notificationId' => $notification->id])
                         : null,
@@ -213,7 +214,8 @@
     </div>
 
     <div class="header-right">
-        <div id="notifDropdown">
+        <div id="notifDropdown"
+            @if (Route::has('notifications.poll')) data-notif-poll-url="{{ route('notifications.poll') }}" @endif>
             <button class="hdr-icon-btn" id="notifBtn" type="button" aria-label="Notifications">
                 <i class="fa-regular fa-bell"></i>
                 @if ($notifCount > 0)
@@ -239,9 +241,10 @@
                         </div>
                     </div>
 
-                    @if ($notifCount > 0 && Route::has('notifications.mark-all-read'))
+                    @if (Route::has('notifications.mark-all-read'))
                         <form method="POST" action="{{ route('notifications.mark-all-read') }}"
-                            class="header-notif-actions" data-notif-mark-all-form>
+                            class="header-notif-actions" data-notif-mark-all-form {{ $notifCount > 0 ? '' : 'hidden' }}"
+                            @if ($notifCount === 0) hidden @endif>
                             @csrf
                             <button type="submit" class="header-notif-mark-all">Mark all as read</button>
                         </form>
@@ -267,6 +270,7 @@
                     @forelse($notifications as $n)
                         <div class="header-notif-item {{ ($n['state'] ?? 'unread') === 'unread' ? 'is-unread' : 'is-read' }}"
                             data-notif-state="{{ $n['state'] ?? 'unread' }}"
+                            data-notif-dedupe-key="{{ $n['id'] }}"
                             @if (!empty($n['mark_read_url'])) data-notif-mark-read-url="{{ $n['mark_read_url'] }}" @endif
                             data-notif-item>
                             <div class="header-notif-item-icon">

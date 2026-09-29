@@ -120,20 +120,22 @@ class DailyTreatmentRecordRoutingTest extends TestCase
     {
         $dentist = $this->makeDentist();
 
-        $template = DocumentTemplate::create([
-            'name' => 'Daily Treatment Record - Alumni / Dependent',
-            'code' => 'DTR-ALUMNI',
-            'document_type' => 'daily_treatment_record',
-            'category' => 'Record',
-            'engine' => 'html',
-            'output_format' => 'pdf',
-            'content' => 'template',
-            'paper_size' => 'Legal',
-            'orientation' => 'landscape',
-            'status' => 'active',
-            'is_default' => true,
-            'version' => 1,
-        ]);
+        $template = DocumentTemplate::updateOrCreate(
+            ['code' => 'DTR-ALUMNI'],
+            [
+                'name' => 'Daily Treatment Record - Alumni / Dependent',
+                'document_type' => 'daily_treatment_record',
+                'category' => 'Record',
+                'engine' => 'html',
+                'output_format' => 'pdf',
+                'content' => 'template',
+                'paper_size' => 'Legal',
+                'orientation' => 'landscape',
+                'status' => 'active',
+                'is_default' => true,
+                'version' => 1,
+            ]
+        );
 
         $this->createCompletedAppointment('alumni', 'Alumni In Range', '2026-09-02', [
             'email' => null,
@@ -170,6 +172,55 @@ class DailyTreatmentRecordRoutingTest extends TestCase
             ]);
     }
 
+    public function test_student_daily_treatment_pdf_uses_all_ten_template_rows_before_adding_a_page(): void
+    {
+        $dentist = $this->makeDentist();
+
+        $template = DocumentTemplate::updateOrCreate(
+            ['code' => 'DTR-DEFAULT'],
+            [
+                'name' => 'Daily Treatment Record - Student',
+                'document_type' => 'daily_treatment_record',
+                'category' => 'Record',
+                'engine' => 'html',
+                'output_format' => 'pdf',
+                'content' => 'template',
+                'paper_size' => 'Legal',
+                'orientation' => 'landscape',
+                'status' => 'active',
+                'is_default' => true,
+                'version' => 1,
+            ]
+        );
+
+        foreach (range(1, 9) as $index) {
+            $this->createCompletedAppointment(
+                'student',
+                sprintf('Student Row %02d', $index),
+                '2026-09-02',
+                [
+                    'course_code' => 'BSIT',
+                    'student_no' => sprintf('2026-%04d', $index),
+                    'appointment_time' => sprintf('09:%02d:00', $index),
+                ]
+            );
+        }
+
+        $response = $this->actingAs($dentist)
+            ->post(route('dentist.dentist.report.daily-treatment-record-download'), [
+                'report_name' => 'student-nine-records',
+                'document_template_id' => $template->id,
+                'date_from' => '2026-09-02',
+                'date_to' => '2026-09-02',
+                'quantity' => 1,
+            ]);
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'application/pdf');
+
+        $this->assertSame(1, $this->pdfPageCount($response->getContent()));
+    }
+
     private function makeDentist(): User
     {
         $role = Role::create([
@@ -177,15 +228,27 @@ class DailyTreatmentRecordRoutingTest extends TestCase
             'slug' => 'dentist',
         ]);
 
-        $permission = Permission::firstOrCreate(
-            ['slug' => 'manage_appointments'],
+        $permissions = collect([
             [
+                'slug' => 'manage_appointments',
                 'name' => 'Manage Appointments',
                 'module' => 'Dentist',
-            ]
-        );
+            ],
+            [
+                'slug' => 'create_report_files',
+                'name' => 'Create Report Files',
+                'module' => 'Reports',
+            ],
+        ])
+            ->map(fn(array $permission) => Permission::firstOrCreate(
+                ['slug' => $permission['slug']],
+                [
+                    'name' => $permission['name'],
+                    'module' => $permission['module'],
+                ]
+            ));
 
-        $role->permissions()->attach($permission);
+        $role->permissions()->attach($permissions->pluck('id'));
 
         return User::create([
             'name' => 'DTR Dentist',
@@ -249,5 +312,12 @@ class DailyTreatmentRecordRoutingTest extends TestCase
         ]);
 
         return $appointment->load(['patient', 'procedure']);
+    }
+
+    private function pdfPageCount(string $pdfContent): int
+    {
+        preg_match_all('/\/Type\s*\/Page\b/', $pdfContent, $matches);
+
+        return count($matches[0]);
     }
 }
