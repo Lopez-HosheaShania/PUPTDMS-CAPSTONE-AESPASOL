@@ -15,6 +15,8 @@ class AdminPatientController extends Controller
         $isBookingMode = request()->routeIs('admin.book_appointments.*');
         $today = Carbon::today()->toDateString();
 
+        Appointment::cancelElapsedScheduledAppointments();
+
         $appointments = Appointment::with('patient')
             ->whereHas('patient')
             ->orderByRaw(
@@ -113,6 +115,8 @@ class AdminPatientController extends Controller
         ]);
 
         $today = Carbon::today()->toDateString();
+
+        Appointment::cancelElapsedScheduledAppointments();
 
         $appointments = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
             ->where('patient_id', $patient->id)

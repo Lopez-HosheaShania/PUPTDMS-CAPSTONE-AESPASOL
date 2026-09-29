@@ -101,9 +101,10 @@ class ClinicScheduleController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateRule($request);
+        $this->ensureMaxSlotsFitSchedule($request, $validated);
 
         if ((bool) $validated['is_active']) {
-            $this->ensureNoOtherActiveSchedule($request);
+            $this->ensureNoOverlappingActiveSchedule($request, $validated['days']);
         }
 
         ClinicSchedule::create($this->prepareRule($validated));
@@ -114,10 +115,12 @@ class ClinicScheduleController extends Controller
     public function update(Request $request, ClinicSchedule $clinicSchedule)
     {
         $validated = $this->validateRule($request);
+        $this->ensureMaxSlotsFitSchedule($request, $validated);
 
         if ((bool) $validated['is_active']) {
-            $this->ensureNoOtherActiveSchedule(
+            $this->ensureNoOverlappingActiveSchedule(
                 $request,
+                $validated['days'],
                 $clinicSchedule->id
             );
         }
@@ -246,6 +249,10 @@ class ClinicScheduleController extends Controller
             return response()->json([
                 'slots'   => [],
                 'message' => 'All slots for this day are fully booked.',
+                'max_slots' => $schedule->max_slots,
+                'booked' => $totalBooked,
+                'remaining' => 0,
+                'slot_duration_minutes' => $schedule->slot_duration_minutes ?: 60,
             ]);
         }
 
@@ -277,6 +284,7 @@ class ClinicScheduleController extends Controller
             'open_time'  => $schedule->open_time,
             'close_time' => $schedule->close_time,
             'break_time' => $schedule->break_time,
+            'slot_duration_minutes' => $schedule->slot_duration_minutes ?: 60,
         ]);
     }
 
@@ -291,12 +299,17 @@ class ClinicScheduleController extends Controller
             'close_time' => 'required_unless:status,closed|nullable|date_format:H:i|after:open_time',
             'break_time' => 'nullable|string',
             'max_slots'  => 'required_unless:status,closed|nullable|integer|min:1|max:30',
+            'slot_duration_minutes' => 'required_unless:status,closed|nullable|integer|min:5|max:240|multiple_of:5',
             'notes'      => 'nullable|string|max:500',
+        ], [
+            'slot_duration_minutes.required_unless' => 'Set how long each appointment slot should last.',
+            'slot_duration_minutes.multiple_of' => 'Slot duration must use 5-minute increments.',
         ]);
     }
 
-    private function ensureNoOtherActiveSchedule(
+    private function ensureNoOverlappingActiveSchedule(
         Request $request,
+        array $selectedDays,
         ?int $ignoreId = null
     ): void {
         $query = ClinicSchedule::active();
@@ -305,7 +318,13 @@ class ClinicScheduleController extends Controller
             $query->where('id', '<>', $ignoreId);
         }
 
-        if (! $query->exists()) {
+        $hasOverlappingSchedule = $query
+            ->get()
+            ->contains(function (ClinicSchedule $schedule) use ($selectedDays) {
+                return count(array_intersect($schedule->days ?? [], $selectedDays)) > 0;
+            });
+
+        if (! $hasOverlappingSchedule) {
             return;
         }
 
@@ -313,10 +332,35 @@ class ClinicScheduleController extends Controller
             'is_active' => [
                 function ($attribute, $value, $fail) {
                     $fail(
-                        'Another clinic schedule is already active. '
-                            . 'Set the current active schedule to Inactive '
-                            . 'before activating another schedule.'
+                        'Another active clinic schedule already uses one or more selected days. '
+                            . 'Set the overlapping active schedule to Inactive before activating this schedule.'
                     );
+                },
+            ],
+        ]);
+    }
+
+    private function ensureMaxSlotsFitSchedule(Request $request, array $validated): void
+    {
+        if (($validated['status'] ?? null) === 'closed') {
+            return;
+        }
+
+        $possibleSlots = ClinicSchedule::possibleSlotCount(
+            $validated['open_time'],
+            $validated['close_time'],
+            $validated['break_time'] ?? null,
+            (int) ($validated['slot_duration_minutes'] ?? 60)
+        );
+
+        if ((int) ($validated['max_slots'] ?? 0) <= $possibleSlots) {
+            return;
+        }
+
+        $request->validate([
+            'max_slots' => [
+                function ($attribute, $value, $fail) use ($possibleSlots) {
+                    $fail("Max appointments cannot exceed {$possibleSlots} for the selected hours, lunch break, and slot duration.");
                 },
             ],
         ]);
@@ -338,6 +382,7 @@ class ClinicScheduleController extends Controller
             'close_time' => $v['close_time'] ?? null,
             'break_time' => $v['break_time'] ?? null,
             'max_slots'  => $v['max_slots']  ?? 0,
+            'slot_duration_minutes' => $v['slot_duration_minutes'] ?? 60,
             'notes'      => $v['notes']      ?? null,
             'is_active'  => (bool) $v['is_active'],
         ];
