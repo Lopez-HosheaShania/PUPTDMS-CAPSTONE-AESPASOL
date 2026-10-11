@@ -1001,6 +1001,10 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->middleware('permission:book_appointments')
         ->name('book.appointment.draft.show');
 
+    Route::get('/book-appointment/verify-personal-information', [AppointmentController::class, 'verifyPersonalInformation'])
+        ->middleware('permission:book_appointments')
+        ->name('book.appointment.verify-personal-information');
+
     Route::put('/book-appointment/draft', [AppointmentController::class, 'saveDraft'])
         ->middleware('permission:book_appointments')
         ->name('book.appointment.draft.save');

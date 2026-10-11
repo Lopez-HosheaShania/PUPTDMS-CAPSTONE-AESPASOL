@@ -955,8 +955,9 @@
             }
 
 
-            window.location.href =
-                "{{ route('patient.book.appointment') }}";
+            window.verifyPersonalInformationBeforeBooking(
+                "{{ route('patient.book.appointment') }}"
+            );
         }
 
         function openAccordion(acc) {

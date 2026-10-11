@@ -879,7 +879,7 @@
 
         var PROFILE_DATA = {
             name: @json($patient->name ?? 'Guest'),
-            roleLabel: "{{ $patient->faculty_code ? 'Faculty' : ($patient->student_no ? 'Student' : 'Patient') }}",
+            roleLabel: "{{ ($patient->classification === 'faculty' || $patient->faculty_code) ? 'Faculty' : (($patient->classification === 'student' || $patient->student_no) ? 'Student' : 'Patient') }}",
             facultyCode: "{{ $patient->faculty_code ?? '' }}",
             studentNo: "{{ $patient->student_no ?? '' }}",
             age: "{{ $age ?? '' }}",
@@ -2144,6 +2144,13 @@
 
         function scrollToCalendar(event) {
             event?.preventDefault();
+
+            return window.verifyPersonalInformationBeforeBooking(() => {
+                scrollToVerifiedCalendar();
+            }, event?.currentTarget);
+        }
+
+        function scrollToVerifiedCalendar() {
 
             const calendar =
                 document.getElementById(

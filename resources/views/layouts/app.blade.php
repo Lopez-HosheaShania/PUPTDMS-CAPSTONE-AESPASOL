@@ -224,6 +224,10 @@
 
     @include('components.active-appointment-modal')
 
+    @if ($isPatient)
+        @include('components.booking.personal-information-verification')
+    @endif
+
     @include('components.discard-changes')
 
     @include('partials.global-toast')

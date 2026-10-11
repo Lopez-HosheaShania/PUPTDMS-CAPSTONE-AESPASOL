@@ -411,7 +411,8 @@ class OIDCController extends Controller
                 $studentData,
                 $patient,
                 $assignedAccess,
-                $facultyAccess
+                $facultyAccess,
+                $incomingRoles
             );
         }
 
@@ -561,9 +562,10 @@ class OIDCController extends Controller
         array $studentData,
         ?Patient $patient,
         ?ExternalAdminAccess $assignedAccess,
-        ?Faculty $facultyAccess
+        ?Faculty $facultyAccess,
+        array $incomingRoles = []
     ): Patient {
-        $patient?->loadMissing('information');
+        $patient?->loadMissing(['information', 'studentInformation', 'facultyInformation']);
 
         $information = $patient?->information;
 
@@ -572,28 +574,28 @@ class OIDCController extends Controller
             ?: (string) ($information?->phone ?? '');
 
         $facultyCode =
-            $information?->faculty_code;
+            $patient?->faculty_code;
 
         $studentNo =
             $this->extractStudentNumber($studentData)
-            ?: $information?->student_no;
+            ?: $patient?->student_no;
 
         $programCode =
             $this->extractStudentProgramCode($studentData)
-            ?: $information?->course_code;
+            ?: $patient?->course_code;
 
         $programName =
             $this->extractStudentProgramName($studentData)
-            ?: $information?->course_name;
+            ?: $patient?->course_name;
 
         $yearLevel =
             $studentData['yearLevel']
             ?? $studentData['year_level']
-            ?? $information?->year_level;
+            ?? $patient?->year_level;
 
         $section =
             $studentData['section']
-            ?? $information?->section;
+            ?? $patient?->section;
 
 
         $personalInfo = [];
@@ -685,6 +687,8 @@ class OIDCController extends Controller
                 ?? $weightKg
         );
 
+        $hasFacultyProfile = false;
+
         if ($assignedAccess) {
             try {
                 $baseUrl = rtrim((string) env('OCMS_EXTERNAL_API_URL'), '/');
@@ -745,6 +749,7 @@ class OIDCController extends Controller
                 });
 
                 if ($matchedFaculty) {
+                    $hasFacultyProfile = true;
                     $birthdate = $this->normalizeDate(
                         $matchedFaculty['birthday']
                             ?? $matchedFaculty['birthdate']
@@ -756,7 +761,7 @@ class OIDCController extends Controller
                     );
                     $gender = $this->normalizeGenderLabel($matchedFaculty['profile']['gender'] ?? $gender);
                     $phone = $matchedFaculty['contact_number'] ?? $phone;
-                    $facultyCode = $matchedFaculty['faculty_code'] ?? null;
+                    $facultyCode = $matchedFaculty['faculty_code'] ?? $facultyCode;
                 }
             } catch (\Throwable $e) {
                 Log::error('Faculty API fetch failed', [
@@ -783,6 +788,7 @@ class OIDCController extends Controller
                 });
 
                 if ($matchedFaculty) {
+                    $hasFacultyProfile = true;
                     $birthdate = $this->normalizeDate(
                         $matchedFaculty['birthday']
                             ?? $matchedFaculty['birthdate']
@@ -826,13 +832,20 @@ class OIDCController extends Controller
         )));
 
         $classification = 'dependent_alumni';
+        // OIDC categories describe the patient; local roles still control access.
+        $incomingRoles = array_map(
+            fn ($role) => strtolower(trim((string) $role)),
+            $incomingRoles
+        );
 
         if (
             $facultyAccess ||
-            filled($facultyCode)
+            $hasFacultyProfile ||
+            filled($facultyCode) ||
+            in_array('faculty', $incomingRoles, true)
         ) {
             $classification = 'faculty';
-        } elseif (filled($studentNo)) {
+        } elseif (filled($studentNo) || $studentData !== [] || in_array('student', $incomingRoles, true)) {
             $classification = 'student';
         } elseif ($assignedAccess) {
             $classification = 'administrative';
@@ -843,6 +856,9 @@ class OIDCController extends Controller
                     'student',
                     'faculty',
                     'administrative',
+                    'alumni',
+                    'dependent',
+                    'guest',
                     'dependent_alumni',
                 ],
                 true
@@ -874,27 +890,27 @@ class OIDCController extends Controller
 
             $patient->faculty_code =
                 $facultyCode
-                ?: $information?->faculty_code;
+                ?: $patient->faculty_code;
 
             $patient->student_no =
                 $studentNo
-                ?: $information?->student_no;
+                ?: $patient->student_no;
 
             $patient->course_code =
                 $programCode
-                ?: $information?->course_code;
+                ?: $patient->course_code;
 
             $patient->course_name =
                 $programName
-                ?: $information?->course_name;
+                ?: $patient->course_name;
 
             $patient->year_level =
                 $yearLevel
-                ?? $information?->year_level;
+                ?? $patient->year_level;
 
             $patient->section =
                 $section
-                ?: $information?->section;
+                ?: $patient->section;
 
             $patient->is_pwd =
                 $information?->is_pwd

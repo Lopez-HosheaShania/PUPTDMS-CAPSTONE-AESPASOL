@@ -91,7 +91,7 @@ urlencode($displayName) .
 '&background=8B0000&color=ffffff&bold=true';
 }
 
-$identityLabel = $patient->faculty_code ? 'Faculty Code' : 'Student No';
+$identityLabel = ($patient->classification === 'faculty' || $patient->faculty_code) ? 'Faculty Code' : 'Student No';
 $identityValue = $patient->faculty_code ?: ($patient->student_no ?: 'N/A');
 
 $emergencyPerson = optional($patient->medicalHistory)->emergency_person;
@@ -100,7 +100,7 @@ $emergencyRelation = optional($patient->medicalHistory)->emergency_relation;
 
 $profileIsActive = true;
 
-$patientType = $patient->faculty_code ? 'Faculty' : ($patient->student_no ? 'Student' : 'Patient');
+$patientType = ($patient->classification === 'faculty' || $patient->faculty_code) ? 'Faculty' : (($patient->classification === 'student' || $patient->student_no) ? 'Student' : 'Patient');
 
 $procedureAppointment = collect($futureVisits ?? [])
 ->first(function ($visit) {

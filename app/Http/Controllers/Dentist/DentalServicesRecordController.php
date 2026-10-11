@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dentist;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\DocumentTemplate;
+use App\Support\DentalServicesPatientName;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -65,6 +66,7 @@ class DentalServicesRecordController extends Controller
         return Appointment::query()
             ->with([
                 'patient.medicalHistory',
+                'patient.user.profile',
                 'procedure',
             ])
             ->where('status', 'completed')
@@ -136,7 +138,7 @@ class DentalServicesRecordController extends Controller
                 ? Carbon::parse($appointment->appointment_date)->format('Y-m')
                 : '',
             'timeIn' => $timeIn,
-            'name' => $this->formatPatientNameSurnameFirst($patient?->name),
+            'name' => DentalServicesPatientName::surnameFirst($patient),
             'program' => $programDisplay,
             'age' => $this->patientAge($patient?->birthdate ?? $patient?->user?->birthdate),
             'gad' => [
@@ -154,29 +156,6 @@ class DentalServicesRecordController extends Controller
                 ? asset('storage/' . ltrim((string) $patient->medicalHistory->patient_signature, '/'))
                 : null,
         ];
-    }
-
-    private function formatPatientNameSurnameFirst(?string $fullName): string
-    {
-        $fullName = trim((string) $fullName);
-
-        if ($fullName === '') {
-            return 'Unknown Patient';
-        }
-
-        $parts = preg_split('/\s+/', $fullName) ?: [];
-        $parts = array_values(array_filter($parts, fn($part) => trim((string) $part) !== ''));
-
-        if (count($parts) === 1) {
-            return $parts[0];
-        }
-
-        $surname = array_pop($parts);
-        $firstName = array_shift($parts) ?? '';
-        $remainingNames = trim(implode(' ', $parts));
-        $givenNames = trim($firstName . ' ' . $remainingNames);
-
-        return trim($surname . ', ' . $givenNames);
     }
 
     private function patientAge($birthdate): string
@@ -199,7 +178,8 @@ class DentalServicesRecordController extends Controller
         }
 
         $patientType = strtolower(trim((string) (
-            $patient->patient_type
+            $patient->classification
+            ?? $patient->patient_type
             ?? $patient->type
             ?? ''
         )));
@@ -212,11 +192,11 @@ class DentalServicesRecordController extends Controller
             return 'Dependent';
         }
 
-        if (filled($patient->faculty_code)) {
+        if ($patientType === 'faculty' || filled($patient->faculty_code)) {
             return 'Faculty';
         }
 
-        if (filled($patient->course_code) || filled($patient->course_name)) {
+        if ($patientType === 'student' || filled($patient->student_no) || filled($patient->course_code) || filled($patient->course_name)) {
             return 'Student';
         }
 
