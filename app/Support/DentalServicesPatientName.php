@@ -17,7 +17,6 @@ class DentalServicesPatientName
         $suffix = trim((string) ($user?->suffix_name ?? ''));
 
         if ($surname !== '' && $givenNames !== []) {
-            // The profile is authoritative; never split its surname on spaces.
             return $surname . ', ' . implode(' ', array_filter([
                 implode(' ', $givenNames),
                 $suffix,
@@ -30,7 +29,6 @@ class DentalServicesPatientName
             return $surname !== '' ? $surname : 'Unknown Patient';
         }
 
-        // Legacy names already in surname-first order must not be reversed again.
         if (str_contains($fullName, ',')) {
             return $fullName;
         }
@@ -49,7 +47,6 @@ class DentalServicesPatientName
                 return $surname . ', ' . trim($matches[1] . ' ' . $suffix);
             }
 
-            // Incomplete, inconsistent profile data is not enough to guess a new name.
             return $fullName;
         }
 
@@ -57,7 +54,6 @@ class DentalServicesPatientName
             return trim($parts[0] . ' ' . $suffix);
         }
 
-        // Only full-name-only legacy records need this surname-particle heuristic.
         $surnameParts = [array_pop($parts)];
         while (count($parts) > 1 && in_array(mb_strtolower(end($parts)), [
             'de', 'del', 'dela', 'la', 'las', 'los', 'san', 'santa', 'santo',

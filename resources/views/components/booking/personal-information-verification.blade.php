@@ -50,7 +50,7 @@
         let verifying = false;
         const verificationError = {
             title: 'Unable to Verify Information',
-            message: 'We could not verify your Personal Information from GUISIS. Please try again later.'
+            message: 'We could not verify your Personal Information from GUISIS.'
         };
         function showFailure(failure) {
             const incomplete = failure.code === 'personal_information_incomplete';

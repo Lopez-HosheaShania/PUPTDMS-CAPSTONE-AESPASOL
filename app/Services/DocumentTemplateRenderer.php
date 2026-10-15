@@ -447,7 +447,7 @@ class DocumentTemplateRenderer
         for ($i = 1; $i <= 15; $i++) {
             $record = $records->get($i - 1);
 
-            $name = $record?->patient_name ?? '—';
+            $name = $record?->dental_services_patient_name ?? '—';
 
             $courseSectionDepartment = '—';
             if ($record) {
@@ -467,12 +467,12 @@ class DocumentTemplateRenderer
             }
 
             $processingTime = '—';
-            if ($record?->time_in && $record?->time_out) {
-                $processingTime = (string) $record->minutes_processed;
+            if ($record?->dental_services_minutes_processed !== null) {
+                $processingTime = (string) $record->dental_services_minutes_processed;
             }
 
             $context['date_' . $i] = $record?->time_in?->format('m/d/y') ?? '—';
-            $context['time_in_' . $i] = $record?->time_in?->format('h:i A') ?? '—';
+            $context['time_in_' . $i] = $record?->dental_services_time_in?->format('h:i A') ?? '—';
             $context['patient_name_' . $i] = $name;
             $context['course_section_department_' . $i] = $courseSectionDepartment;
             $context['age_' . $i] = $record?->age !== null ? (string) $record->age : '—';
@@ -482,7 +482,7 @@ class DocumentTemplateRenderer
             $context['pwd_' . $i] = $record?->is_pwd ? '✓' : '—';
             $context['email_address_' . $i] = $record?->email ?? '—';
             $context['contact_number_' . $i] = $record?->contact ?? '—';
-            $context['time_processed_' . $i] = $record?->time_out?->format('h:i A') ?? '—';
+            $context['time_processed_' . $i] = $record?->dental_services_time_processed?->format('h:i A') ?? '—';
             $context['processing_time_' . $i] = $processingTime;
             $isWalkIn = (bool) ($record?->is_walk_in ?? false);
             $visitType = trim((string) ($record?->visit_type ?? ''));

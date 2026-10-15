@@ -122,7 +122,7 @@ class AppointmentController extends Controller
             'status' => 503,
             'code' => 'personal_information_unverified',
             'title' => 'Unable to Verify Information',
-            'message' => 'We could not verify your Personal Information from GUISIS. Please try again later.',
+            'message' => 'We could not verify your Personal Information from GUISIS.',
         ];
     }
 

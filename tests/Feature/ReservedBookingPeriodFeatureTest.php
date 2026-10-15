@@ -46,7 +46,6 @@ class ReservedBookingPeriodFeatureTest extends TestCase
 
         Carbon::setTestNow('2026-09-01 08:00:00');
 
-        // These booking regressions exercise students whose OGOS information is complete.
         $this->mock(\App\Services\StudentApiService::class, function ($mock) {
             $mock->shouldReceive('getPersonalInformationCompletion')->andReturn(100.0);
             $mock->shouldReceive('getStudentByEmail')->andReturn(['data' => []]);

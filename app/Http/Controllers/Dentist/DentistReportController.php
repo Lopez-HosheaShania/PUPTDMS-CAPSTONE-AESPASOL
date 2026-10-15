@@ -19,6 +19,7 @@ use App\Models\MedicalHistoryDiseaseAnswer;
 use App\Models\Patient;
 use App\Models\PatientOdontogram;
 use App\Support\DentalServicesPatientName;
+use App\Support\DentalServicesProcedureTiming;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -4200,7 +4201,7 @@ class DentistReportController extends Controller
                 ? Carbon::parse($appointment->appointment_date)->format('m/d/y')
                 : '';
 
-            $timeIn = $this->formatPdfTime($appointment->appointment_time ?? null);
+            $timeIn = DentalServicesProcedureTiming::requestedTimeIn($appointment)?->format('h:i A') ?? '';
 
             $patientName = DentalServicesPatientName::surnameFirst($patient);
             $patientName = $patientName !== '' ? $patientName : 'Unknown Patient';
@@ -4225,13 +4226,9 @@ class DentistReportController extends Controller
             $isEmergency = $isWalkIn || str_contains($visitType, 'emergency');
             $isNonEmergency = ! $isEmergency;
 
-            $timeProcessed = $procedure?->procedure_started_at
-                ? $procedure->procedure_started_at->format('h:i A')
-                : $timeIn;
-
-            $processingTime = $this->formatPdfDurationMinutes(
-                (int) ($procedure?->procedure_duration_seconds ?? 0)
-            );
+            $timeProcessed = DentalServicesProcedureTiming::timeProcessed($appointment)?->format('h:i A') ?? '';
+            $minutesProcessed = DentalServicesProcedureTiming::minutesProcessed($appointment);
+            $processingTime = $minutesProcessed !== null ? (string) $minutesProcessed : '';
 
             if ($processingTime !== '') {
                 $processingTime .= ((int) $processingTime === 1) ? ' min' : ' mins';

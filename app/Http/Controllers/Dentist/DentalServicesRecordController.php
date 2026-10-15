@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\DocumentTemplate;
 use App\Support\DentalServicesPatientName;
+use App\Support\DentalServicesProcedureTiming;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -113,18 +114,10 @@ class DentalServicesRecordController extends Controller
             ($patient->is_senior ?? false) ? 'Senior' : null,
         ]));
 
-        $timeIn = $appointment->appointment_time
-            ? Carbon::parse($appointment->appointment_time)->format('h:i A')
-            : '';
-
-        $timeOut = $procedure?->procedure_completed_at
-            ? Carbon::parse($procedure->procedure_completed_at)->format('h:i A')
-            : '';
-
-        $durationMinutes = (int) ($procedure?->procedure_duration_seconds ?? 0);
-        $duration = $durationMinutes > 0
-            ? (string) (int) ceil($durationMinutes / 60) . ' mins'
-            : '';
+        $timeIn = DentalServicesProcedureTiming::requestedTimeIn($appointment)?->format('h:i A') ?? '';
+        $timeOut = DentalServicesProcedureTiming::timeProcessed($appointment)?->format('h:i A') ?? '';
+        $durationMinutes = DentalServicesProcedureTiming::minutesProcessed($appointment);
+        $duration = $durationMinutes !== null ? $durationMinutes . ' mins' : '';
 
         return [
             'id' => $appointment->id,

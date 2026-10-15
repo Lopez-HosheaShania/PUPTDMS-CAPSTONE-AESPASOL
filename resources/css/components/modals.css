@@ -4216,7 +4216,6 @@ body.session-expired {
 
 }
 
-/* Personal information verification uses the application's Inter typography. */
 #personalInformationVerificationModal {
     font-family: var(--font-family-base);
     background: rgba(2, 6, 23, .66);

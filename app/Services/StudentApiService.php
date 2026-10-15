@@ -412,9 +412,6 @@ class StudentApiService
             }
         }
 
-        // GUISIS personal-info normally returns details, without a completion flag.
-        // Name, phone and email come from the student profile synced at login;
-        // use fresh personal-info for the remaining dashboard completion fields.
         $required = [
             $profile['name'] ?? null,
             $info['dateOfBirth'] ?? $info['birthdate'] ?? null,
