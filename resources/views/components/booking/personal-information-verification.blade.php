@@ -1,43 +1,43 @@
-<div id="personalInformationVerificationModal" class="ui-modal personal-information-modal" role="dialog"
+<div id="personalInformationVerificationModal" class="ui-modal" role="dialog"
     aria-modal="true" aria-hidden="true" aria-labelledby="personalInformationVerificationTitle"
     aria-describedby="personalInformationVerificationMessage">
-    <div class="ui-modal-card modal-lg">
+    <div class="ui-modal-card modal-md">
         <div class="modal-hd">
             <div class="modal-heading">
                 <div class="modal-icon"><i class="fa-solid fa-user-pen" aria-hidden="true"></i></div>
                 <div class="modal-copy">
-                    <span class="personal-information-eyebrow patient-doc-eyebrow">Appointment booking</span>
-                    <h2 id="personalInformationVerificationTitle" class="modal-title patient-doc-title"></h2>
+                    <h2 id="personalInformationVerificationTitle" class="modal-title"></h2>
+                    <p class="modal-subtitle">Appointment booking</p>
                 </div>
             </div>
-            <button type="button" class="modal-x" data-modal-close="personalInformationVerificationModal"
-                aria-label="Close personal information notice">
-                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-            </button>
         </div>
-        <div class="modal-bd">
-            <div class="personal-information-message">
-                <p id="personalInformationVerificationMessage" class="patient-doc-help"></p>
+        <div class="modal-bd modal-form-grid">
+            <div class="global-confirm-alert">
+                <p id="personalInformationVerificationMessage"></p>
             </div>
-            <div class="personal-information-section-title patient-doc-label" role="heading" aria-level="3">What you can do</div>
-            <ol class="personal-information-steps">
-                <li>
-                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
-                    <span id="personalInformationVerificationStep">Please complete your personal information in GUISIS.</span>
-                </li>
-                <li>
-                    <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
-                    <span id="personalInformationVerificationReturn">Return here and book your appointment</span>
-                </li>
-            </ol>
-            <p class="personal-information-note">
+            <section class="modal-form-section" aria-labelledby="personalInformationVerificationActions">
+                <div class="modal-section-heading">
+                    <h4 id="personalInformationVerificationActions">What you can do</h4>
+                </div>
+                <ol>
+                    <li class="modal-section-heading">
+                        <div class="modal-section-icon"><i class="fa-regular fa-pen-to-square" aria-hidden="true"></i></div>
+                        <div><p id="personalInformationVerificationStep">Please complete your personal information in GUISIS.</p></div>
+                    </li>
+                    <li class="modal-section-heading">
+                        <div class="modal-section-icon"><i class="fa-regular fa-calendar-check" aria-hidden="true"></i></div>
+                        <div><p id="personalInformationVerificationReturn">Return here and book your appointment</p></div>
+                    </li>
+                </ol>
+            </section>
+            <p class="modal-helper-text">
                 GUISIS opens in a new tab so you can keep this page open.
             </p>
         </div>
         <div class="modal-ft">
-            <button id="personalInformationVerificationClose" type="button" class="ui-btn ui-btn-secondary"
+            <button id="personalInformationVerificationClose" type="button" class="btn-close-modal"
                 data-modal-close="personalInformationVerificationModal">Close</button>
-            <a id="personalInformationVerificationGuisis" class="ui-btn ui-btn-primary"
+            <a id="personalInformationVerificationGuisis" class="modal-btn-primary"
                 href="https://www.guisis.dllbsit2027.com/" target="_blank" rel="noopener noreferrer">
                 <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> Go to GUISIS
             </a>

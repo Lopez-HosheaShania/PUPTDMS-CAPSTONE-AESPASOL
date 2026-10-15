@@ -203,6 +203,7 @@
 
     @if ($isPatient)
         @include('partials.impersonation-banner')
+        @include('components.booking.personal-information-verification')
     @endif
 
     @if ($isDentist || ($isAdmin && View::hasSection('usesAppointmentCalendar')))
@@ -223,10 +224,6 @@
     @endif
 
     @include('components.active-appointment-modal')
-
-    @if ($isPatient)
-        @include('components.booking.personal-information-verification')
-    @endif
 
     @include('components.discard-changes')
 
