@@ -548,7 +548,7 @@
 
                                         $courseName = trim((string) ($patient?->course_name ?? ''));
 
-                                        $isFacultyPatient = filled($patient?->faculty_code);
+                                        $isFacultyPatient = $patient?->classification === 'faculty' || filled($patient?->faculty_code);
 
                                         if ($isFacultyPatient) {
                                             $program = 'Faculty';
@@ -994,7 +994,7 @@
 
                                     $courseName = trim((string) ($patient?->course_name ?? ''));
 
-                                    $isFacultyPatient = filled($patient?->faculty_code);
+                                    $isFacultyPatient = $patient?->classification === 'faculty' || filled($patient?->faculty_code);
 
                                     if ($isFacultyPatient) {
                                         $program = 'Faculty';

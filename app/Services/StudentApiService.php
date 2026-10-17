@@ -282,7 +282,7 @@ class StudentApiService
         }
     }
 
-    public function getStudentByEmail(string $email): array
+    public function getStudentByEmail(string $email, bool $allowCachedFallback = true): array
     {
         try {
             $token = $this->getAccessToken();
@@ -317,6 +317,10 @@ class StudentApiService
 
             return $payload;
         } catch (\Throwable $e) {
+            if (! $allowCachedFallback) {
+                throw $e;
+            }
+
             $student = $this->findStudentByEmailFromFallbacks($email);
 
             if ($student !== null) {
@@ -332,7 +336,7 @@ class StudentApiService
         }
     }
 
-    public function getPersonalInfoByStudentNumber(string $studentNumber): array
+    public function getPersonalInfoByStudentNumber(string $studentNumber, bool $allowCachedFallback = true): array
     {
         try {
             $token = $this->getAccessToken();
@@ -365,6 +369,10 @@ class StudentApiService
 
             return $payload;
         } catch (\Throwable $e) {
+            if (! $allowCachedFallback) {
+                throw $e;
+            }
+
             $cachedPayload = Cache::get($this->personalInfoCacheKey($studentNumber));
 
             if (is_array($cachedPayload)) {
@@ -378,6 +386,48 @@ class StudentApiService
 
             throw $e;
         }
+    }
+
+    public function getPersonalInformationCompletion(string $studentNumber, array $profile = []): ?float
+    {
+        $payload = $this->getPersonalInfoByStudentNumber($studentNumber, false);
+        $info = $payload['data'] ?? null;
+
+        if (! is_array($info) || $info === []) {
+            return null;
+        }
+
+        foreach (['personalInformationCompletion', 'personal_information_completion', 'completionPercentage', 'completion_percentage', 'profileCompletion', 'profile_completion'] as $field) {
+            if (array_key_exists($field, $info)) {
+                $value = $info[$field];
+
+                return is_numeric($value) && (float) $value >= 0 && (float) $value <= 100
+                    ? (float) $value : null;
+            }
+        }
+
+        foreach (['isProfileComplete', 'is_profile_complete'] as $field) {
+            if (array_key_exists($field, $info)) {
+                return is_bool($info[$field]) ? ($info[$field] ? 100.0 : 0.0) : null;
+            }
+        }
+
+        $required = [
+            $profile['name'] ?? null,
+            $info['dateOfBirth'] ?? $info['birthdate'] ?? null,
+            data_get($info, 'gender.name') ?? $info['gender'] ?? null,
+            $profile['phone'] ?? null,
+            $profile['email'] ?? null,
+            $info['emergencyContactName'] ?? $info['emergency_contact_name']
+                ?? data_get($info, 'emergencyContact.name') ?? data_get($info, 'emergency_contact.name'),
+            $info['emergencyContactNumber'] ?? $info['emergency_contact_number']
+                ?? data_get($info, 'emergencyContact.number') ?? data_get($info, 'emergencyContact.contactNumber')
+                ?? data_get($info, 'emergency_contact.number') ?? data_get($info, 'emergency_contact.contact_number'),
+        ];
+
+        $completed = collect($required)->filter(fn ($value) => is_scalar($value) && filled($value))->count();
+
+        return round(($completed / count($required)) * 100, 2);
     }
 
     public function getAddressesByStudentNumber(string $studentNumber): array

@@ -59,6 +59,82 @@ class AppointmentController extends Controller
             ->first();
     }
 
+    public function verifyPersonalInformation()
+    {
+        $patient = $this->resolveAuthenticatedPatient();
+        abort_unless($patient, 401);
+        $failure = $this->personalInformationBookingFailure($patient);
+
+        return response()->json($failure ?? ['verified' => true], $failure['status'] ?? 200);
+    }
+
+    private function personalInformationBookingFailure(Patient $patient): ?array
+    {
+        $isStudent = strtolower(trim((string) $patient->classification)) === 'student'
+            || ! empty($patient->student_no)
+            || (! empty($patient->email) && ! empty($patient->course_code));
+
+        $usesFacultyIntegration = in_array(strtolower(trim((string) $patient->classification)), ['faculty', 'administrative'], true)
+            || filled($patient->faculty_code);
+
+        if (! $isStudent && $usesFacultyIntegration) {
+            return null;
+        }
+
+        try {
+            $studentNumber = $patient->student_no;
+            if (blank($studentNumber) && filled($patient->email)) {
+                $profile = $this->studentApiService->getStudentByEmail($patient->email, false);
+                $studentNumber = data_get($profile, 'data.studentNumber')
+                    ?: data_get($profile, 'data.student_number');
+            }
+
+            $completion = filled($studentNumber)
+                ? $this->studentApiService->getPersonalInformationCompletion($studentNumber, [
+                    'name' => $patient->name,
+                    'phone' => $patient->phone,
+                    'email' => $patient->email,
+                ])
+                : null;
+
+            if ($completion === 100.0) {
+                return null;
+            }
+
+            if ($completion !== null) {
+                return [
+                    'verified' => false,
+                    'status' => 422,
+                    'code' => 'personal_information_incomplete',
+                    'title' => 'Complete Your Personal Information',
+                    'message' => 'Your Personal Information in GUISIS is not yet complete. Please complete all required information in GUISIS before booking an appointment.',
+                ];
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Appointment personal information verification failed', [
+                'patient_id' => $patient->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+        return [
+            'verified' => false,
+            'status' => 503,
+            'code' => 'personal_information_unverified',
+            'title' => 'Unable to Verify Information',
+            'message' => 'We could not verify your Personal Information from GUISIS.',
+        ];
+    }
+
+    private function rejectPersonalInformationBooking(Request $request, array $failure)
+    {
+        if ($request->expectsJson()) {
+            return response()->json($failure, $failure['status']);
+        }
+
+        return redirect()->route('homepage')->with('booking_verification_error', $failure);
+    }
+
     public function index()
     {
         $patientId = session('impersonated_patient_id') ?: session('patient_id');

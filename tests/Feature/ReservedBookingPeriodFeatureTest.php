@@ -46,6 +46,12 @@ class ReservedBookingPeriodFeatureTest extends TestCase
 
         Carbon::setTestNow('2026-09-01 08:00:00');
 
+        $this->mock(\App\Services\StudentApiService::class, function ($mock) {
+            $mock->shouldReceive('getPersonalInformationCompletion')->andReturn(100.0);
+            $mock->shouldReceive('getStudentByEmail')->andReturn(['data' => []]);
+            $mock->shouldReceive('getPersonalInfoByStudentNumber')->andReturn(['data' => []]);
+        });
+
         $this->mock(StudentTargetOptionService::class, function ($mock) {
             $mock->shouldReceive('get')->andReturn(collect([
                 [
