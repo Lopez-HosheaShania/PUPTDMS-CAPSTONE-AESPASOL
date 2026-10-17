@@ -827,12 +827,8 @@
                             </div>
 
                             <x-pagination-bar id="academicPeriodPagebar" info-id="academicPeriodPageInfo"
-                                pagination-id="academicPeriodPagination" position="bottom" :show-entries="false"
-                                label="periods" data-current-page="{{ $academicPeriods->currentPage() }}"
-                                data-last-page="{{ $academicPeriods->lastPage() }}"
-                                data-total="{{ $academicPeriods->total() }}"
-                                data-from="{{ $academicPeriods->firstItem() ?? 0 }}"
-                                data-to="{{ $academicPeriods->lastItem() ?? 0 }}" />
+                                pagination-id="academicPeriodPagination" position="bottom" label="periods"
+                                :paginator="$academicPeriods" />
                         </div>
 
                         <section class="table-card">

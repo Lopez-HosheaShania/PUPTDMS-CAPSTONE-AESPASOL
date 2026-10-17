@@ -14,9 +14,7 @@
     $resolvedDrawTitle =
         $drawTitle ?? ($isDrawOnly ? "Draw the patient's signature here" : 'Or draw your signature here');
 
-    $resolvedDrawHelp =
-        $drawHelp ??
-        ($isDrawOnly ? 'Use the drawing tablet, mouse, touch, or stylus.' : 'Use mouse, touch, or stylus.');
+    $resolvedDrawHelp = 'Draw the signature using a mouse, finger, or stylus.';
 @endphp
 
 
@@ -26,7 +24,6 @@
     data-signature-drawn-prefix="{{ $isDrawOnly ? 'walk-in-signature' : 'drawn-signature' }}">
 
     <div class="signature-full-row">
-
 
         <div class="signature-existing-card {{ $hasExistingSignature ? '' : 'hidden' }}" data-existing-signature-card>
 
@@ -91,50 +88,74 @@
 
                     <div class="signature-methods-grid signature-drawing-only">
 
-                        <div class="signature-draw-card">
+                        <div class="signature-draw-card" data-signature-draw-card>
 
-                            <p class="signature-draw-title">
-                                {{ $resolvedDrawTitle }}
-                            </p>
+                            <div class="signature-draw-header">
+                                <p class="signature-draw-title">
+                                    {{ $resolvedDrawTitle }}
+                                </p>
+                            </div>
 
                             <div class="signature-pad-wrap">
+
+                                <button type="button" class="ui-icon-btn neutral signature-expand-btn"
+                                    data-signature-expand data-tooltip="Expand signature pad"
+                                    data-tooltip-tone="neutral" aria-label="Expand signature pad">
+
+                                    <i class="fa-solid fa-expand" aria-hidden="true"></i>
+
+                                </button>
+
                                 <canvas id="signatureCanvas" class="signature-pad-canvas">
                                 </canvas>
+
                             </div>
 
                             <div class="signature-pad-footer">
 
                                 <span class="signature-pad-help">
                                     {{ $resolvedDrawHelp }}
-                                    Click
-                                    <b>
-                                        Use Drawn Signature
-                                    </b>
-                                    after signing.
+                                    Once finished, click <strong>Use Signature</strong> to continue.
                                 </span>
 
                                 <div class="signature-pad-actions">
 
                                     <button type="button" id="signatureUndoBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm">
-                                        <i class="fa-solid fa-rotate-left"></i>
-                                        Undo
+                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-undo
+                                        data-tooltip="Undo" data-tooltip-tone="neutral"
+                                        aria-label="Undo signature stroke">
+
+                                        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                                        <span class="signature-action-label">Undo</span>
+
                                     </button>
 
+                                    <button type="button" id="signatureRedoBtn"
+                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-redo
+                                        data-tooltip="Redo" data-tooltip-tone="neutral"
+                                        aria-label="Redo signature stroke">
+
+                                        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                                        <span class="signature-action-label">Redo</span>
+
+                                    </button>
 
                                     <button type="button" id="signatureClearBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm">
-                                        <i class="fa-solid fa-eraser"></i>
-                                        Clear Signature
+                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-clear
+                                        data-tooltip="Clear" data-tooltip-tone="neutral" aria-label="Clear signature">
+
+                                        <i class="fa-solid fa-eraser" aria-hidden="true"></i>
+                                        <span class="signature-action-label">Clear</span>
+
                                     </button>
 
                                     <button type="button" id="signatureUseDrawnBtn"
-                                        class="ui-btn ui-btn-primary ui-btn-sm">
-                                        <i class="fa-solid fa-check"></i>
-                                        Use Drawn Signature
+                                        class="ui-btn ui-btn-primary ui-btn-sm" data-signature-use-drawn>
+                                        <span>Use Signature</span>
                                     </button>
 
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -167,54 +188,140 @@
                                     Browse
                                     <input type="file" name="patient_signature" id="patient_signature" class="hidden"
                                         accept=".jpg,.jpeg,.png">
-                                    <input type="hidden" name="signature_source" id="signature_source" value="">
+                                    <input type="hidden" name="signature_source" id="signature_source"
+                                        value="">
                                 </label>
 
                             </div>
                         </div>
 
-                        <div class="signature-draw-card">
+                        <div class="signature-draw-card" data-signature-draw-card>
 
-                            <p class="signature-draw-title">
-                                {{ $resolvedDrawTitle }}
-                            </p>
+                            <div class="signature-draw-header">
+                                <p class="signature-draw-title">
+                                    {{ $resolvedDrawTitle }}
+                                </p>
+                            </div>
 
                             <div class="signature-pad-wrap">
+
+                                <button type="button" class="ui-icon-btn neutral signature-expand-btn"
+                                    data-signature-expand data-tooltip="Expand signature pad"
+                                    data-tooltip-tone="neutral" aria-label="Expand signature pad">
+
+                                    <i class="fa-solid fa-expand" aria-hidden="true"></i>
+
+                                </button>
+
                                 <canvas id="signatureCanvas" class="signature-pad-canvas">
                                 </canvas>
+
                             </div>
 
                             <div class="signature-pad-footer">
 
                                 <span class="signature-pad-help">
                                     {{ $resolvedDrawHelp }}
+                                    Once finished, click <strong>Use Signature</strong> to continue.
                                 </span>
 
                                 <div class="signature-pad-actions">
 
                                     <button type="button" id="signatureUndoBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm">
-                                        <i class="fa-solid fa-rotate-left"></i>
-                                        Undo
+                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-undo
+                                        data-tooltip="Undo" data-tooltip-tone="neutral"
+                                        aria-label="Undo signature stroke">
+
+                                        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                                        <span class="signature-action-label">Undo</span>
+
+                                    </button>
+
+                                    <button type="button" id="signatureRedoBtn"
+                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-redo
+                                        data-tooltip="Redo" data-tooltip-tone="neutral"
+                                        aria-label="Redo signature stroke">
+
+                                        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                                        <span class="signature-action-label">Redo</span>
+
                                     </button>
 
                                     <button type="button" id="signatureClearBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm">
-                                        <i class="fa-solid fa-eraser"></i>
-                                        Clear Signature
+                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-clear
+                                        data-tooltip="Clear" data-tooltip-tone="neutral"
+                                        aria-label="Clear signature">
+
+                                        <i class="fa-solid fa-eraser" aria-hidden="true"></i>
+                                        <span class="signature-action-label">Clear</span>
+
                                     </button>
 
                                     <button type="button" id="signatureUseDrawnBtn"
-                                        class="ui-btn ui-btn-primary ui-btn-sm">
-                                        <i class="fa-solid fa-check"></i>
-                                        Use Drawn Signature
+                                        class="ui-btn ui-btn-primary ui-btn-sm" data-signature-use-drawn>
+                                        <span>Use Signature</span>
                                     </button>
 
                                 </div>
+
                             </div>
                         </div>
                     </div>
                 @endif
+
+                <div class="ui-modal" data-signature-modal role="dialog" aria-modal="true"
+                    aria-labelledby="signatureExpandedTitle" aria-hidden="true">
+
+                    <div class="ui-modal-card modal-preview-card" data-signature-modal-dialog>
+
+                        <div class="modal-hd">
+
+                            <div class="modal-heading">
+
+                                <span class="modal-icon">
+                                    <i class="fa-solid fa-signature"></i>
+                                </span>
+
+                                <div class="modal-copy">
+
+                                    <h3 id="signatureExpandedTitle" class="modal-title">
+                                        Draw Your Signature
+                                    </h3>
+
+                                    <p class="modal-subtitle">
+                                        {{ $resolvedDrawHelp }}
+                                        Once finished, click <strong>Use Signature</strong> to continue.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                            <button type="button" class="modal-x" data-signature-modal-close
+                                aria-label="Close expanded signature pad" title="Close">
+
+                                <i class="fa-solid fa-xmark"></i>
+
+                            </button>
+
+                        </div>
+
+
+                        <div class="modal-bd modal-preview-body" data-signature-modal-body>
+
+                            {{-- Modal-local validation message --}}
+                            <p class="global-field-error hidden" data-signature-modal-error>
+
+                                <i class="fa-solid fa-circle-exclamation"></i>
+
+                                <span data-signature-modal-error-text></span>
+
+                            </p>
+
+                        </div>
+
+                    </div>
+                </div>
 
                 <div id="signature_result_box" class="signature-result-box hidden">
                     <p id="signature_filename"></p>

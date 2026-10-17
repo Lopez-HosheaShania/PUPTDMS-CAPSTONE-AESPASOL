@@ -1422,14 +1422,6 @@
     align-self: center;
 }
 
-.appt-visit-title {
-    margin: 0;
-    color: var(--text-1);
-    font-size: .84rem;
-    font-weight: 900;
-    line-height: 1.2;
-}
-
 .appt-visit-meta {
     grid-column: 1;
     grid-row: 2;
