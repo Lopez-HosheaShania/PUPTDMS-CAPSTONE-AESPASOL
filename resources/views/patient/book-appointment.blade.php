@@ -2396,18 +2396,38 @@
         </span>
     `;
 
-            if (sigFile && sigFile.size > 0) {
-                const url = URL.createObjectURL(sigFile);
-                sigHTML = `
-        <div class="space-y-2">
-            <p><b class="text-[#5c5550] font-semibold">File:</b> ${sigFile.name}</p>
-            <p class="text-emerald-700 font-semibold">
-                <i class="fa-solid fa-circle-check mr-1"></i> Signature uploaded
-            </p>
-            <img src="${url}" alt="Signature" class="max-w-[220px] max-h-[130px] rounded-lg border border-[#e8e2dd]">
-        </div>
-    `;
-            }
+            
+        if (sigFile && sigFile.size > 0) {
+            const url = URL.createObjectURL(sigFile);
+
+            const signatureStatus =
+                sigFile.name.startsWith('drawn-signature-') ||
+                sigFile.name.startsWith('walk-in-signature-')
+                    ? 'Drawn signature accepted'
+                    : 'Signature uploaded';
+
+            sigHTML = `
+                <div class="booking-signature-summary">
+
+                    <div class="booking-signature-summary-file">
+                        <i class="fa-solid fa-file-image" aria-hidden="true"></i>
+                        <span>${sigFile.name}</span>
+                    </div>
+
+                    <div class="booking-signature-summary-status">
+                        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                        <span>${signatureStatus}</span>
+                    </div>
+
+                    <img
+                        src="${url}"
+                        alt="Patient signature"
+                        class="booking-signature-summary-preview"
+                    >
+
+                </div>
+            `;
+        }
 
             const row = (
                 label,
@@ -2457,40 +2477,39 @@
     `;
             };
 
-            const summaryCard = (
-                title,
-                icon,
-                body,
-                editAction = null
-            ) => `
-<section class="booking-summary-card">
+            
+const summaryCard = (
+    title,
+    icon,
+    body,
+    editAction = null
+) => `
+    <section class="booking-summary-card">
 
-<div class="booking-summary-card-header flex items-center">
-    <div class="flex items-center gap-2">
-        <i class="fa-solid ${icon}"></i>
+        <div class="booking-summary-card-header">
 
-        <span>
-            ${title}
-        </span>
-    </div>
+            <div class="flex items-center gap-2 min-w-0">
+                <i class="fa-solid ${icon}" aria-hidden="true"></i>
+                <span>${title}</span>
+            </div>
 
-    ${editAction ? `
-                            <button
-                                type="button"
-                                class="ui-btn ui-btn-secondary ui-btn-sm ml-auto"
-                                onclick="${editAction}"
-                            >
-                                <i class="fa-solid fa-pen"></i>
-                                Edit
-                            </button>
-                        ` : ''}
-</div>
+            ${editAction ? `
+                <button
+                    type="button"
+                    class="ui-btn ui-btn-secondary ui-btn-sm"
+                    onclick="${editAction}">
+                    <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                    <span>Edit</span>
+                </button>
+            ` : ''}
 
-    <div class="booking-summary-card-body">
-        ${body}
-    </div>
+        </div>
 
-</section>
+        <div class="booking-summary-card-body">
+            ${body}
+        </div>
+
+    </section>
 `;
 
             const subSection = (

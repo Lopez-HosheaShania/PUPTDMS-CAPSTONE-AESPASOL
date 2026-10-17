@@ -902,7 +902,7 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canStartProcedure)
+                                                @if ($canStartProcedure && $isActiveAppointment)
                                                     <button type="button"
                                                         class="ui-action-btn
                                                            ui-action-success
@@ -921,7 +921,7 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canRescheduleAppointment && !$appt->reserved_booking_period_id)
+                                                @if ($canRescheduleAppointment && $isActiveAppointment && !$appt->reserved_booking_period_id)
                                                     <button type="button"
                                                         class="ui-action-btn ui-action-warning {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                         data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
@@ -939,7 +939,7 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canCancelAppointment)
+                                                @if ($canCancelAppointment && $isActiveAppointment)
                                                     <button type="button"
                                                         class="ui-action-btn ui-action-delete {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                         data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
@@ -1305,7 +1305,7 @@
                                             </a>
                                         @endif
 
-                                        @if ($canStartProcedure)
+                                        @if ($canStartProcedure && $isActiveAppointment)
                                             <button type="button"
                                                 class="ui-action-btn
                                                    ui-action-success
@@ -1323,7 +1323,7 @@
                                             </button>
                                         @endif
 
-                                        @if ($canRescheduleAppointment && !$appt->reserved_booking_period_id)
+                                        @if ($canRescheduleAppointment && $isActiveAppointment && !$appt->reserved_booking_period_id)
                                             <button type="button"
                                                 class="ui-action-btn ui-action-warning {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                 data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
@@ -1340,7 +1340,7 @@
                                             </button>
                                         @endif
 
-                                        @if ($canCancelAppointment)
+                                        @if ($canCancelAppointment && $isActiveAppointment)
                                             <button type="button"
                                                 class="ui-action-btn ui-action-delete {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                 data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
