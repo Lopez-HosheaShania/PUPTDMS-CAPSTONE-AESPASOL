@@ -50,7 +50,17 @@ class RoleMiddleware
             abort(403, 'You no longer have access.');
         }
 
-        // If admin is impersonating, use impersonated role first
+        if (in_array($user->role?->slug, ['dentist', 'dentist_role'], true)) {
+            $unavailable = \App\Models\DentistTransition::where('dentist_id', $user->id)
+                ->whereNotNull('effective_date')
+                ->where(function ($q) {
+                    $q->where('status', 'active')->orWhere(function ($q) {
+                        $q->where('status', 'scheduled')->whereDate('effective_date', '<=', today());
+                    });
+                })->exists();
+            abort_if($unavailable, 403, 'Your care responsibilities are covered by an effective continuity plan. Contact an administrator.');
+        }
+
         $userRole = session('impersonated_role') ?: optional($user->role)->slug;
 
         if ($userRole === 'super_admin' && in_array('admin', $roles, true)) {

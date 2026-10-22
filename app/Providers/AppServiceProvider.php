@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 class AppServiceProvider extends ServiceProvider
 {
     private const AUDIT_EXCLUDED_MODELS = [
+        \App\Models\RetentionPolicy::class,
         \App\Models\AiServiceLog::class,
         \App\Models\AuditLog::class,
         \App\Models\AuditLogActor::class,

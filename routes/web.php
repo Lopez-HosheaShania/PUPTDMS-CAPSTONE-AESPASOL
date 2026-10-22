@@ -693,6 +693,11 @@ Route::prefix('admin')
             ->middleware('permission:manage_system_settings,set_notification_rules')
             ->name('admin.system_settings');
 
+        Route::get('/retention-policy', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'index'])
+            ->middleware('permission:manage_system_settings')->name('admin.retention.index');
+        Route::put('/retention-policy/{policy}', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'update'])
+            ->middleware('permission:manage_system_settings')->name('admin.retention.update');
+
         Route::post('/system-settings', [SystemSettingsController::class, 'update'])
             ->middleware('permission:manage_system_settings,set_notification_rules')
             ->name('admin.system_settings.update');
@@ -756,8 +761,6 @@ Route::prefix('admin')
         Route::put('/dentist-transitions/{transition}/assignments', [DentistTransitionController::class, 'assignments'])
             ->name('admin.dentist-transitions.assignments');
 
-        Route::put('/dentist-transitions/{transition}/checklist', [DentistTransitionController::class, 'checklist'])
-            ->name('admin.dentist-transitions.checklist');
 
         Route::post('/dentist-transitions/{transition}/finalize', [DentistTransitionController::class, 'finalize'])
             ->name('admin.dentist-transitions.finalize');
@@ -767,6 +770,11 @@ Route::prefix('admin')
 
         Route::post('/dentist-transitions/{transition}/extend-access', [DentistTransitionController::class, 'extendAccess'])
             ->name('admin.dentist-transitions.extend-access');
+
+        Route::post('/dentist-transitions/{transition}/end-temporary', [DentistTransitionController::class, 'endTemporary'])
+            ->middleware('permission:finalize_dentist_transitions')
+            ->name('admin.dentist-transitions.end-temporary');
+
     });
 
 Route::prefix('admin')
@@ -1585,9 +1593,6 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:assign_dentist_successors')
         ->name('dentist.dentist.transitions.assignments');
 
-    Route::put('/transitions/{transition}/checklist', [DentistTransitionController::class, 'checklist'])
-        ->middleware('permission:update_dentist_transitions')
-        ->name('dentist.dentist.transitions.checklist');
 
     Route::post('/transitions/{transition}/finalize', [DentistTransitionController::class, 'finalize'])
         ->middleware('permission:finalize_dentist_transitions')

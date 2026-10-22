@@ -3290,6 +3290,135 @@
    HANDOVER CONTROLS
    ========================================================= */
 
+.continuity-page .dt-review-panel {
+    padding: 1.35rem;
+}
+
+.continuity-page .dt-review-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin: 1rem 0;
+}
+
+.continuity-page .dt-review-metrics > div {
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--dt-border);
+    border-radius: 14px;
+    background: var(--dt-red-soft);
+    min-width: 0;
+}
+
+.continuity-page .dt-review-metrics dt {
+    color: var(--dt-muted);
+    font-size: var(--dt-font-meta);
+    line-height: 1.4;
+}
+
+.continuity-page .dt-review-metrics dd {
+    margin: 0.3rem 0 0;
+    color: var(--dt-red);
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.continuity-page .dt-review-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 1rem;
+    border: 1px solid var(--dt-border);
+    border-radius: 14px;
+}
+
+.continuity-page .dt-review-notice > i {
+    margin-top: 0.2rem;
+    color: var(--dt-red);
+    flex-shrink: 0;
+}
+
+.continuity-page .dt-review-copy {
+    color: var(--dt-muted);
+    font-size: var(--dt-font-body);
+    line-height: 1.6;
+}
+
+.continuity-page .dt-review-copy p {
+    margin: 0;
+}
+
+.continuity-page .dt-review-copy p + p {
+    margin-top: 0.6rem;
+}
+
+.continuity-page .dt-review-form,
+.continuity-page .dt-review-approval {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.continuity-page .dt-review-fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.continuity-page .dt-review-fieldset legend,
+.continuity-page .dt-review-approval h3 {
+    margin: 0 0 0.8rem;
+    color: var(--dt-ink);
+    font-size: var(--dt-font-title);
+    font-weight: 800;
+}
+
+.continuity-page .dt-review-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    margin: 0;
+    color: var(--dt-ink);
+    font-size: var(--dt-font-body);
+    font-weight: 600;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.continuity-page .dt-review-check input[type="checkbox"] {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    margin: 0.1rem 0 0;
+    accent-color: var(--dt-red);
+}
+
+.continuity-page .dt-review-approval {
+    border-top: 1px solid var(--dt-border);
+    padding-top: 1.25rem;
+}
+
+.continuity-page .dt-review-approval h3 {
+    margin-bottom: 0;
+}
+
+.continuity-page .dt-review-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+    .continuity-page .dt-review-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .continuity-page .dt-review-actions .dt-btn {
+        width: 100%;
+        white-space: normal;
+        text-align: center;
+    }
+}
+
 .continuity-page .dt-handover-controls-panel {
     padding: 1.35rem;
     overflow: hidden;

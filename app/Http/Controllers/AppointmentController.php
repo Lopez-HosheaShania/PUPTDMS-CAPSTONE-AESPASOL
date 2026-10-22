@@ -50,11 +50,21 @@ class AppointmentController extends Controller
         private readonly StudentApiService $studentApiService
     ) {}
 
-    private function resolveBookableDentist(): ?User
+    private function resolveBookableDentist(int $patientId): ?User
     {
+        $careDentistId = DB::table('patient_care_assignments')->where('patient_id', $patientId)->value('dentist_id');
+
         return User::query()
+            ->when($careDentistId, fn ($q) => $q->whereKey($careDentistId))
+            ->whereDoesntHave('dentistTransitions', function ($q) {
+                $q->whereNotNull('effective_date')->where(function ($q) {
+                    $q->where('status', 'active')->orWhere(function ($q) {
+                        $q->where('status', 'scheduled')->whereDate('effective_date', '<=', today());
+                    });
+                });
+            })
             ->where('status', 'active')
-            ->whereHas('role', fn($query) => $query->where('slug', 'dentist'))
+            ->whereHas('role', fn($query) => $query->whereIn('slug', ['dentist', 'dentist_role']))
             ->orderBy('id')
             ->first();
     }
@@ -1261,7 +1271,7 @@ class AppointmentController extends Controller
                 }
             }
 
-            $assignedDentist = $this->resolveBookableDentist();
+            $assignedDentist = $this->resolveBookableDentist($patientId);
 
             if (! $assignedDentist) {
                 throw \Illuminate\Validation\ValidationException::withMessages([

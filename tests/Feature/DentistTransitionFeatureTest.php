@@ -17,6 +17,12 @@ class DentistTransitionFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->travelTo(\Carbon\Carbon::parse('2026-07-18 08:00:00'));
+    }
+
     public function test_authorized_admin_can_create_a_transition(): void
     {
         [$admin, $departingDentist, $successor] = $this->makeCoreUsers();
@@ -27,6 +33,8 @@ class DentistTransitionFeatureTest extends TestCase
                 'dentist_id' => $departingDentist->id,
                 'transition_type' => 'retirement',
                 'default_successor_dentist_id' => $successor->id,
+                'coverage_type' => 'permanent',
+                'effective_date' => '2026-07-21',
                 'last_working_date' => '2026-07-20',
                 'access_ends_at' => '2026-07-20 17:00:00',
                 'handover_notes' => 'Ready for handover.',
@@ -49,7 +57,9 @@ class DentistTransitionFeatureTest extends TestCase
             'dentist_id' => $departingDentist->id,
             'transition_type' => 'retirement',
             'default_successor_dentist_id' => $successor->id,
-            'last_working_date' => '2026-07-20',
+            'coverage_type' => 'permanent',
+                'effective_date' => '2026-07-21',
+                'last_working_date' => '2026-07-20',
             'access_ends_at' => '2026-07-20 17:00:00',
             'status' => 'draft',
             'initiated_by' => $admin->id,
@@ -62,6 +72,8 @@ class DentistTransitionFeatureTest extends TestCase
                 'dentist_id' => $departingDentist->id,
                 'transition_type' => 'retirement',
                 'default_successor_dentist_id' => $successor->id,
+                'coverage_type' => 'permanent',
+                'effective_date' => '2026-07-22',
                 'last_working_date' => '2026-07-21',
                 'access_ends_at' => '2026-07-21 17:00:00',
             ]);
@@ -81,6 +93,8 @@ class DentistTransitionFeatureTest extends TestCase
                 'dentist_id' => $departingDentist->id,
                 'transition_type' => 'retirement',
                 'default_successor_dentist_id' => $departingDentist->id,
+                'coverage_type' => 'permanent',
+                'effective_date' => '2026-07-21',
                 'last_working_date' => '2026-07-20',
                 'access_ends_at' => '2026-07-20 17:00:00',
             ]);
@@ -101,6 +115,8 @@ class DentistTransitionFeatureTest extends TestCase
                 'dentist_id' => $departingDentist->id,
                 'transition_type' => 'retirement',
                 'default_successor_dentist_id' => $successor->id,
+                'coverage_type' => 'permanent',
+                'effective_date' => '2026-07-21',
                 'last_working_date' => '2026-07-20',
                 'access_ends_at' => '2026-07-20 17:00:00',
             ]);
@@ -109,34 +125,35 @@ class DentistTransitionFeatureTest extends TestCase
         $response->assertSessionHasErrors('default_successor_dentist_id');
     }
 
-    public function test_finalize_fails_when_required_checklist_items_are_incomplete(): void
+    public function test_admin_can_finalize_without_completing_a_checklist(): void
     {
         [$admin, $departingDentist, $successor] = $this->makeCoreUsers();
         $transition = $this->createTransitionWithAppointment($admin, $departingDentist, $successor);
 
+        $this->assertSame(0, $transition->checklistItems()->count());
+        $transition->checklistItems()->create([
+            'checklist_key' => 'legacy_review', 'label' => 'Legacy incomplete review',
+            'is_required' => true, 'is_completed' => false,
+        ]);
+        $this->assertSame(0, $transition->progress_percentage);
+
         $response = $this->actingAs($admin)
             ->withSession($this->adminSession($admin))
-            ->post(route('admin.dentist-transitions.finalize', $transition));
+            ->post(route('admin.dentist-transitions.finalize', $transition), ['confirmed' => 1]);
 
-        $response->assertSessionHas('error');
-        $this->assertDatabaseMissing('dentist_transitions', [
+        $response->assertSessionHasNoErrors()->assertSessionHas('success');
+        $this->assertDatabaseHas('dentist_transitions', [
             'id' => $transition->id,
-            'status' => 'scheduled',
+            'status' => 'completed',
         ]);
+        $this->assertSame(100, $transition->fresh()->progress_percentage);
+        $this->assertFalse($transition->checklistItems()->firstOrFail()->is_completed);
     }
 
     public function test_future_appointments_are_reassigned_and_original_dentist_is_preserved(): void
     {
         [$admin, $departingDentist, $successor] = $this->makeCoreUsers();
         $transition = $this->createTransitionWithAppointment($admin, $departingDentist, $successor);
-
-        DB::table('dentist_transition_checklist_items')
-            ->where('dentist_transition_id', $transition->id)
-            ->update([
-                'is_completed' => true,
-                'completed_by' => $admin->id,
-                'completed_at' => now(),
-            ]);
 
         $item = DB::table('dentist_transition_items')->where('dentist_transition_id', $transition->id)->first();
 
@@ -155,7 +172,7 @@ class DentistTransitionFeatureTest extends TestCase
 
         $this->actingAs($admin)
             ->withSession($this->adminSession($admin))
-            ->post(route('admin.dentist-transitions.finalize', $transition))
+            ->post(route('admin.dentist-transitions.finalize', $transition), ['confirmed' => 1])
             ->assertSessionHas('success');
 
         $appointment = Appointment::firstOrFail();
@@ -168,15 +185,7 @@ class DentistTransitionFeatureTest extends TestCase
     public function test_deactivation_command_disables_expired_dentist_and_revokes_sessions(): void
     {
         [$admin, $departingDentist, $successor] = $this->makeCoreUsers();
-        $transition = $this->createTransitionWithAppointment($admin, $departingDentist, $successor);
-
-        DB::table('dentist_transition_checklist_items')
-            ->where('dentist_transition_id', $transition->id)
-            ->update([
-                'is_completed' => true,
-                'completed_by' => $admin->id,
-                'completed_at' => now(),
-            ]);
+        $transition = $this->createTransitionWithAppointment($admin, $departingDentist, $successor, true);
 
         \App\Models\DentistTransitionItem::query()
             ->where('dentist_transition_id', $transition->id)
@@ -187,18 +196,9 @@ class DentistTransitionFeatureTest extends TestCase
 
         $this->actingAs($admin)
             ->withSession($this->adminSession($admin))
-            ->post(route('admin.dentist-transitions.finalize', $transition));
+            ->post(route('admin.dentist-transitions.finalize', $transition), ['confirmed' => 1]);
 
-        $transition->refresh();
-        $transition->update([
-            'status' => 'scheduled',
-            'access_ends_at' => now()->subMinute(),
-        ]);
-
-        $departingDentist->update([
-            'access_ends_at' => now()->subMinute(),
-            'status' => 'active',
-        ]);
+        $this->travel(1)->days();
 
         DB::table('sessions')->insert([
             'id' => 'test-session-id',
@@ -224,7 +224,7 @@ class DentistTransitionFeatureTest extends TestCase
         ]);
     }
 
-    private function createTransitionWithAppointment(User $admin, User $departingDentist, User $successor): DentistTransition
+    private function createTransitionWithAppointment(User $admin, User $departingDentist, User $successor, bool $tomorrow = false): DentistTransition
     {
         $patient = Patient::create([
             'name' => 'Juan Dela Cruz',
@@ -248,6 +248,8 @@ class DentistTransitionFeatureTest extends TestCase
             'dentist_id' => $departingDentist->id,
             'transition_type' => 'retirement',
             'default_successor_dentist_id' => $successor->id,
+            'coverage_type' => 'permanent',
+            'effective_date' => $tomorrow ? now()->addDay()->toDateString() : now()->toDateString(),
             'last_working_date' => now()->toDateString(),
             'access_ends_at' => now()->addDay()->toDateTimeString(),
             'handover_notes' => 'Prepared for transfer.',

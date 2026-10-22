@@ -67,7 +67,7 @@ class WalkInController extends Controller
         $startDate = now()->startOfMonth()->subMonth();
         $endDate = now()->endOfMonth()->addMonths(3);
 
-        $appointmentCountsPerDay = Appointment::whereBetween('appointment_date', [
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereBetween('appointment_date', [
             $startDate->toDateString(),
             $endDate->toDateString(),
         ])

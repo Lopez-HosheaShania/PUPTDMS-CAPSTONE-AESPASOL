@@ -11,12 +11,16 @@
 @section('content')
 
 @php
+    $canManageRetention = $canManageRetention ?? false;
     $allowedSettingGroups = $allowedSettingGroups ?? ['general', 'notifications'];
     $canManageGeneralSettings = in_array('general', $allowedSettingGroups, true);
     $canManageNotificationSettings = in_array('notifications', $allowedSettingGroups, true);
     $defaultSettingsTab = $canManageGeneralSettings
         ? 'general'
         : ($canManageNotificationSettings ? 'notifications' : 'general');
+    if ($canManageRetention && request('tab') === 'retention') {
+        $defaultSettingsTab = 'retention';
+    }
 @endphp
 
 <main id="mainContent" class="system-settings-page app-page-shell page-enter">
@@ -68,12 +72,12 @@
                                     onclick="switchTab('notifications', this); return false;"><i
                                         class="fa-solid fa-bell"></i> Notifications</a>
                                 @endif
-                                {{-- Temporarily hidden: Security
-                                <a href="#" class="settings-nav-item"
-                                    onclick="switchTab('security', this); return false;"><i
-                                        class="fa-solid fa-shield-halved"></i> Security</a>
-                                --}}
-                                {{-- Temporarily hidden: Email / SMTP
+                                @if ($canManageRetention)
+                                <a href="?tab=retention" class="settings-nav-item {{ $defaultSettingsTab === 'retention' ? 'active' : '' }}"
+                                    onclick="switchTab('retention', this); return false;"><i
+                                        class="fa-solid fa-shield-halved"></i> Data Retention</a>
+                                @endif
+                                {{-- Temporarily hidden: Email/SMTP
                                 <a href="#" class="settings-nav-item"
                                     onclick="switchTab('email', this); return false;"><i
                                         class="fa-solid fa-envelope"></i> Email / SMTP</a>
@@ -88,6 +92,10 @@
                     </div>
 
                     <div class="lg:col-span-3 space-y-0">
+
+                        @if ($canManageRetention)
+                            @include('admin.partials.retention-settings')
+                        @endif
 
                         @if ($canManageGeneralSettings)
                         <div id="tab-general" class="settings-section {{ $defaultSettingsTab === 'general' ? 'active' : '' }}">
@@ -609,6 +617,19 @@
                 </div>
             </div>
         </form>
+        @if ($canManageRetention)
+            @foreach ($retentionPolicies as $policy)
+                <form id="retention-period-{{ $policy->id }}" action="{{ route('admin.retention.update', $policy) }}" method="POST" hidden>
+                    @csrf @method('PUT')
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="version" value="{{ $policy->version }}">
+                    <input type="hidden" name="confirmed" value="1">
+                    <input type="hidden" name="return_to" value="system_settings">
+                    <input type="hidden" name="retention_policy_id" value="{{ $policy->id }}">
+                    <input type="hidden" name="start_event" value="{{ $policy->start_event }}">
+                </form>
+            @endforeach
+        @endif
     </div>
 </main>
 @endsection
@@ -642,6 +663,12 @@
         }
 
         setActiveNav(tabId, clickedItem);
+        const url = new URL(window.location.href);
+        if (tabId === 'retention') url.searchParams.set('tab', 'retention');
+        else url.searchParams.delete('tab');
+        window.history.replaceState(null, '', url);
+        updateSettingsFloatingBar();
+
     }
 
     function initializeClinicVoiceClearButtons(root = document) {
@@ -948,6 +975,8 @@
         const discardBtn = document.getElementById('settingsDiscardBtn');
         const resetBtn = document.getElementById('settingsResetDefaultsBtn');
         const saveButtons = document.querySelectorAll('[data-settings-save]');
+        const bannerSave = document.getElementById('settingsBannerSaveBtn');
+        if (bannerSave) bannerSave.style.display = getActiveSettingsTabId() === 'retention' ? 'none' : '';
 
         if (discardBtn) {
             discardBtn.disabled = !settingsIsDirty || settingsIsSubmitting;
@@ -984,7 +1013,7 @@
         bar.classList.toggle('is-dirty', settingsIsDirty);
         bar.classList.toggle('is-clean', !settingsIsDirty);
 
-        if (!settingsIsDirty) {
+        if (!settingsIsDirty || getActiveSettingsTabId() === 'retention') {
             updateSettingsButtons();
             return;
         }
@@ -1007,7 +1036,7 @@
 
     function setNamedFieldValue(form, name, value) {
         const fields = Array.from(form.querySelectorAll('input, select, textarea'))
-            .filter(field => field.name === name || field.name === `${name}[]`);
+            .filter(field => field.form === form && (field.name === name || field.name === `${name}[]`));
 
         if (!fields.length) return;
 
