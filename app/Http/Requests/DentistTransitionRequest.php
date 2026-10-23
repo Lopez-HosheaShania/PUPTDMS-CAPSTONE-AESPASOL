@@ -12,11 +12,15 @@ class DentistTransitionRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->hasAnyRole(['admin', 'super_admin']) ?? false;
     }
 
     protected function prepareForValidation(): void
     {
+        if (!$this->isTransitionDetailsRequest()) {
+            return;
+        }
+
         $this->selectedTransitionType = trim((string) $this->input('transition_type', ''));
         $customTransitionType = trim((string) $this->input('transition_type_other', ''));
 
@@ -30,11 +34,37 @@ class DentistTransitionRequest extends FormRequest
 
     public function rules(): array
     {
+        return match ($this->route()?->getActionMethod()) {
+            'cancel' => $this->cancellationRules(),
+            'finalize' => $this->finalizationRules(),
+            default => $this->transitionRules(),
+        };
+    }
+
+    private function cancellationRules(): array
+    {
+        return [
+            'cancellation_reason' => ['required', 'string'],
+        ];
+    }
+
+    private function finalizationRules(): array
+    {
+        return [
+            'review_notes' => ['nullable', 'string'],
+        ];
+    }
+
+    private function transitionRules(): array
+    {
         $rules = [
             'transition_type' => ['required', 'string', 'max:40'],
             'transition_type_other' => ['nullable', 'string', 'max:40'],
-            'default_successor_dentist_id' => ['required', 'integer', 'exists:users,id'],
-            'last_working_date' => ['required', 'date'],
+            'default_successor_dentist_id' => ['nullable', 'integer', 'exists:users,id'],
+            'coverage_type' => ['required', 'in:temporary,permanent'],
+            'effective_date' => ['required', 'date', 'after_or_equal:today'],
+            'end_date' => ['nullable', 'prohibited_if:coverage_type,permanent', 'date', 'after_or_equal:effective_date'],
+            'last_working_date' => ['required', 'date', 'before_or_equal:effective_date'],
             'handover_notes' => ['nullable', 'string', 'max:5000'],
         ];
 
@@ -47,6 +77,10 @@ class DentistTransitionRequest extends FormRequest
 
     public function withValidator($validator): void
     {
+        if (!$this->isTransitionDetailsRequest()) {
+            return;
+        }
+
         $validator->after(function ($validator) {
             /** @var DentistTransition|null $transition */
             $transition = $this->route('transition');
@@ -73,7 +107,7 @@ class DentistTransitionRequest extends FormRequest
                 $validator->errors()->add('transition_type', 'Please select a valid transition reason.');
             }
 
-            if (!$dentist || optional($dentist->role)->slug !== 'dentist') {
+            if (!$dentist || !in_array(optional($dentist->role)->slug, ['dentist', 'dentist_role'], true)) {
                 $validator->errors()->add('dentist_id', 'The selected departing user must be a dentist.');
             }
 
@@ -81,14 +115,14 @@ class DentistTransitionRequest extends FormRequest
                 $validator->errors()->add('default_successor_dentist_id', 'The departing dentist cannot be their own successor.');
             }
 
-            if ($successor && (optional($successor->role)->slug !== 'dentist' || $successor->status !== 'active')) {
+            if ($successor && (!in_array(optional($successor->role)->slug, ['dentist', 'dentist_role'], true) || $successor->status !== 'active')) {
                 $validator->errors()->add('default_successor_dentist_id', 'The successor dentist must be an active dentist.');
             }
 
             if ($this->isCreateRequest()) {
                 $duplicateExists = DentistTransition::query()
                     ->where('dentist_id', $dentistId)
-                    ->whereIn('status', ['draft', 'pending_review', 'handover_in_progress', 'scheduled'])
+                    ->whereIn('status', ['draft', 'pending_review', 'handover_in_progress', 'scheduled', 'active'])
                     ->exists();
 
                 if ($duplicateExists) {
@@ -96,6 +130,11 @@ class DentistTransitionRequest extends FormRequest
                 }
             }
         });
+    }
+
+    private function isTransitionDetailsRequest(): bool
+    {
+        return !in_array($this->route()?->getActionMethod(), ['cancel', 'finalize'], true);
     }
 
     private function isCreateRequest(): bool

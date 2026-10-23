@@ -251,7 +251,7 @@
                                     {{ $recordCount > 0
                                         ? 'Last Visit: ' . ($latestRecordDate ?? 'Available')
                                         : 'No dental
-                                                                                                                                                                                                                                                                                                                                record yet' }}
+                                                                                                                                                                                                                                                                                                                                                                    record yet' }}
                                 </span>
 
                             </div>
@@ -640,90 +640,92 @@
         </x-booking.confirmed-modal>
     @endif
 
+
     <div id="privateInformationModal" class="ui-modal modal-theme-warning" role="dialog" aria-modal="true"
-        aria-labelledby="privateInformationModalTitle" aria-describedby="privateInformationModalDescription">
-        <div class="ui-modal-card modal-sm" tabindex="-1">
+        aria-hidden="true" aria-labelledby="privateInformationModalTitle"
+        aria-describedby="privateInformationModalDescription">
+        <div class="ui-modal-card modal-sm">
+
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon">
+
+                    <div class="modal-icon" aria-hidden="true">
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
 
                     <div class="modal-copy">
-                        <h2 id="privateInformationModalTitle" class="modal-title">
+                        <h2 id="privateInformationModalTitle" class="modal-title" tabindex="-1"
+                            data-modal-initial-focus>
                             Show Private Information?
                         </h2>
 
                         <p id="privateInformationModalDescription" class="modal-subtitle">
-                            Your personal contact and identification details will become visible.
+                            Your contact and identification details will be shown.
                         </p>
                     </div>
-                </div>
 
-                <button type="button" class="modal-x" onclick="closePrivateInformationModal()"
-                    aria-label="Close private information modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                </div>
             </div>
 
             <div class="modal-bd">
                 <div class="global-confirm-alert">
-                    <i class="fa-solid fa-eye"></i>
+                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
 
-                    <div>
-                        <p>Private information will be displayed.</p>
-
-                        <span>
-                            Make sure no one else can see your screen before continuing.
-                        </span>
-                    </div>
+                    <p>
+                        Make sure no one else can see your screen before continuing.
+                    </p>
                 </div>
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" onclick="closePrivateInformationModal()">
+
+                <button type="button" class="btn-close-modal" onclick="closePrivateInformationModal()">
                     Cancel
                 </button>
 
-                <button type="button" class="ui-btn ui-btn-primary" onclick="confirmShowPrivateInformation()">
-                    <i class="fa-regular fa-eye"></i>
-                    Show Information
+                <button type="button" class="modal-btn-primary" onclick="confirmShowPrivateInformation()">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+
+                    <span>Show Information</span>
                 </button>
+
             </div>
+
         </div>
     </div>
+
 
     @include('components.appointment-calendar-script', [
         'mode' => 'patient-dashboard',
         'renderStyle' => 'patient',
         'calendarContainerId' => 'calendarSkeletonContainer',
         'hasActiveAppointment' => $hasActiveAppointment,
-
+    
         'dateInputId' => null,
         'timeInputId' => null,
-
+    
         'slotEndpoint' => route('book.appointment.slots'),
         'bookingUrl' => route('patient.book.appointment'),
-
+    
         'scheduleRules' => isset($schedules)
             ? $schedules
             : (isset($scheduleRules)
                 ? $scheduleRules
                 : \App\Models\ClinicSchedule::active()->get()->values()->toArray()),
-
+    
         'blockedDates' => $unavailableDates ?? [],
         'appointmentCountsPerDay' => $appointmentCountsPerDay ?? [],
         'philippineHolidays' => $philippineHolidays ?? [],
         'personalAppointments' => $calendarAppointments ?? [],
         'completedAppointments' => $completedCalendarAppointments ?? [],
-
+    
         'useDynamicScheduleRules' => true,
         'disallowToday' => true,
         'allowToggleOffDate' => false,
-
+    
         'maxFutureMonths' => 6,
         'historyMonths' => 12,
-
+    
         'appointmentHistoryUrl' => route('patient.record'),
     ])
 @endsection
@@ -914,7 +916,7 @@
 
         var PROFILE_DATA = {
             name: @json($patient->name ?? 'Guest'),
-            roleLabel: "{{ $patient->faculty_code ? 'Faculty' : ($patient->student_no ? 'Student' : 'Patient') }}",
+            roleLabel: "{{ $patient->classification === 'faculty' || $patient->faculty_code ? 'Faculty' : ($patient->classification === 'student' || $patient->student_no ? 'Student' : 'Patient') }}",
             facultyCode: "{{ $patient->faculty_code ?? '' }}",
             studentNo: "{{ $patient->student_no ?? '' }}",
             age: "{{ $age ?? '' }}",
@@ -971,20 +973,6 @@
                 ).get(
                     'quick_action'
                 );
-
-            const privateInformationModal =
-                document.getElementById(
-                    'privateInformationModal'
-                );
-
-            privateInformationModal?.addEventListener(
-                'click',
-                function(event) {
-                    if (event.target === privateInformationModal) {
-                        closePrivateInformationModal();
-                    }
-                }
-            );
 
             renderGreeting();
 
@@ -1181,23 +1169,17 @@
                 'privateInformationModal'
             );
 
-            if (!modal) {
-                return;
-            }
+            if (!modal || !button) return;
 
             pendingPrivateInformationButton = button;
 
-            modal.classList.remove('closing');
-            modal.classList.add('open');
+            hideActiveGlobalTooltip();
 
-            document.documentElement.classList.add('modal-lock');
-            document.body.classList.add('modal-lock');
+            window.openModal('privateInformationModal');
 
-            requestAnimationFrame(() => {
-                modal
-                    .querySelector('.ui-modal-card')
-                    ?.focus();
-            });
+            modal.querySelector(
+                '[data-modal-initial-focus]'
+            )?.focus({ preventScroll: true });
         }
 
         function hideActiveGlobalTooltip() {
@@ -1214,22 +1196,20 @@
             );
 
             if (!modal || !modal.classList.contains('open')) {
-                pendingPrivateInformationButton = null;
                 return;
             }
 
+            const previousButton = pendingPrivateInformationButton;
+
             hideActiveGlobalTooltip();
 
-            modal.classList.add('closing');
+            window.closeModal('privateInformationModal');
 
-            window.setTimeout(() => {
-                modal.classList.remove('open', 'closing');
+            pendingPrivateInformationButton = null;
 
-                document.documentElement.classList.remove('modal-lock');
-                document.body.classList.remove('modal-lock');
-
-                pendingPrivateInformationButton = null;
-            }, 170);
+            if (previousButton?.isConnected) {
+                previousButton.focus({ preventScroll: true });
+            }
         }
 
         function confirmShowPrivateInformation() {
@@ -2180,6 +2160,13 @@
         function scrollToCalendar(event) {
             event?.preventDefault();
 
+            return window.verifyPersonalInformationBeforeBooking(() => {
+                scrollToVerifiedCalendar();
+            }, event?.currentTarget);
+        }
+
+        function scrollToVerifiedCalendar() {
+
             const calendar =
                 document.getElementById(
                     'calendarSkeletonContainer'
@@ -2204,16 +2191,5 @@
                 );
             }, 1200);
         }
-
-        document.addEventListener('keydown', function(event) {
-            if (
-                event.key === 'Escape' &&
-                document
-                .getElementById('privateInformationModal')
-                ?.classList.contains('open')
-            ) {
-                closePrivateInformationModal();
-            }
-        });
     </script>
 @endsection

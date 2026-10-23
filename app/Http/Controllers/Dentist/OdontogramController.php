@@ -137,13 +137,13 @@ class OdontogramController extends Controller
 
     private function getProcedureWorkspaceContext(): array
     {
-        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, COUNT(*) as count')
             ->groupBy('appointment_date')
             ->pluck('count', 'appointment_date')
             ->toArray();
 
-        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerSlot = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
             ->groupBy('appointment_date', 'appointment_time')
             ->get()
@@ -199,13 +199,13 @@ class OdontogramController extends Controller
 
     private function getExistingAppointmentCalendarContext(): array
     {
-        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, COUNT(*) as count')
             ->groupBy('appointment_date')
             ->pluck('count', 'appointment_date')
             ->toArray();
 
-        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerSlot = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
             ->groupBy('appointment_date', 'appointment_time')
             ->get()
@@ -294,6 +294,11 @@ class OdontogramController extends Controller
     private function existingAppointmentDraftSessionKey(Patient $patient): string
     {
         return 'existing_appointment_draft_patient_' . $patient->id;
+    }
+
+    private function procedureStartSessionKey(Appointment $appointment): string
+    {
+        return 'procedure_started_at_' . $appointment->id;
     }
 
     private function yesNoValue($value): string
@@ -724,13 +729,17 @@ class OdontogramController extends Controller
         int $procedureDurationSeconds,
         ?Carbon $procedureCompletedAt = null
     ): array {
+        abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Only the assigned dentist may record treatment for this visit.');
         $appointment->loadMissing('patient');
         $patient = $appointment->patient;
         $completionAction = $validated['completion_action'] ?? 'finished';
-        $procedureCompletedAt = $procedureCompletedAt ?: now();
-        $procedureStartedAt = $procedureDurationSeconds > 0
-            ? $procedureCompletedAt->copy()->subSeconds($procedureDurationSeconds)
-            : null;
+        if ($procedureCompletedAt) {
+            $procedureStartedAt = $procedureCompletedAt->copy()->subSeconds($procedureDurationSeconds);
+        } else {
+            $procedureStartedAt = $appointment->procedure?->procedure_started_at
+                ?? Carbon::parse(session($this->procedureStartSessionKey($appointment), now()->toDateTimeString()));
+            $procedureCompletedAt = $procedureStartedAt->copy()->addSeconds($procedureDurationSeconds);
+        }
         $rawOdontogramData = $validated['odontogram_data'] ?? [];
 
         $cleanOdontogramData = collect($rawOdontogramData)
@@ -999,6 +1008,7 @@ class OdontogramController extends Controller
         });
 
         $appointment->refresh();
+        session()->forget($this->procedureStartSessionKey($appointment));
 
         return [
             'appointment' => $appointment,
@@ -1060,6 +1070,12 @@ class OdontogramController extends Controller
         $entrySource = $this->procedureEntrySource($request->query('from'));
 
         $procedure = AppointmentProcedure::where('appointment_id', $appointment->id)->first();
+        if (in_array($appointment->status, ['upcoming', 'rescheduled'], true) && !$procedure?->procedure_started_at) {
+            $startKey = $this->procedureStartSessionKey($appointment);
+            if (!session()->has($startKey)) {
+                session()->put($startKey, now()->toDateTimeString());
+            }
+        }
         $savedOdontogramData = $this->getSavedOdontogramDataForPatient($patient);
 
         return view('dentist.dentist-odontogram', array_merge(compact(
@@ -1800,6 +1816,7 @@ class OdontogramController extends Controller
 
     public function editSavedVisit(Request $request, Appointment $appointment)
     {
+        abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Record subsequent care as a new visit.');
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
@@ -1856,6 +1873,7 @@ class OdontogramController extends Controller
 
     public function updateSavedVisit(Request $request, Appointment $appointment)
     {
+        abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Historical clinical notes must retain their original author. Record subsequent care as a new visit.');
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
@@ -1970,6 +1988,7 @@ class OdontogramController extends Controller
         }
 
         abort_unless($appointment && $patient, 404, 'Appointment not found.');
+        session()->forget($this->procedureStartSessionKey($appointment));
 
         if ($context === 'walk-in') {
             abort_if(!($appointment->is_walk_in ?? false), 422, 'Only temporary walk-in procedures can be discarded from this flow.');

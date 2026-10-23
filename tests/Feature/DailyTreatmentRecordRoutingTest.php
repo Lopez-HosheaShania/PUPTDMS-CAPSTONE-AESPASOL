@@ -296,7 +296,7 @@ class DailyTreatmentRecordRoutingTest extends TestCase
 
         $appointment = Appointment::create([
             'patient_id' => $patient->id,
-            'dentist_id' => $overrides['dentist_id'] ?? null,
+            'dentist_id' => $overrides['dentist_id'] ?? User::whereHas('role', fn ($q) => $q->where('slug', 'dentist'))->value('id'),
             'service_type' => $overrides['service_type'] ?? 'Oral Prophylaxis',
             'appointment_date' => $appointmentDate,
             'appointment_time' => $appointmentTime,

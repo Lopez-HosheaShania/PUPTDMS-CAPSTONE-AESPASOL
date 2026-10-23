@@ -70,6 +70,8 @@ class AuditLogNormalizationTest extends TestCase
 
     public function test_migration_round_trip_preserves_guest_actor_device_and_archive_values(): void
     {
+        $actorCount = DB::table('audit_log_actors')->count();
+        $requestCount = DB::table('audit_log_requests')->count();
         $log = AuditLog::create(['actor_id' => null, 'actor_name' => 'Unknown User', 'actor_role' => 'guest',
             'actor_identifier' => null, 'action' => 'error', 'module' => 'system', 'description' => '419 | CSRF token mismatch.',
             'ip_address' => '::1', 'user_agent' => str_repeat('Agent ', 100), 'browser_name' => 'Firefox',
@@ -83,13 +85,16 @@ class AuditLogNormalizationTest extends TestCase
         $this->assertSame($before, $log->fresh()->toArray());
         $this->assertFalse(Schema::hasColumn('audit_logs', 'user_agent'));
         $log->delete();
-        $this->assertDatabaseCount('audit_log_actors', 0);
-        $this->assertDatabaseCount('audit_log_requests', 0);
+        $this->assertDatabaseCount('audit_log_actors', $actorCount);
+        $this->assertDatabaseCount('audit_log_requests', $requestCount);
+        $this->assertDatabaseMissing('audit_log_actors', ['audit_log_id' => $log->id]);
+        $this->assertDatabaseMissing('audit_log_requests', ['audit_log_id' => $log->id]);
     }
 
     public function test_detail_failure_does_not_leave_a_partial_audit_event(): void
     {
         $count = AuditLog::count();
+        $actorCount = DB::table('audit_log_actors')->count();
         DB::unprepared("CREATE TRIGGER reject_audit_request BEFORE INSERT ON audit_log_requests BEGIN SELECT RAISE(ABORT, 'Simulated request failure'); END");
         try {
             AuditLog::create(['action' => 'test', 'module' => 'test', 'actor_role' => 'guest', 'ip_address' => '127.0.0.1']);
@@ -100,7 +105,7 @@ class AuditLogNormalizationTest extends TestCase
             DB::unprepared('DROP TRIGGER reject_audit_request');
         }
         $this->assertSame($count, AuditLog::count());
-        $this->assertDatabaseCount('audit_log_actors', 0);
+        $this->assertDatabaseCount('audit_log_actors', $actorCount);
     }
 
     public function test_short_descriptions_preserve_full_text_and_searchable_changed_fields(): void

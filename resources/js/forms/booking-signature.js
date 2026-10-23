@@ -77,6 +77,11 @@ function createBookingSignature(root) {
             '#signatureUndoBtn, [data-signature-undo]'
         );
 
+    const signatureRedoBtn =
+        root.querySelector(
+            '#signatureRedoBtn, [data-signature-redo]'
+        );
+
     const signatureClearBtn =
         root.querySelector(
             '#signatureClearBtn, [data-signature-clear]'
@@ -85,6 +90,41 @@ function createBookingSignature(root) {
     const signatureUseDrawnBtn =
         root.querySelector(
             '#signatureUseDrawnBtn, [data-signature-use-drawn]'
+        );
+
+    const signatureDrawCard =
+        root.querySelector(
+            '[data-signature-draw-card]'
+        );
+
+    const signatureExpandBtn =
+        root.querySelector(
+            '[data-signature-expand]'
+        );
+
+    const signatureModal =
+        root.querySelector(
+            '[data-signature-modal]'
+        );
+
+    const signatureModalBody =
+        root.querySelector(
+            '[data-signature-modal-body]'
+        );
+
+    const signatureModalCloseBtn =
+        root.querySelector(
+            '[data-signature-modal-close]'
+        );
+
+    const signatureModalError =
+        root.querySelector(
+            '[data-signature-modal-error]'
+        );
+
+    const signatureModalErrorText =
+        root.querySelector(
+            '[data-signature-modal-error-text]'
         );
 
     const uploadTabBtn =
@@ -116,6 +156,9 @@ function createBookingSignature(root) {
     let drawnSignatureStrokes =
         [];
 
+    let drawnSignatureRedoStrokes =
+        [];
+
     let drawnSignatureCurrentStroke =
         [];
 
@@ -124,6 +167,15 @@ function createBookingSignature(root) {
 
     let drawnSignatureWasUsed =
         false;
+
+    let signatureExpanded =
+        false;
+
+    let signatureOriginalParent =
+        null;
+
+    let signatureOriginalNextSibling =
+        null;
 
     const acceptedMessage =
         root.dataset.signatureAcceptedMessage ||
@@ -192,10 +244,15 @@ function createBookingSignature(root) {
             root,
             'patient_signature'
         );
+
+        clearExpandedSignatureError();
     }
 
     function resetDrawnSignatureState() {
         drawnSignatureStrokes =
+            [];
+
+        drawnSignatureRedoStrokes =
             [];
 
         drawnSignatureCurrentStroke =
@@ -208,6 +265,7 @@ function createBookingSignature(root) {
             false;
 
         redrawSignatureCanvas();
+        syncHistoryButtons();
     }
 
     function clearUploadedSignatureState(
@@ -411,6 +469,10 @@ function createBookingSignature(root) {
         window.showGlobalGroupError?.(
             root,
             'patient_signature',
+            reason
+        );
+
+        showExpandedSignatureError(
             reason
         );
 
@@ -951,20 +1013,82 @@ function createBookingSignature(root) {
             return;
         }
 
+        const cssWidth =
+            rect.width;
+
+        const cssHeight =
+            signatureCanvas.offsetHeight ||
+            rect.height ||
+            220;
+
+        const previousWidth =
+            Number(
+                signatureCanvas.dataset
+                    .signatureCssWidth || 0
+            );
+
+        const previousHeight =
+            Number(
+                signatureCanvas.dataset
+                    .signatureCssHeight || 0
+            );
+
+        if (
+            previousWidth > 0 &&
+            previousHeight > 0 &&
+            (
+                Math.abs(previousWidth - cssWidth) > 0.5 ||
+                Math.abs(previousHeight - cssHeight) > 0.5
+            )
+        ) {
+            const scaleX =
+                cssWidth /
+                previousWidth;
+
+            const scaleY =
+                cssHeight /
+                previousHeight;
+
+            const scaleStroke =
+                stroke => {
+                    stroke.forEach(
+                        point => {
+                            point.x *= scaleX;
+                            point.y *= scaleY;
+                        }
+                    );
+                };
+
+            drawnSignatureStrokes
+                .forEach(scaleStroke);
+
+            drawnSignatureRedoStrokes
+                .forEach(scaleStroke);
+
+            if (
+                drawnSignatureCurrentStroke
+                    .length
+            ) {
+                scaleStroke(
+                    drawnSignatureCurrentStroke
+                );
+            }
+        }
+
+        signatureCanvas.dataset
+            .signatureCssWidth =
+            String(cssWidth);
+
+        signatureCanvas.dataset
+            .signatureCssHeight =
+            String(cssHeight);
+
         const dpr =
             Math.max(
                 window.devicePixelRatio ||
                 1,
                 1
             );
-
-        const cssWidth =
-            rect.width;
-
-        const cssHeight =
-            signatureCanvas
-                .offsetHeight ||
-            220;
 
         signatureCanvas.width =
             Math.round(
@@ -1012,6 +1136,206 @@ function createBookingSignature(root) {
                 .length === 0 &&
             drawnSignatureCurrentStroke
                 .length === 0
+        );
+    }
+
+    function syncHistoryButtons() {
+        if (signatureUndoBtn) {
+            signatureUndoBtn.disabled =
+                drawnSignatureStrokes
+                    .length === 0;
+        }
+
+        if (signatureRedoBtn) {
+            signatureRedoBtn.disabled =
+                drawnSignatureRedoStrokes
+                    .length === 0;
+        }
+    }
+
+    function showExpandedSignatureError(
+        message
+    ) {
+        if (
+            !signatureExpanded ||
+            !signatureModalError
+        ) {
+            return;
+        }
+
+        if (signatureModalErrorText) {
+            signatureModalErrorText.textContent =
+                message || '';
+        }
+
+        signatureModalError.classList.remove(
+            'hidden'
+        );
+
+        signatureModalError.classList.add(
+            'show'
+        );
+    }
+
+    function clearExpandedSignatureError() {
+        if (!signatureModalError) {
+            return;
+        }
+
+        if (signatureModalErrorText) {
+            signatureModalErrorText.textContent =
+                '';
+        }
+
+        signatureModalError.classList.add(
+            'hidden'
+        );
+
+        signatureModalError.classList.remove(
+            'show'
+        );
+    }
+
+    function openExpandedSignature() {
+        if (
+            !signatureModal ||
+            !signatureModalBody ||
+            !signatureDrawCard ||
+            signatureExpanded
+        ) {
+            return;
+        }
+
+        signatureExpanded =
+            true;
+
+        signatureOriginalParent =
+            signatureDrawCard.parentNode;
+
+        signatureOriginalNextSibling =
+            signatureDrawCard.nextSibling;
+
+
+        /*
+         * Keep global modal outside booking containers
+         * so it cannot be clipped by the workflow card.
+         */
+        if (
+            signatureModal.parentNode !==
+            document.body
+        ) {
+            document.body.appendChild(
+                signatureModal
+            );
+        }
+
+
+        /*
+         * Keep the local error underneath the drawing card.
+         */
+        if (
+            signatureModalError &&
+            signatureModalError.parentNode ===
+            signatureModalBody
+        ) {
+            signatureModalBody.insertBefore(
+                signatureDrawCard,
+                signatureModalError
+            );
+        } else {
+            signatureModalBody.appendChild(
+                signatureDrawCard
+            );
+        }
+
+
+        signatureModal.classList.remove(
+            'closing'
+        );
+
+        signatureModal.classList.add(
+            'open'
+        );
+
+        signatureModal.setAttribute(
+            'aria-hidden',
+            'false'
+        );
+
+
+        window.requestAnimationFrame(
+            () => {
+                window.requestAnimationFrame(
+                    () => {
+                        resize();
+
+                        signatureCanvas
+                            ?.focus?.();
+                    }
+                );
+            }
+        );
+    }
+
+    function closeExpandedSignature() {
+        if (!signatureExpanded) {
+            return;
+        }
+
+        signatureExpanded =
+            false;
+
+
+        if (
+            signatureOriginalParent &&
+            signatureDrawCard
+        ) {
+            if (
+                signatureOriginalNextSibling &&
+                signatureOriginalNextSibling
+                    .parentNode ===
+                signatureOriginalParent
+            ) {
+                signatureOriginalParent
+                    .insertBefore(
+                        signatureDrawCard,
+                        signatureOriginalNextSibling
+                    );
+            } else {
+                signatureOriginalParent
+                    .appendChild(
+                        signatureDrawCard
+                    );
+            }
+        }
+
+
+        signatureModal?.classList.remove(
+            'open'
+        );
+
+        signatureModal?.classList.remove(
+            'closing'
+        );
+
+        signatureModal?.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+
+        clearExpandedSignatureError();
+
+
+        signatureOriginalParent =
+            null;
+
+        signatureOriginalNextSibling =
+            null;
+
+
+        window.requestAnimationFrame(
+            resize
         );
     }
 
@@ -1077,6 +1401,11 @@ function createBookingSignature(root) {
         event.preventDefault();
 
         clearSignatureDisplay();
+
+        drawnSignatureRedoStrokes =
+            [];
+
+        syncHistoryButtons();
 
         drawnSignatureIsDrawing =
             true;
@@ -1146,6 +1475,8 @@ function createBookingSignature(root) {
 
         redrawSignatureCanvas();
 
+        syncHistoryButtons();
+
         root.dispatchEvent(
             new CustomEvent(
                 'booking-signature:changed',
@@ -1158,10 +1489,14 @@ function createBookingSignature(root) {
 
     function clear() {
         resetDrawnSignatureState();
+
         clearUploadedSignatureState({
             preserveStatus: true,
         });
+
         clearSignatureDisplay();
+
+        syncHistoryButtons();
 
         root.dispatchEvent(
             new CustomEvent(
@@ -1173,6 +1508,7 @@ function createBookingSignature(root) {
         );
     }
 
+
     function undo() {
         if (
             !drawnSignatureStrokes
@@ -1181,10 +1517,18 @@ function createBookingSignature(root) {
             return;
         }
 
-        drawnSignatureStrokes.pop();
+        const removedStroke =
+            drawnSignatureStrokes.pop();
+
+        if (removedStroke) {
+            drawnSignatureRedoStrokes.push(
+                removedStroke
+            );
+        }
 
         redrawSignatureCanvas();
         invalidateAfterEdit();
+        syncHistoryButtons();
 
         if (isBlank()) {
             drawnSignatureWasUsed =
@@ -1207,6 +1551,37 @@ function createBookingSignature(root) {
 
             clearSignatureDisplay();
         }
+
+        root.dispatchEvent(
+            new CustomEvent(
+                'booking-signature:changed',
+                {
+                    bubbles: true,
+                }
+            )
+        );
+    }
+
+    function redo() {
+        if (
+            !drawnSignatureRedoStrokes
+                .length
+        ) {
+            return;
+        }
+
+        const restoredStroke =
+            drawnSignatureRedoStrokes.pop();
+
+        if (restoredStroke) {
+            drawnSignatureStrokes.push(
+                restoredStroke
+            );
+        }
+
+        redrawSignatureCanvas();
+        invalidateAfterEdit();
+        syncHistoryButtons();
 
         root.dispatchEvent(
             new CustomEvent(
@@ -1419,10 +1794,17 @@ function createBookingSignature(root) {
         }
 
         if (isBlank()) {
+            const message =
+                'Please draw your signature first.';
+
             window.showGlobalGroupError?.(
                 root,
                 'patient_signature',
-                'Please draw your signature first.'
+                message
+            );
+
+            showExpandedSignatureError(
+                message
             );
 
             return;
@@ -1433,10 +1815,17 @@ function createBookingSignature(root) {
         const croppedCanvas = cropCanvasToSignature();
 
         if (!croppedCanvas) {
+            const message =
+                'Please draw your signature first.';
+
             window.showGlobalGroupError?.(
                 root,
                 'patient_signature',
-                'Please draw your signature first.'
+                message
+            );
+
+            showExpandedSignatureError(
+                message
             );
 
             return;
@@ -1498,11 +1887,17 @@ function createBookingSignature(root) {
                     new Event(
                         'change',
                         {
-                            bubbles:
-                                true,
+                            bubbles: true,
                         }
                     )
                 );
+
+                clearExpandedSignatureError();
+
+                if (signatureExpanded) {
+                    closeExpandedSignature();
+                }
+                
             },
             'image/png',
             0.95
@@ -1669,6 +2064,11 @@ function createBookingSignature(root) {
         undo
     );
 
+    signatureRedoBtn?.addEventListener(
+        'click',
+        redo
+    );
+
     signatureClearBtn?.addEventListener(
         'click',
         clear
@@ -1677,6 +2077,40 @@ function createBookingSignature(root) {
     signatureUseDrawnBtn?.addEventListener(
         'click',
         useDrawn
+    );
+
+    signatureExpandBtn?.addEventListener(
+        'click',
+        openExpandedSignature
+    );
+
+    signatureModalCloseBtn?.addEventListener(
+        'click',
+        closeExpandedSignature
+    );
+
+    signatureModal?.addEventListener(
+        'click',
+        event => {
+            if (
+                event.target ===
+                signatureModal
+            ) {
+                closeExpandedSignature();
+            }
+        }
+    );
+
+    document.addEventListener(
+        'keydown',
+        event => {
+            if (
+                event.key === 'Escape' &&
+                signatureExpanded
+            ) {
+                closeExpandedSignature();
+            }
+        }
     );
 
     uploadTabBtn?.addEventListener(
@@ -1837,7 +2271,10 @@ function createBookingSignature(root) {
         resize,
         clear,
         undo,
+        redo,
         useDrawn,
+        openExpandedSignature,
+        closeExpandedSignature,
         isBlank,
         isReady,
         validate,
@@ -1872,6 +2309,7 @@ function createBookingSignature(root) {
         250
     );
 
+    syncHistoryButtons();
     return controller;
 }
 

@@ -18,6 +18,8 @@ use App\Models\MedicalHistoryAnswer;
 use App\Models\MedicalHistoryDiseaseAnswer;
 use App\Models\Patient;
 use App\Models\PatientOdontogram;
+use App\Support\DentalServicesPatientName;
+use App\Support\DentalServicesProcedureTiming;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -732,6 +734,7 @@ class DentistReportController extends Controller
 
         $records = Appointment::with([
             'patient.medicalHistory',
+            'patient.user.profile',
             'procedure',
         ])
             ->where('status', 'completed')
@@ -4200,9 +4203,9 @@ class DentistReportController extends Controller
                 ? Carbon::parse($appointment->appointment_date)->format('m/d/y')
                 : '';
 
-            $timeIn = $this->formatPdfTime($appointment->appointment_time ?? null);
+            $timeIn = DentalServicesProcedureTiming::requestedTimeIn($appointment)?->format('h:i A') ?? '';
 
-            $patientName = $this->formatPdfPatientNameSurnameFirst($patient?->name);
+            $patientName = DentalServicesPatientName::surnameFirst($patient);
             $patientName = $patientName !== '' ? $patientName : 'Unknown Patient';
 
             $programOrDept = $this->dentalServicesCourseYearSectionDisplay($patient);
@@ -4225,13 +4228,9 @@ class DentistReportController extends Controller
             $isEmergency = $isWalkIn || str_contains($visitType, 'emergency');
             $isNonEmergency = ! $isEmergency;
 
-            $timeProcessed = $procedure?->procedure_started_at
-                ? $procedure->procedure_started_at->format('h:i A')
-                : $timeIn;
-
-            $processingTime = $this->formatPdfDurationMinutes(
-                (int) ($procedure?->procedure_duration_seconds ?? 0)
-            );
+            $timeProcessed = DentalServicesProcedureTiming::timeProcessed($appointment)?->format('h:i A') ?? '';
+            $minutesProcessed = DentalServicesProcedureTiming::minutesProcessed($appointment);
+            $processingTime = $minutesProcessed !== null ? (string) $minutesProcessed : '';
 
             if ($processingTime !== '') {
                 $processingTime .= ((int) $processingTime === 1) ? ' min' : ' mins';
@@ -4936,29 +4935,6 @@ class DentistReportController extends Controller
         ], fn($value) => $value !== ''));
 
         return implode('  |  ', $parts);
-    }
-
-    private function formatPdfPatientNameSurnameFirst(?string $fullName): string
-    {
-        $fullName = trim((string) $fullName);
-
-        if ($fullName === '') {
-            return '';
-        }
-
-        $parts = preg_split('/\s+/', $fullName) ?: [];
-        $parts = array_values(array_filter($parts, fn($part) => trim((string) $part) !== ''));
-
-        if (count($parts) === 1) {
-            return $parts[0];
-        }
-
-        $surname = array_pop($parts);
-        $firstName = array_shift($parts) ?? '';
-        $remainingNames = trim(implode(' ', $parts));
-        $givenNames = trim($firstName . ' ' . $remainingNames);
-
-        return trim($surname . ', ' . $givenNames);
     }
 
     private function formatPdfDurationMinutes(int $seconds): string

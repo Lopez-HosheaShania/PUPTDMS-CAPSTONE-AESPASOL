@@ -58,6 +58,7 @@ class DentistTransitionItem extends Model
     }
 
     public const TYPES = [
+        'patient',
         'appointment',
         'document_request',
     ];

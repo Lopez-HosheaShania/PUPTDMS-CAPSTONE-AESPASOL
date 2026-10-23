@@ -53,13 +53,13 @@ class DentistAppointmentController extends Controller
 
         $notifications = collect($notifications ?? []);
 
-        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, COUNT(*) as count')
             ->groupBy('appointment_date')
             ->pluck('count', 'appointment_date')
             ->toArray();
 
-        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerSlot = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
             ->groupBy('appointment_date', 'appointment_time')
             ->get()
@@ -405,7 +405,7 @@ class DentistAppointmentController extends Controller
 
         $mysqlTime = Carbon::createFromFormat('g:i A', trim($request->new_appointment_time))->format('H:i:s');
 
-        $slotTaken = Appointment::where('appointment_date', $request->new_appointment_date)
+        $slotTaken = Appointment::withoutGlobalScope('clinical_patients')->where('appointment_date', $request->new_appointment_date)
             ->where('appointment_time', $mysqlTime)
             ->where('id', '!=', $appointment->id)
             ->whereIn('status', ['upcoming', 'rescheduled'])
@@ -511,7 +511,7 @@ class DentistAppointmentController extends Controller
 
         $mysqlTime = Carbon::createFromFormat('g:i A', trim($request->followup_appointment_time))->format('H:i:s');
 
-        $slotTaken = Appointment::where('appointment_date', $request->followup_appointment_date)
+        $slotTaken = Appointment::withoutGlobalScope('clinical_patients')->where('appointment_date', $request->followup_appointment_date)
             ->where('appointment_time', $mysqlTime)
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->exists();
