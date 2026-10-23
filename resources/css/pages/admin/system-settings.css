@@ -250,6 +250,95 @@
     line-height: 1.35;
 }
 
+/* Retention uses the same label/description rows as the other settings tabs. */
+.system-settings-page:has(#tab-retention.active) .settings-banner-actions {
+    display: none;
+}
+
+.system-settings-page .retention-intro {
+    margin: 0 0 1rem;
+}
+
+.system-settings-page .retention-setting-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.25rem;
+    padding: 1.1rem 0;
+}
+
+.system-settings-page .retention-setting-row .setting-row-info {
+    padding-right: 0;
+}
+
+.system-settings-page .retention-period-controls {
+    display: grid;
+    grid-template-columns: 112px 140px auto;
+    align-items: end;
+    gap: .75rem;
+    min-width: 0;
+}
+
+.system-settings-page .retention-period-controls .form-label {
+    display: block;
+    margin-bottom: .4rem;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.system-settings-page .retention-period-controls input.form-ctrl,
+.system-settings-page .retention-period-controls select.form-ctrl {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 0 13px;
+    border: 1.5px solid #e8e2dd;
+    border-radius: 12px;
+    background: #fff;
+    color: #0d1117;
+    font-size: .84rem;
+    font-weight: 800;
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.system-settings-page .retention-period-controls input.form-ctrl:focus-visible,
+.system-settings-page .retention-period-controls select.form-ctrl:focus-visible {
+    outline: none;
+    border-color: var(--settings-primary);
+    box-shadow: 0 0 0 4px rgba(139, 0, 0, .08);
+}
+
+.system-settings-page .retention-save-btn {
+    width: auto;
+    min-height: 42px;
+    padding: 0 1rem;
+    border-radius: 12px;
+    white-space: nowrap;
+    box-shadow: none;
+}
+
+@media (max-width: 1280px) {
+    .system-settings-page .retention-setting-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: .8rem;
+    }
+
+    .system-settings-page .retention-period-controls {
+        grid-template-columns: minmax(100px, 1fr) minmax(120px, 1fr) auto;
+    }
+}
+
+@media (max-width: 540px) {
+    .system-settings-page .retention-period-controls {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .system-settings-page .retention-save-btn {
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+}
+
 .toggle-wrap {
     position: relative;
     display: inline-flex;

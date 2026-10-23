@@ -228,7 +228,7 @@ class ReservedBookingPeriodService
             );
         }
 
-        $hasExistingAppointments = Appointment::query()
+        $hasExistingAppointments = Appointment::withoutGlobalScope('clinical_patients')
             ->whereDate('appointment_date', $dateString)
             ->regularBooking()
             ->whereTime('appointment_time', '>=', $start)

@@ -1064,6 +1064,7 @@ class ReservedBookingPeriodFeatureTest extends TestCase
         ]);
         $appointment = Appointment::create([
             'patient_id' => $patientUser->patient->id,
+            'dentist_id' => $dentist->id,
             'reserved_booking_period_id' => $period->id,
             'reserved_booking_period_slot_id' => $slot->id,
             'service_type' => 'Oral Check-up',

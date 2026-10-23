@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class Patient extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\ScopesClinicalPatients;
 
     private const COMMON_INFORMATION_ATTRIBUTES = [
         'phone',

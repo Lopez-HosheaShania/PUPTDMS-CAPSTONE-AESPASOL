@@ -69,6 +69,9 @@ class DentistTransitionNotification extends Notification
     private function resolveTitle(): string
     {
         return match ($this->event) {
+            'effective' => 'Dentist Coverage Effective',
+            'completed' => 'Temporary Dentist Coverage Completed',
+            'blocked' => 'Dentist Coverage Requires Attention',
             'created' => 'Dentist Continuity Plan Created',
             'updated' => 'Dentist Continuity Plan Updated',
             'finalized' => 'Dentist Continuity Plan Finalized',
@@ -84,6 +87,9 @@ class DentistTransitionNotification extends Notification
         $type = str_replace('_', ' ', ucfirst($this->transition->transition_type));
 
         return match ($this->event) {
+            'effective' => "Care responsibilities for {$dentistName} have transferred under the approved plan.",
+            'completed' => "Temporary coverage for {$dentistName} has ended and care responsibility has returned.",
+            'blocked' => "The continuity plan for {$dentistName} requires administrator review before it can proceed.",
             'created' => "A continuity plan for {$dentistName} ({$type}) has been created.",
             'updated' => "The continuity plan for {$dentistName} ({$type}) has been updated.",
             'finalized' => "The continuity plan for {$dentistName} ({$type}) has been finalized.",
@@ -99,7 +105,7 @@ class DentistTransitionNotification extends Notification
 
         return match ($role) {
             'admin', 'super_admin' => route('admin.dentist-transitions.show', $this->transition),
-            'dentist' => route('dentist.dentist.transitions.show', $this->transition),
+            'dentist', 'dentist_role' => route('dentist.dentist.patients'),
             default => route('admin.dentist-transitions.show', $this->transition),
         };
     }

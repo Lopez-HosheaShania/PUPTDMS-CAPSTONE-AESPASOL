@@ -12,6 +12,7 @@ use App\Models\ServiceType;
 class Appointment extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\ScopesClinicalPatients;
 
     private const DETAIL_FIELDS = [
         'reserved_booking_period_id' => 'reservedBookingDetails',

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class DocumentRequest extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\ScopesClinicalPatients;
     use \App\Models\Concerns\StoresOptionalDetails { save as private saveWithDetails; }
 
     protected $hidden = ['document_request_id'];

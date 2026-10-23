@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
+use App\Models\RetentionPolicy;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -91,6 +92,12 @@ class SystemSettingsController extends Controller
     {
         $settings = SystemSetting::query()->get()->keyBy('key');
         $notifications = collect([]);
+        $user = auth()->user();
+        $canManageRetention = $user && $user->status === 'active'
+            && $user->hasAnyRole(['admin', 'super_admin'])
+            && ! session()->has('impersonated_role')
+            && $user->hasPermission('manage_system_settings');
+
 
         AuditLogger::log(
             'view',
@@ -99,6 +106,8 @@ class SystemSettingsController extends Controller
         );
 
         return view('admin.system-settings', [
+            'canManageRetention' => $canManageRetention,
+            'retentionPolicies' => $canManageRetention ? RetentionPolicy::orderBy('id')->get() : collect(),
             'settings' => $settings,
             'notifications' => $notifications,
             'layoutRole' => $this->resolveLayoutRole(),

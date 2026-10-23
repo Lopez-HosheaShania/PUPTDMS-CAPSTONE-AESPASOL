@@ -137,13 +137,13 @@ class OdontogramController extends Controller
 
     private function getProcedureWorkspaceContext(): array
     {
-        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, COUNT(*) as count')
             ->groupBy('appointment_date')
             ->pluck('count', 'appointment_date')
             ->toArray();
 
-        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerSlot = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
             ->groupBy('appointment_date', 'appointment_time')
             ->get()
@@ -199,13 +199,13 @@ class OdontogramController extends Controller
 
     private function getExistingAppointmentCalendarContext(): array
     {
-        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, COUNT(*) as count')
             ->groupBy('appointment_date')
             ->pluck('count', 'appointment_date')
             ->toArray();
 
-        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerSlot = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
             ->groupBy('appointment_date', 'appointment_time')
             ->get()
@@ -729,6 +729,7 @@ class OdontogramController extends Controller
         int $procedureDurationSeconds,
         ?Carbon $procedureCompletedAt = null
     ): array {
+        abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Only the assigned dentist may record treatment for this visit.');
         $appointment->loadMissing('patient');
         $patient = $appointment->patient;
         $completionAction = $validated['completion_action'] ?? 'finished';
@@ -1815,6 +1816,7 @@ class OdontogramController extends Controller
 
     public function editSavedVisit(Request $request, Appointment $appointment)
     {
+        abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Record subsequent care as a new visit.');
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
@@ -1871,6 +1873,7 @@ class OdontogramController extends Controller
 
     public function updateSavedVisit(Request $request, Appointment $appointment)
     {
+        abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Historical clinical notes must retain their original author. Record subsequent care as a new visit.');
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
