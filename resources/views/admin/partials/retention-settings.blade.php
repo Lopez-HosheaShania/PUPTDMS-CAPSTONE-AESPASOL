@@ -7,7 +7,7 @@
             </div>
         </div>
         <div class="section-card-body">
-            <p class="setting-row-desc retention-intro">Set how long each type of record should be kept. Saving a period does not automatically archive or delete records.</p>
+            <p class="setting-row-desc retention-intro">Set how long each type of record should be kept. Your admin password is required for every save. Saving a period does not automatically archive or delete records.</p>
             @if ($errors->any())
                 <div role="alert" class="text-sm text-red-700">
                     <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>

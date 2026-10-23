@@ -6,12 +6,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class RetentionPolicy extends Model
 {
-    protected $guarded = ['id'];
+    use \App\Models\Concerns\StoresOptionalDetails;
+
+    protected function detailFields(): array
+    {
+        return ['approval' => ['approved_by', 'approved_at', 'approval_reference', 'activated_by', 'activated_at']];
+    }
+
+    public function approval()
+    {
+        return $this->hasOne(RetentionPolicyApproval::class);
+    }
+
+    protected $fillable = [
+        'category', 'duration', 'unit', 'status', 'updated_by',
+        'approved_by', 'approved_at', 'approval_reference', 'activated_by',
+        'activated_at', 'version',
+    ];
 
     protected $casts = [
         'duration' => 'integer', 'version' => 'integer',
-        'archive_enabled' => 'boolean', 'disposal_enabled' => 'boolean',
-        'approved_at' => 'datetime', 'activated_at' => 'datetime',
     ];
 
     public function getPeriodLabelAttribute(): string

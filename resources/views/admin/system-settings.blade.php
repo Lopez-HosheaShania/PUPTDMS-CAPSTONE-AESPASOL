@@ -18,7 +18,7 @@
     $defaultSettingsTab = $canManageGeneralSettings
         ? 'general'
         : ($canManageNotificationSettings ? 'notifications' : 'general');
-    if ($canManageRetention && request('tab') === 'retention') {
+    if ($canManageRetention && (request('tab') === 'retention' || old('retention_policy_id'))) {
         $defaultSettingsTab = 'retention';
     }
 @endphp
@@ -617,25 +617,116 @@
                 </div>
             </div>
         </form>
+    </div>
+</main>
+
         @if ($canManageRetention)
+            <div id="retentionPasswordDialog" class="ui-modal modal-theme-primary" aria-hidden="true">
+                <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true"
+                    aria-labelledby="retentionPasswordTitle" aria-describedby="retentionPasswordDescription">
+                    <div class="modal-hd">
+                        <div class="modal-heading">
+                            <div class="modal-icon"><i class="fa-solid fa-lock" aria-hidden="true"></i></div>
+                            <div class="modal-copy">
+                                <h2 id="retentionPasswordTitle" class="modal-title">Confirm retention change</h2>
+                                <p id="retentionPasswordDescription" class="modal-subtitle">Enter your current admin password to save this retention period.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="modal-x" data-modal-close="retentionPasswordDialog" aria-label="Close password confirmation">
+                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="modal-bd modal-form-grid">
+                        <div class="global-confirm-alert">
+                            <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                            <div><p>Retention period</p><strong id="retentionPasswordSummary"></strong></div>
+                        </div>
+                        <div class="global-form-group">
+                            <label for="retentionPassword" class="global-form-label">Your admin password <span class="required-mark">*</span></label>
+                            <div class="global-control-wrap">
+                                <i class="fa-solid fa-lock global-control-icon" aria-hidden="true"></i>
+                                <input id="retentionPassword" name="password" type="password" class="form-input-custom global-form-icon"
+                                    autocomplete="current-password" required maxlength="1024" data-modal-initial-focus>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-ft">
+                        <button id="retentionPasswordCancel" type="button" class="ui-btn ui-btn-secondary" data-modal-close="retentionPasswordDialog">Cancel</button>
+                        <button id="retentionPasswordConfirm" type="button" class="ui-btn ui-btn-primary">Confirm and save</button>
+                    </div>
+                </div>
+            </div>
             @foreach ($retentionPolicies as $policy)
-                <form id="retention-period-{{ $policy->id }}" action="{{ route('admin.retention.update', $policy) }}" method="POST" hidden>
+                <form id="retention-period-{{ $policy->id }}" action="{{ route('admin.retention.update', $policy) }}" method="POST" hidden
+                    data-retention-label="{{ config('retention.categories.'.$policy->category.'.label', $policy->category) }}">
                     @csrf @method('PUT')
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="version" value="{{ $policy->version }}">
                     <input type="hidden" name="confirmed" value="1">
                     <input type="hidden" name="return_to" value="system_settings">
                     <input type="hidden" name="retention_policy_id" value="{{ $policy->id }}">
-                    <input type="hidden" name="start_event" value="{{ $policy->start_event }}">
                 </form>
             @endforeach
         @endif
-    </div>
-</main>
 @endsection
 
 @section('scripts')
 <script>
+    function initRetentionPasswordConfirmation() {
+        const dialog = document.getElementById('retentionPasswordDialog');
+        if (!dialog) return;
+
+        const password = document.getElementById('retentionPassword');
+        const confirm = document.getElementById('retentionPasswordConfirm');
+        let pendingForm = null;
+        let submitting = false;
+
+        document.querySelectorAll('form[data-retention-label]').forEach(form => {
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                if (submitting) return;
+                pendingForm = form;
+                password.value = '';
+                password.setAttribute('form', form.id);
+                const duration = form.elements.namedItem('duration').value;
+                const unit = form.elements.namedItem('unit').selectedOptions[0].textContent;
+                document.getElementById('retentionPasswordSummary').textContent =
+                    `${form.dataset.retentionLabel}: ${duration} ${unit}`;
+                window.openModal(dialog.id);
+            });
+        });
+
+        function saveRetentionPeriod() {
+            if (submitting || !pendingForm || !pendingForm.reportValidity()) return;
+            submitting = true;
+            confirm.disabled = true;
+            // Submit the associated password with this policy only. A full reload
+            // obtains the new version and requires a fresh password on the next save.
+            HTMLFormElement.prototype.submit.call(pendingForm);
+            password.value = '';
+        }
+
+        confirm.addEventListener('click', saveRetentionPeriod);
+        password.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                saveRetentionPeriod();
+            }
+        });
+        document.addEventListener('ui-modal:closed', event => {
+            if (event.detail.modal !== dialog) return;
+            password.value = '';
+            password.removeAttribute('form');
+            pendingForm = null;
+        });
+        window.addEventListener('pageshow', () => {
+            password.value = '';
+            submitting = false;
+            confirm.disabled = false;
+            if (dialog.classList.contains('open')) window.closeModal(dialog.id);
+        });
+    }
+
     function getActiveSettingsTabId() {
         const activeSection = document.querySelector('#settingsListView .settings-section.active');
         if (!activeSection) return 'general';
@@ -1231,6 +1322,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        initRetentionPasswordConfirmation();
         initSettingsCustomDropdowns(document);
         initializeClinicVoiceClearButtons(document);
         initSettingsFloatingActions();
