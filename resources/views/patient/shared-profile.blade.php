@@ -27,6 +27,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Services\AppointmentOdontogramSnapshotService;
 $isDentistProfile = $profileMode === 'dentist';
+$canViewClinicalRecords = $isDentistProfile;
 
 $patientName = $patient->name ?? 'Unknown Patient';
 $displayName = $patient->name ?? 'Guest';
@@ -40,13 +41,13 @@ $odontogramSnapshotService =
     app(AppointmentOdontogramSnapshotService::class);
 
 $previousOdontogramByVisitId =
-    $odontogramSnapshotService
+    $canViewClinicalRecords ? $odontogramSnapshotService
         ->previousSnapshotsByAppointment(
             collect($pastVisits ?? [])
-        );
+        ) : [];
 
-$medicalAnswers = optional($patient->medicalHistory)->answers ?? collect();
-$dentalDates = optional($patient->dentalHistoryDates);
+$medicalAnswers = $canViewClinicalRecords ? (optional($patient->medicalHistory)->answers ?? collect()) : collect();
+$dentalDates = $canViewClinicalRecords ? optional($patient->dentalHistoryDates) : null;
 $signatureReviewStatus = optional($patient->medicalHistory)->signature_review_status;
 $signatureReviewNotes = optional($patient->medicalHistory)->signature_review_notes;
 $signaturePath = optional($patient->medicalHistory)->patient_signature;
@@ -55,7 +56,7 @@ $isPendingManualReview = $signatureReviewStatus === 'pending_manual_review';
 $isInvalidSignature = $signatureReviewStatus === 'invalid_reupload_required';
 $canReviewSignature = auth()->user()?->hasPermission('create_medical_records') ?? false;
 $showManualSignatureReview =
-in_array($profileMode, ['admin', 'dentist'], true) &&
+$canViewClinicalRecords &&
 in_array($signatureReviewStatus, ['pending_manual_review', 'invalid_reupload_required'], true) &&
 !empty($signaturePath) &&
 $canReviewSignature;
@@ -128,9 +129,9 @@ Carbon::parse($visit->appointment_date)->isToday();
 $canStartProcedure =
 $isDentistProfile &&
 !empty($procedureAppointment);
-$odontogramData = optional($patient->odontogram)->odontogram_data ?? [];
-$odontogramLastUpdatedAt = optional($patient->odontogram)->updated_at;
-$odontogramLastUpdatedBy = optional($patient->odontogram)->updated_by;
+$odontogramData = $canViewClinicalRecords ? (optional($patient->odontogram)->odontogram_data ?? []) : [];
+$odontogramLastUpdatedAt = $canViewClinicalRecords ? optional($patient->odontogram)->updated_at : null;
+$odontogramLastUpdatedBy = $canViewClinicalRecords ? optional($patient->odontogram)->updated_by : null;
 $odontogramMetaVisit = $lastVisit ?? ($appointment ?? ($nextAppointment ?? null));
 $odontogramMetaDate = $odontogramMetaVisit?->appointment_date
 ? Carbon::parse($odontogramMetaVisit->appointment_date)->format('M d, Y')
@@ -535,7 +536,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 <div class="space-y-3" data-show-more-list>
                                     @forelse($pastVisits ?? [] as $visit)
 
-                                    <x-appointment-record-card :appointment="$visit" variant="past" :show-details="true"
+                                    <x-appointment-record-card :appointment="$visit" variant="past" :show-details="$canViewClinicalRecords"
                                         :show-countdown="false" :show-time-range="false"
                                         :show-reserved="$isDentistProfile"
                                         :previous-odontogram="$previousOdontogramByVisitId[$visit->id] ?? []"
@@ -570,6 +571,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                     </div>
                 </section>
 
+                @if ($canViewClinicalRecords)
                 <section class="card health-lifestyle-card mb-10">
                     <div class="card-header">
                         <div class="card-header-left">
@@ -974,6 +976,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                         </div>
                     </div>
                 </section>
+                @endif
         </div>
     </div>
 </main>
