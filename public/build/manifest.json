@@ -60,7 +60,7 @@
     "src": "node_modules/flatpickr/dist/flatpickr.min.css"
   },
   "resources/css/app.css": {
-    "file": "assets/app-BTzypvKX.css",
+    "file": "assets/app-CeO8bl7k.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -87,7 +87,7 @@
     ]
   },
   "resources/css/pages/admin/ai-generated-report.css": {
-    "file": "assets/ai-generated-report-CMQ5U2zE.css",
+    "file": "assets/ai-generated-report-3uBn5LtI.css",
     "src": "resources/css/pages/admin/ai-generated-report.css",
     "isEntry": true,
     "name": "ai-generated-report",
@@ -375,7 +375,7 @@
     ]
   },
   "resources/css/pages/shared/inventory.css": {
-    "file": "assets/inventory-4KvE6puM.css",
+    "file": "assets/inventory-B03wG_aT.css",
     "src": "resources/css/pages/shared/inventory.css",
     "isEntry": true,
     "name": "inventory",

@@ -548,6 +548,15 @@
                                             placeholder="Add medication or aftercare instructions...">{{ old('prescriptions', $procedure?->prescriptions) }}</textarea>
                                     </div>
 
+                                    <div class="global-form-group">
+                                        <label for="inventoryNotes" class="global-form-label">
+                                            Inventory Notes <span class="odontogram-label-optional">(Optional)</span>
+                                        </label>
+                                        <textarea id="inventoryNotes" name="inventory_notes" rows="3" maxlength="10000"
+                                            class="form-input-custom global-form-textarea"
+                                            placeholder="List medicines, materials, or supplies used during this procedure...">{{ old('inventory_notes', $procedure?->inventory_notes) }}</textarea>
+                                    </div>
+
                                     <div class="odontogram-procedure-actions">
                                         @unless ($existingAppointmentMode || $savedVisitEditMode)
                                             <button type="button" id="followUpBtn" class="ui-btn ui-btn-warning">
@@ -4386,6 +4395,7 @@
                     oral_examination: document.getElementById('oralExaminationNotes').value,
                     diagnosis: diagnosisValue,
                     prescriptions: document.getElementById('prescriptionsNotes').value,
+                    inventory_notes: document.getElementById('inventoryNotes').value,
                     completion_action: completionAction,
                     has_applied_treatment: allowsProcedureCompletionWithoutOdontogramChanges ||
                         hasAppliedTreatmentThisSession,

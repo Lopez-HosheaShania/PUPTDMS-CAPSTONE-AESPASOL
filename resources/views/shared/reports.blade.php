@@ -746,25 +746,30 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                             </span>
                         </a>
 
-                        <div class="stat-card s-red">
+                        <button type="button" class="stat-card s-red stat-card-link text-left w-full"
+                            data-open-modal="cancellationBreakdownModal" aria-haspopup="dialog"
+                            aria-controls="cancellationBreakdownModal" aria-label="View cancellation and no-show breakdown">
                             <div class="stat-card-info">
                                 <div class="stat-label">
                                     Cancellation Rate
                                 </div>
 
                                 <div class="stat-num">
-                                    {{ $cancellationRate }}%
+                                    <span data-cancellation-card-rate>{{ ($cancellationBreakdown['available'] ?? false) ? $cancellationRate.'%' : 'Unavailable' }}</span>
                                 </div>
 
                                 <div class="stat-footer">
-                                    Based on recorded appointments
+                                    <span data-cancellation-card-period>{{ $cancellationBreakdown['period'] ?? 'Current month' }}</span> &middot; View breakdown
                                 </div>
                             </div>
 
                             <div class="stat-icon-wrapper">
                                 <i class="fa-solid fa-calendar-xmark"></i>
                             </div>
-                        </div>
+                            <span class="stat-card-link-indicator" aria-hidden="true">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </span>
+                        </button>
 
                         <a href="{{ route('dentist.dentist.inventory') }}" class="stat-card s-amber stat-card-link">
                             <div class="stat-card-info">
@@ -1302,6 +1307,73 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                     </div>
 </main>
 
+@if ($isDentistView)
+<div id="cancellationBreakdownModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"
+    aria-labelledby="cancellationBreakdownTitle" aria-describedby="cancellationBreakdownSubtitle">
+    <div class="ui-modal-card modal-lg">
+        <header class="modal-hd">
+            <div class="modal-heading">
+                <div class="modal-icon" aria-hidden="true"><i class="fa-solid fa-calendar-xmark"></i></div>
+                <div class="modal-copy">
+                    <h2 id="cancellationBreakdownTitle" class="modal-title" tabindex="-1" data-modal-initial-focus>Cancellation Breakdown</h2>
+                    <p id="cancellationBreakdownSubtitle" class="modal-subtitle">Breakdown of cancelled and missed appointments for {{ $cancellationBreakdown['period'] ?? 'the current month' }}.</p>
+                </div>
+            </div>
+            <button type="button" class="modal-x" data-modal-close="cancellationBreakdownModal" aria-label="Close breakdown">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </header>
+        <div class="modal-bd modal-form-grid">
+            <div class="modal-form-grid-2">
+                <div class="global-form-group">
+                    <label for="cancellationMonth" class="global-form-label">Month</label>
+                    <select id="cancellationMonth" class="js-custom-select" data-placeholder="Select month">
+                        @foreach (range(1, 12) as $month)
+                            <option value="{{ $month }}" @selected($month === ($cancellationBreakdown['month'] ?? now()->month))>{{ \Carbon\Carbon::create(2000, $month, 1)->format('F') }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="global-form-group">
+                    <label for="cancellationYear" class="global-form-label">Year</label>
+                    <select id="cancellationYear" class="js-custom-select" data-placeholder="Select year">
+                        @foreach (range(now()->year, min(now()->year - 5, collect($cancellationBreakdown['years'] ?? [now()->year])->min() ?? now()->year)) as $year)
+                            <option value="{{ $year }}" @selected($year === ($cancellationBreakdown['year'] ?? now()->year))>{{ $year }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <p id="cancellationLoading" class="modal-helper-text" role="status" hidden>Loading cancellation breakdown...</p>
+            <div id="cancellationError" @if ($cancellationBreakdown['available'] ?? false) hidden @endif>
+                <div class="global-confirm-alert" role="alert">
+                    <p>Cancellation and no-show statistics could not be loaded. Please try again.</p>
+                </div>
+                <button id="retryCancellationBreakdown" type="button" class="ui-btn ui-btn-secondary mt-2">Try again</button>
+            </div>
+            <div id="cancellationResults" class="space-y-4" @if (!($cancellationBreakdown['available'] ?? false)) hidden @endif>
+                <div id="cancellationReasons" @if (empty($cancellationBreakdown['reasons'])) hidden @endif>
+                    <section class="modal-form-grid-2" aria-label="Cancellation reason breakdown">
+                        @foreach (($cancellationBreakdown['reasons'] ?? []) as $reason)
+                            <div class="global-info-item">
+                                <div class="global-info-copy w-full">
+                                    <strong class="global-info-label break-words">{{ $reason['reason'] }}</strong>
+                                    <p class="global-info-value m-0">{{ $reason['count'] }} {{ $reason['count'] === 1 ? 'cancelled appointment' : 'cancelled appointments' }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </section>
+                </div>
+                <div id="cancellationLegacyNote" @if (empty($cancellationBreakdown['legacy_no_shows'])) hidden @endif>
+                    <p class="modal-helper-text">The existing cancellation workflow records ?Patient no-show? as cancelled. {{ $cancellationBreakdown['legacy_no_shows'] ?? 0 }} included in both the cancellation and no-show totals.</p>
+                </div>
+            </div>
+        </div>
+        <footer class="modal-ft">
+            <button type="button" class="btn-close-modal" data-modal-close="cancellationBreakdownModal">Close</button>
+        </footer>
+    </div>
+</div>
+@endif
+
 @if ($isAdminView)
 <div id="aiReportConfirmModal" class="ui-modal modal-theme-primary" aria-hidden="true">
     <div class="ui-modal-card modal-md" role="dialog" aria-modal="true" aria-labelledby="aiReportConfirmTitle"
@@ -1673,6 +1745,93 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 @endsection
 
 @section('scripts')
+@if ($isDentistView)
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('cancellationBreakdownModal');
+        const month = document.getElementById('cancellationMonth');
+        const year = document.getElementById('cancellationYear');
+        const results = document.getElementById('cancellationResults');
+        const loading = document.getElementById('cancellationLoading');
+        const error = document.getElementById('cancellationError');
+        const reasons = document.querySelector('#cancellationReasons section');
+        const legacy = document.getElementById('cancellationLegacyNote');
+        const subtitle = document.getElementById('cancellationBreakdownSubtitle');
+        const cardRate = document.querySelector('[data-cancellation-card-rate]');
+        const cardPeriod = document.querySelector('[data-cancellation-card-period]');
+        const endpoint = @json(route($analyticsRoutePrefix.'.reports.cancellation-breakdown'));
+        let activeRequest;
+        let requestNumber = 0;
+
+        async function loadPeriod() {
+            const currentRequest = ++requestNumber;
+            activeRequest?.abort();
+            activeRequest = new AbortController();
+            const controller = activeRequest;
+            const timeout = setTimeout(() => controller.abort(), 20000);
+            const period = month.selectedOptions[0].textContent.trim() + ' ' + year.value;
+            subtitle.textContent = 'Breakdown of cancelled and missed appointments for ' + period + '.';
+            results.hidden = true;
+            error.hidden = true;
+            loading.hidden = false;
+            modal.setAttribute('aria-busy', 'true');
+            cardRate.textContent = 'Loading...';
+            cardPeriod.textContent = period;
+
+            try {
+                const url = new URL(endpoint, window.location.origin);
+                url.searchParams.set('month', month.value);
+                url.searchParams.set('year', year.value);
+                const response = await fetch(url, {
+                    headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin', cache: 'no-store', signal: controller.signal
+                });
+                const data = await response.json();
+                if (currentRequest !== requestNumber) return;
+                if (!response.ok || !data.available) throw new Error('Analytics unavailable');
+
+                reasons.replaceChildren();
+                for (const reason of data.reasons) {
+                    const row = document.createElement('div');
+                    row.className = 'global-info-item';
+                    const copy = document.createElement('div');
+                    copy.className = 'global-info-copy w-full';
+                    const title = document.createElement('strong');
+                    title.className = 'global-info-label break-words';
+                    title.textContent = reason.reason;
+                    const detail = document.createElement('p');
+                    detail.className = 'global-info-value m-0';
+                    detail.textContent = `${reason.count} ${reason.count === 1 ? 'cancelled appointment' : 'cancelled appointments'}`;
+                    copy.append(title, detail);
+                    row.append(copy);
+                    reasons.append(row);
+                }
+                document.getElementById('cancellationReasons').hidden = data.reasons.length === 0;
+                legacy.hidden = data.legacy_no_shows === 0;
+                legacy.querySelector('p').textContent = `The existing cancellation workflow records ?Patient no-show? as cancelled. ${data.legacy_no_shows} included in both the cancellation and no-show totals.`;
+                cardRate.textContent = data.cancellation_rate + '%';
+                cardPeriod.textContent = data.period;
+                results.hidden = false;
+            } catch (failure) {
+                if (currentRequest !== requestNumber) return;
+                error.hidden = false;
+                cardRate.textContent = 'Unavailable';
+            } finally {
+                clearTimeout(timeout);
+                if (currentRequest === requestNumber) {
+                    loading.hidden = true;
+                    modal.removeAttribute('aria-busy');
+                }
+            }
+        }
+
+        month.addEventListener('change', loadPeriod);
+        year.addEventListener('change', loadPeriod);
+        document.getElementById('retryCancellationBreakdown').addEventListener('click', loadPeriod);
+    });
+</script>
+@endif
+
 @if ($isAdminView)
 <script>
     document.addEventListener('DOMContentLoaded', async function () {

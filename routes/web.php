@@ -348,6 +348,9 @@ Route::prefix('admin')
             ->middleware('permission:create_report_files')
             ->name('admin.report-files');
 
+        Route::get('/report-files/cancellation-breakdown', [AdminReportController::class, 'cancellationBreakdown'])
+            ->middleware('permission:create_report_files')->name('admin.reports.cancellation-breakdown');
+
         Route::get('/reports', [AdminReportController::class, 'index'])
             ->middleware('permission:view_reports,view_ai_reports,create_ai_generative_reports')
             ->name('admin.reports');
@@ -1156,6 +1159,9 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:view_reports,create_report_files')
         ->name('dentist.dentist.report');
 
+    Route::get('/report/cancellation-breakdown', [AdminReportController::class, 'cancellationBreakdown'])
+        ->middleware('permission:view_reports,create_report_files')->name('dentist.reports.cancellation-breakdown');
+
     Route::get('/report/gad-data', [\App\Http\Controllers\Dentist\DentistReportController::class, 'gadData'])
         ->middleware('permission:view_reports,create_report_files')
         ->name('dentist.dentist.report.gad-data');
@@ -1365,6 +1371,9 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
     Route::get('/inventory/data', [InventoryController::class, 'fetch'])
         ->middleware('permission:view_inventory')
         ->name('dentist.dentist.inventory.data');
+
+    Route::get('/inventory/procedure-notes', [InventoryController::class, 'procedureNotes'])
+        ->middleware('permission:view_inventory')->name('dentist.inventory.procedure-notes');
 
     Route::post('/inventory', [InventoryController::class, 'store'])
         ->middleware('permission:add_inventory')

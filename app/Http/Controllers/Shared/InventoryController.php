@@ -6,6 +6,8 @@ use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
 use App\Services\InventoryExpirationNotifier;
+use App\Services\InventoryBottleStock;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -67,20 +69,17 @@ abstract class InventoryController extends Controller
                 $data['unit']
             );
 
-        $inventory =
-            Inventory::create($data);
+        $inventory = DB::transaction(function () use ($data) {
+            $inventory = Inventory::create(app(InventoryBottleStock::class)->prepare($data));
+            AuditLogger::log('create_inventory', 'inventory', $this->actorLabel().' added inventory item: '.$inventory->name
+                .($inventory->is_volume_bottle ? ' | '.json_encode(['volume_consumed_ml' => $data['volume_consumed_ml'] ?? null, 'bottles' => $inventory->qty, 'current_bottle_remaining_ml' => $inventory->current_bottle_remaining_ml], JSON_THROW_ON_ERROR) : ''));
+
+            return $inventory;
+        });
 
         app(
             InventoryExpirationNotifier::class
         )->notify($inventory);
-
-        AuditLogger::log(
-            'create_inventory',
-            'inventory',
-            $this->actorLabel()
-                . ' added inventory item: '
-                . $inventory->name
-        );
 
         return response()->json([
             'success' => true,
@@ -103,20 +102,25 @@ abstract class InventoryController extends Controller
                 $data['unit']
             );
 
-        $inventory->update($data);
+        $inventory = DB::transaction(function () use ($inventory, $data) {
+            $locked = Inventory::lockForUpdate()->findOrFail($inventory->id);
+            $before = $locked->only(['qty', 'used', 'volume_per_bottle_ml', 'current_bottle_remaining_ml']);
+            $before['total_available_volume_ml'] = $locked->total_available_volume_ml;
+            $locked->update(app(InventoryBottleStock::class)->prepare($data, $locked));
+            AuditLogger::log('update_inventory', 'inventory', json_encode([
+                'item_id' => $locked->id, 'volume_consumed_ml' => $data['volume_consumed_ml'] ?? null,
+                'previous' => $before,
+                'updated' => $locked->only(['qty', 'used', 'volume_per_bottle_ml', 'current_bottle_remaining_ml']),
+                'total_available_volume_ml' => $locked->total_available_volume_ml,
+            ], JSON_THROW_ON_ERROR));
+
+            return $locked;
+        });
 
         app(
             InventoryExpirationNotifier::class
         )->notify(
             $inventory->fresh()
-        );
-
-        AuditLogger::log(
-            'update_inventory',
-            'inventory',
-            $this->actorLabel()
-                . ' updated inventory item ID '
-                . $inventory->id
         );
 
         return response()->json([
@@ -162,7 +166,14 @@ abstract class InventoryController extends Controller
             );
         }
 
+        $bottle = strtolower(trim((string) request('unit'))) === 'bottle';
+        $volumeRules = ['nullable', 'numeric', 'regex:/^\d+(?:\.\d{1,2})?$/', 'min:0.01', 'max:99999999.99'];
+
         return [
+            'volume_per_bottle_ml' => array_merge([Rule::requiredIf($bottle)], $volumeRules),
+            'volume_consumed_ml' => array_merge([Rule::prohibitedIf(!$bottle)], $volumeRules),
+            'stock_revision' => [Rule::requiredIf($inventory && ($inventory->is_volume_bottle || $bottle)), 'nullable', 'string', 'size:64'],
+            'current_bottle_remaining_ml' => ['prohibited'],
             'category' => [
                 'required',
                 Rule::in([
@@ -203,7 +214,7 @@ abstract class InventoryController extends Controller
             'qty' => [
                 'required',
                 'integer',
-                'min:1',
+                $inventory && $bottle ? 'min:0' : 'min:1',
                 'max:99999',
             ],
 
@@ -213,6 +224,7 @@ abstract class InventoryController extends Controller
                 'min:0',
                 'max:99999',
                 'lte:qty',
+                Rule::when($bottle, ['max:0']),
             ],
         ];
     }

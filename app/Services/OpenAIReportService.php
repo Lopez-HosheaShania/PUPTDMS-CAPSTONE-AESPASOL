@@ -128,11 +128,29 @@ class OpenAIReportService
 
             $decoded = json_decode($text, true);
 
-            if (is_array($decoded)) {
-                $this->aiServiceManager->recordSuccess('reports', 'OpenAI report generation completed.');
+            if (!is_array($decoded) || ($response->json('status') !== null && $response->json('status') !== 'completed')) {
+                $this->aiServiceManager->recordFailure('reports', 'OpenAI report generation returned invalid or incomplete output.');
+
+                return null;
             }
 
-            return is_array($decoded) ? $decoded : null;
+            foreach ($schema['required'] as $field) {
+                $value = $decoded[$field] ?? null;
+                $valid = $field === 'executive_summary'
+                    ? is_string($value) && trim($value) !== ''
+                    : is_array($value) && array_is_list($value) && count($value) > 0
+                        && collect($value)->every(fn ($item) => is_string($item) && trim($item) !== '');
+
+                if (!$valid) {
+                    $this->aiServiceManager->recordFailure('reports', 'OpenAI report generation returned invalid or incomplete output.');
+
+                    return null;
+                }
+            }
+
+            $this->aiServiceManager->recordSuccess('reports', 'OpenAI report generation completed.');
+
+            return array_intersect_key($decoded, $schema['properties']);
         } catch (Throwable $e) {
             Log::error('OpenAI report generation exception.', [
                 'message' => $e->getMessage(),

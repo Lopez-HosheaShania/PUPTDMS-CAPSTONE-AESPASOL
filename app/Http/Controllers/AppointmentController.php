@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 use App\Models\Appointment;
+use App\Models\SystemSetting;
 use App\Models\DentalHistory;
 use App\Models\DentalHistoryCondition;
 use App\Models\DentalHistoryAnswer;
@@ -73,9 +74,25 @@ class AppointmentController extends Controller
     {
         $patient = $this->resolveAuthenticatedPatient();
         abort_unless($patient, 401);
-        $failure = $this->personalInformationBookingFailure($patient);
+        $failure = $this->maintenanceBookingFailure() ?? $this->personalInformationBookingFailure($patient);
 
-        return response()->json($failure ?? ['verified' => true], $failure['status'] ?? 200);
+        return response()->json($failure ?? ['verified' => true], $failure['status'] ?? 200)
+            ->header('Cache-Control', 'no-store');
+    }
+
+    private function maintenanceBookingFailure(): ?array
+    {
+        if (! SystemSetting::isEnabled('maintenance_mode', false)) {
+            return null;
+        }
+
+        return [
+            'verified' => false,
+            'status' => 503,
+            'code' => 'booking_maintenance',
+            'title' => 'Clinic Temporarily Unavailable',
+            'message' => 'The clinic system is temporarily unavailable right now. Appointment booking is temporarily disabled while we perform system maintenance. Please try again later.',
+        ];
     }
 
     private function personalInformationBookingFailure(Patient $patient): ?array
@@ -313,6 +330,10 @@ class AppointmentController extends Controller
 
         $patient = Patient::findOrFail($patientId);
         $availableReservedSlots = collect();
+
+        if ($failure = $this->maintenanceBookingFailure()) {
+            return $this->rejectPersonalInformationBooking($request, $failure);
+        }
 
         Appointment::cancelElapsedScheduledAppointments();
 
@@ -785,6 +806,10 @@ class AppointmentController extends Controller
         Request $request,
         SignatureAiVerifier $signatureVerifier
     ) {
+        if ($failure = $this->maintenanceBookingFailure()) {
+            return $this->rejectPersonalInformationBooking($request, $failure);
+        }
+
         $request->merge([
             'emergency_number' => $this->normalizePhilippineMobile(
                 (string) $request->input('emergency_number', '')

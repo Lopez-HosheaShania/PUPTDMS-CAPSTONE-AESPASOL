@@ -101,6 +101,11 @@
         };
 
         function showFailure(failure = verificationError) {
+            if (failure?.code === 'booking_maintenance') {
+                window.openModal('bookingMaintenanceModal');
+                return;
+            }
+
             const incomplete =
                 failure?.code === 'personal_information_incomplete';
 
@@ -174,6 +179,7 @@
 
                 showFailure(
                     [
+                        'booking_maintenance',
                         'personal_information_incomplete',
                         'personal_information_unverified'
                     ].includes(result.code) ?
