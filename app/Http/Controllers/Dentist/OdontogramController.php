@@ -99,7 +99,10 @@ class OdontogramController extends Controller
         bool $savedVisitEditMode = false
     ): string {
         if ($existingAppointmentMode) {
-            return route($this->existingAppointmentRouteName('create'), ['patient' => $patient?->id]);
+            return route(
+                $this->isAdminExistingAppointmentContext() ? 'admin.admin.patient.profile' : 'dentist.dentist.patient.profile',
+                ['patient' => $patient?->id]
+            );
         }
 
         if ($savedVisitEditMode) {

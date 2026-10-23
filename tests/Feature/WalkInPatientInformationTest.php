@@ -14,6 +14,37 @@ class WalkInPatientInformationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_existing_record_selection_reuses_patient_with_incomplete_information(): void
+    {
+        $role = \App\Models\Role::create(['name' => 'Dentist', 'slug' => 'dentist']);
+        foreach (['manage_existing_records', 'create_procedure_records'] as $slug) {
+            $permission = \App\Models\Permission::create([
+                'name' => $slug, 'slug' => $slug, 'module' => 'Appointments',
+            ]);
+            $role->permissions()->attach($permission);
+        }
+        $dentist = \App\Models\User::create([
+            'name' => 'Dentist', 'email' => 'dentist@example.test',
+            'password' => bcrypt('password'), 'role_id' => $role->id, 'status' => 'active',
+        ]);
+        $patient = Patient::create([
+            'name' => 'Incomplete Faculty', 'email' => 'faculty@example.test',
+            'password' => bcrypt('password'), 'classification' => 'faculty',
+        ]);
+        $token = \Illuminate\Support\Facades\Crypt::encryptString(json_encode([
+            'source' => 'faculty',
+            'data' => ['name' => $patient->name, 'email' => $patient->email],
+        ]));
+
+        $this->actingAs($dentist)->withSession(['role' => 'dentist'])
+            ->postJson(route('shared.existing-record.resolve-external-patient'), [
+                'selection_token' => $token,
+            ])->assertOk()->assertJsonPath('success', true)
+            ->assertJsonPath('patient.id', $patient->id);
+
+        $this->assertDatabaseCount('patients', 1);
+    }
+
     private function student(): Patient
     {
         return Patient::create([

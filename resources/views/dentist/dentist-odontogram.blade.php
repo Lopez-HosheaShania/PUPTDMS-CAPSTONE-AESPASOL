@@ -1798,7 +1798,7 @@
                 }
 
                 window.setTimeout(() => {
-                    finishProcedureBtn?.focus();
+                    finishProcedureBtn?.focus({ preventScroll: true });
                 }, 180);
             }
 
@@ -4502,6 +4502,10 @@
             }
 
             finishProcedureBtn.addEventListener('click', function() {
+                if (!validateProcedureDurationField()) {
+                    return;
+                }
+
                 updateHiddenInput();
                 const cleanOdontogramData = getCleanOdontogramDataForSave();
                 const hasAnySavedTreatment = cleanOdontogramData.length > 0;

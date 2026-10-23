@@ -2462,10 +2462,6 @@ aria-label="Delete inventory item"
                     String(item.unit || '').trim() ||
                     'item';
 
-                const bottleVolumeMarkup = item.is_volume_bottle
-                    ? `<span class="inventory-bottle-volume">Current: ${formatMl(item.current_bottle_remaining_ml)} / ${formatMl(item.volume_per_bottle_ml)} mL<br>${formatMl(item.total_available_volume_ml)} mL total remaining</span>`
-                    : (isBottleUnit(item.unit) ? '<span class="inventory-bottle-volume">Set bottle capacity in Edit to track mL.</span>' : '');
-
                 const categoryMarkup = `
                     <span class="status-pill ${catStatusClass}">
                         <span class="status-dot"></span>
@@ -2530,7 +2526,6 @@ aria-label="Delete inventory item"
                                     <span class="inventory-grid-balance-unit">
                                         ${unit} left
                                     </span>
-                                    ${bottleVolumeMarkup}
                                 </div>
 
                                 <div class="inventory-grid-details">
@@ -2600,7 +2595,6 @@ aria-label="Delete inventory item"
                                 <strong class="inventory-balance-number">
                                     ${balance}
                                 </strong>
-                                ${bottleVolumeMarkup}
 
                                 ${stockStatusMarkup}
                             </div>
