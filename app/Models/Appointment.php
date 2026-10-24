@@ -154,6 +154,14 @@ class Appointment extends Model
         'no-show',
     ];
 
+    public const CANCELLATION_REASONS = [
+        'Patient no-show',
+        'Doctor unavailable',
+        'Patient request',
+        'Emergency',
+        'Rescheduled',
+    ];
+
     protected $fillable = [
         'patient_id',
         'service_type_id',

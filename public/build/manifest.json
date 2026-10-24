@@ -60,7 +60,7 @@
     "src": "node_modules/flatpickr/dist/flatpickr.min.css"
   },
   "resources/css/app.css": {
-    "file": "assets/app-BTzypvKX.css",
+    "file": "assets/app-CeO8bl7k.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -87,7 +87,7 @@
     ]
   },
   "resources/css/pages/admin/ai-generated-report.css": {
-    "file": "assets/ai-generated-report-CMQ5U2zE.css",
+    "file": "assets/ai-generated-report-3uBn5LtI.css",
     "src": "resources/css/pages/admin/ai-generated-report.css",
     "isEntry": true,
     "name": "ai-generated-report",
@@ -375,7 +375,7 @@
     ]
   },
   "resources/css/pages/shared/inventory.css": {
-    "file": "assets/inventory-4KvE6puM.css",
+    "file": "assets/inventory-B03wG_aT.css",
     "src": "resources/css/pages/shared/inventory.css",
     "isEntry": true,
     "name": "inventory",
@@ -411,7 +411,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-8eLvdgmH.js",
+    "file": "assets/app-CaCEP6uq.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -470,7 +470,7 @@
     "isDynamicEntry": true
   },
   "resources/js/odontogram/odontogram-preview.js": {
-    "file": "assets/odontogram-preview-Dg1v4KCN.js",
+    "file": "assets/odontogram-preview-Cfw6GPhL.js",
     "name": "odontogram-preview",
     "src": "resources/js/odontogram/odontogram-preview.js",
     "isDynamicEntry": true,
@@ -506,7 +506,7 @@
     "isDynamicEntry": true
   },
   "resources/js/ui/date-picker.js": {
-    "file": "assets/date-picker-CH-RQyWD.js",
+    "file": "assets/date-picker-DIMlI1an.js",
     "name": "date-picker",
     "src": "resources/js/ui/date-picker.js",
     "isDynamicEntry": true,

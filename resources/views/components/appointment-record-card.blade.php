@@ -100,6 +100,7 @@ $countdown = 'In ' . $difference . ' days';
 }
 }
 
+if ($showDetails) {
 $procedure = $get('procedure');
 
 $durationSeconds =
@@ -206,6 +207,7 @@ $recordPayload = [
 
 'edit_url' => $recordEditUrl,
 ];
+}
 
 $cardClasses = [
 'global-record-card',

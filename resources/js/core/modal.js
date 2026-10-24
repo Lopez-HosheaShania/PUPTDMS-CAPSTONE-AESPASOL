@@ -14,6 +14,9 @@ const focusableSelector = [
 ].join(',');
 
 function getTopOpenModal() {
+    const discardModal = document.querySelector('.discard-modal-overlay.open');
+    if (discardModal) return discardModal;
+
     const modals = document.querySelectorAll(
         '.ui-modal.open, .modal-overlay.open'
     );
@@ -267,6 +270,9 @@ document.addEventListener('keydown', event => {
 
     if (event.key !== 'Escape') return;
 
+    // The discard dialog handles Escape by keeping the current draft.
+    if (modal.matches('.discard-modal-overlay')) return;
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -294,6 +300,7 @@ document.addEventListener('keydown', event => {
 });
 
 window.openModal = openModal;
+window.syncModalBackground = syncModalBackground;
 window.closeModal = closeModal;
 window.closeModalOnBackdrop = closeModalOnBackdrop;
 

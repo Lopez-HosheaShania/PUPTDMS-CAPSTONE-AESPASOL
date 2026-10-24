@@ -46,7 +46,10 @@
                                 <i class="fa-solid fa-brain"></i>
                             </div>
                             <div>
-                                <h1 class="air-banner-heading">AI generated overall report</h1>
+                                <div class="air-report-title-row">
+                                    <h1 class="air-banner-heading">Administrative AI Generated Overall Report</h1>
+                                    <span class="air-advisory-badge">AI-Generated &bull; Advisory Only</span>
+                                </div>
                                 <p class="air-banner-sub">{{ $aiReport['period'] }} · Monthly analysis</p>
                             </div>
                         </div>
@@ -69,6 +72,12 @@
             </div>
 
             <section id="aiReportScreenArea" class="air-screen">
+                <div class="air-advisory-notice">
+                    <p class="air-advisory-note">This report contains AI-generated summaries and interpretations intended to assist administrative review. Please verify all figures and findings against the underlying clinic records before making operational or administrative decisions.</p>
+                    @if (($aiReport['generation_source'] ?? null) !== 'ai')
+                        <p class="air-analysis-unavailable" role="status">AI-generated analysis is currently unavailable. Please refer to the verified clinic statistics shown in this report.</p>
+                    @endif
+                </div>
 
                 <div class="air-status-strip">
                     <div class="air-status-card air-status-card--red">
@@ -82,7 +91,8 @@
                         <span class="air-status-label">Generated at</span>
                         <span class="air-status-value air-status-value--sm">{{ $aiReport['generated_at'] }}</span>
                         <span class="air-status-sub">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> AI-generated insight
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            {{ $aiReport['generation_source'] === 'ai' ? 'AI-generated insight' : 'AI analysis unavailable' }}
                         </span>
                     </div>
                     <div class="air-status-card {{ $riskClass }}">
@@ -105,7 +115,7 @@
                             </div>
                             <div>
                                 <h2 class="card-title">Executive summary</h2>
-                                <p class="card-subtitle">Automatically generated overview based on system statistics</p>
+                                <p class="card-subtitle">AI-generated advisory overview based on system statistics</p>
                             </div>
                         </div>
                     </div>
@@ -239,7 +249,7 @@
                                 </div>
                                 <div>
                                     <h2 class="card-title">Document request analysis</h2>
-                                    <p class="card-subtitle">Document request status and processing interpretation</p>
+                                    <p class="card-subtitle">System-generated summary of document request records</p>
                                 </div>
                             </div>
                         </div>
@@ -323,99 +333,16 @@
     </main>
 
     @php
-        $printFindings = $aiReport['key_findings'] ?? [];
-        $printFindingsText = trim(implode(' ', array_filter($printFindings)));
-        $printTreatmentText = trim(implode(' ', array_filter($aiReport['treatment_analysis'] ?? [])));
-        $printInventoryText = trim(implode(' ', array_filter($aiReport['inventory_analysis'] ?? [])));
-
-        $extractNumber = function ($patterns, $default = '—') use (
-            $printFindingsText,
-            $printTreatmentText,
-            $printInventoryText,
-        ) {
-            $haystack = trim($printFindingsText . ' ' . $printTreatmentText . ' ' . $printInventoryText);
-            foreach ((array) $patterns as $pattern) {
-                if (preg_match($pattern, $haystack, $matches)) {
-                    return $matches[1];
-                }
-            }
-            return $default;
-        };
-
-        $totalPatients =
-            data_get($aiReport, 'print_metrics.total_patients') ??
-            (data_get($aiReport, 'metrics.total_patients') ??
-                $extractNumber(['/Total patients:\s*(\d+)/i', '/(\d+)\s+total\s+patients?/i']));
-        $newPatients =
-            data_get($aiReport, 'print_metrics.new_patients') ??
-            (data_get($aiReport, 'metrics.new_patients') ??
-                $extractNumber(['/new patients?:\s*(\d+)/i', '/(\d+)\s+new\s+patients?/i', '/with\s+(\d+)\s+new/i']));
-        $totalAppointments =
-            data_get($aiReport, 'print_metrics.total_appointments') ??
-            (data_get($aiReport, 'metrics.total_appointments') ??
-                $extractNumber([
-                    '/appointments?\s+(?:totaled|totalled)\s+(\d+)/i',
-                    '/(\d+)\s+total\s+appointments?/i',
-                    '/activity\s+included\s+(\d+)\s+total\s+appointments?/i',
-                ]));
-        $cancelledAppointments =
-            data_get($aiReport, 'print_metrics.cancelled_appointments') ??
-            (data_get($aiReport, 'metrics.cancelled_appointments') ??
-                $extractNumber(['/(\d+)\s+cancellations?/i', '/(\d+)\s+cancelled/i']));
-        $completionRate =
-            data_get($aiReport, 'print_metrics.completion_rate') ??
-            (data_get($aiReport, 'metrics.completion_rate') ??
-                $extractNumber(
-                    ['/completion\s+rate\s+(?:was\s+)?(\d+(?:\.\d+)?)%/i', '/(\d+(?:\.\d+)?)%\s+completion\s+rate/i'],
-                    '0',
-                ));
-        $cancellationRate =
-            data_get($aiReport, 'print_metrics.cancellation_rate') ??
-            (data_get($aiReport, 'metrics.cancellation_rate') ??
-                $extractNumber(
-                    [
-                        '/cancellation\s+rate\s+(?:was\s+)?(\d+(?:\.\d+)?)%/i',
-                        '/(\d+(?:\.\d+)?)%\s+cancellation\s+rate/i',
-                    ],
-                    '0',
-                ));
-        $treatmentsRecorded =
-            data_get($aiReport, 'print_metrics.treatments_recorded') ??
-            (data_get($aiReport, 'metrics.treatments_recorded') ??
-                $extractNumber(
-                    [
-                        '/Total\s+treatments?\s+recorded\s+(?:were\s+)?(\d+)/i',
-                        '/(\d+)\s+treatments?\s+(?:were\s+)?(?:recorded|performed)/i',
-                    ],
-                    str_contains(strtolower($printTreatmentText . ' ' . $printFindingsText), 'no treatments')
-                        ? '0'
-                        : '—',
-                ));
-        $treatmentBreakdown = collect(
-            data_get($aiReport, 'print_metrics.treatment_breakdown', data_get($aiReport, 'treatments.breakdown', [])),
-        );
-        $lowStockCount =
-            data_get($aiReport, 'print_metrics.low_stock_count') ??
-            (data_get($aiReport, 'metrics.low_stock_count') ??
-                $extractNumber(
-                    [
-                        '/Inventory\s+showed\s+(\d+)\s+low-stock/i',
-                        '/(\d+)\s+low-stock\s+items?/i',
-                        '/(\d+)\s+item\/s\s+below/i',
-                    ],
-                    '0',
-                ));
-        $criticalStockCount =
-            data_get($aiReport, 'print_metrics.critical_stock_count') ??
-            (data_get($aiReport, 'metrics.critical_stock_count') ??
-                $extractNumber(
-                    [
-                        '/and\s+(\d+)\s+critical-stock/i',
-                        '/(\d+)\s+critical-stock\s+items?/i',
-                        '/(\d+)\s+item\/s\s+are\s+considered\s+critical/i',
-                    ],
-                    '0',
-                ));
+        $totalPatients = data_get($aiReport, 'print_metrics.total_patients') ?? data_get($aiReport, 'metrics.total_patients') ?? 'Unavailable';
+        $newPatients = data_get($aiReport, 'print_metrics.new_patients') ?? data_get($aiReport, 'metrics.new_patients') ?? 'Unavailable';
+        $totalAppointments = data_get($aiReport, 'print_metrics.total_appointments') ?? data_get($aiReport, 'metrics.total_appointments') ?? 'Unavailable';
+        $cancelledAppointments = data_get($aiReport, 'print_metrics.cancelled_appointments') ?? data_get($aiReport, 'metrics.cancelled_appointments') ?? 'Unavailable';
+        $completionRate = data_get($aiReport, 'print_metrics.completion_rate') ?? data_get($aiReport, 'metrics.completion_rate') ?? 'Unavailable';
+        $cancellationRate = data_get($aiReport, 'print_metrics.cancellation_rate') ?? data_get($aiReport, 'metrics.cancellation_rate') ?? 'Unavailable';
+        $treatmentsRecorded = data_get($aiReport, 'print_metrics.treatments_recorded') ?? data_get($aiReport, 'metrics.treatments_recorded') ?? 'Unavailable';
+        $lowStockCount = data_get($aiReport, 'print_metrics.low_stock_count') ?? data_get($aiReport, 'metrics.low_stock_count') ?? 'Unavailable';
+        $criticalStockCount = data_get($aiReport, 'print_metrics.critical_stock_count') ?? data_get($aiReport, 'metrics.critical_stock_count') ?? 'Unavailable';
+        $treatmentBreakdown = collect(data_get($aiReport, 'print_metrics.treatment_breakdown', []));
 
         $documentRequestAnalysis = $aiReport['document_request_analysis'] ?? [];
         $hasDocumentRequestAnalysis = !empty($documentRequestAnalysis);
@@ -467,9 +394,16 @@
     <section id="aiFullPrintDocument" class="air-print-doc">
 
         <div class="air-print-page" data-print-page="1">
+            <div class="air-advisory-notice">
+                <p class="air-advisory-note">This report contains AI-generated summaries and interpretations intended to assist administrative review. Please verify all figures and findings against the underlying clinic records before making operational or administrative decisions.</p>
+                @if (($aiReport['generation_source'] ?? null) !== 'ai')
+                    <p class="air-analysis-unavailable" role="status">AI-generated analysis is currently unavailable. Please refer to the verified clinic statistics shown in this report.</p>
+                @endif
+            </div>
             <div class="air-print-fixed-header">
                 <strong>AI Generated Overall Report</strong>
                 <span>· {{ $aiReport['period'] }} · Summary and metrics</span>
+                <span class="air-advisory-badge">AI-Generated &bull; Advisory Only</span>
             </div>
 
             <div class="air-print-meta-grid">
@@ -798,6 +732,14 @@
                                 <div class="air-modal-print-hero">
                                     <h1>PUP Taguig Dental Management System</h1>
                                     <p>Administrative AI Generated Overall Report</p>
+                                    <span class="air-advisory-badge">AI-Generated &bull; Advisory Only</span>
+                                </div>
+
+                                <div class="air-advisory-notice">
+                                    <p class="air-advisory-note">This report contains AI-generated summaries and interpretations intended to assist administrative review. Please verify all figures and findings against the underlying clinic records before making operational or administrative decisions.</p>
+                                    @if (($aiReport['generation_source'] ?? null) !== 'ai')
+                                        <p class="air-analysis-unavailable" role="status">AI-generated analysis is currently unavailable. Please refer to the verified clinic statistics shown in this report.</p>
+                                    @endif
                                 </div>
 
                                 <div class="air-modal-print-meta-grid">

@@ -105,26 +105,22 @@ class AdminPatientController extends Controller
 
         $patient->loadMissing([
             'user',
-            'odontogram',
-            'medicalHistory.answers.question',
-            'medicalHistory.diseaseAnswers.disease',
-            'dentalHistory',
-            'dentalHistoryDates',
-            'dentalHistoryConcerns',
-            'dentalHistoryAnswers.condition',
+            'medicalHistory' => fn ($query) => $query->select([
+                'id', 'patient_id', 'emergency_person', 'emergency_number', 'emergency_relation',
+            ]),
         ]);
 
         $today = Carbon::today()->toDateString();
 
         Appointment::cancelElapsedScheduledAppointments();
 
-        $appointments = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        $appointments = Appointment::with('dentist')
             ->where('patient_id', $patient->id)
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc')
             ->get();
 
-        $futureVisits = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        $futureVisits = Appointment::with('dentist')
             ->where('patient_id', $patient->id)
             ->whereDate('appointment_date', '>=', $today)
             ->whereIn('status', ['upcoming', 'rescheduled'])
@@ -132,7 +128,7 @@ class AdminPatientController extends Controller
             ->orderBy('appointment_time', 'asc')
             ->get();
 
-        $pastVisits = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        $pastVisits = Appointment::with('dentist')
             ->where('patient_id', $patient->id)
             ->where(function ($query) use ($today) {
                 $query->whereDate('appointment_date', '<', $today)

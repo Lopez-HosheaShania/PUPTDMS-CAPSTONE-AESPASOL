@@ -204,6 +204,7 @@
     @if ($isPatient)
         @include('partials.impersonation-banner')
         @include('components.booking.personal-information-verification')
+        @include('components.booking.maintenance-modal')
     @endif
 
     @if ($isDentist || ($isAdmin && View::hasSection('usesAppointmentCalendar')))

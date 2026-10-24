@@ -98,53 +98,17 @@
                     <div id="cancelReasonChips" class="flex flex-wrap gap-2" role="radiogroup"
                         aria-label="Cancellation Reason">
 
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r1" value="Patient no-show" required
-                                data-required-message="Select the reason for cancelling this appointment.">
-
-                            <label for="r1">
-                                <i class="fa-regular fa-circle-xmark"></i>
-                                Patient no-show
-                            </label>
-                        </div>
-
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r2" value="Doctor unavailable"
-                                required>
-
-                            <label for="r2">
-                                <i class="fa-solid fa-user-doctor"></i>
-                                Doctor unavailable
-                            </label>
-                        </div>
-
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r3" value="Patient request" required>
-
-                            <label for="r3">
-                                <i class="fa-regular fa-hand"></i>
-                                Patient request
-                            </label>
-                        </div>
-
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r4" value="Emergency" required>
-
-                            <label for="r4">
-                                <i class="fa-solid fa-bolt"></i>
-                                Emergency
-                            </label>
-                        </div>
-
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r5" value="Rescheduled" required>
-
-                            <label for="r5">
-                                <i class="fa-solid fa-rotate"></i>
-                                Rescheduled
-                            </label>
-                        </div>
-
+                        @php($cancellationReasonIcons = ['fa-regular fa-circle-xmark', 'fa-solid fa-user-doctor', 'fa-regular fa-hand', 'fa-solid fa-bolt', 'fa-solid fa-rotate'])
+                        @foreach (\App\Models\Appointment::CANCELLATION_REASONS as $reason)
+                            <div class="reason-chip">
+                                <input type="radio" name="cancelReason" id="r{{ $loop->iteration }}" value="{{ $reason }}" required
+                                    data-required-message="Select the reason for cancelling this appointment.">
+                                <label for="r{{ $loop->iteration }}">
+                                    <i class="{{ $cancellationReasonIcons[$loop->index] }}"></i>
+                                    {{ $reason }}
+                                </label>
+                            </div>
+                        @endforeach
                     </div>
 
                     <div class="global-field-error" data-error-for="cancelReason" aria-hidden="true">

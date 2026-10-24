@@ -2926,13 +2926,11 @@ const summaryCard = (
                 return false;
             }
 
-            formSubmitting = true;
-
-            clearTimeout(
-                draftAutosaveTimer
-            );
-
-            form.submit();
+            window.verifyPersonalInformationBeforeBooking(() => {
+                formSubmitting = true;
+                clearTimeout(draftAutosaveTimer);
+                form.submit();
+            });
 
             return true;
         }

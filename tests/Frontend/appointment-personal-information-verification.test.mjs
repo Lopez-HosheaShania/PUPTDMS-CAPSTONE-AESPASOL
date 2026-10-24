@@ -11,6 +11,7 @@ const source = template.match(/<script>([\s\S]*)<\/script>/)[1]
 function setup(fetch) {
     const listeners = {};
     const elements = {};
+    elements.personalInformationVerificationClose = { textContent: 'Close' };
     const navigations = [];
     const modals = [];
     const window = {
@@ -32,6 +33,23 @@ test('100% continues to the selected booking URL and keeps date/time parameters'
     await app.window.verifyPersonalInformationBeforeBooking(url);
     assert.deepEqual(app.navigations, [url]);
     assert.deepEqual(app.modals, []);
+});
+
+test('maintenance blocks both navigation and final submission, then permits retry after disabling', async () => {
+    let maintenance = true;
+    let submissions = 0;
+    const app = setup(async () => ({ ok: !maintenance, json: async () => maintenance
+        ? { code: 'booking_maintenance', verified: false }
+        : { verified: true } }));
+    await app.window.verifyPersonalInformationBeforeBooking('/book-appointment');
+    await app.window.verifyPersonalInformationBeforeBooking(() => { submissions++; });
+    assert.deepEqual(app.navigations, []);
+    assert.equal(submissions, 0);
+    assert.deepEqual(app.modals, ['bookingMaintenanceModal', 'bookingMaintenanceModal']);
+    maintenance = false;
+    await app.window.verifyPersonalInformationBeforeBooking(() => { submissions++; });
+    assert.equal(submissions, 1);
+    assert.equal(app.modals.length, 2);
 });
 
 test('incomplete status displays the completion modal and stops navigation', async () => {
@@ -68,8 +86,8 @@ test('clicks on regular, alternate, and reserved booking links are intercepted',
     app.window.verifyPersonalInformationBeforeBooking = url => calls.push(url);
     for (const path of ['/book-appointment', '/patient/book-appointment', '/patient/appointment/create', '/book-appointment/reserved/42']) {
         let stopped = false;
-        const link = { href: `https://clinic.test${path}`, getAttribute: () => null };
-        app.listeners.click({ target: { closest: () => link }, preventDefault() {}, stopImmediatePropagation() { stopped = true; } });
+        const link = { href: `https://clinic.test${path}`, getAttribute: () => null, hasAttribute: () => false };
+        app.listeners.click({ button: 0, target: { closest: () => link }, preventDefault() {}, stopImmediatePropagation() { stopped = true; } });
         assert.equal(stopped, true);
     }
     assert.equal(calls.length, 4);
@@ -92,7 +110,7 @@ test('repeat clicks share the pending verification and clear loading state', asy
 
 const dashboard = readFileSync(new URL('../../resources/views/patient/index.blade.php', import.meta.url), 'utf8');
 const calendarActions = dashboard.slice(dashboard.indexOf('        function scrollToCalendar(event)'),
-    dashboard.indexOf("        document.addEventListener('keydown'", dashboard.indexOf('        function scrollToCalendar(event)')));
+    dashboard.indexOf('    </script>', dashboard.indexOf('        function scrollToCalendar(event)')));
 
 for (const complete of [false, true]) {
     test(`dashboard calendar action ${complete ? 'scrolls after verification' : 'shows the modal without scrolling when incomplete'}`, async () => {

@@ -99,24 +99,16 @@ class DentistReportController extends Controller
             : null;
 
         $lowStockItems = DB::table('inventory_items')
-            ->whereRaw('(qty - used) <= (qty * 0.30)')->count();
+            ->whereRaw(\App\Models\Inventory::lowStockSql())->count();
 
         [$gadLabels, $gadFemale, $gadMale] = $this->buildGadData($thisYear, $thisMonth);
 
         [$weekLabels, $weeklyDatasets] = $this->buildWeeklyData($thisYear, $thisMonth);
 
-        $totalAppointmentsThisMonth = Appointment::whereYear('appointment_date', $thisYear)
-            ->whereMonth('appointment_date', $thisMonth)
-            ->count();
-
-        $cancelledAppointments = Appointment::whereYear('appointment_date', $thisYear)
-            ->whereMonth('appointment_date', $thisMonth)
-            ->where('status', 'cancelled')
-            ->count();
-
-        $cancellationRate = $totalAppointmentsThisMonth > 0
-            ? round(($cancelledAppointments / $totalAppointmentsThisMonth) * 100)
-            : 0;
+        $cancellationBreakdown = app(\App\Services\AppointmentCancellationAnalytics::class)->currentMonth($now);
+        $totalAppointmentsThisMonth = $cancellationBreakdown['total_scheduled'] ?? 0;
+        $cancelledAppointments = $cancellationBreakdown['total_cancelled'] ?? 0;
+        $cancellationRate = $cancellationBreakdown['cancellation_rate'] ?? null;
 
         $daysElapsedThisMonth = max(1, min($now->day, $now->daysInMonth));
         $avgPatientsPerDay = round($patientsThisMonth / $daysElapsedThisMonth, 1);
@@ -157,7 +149,7 @@ class DentistReportController extends Controller
         $suppliesItems = $inventoryItems->where('category', 'Supplies')->values();
 
         $lowStockRows = DB::table('inventory_items')
-            ->whereRaw('(qty - used) <= (qty * 0.30)')
+            ->whereRaw(\App\Models\Inventory::lowStockSql())
             ->orderByRaw('(qty - used) ASC')->get();
 
         $lowStockMedicine = $lowStockRows->where('category', 'Medicine')->values();
@@ -206,6 +198,7 @@ class DentistReportController extends Controller
         );
 
         return view('shared.reports', [
+            'cancellationBreakdown' => $cancellationBreakdown,
             'layoutRole' => 'dentist',
             'pageTitle' => 'Reports & Analytics',
             'pageShellClass' => 'app-page-shell dentist-report-page',

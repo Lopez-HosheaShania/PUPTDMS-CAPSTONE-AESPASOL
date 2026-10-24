@@ -159,8 +159,8 @@
                                     <div class="setting-row">
                                         <div class="setting-row-info">
                                             <div class="setting-row-label">Maintenance Mode</div>
-                                            <div class="setting-row-desc">Temporarily disable patient-facing booking
-                                                portal</div>
+                                            <div class="setting-row-desc">Temporarily disable appointment booking.
+                                                Patients can still access their dashboard.</div>
                                         </div>
                                         <label class="toggle-wrap">
                                             <input type="hidden" name="maintenance_mode" value="0">

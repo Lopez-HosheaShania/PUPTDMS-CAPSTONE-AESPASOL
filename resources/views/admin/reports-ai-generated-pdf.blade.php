@@ -5,6 +5,21 @@
     <meta charset="UTF-8">
     <title>AI Generated Overall Report</title>
     <style>
+        .air-advisory-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border: 1px solid #e5caca;
+            border-radius: 12px;
+            background: #fff1f2;
+            color: #7f1417;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        .air-advisory-notice { margin-bottom: 10px; }
+        .air-advisory-note { margin: 6px 0 0; color: #52525b; font-size: 8px; line-height: 1.5; }
+        .air-analysis-unavailable { color: #7f1417; font-size: 8px; font-weight: bold; }
+
         @page {
             margin: 26px 28px 34px;
         }
@@ -57,7 +72,7 @@
 
         .meta-card span {
             display: block;
-            font-size: 10px;
+            font-size: 8px;
             color: #7a7a7a;
             text-transform: uppercase;
         }
@@ -138,7 +153,7 @@
         .kpi-card span {
             display: block;
             margin-top: 4px;
-            font-size: 10px;
+            font-size: 8px;
             color: #666;
             text-transform: uppercase;
         }
@@ -154,7 +169,7 @@
 
         .footer-note {
             margin-top: 24px;
-            font-size: 10px;
+            font-size: 8px;
             color: #777;
             border-top: 1px solid #ddd;
             padding-top: 8px;
@@ -174,32 +189,13 @@
             'risk_explanation',
             'Operational risk details are currently unavailable for this report.',
         );
-        $printFindings = $aiReport['key_findings'] ?? [];
-        $printFindingsText = trim(implode(' ', array_filter($printFindings)));
-        $printTreatmentText = trim(implode(' ', array_filter($aiReport['treatment_analysis'] ?? [])));
-        $printInventoryText = trim(implode(' ', array_filter($aiReport['inventory_analysis'] ?? [])));
-
-        $extractNumber = function ($patterns, $default = '—') use (
-            $printFindingsText,
-            $printTreatmentText,
-            $printInventoryText,
-        ) {
-            $haystack = trim($printFindingsText . ' ' . $printTreatmentText . ' ' . $printInventoryText);
-            foreach ((array) $patterns as $pattern) {
-                if (preg_match($pattern, $haystack, $matches)) {
-                    return $matches[1];
-                }
-            }
-            return $default;
-        };
-
-        $totalPatients = data_get($aiReport, 'print_metrics.total_patients') ?? data_get($aiReport, 'metrics.total_patients') ?? $extractNumber(['/Total patients:\s*(\d+)/i', '/(\d+)\s+total\s+patients?/i']);
-        $newPatients = data_get($aiReport, 'print_metrics.new_patients') ?? data_get($aiReport, 'metrics.new_patients') ?? $extractNumber(['/new patients?:\s*(\d+)/i', '/(\d+)\s+new\s+patients?/i', '/with\s+(\d+)\s+new/i']);
-        $totalAppointments = data_get($aiReport, 'print_metrics.total_appointments') ?? data_get($aiReport, 'metrics.total_appointments') ?? $extractNumber(['/appointments?\s+(?:totaled|totalled)\s+(\d+)/i', '/(\d+)\s+total\s+appointments?/i', '/activity\s+included\s+(\d+)\s+total\s+appointments?/i']);
-        $cancelledAppointments = data_get($aiReport, 'print_metrics.cancelled_appointments') ?? data_get($aiReport, 'metrics.cancelled_appointments') ?? $extractNumber(['/(\d+)\s+cancellations?/i', '/(\d+)\s+cancelled/i']);
-        $completionRate = data_get($aiReport, 'print_metrics.completion_rate', 0);
-        $cancellationRate = data_get($aiReport, 'print_metrics.cancellation_rate', 0);
-        $treatmentsRecorded = data_get($aiReport, 'print_metrics.treatments_recorded') ?? data_get($aiReport, 'metrics.treatments_recorded') ?? $extractNumber(['/Total\s+treatments?\s+recorded\s+(?:were\s+)?(\d+)/i', '/(\d+)\s+treatments?\s+(?:were\s+)?(?:recorded|performed)/i'], '0');
+        $totalPatients = data_get($aiReport, 'print_metrics.total_patients') ?? data_get($aiReport, 'metrics.total_patients') ?? 'Unavailable';
+        $newPatients = data_get($aiReport, 'print_metrics.new_patients') ?? data_get($aiReport, 'metrics.new_patients') ?? 'Unavailable';
+        $totalAppointments = data_get($aiReport, 'print_metrics.total_appointments') ?? data_get($aiReport, 'metrics.total_appointments') ?? 'Unavailable';
+        $cancelledAppointments = data_get($aiReport, 'print_metrics.cancelled_appointments') ?? data_get($aiReport, 'metrics.cancelled_appointments') ?? 'Unavailable';
+        $completionRate = data_get($aiReport, 'print_metrics.completion_rate') ?? data_get($aiReport, 'metrics.completion_rate') ?? 'Unavailable';
+        $cancellationRate = data_get($aiReport, 'print_metrics.cancellation_rate') ?? data_get($aiReport, 'metrics.cancellation_rate') ?? 'Unavailable';
+        $treatmentsRecorded = data_get($aiReport, 'print_metrics.treatments_recorded') ?? data_get($aiReport, 'metrics.treatments_recorded') ?? 'Unavailable';
         $dominantTreatment = data_get($aiReport, 'print_metrics.dominant_treatment', 'None identified');
         $dominantTreatmentCount = (int) data_get($aiReport, 'print_metrics.dominant_treatment_count', 0);
         $dominantTreatmentRate = (float) data_get($aiReport, 'print_metrics.dominant_treatment_rate', 0);
@@ -222,8 +218,16 @@
     @endphp
 
     <div class="header">
-        <h1>AI Generated Overall Report</h1>
+        <h1>Administrative AI Generated Overall Report</h1>
         <p>{{ $aiReport['period'] }} · PUP Taguig Dental Clinic · System-generated PDF export</p>
+        <span class="air-advisory-badge">AI-Generated &bull; Advisory Only</span>
+    </div>
+
+    <div class="air-advisory-notice">
+        <p class="air-advisory-note">This report contains AI-generated summaries and interpretations intended to assist administrative review. Please verify all figures and findings against the underlying clinic records before making operational or administrative decisions.</p>
+        @if (($aiReport['generation_source'] ?? null) !== 'ai')
+            <p class="air-analysis-unavailable" role="status">AI-generated analysis is currently unavailable. Please refer to the verified clinic statistics shown in this report.</p>
+        @endif
     </div>
 
     <div class="meta-grid">

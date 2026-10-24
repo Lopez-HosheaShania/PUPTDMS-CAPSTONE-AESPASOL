@@ -3,6 +3,8 @@
 @php
     $layoutRole = $layoutRole ?? 'admin';
     $isDentistView = $isDentistView ?? false;
+    $canViewProcedureInventoryNotes = $isDentistView && auth()->user()?->hasAnyRole(['dentist', 'dentist_role'])
+        && !session()->has('impersonated_role');
 
     $pageShellClass = $pageShellClass ?? ($isDentistView ? 'app-page-shell' : 'app-page-shell');
 
@@ -36,7 +38,7 @@
             @if ($isDentistView)
                 <div class="inventory-header-wrap">
                     <div class="dentist-hero">
-                        <div class="dentist-hero-content">
+                        <div class="dentist-hero-content w-full justify-between">
                             <div class="inventory-title-left">
                                 <div class="dentist-hero-icon">
                                     <i class="fa-solid fa-boxes-stacked"></i>
@@ -53,6 +55,13 @@
                                     </h2>
                                 </div>
                             </div>
+                            @if ($canViewProcedureInventoryNotes)
+                                <button type="button" class="ui-action-btn ui-action-neutral shrink-0"
+                                    data-open-modal="procedureInventoryNotesModal" data-tooltip="Procedure Inventory Notes"
+                                    aria-label="Procedure Inventory Notes" aria-haspopup="dialog" aria-controls="procedureInventoryNotesModal">
+                                    <i class="fa-regular fa-clipboard" aria-hidden="true"></i>
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -453,6 +462,14 @@
                             data-required-message="Please enter a unit." required>
                     </div>
 
+                    <div id="addBottleFields" hidden>
+                        <div class="inventory-field" data-global-field>
+                            <label for="addBottleCapacity" class="inventory-field-label">Volume per Bottle (mL) <span class="required-mark">*</span></label>
+                            <input id="addBottleCapacity" name="volume_per_bottle_ml" type="number" class="form-input-custom"
+                                placeholder="e.g. 100" min="0.01" max="99999999.99" step="0.01" inputmode="decimal" disabled>
+                        </div>
+                    </div>
+
                     <div class="inventory-field" data-global-field>
 
                         <div class="global-label-row">
@@ -486,7 +503,7 @@
 
                         <label for="addQty" class="inventory-field-label">
 
-                            Quantity
+                            <span id="addQtyLabel">Quantity</span>
                             <span class="required-mark">*</span>
                         </label>
 
@@ -522,7 +539,7 @@
 
                         <label for="addUsed" class="inventory-field-label">
 
-                            Consumed
+                            <span id="addUsedLabel">Consumed</span>
                             <span class="required-mark">*</span>
                         </label>
 
@@ -684,6 +701,21 @@
                             data-required-message="Please enter a unit." required>
                     </div>
 
+                    <div id="editBottleCapacityField" hidden>
+                        <div class="inventory-field" data-global-field>
+                            <label for="editBottleCapacity" class="inventory-field-label">Volume per Bottle (mL) <span class="required-mark">*</span></label>
+                            <input id="editBottleCapacity" name="volume_per_bottle_ml" type="number" class="form-input-custom"
+                                placeholder="e.g. 100" min="0.01" max="99999999.99" step="0.01" inputmode="decimal" disabled>
+                        </div>
+                    </div>
+
+                    <div id="editBottleFields" hidden>
+                        <div class="inventory-field">
+                            <label for="editBottleRemaining" class="inventory-field-label">Current Bottle Remaining (mL)</label>
+                            <input id="editBottleRemaining" type="text" class="form-input-custom" readonly>
+                        </div>
+                    </div>
+
                     <div class="inventory-field" data-global-field>
 
                         <div class="global-label-row">
@@ -717,7 +749,7 @@
 
                         <label for="editQty" class="inventory-field-label">
 
-                            Quantity
+                            <span id="editQtyLabel">Quantity</span>
                             <span class="required-mark">*</span>
                         </label>
 
@@ -753,7 +785,7 @@
 
                         <label for="editUsed" class="inventory-field-label">
 
-                            Consumed
+                            <span id="editUsedLabel">Consumed</span>
                             <span class="required-mark">*</span>
                         </label>
 
@@ -785,7 +817,7 @@
                         </div>
                     </div>
 
-                    <div class="inventory-field" data-global-field>
+                    <div class="inventory-field inventory-field-full" data-global-field>
                         <label for="editBalance" class="inventory-field-label">
                             Balance (auto-calculated)
                         </label>
@@ -810,9 +842,116 @@
     <x-delete-confirm-modal id="deleteModal" form-id="inventoryDeleteForm" name-id="inventoryDeleteName"
         title="Delete Inventory Item" helper="This inventory item will be permanently removed." />
 
+    @if ($canViewProcedureInventoryNotes)
+        <div id="procedureInventoryNotesModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"
+            aria-labelledby="procedureInventoryNotesTitle" aria-describedby="procedureInventoryNotesSubtitle">
+            <div class="ui-modal-card modal-lg">
+                <header class="modal-hd">
+                    <div class="modal-heading">
+                        <div class="modal-icon" aria-hidden="true"><i class="fa-regular fa-clipboard"></i></div>
+                        <div class="modal-copy">
+                            <h2 id="procedureInventoryNotesTitle" class="modal-title">Procedure Inventory Notes</h2>
+                            <p id="procedureInventoryNotesSubtitle" class="modal-subtitle">Medicines and supplies recorded by the dentist during patient procedures.</p>
+                        </div>
+                    </div>
+                    <button type="button" class="modal-x" data-modal-close="procedureInventoryNotesModal" aria-label="Close inventory notes"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                </header>
+                <div class="modal-bd modal-form-grid">
+                    <p class="modal-helper-text">Reference notes only. Stock quantities are managed separately in Inventory.</p>
+                    <p id="procedureInventoryNotesLoading" class="modal-helper-text" role="status" hidden>Loading procedure inventory notes...</p>
+                    <div id="procedureInventoryNotesError" hidden>
+                        <div class="global-confirm-alert" role="alert"><p>Procedure inventory notes could not be loaded. Please try again.</p></div>
+                        <button id="procedureInventoryNotesRetry" type="button" class="ui-btn ui-btn-secondary mt-2">Try again</button>
+                    </div>
+                    <p id="procedureInventoryNotesEmpty" class="modal-helper-text" role="status" hidden>No inventory notes have been recorded from procedures yet.</p>
+                    <div id="procedureInventoryNotesEntries" class="space-y-4"></div>
+                </div>
+                <footer class="modal-ft"><button type="button" class="btn-close-modal" data-modal-close="procedureInventoryNotesModal">Close</button></footer>
+            </div>
+        </div>
+    @endif
+
 @endsection
 
 @section('scripts')
+
+    @if ($canViewProcedureInventoryNotes)
+    <script>
+        (() => {
+            const endpoint = @json(route('dentist.inventory.procedure-notes'));
+            const modal = document.getElementById('procedureInventoryNotesModal');
+            const entries = document.getElementById('procedureInventoryNotesEntries');
+            const loading = document.getElementById('procedureInventoryNotesLoading');
+            const error = document.getElementById('procedureInventoryNotesError');
+            const empty = document.getElementById('procedureInventoryNotesEmpty');
+            let requestNumber = 0;
+            let activeRequest;
+
+            function addText(parent, tag, className, value) {
+                const element = document.createElement(tag);
+                element.className = className;
+                element.textContent = value;
+                parent.append(element);
+                return element;
+            }
+
+            async function loadNotes() {
+                const currentRequest = ++requestNumber;
+                activeRequest?.abort();
+                activeRequest = new AbortController();
+                const controller = activeRequest;
+                const timeout = setTimeout(() => controller.abort(), 20000);
+                entries.replaceChildren();
+                loading.hidden = false;
+                error.hidden = true;
+                empty.hidden = true;
+                modal.setAttribute('aria-busy', 'true');
+
+                try {
+                    const url = new URL(endpoint, window.location.origin);
+                    const response = await fetch(url, {
+                        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        credentials: 'same-origin', cache: 'no-store', signal: controller.signal
+                    });
+                    const result = await response.json();
+                    if (currentRequest !== requestNumber) return;
+                    if (!response.ok || !Array.isArray(result.data)) throw new Error('Notes unavailable');
+
+                    for (const note of result.data) {
+                        const card = addText(entries, 'article', 'global-info-item', '');
+                        const copy = addText(card, 'div', 'global-info-copy w-full', '');
+                        addText(copy, 'h3', 'global-info-value m-0', note.patient_name);
+                        addText(copy, 'p', 'modal-helper-text', `Patient #${note.patient_id ?? 'Unavailable'} | Procedure record #${note.procedure_id} | Visit #${note.appointment_id}`);
+                        const details = addText(copy, 'dl', 'modal-form-grid-2 mt-3', '');
+                        for (const [label, value] of [['Procedure', note.procedure_name], ['Procedure date', note.procedure_date], ['Visit date', note.visit_date], ['Dentist', note.dentist_name]]) {
+                            const field = addText(details, 'div', '', '');
+                            addText(field, 'dt', 'global-info-label', label);
+                            addText(field, 'dd', 'global-info-value m-0', value ?? 'Unavailable');
+                        }
+                        addText(copy, 'h4', 'global-info-label mt-3', 'Inventory Notes');
+                        addText(copy, 'p', 'global-info-value m-0 whitespace-pre-wrap break-words', note.inventory_notes);
+                    }
+
+                    empty.hidden = result.data.length !== 0;
+                } catch (failure) {
+                    if (currentRequest !== requestNumber) return;
+                    error.hidden = false;
+                } finally {
+                    clearTimeout(timeout);
+                    if (currentRequest === requestNumber) {
+                        loading.hidden = true;
+                        modal.removeAttribute('aria-busy');
+                    }
+                }
+            }
+
+            document.addEventListener('ui-modal:opened', event => {
+                if (event.detail.modal.id === modal.id) return loadNotes();
+            });
+            document.getElementById('procedureInventoryNotesRetry').addEventListener('click', loadNotes);
+        })();
+    </script>
+    @endif
 
     @php
         $inventoryDataUrl = route($inventoryRouteNames['data']);
@@ -1163,9 +1302,7 @@
         var inventoryActiveDatePreset = '';
 
         function itemBalance(item) {
-            var qty = Number(item?.qty || 0);
-            var used = Number(item?.used || 0);
-            return qty - used;
+            return item?.is_volume_bottle ? Number(item.qty || 0) : Number(item?.qty || 0) - Number(item?.used || 0);
         }
 
         function applyStockMode(data, mode) {
@@ -2266,10 +2403,12 @@ aria-label="Delete inventory item"
             paginatedData.forEach(function(item) {
                 const quantity = n(item.qty);
                 const used = n(item.used);
-                const balance = quantity - used;
-                const usagePercent = quantity > 0 ?
-                    Math.min(100, Math.max(0, (used / quantity) * 100)) :
-                    0;
+                const balance = itemBalance(item);
+                const activeBottleUsed = item.is_volume_bottle && quantity > 0
+                    ? Math.max(0, Number(item.volume_per_bottle_ml) - Number(item.current_bottle_remaining_ml)) : 0;
+                const usagePercent = item.is_volume_bottle
+                    ? (Number(item.volume_per_bottle_ml) > 0 ? activeBottleUsed / Number(item.volume_per_bottle_ml) * 100 : 0)
+                    : (quantity > 0 ? Math.min(100, Math.max(0, used / quantity * 100)) : 0);
 
                 const balLabel =
                     balance <= 0 ?
@@ -2350,8 +2489,8 @@ aria-label="Delete inventory item"
                 const usageMarkup = `
                     <div class="inventory-usage-block">
                         <div class="inventory-usage-label">
-                            <strong>${used}</strong>
-                            <span>/ ${quantity} ${unit}</span>
+                            <strong>${item.is_volume_bottle ? formatMl(activeBottleUsed) : used}</strong>
+                            <span>/ ${item.is_volume_bottle ? formatMl(item.volume_per_bottle_ml) + " mL (active bottle)" : quantity + " " + unit}</span>
                         </div>
 
                         <div class="inventory-usage-track" aria-hidden="true">
@@ -2420,7 +2559,7 @@ aria-label="Delete inventory item"
                                         </span>
 
                                         <span class="inventory-grid-detail-value">
-                                            ${used}/${quantity} ${unit}
+                                            ${item.is_volume_bottle ? `${formatMl(activeBottleUsed)} / ${formatMl(item.volume_per_bottle_ml)} mL (active bottle)` : `${used}/${quantity} ${unit}`}
                                         </span>
                                     </div>
                                 </div>
@@ -2578,6 +2717,7 @@ aria-label="Delete inventory item"
                 addUsed.value = '0';
             }
 
+            document.getElementById('addBottleCapacity').value = '';
             computeAddBalance();
 
             const form =
@@ -2672,7 +2812,9 @@ aria-label="Delete inventory item"
                         name: document.getElementById('addName').value.trim(),
                         unit: document.getElementById('addUnit').value.trim(),
                         qty: Number(document.getElementById('addQty').value),
-                        used: Number(document.getElementById('addUsed').value || 0)
+                        used: isBottleUnit(document.getElementById('addUnit').value) ? 0 : Number(document.getElementById('addUsed').value || 0),
+                        volume_per_bottle_ml: isBottleUnit(document.getElementById('addUnit').value) ? document.getElementById('addBottleCapacity').value : null,
+                        volume_consumed_ml: isBottleUnit(document.getElementById('addUnit').value) ? (document.getElementById('addUsed').value || null) : null
                     })
                 });
             btnSave.disabled = false;
@@ -2691,7 +2833,9 @@ aria-label="Delete inventory item"
                         name: 'addName',
                         unit: 'addUnit',
                         qty: 'addQty',
-                        used: 'addUsed'
+                        used: 'addUsed',
+                        volume_per_bottle_ml: 'addBottleCapacity',
+                        volume_consumed_ml: 'addUsed'
                     };
 
                     Object.entries(errorPayload.errors).forEach(function([key, messages]) {
@@ -2805,6 +2949,9 @@ aria-label="Delete inventory item"
 
             if (!item) return;
 
+            editBottleOriginal = { ...item };
+            document.getElementById('editBottleCapacity').value = item.volume_per_bottle_ml ?? '';
+
             const editCategory =
                 document.getElementById('editCategory');
 
@@ -2854,7 +3001,7 @@ aria-label="Delete inventory item"
                 document.getElementById('editUsed');
 
             if (editQty) {
-                editQty.value = item.qty ?? 0;
+                editQty.value = isBottleUnit(item.unit) && !item.is_volume_bottle ? itemBalance(item) : (item.qty ?? 0);
 
                 editQty.dispatchEvent(
                     new Event('input', {
@@ -2864,7 +3011,7 @@ aria-label="Delete inventory item"
             }
 
             if (editUsed) {
-                editUsed.value = item.used ?? 0;
+                editUsed.value = isBottleUnit(item.unit) ? '' : (item.used ?? 0);
 
                 editUsed.dispatchEvent(
                     new Event('input', {
@@ -2919,8 +3066,11 @@ aria-label="Delete inventory item"
         }
 
         async function saveEdit() {
-            if (!editId) return;
-
+            if (!editId || inventoryEditSaving) return;
+            inventoryEditSaving = true;
+            const saveButton = document.querySelector('#editInventoryForm button[type="submit"]');
+            if (saveButton) saveButton.disabled = true;
+            try {
             const res = await fetch(inventoryUrl('update', editId), {
                 method: 'PUT',
                 headers: {
@@ -2936,7 +3086,10 @@ aria-label="Delete inventory item"
                     name: document.getElementById('editName').value.trim(),
                     unit: document.getElementById('editUnit').value.trim(),
                     qty: Number(document.getElementById('editQty').value),
-                    used: Number(document.getElementById('editUsed').value || 0)
+                    used: isBottleUnit(document.getElementById('editUnit').value) ? 0 : Number(document.getElementById('editUsed').value || 0),
+                    volume_per_bottle_ml: isBottleUnit(document.getElementById('editUnit').value) ? document.getElementById('editBottleCapacity').value : null,
+                    volume_consumed_ml: isBottleUnit(document.getElementById('editUnit').value) ? (document.getElementById('editUsed').value || null) : null,
+                    stock_revision: editBottleOriginal?.stock_revision || null
                 })
             });
 
@@ -2946,6 +3099,7 @@ aria-label="Delete inventory item"
 
             if (!res.ok) {
                 console.error('Inventory edit failed:', res.status, result);
+                if (res.status === 409) await loadInventory();
                 showToast('error', result.message || 'Edit failed — please try again.');
                 return;
             }
@@ -2959,16 +3113,91 @@ aria-label="Delete inventory item"
             editId = null;
             await loadInventory();
             showToast('success', 'Item updated successfully!');
+            } catch (error) {
+                showToast('error', 'Inventory could not be updated. Please try again.');
+            } finally {
+                inventoryEditSaving = false;
+                if (saveButton) saveButton.disabled = false;
+            }
         }
 
-        function computeAddBalance() {
-            document.getElementById('addBalance').value = Number(document.getElementById('addQty').value || 0) - Number(
-                document.getElementById('addUsed').value || 0);
+        var editBottleOriginal = null;
+        var inventoryEditSaving = false;
+
+        function isBottleUnit(unit) {
+            return String(unit || '').trim().toLowerCase() === 'bottle';
         }
 
-        function computeEditBalance() {
-            document.getElementById('editBalance').value = Number(document.getElementById('editQty').value || 0) - Number(
-                document.getElementById('editUsed').value || 0);
+        function formatMl(value) {
+            const number = Number(value);
+            return Number.isFinite(number) ? number.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0';
         }
+
+        function syncBottleFields(prefix) {
+            const bottle = isBottleUnit(document.getElementById(prefix + 'Unit').value);
+            const wrapper = document.getElementById(prefix + 'BottleFields');
+            const capacity = document.getElementById(prefix + 'BottleCapacity');
+            const used = document.getElementById(prefix + 'Used');
+            document.getElementById(prefix + 'QtyLabel').textContent = bottle ? 'Bottle Quantity' : 'Quantity';
+            wrapper.hidden = !bottle;
+            capacity.disabled = !bottle;
+            capacity.required = bottle;
+            used.disabled = false;
+            used.required = !bottle;
+            used.closest('.inventory-field').style.display = '';
+            document.getElementById(prefix + 'UsedLabel').textContent = bottle ? 'Consumed (mL)' : 'Consumed';
+            used.min = bottle ? '0.01' : '0';
+            used.max = bottle ? '99999999.99' : '99999';
+            used.step = bottle ? '0.01' : '1';
+            used.inputMode = bottle ? 'decimal' : 'numeric';
+            used.placeholder = bottle ? 'e.g. 0.5' : '';
+            if (bottle) {
+                used.removeAttribute('data-validation-rule');
+                if (used.dataset.volumeMode === '0' || used.value === '0') used.value = '';
+            } else {
+                used.setAttribute('data-validation-rule', 'inventoryConsumed');
+                if (used.dataset.volumeMode === '1') used.value = '0';
+            }
+            used.dataset.volumeMode = bottle ? '1' : '0';
+            if (prefix === 'edit') {
+                document.getElementById('editBottleCapacityField').hidden = !bottle;
+                document.getElementById('editQty').min = bottle ? '0' : '1';
+                const fixedCapacity = editBottleOriginal?.is_volume_bottle && Number(editBottleOriginal.qty) > 0;
+                capacity.readOnly = Boolean(fixedCapacity);
+                document.getElementById('editUnit').readOnly = Boolean(fixedCapacity);
+                const quantity = Number(document.getElementById('editQty').value || 0);
+                const cap = Math.round(Number(capacity.value || 0) * 100);
+                const current = fixedCapacity ? Math.round(Number(editBottleOriginal.current_bottle_remaining_ml) * 100) : cap;
+                const available = quantity > 0 ? current + (quantity - 1) * cap : 0;
+                const consumed = Math.round(Number(document.getElementById('editUsed').value || 0) * 100);
+                const remaining = available - consumed;
+                const bottles = cap > 0 && remaining > 0 ? Math.ceil(remaining / cap) : 0;
+                document.getElementById('editBottleRemaining').value = remaining >= 0 && cap > 0
+                    ? formatMl((bottles > 0 ? remaining - (bottles - 1) * cap : 0) / 100) : 'Unavailable';
+                document.getElementById('editBalance').value = bottle
+                    ? (remaining < 0 ? 'Consumption exceeds available volume' : `${bottles} bottles | ${formatMl(remaining / 100)} mL remaining`)
+                    : quantity - Number(used.value || 0);
+            } else {
+                const quantity = Number(document.getElementById('addQty').value || 0);
+                const cap = Math.round(Number(capacity.value || 0) * 100);
+                const remaining = quantity * cap - Math.round(Number(used.value || 0) * 100);
+                const bottles = remaining > 0 && cap > 0 ? Math.ceil(remaining / cap) : 0;
+                document.getElementById('addBalance').value = bottle
+                    ? (remaining < 0 ? 'Consumption exceeds available volume' : `${capacity.value ? bottles : quantity} bottles | ${formatMl(remaining / 100)} mL total`)
+                    : quantity - Number(used.value || 0);
+            }
+        }
+
+        function computeAddBalance() { syncBottleFields('add'); }
+        function computeEditBalance() { syncBottleFields('edit'); }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            for (const prefix of ['add', 'edit']) {
+                for (const suffix of ['Unit', 'BottleCapacity']) {
+                    document.getElementById(prefix + suffix).addEventListener('input', () => syncBottleFields(prefix));
+                }
+            }
+            document.getElementById('editUsed').addEventListener('input', computeEditBalance);
+        });
     </script>
 @endsection

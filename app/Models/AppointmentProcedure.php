@@ -20,6 +20,7 @@ class AppointmentProcedure extends Model
         'oral_examination',
         'diagnosis',
         'prescriptions',
+        'inventory_notes',
         'completion_action',
         'procedure_started_at',
         'procedure_completed_at',
@@ -34,7 +35,7 @@ class AppointmentProcedure extends Model
 
     protected $with = ['odontogram', 'timing'];
 
-    protected $hidden = ['odontogram', 'timing'];
+    protected $hidden = ['odontogram', 'timing', 'inventory_notes'];
 
     protected $appends = ['odontogram_data', 'procedure_started_at', 'procedure_completed_at', 'procedure_duration_seconds'];
 

@@ -304,6 +304,8 @@
                 'false'
             );
 
+            window.syncModalBackground?.();
+
             document.body.classList.add(
                 'modal-lock',
                 'discard-lock'
@@ -327,6 +329,7 @@
 
             discardModal.classList.remove('open');
             discardModal.setAttribute('aria-hidden', 'true');
+            window.syncModalBackground?.();
             pendingDiscardCallback = null;
             pendingDiscardForm = null;
             document.body.classList.remove('discard-lock');

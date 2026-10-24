@@ -99,7 +99,10 @@ class OdontogramController extends Controller
         bool $savedVisitEditMode = false
     ): string {
         if ($existingAppointmentMode) {
-            return route($this->existingAppointmentRouteName('create'), ['patient' => $patient?->id]);
+            return route(
+                $this->isAdminExistingAppointmentContext() ? 'admin.admin.patient.profile' : 'dentist.dentist.patient.profile',
+                ['patient' => $patient?->id]
+            );
         }
 
         if ($savedVisitEditMode) {
@@ -986,6 +989,10 @@ class OdontogramController extends Controller
                 'procedure_duration_seconds' => max(0, $procedureDurationSeconds),
             ];
 
+            if (array_key_exists('inventory_notes', $validated)) {
+                $procedurePayload['inventory_notes'] = $validated['inventory_notes'];
+            }
+
             AppointmentProcedure::updateOrCreate(
                 [
                     'appointment_id' => $appointment->id,
@@ -1769,6 +1776,7 @@ class OdontogramController extends Controller
             'oral_examination' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'prescriptions' => 'nullable|string',
+            'inventory_notes' => 'sometimes|nullable|string|max:10000',
             'completion_action' => 'nullable|in:finished,follow_up',
             'has_applied_treatment' => 'required|boolean',
             'procedure_duration_hms' => ['required', 'regex:/^\d{2}:[0-5]\d:[0-5]\d$/'],
@@ -1911,6 +1919,7 @@ class OdontogramController extends Controller
             'oral_examination' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'prescriptions' => 'nullable|string',
+            'inventory_notes' => 'sometimes|nullable|string|max:10000',
             'completion_action' => 'nullable|in:finished',
             'has_applied_treatment' => 'required|boolean',
             'procedure_duration_hms' => ['required', 'regex:/^\d{2}:\d{2}:\d{2}$/'],
@@ -2049,6 +2058,7 @@ class OdontogramController extends Controller
             'oral_examination' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'prescriptions' => 'nullable|string',
+            'inventory_notes' => 'sometimes|nullable|string|max:10000',
             'completion_action' => 'nullable|in:finished',
             'has_applied_treatment' => 'required|boolean',
         ]);
