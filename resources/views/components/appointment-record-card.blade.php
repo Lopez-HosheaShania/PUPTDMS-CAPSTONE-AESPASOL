@@ -274,13 +274,22 @@ $odontogramEditLocked = false;
 $odontogramEditDeadline = null;
 
 if ($appointment instanceof \App\Models\Appointment) {
+  $canShowOdontogramEditState =
+    filled($recordEditUrl);
+
     $odontogramEditLocked =
+        $canShowOdontogramEditState
+        &&
         $normalizedStatus === 'completed'
         &&
-        $appointment->isOdontogramEditLocked();
+        $appointment
+            ->isOdontogramEditLocked();
 
     $odontogramEditDeadline =
-        $appointment->odontogramEditDeadline();
+        $canShowOdontogramEditState
+            ? $appointment
+                ->odontogramEditDeadline()
+            : null;
 }
 
 $recordPayload = [

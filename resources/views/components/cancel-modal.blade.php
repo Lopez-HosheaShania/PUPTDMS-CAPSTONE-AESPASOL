@@ -87,7 +87,7 @@
 
                 </div>
 
-                <div class="modal-form-section global-form-group" data-global-field>
+                <div class="modal-form-section global-form-group mt-4" data-global-field>
 
                     <div class="global-label-row">
                         <label class="global-form-label">
@@ -101,7 +101,8 @@
                         @php($cancellationReasonIcons = ['fa-regular fa-circle-xmark', 'fa-solid fa-user-doctor', 'fa-regular fa-hand', 'fa-solid fa-bolt', 'fa-solid fa-rotate'])
                         @foreach (\App\Models\Appointment::CANCELLATION_REASONS as $reason)
                             <div class="reason-chip">
-                                <input type="radio" name="cancelReason" id="r{{ $loop->iteration }}" value="{{ $reason }}" required
+                                <input type="radio" name="cancelReason" id="r{{ $loop->iteration }}"
+                                    value="{{ $reason }}" required
                                     data-required-message="Select the reason for cancelling this appointment.">
                                 <label for="r{{ $loop->iteration }}">
                                     <i class="{{ $cancellationReasonIcons[$loop->index] }}"></i>
