@@ -270,15 +270,27 @@ $currentRevisionVersion =
     collect($revisionItems)
         ->max('version_number');
 
-$odontogramEditLocked =
-    $normalizedStatus === 'completed'
-    &&
-    $appointment
-        ->isOdontogramEditLocked();
+$odontogramEditLocked = false;
+$odontogramEditDeadline = null;
 
-$odontogramEditDeadline =
-    $appointment
-        ->odontogramEditDeadline();
+if ($appointment instanceof \App\Models\Appointment) {
+  $canShowOdontogramEditState =
+    filled($recordEditUrl);
+
+    $odontogramEditLocked =
+        $canShowOdontogramEditState
+        &&
+        $normalizedStatus === 'completed'
+        &&
+        $appointment
+            ->isOdontogramEditLocked();
+
+    $odontogramEditDeadline =
+        $canShowOdontogramEditState
+            ? $appointment
+                ->odontogramEditDeadline()
+            : null;
+}
 
 $recordPayload = [
 'id' => $get('id'),

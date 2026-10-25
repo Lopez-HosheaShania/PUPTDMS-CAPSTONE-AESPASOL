@@ -734,9 +734,24 @@ class OdontogramController extends Controller
         Appointment $appointment,
         array $validated,
         int $procedureDurationSeconds,
-        ?Carbon $procedureCompletedAt = null
+        ?Carbon $procedureCompletedAt = null,
+        bool $allowUnassignedDentistCorrection = false
     ): array {
-        abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Only the assigned dentist may record treatment for this visit.');
+        if (!$allowUnassignedDentistCorrection) {
+            abort_if(
+                in_array(
+                    Auth::user()?->role?->slug,
+                    ['dentist', 'dentist_role'],
+                    true
+                )
+                    &&
+                    (int) $appointment->dentist_id !==
+                    (int) Auth::id(),
+                403,
+                'Only the assigned dentist may record treatment for this visit.'
+            );
+        }
+
         $appointment->loadMissing('patient');
         $patient = $appointment->patient;
         $completionAction = $validated['completion_action'] ?? 'finished';
@@ -1945,7 +1960,6 @@ class OdontogramController extends Controller
         Appointment $appointment,
         OdontogramRevisionService $revisionService
     ) {
-        abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Historical clinical notes must retain their original author. Record subsequent care as a new visit.');
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
@@ -2028,7 +2042,11 @@ class OdontogramController extends Controller
                 array_merge($validated, [
                     'completion_action' => 'finished',
                 ]),
-                max(0, $procedureDurationSeconds)
+                max(
+                    0,
+                    $procedureDurationSeconds
+                ),
+                allowUnassignedDentistCorrection: true
             );
 
             $savedAppointment = $result['appointment'];
