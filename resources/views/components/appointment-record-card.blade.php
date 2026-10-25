@@ -176,6 +176,110 @@ $followUp = [
 }
 }
 
+   $revisionItems = collect(
+    $get(
+        'odontogramRevisions',
+        []
+    )
+)
+    ->sortByDesc('version_number')
+    ->map(function ($revision) {
+        $createdAt =
+            data_get(
+                $revision,
+                'created_at'
+            );
+
+        return [
+            'id' =>
+                data_get(
+                    $revision,
+                    'id'
+                ),
+
+            'version_number' =>
+                (int) data_get(
+                    $revision,
+                    'version_number',
+                    0
+                ),
+
+            'odontogram_data' =>
+                data_get(
+                    $revision,
+                    'odontogram_data',
+                    []
+                ),
+
+            'changes' =>
+                data_get(
+                    $revision,
+                    'changes',
+                    []
+                ),
+
+           'reason_type_code' =>
+                data_get(
+                    $revision,
+                    'reasonType.code'
+                ),
+
+            'reason_type_label' =>
+                data_get(
+                    $revision,
+                    'reasonType.label'
+                ),
+
+            'reason_detail' =>
+                data_get(
+                    $revision,
+                    'reason_detail'
+                ),
+
+            'reason_notes' =>
+                data_get(
+                    $revision,
+                    'reason_notes'
+                ),
+
+            'changed_by_name' =>
+                data_get(
+                    $revision,
+                    'changedBy.name',
+                    'Unknown user'
+                ),
+
+            'changed_by_role' =>
+                data_get(
+                    $revision,
+                    'changed_by_role'
+                ),
+
+            'created_at' =>
+                $createdAt
+                    ? Carbon::parse(
+                        $createdAt
+                    )->toIso8601String()
+                    : null,
+        ];
+    })
+    ->values()
+    ->all();
+
+$currentRevisionVersion =
+    collect($revisionItems)
+        ->max('version_number');
+
+$odontogramEditLocked =
+    $normalizedStatus === 'completed'
+    &&
+    $appointment
+        ->isOdontogramEditLocked();
+
+$odontogramEditDeadline =
+    $appointment
+        ->odontogramEditDeadline();
+
 $recordPayload = [
 'id' => $get('id'),
 
@@ -205,7 +309,22 @@ $recordPayload = [
 
 'follow_up' => $followUp,
 
+'revisions' => $revisionItems,
+
+'current_version' => $currentRevisionVersion,
+
 'edit_url' => $recordEditUrl,
+
+'edit_locked' => $odontogramEditLocked,
+
+'edit_lock_reason' =>
+    $odontogramEditLocked
+        ? 'The 7-day editing period for this completed odontogram has expired.'
+        : null,
+
+'edit_deadline' =>
+    $odontogramEditDeadline
+        ?->toIso8601String(),
 ];
 }
 
@@ -310,6 +429,7 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
     </div>
 
     @if ($showDetails)
+
     <div class="appt-visit-actions">
         <button type="button" class="ui-action-btn ui-action-view" data-appointment-id="{{ $get('id') }}" data-record='@json(
         $recordPayload,
@@ -323,5 +443,6 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
             <i class="fa-regular fa-eye"></i>
         </button>
     </div>
+    
     @endif
 </div>

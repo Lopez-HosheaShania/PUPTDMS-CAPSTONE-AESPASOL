@@ -19,6 +19,23 @@ const TOOTH_WIDTH_SCALE = 1.10;
 let dentalTextures = null;
 const occlusalTextureCache = new Map();
 
+function yieldOdontogramBuild() {
+    if (
+        globalThis.scheduler?.yield
+    ) {
+        return globalThis.scheduler.yield();
+    }
+
+    return new Promise(
+        resolve => {
+            globalThis.setTimeout(
+                resolve,
+                0
+            );
+        }
+    );
+}
+
 const clamp01 = value => Math.min(1, Math.max(0, value));
 const smooth = value => { const t = clamp01(value); return t * t * (3 - 2 * t); };
 
@@ -705,6 +722,97 @@ export function createOdontogramArch({ scene, teethArray, yPosition, isUpper = t
     return group;
 }
 
+export async function createOdontogramArchProgressive({
+    scene,
+    teethArray,
+    yPosition,
+    isUpper = true,
+    teethMeshes
+}) {
+    const group =
+        new THREE.Group();
+
+    const arch =
+        isUpper
+            ? ARCHES.upper
+            : ARCHES.lower;
+
+    group.name =
+        isUpper
+            ? 'upper-teeth'
+            : 'lower-teeth';
+
+    scene.add(
+        group
+    );
+
+    const placements =
+        toothPlacements(
+            teethArray,
+            isUpper
+        );
+
+    for (
+        let index = 0;
+        index < placements.length;
+        index++
+    ) {
+        const {
+            number,
+            angle
+        } = placements[index];
+
+        const tooth =
+            createOdontogramTooth(
+                number,
+                isUpper
+            );
+
+        const point =
+            archPoint(
+                angle,
+                yPosition,
+                isUpper
+            );
+
+        point.y +=
+            (
+                isUpper
+                    ? 1
+                    : -1
+            ) *
+            .035 *
+            Math.abs(
+                Math.cos(angle)
+            ) ** 2;
+
+        tooth.group.position.copy(
+            point
+        );
+
+        tooth.group.rotation.y =
+            Math.atan2(
+                Math.cos(angle) /
+                arch.width,
+
+                Math.sin(angle) /
+                arch.depth
+            );
+
+        group.add(
+            tooth.group
+        );
+
+        teethMeshes.push(
+            tooth.hitMesh
+        );
+
+        await yieldOdontogramBuild();
+    }
+
+    return group;
+}
+
 export function createOdontogramGumArch({ scene, yPosition, isUpper = true, teethArray = [] }) {
     const arch = isUpper ? ARCHES.upper : ARCHES.lower, towardTeeth = isUpper ? -1 : 1;
     const toothY = yPosition - (isUpper ? .28 : -.28);
@@ -1006,4 +1114,151 @@ export function createOdontogramPresentation({ scene, teethMeshes, upperTeeth, l
     }
     scene.add(root);
     return { root, jaws, oralTissues };
+}
+
+export async function createOdontogramPresentationProgressive({
+    scene,
+    teethMeshes,
+    upperTeeth,
+    lowerTeeth
+}) {
+    const root =
+        new THREE.Group();
+
+    const jaws = {};
+    const oralTissues = [];
+
+    root.name =
+        'dental-arches';
+
+    scene.add(
+        root
+    );
+
+    const jawDefinitions = [
+        {
+            teethArray:
+                upperTeeth,
+
+            isUpper:
+                true
+        },
+        {
+            teethArray:
+                lowerTeeth,
+
+            isUpper:
+                false
+        }
+    ];
+
+    for (
+        const {
+            teethArray,
+            isUpper
+        } of jawDefinitions
+    ) {
+        const jaw =
+            new THREE.Group();
+
+        const content =
+            new THREE.Group();
+
+        const key =
+            isUpper
+                ? 'upper'
+                : 'lower';
+
+
+        jaw.name =
+            `${key}-jaw`;
+
+        jaw.position.y =
+            isUpper
+                ? 1.82
+                : -2.0;
+
+        jaw.rotation.x =
+            isUpper
+                ? -.70
+                : .82;
+
+        content.position.z =
+            -1.70;
+
+        jaw.add(
+            content
+        );
+
+        root.add(
+            jaw
+        );
+
+        jaws[key] =
+            jaw;
+
+        await yieldOdontogramBuild();
+
+        createOdontogramGumArch({
+            scene:
+                content,
+
+            teethArray,
+
+            yPosition:
+                isUpper
+                    ? .28
+                    : -.28,
+
+            isUpper
+        });
+
+        await yieldOdontogramBuild();
+
+        await createOdontogramArchProgressive({
+            scene:
+                content,
+
+            teethArray,
+
+            yPosition:
+                0,
+
+            isUpper,
+
+            teethMeshes
+        });
+
+        await yieldOdontogramBuild();
+
+        oralTissues.push(
+            createOdontogramPalate({
+                scene:
+                    content,
+
+                isUpper,
+
+                teethArray
+            })
+        );
+
+        await yieldOdontogramBuild();
+
+        if (!isUpper) {
+            oralTissues.push(
+                createOdontogramTongue({
+                    scene:
+                        content
+                })
+            );
+
+            await yieldOdontogramBuild();
+        }
+    }
+
+    return {
+        root,
+        jaws,
+        oralTissues
+    };
 }

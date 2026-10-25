@@ -1,32 +1,95 @@
 @php
     $previewOdontogramData = $odontogramData ?? [];
     $showEditButton = $showEditButton ?? false;
+    $showHistoricalNotice = $showHistoricalNotice ?? false;
+    $tallPreview = $tallPreview ?? false;
 @endphp
 
-<div class="odontogram-preview" data-odontogram-preview data-odontogram='@json($previewOdontogramData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)'>
+<div @class([
+    'odontogram-preview',
+    'odontogram-preview-tall' => $tallPreview,
+]) data-odontogram-preview data-odontogram='@json($previewOdontogramData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)'>
 
-    <div class="odontogram-preview-head">
-        <div>
-            <p class="odontogram-preview-subtitle">
-                Click any tooth to view its saved markings.
-            </p>
-        </div>
+    @if ($showEditButton)
+        <div class="odontogram-preview-head">
 
-        @if ($showEditButton)
-            <a href="#" id="recordModalEditBtn"
-                class="ui-btn ui-btn-primary ui-btn-sm odontogram-preview-head-edit-btn"
-                hidden>
+            <a href="#" id="recordModalEditBtn" class="ui-btn ui-btn-primary ui-btn-sm" hidden>
+
                 <i class="fa-solid fa-pen-to-square"></i>
-                <span>Edit Odontogram</span>
+
+                <span>
+                    Edit Odontogram
+                </span>
+
             </a>
-        @endif
-    </div>
+
+        </div>
+    @endif
 
     <div class="odontogram-preview-layout">
         <div class="odontogram-preview-stage">
-            <div class="odontogram-preview-loading" data-odontogram-preview-loading>
-                <i class="fa-solid fa-circle-notch fa-spin"></i>
-                <span>Generating 3D Model...</span>
+            @if ($showHistoricalNotice)
+                <div id="recordHistoricalVersionNotice"
+                    class="global-confirm-alert odontogram-preview-history-notice !items-center !gap-2.5 !px-3 !py-2.5"
+                    hidden>
+
+                    <i class="fa-solid fa-clock-rotate-left !mt-0"></i>
+
+                    <div class="min-w-0 flex-1">
+
+                        <div class="flex items-baseline gap-2 min-w-0">
+
+                            <strong id="recordHistoricalVersionTitle" class="!mt-0 whitespace-nowrap">
+                                Viewing version 1
+                            </strong>
+
+                            <span class="!mt-0 hidden sm:block">
+                                Previous odontogram snapshot · read-only
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <button type="button" id="recordBackToCurrentBtn"
+                        class="ui-btn ui-btn-secondary ui-btn-sm ml-auto flex-shrink-0 whitespace-nowrap">
+
+                        <span class="!inline-flex items-center gap-1.5 !mt-0 sm:!hidden">
+
+                            <i class="fa-solid fa-arrow-left"></i>
+
+                            <span class="!inline !mt-0">
+                                Current
+                                (<span data-record-latest-version class="!inline !mt-0">v1</span>)
+                            </span>
+
+                        </span>
+
+                        <span class="!hidden sm:!inline-flex items-center !mt-0">
+
+                            Return to latest
+                            (<span data-record-latest-version class="!inline !mt-0">v1</span>)
+
+                        </span>
+
+                    </button>
+
+                </div>
+            @endif
+
+            <div class="odontogram-loading" data-odontogram-preview-loading role="status" aria-live="polite"
+                aria-label="Generating 3D odontogram model.">
+
+                <div aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <p>
+                    Generating 3D model...
+                </p>
+
             </div>
 
             <div class="odontogram-preview-canvas" data-odontogram-preview-canvas>
@@ -77,7 +140,7 @@
                 <div class="odontogram-preview-panel-body">
                     <div class="odontogram-preview-detail-main">
                         <div>
-                            <p class="odontogram-preview-detail-label">
+                            <p class="odontogram-preview-detail-label" data-odontogram-preview-condition-label>
                                 Overall Marking
                             </p>
 
@@ -131,7 +194,7 @@
 
                     <section class="odontogram-preview-markings">
                         <p class="odontogram-preview-detail-label">
-                            Surface Markings
+                            Saved Markings
                         </p>
 
                         <div class="odontogram-preview-marking-list" data-odontogram-preview-markings>

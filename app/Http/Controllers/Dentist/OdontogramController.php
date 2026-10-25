@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Dentist;
 
+use App\Http\Requests\UpdateSavedOdontogramRequest;
+use App\Services\OdontogramRevisionService;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\AppointmentProcedure;
@@ -25,6 +27,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Patient;
 use Carbon\Carbon;
@@ -32,6 +35,7 @@ use App\Models\ClinicSchedule;
 use App\Models\BlockedDate;
 use App\Helpers\PhilippineHolidays;
 use App\Helpers\BookingQuestions;
+use App\Models\OdontogramRevisionReasonType;
 
 class OdontogramController extends Controller
 {
@@ -128,7 +132,7 @@ class OdontogramController extends Controller
             : AppointmentProcedure::whereHas('appointment', function ($query) use ($patient) {
                 $query->where('patient_id', $patient->id);
             })
-            ->whereHas('odontogram', fn ($query) => $query->where('has_data', true))
+            ->whereHas('odontogram', fn($query) => $query->where('has_data', true))
             ->latest('updated_at')
             ->latest('id')
             ->first();
@@ -891,7 +895,7 @@ class OdontogramController extends Controller
             &$savedTeeth
         ) {
 
-            if ($hasOdontogramChanges) {
+            if ($hasOdontogramChanges && $shouldUpdatePatientOdontogram) {
                 $submittedToothNumbers = collect($cleanOdontogramData)
                     ->pluck('tooth')
                     ->map(fn($toothNumber) => (int) $toothNumber)
@@ -1737,8 +1741,11 @@ class OdontogramController extends Controller
         ]);
     }
 
-    public function save(Request $request, Appointment $appointment)
-    {
+    public function save(
+        Request $request,
+        Appointment $appointment,
+        OdontogramRevisionService $revisionService
+    ) {
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
@@ -1797,11 +1804,40 @@ class OdontogramController extends Controller
             ], 422);
         }
 
-        $result = $this->persistProcedureSnapshot(
+        $user = Auth::user();
+
+        $result = DB::transaction(function () use (
             $appointment,
             $validated,
-            $this->procedureDurationSeconds($validated)
-        );
+            $revisionService,
+            $user
+        ) {
+            $result = $this->persistProcedureSnapshot(
+                $appointment,
+                $validated,
+                $this->procedureDurationSeconds($validated)
+            );
+
+            $savedAppointment = $result['appointment'];
+
+            $savedAppointment->load('procedure');
+
+            $procedure = $savedAppointment->procedure;
+
+            if (!$procedure) {
+                throw new \LogicException(
+                    'The appointment procedure could not be loaded after saving.'
+                );
+            }
+
+            $revisionService->recordInitialRevision(
+                $procedure,
+                $user
+            );
+
+            return $result;
+        });
+
         $appointment = $result['appointment'];
         $completionAction = $validated['completion_action'] ?? 'finished';
 
@@ -1837,6 +1873,15 @@ class OdontogramController extends Controller
             return redirect('/login');
         }
 
+        abort_unless(
+            $appointment
+                ->canEditCompletedOdontogram(
+                    Auth::user()
+                ),
+            403,
+            'The 7-day editing period for this completed odontogram has expired.'
+        );
+
         $appointment->load([
             'patient.user',
             'procedure',
@@ -1848,6 +1893,22 @@ class OdontogramController extends Controller
         if (!$patient) {
             abort(404, 'Patient not found for this appointment.');
         }
+
+        $revisionReasonTypes =
+            OdontogramRevisionReasonType
+            ::active()
+            ->orderBy(
+                'sort_order'
+            )
+            ->orderBy(
+                'label'
+            )
+            ->get([
+                'id',
+                'code',
+                'label',
+                'requires_detail',
+            ]);
 
         return view('dentist.dentist-odontogram', array_merge(
             [
@@ -1865,10 +1926,10 @@ class OdontogramController extends Controller
                     true
                 ),
                 'discardProcedureUrl' => route('dentist.odontogram.discard'),
-                // A completed visit may not have an odontogram record yet; start its editor blank.
                 'savedOdontogramData' => $procedure?->odontogram_data ?? [],
                 'existingAppointmentMode' => false,
                 'savedVisitEditMode' => true,
+                'revisionReasonTypes' => $revisionReasonTypes,
                 'saveProcedureUrl' => route('dentist.odontogram.saved.update', [
                     'appointment' => $appointment->id,
                     'from' => $request->query('from', 'appointments'),
@@ -1879,8 +1940,11 @@ class OdontogramController extends Controller
         ));
     }
 
-    public function updateSavedVisit(Request $request, Appointment $appointment)
-    {
+    public function updateSavedVisit(
+        UpdateSavedOdontogramRequest $request,
+        Appointment $appointment,
+        OdontogramRevisionService $revisionService
+    ) {
         abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Historical clinical notes must retain their original author. Record subsequent care as a new visit.');
         $activeRole = session('impersonated_role') ?: session('role');
 
@@ -1889,6 +1953,15 @@ class OdontogramController extends Controller
                 'message' => 'Unauthorized.',
             ], 403);
         }
+
+        abort_unless(
+            $appointment
+                ->canEditCompletedOdontogram(
+                    Auth::user()
+                ),
+            403,
+            'The 7-day editing period for this completed odontogram has expired.'
+        );
 
         $appointment->load([
             'patient.user',
@@ -1903,28 +1976,27 @@ class OdontogramController extends Controller
             ], 404);
         }
 
-        $validated = $request->validate([
-            'odontogram_data' => 'present|array',
-            'odontogram_data.*.tooth' => 'nullable|integer|min:1',
-            'odontogram_data.*.status.code' => 'nullable|string|max:20',
-            'odontogram_data.*.status.label' => 'nullable|string|max:255',
-            'odontogram_data.*.status.colorHex' => 'nullable|string|max:30',
-            'odontogram_data.*.threeD.code' => 'nullable|string|max:20',
-            'odontogram_data.*.threeD.label' => 'nullable|string|max:255',
-            'odontogram_data.*.threeD.colorHex' => 'nullable|string|max:30',
-            'odontogram_data.*.surfaces' => 'nullable|array',
-            'odontogram_data.*.surfaces.*.code' => 'nullable|string|max:20',
-            'odontogram_data.*.surfaces.*.label' => 'nullable|string|max:255',
-            'odontogram_data.*.surfaces.*.colorHex' => 'nullable|string|max:30',
-            'oral_examination' => 'nullable|string',
-            'diagnosis' => 'nullable|string',
-            'prescriptions' => 'nullable|string',
-            'inventory_notes' => 'sometimes|nullable|string|max:10000',
-            'completion_action' => 'nullable|in:finished',
-            'has_applied_treatment' => 'required|boolean',
-            'procedure_duration_hms' => ['required', 'regex:/^\d{2}:\d{2}:\d{2}$/'],
-            'procedure_duration_seconds' => 'nullable|integer|min:0',
-        ]);
+        $procedure = $appointment->procedure;
+
+        $oldOdontogramData = $procedure?->odontogram_data ?? [];
+
+        $validated = $request->validated();
+
+        $changes = $revisionService->computeChanges(
+            $oldOdontogramData,
+            $validated['odontogram_data'] ?? []
+        );
+
+        if ($changes === []) {
+            return response()->json([
+                'message' => 'No odontogram changes were detected.',
+                'errors' => [
+                    'odontogram_data' => [
+                        'Please make an odontogram correction before saving.',
+                    ],
+                ],
+            ], 422);
+        }
 
         $allowsProcedureCompletionWithoutOdontogramChanges = $this->allowsProcedureCompletionWithoutOdontogramChanges(
             $appointment->service_type_name
@@ -1941,13 +2013,50 @@ class OdontogramController extends Controller
 
         $procedureDurationSeconds = $this->procedureDurationSeconds($validated);
 
-        $result = $this->persistProcedureSnapshot(
+        $user = Auth::user();
+
+        $result = DB::transaction(function () use (
             $appointment,
-            array_merge($validated, [
-                'completion_action' => 'finished',
-            ]),
-            max(0, $procedureDurationSeconds)
-        );
+            $validated,
+            $procedureDurationSeconds,
+            $oldOdontogramData,
+            $revisionService,
+            $user
+        ) {
+            $result = $this->persistProcedureSnapshot(
+                $appointment,
+                array_merge($validated, [
+                    'completion_action' => 'finished',
+                ]),
+                max(0, $procedureDurationSeconds)
+            );
+
+            $savedAppointment = $result['appointment'];
+
+            $savedAppointment->load('procedure');
+
+            $procedure = $savedAppointment->procedure;
+
+            if (!$procedure) {
+                throw new \LogicException(
+                    'The appointment procedure could not be loaded after saving.'
+                );
+            }
+
+            $newOdontogramData = $procedure->odontogram_data ?? [];
+
+            $revisionService->recordRevision(
+                $procedure,
+                $newOdontogramData,
+                $oldOdontogramData,
+                (int) $validated['reason_type_id'],
+                $validated['reason_detail'] ?? null,
+                $validated['reason_notes'] ?? null,
+                $user
+            );
+
+            return $result;
+        });
 
         return response()->json([
             'message' => 'Saved visit odontogram updated successfully.',
@@ -2024,8 +2133,11 @@ class OdontogramController extends Controller
         ]);
     }
 
-    public function storeExistingAppointment(Request $request, Patient $patient)
-    {
+    public function storeExistingAppointment(
+        Request $request,
+        Patient $patient,
+        OdontogramRevisionService $revisionService
+    ) {
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
@@ -2117,6 +2229,8 @@ class OdontogramController extends Controller
 
         $result = null;
 
+        $user = Auth::user();
+
         DB::transaction(function () use (
             $patient,
             $draft,
@@ -2124,6 +2238,8 @@ class OdontogramController extends Controller
             $validated,
             $procedureDurationSeconds,
             $procedureCompletedAt,
+            $revisionService,
+            $user,
             &$result
         ) {
             $this->persistExistingAppointmentPatientHistory($patient, $draft);
@@ -2137,6 +2253,23 @@ class OdontogramController extends Controller
                 ]),
                 $procedureDurationSeconds,
                 $procedureCompletedAt
+            );
+
+            $savedAppointment = $result['appointment'];
+
+            $savedAppointment->load('procedure');
+
+            $procedure = $savedAppointment->procedure;
+
+            if (!$procedure) {
+                throw new \LogicException(
+                    'The appointment procedure could not be loaded after saving.'
+                );
+            }
+
+            $revisionService->recordInitialRevision(
+                $procedure,
+                $user
             );
         });
 
