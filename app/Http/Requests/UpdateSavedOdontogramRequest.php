@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Models\OdontogramRevisionReasonType;
 
 class UpdateSavedOdontogramRequest extends FormRequest
 {
@@ -15,16 +16,14 @@ class UpdateSavedOdontogramRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'reason_category' => filled($this->input('reason_category'))
-                ? trim((string) $this->input('reason_category'))
+            'reason_type_id' => filled($this->input('reason_type_id'))
+                ? (int) $this->input('reason_type_id')
                 : null,
 
-            'reason_notes' => trim(
-                (string) $this->input(
-                    'reason_notes',
-                    ''
-                )
-            ),
+            'reason_detail' => filled($this->input('reason_detail'))
+                ? trim((string) $this->input('reason_detail')) : null,
+
+            'reason_notes' => trim((string) $this->input('reason_notes', '')),
         ]);
     }
 
@@ -71,20 +70,29 @@ class UpdateSavedOdontogramRequest extends FormRequest
                 'min:0',
             ],
 
-            'reason_category' => [
+            'reason_type_id' => [
                 'required',
+                'integer',
+                Rule::exists(
+                    'odontogram_revision_reason_types',
+                    'id'
+                )->where(
+                    fn($query) =>
+                    $query->where(
+                        'is_active',
+                        true
+                    )
+                ),
+            ],
+
+            'reason_detail' => [
+                'nullable',
                 'string',
-                Rule::in([
-                    'wrong_tooth',
-                    'wrong_surface',
-                    'wrong_condition',
-                    'treatment_changed',
-                    'data_entry_error',
-                    'other',
-                ]),
+                'max:255',
             ],
 
             'reason_notes' => [
+                'nullable',
                 'string',
                 'max:2000',
             ],
@@ -94,11 +102,58 @@ class UpdateSavedOdontogramRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'reason_category.required' =>
+            'reason_type_id.required' =>
             'Please select a reason for the correction.',
 
-            'reason_category.in' =>
+            'reason_type_id.exists' =>
             'The selected correction reason is invalid.',
+
+            'reason_detail.max' =>
+            'The specified correction reason may not exceed 255 characters.',
         ];
+    }
+
+    public function withValidator(
+        $validator
+    ): void {
+        $validator->after(
+            function ($validator) {
+                if (
+                    $validator
+                    ->errors()
+                    ->has(
+                        'reason_type_id'
+                    )
+                ) {
+                    return;
+                }
+
+                $reasonType =
+                    OdontogramRevisionReasonType
+                    ::query()
+                    ->find(
+                        $this->input(
+                            'reason_type_id'
+                        )
+                    );
+
+                if (
+                    $reasonType
+                    ?->requires_detail &&
+                    blank(
+                        $this->input(
+                            'reason_detail'
+                        )
+                    )
+                ) {
+                    $validator
+                        ->errors()
+                        ->add(
+                            'reason_detail',
+                            'Please specify the correction reason.'
+                        );
+                }
+            }
+        );
     }
 }

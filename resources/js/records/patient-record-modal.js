@@ -73,8 +73,25 @@ function normalizeRecordData(source) {
                 null
             ),
 
-            editUrl: source.dataset.editUrl ||
+            editUrl:
+                source?.edit_url ||
+                source?.editUrl ||
                 '',
+
+            editLocked:
+                source?.edit_locked ??
+                source?.editLocked ??
+                false,
+
+            editLockReason:
+                source?.edit_lock_reason ||
+                source?.editLockReason ||
+                '',
+
+            editDeadline:
+                source?.edit_deadline ||
+                source?.editDeadline ||
+                null,
 
             revisions: parseRecordDatasetJson(
                 source.dataset.revisions,
@@ -148,9 +165,25 @@ function normalizeRecordData(source) {
             source?.followUp ||
             null,
 
-        editUrl: source?.edit_url ||
+        editUrl:
+            source?.edit_url ||
             source?.editUrl ||
             '',
+
+        editLocked:
+            source?.edit_locked ??
+            source?.editLocked ??
+            false,
+
+        editLockReason:
+            source?.edit_lock_reason ||
+            source?.editLockReason ||
+            '',
+
+        editDeadline:
+            source?.edit_deadline ||
+            source?.editDeadline ||
+            null,
 
         revisions:
             source?.revisions ||
@@ -834,6 +867,16 @@ function showRecordOdontogramSnapshot(
             '#recordModalEditBtn'
         );
 
+    const editLockNotice =
+        modal.querySelector(
+            '#recordEditLockNotice'
+        );
+
+    const editLockMessage =
+        modal.querySelector(
+            '#recordEditLockMessage'
+        );
+
     const odontogramSection =
         modal.querySelector(
             '#recordOdontogramSection'
@@ -841,6 +884,37 @@ function showRecordOdontogramSnapshot(
 
     const isHistorical =
         options.historical === true;
+
+    const editLocked =
+        modal.__recordData
+            ?.editLocked === true;
+
+    const editDisabled =
+        isHistorical ||
+        editLocked;
+
+    if (editLockNotice) {
+        editLockNotice.hidden =
+            !editLocked;
+    }
+
+    if (
+        editLocked &&
+        editLockMessage
+    ) {
+        const deadline =
+            modal.__recordData
+                ?.editDeadline;
+
+        editLockMessage.textContent =
+            deadline
+                ? `The 7-day editing period for this odontogram ended on ${formatRecordRevisionDate(deadline)}. This record is now read-only.`
+                : (
+                    modal.__recordData
+                        ?.editLockReason ||
+                    'The 7-day editing period for this odontogram has expired. This record is now read-only.'
+                );
+    }
 
     const version =
         Number(
@@ -857,6 +931,92 @@ function showRecordOdontogramSnapshot(
             )
     );
 
+    if (editBtn) {
+        const editUrl =
+            String(
+                modal.__recordData
+                    ?.editUrl || ''
+            ).trim();
+
+        editBtn.hidden =
+            !editUrl;
+
+        const editBtnIcon =
+            editBtn.querySelector('i');
+
+        const editBtnText =
+            editBtn.querySelector('span');
+
+        if (editLocked) {
+            if (editBtnIcon) {
+                editBtnIcon.className =
+                    'fa-solid fa-lock';
+            }
+
+            if (editBtnText) {
+                editBtnText.textContent =
+                    'Editing Locked';
+            }
+        } else {
+            if (editBtnIcon) {
+                editBtnIcon.className =
+                    'fa-solid fa-pen-to-square';
+            }
+
+            if (editBtnText) {
+                editBtnText.textContent =
+                    'Edit Odontogram';
+            }
+        }
+
+        if (
+            editUrl &&
+            !editDisabled
+        ) {
+            editBtn.href =
+                editUrl;
+
+            editBtn.removeAttribute(
+                'tabindex'
+            );
+        } else {
+            editBtn.removeAttribute(
+                'href'
+            );
+
+            editBtn.setAttribute(
+                'tabindex',
+                '-1'
+            );
+        }
+
+        editBtn.setAttribute(
+            'aria-disabled',
+            String(editDisabled)
+        );
+
+        editBtn.title =
+            isHistorical
+                ? 'Return to the current version to edit.'
+                : editLocked
+                    ? (
+                        modal.__recordData
+                            ?.editLockReason ||
+                        'The editing period for this odontogram has expired.'
+                    )
+                    : 'Edit odontogram';
+
+        editBtn.classList.toggle(
+            'pointer-events-none',
+            editDisabled
+        );
+
+        editBtn.classList.toggle(
+            'opacity-60',
+            editDisabled
+        );
+    }
+
     if (notice) {
         notice.hidden =
             !isHistorical;
@@ -868,49 +1028,6 @@ function showRecordOdontogramSnapshot(
     ) {
         noticeTitle.textContent =
             `Viewing version ${version}`;
-    }
-
-    if (editBtn) {
-        const editUrl =
-            String(
-                modal.__recordData
-                    ?.editUrl || ''
-            ).trim();
-
-        editBtn.hidden =
-            !editUrl;
-
-        if (
-            editUrl &&
-            !isHistorical
-        ) {
-            editBtn.href =
-                editUrl;
-        } else if (isHistorical) {
-            editBtn.removeAttribute(
-                'href'
-            );
-        }
-
-        editBtn.setAttribute(
-            'aria-disabled',
-            String(isHistorical)
-        );
-
-        editBtn.title =
-            isHistorical
-                ? 'Return to the current version to edit.'
-                : 'Edit odontogram';
-
-        editBtn.classList.toggle(
-            'pointer-events-none',
-            isHistorical
-        );
-
-        editBtn.classList.toggle(
-            'opacity-60',
-            isHistorical
-        );
     }
 
     window.requestAnimationFrame(
@@ -1098,6 +1215,11 @@ function renderRecordRevisionHistory(
                     revision?.reason_notes || ''
                 ).trim();
 
+            const reasonDetail =
+                String(
+                    revision?.reason_detail || ''
+                ).trim();
+
             const showNotes =
                 notes &&
                 !(
@@ -1213,7 +1335,6 @@ function renderRecordRevisionHistory(
                 versionTitle
             );
 
-
             if (isCurrent) {
 
                 const currentBadge =
@@ -1256,7 +1377,6 @@ function renderRecordRevisionHistory(
                     viewingBadge
                 );
             }
-
 
             headerMain.appendChild(
                 versionGroup
@@ -1325,7 +1445,6 @@ function renderRecordRevisionHistory(
                 );
             }
 
-
             content.appendChild(
                 header
             );
@@ -1337,7 +1456,6 @@ function renderRecordRevisionHistory(
 
             meta.className =
                 'record-modal-meta mt-2';
-
 
             const actor =
                 document.createElement(
@@ -1359,7 +1477,6 @@ function renderRecordRevisionHistory(
             )})
         `;
 
-
             const date =
                 document.createElement(
                     'span'
@@ -1374,7 +1491,6 @@ function renderRecordRevisionHistory(
                 )
             )}
         `;
-
 
             meta.append(
                 actor,
@@ -1421,10 +1537,10 @@ function renderRecordRevisionHistory(
                     'status-pill status-default';
 
                 reasonBadge.textContent =
+                    revision?.reason_type_label ||
                     formatRecordRevisionReason(
-                        revision?.reason_category
+                        revision?.reason_type_code
                     );
-
 
                 reasonBlock.append(
                     reasonLabel,
@@ -1435,6 +1551,41 @@ function renderRecordRevisionHistory(
                     reasonBlock
                 );
 
+                if (reasonDetail) {
+                    const detailCard =
+                        document.createElement('div');
+
+                    detailCard.className =
+                        'info-card';
+
+                    const detailLabel =
+                        document.createElement('span');
+
+                    detailLabel.className =
+                        'global-form-label';
+
+                    detailLabel.textContent =
+                        'Specified Reason';
+
+                    const detailText =
+                        document.createElement('p');
+
+                    detailText.className =
+                        'modal-helper-text';
+
+                    detailText.textContent =
+                        reasonDetail;
+
+                    detailCard.append(
+                        detailLabel,
+                        detailText
+                    );
+
+                    correctionDetails.appendChild(
+                        detailCard
+                    );
+                }
+
                 if (showNotes) {
                     const noteCard =
                         document.createElement(
@@ -1443,7 +1594,6 @@ function renderRecordRevisionHistory(
 
                     noteCard.className =
                         'info-card';
-
 
                     const noteLabel =
                         document.createElement(
@@ -1455,7 +1605,6 @@ function renderRecordRevisionHistory(
 
                     noteLabel.textContent =
                         'Correction Note';
-
 
                     const note =
                         document.createElement(
@@ -1485,7 +1634,6 @@ function renderRecordRevisionHistory(
                             'div'
                         );
 
-
                     const changesLabel =
                         document.createElement(
                             'span'
@@ -1499,7 +1647,6 @@ function renderRecordRevisionHistory(
                             ? 'Changed Tooth'
                             : 'Changed Teeth';
 
-
                     const changesList =
                         document.createElement(
                             'div'
@@ -1507,7 +1654,6 @@ function renderRecordRevisionHistory(
 
                     changesList.className =
                         'flex flex-wrap gap-2 mt-2';
-
 
                     changes.forEach(
                         change => {
@@ -1530,7 +1676,6 @@ function renderRecordRevisionHistory(
                         }
                     );
 
-
                     changesBlock.append(
                         changesLabel,
                         changesList
@@ -1541,12 +1686,10 @@ function renderRecordRevisionHistory(
                     );
                 }
 
-
                 content.appendChild(
                     correctionDetails
                 );
             }
-
 
             timeline.appendChild(
                 content
@@ -1687,17 +1830,13 @@ function setRecordModalData(
         );
 
     if (editBtn) {
-        const editUrl = String(
-            data.editUrl || ''
-        ).trim();
+        const editUrl =
+            String(
+                data.editUrl || ''
+            ).trim();
 
-        if (editUrl) {
-            editBtn.href = editUrl;
-            editBtn.hidden = false;
-        } else {
-            editBtn.href = '#';
-            editBtn.hidden = true;
-        }
+        editBtn.hidden =
+            !editUrl;
     }
 }
 

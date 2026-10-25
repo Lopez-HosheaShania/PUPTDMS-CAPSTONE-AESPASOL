@@ -260,6 +260,7 @@
                                         <div class="odontogram-procedure-duration-copy">
                                             <label for="procedureDurationInput" class="odontogram-appointment-meta-label">
                                                 Procedure Duration
+                                                <span class="required-mark">*</span>
                                             </label>
 
                                             <input type="text" id="procedureDurationInput" class="form-input-custom"
@@ -877,9 +878,9 @@
                         <span>
                             {{ $savedVisitEditMode
                                 ? 'Are you sure you want to cancel this edit? Any unsaved changes in this saved visit may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                lost.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        lost.'
                                 : 'Are you sure you want to cancel this procedure? Any unsaved progress in this session may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                lost.' }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        lost.' }}
                         </span>
                     </div>
                 </div>
@@ -943,42 +944,40 @@
                     <div class="global-form-group mt-4" data-global-field>
                         <label for="correctionReasonCategory" class="global-form-label">
                             Correction Reason
+                            <span class="required-mark">*</span>
                         </label>
 
                         <select id="correctionReasonCategory" class="form-select-custom js-custom-select"
                             data-placeholder="Select a reason" data-field-label="Correction Reason">
-
                             <option value="">
                                 Select a reason
                             </option>
 
-                            <option value="wrong_tooth">
-                                Wrong Tooth
-                            </option>
-
-                            <option value="wrong_surface">
-                                Wrong Surface
-                            </option>
-
-                            <option value="wrong_condition">
-                                Wrong Condition / Treatment
-                            </option>
-
-                            <option value="treatment_changed">
-                                Treatment Information Changed
-                            </option>
-
-                            <option value="data_entry_error">
-                                Data Entry Error
-                            </option>
-
-                            <option value="other">
-                                Other
-                            </option>
+                            @foreach ($revisionReasonTypes ?? [] as $reasonType)
+                                <option value="{{ $reasonType->id }}" data-code="{{ $reasonType->code }}"
+                                    data-requires-detail="{{ $reasonType->requires_detail ? '1' : '0' }}">
+                                    {{ $reasonType->label }}
+                                </option>
+                            @endforeach
                         </select>
 
                         <div class="global-field-error" data-error-for="correctionReasonCategory" aria-hidden="true">
                         </div>
+                    </div>
+
+                    <div id="correctionReasonOtherField" class="global-form-group mt-4" data-global-field hidden>
+
+                        <label for="correctionReasonOther" class="global-form-label">
+                            Specify Reason
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <input type="text" id="correctionReasonOther" class="form-input-custom" maxlength="255"
+                            data-field-label="Specify Reason" placeholder="Specify the correction reason...">
+
+                        <div class="global-field-error" data-error-for="correctionReasonOther" aria-hidden="true">
+                        </div>
+
                     </div>
 
                     <div class="global-form-group mt-4" data-global-field>
@@ -1127,6 +1126,8 @@
 
             const correctionReasonCategory = document.getElementById('correctionReasonCategory');
             const correctionReasonNotes = document.getElementById('correctionReasonNotes');
+            const correctionReasonOtherField = document.getElementById('correctionReasonOtherField');
+            const correctionReasonOther = document.getElementById('correctionReasonOther');
             const dismissCorrectionReasonBtn = document.getElementById('dismissCorrectionReasonBtn');
             const confirmCorrectionReasonBtn = document.getElementById('confirmCorrectionReasonBtn');
 
@@ -1227,7 +1228,6 @@
 
             let odontogramThreeLoadPromise =
                 null;
-
 
             function waitForThreeSceneIdle() {
                 return new Promise(
@@ -1422,22 +1422,11 @@
                 odontogramThreeLoadPromise =
                     (async () => {
 
-                        /*
-                         * The 3D panel has already been shown.
-                         * Give the browser time to paint the
-                         * loader and handle scrolling first.
-                         */
                         await waitForThreeSceneIdle();
 
-
-                        /*
-                         * User may already have returned to 2D
-                         * while we were waiting.
-                         */
                         if (currentView !== '3d') {
                             return null;
                         }
-
 
                         if (!window.Odontogram3D) {
                             try {
@@ -1458,7 +1447,6 @@
                             }
                         }
                         await waitForThreeSceneIdle();
-
 
                         if (currentView !== '3d') {
                             return null;
@@ -1567,7 +1555,6 @@
 
                         return odontogramThreeState;
                     })();
-
 
                 try {
 
@@ -1807,6 +1794,95 @@
                 if (!modal?.id) return;
 
                 window.closeModal?.(modal.id);
+            }
+
+            function setCorrectionOtherFieldVisible(
+                visible
+            ) {
+                if (!correctionReasonOtherField) {
+                    return;
+                }
+
+                if (
+                    correctionReasonOtherField
+                    .__hideTimer
+                ) {
+                    window.clearTimeout(
+                        correctionReasonOtherField
+                        .__hideTimer
+                    );
+
+                    correctionReasonOtherField
+                        .__hideTimer = null;
+                }
+
+                correctionReasonOtherField
+                    .classList
+                    .remove(
+                        'slide-down-fade-in',
+                        'content-fade-out'
+                    );
+
+                if (visible) {
+
+                    if (
+                        !correctionReasonOtherField.hidden
+                    ) {
+                        return;
+                    }
+
+                    correctionReasonOtherField.hidden =
+                        false;
+
+                    void correctionReasonOtherField
+                        .offsetWidth;
+
+                    correctionReasonOtherField
+                        .classList
+                        .add(
+                            'slide-down-fade-in'
+                        );
+
+                    return;
+                }
+
+                if (
+                    correctionReasonOtherField.hidden
+                ) {
+                    return;
+                }
+
+                void correctionReasonOtherField
+                    .offsetWidth;
+
+                correctionReasonOtherField
+                    .classList
+                    .add(
+                        'content-fade-out'
+                    );
+
+                correctionReasonOtherField
+                    .__hideTimer =
+                    window.setTimeout(
+                        () => {
+
+                            correctionReasonOtherField
+                                .classList
+                                .remove(
+                                    'content-fade-out'
+                                );
+
+                            correctionReasonOtherField
+                                .hidden =
+                                true;
+
+                            correctionReasonOtherField
+                                .__hideTimer =
+                                null;
+
+                        },
+                        180
+                    );
             }
 
             function openCorrectionReasonModal() {
@@ -4679,11 +4755,41 @@
                 };
 
                 if (savedVisitEditMode) {
-                    payload.reason_category =
-                        correctionReasonCategory?.value || '';
+                    const reasonTypeId =
+                        correctionReasonCategory
+                        ?.value || '';
+
+                    const selectedReasonOption =
+                        correctionReasonCategory
+                        ?.selectedOptions?.[0];
+
+                    const requiresReasonDetail =
+                        selectedReasonOption
+                        ?.dataset
+                        ?.requiresDetail === '1';
+
+                    const correctionNotes =
+                        correctionReasonNotes
+                        ?.value
+                        .trim() || '';
+
+                    const reasonDetail =
+                        correctionReasonOther
+                        ?.value
+                        .trim() || '';
+
+                    payload.reason_type_id =
+                        reasonTypeId ?
+                        Number(reasonTypeId) :
+                        null;
+
+                    payload.reason_detail =
+                        requiresReasonDetail ?
+                        reasonDetail :
+                        null;
 
                     payload.reason_notes =
-                        correctionReasonNotes?.value.trim() || '';
+                        correctionNotes;
                 }
 
                 finishProcedureBtn.disabled = true;
@@ -4839,52 +4945,144 @@
                 closeCorrectionReasonModal
             );
 
-            confirmCorrectionReasonBtn?.addEventListener(
-                'click',
-                function() {
-                    const category =
-                        correctionReasonCategory?.value.trim() || '';
+            confirmCorrectionReasonBtn
+                ?.addEventListener(
+                    'click',
+                    function() {
 
-                    if (!category) {
-                        window.showFormInputValidationMessage?.(
-                            correctionReasonCategory,
-                            'Please select a reason for the correction.'
-                        );
-
-                        correctionReasonCategory
-                            ?.closest('.custom-select')
-                            ?.querySelector('.custom-select-button')
-                            ?.focus();
-
-                        return;
-                    }
-
-                    window.clearFormInputValidation?.(
-                        correctionReasonCategory
-                    );
-
-                    closeCorrectionReasonModal();
-
-                    saveProcedure(
-                        'finished',
-                        finishProcedureBtn,
-                        'Saving Correction...'
-                    );
-                }
-            );
-
-            correctionReasonCategory?.addEventListener(
-                'change',
-                function() {
-                    if (
-                        correctionReasonCategory.value.trim()
-                    ) {
-                        window.clearFormInputValidation?.(
+                        const reasonTypeId =
                             correctionReasonCategory
+                            ?.value
+                            .trim() || '';
+
+                        if (!reasonTypeId) {
+                            window
+                                .showFormInputValidationMessage?.(
+                                    correctionReasonCategory,
+                                    'Please select a reason for the correction.'
+                                );
+
+                            correctionReasonCategory
+                                ?.closest('.custom-select')
+                                ?.querySelector(
+                                    '.custom-select-button'
+                                )
+                                ?.focus();
+
+                            return;
+                        }
+
+                        const selectedReasonOption =
+                            correctionReasonCategory
+                            ?.selectedOptions?.[0];
+
+                        const requiresReasonDetail =
+                            selectedReasonOption
+                            ?.dataset
+                            ?.requiresDetail === '1';
+
+                        const reasonDetail =
+                            correctionReasonOther
+                            ?.value
+                            .trim() || '';
+
+                        if (
+                            requiresReasonDetail &&
+                            !reasonDetail
+                        ) {
+                            window
+                                .showFormInputValidationMessage?.(
+                                    correctionReasonOther,
+                                    'Please specify the correction reason.'
+                                );
+
+                            correctionReasonOther?.focus();
+
+                            return;
+                        }
+
+                        window
+                            .clearFormInputValidation?.(
+                                correctionReasonOther
+                            );
+
+                        window
+                            .clearFormInputValidation?.(
+                                correctionReasonCategory
+                            );
+
+                        closeCorrectionReasonModal();
+
+                        saveProcedure(
+                            'finished',
+                            finishProcedureBtn,
+                            'Saving Correction...'
                         );
                     }
-                }
-            );
+                );
+
+            correctionReasonOther
+                ?.addEventListener(
+                    'input',
+                    function() {
+
+                        if (
+                            correctionReasonOther
+                            .value
+                            .trim()
+                        ) {
+                            window
+                                .clearFormInputValidation?.(
+                                    correctionReasonOther
+                                );
+                        }
+                    }
+                );
+
+            correctionReasonCategory
+                ?.addEventListener(
+                    'change',
+                    function() {
+
+                        const reasonTypeId =
+                            correctionReasonCategory
+                            ?.value
+                            .trim() || '';
+
+                        if (reasonTypeId) {
+                            window
+                                .clearFormInputValidation?.(
+                                    correctionReasonCategory
+                                );
+                        }
+
+                        const selectedReasonOption =
+                            correctionReasonCategory
+                            ?.selectedOptions?.[0];
+
+                        const requiresReasonDetail =
+                            selectedReasonOption
+                            ?.dataset
+                            ?.requiresDetail === '1';
+
+                        setCorrectionOtherFieldVisible(
+                            requiresReasonDetail
+                        );
+
+                        if (!requiresReasonDetail) {
+
+                            if (correctionReasonOther) {
+                                correctionReasonOther
+                                    .value = '';
+                            }
+
+                            window
+                                .clearFormInputValidation?.(
+                                    correctionReasonOther
+                                );
+                        }
+                    }
+                );
 
             correctionReasonModal?.addEventListener(
                 'click',

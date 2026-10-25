@@ -128,9 +128,9 @@ class OdontogramRevisionService
                 'appointment_id' => $appointment->id,
                 'version_number' => 1,
                 'odontogram_data' => $snapshot,
-                'previous_odontogram_data' => null,
                 'changes' => [],
-                'reason_category' => 'other',
+                'reason_type_id' => null,
+                'reason_detail' => null,
                 'reason_notes' => 'Initial record',
                 'changed_by' => $user->id,
                 'changed_by_role' => $activeRole,
@@ -143,8 +143,9 @@ class OdontogramRevisionService
         Model $odontogramable,
         array $newData,
         array $oldData,
-        string $category,
-        string $notes,
+        int $reasonTypeId,
+        ?string $reasonDetail,
+        ?string $notes,
         User $user
     ): OdontogramRevision {
         $changes = $this->computeChanges($oldData, $newData);
@@ -163,9 +164,9 @@ class OdontogramRevisionService
             $patientOdontogramId,
             $appointmentId,
             $newData,
-            $oldData,
             $changes,
-            $category,
+            $reasonTypeId,
+            $reasonDetail,
             $notes,
             $user
         ) {
@@ -193,10 +194,15 @@ class OdontogramRevisionService
                 'appointment_id' => $appointmentId,
                 'version_number' => $versionNumber,
                 'odontogram_data' => $newData,
-                'previous_odontogram_data' => $oldData,
                 'changes' => $changes,
-                'reason_category' => $category,
-                'reason_notes' => trim($notes),
+                'reason_type_id' => $reasonTypeId,
+
+                'reason_detail' =>
+                filled($reasonDetail)
+                    ? trim($reasonDetail)
+                    : null,
+
+                'reason_notes' => trim((string) $notes),
                 'changed_by' => $user->id,
                 'changed_by_role' => $activeRole,
                 'ip_address' => request()->ip(),
@@ -209,7 +215,7 @@ class OdontogramRevisionService
         ?int $appointmentId = null
     ): Collection {
         $query = OdontogramRevision::query()
-            ->with('changedBy')
+            ->with(['changedBy', 'reasonType',])
             ->where('patient_id', $patientId);
 
         if ($appointmentId !== null) {
@@ -225,7 +231,7 @@ class OdontogramRevisionService
     public function getVersion(int $revisionId): OdontogramRevision
     {
         return OdontogramRevision::query()
-            ->with('changedBy')
+            ->with(['changedBy', 'reasonType',])
             ->findOrFail($revisionId);
     }
 

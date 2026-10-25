@@ -218,10 +218,22 @@ $followUp = [
                     []
                 ),
 
-            'reason_category' =>
+           'reason_type_code' =>
                 data_get(
                     $revision,
-                    'reason_category'
+                    'reasonType.code'
+                ),
+
+            'reason_type_label' =>
+                data_get(
+                    $revision,
+                    'reasonType.label'
+                ),
+
+            'reason_detail' =>
+                data_get(
+                    $revision,
+                    'reason_detail'
                 ),
 
             'reason_notes' =>
@@ -258,6 +270,16 @@ $currentRevisionVersion =
     collect($revisionItems)
         ->max('version_number');
 
+$odontogramEditLocked =
+    $normalizedStatus === 'completed'
+    &&
+    $appointment
+        ->isOdontogramEditLocked();
+
+$odontogramEditDeadline =
+    $appointment
+        ->odontogramEditDeadline();
+
 $recordPayload = [
 'id' => $get('id'),
 
@@ -287,11 +309,22 @@ $recordPayload = [
 
 'follow_up' => $followUp,
 
-'edit_url' => $recordEditUrl,
-
 'revisions' => $revisionItems,
 
 'current_version' => $currentRevisionVersion,
+
+'edit_url' => $recordEditUrl,
+
+'edit_locked' => $odontogramEditLocked,
+
+'edit_lock_reason' =>
+    $odontogramEditLocked
+        ? 'The 7-day editing period for this completed odontogram has expired.'
+        : null,
+
+'edit_deadline' =>
+    $odontogramEditDeadline
+        ?->toIso8601String(),
 ];
 }
 

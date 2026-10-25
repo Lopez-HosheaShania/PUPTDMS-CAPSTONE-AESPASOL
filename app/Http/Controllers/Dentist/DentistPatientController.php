@@ -172,9 +172,7 @@ class DentistPatientController extends Controller
 
         $revisionHistoryByAppointment =
             OdontogramRevision::query()
-            ->with([
-                'changedBy:id,name',
-            ])
+            ->with(['changedBy:id,name', 'reasonType:id,code,label',])
             ->whereIn(
                 'appointment_id',
                 $pastVisits->pluck('id')

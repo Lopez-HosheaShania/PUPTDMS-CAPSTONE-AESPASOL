@@ -16,9 +16,9 @@ class OdontogramRevision extends Model
         'appointment_id',
         'version_number',
         'odontogram_data',
-        'previous_odontogram_data',
         'changes',
-        'reason_category',
+        'reason_type_id',
+        'reason_detail',
         'reason_notes',
         'changed_by',
         'changed_by_role',
@@ -30,7 +30,6 @@ class OdontogramRevision extends Model
         return [
             'version_number' => 'integer',
             'odontogram_data' => 'array',
-            'previous_odontogram_data' => 'array',
             'changes' => 'array',
             'created_at' => 'datetime',
         ];
@@ -49,6 +48,14 @@ class OdontogramRevision extends Model
                 'Odontogram revisions are immutable and cannot be deleted.'
             );
         });
+    }
+
+    public function reasonType(): BelongsTo
+    {
+        return $this->belongsTo(
+            OdontogramRevisionReasonType::class,
+            'reason_type_id'
+        );
     }
 
     public function patient(): BelongsTo

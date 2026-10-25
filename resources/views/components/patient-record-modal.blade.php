@@ -187,6 +187,21 @@
 
                 </div>
 
+                <div id="recordEditLockNotice" class="global-confirm-alert mb-4" hidden>
+                    <i class="fa-solid fa-lock"></i>
+
+                    <div>
+                        <strong>
+                            Editing period expired
+                        </strong>
+
+                        <p id="recordEditLockMessage" class="modal-helper-text">
+                            The editing period for this odontogram has expired.
+                            This record is now read-only.
+                        </p>
+                    </div>
+                </div>
+
                 <div id="m_odontogram" class="record-modal-odontogram relative">
 
                     @include('components.odontogram-preview', [

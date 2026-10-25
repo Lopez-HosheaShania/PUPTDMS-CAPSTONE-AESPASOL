@@ -8,6 +8,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Models\ServiceType;
+use App\Models\User;
 
 class Appointment extends Model
 {
@@ -378,5 +379,95 @@ class Appointment extends Model
     public function getServiceTypeNameAttribute(): ?string
     {
         return $this->serviceType?->name ?? $this->service_type;
+    }
+
+    private const ODONTOGRAM_EDIT_WINDOW_DAYS = 7;
+
+    public function odontogramEditDeadline(): ?Carbon
+    {
+        if ($this->status !== 'completed') {
+            return null;
+        }
+
+        $this->loadMissing('procedure');
+
+        $completedAt =
+            $this->procedure?->procedure_completed_at;
+
+        if (!$completedAt) {
+            if (!$this->appointment_date) {
+                return null;
+            }
+
+            $appointmentDateTime =
+                Carbon::parse(
+                    trim(
+                        $this->appointment_date . ' ' .
+                            ($this->appointment_time ?: '00:00:00')
+                    )
+                );
+
+            $durationSeconds =
+                max(
+                    0,
+                    (int) (
+                        $this->procedure
+                        ?->procedure_duration_seconds
+                        ?? 0
+                    )
+                );
+
+            $completedAt =
+                $appointmentDateTime
+                ->addSeconds(
+                    $durationSeconds
+                );
+        }
+
+        return Carbon::parse($completedAt)
+            ->addDays(
+                self::ODONTOGRAM_EDIT_WINDOW_DAYS
+            );
+    }
+
+    public function isOdontogramEditLocked(): bool
+    {
+        $deadline =
+            $this->odontogramEditDeadline();
+
+        if (!$deadline) {
+            return true;
+        }
+
+        return now()->greaterThan(
+            $deadline
+        );
+    }
+
+    public function canEditCompletedOdontogram(
+        User $user
+    ): bool {
+        if ($this->status !== 'completed') {
+            return false;
+        }
+
+        if (
+            !in_array(
+                $user->role?->slug,
+                ['dentist', 'dentist_role'],
+                true
+            )
+        ) {
+            return false;
+        }
+
+        if (
+            (int) $this->dentist_id !==
+            (int) $user->id
+        ) {
+            return false;
+        }
+
+        return !$this->isOdontogramEditLocked();
     }
 }

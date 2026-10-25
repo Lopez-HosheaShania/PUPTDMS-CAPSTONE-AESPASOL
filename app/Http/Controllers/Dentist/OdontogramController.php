@@ -35,6 +35,7 @@ use App\Models\ClinicSchedule;
 use App\Models\BlockedDate;
 use App\Helpers\PhilippineHolidays;
 use App\Helpers\BookingQuestions;
+use App\Models\OdontogramRevisionReasonType;
 
 class OdontogramController extends Controller
 {
@@ -1872,7 +1873,14 @@ class OdontogramController extends Controller
             return redirect('/login');
         }
 
-        Gate::authorize('edit', $appointment);
+        abort_unless(
+            $appointment
+                ->canEditCompletedOdontogram(
+                    Auth::user()
+                ),
+            403,
+            'The 7-day editing period for this completed odontogram has expired.'
+        );
 
         $appointment->load([
             'patient.user',
@@ -1885,6 +1893,22 @@ class OdontogramController extends Controller
         if (!$patient) {
             abort(404, 'Patient not found for this appointment.');
         }
+
+        $revisionReasonTypes =
+            OdontogramRevisionReasonType
+            ::active()
+            ->orderBy(
+                'sort_order'
+            )
+            ->orderBy(
+                'label'
+            )
+            ->get([
+                'id',
+                'code',
+                'label',
+                'requires_detail',
+            ]);
 
         return view('dentist.dentist-odontogram', array_merge(
             [
@@ -1902,10 +1926,10 @@ class OdontogramController extends Controller
                     true
                 ),
                 'discardProcedureUrl' => route('dentist.odontogram.discard'),
-                // A completed visit may not have an odontogram record yet; start its editor blank.
                 'savedOdontogramData' => $procedure?->odontogram_data ?? [],
                 'existingAppointmentMode' => false,
                 'savedVisitEditMode' => true,
+                'revisionReasonTypes' => $revisionReasonTypes,
                 'saveProcedureUrl' => route('dentist.odontogram.saved.update', [
                     'appointment' => $appointment->id,
                     'from' => $request->query('from', 'appointments'),
@@ -1930,7 +1954,14 @@ class OdontogramController extends Controller
             ], 403);
         }
 
-        Gate::authorize('edit', $appointment);
+        abort_unless(
+            $appointment
+                ->canEditCompletedOdontogram(
+                    Auth::user()
+                ),
+            403,
+            'The 7-day editing period for this completed odontogram has expired.'
+        );
 
         $appointment->load([
             'patient.user',
@@ -2018,8 +2049,9 @@ class OdontogramController extends Controller
                 $procedure,
                 $newOdontogramData,
                 $oldOdontogramData,
-                $validated['reason_category'],
-                $validated['reason_notes'],
+                (int) $validated['reason_type_id'],
+                $validated['reason_detail'] ?? null,
+                $validated['reason_notes'] ?? null,
                 $user
             );
 
