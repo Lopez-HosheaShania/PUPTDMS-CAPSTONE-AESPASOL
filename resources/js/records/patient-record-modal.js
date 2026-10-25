@@ -1,3 +1,7 @@
+import {
+    setOdontogramPreviewData
+} from '../odontogram/odontogram-preview';
+
 function parseRecordDatasetJson(value, fallback) {
     if (!value) {
         return fallback;
@@ -20,6 +24,11 @@ function normalizeRecordData(source) {
         }
 
         return {
+            id:
+                source.dataset.apptId ||
+                source.dataset.appointmentId ||
+                null,
+
             service: source.dataset.service ||
                 source.dataset.type ||
                 '',
@@ -67,6 +76,18 @@ function normalizeRecordData(source) {
             editUrl: source.dataset.editUrl ||
                 '',
 
+            revisions: parseRecordDatasetJson(
+                source.dataset.revisions,
+                []
+            ),
+
+            currentVersion:
+                source.dataset.currentVersion ?
+                    Number(
+                        source.dataset.currentVersion
+                    ) :
+                    null,
+
             odontogramData: parseRecordDatasetJson(
                 source.dataset.odontogramData,
                 []
@@ -75,7 +96,13 @@ function normalizeRecordData(source) {
     }
 
     return {
-        service: source?.service ||
+        id:
+            source?.id ??
+            source?.appointment_id ??
+            null,
+
+        service:
+            source?.service ||
             source?.service_type ||
             source?.type ||
             '',
@@ -124,6 +151,16 @@ function normalizeRecordData(source) {
         editUrl: source?.edit_url ||
             source?.editUrl ||
             '',
+
+        revisions:
+            source?.revisions ||
+            source?.revision_history ||
+            [],
+
+        currentVersion:
+            source?.current_version ??
+            source?.currentVersion ??
+            null,
 
         odontogramData: source?.odontogram ||
             source?.odontogram_data ||
@@ -423,29 +460,58 @@ function formatRecordTreatments(
             entry?.threeD ||
             entry?.three_d;
 
+        const normalizedThreeDCode =
+            String(
+                threeDRecord?.code || ''
+            )
+                .trim()
+                .toUpperCase();
+
+        const normalizedThreeDLabel =
+            String(
+                threeDRecord?.label ||
+                threeDRecord?.code ||
+                ''
+            )
+                .trim()
+                .toLowerCase();
+
         const hasMatchingSurfaceTreatment =
             !!threeDRecord &&
             surfaceTreatments.some(
                 treatment =>
                     treatment.code ===
-                    String(
-                        threeDRecord.code || ''
-                    )
-                        .trim()
-                        .toUpperCase() &&
+                    normalizedThreeDCode &&
                     treatment.label ===
-                    String(
-                        threeDRecord.label ||
-                        threeDRecord.code ||
-                        ''
-                    )
-                        .trim()
-                        .toLowerCase()
+                    normalizedThreeDLabel
             );
+
+        const statusCode =
+            String(
+                entry?.status?.code || ''
+            )
+                .trim()
+                .toUpperCase();
+
+        const statusLabel =
+            String(
+                entry?.status?.label ||
+                entry?.status?.code ||
+                ''
+            )
+                .trim()
+                .toLowerCase();
+
+        const hasMatchingStatus =
+            !!threeDRecord &&
+            !!entry?.status &&
+            statusCode === normalizedThreeDCode &&
+            statusLabel === normalizedThreeDLabel;
 
         if (
             threeDRecord &&
-            !hasMatchingSurfaceTreatment
+            !hasMatchingSurfaceTreatment &&
+            !hasMatchingStatus
         ) {
             addTreatment(
                 '3D',
@@ -538,6 +604,972 @@ function renderRecordTreatments(
                 `
             )
             .join('');
+}
+
+function formatRecordRevisionRole(role) {
+    const normalized =
+        String(role || '')
+            .trim()
+            .replace(/_/g, ' ');
+
+    if (!normalized) {
+        return 'User';
+    }
+
+    return normalized.replace(
+        /\b\w/g,
+        letter => letter.toUpperCase()
+    );
+}
+
+function formatRecordRevisionReason(reason) {
+    const labels = {
+        wrong_tooth: 'Wrong tooth',
+        wrong_surface: 'Wrong surface',
+        wrong_condition: 'Wrong condition / treatment',
+        treatment_changed: 'Treatment changed',
+        data_entry_error: 'Data entry error',
+        other: 'Other'
+    };
+
+    return labels[
+        String(reason || '')
+            .trim()
+            .toLowerCase()
+    ] || 'Correction';
+}
+
+function formatRecordRevisionDate(value) {
+    if (!value) {
+        return 'Unknown date';
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return String(value);
+    }
+
+    return new Intl.DateTimeFormat(
+        'en-PH',
+        {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        }
+    ).format(date);
+}
+
+function getRecordRevisionChanges(changes) {
+    const items =
+        Array.isArray(changes)
+            ? changes
+            : [];
+
+    return items.filter(change => {
+        if (change?.surface !== 'threeD') {
+            return true;
+        }
+
+        return !items.some(other =>
+            other !== change &&
+            Number(other?.tooth) ===
+            Number(change?.tooth) &&
+            other?.surface !== 'threeD' &&
+            (other?.old_code || null) ===
+            (change?.old_code || null) &&
+            (other?.new_code || null) ===
+            (change?.new_code || null)
+        );
+    });
+}
+
+function formatRecordRevisionChange(change) {
+    const surface =
+        String(
+            change?.surface || ''
+        )
+            .replace(
+                'threeD',
+                '3D'
+            )
+            .replace(
+                /\b\w/g,
+                letter =>
+                    letter.toUpperCase()
+            );
+
+    const oldCode =
+        change?.old_code ||
+        'Healthy';
+
+    const newCode =
+        change?.new_code ||
+        'Healthy';
+
+    return `Tooth #${change?.tooth} · ${surface}: ${oldCode} → ${newCode}`;
+}
+
+function setRecordRevisionViewedVersion(
+    modal,
+    viewedVersion
+) {
+    if (!modal) {
+        return;
+    }
+
+    const currentVersion =
+        Number(
+            modal.__recordCurrentVersion || 0
+        );
+
+    const activeVersion =
+        Number(
+            viewedVersion ||
+            currentVersion
+        );
+
+    modal.__recordViewedVersion =
+        activeVersion;
+
+    modal
+        .querySelectorAll(
+            '[data-record-revision-row]'
+        )
+        .forEach(row => {
+
+            const version =
+                Number(
+                    row.dataset
+                        .recordRevisionVersion ||
+                    0
+                );
+
+            const viewingBadge =
+                row.querySelector(
+                    '[data-record-revision-viewing]'
+                );
+
+            const viewButton =
+                row.querySelector(
+                    '[data-record-revision-view-button]'
+                );
+
+            const isViewingHistorical =
+                version !== currentVersion &&
+                version === activeVersion;
+
+            if (viewingBadge) {
+                viewingBadge.hidden =
+                    !isViewingHistorical;
+            }
+
+            if (viewButton) {
+                viewButton.hidden =
+                    isViewingHistorical;
+            }
+        });
+}
+
+function setRecordHistoryExpanded(modal, expanded,) {
+    if (!modal) {
+        return;
+    }
+
+    const section =
+        modal.querySelector(
+            '#recordRevisionHistorySection'
+        );
+
+    if (!section) {
+        return;
+    }
+
+    if (
+        window.GlobalAccordion
+            ?.setOpen
+    ) {
+        window.GlobalAccordion.setOpen(
+            section,
+            expanded
+        );
+    } else {
+        section.open =
+            expanded;
+    }
+}
+
+function showRecordOdontogramSnapshot(
+    modal,
+    odontogramData,
+    options = {}
+) {
+    if (!modal) {
+        return;
+    }
+
+    const preview =
+        modal.querySelector(
+            '[data-odontogram-preview]'
+        );
+
+    if (!preview) {
+        return;
+    }
+
+    const notice =
+        modal.querySelector(
+            '#recordHistoricalVersionNotice'
+        );
+
+    const noticeTitle =
+        modal.querySelector(
+            '#recordHistoricalVersionTitle'
+        );
+
+    const editBtn =
+        modal.querySelector(
+            '#recordModalEditBtn'
+        );
+
+    const odontogramSection =
+        modal.querySelector(
+            '#recordOdontogramSection'
+        );
+
+    const isHistorical =
+        options.historical === true;
+
+    const version =
+        Number(
+            options.version || 0
+        );
+
+    setRecordRevisionViewedVersion(
+        modal,
+        isHistorical
+            ? version
+            : (
+                modal.__recordCurrentVersion ||
+                version
+            )
+    );
+
+    if (notice) {
+        notice.hidden =
+            !isHistorical;
+    }
+
+    if (
+        isHistorical &&
+        noticeTitle
+    ) {
+        noticeTitle.textContent =
+            `Viewing version ${version}`;
+    }
+
+    if (editBtn) {
+        const editUrl =
+            String(
+                modal.__recordData
+                    ?.editUrl || ''
+            ).trim();
+
+        editBtn.hidden =
+            !editUrl;
+
+        if (
+            editUrl &&
+            !isHistorical
+        ) {
+            editBtn.href =
+                editUrl;
+        } else if (isHistorical) {
+            editBtn.removeAttribute(
+                'href'
+            );
+        }
+
+        editBtn.setAttribute(
+            'aria-disabled',
+            String(isHistorical)
+        );
+
+        editBtn.title =
+            isHistorical
+                ? 'Return to the current version to edit.'
+                : 'Edit odontogram';
+
+        editBtn.classList.toggle(
+            'pointer-events-none',
+            isHistorical
+        );
+
+        editBtn.classList.toggle(
+            'opacity-60',
+            isHistorical
+        );
+    }
+
+    window.requestAnimationFrame(
+        () => {
+            setOdontogramPreviewData(
+                preview,
+                odontogramData || [],
+                {
+                    animateSurfaceChanges:
+                        options
+                            .animateSurfaceChanges ===
+                        true
+                }
+            );
+
+            if (
+                options.scrollIntoView &&
+                odontogramSection
+            ) {
+                odontogramSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+    );
+}
+
+function renderRecordRevisionHistory(
+    modal,
+    data
+) {
+    if (!modal) {
+        return;
+    }
+
+    const revisions =
+        Array.isArray(data?.revisions)
+            ? [...data.revisions]
+            : [];
+
+    revisions.sort(
+        (a, b) =>
+            Number(
+                b?.version_number || 0
+            ) -
+            Number(
+                a?.version_number || 0
+            )
+    );
+
+    modal.__recordRevisions =
+        revisions;
+
+    const currentVersion =
+        Number(
+            data?.currentVersion ||
+            revisions[0]?.version_number ||
+            0
+        );
+
+    modal.__recordCurrentVersion =
+        currentVersion;
+
+    modal
+        .querySelectorAll(
+            '[data-record-latest-version]'
+        )
+        .forEach(label => {
+            label.textContent =
+                `v${currentVersion}`;
+        });
+
+    const list =
+        modal.querySelector(
+            '#recordRevisionHistoryList'
+        );
+
+    const historySection =
+        modal.querySelector(
+            '#recordRevisionHistorySection'
+        );
+
+    const countBadge =
+        modal.querySelector(
+            '#recordRevisionCountBadge'
+        );
+
+    const editedBadge =
+        modal.querySelector(
+            '#recordEditedBadge'
+        );
+
+    const editedVersion =
+        modal.querySelector(
+            '#recordEditedVersion'
+        );
+
+    const viewHistoryButton =
+        modal.querySelector(
+            '#recordViewHistoryBtn'
+        );
+
+    const viewHistoryCount =
+        modal.querySelector(
+            '#recordViewHistoryCount'
+        );
+
+    const showMoreRoot =
+        modal.querySelector(
+            '#recordRevisionHistoryContent'
+        );
+
+    const hasEdits =
+        revisions.length > 1 &&
+        currentVersion > 1;
+
+    if (historySection) {
+        historySection.hidden =
+            !hasEdits;
+    }
+
+    if (editedBadge) {
+        editedBadge.hidden =
+            !hasEdits;
+    }
+
+    if (editedVersion) {
+        editedVersion.textContent =
+            `v${currentVersion}`;
+    }
+
+    if (viewHistoryButton) {
+        viewHistoryButton.hidden =
+            !hasEdits;
+    }
+
+    if (viewHistoryCount) {
+        viewHistoryCount.textContent =
+            String(revisions.length);
+    }
+
+    if (countBadge) {
+        countBadge.textContent =
+            `${revisions.length} version${revisions.length === 1
+                ? ''
+                : 's'
+            }`;
+    }
+
+    if (!list) {
+        return;
+    }
+
+    list.replaceChildren();
+
+    if (!hasEdits) {
+        window.ShowMore?.reset(
+            showMoreRoot
+        );
+
+        return;
+    }
+
+    revisions.forEach(
+        revision => {
+            const version =
+                Number(
+                    revision?.version_number || 0
+                );
+
+            const isCurrent =
+                version === currentVersion;
+
+            const isInitial =
+                version === 1;
+
+            const changes =
+                getRecordRevisionChanges(
+                    revision?.changes
+                );
+
+            const notes =
+                String(
+                    revision?.reason_notes || ''
+                ).trim();
+
+            const showNotes =
+                notes &&
+                !(
+                    isInitial &&
+                    notes.toLowerCase() ===
+                    'initial record'
+                );
+
+            const row =
+                document.createElement(
+                    'div'
+                );
+
+            row.className =
+                'table-list-row relative px-5 py-5';
+
+            row.setAttribute(
+                'data-show-more-item',
+                ''
+            );
+
+            row.setAttribute(
+                'data-record-revision-row',
+                ''
+            );
+
+            row.dataset.recordRevisionVersion =
+                String(version);
+
+            const timeline =
+                document.createElement(
+                    'div'
+                );
+
+            timeline.className =
+                'relative pl-7';
+
+
+            const timelineLine =
+                document.createElement(
+                    'span'
+                );
+
+            timelineLine.className =
+                'absolute left-2 top-0 bottom-0 border-l border-[var(--border)]';
+
+
+            const timelineDot =
+                document.createElement(
+                    'span'
+                );
+
+            timelineDot.className =
+                isCurrent
+                    ? 'table-dot table-dot-success absolute left-[5px] top-[7px]'
+                    : 'table-dot table-dot-muted absolute left-[5px] top-[7px]';
+
+
+            timeline.append(
+                timelineLine,
+                timelineDot
+            );
+
+            const content =
+                document.createElement(
+                    'div'
+                );
+
+            content.className =
+                'min-w-0';
+
+            const header =
+                document.createElement(
+                    'div'
+                );
+
+            header.className =
+                'global-label-row';
+
+
+            const headerMain =
+                document.createElement(
+                    'div'
+                );
+
+            headerMain.className =
+                'global-label-main';
+
+
+            const versionTitle =
+                document.createElement(
+                    'strong'
+                );
+
+            versionTitle.className =
+                'record-summary-value';
+
+            versionTitle.textContent =
+                isInitial
+                    ? `v${version} · Initial record`
+                    : `v${version}`;
+
+
+            const versionGroup =
+                document.createElement(
+                    'div'
+                );
+
+            versionGroup.className =
+                'global-info-group';
+
+            versionGroup.appendChild(
+                versionTitle
+            );
+
+
+            if (isCurrent) {
+
+                const currentBadge =
+                    document.createElement(
+                        'span'
+                    );
+
+                currentBadge.className =
+                    'status-pill status-completed';
+
+                currentBadge.textContent =
+                    'Current';
+
+                versionGroup.appendChild(
+                    currentBadge
+                );
+
+            } else {
+
+                const viewingBadge =
+                    document.createElement(
+                        'span'
+                    );
+
+                viewingBadge.className =
+                    'status-pill status-cancelled';
+
+                viewingBadge.textContent =
+                    'Viewing';
+
+                viewingBadge.hidden =
+                    true;
+
+                viewingBadge.setAttribute(
+                    'data-record-revision-viewing',
+                    ''
+                );
+
+                versionGroup.appendChild(
+                    viewingBadge
+                );
+            }
+
+
+            headerMain.appendChild(
+                versionGroup
+            );
+
+            header.appendChild(
+                headerMain
+            );
+
+            if (!isCurrent) {
+                const actions =
+                    document.createElement(
+                        'div'
+                    );
+
+                actions.className =
+                    'global-label-meta';
+
+
+                const viewButton =
+                    document.createElement(
+                        'button'
+                    );
+
+                viewButton.type =
+                    'button';
+
+                viewButton.setAttribute(
+                    'data-record-revision-view-button',
+                    ''
+                );
+
+                viewButton.className =
+                    'ui-btn ui-btn-secondary ui-btn-sm';
+
+                viewButton.innerHTML = `
+                <i class="fa-regular fa-eye"></i>
+                <span>View Version</span>
+            `;
+
+                viewButton.addEventListener(
+                    'click',
+                    () => {
+                        showRecordOdontogramSnapshot(
+                            modal,
+                            revision?.odontogram_data || [],
+                            {
+                                version,
+
+                                historical: true,
+
+                                scrollIntoView: true,
+
+                                animateSurfaceChanges: true
+                            }
+                        );
+                    }
+                );
+
+                actions.appendChild(
+                    viewButton
+                );
+
+                header.appendChild(
+                    actions
+                );
+            }
+
+
+            content.appendChild(
+                header
+            );
+
+            const meta =
+                document.createElement(
+                    'div'
+                );
+
+            meta.className =
+                'record-modal-meta mt-2';
+
+
+            const actor =
+                document.createElement(
+                    'span'
+                );
+
+            actor.innerHTML = `
+            <i class="fa-solid fa-user-doctor"></i>
+
+            ${safeRecordText(
+                revision?.changed_by_name ||
+                'Unknown user'
+            )}
+
+            (${safeRecordText(
+                formatRecordRevisionRole(
+                    revision?.changed_by_role
+                )
+            )})
+        `;
+
+
+            const date =
+                document.createElement(
+                    'span'
+                );
+
+            date.innerHTML = `
+            <i class="fa-regular fa-clock"></i>
+
+            ${safeRecordText(
+                formatRecordRevisionDate(
+                    revision?.created_at
+                )
+            )}
+        `;
+
+
+            meta.append(
+                actor,
+                date
+            );
+
+            content.appendChild(
+                meta
+            );
+
+            if (!isInitial) {
+                const correctionDetails =
+                    document.createElement(
+                        'div'
+                    );
+
+                correctionDetails.className =
+                    'mt-4 flex flex-col gap-3';
+
+                const reasonBlock =
+                    document.createElement(
+                        'div'
+                    );
+
+
+                const reasonLabel =
+                    document.createElement(
+                        'span'
+                    );
+
+                reasonLabel.className =
+                    'global-form-label';
+
+                reasonLabel.textContent =
+                    'Correction Reason';
+
+
+                const reasonBadge =
+                    document.createElement(
+                        'span'
+                    );
+
+                reasonBadge.className =
+                    'status-pill status-default';
+
+                reasonBadge.textContent =
+                    formatRecordRevisionReason(
+                        revision?.reason_category
+                    );
+
+
+                reasonBlock.append(
+                    reasonLabel,
+                    reasonBadge
+                );
+
+                correctionDetails.appendChild(
+                    reasonBlock
+                );
+
+                if (showNotes) {
+                    const noteCard =
+                        document.createElement(
+                            'div'
+                        );
+
+                    noteCard.className =
+                        'info-card';
+
+
+                    const noteLabel =
+                        document.createElement(
+                            'span'
+                        );
+
+                    noteLabel.className =
+                        'global-form-label';
+
+                    noteLabel.textContent =
+                        'Correction Note';
+
+
+                    const note =
+                        document.createElement(
+                            'p'
+                        );
+
+                    note.className =
+                        'modal-helper-text';
+
+                    note.textContent =
+                        notes;
+
+
+                    noteCard.append(
+                        noteLabel,
+                        note
+                    );
+
+                    correctionDetails.appendChild(
+                        noteCard
+                    );
+                }
+
+                if (changes.length) {
+                    const changesBlock =
+                        document.createElement(
+                            'div'
+                        );
+
+
+                    const changesLabel =
+                        document.createElement(
+                            'span'
+                        );
+
+                    changesLabel.className =
+                        'global-form-label';
+
+                    changesLabel.textContent =
+                        changes.length === 1
+                            ? 'Changed Tooth'
+                            : 'Changed Teeth';
+
+
+                    const changesList =
+                        document.createElement(
+                            'div'
+                        );
+
+                    changesList.className =
+                        'flex flex-wrap gap-2 mt-2';
+
+
+                    changes.forEach(
+                        change => {
+                            const changePill =
+                                document.createElement(
+                                    'div'
+                                );
+
+                            changePill.className =
+                                'global-info-pill';
+
+                            changePill.textContent =
+                                formatRecordRevisionChange(
+                                    change
+                                );
+
+                            changesList.appendChild(
+                                changePill
+                            );
+                        }
+                    );
+
+
+                    changesBlock.append(
+                        changesLabel,
+                        changesList
+                    );
+
+                    correctionDetails.appendChild(
+                        changesBlock
+                    );
+                }
+
+
+                content.appendChild(
+                    correctionDetails
+                );
+            }
+
+
+            timeline.appendChild(
+                content
+            );
+
+            row.appendChild(
+                timeline
+            );
+
+            list.appendChild(
+                row
+            );
+        }
+    );
+
+    setRecordRevisionViewedVersion(
+        modal,
+        currentVersion
+    );
+
+    window.ShowMore?.reset(
+        showMoreRoot
+    );
 }
 
 function setRecordModalData(
@@ -669,7 +1701,9 @@ function setRecordModalData(
     }
 }
 
-export async function openRecordModal(source) {
+export async function openRecordModal(
+    source
+) {
     initRecordModal();
 
     const modal =
@@ -686,31 +1720,40 @@ export async function openRecordModal(source) {
             source || {}
         );
 
+    modal.__recordData =
+        recordData;
+
     setRecordModalData(
         recordData,
         true
     );
 
-    const odontogramPreview =
-        modal.querySelector(
-            '[data-odontogram-preview]'
-        );
+    renderRecordRevisionHistory(
+        modal,
+        recordData
+    );
 
-    if (odontogramPreview) {
-        odontogramPreview.dataset.odontogram =
-            JSON.stringify(
-                recordData.odontogramData ||
-                []
-            );
-
-        odontogramPreview
-            .removeAttribute(
-                'data-odontogram-preview-initialized'
-            );
-    }
+    setRecordHistoryExpanded(
+        modal,
+        false
+    );
 
     window.openModal?.(
         'record_modal'
+    );
+
+    showRecordOdontogramSnapshot(
+        modal,
+        recordData.odontogramData ||
+        [],
+        {
+            version:
+                recordData
+                    .currentVersion ||
+                0,
+
+            historical: false
+        }
     );
 }
 
@@ -747,6 +1790,16 @@ function initRecordModal() {
             '#modalCloseFooter'
         );
 
+    const viewHistoryBtn =
+        modal.querySelector(
+            '#recordViewHistoryBtn'
+        );
+
+    const backToCurrentBtn =
+        modal.querySelector(
+            '#recordBackToCurrentBtn'
+        );
+
     const card =
         modal.querySelector(
             '.ui-modal-card'
@@ -760,6 +1813,37 @@ function initRecordModal() {
     closeFooter?.addEventListener(
         'click',
         closeRecordModal
+    );
+
+    viewHistoryBtn?.addEventListener(
+        'click',
+        () => {
+            setRecordHistoryExpanded(
+                modal,
+                true
+            );
+        }
+    );
+
+    backToCurrentBtn?.addEventListener(
+        'click',
+        () => {
+            const data =
+                modal.__recordData;
+
+            showRecordOdontogramSnapshot(
+                modal,
+                data?.odontogramData || [],
+                {
+                    version:
+                        data?.currentVersion || 0,
+
+                    historical: false,
+
+                    animateSurfaceChanges: true
+                }
+            );
+        }
     );
 
     modal.addEventListener(

@@ -176,6 +176,88 @@ $followUp = [
 }
 }
 
+   $revisionItems = collect(
+    $get(
+        'odontogramRevisions',
+        []
+    )
+)
+    ->sortByDesc('version_number')
+    ->map(function ($revision) {
+        $createdAt =
+            data_get(
+                $revision,
+                'created_at'
+            );
+
+        return [
+            'id' =>
+                data_get(
+                    $revision,
+                    'id'
+                ),
+
+            'version_number' =>
+                (int) data_get(
+                    $revision,
+                    'version_number',
+                    0
+                ),
+
+            'odontogram_data' =>
+                data_get(
+                    $revision,
+                    'odontogram_data',
+                    []
+                ),
+
+            'changes' =>
+                data_get(
+                    $revision,
+                    'changes',
+                    []
+                ),
+
+            'reason_category' =>
+                data_get(
+                    $revision,
+                    'reason_category'
+                ),
+
+            'reason_notes' =>
+                data_get(
+                    $revision,
+                    'reason_notes'
+                ),
+
+            'changed_by_name' =>
+                data_get(
+                    $revision,
+                    'changedBy.name',
+                    'Unknown user'
+                ),
+
+            'changed_by_role' =>
+                data_get(
+                    $revision,
+                    'changed_by_role'
+                ),
+
+            'created_at' =>
+                $createdAt
+                    ? Carbon::parse(
+                        $createdAt
+                    )->toIso8601String()
+                    : null,
+        ];
+    })
+    ->values()
+    ->all();
+
+$currentRevisionVersion =
+    collect($revisionItems)
+        ->max('version_number');
+
 $recordPayload = [
 'id' => $get('id'),
 
@@ -206,6 +288,10 @@ $recordPayload = [
 'follow_up' => $followUp,
 
 'edit_url' => $recordEditUrl,
+
+'revisions' => $revisionItems,
+
+'current_version' => $currentRevisionVersion,
 ];
 }
 
@@ -310,6 +396,7 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
     </div>
 
     @if ($showDetails)
+
     <div class="appt-visit-actions">
         <button type="button" class="ui-action-btn ui-action-view" data-appointment-id="{{ $get('id') }}" data-record='@json(
         $recordPayload,
@@ -323,5 +410,6 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
             <i class="fa-regular fa-eye"></i>
         </button>
     </div>
+    
     @endif
 </div>

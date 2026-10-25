@@ -46,10 +46,47 @@
                         Status
                     </span>
 
-                    <span id="m_status" class="status-pill status-default">
-                        <span class="status-dot"></span>
-                        —
-                    </span>
+                    <div class="global-label-row">
+
+                        <div class="global-info-group">
+
+                            <span id="m_status" class="status-pill status-default">
+
+                                <span class="status-dot"></span>
+                                —
+                            </span>
+
+                            <span id="recordEditedBadge" class="global-info-subvalue" hidden>
+
+                                Edited ·
+                                <span id="recordEditedVersion">
+                                    v1
+                                </span>
+
+                                ·
+
+                                <span id="recordViewHistoryCount">
+                                    0
+                                </span>
+                                versions
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="global-label-meta">
+
+                            <button type="button" id="recordViewHistoryBtn" class="ui-action-btn ui-action-view"
+                                data-tooltip="View edit history" aria-label="View edit history" hidden>
+
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+
+                            </button>
+
+                        </div>
+
+                    </div>
                 </div>
 
                 <div class="record-summary-card">
@@ -125,20 +162,90 @@
                 </div>
             </div>
 
-            <div class="record-modal-section record-modal-odontogram-section">
-                <div class="record-modal-section-title">
-                    <i class="fa-solid fa-tooth"></i>
-                    <span>Odontogram</span>
+            <div id="recordOdontogramSection" class="record-modal-section record-modal-odontogram-section">
+
+                <div class="global-label-row">
+
+                    <div class="record-modal-section-title global-label-main">
+                        <i class="fa-solid fa-tooth"></i>
+
+                        <span>
+                            Odontogram
+                        </span>
+                    </div>
+
+                    <div class="global-label-meta">
+                        <a href="#" id="recordModalEditBtn" class="ui-btn ui-btn-primary ui-btn-sm" hidden>
+
+                            <i class="fa-solid fa-pen-to-square"></i>
+
+                            <span>
+                                Edit Odontogram
+                            </span>
+                        </a>
+                    </div>
+
                 </div>
 
                 <div id="m_odontogram" class="record-modal-odontogram relative">
+
                     @include('components.odontogram-preview', [
                         'odontogramData' => [],
-                        'showEditButton' => true,
+                        'showEditButton' => false,
+                        'showHistoricalNotice' => true,
+                        'tallPreview' => true,
                     ])
 
                 </div>
+
             </div>
+
+            <details id="recordRevisionHistorySection" class="global-accordion record-modal-section"
+                data-accordion-reveal-on-open hidden>
+
+                <summary class="global-accordion-summary">
+
+                    <span class="global-accordion-left">
+
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+
+                        <span class="global-accordion-title">
+                            Edit History
+                        </span>
+
+                        <span class="global-info-group">
+                            <span id="recordRevisionCountBadge" class="global-info-subvalue">
+                                0 versions
+                            </span>
+                        </span>
+
+                    </span>
+
+                    <i class="fa-solid fa-chevron-down global-accordion-chevron"></i>
+
+                </summary>
+
+                <div class="global-accordion-body">
+
+                    <div id="recordRevisionHistoryContent" data-show-more data-show-more-step="3"
+                        data-show-more-label="versions">
+
+                        <div class="record-modal-content">
+
+                            <div id="recordRevisionHistoryList"
+                                class="table-list-view max-h-[360px] overflow-y-auto overscroll-contain"
+                                data-show-more-list>
+                            </div>
+
+                        </div>
+
+                        <x-show-more label="versions" />
+
+                    </div>
+
+                </div>
+
+            </details>
 
         </div>
 

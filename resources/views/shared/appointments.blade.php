@@ -445,19 +445,25 @@
                     $monthLabel = \Carbon\Carbon::createFromFormat('Y-m-d', $monthKey . '-01')->format('F Y');
                 @endphp
 
-                <details class="appt-month-group" data-month="{{ $monthKey }}" data-show-more data-show-more-step="7"
-                    data-show-more-label="appointments" open>
-                    <summary class="appt-month-summary">
-                        <span class="appt-month-left">
+                <details class="appt-month-group global-accordion" data-month="{{ $monthKey }}" data-show-more
+                    data-show-more-step="7" data-show-more-label="appointments" open>
+
+                    <summary class="global-accordion-summary">
+
+                        <span class="global-accordion-left">
+
                             <span class="timeline-dot"></span>
 
-                            <span class="appt-month-title">
+                            <span class="global-accordion-title">
                                 {{ $monthLabel }}
                             </span>
 
                             <span class="global-info-group">
+
                                 <span class="appt-type-icon" aria-hidden="true">
+
                                     <i class="fa-solid fa-calendar-check"></i>
+
                                 </span>
 
                                 <span class="global-info-subvalue" data-month-count data-show-more-count
@@ -465,14 +471,18 @@
 
                                     {{ $items->count() }}
                                     {{ Str::plural('appointment', $items->count()) }}
+
                                 </span>
+
                             </span>
+
                         </span>
 
-                        <i class="fa-solid fa-chevron-down appt-month-chevron"></i>
+                        <i class="fa-solid fa-chevron-down global-accordion-chevron"></i>
+
                     </summary>
 
-                    <div class="appt-month-body">
+                    <div class="global-accordion-body">
 
                         <div class="desktop-appointments-table relative pl-10">
 
@@ -548,7 +558,8 @@
 
                                         $courseName = trim((string) ($patient?->course_name ?? ''));
 
-                                        $isFacultyPatient = $patient?->classification === 'faculty' || filled($patient?->faculty_code);
+                                        $isFacultyPatient =
+                                            $patient?->classification === 'faculty' || filled($patient?->faculty_code);
 
                                         if ($isFacultyPatient) {
                                             $program = 'Faculty';
@@ -994,7 +1005,8 @@
 
                                     $courseName = trim((string) ($patient?->course_name ?? ''));
 
-                                    $isFacultyPatient = $patient?->classification === 'faculty' || filled($patient?->faculty_code);
+                                    $isFacultyPatient =
+                                        $patient?->classification === 'faculty' || filled($patient?->faculty_code);
 
                                     if ($isFacultyPatient) {
                                         $program = 'Faculty';
@@ -1466,15 +1478,15 @@
 
             <div class="filter-date-grid">
                 <div class="filter-date-input-wrap">
-                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date"
-                        readonly autocomplete="off">
+                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from"
+                        placeholder="Start date" readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
                 </div>
 
                 <div class="filter-date-input-wrap">
-                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date"
-                        readonly autocomplete="off">
+                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to"
+                        placeholder="End date" readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
                 </div>
@@ -1801,44 +1813,6 @@
                 applyAppointmentFilters();
             };
 
-        function setupAppointmentAccordions() {
-            document.querySelectorAll('details.appt-month-group').forEach((group) => {
-                const summary = group.querySelector('summary');
-                if (!summary || group.dataset.accordionReady === 'true') return;
-
-                group.dataset.accordionReady = 'true';
-
-                summary.addEventListener('click', function(event) {
-                    event.preventDefault();
-
-                    if (group.dataset.animating === 'true') return;
-
-                    if (group.open) {
-                        group.dataset.animating = 'true';
-                        group.classList.add('is-closing');
-
-                        setTimeout(() => {
-                            group.open = false;
-                            group.classList.remove('is-closing');
-                            group.dataset.animating = 'false';
-                        }, 220);
-
-                        return;
-                    }
-
-                    group.open = true;
-                    group.dataset.animating = 'true';
-                    group.classList.remove('is-closing');
-                    group.classList.add('is-opening');
-
-                    setTimeout(() => {
-                        group.classList.remove('is-opening');
-                        group.dataset.animating = 'false';
-                    }, 280);
-                });
-            });
-        }
-
         document.addEventListener(
             'DOMContentLoaded',
             () => {
@@ -1870,7 +1844,6 @@
                 applyAppointmentFilters();
                 updateAppointmentFilterButtonState();
                 revealAppointmentContainer?.();
-                setupAppointmentAccordions();
 
                 window.ShowMore?.init(
                     document
@@ -2679,4 +2652,3 @@
         }
     </script>
 @endsection
-

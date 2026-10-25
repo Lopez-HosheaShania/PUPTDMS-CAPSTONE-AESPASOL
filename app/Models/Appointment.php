@@ -47,22 +47,22 @@ class Appointment extends Model
 
     public function scopeRegularBooking(Builder $query): Builder
     {
-        return $query->whereDoesntHave('reservedBookingDetails', fn ($details) => $details->whereNotNull('reserved_booking_period_id'));
+        return $query->whereDoesntHave('reservedBookingDetails', fn($details) => $details->whereNotNull('reserved_booking_period_id'));
     }
 
     public function scopeForReservedPeriod(Builder $query, int $periodId): Builder
     {
-        return $query->whereHas('reservedBookingDetails', fn ($details) => $details->where('reserved_booking_period_id', $periodId));
+        return $query->whereHas('reservedBookingDetails', fn($details) => $details->where('reserved_booking_period_id', $periodId));
     }
 
     public function scopeForReservedSlot(Builder $query, int $slotId): Builder
     {
-        return $query->whereHas('reservedBookingDetails', fn ($details) => $details->where('reserved_booking_period_slot_id', $slotId));
+        return $query->whereHas('reservedBookingDetails', fn($details) => $details->where('reserved_booking_period_slot_id', $slotId));
     }
 
     public function scopeFollowUps(Builder $query): Builder
     {
-        return $query->whereHas('followUpDetails', fn ($details) => $details->where('is_follow_up', true));
+        return $query->whereHas('followUpDetails', fn($details) => $details->where('is_follow_up', true));
     }
 
     public function transferDetails()
@@ -254,16 +254,17 @@ class Appointment extends Model
             $appointmentIds = static::query()
                 ->whereIn('status', self::ACTIVE_DUTY_END_STATUSES)
                 ->whereDate('appointment_date', '<', $today)
-                ->pluck('id');
+                ->pluck('id')
+                ->all();
 
-            if ($appointmentIds->isEmpty()) {
+            if ($appointmentIds === []) {
                 return 0;
             }
 
             $timestamp = now();
 
-            $cancelled = static::query()
-                ->whereKey($appointmentIds)
+            $cancelled = DB::table('appointments')
+                ->whereIn('id', $appointmentIds)
                 ->update([
                     'status' => 'cancelled',
                     'cancellation_reason' => DB::raw(
@@ -294,14 +295,26 @@ class Appointment extends Model
 
     public function reservedBookingPeriod()
     {
-        return $this->hasOneThrough(ReservedBookingPeriod::class, AppointmentReservedBooking::class,
-            'appointment_id', 'id', 'id', 'reserved_booking_period_id')->withTrashed();
+        return $this->hasOneThrough(
+            ReservedBookingPeriod::class,
+            AppointmentReservedBooking::class,
+            'appointment_id',
+            'id',
+            'id',
+            'reserved_booking_period_id'
+        )->withTrashed();
     }
 
     public function reservedBookingPeriodSlot()
     {
-        return $this->hasOneThrough(ReservedBookingPeriodSlot::class, AppointmentReservedBooking::class,
-            'appointment_id', 'id', 'id', 'reserved_booking_period_slot_id');
+        return $this->hasOneThrough(
+            ReservedBookingPeriodSlot::class,
+            AppointmentReservedBooking::class,
+            'appointment_id',
+            'id',
+            'id',
+            'reserved_booking_period_slot_id'
+        );
     }
 
     public function reservedProcedureWindowIsOpen(?Carbon $now = null): bool
@@ -335,14 +348,26 @@ class Appointment extends Model
 
     public function originalAppointment()
     {
-        return $this->hasOneThrough(Appointment::class, AppointmentFollowUp::class,
-            'appointment_id', 'id', 'id', 'follow_up_for_appointment_id');
+        return $this->hasOneThrough(
+            Appointment::class,
+            AppointmentFollowUp::class,
+            'appointment_id',
+            'id',
+            'id',
+            'follow_up_for_appointment_id'
+        );
     }
 
     public function followUpAppointments()
     {
-        return $this->hasManyThrough(Appointment::class, AppointmentFollowUp::class,
-            'follow_up_for_appointment_id', 'id', 'id', 'appointment_id');
+        return $this->hasManyThrough(
+            Appointment::class,
+            AppointmentFollowUp::class,
+            'follow_up_for_appointment_id',
+            'id',
+            'id',
+            'appointment_id'
+        );
     }
 
     public function procedure()

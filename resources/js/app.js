@@ -7,6 +7,7 @@ import './core/modal';
 import './core/toast';
 import './core/session';
 
+import './ui/accordion';
 import './ui/header';
 
 const featurePromises = new Map();

@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Helpers\AuditLogger;
+use App\Models\Appointment;
+use App\Policies\OdontogramPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -89,8 +92,10 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-        public function boot(): void
+    public function boot(): void
     {
+        Gate::policy(Appointment::class, OdontogramPolicy::class);
+
         try {
             $timezone = setting('timezone', 'Asia/Manila (UTC+8)');
             $clinicName = setting('clinic_name', 'PUP Taguig Dental Clinic');

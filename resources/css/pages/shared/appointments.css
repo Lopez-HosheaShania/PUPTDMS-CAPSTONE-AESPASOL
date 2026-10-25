@@ -986,50 +986,11 @@
         margin: 0;
     }
 
-    #mainContent.shared-appointments-page .appt-month-group {
-        margin-bottom: 0.8rem;
-    }
-
-    #mainContent.shared-appointments-page .appt-month-summary {
-        min-height: 48px;
-        gap: 0.5rem;
-        margin-bottom: 0.4rem;
-        padding: 0.5rem 0.65rem;
-    }
-
-    #mainContent.shared-appointments-page .appt-month-left {
-        display: grid;
-
-        grid-template-columns:
-            auto minmax(0, 1fr) auto;
-
-        align-items: center;
-
-        gap: 0.5rem;
-
-        flex: 1 1 auto;
-    }
-
     #mainContent.shared-appointments-page .timeline-dot {
         width: 14px;
         height: 14px;
 
         border-width: 2px;
-    }
-
-    #mainContent.shared-appointments-page .appt-month-title {
-        min-width: 0;
-
-        font-size: 0.86rem;
-        line-height: 1;
-
-        white-space: nowrap;
-    }
-
-    #mainContent.shared-appointments-page .appt-month-chevron {
-        flex: 0 0 auto;
-
-        font-size: 0.65rem;
     }
 }
 
@@ -1948,103 +1909,6 @@
 #mainContent.shared-appointments-page .empty-state-controlled.show,
 #mainContent.shared-appointments-page .empty-state-controlled.is-visible {
     display: flex;
-}
-
-#mainContent.shared-appointments-page .appt-month-group {
-    margin: 0 0 1.25rem;
-}
-
-#mainContent.shared-appointments-page .appt-month-group:last-child {
-    margin-bottom: 0;
-}
-
-#mainContent.shared-appointments-page .appt-month-summary {
-    list-style: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 0.65rem;
-    padding: 0.75rem 0.9rem;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.78);
-    border: 1px solid rgba(139, 0, 0, 0.10);
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.045);
-    user-select: none;
-}
-
-#mainContent.shared-appointments-page .appt-month-summary::-webkit-details-marker {
-    display: none;
-}
-
-[data-theme="dark"] #mainContent.shared-appointments-page .appt-month-summary,
-.dark #mainContent.shared-appointments-page .appt-month-summary {
-    background:
-        radial-gradient(circle at top left,
-            rgba(139, 0, 0, 0.16),
-            transparent 38%),
-        linear-gradient(145deg,
-            rgba(13, 17, 23, 0.94),
-            rgba(22, 27, 34, 0.88));
-
-    border-color: rgba(255, 255, 255, 0.10);
-
-    box-shadow:
-        0 16px 34px rgba(0, 0, 0, 0.30),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-[data-theme="dark"] #mainContent.shared-appointments-page .appt-month-title,
-.dark #mainContent.shared-appointments-page .appt-month-title {
-    color: #F8FAFC;
-}
-
-[data-theme="dark"] #mainContent.shared-appointments-page .appt-month-chevron,
-.dark #mainContent.shared-appointments-page .appt-month-chevron {
-    color: #94A3B8;
-}
-
-#mainContent.shared-appointments-page .appt-month-left {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-}
-
-#mainContent.shared-appointments-page .appt-month-title {
-    font-size: 1.05rem;
-    font-weight: 800;
-    line-height: 1;
-}
-
-#mainContent.shared-appointments-page .appt-month-chevron {
-    color: #94A3B8;
-    font-size: .8rem;
-    transition: transform .22s ease;
-}
-
-#mainContent.shared-appointments-page .appt-month-group:not([open]) .appt-month-chevron,
-#mainContent.shared-appointments-page .appt-month-group.is-closing .appt-month-chevron {
-    transform: rotate(0deg);
-}
-
-#mainContent.shared-appointments-page .appt-month-group[open]:not(.is-closing) .appt-month-chevron {
-    transform: rotate(180deg);
-}
-
-#mainContent.shared-appointments-page .appt-month-body {
-    overflow: hidden;
-    transform-origin: top;
-}
-
-#mainContent.shared-appointments-page .appt-month-group[open]:not(.is-closing) .appt-month-body {
-    animation: appointmentAccordionExpand .28s cubic-bezier(.22, 1, .36, 1);
-    max-height: none;
-}
-
-#mainContent.shared-appointments-page .appt-month-group.is-closing .appt-month-body {
-    animation: appointmentAccordionCollapse .22s ease both;
 }
 
 #mainContent.shared-appointments-page .appointment-static-empty.hidden,

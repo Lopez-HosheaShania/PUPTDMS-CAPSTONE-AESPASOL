@@ -384,9 +384,19 @@
                                         </div>
                                     </div>
                                     <div id="canvas-container">
-                                        <div id="loadingOverlay" class="odontogram-loading-overlay">
-                                            <i class="fa-solid fa-circle-notch fa-spin"></i>
-                                            <p>Generating 3D Model...</p>
+                                        <div id="loadingOverlay" class="odontogram-loading" role="status"
+                                            aria-live="polite" aria-label="Generating 3D odontogram model.">
+
+                                            <div aria-hidden="true">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+
+                                            <p>
+                                                Generating 3D model...
+                                            </p>
+
                                         </div>
 
                                         <div id="toothTooltip" class="tooth-tooltip">
@@ -536,10 +546,10 @@
                                             @if ($selectedDiagnosis !== 'Others') hidden @endif>
                                     </div>
 
-                                    <div class="global-form-group odontogram-prescription-field">
+                                    <div class="global-form-group">
                                         <label for="prescriptionsNotes" class="global-form-label">
                                             Prescription
-                                            <span class="odontogram-label-optional">
+                                            <span class="field-optional">
                                                 (Optional)
                                             </span>
                                         </label>
@@ -550,7 +560,10 @@
 
                                     <div class="global-form-group">
                                         <label for="inventoryNotes" class="global-form-label">
-                                            Inventory Notes <span class="odontogram-label-optional">(Optional)</span>
+                                            Inventory Notes
+                                            <span class="field-optional">
+                                                (Optional)
+                                            </span>
                                         </label>
                                         <textarea id="inventoryNotes" name="inventory_notes" rows="3" maxlength="10000"
                                             class="form-input-custom global-form-textarea"
@@ -864,9 +877,9 @@
                         <span>
                             {{ $savedVisitEditMode
                                 ? 'Are you sure you want to cancel this edit? Any unsaved changes in this saved visit may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    lost.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                lost.'
                                 : 'Are you sure you want to cancel this procedure? Any unsaved progress in this session may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    lost.' }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                lost.' }}
                         </span>
                     </div>
                 </div>
@@ -886,6 +899,123 @@
             </div>
         </div>
     </div>
+
+    @if ($savedVisitEditMode)
+        <div id="correctionReasonModal" class="ui-modal modal-theme-warning" aria-hidden="true" role="dialog"
+            aria-modal="true" aria-labelledby="correctionReasonModalTitle">
+
+            <div class="ui-modal-card modal-md">
+
+                <div class="modal-hd">
+                    <div class="modal-heading">
+
+                        <div class="modal-icon">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </div>
+
+                        <div class="modal-copy">
+                            <h2 id="correctionReasonModalTitle" class="modal-title">
+                                Reason for Correction
+                            </h2>
+
+                            <p class="modal-subtitle">
+                                Document why this previously saved odontogram is being corrected.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-bd">
+
+                    <div class="global-confirm-alert">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+
+                        <div>
+                            <strong>Correction will be recorded</strong>
+                            <span>
+                                The original version will remain in the revision history together with your identity, role,
+                                date, and reason for this change.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="global-form-group mt-4" data-global-field>
+                        <label for="correctionReasonCategory" class="global-form-label">
+                            Correction Reason
+                        </label>
+
+                        <select id="correctionReasonCategory" class="form-select-custom js-custom-select"
+                            data-placeholder="Select a reason" data-field-label="Correction Reason">
+
+                            <option value="">
+                                Select a reason
+                            </option>
+
+                            <option value="wrong_tooth">
+                                Wrong Tooth
+                            </option>
+
+                            <option value="wrong_surface">
+                                Wrong Surface
+                            </option>
+
+                            <option value="wrong_condition">
+                                Wrong Condition / Treatment
+                            </option>
+
+                            <option value="treatment_changed">
+                                Treatment Information Changed
+                            </option>
+
+                            <option value="data_entry_error">
+                                Data Entry Error
+                            </option>
+
+                            <option value="other">
+                                Other
+                            </option>
+                        </select>
+
+                        <div class="global-field-error" data-error-for="correctionReasonCategory" aria-hidden="true">
+                        </div>
+                    </div>
+
+                    <div class="global-form-group mt-4" data-global-field>
+                        <div class="global-label-row">
+                            <label for="correctionReasonNotes" class="global-form-label">
+                                Correction Notes
+                                <span class="field-optional">(Optional)</span>
+                            </label>
+
+                            <span id="correctionReasonNotesCounter" class="char-counter">
+                                0 / 2000 characters
+                            </span>
+                        </div>
+
+                        <textarea id="correctionReasonNotes" rows="4" maxlength="2000" data-char-limit="2000"
+                            data-char-counter="#correctionReasonNotesCounter" class="form-input-custom global-form-textarea"
+                            placeholder="Add additional details about this correction..."></textarea>
+                    </div>
+
+                </div>
+
+                <div class="modal-ft">
+
+                    <button type="button" id="dismissCorrectionReasonBtn" class="ui-btn ui-btn-secondary">
+                        <span>Continue Editing</span>
+                    </button>
+
+                    <button type="button" id="confirmCorrectionReasonBtn" class="ui-btn ui-btn-warning">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Save Correction</span>
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    @endif
 
     <div id="finishProcedureModal" class="ui-modal modal-theme-success" aria-hidden="true" role="dialog"
         aria-modal="true" aria-labelledby="finishProcedureModalTitle">
@@ -993,6 +1123,13 @@
             const cancelProcedureModal = document.getElementById('cancelProcedureModal');
             const confirmCancelProcedureBtn = document.getElementById('confirmCancelProcedureBtn');
             const dismissCancelProcedureBtn = document.getElementById('dismissCancelProcedureBtn');
+            const correctionReasonModal = document.getElementById('correctionReasonModal');
+
+            const correctionReasonCategory = document.getElementById('correctionReasonCategory');
+            const correctionReasonNotes = document.getElementById('correctionReasonNotes');
+            const dismissCorrectionReasonBtn = document.getElementById('dismissCorrectionReasonBtn');
+            const confirmCorrectionReasonBtn = document.getElementById('confirmCorrectionReasonBtn');
+
             const finishProcedureModal = document.getElementById('finishProcedureModal');
             const finishProcedureModalTitle = document.getElementById('finishProcedureModalTitle');
             const finishProcedureModalMessage = document.getElementById('finishProcedureModalMessage');
@@ -1087,6 +1224,35 @@
             const HISTORY_LIMIT = 50;
 
             let odontogramThreeState = null;
+
+            let odontogramThreeLoadPromise =
+                null;
+
+
+            function waitForThreeSceneIdle() {
+                return new Promise(
+                    resolve => {
+
+                        if (
+                            typeof window.requestIdleCallback ===
+                            'function'
+                        ) {
+                            window.requestIdleCallback(
+                                () => {
+                                    resolve();
+                                }
+                            );
+
+                            return;
+                        }
+
+                        window.setTimeout(
+                            resolve,
+                            180
+                        );
+                    }
+                );
+            }
 
             const legends = [{
                     code: 'D',
@@ -1243,115 +1409,175 @@
             const odontogramState = {};
 
             async function initThreeScene() {
+
                 if (odontogramThreeState) {
-                    return;
+                    return odontogramThreeState;
                 }
 
-                if (!window.Odontogram3D) {
-                    try {
-                        await window.loadOdontogramThreeModule?.();
-                    } catch (error) {
-                        console.error(
-                            'Unable to load odontogram 3D module.',
-                            error
-                        );
 
-                        showProcedureToast(
-                            'Unable to load the 3D odontogram.',
-                            'error',
-                            '3D View Unavailable'
-                        );
-
-                        return;
-                    }
+                if (odontogramThreeLoadPromise) {
+                    return odontogramThreeLoadPromise;
                 }
 
-                if (!window.Odontogram3D) {
-                    showProcedureToast(
-                        'The 3D odontogram module is unavailable.',
-                        'error',
-                        '3D View Unavailable'
-                    );
+                odontogramThreeLoadPromise =
+                    (async () => {
 
-                    return;
-                }
+                        /*
+                         * The 3D panel has already been shown.
+                         * Give the browser time to paint the
+                         * loader and handle scrolling first.
+                         */
+                        await waitForThreeSceneIdle();
 
-                odontogramThreeState =
-                    window.Odontogram3D.create({
-                        container,
 
-                        data: Object.values(
-                            odontogramState
-                        ),
-
-                        mode: 'editor',
-
-                        onToothHover: (
-                            toothNumber,
-                            mesh,
-                            event,
-                            surfaceKey
-                        ) => {
-
-                            if (!toothNumber) {
-                                toothHoverLabel
-                                    .innerText =
-                                    selectedTooth ?
-                                    `Selected: #${selectedTooth}` :
-                                    'Select a tooth';
-
-                                hideTooltip();
-
-                                return;
-                            }
-
-                            toothHoverLabel
-                                .innerText =
-                                `Tooth #${toothNumber} · ${getSurfaceLabel(surfaceKey, toothNumber)}`;
-
-                            showTooltip(event, mesh, surfaceKey);
-                        },
-
-                        onToothClick: (toothNumber, mesh, event, surfaceKey) => {
-                            if (!toothNumber || !mesh) {
-                                if (!event?.shiftKey) clear3DSurfacePickerSelection(false);
-                                hideTooltip();
-                                return;
-                            }
-
-                            const previousTooth = selectedTooth;
-                            const target = {
-                                tooth: toothNumber,
-                                targetType: selectedScope === 'whole' ? 'whole' : 'surface',
-                                surfaceKey: selectedScope === 'whole' ? null : surfaceKey
-                            };
-                            select2DTarget(target, Boolean(event?.shiftKey));
-                            if (selectedTargetType === 'surface' && selectedSurfaceKey) {
-                                ensureToothState(selectedTooth).lastSelectedSurface =
-                                    selectedSurfaceKey;
-                            }
-                            selectedMesh = window.Odontogram3D.getToothMesh(odontogramThreeState,
-                                selectedTooth);
-                            if (selectedMesh && previousTooth !== selectedTooth && !event?.shiftKey) {
-                                window.Odontogram3D.focusTooth(odontogramThreeState, selectedMesh);
-                            }
-                            renderThreeVisuals();
-                            updateScopeButtons();
-                            updateSelectedToothUI();
-                        },
-
-                        onReady: () => {
-                            loadingOverlay.style
-                                .opacity =
-                                '0';
-
-                            setTimeout(() => {
-                                loadingOverlay.style
-                                    .display =
-                                    'none';
-                            }, 500);
+                        /*
+                         * User may already have returned to 2D
+                         * while we were waiting.
+                         */
+                        if (currentView !== '3d') {
+                            return null;
                         }
-                    });
+
+
+                        if (!window.Odontogram3D) {
+                            try {
+                                await window.loadOdontogramThreeModule?.();
+                            } catch (error) {
+                                console.error(
+                                    'Unable to load odontogram 3D module.',
+                                    error
+                                );
+
+                                showProcedureToast(
+                                    'Unable to load the 3D odontogram.',
+                                    'error',
+                                    '3D View Unavailable'
+                                );
+
+                                return;
+                            }
+                        }
+                        await waitForThreeSceneIdle();
+
+
+                        if (currentView !== '3d') {
+                            return null;
+                        }
+                        if (!window.Odontogram3D) {
+                            showProcedureToast(
+                                'The 3D odontogram module is unavailable.',
+                                'error',
+                                '3D View Unavailable'
+                            );
+
+                            return;
+                        }
+
+                        container.style.pointerEvents =
+                            'none';
+
+                        odontogramThreeState =
+                            window.Odontogram3D.create({
+                                container,
+
+                                data: Object.values(
+                                    odontogramState
+                                ),
+
+                                mode: 'editor',
+
+                                onToothHover: (
+                                    toothNumber,
+                                    mesh,
+                                    event,
+                                    surfaceKey
+                                ) => {
+
+                                    if (!toothNumber) {
+                                        toothHoverLabel
+                                            .innerText =
+                                            selectedTooth ?
+                                            `Selected: #${selectedTooth}` :
+                                            'Select a tooth';
+
+                                        hideTooltip();
+
+                                        return;
+                                    }
+
+                                    toothHoverLabel
+                                        .innerText =
+                                        `Tooth #${toothNumber} · ${getSurfaceLabel(surfaceKey, toothNumber)}`;
+
+                                    showTooltip(event, mesh, surfaceKey);
+                                },
+
+                                onToothClick: (toothNumber, mesh, event, surfaceKey) => {
+                                    if (!toothNumber || !mesh) {
+                                        if (!event?.shiftKey) clear3DSurfacePickerSelection(
+                                            false);
+                                        hideTooltip();
+                                        return;
+                                    }
+
+                                    const previousTooth = selectedTooth;
+                                    const target = {
+                                        tooth: toothNumber,
+                                        targetType: selectedScope === 'whole' ? 'whole' :
+                                            'surface',
+                                        surfaceKey: selectedScope === 'whole' ? null :
+                                            surfaceKey
+                                    };
+                                    select2DTarget(target, Boolean(event?.shiftKey));
+                                    if (selectedTargetType === 'surface' &&
+                                        selectedSurfaceKey) {
+                                        ensureToothState(selectedTooth).lastSelectedSurface =
+                                            selectedSurfaceKey;
+                                    }
+                                    selectedMesh = window.Odontogram3D.getToothMesh(
+                                        odontogramThreeState,
+                                        selectedTooth);
+                                    if (selectedMesh && previousTooth !== selectedTooth && !
+                                        event?.shiftKey) {
+                                        window.Odontogram3D.focusTooth(odontogramThreeState,
+                                            selectedMesh);
+                                    }
+                                    renderThreeVisuals();
+                                    updateScopeButtons();
+                                    updateSelectedToothUI();
+                                },
+
+                                onReady: () => {
+
+                                    container.style.removeProperty(
+                                        'pointer-events'
+                                    );
+
+                                    loadingOverlay.style.opacity =
+                                        '0';
+
+                                    setTimeout(() => {
+
+                                        loadingOverlay.style.display =
+                                            'none';
+
+                                    }, 500);
+                                }
+                            });
+
+                        return odontogramThreeState;
+                    })();
+
+
+                try {
+
+                    return await odontogramThreeLoadPromise;
+
+                } finally {
+
+                    odontogramThreeLoadPromise =
+                        null;
+                }
             }
 
             function renderThreeVisuals() {
@@ -1572,31 +1798,40 @@
             }
 
             function openUiModal(modal) {
-                if (!modal) return;
+                if (!modal?.id) return;
 
-                modal.classList.remove('closing');
-                modal.classList.add('open');
-                modal.setAttribute('aria-hidden', 'false');
-
-                document.documentElement.classList.add('modal-lock');
-                document.body.classList.add('modal-lock');
+                window.openModal?.(modal.id);
             }
 
             function closeUiModal(modal) {
-                if (!modal || !modal.classList.contains('open')) return;
+                if (!modal?.id) return;
 
-                modal.classList.remove('open');
-                modal.classList.add('closing');
-                modal.setAttribute('aria-hidden', 'true');
+                window.closeModal?.(modal.id);
+            }
+
+            function openCorrectionReasonModal() {
+                if (!savedVisitEditMode || !correctionReasonModal) {
+                    return;
+                }
+
+                window.initCustomSelects?.(
+                    correctionReasonModal
+                );
+
+                openUiModal(
+                    correctionReasonModal
+                );
 
                 window.setTimeout(() => {
-                    modal.classList.remove('closing');
+                    correctionReasonCategory
+                        ?.closest('.custom-select')
+                        ?.querySelector('.custom-select-button')
+                        ?.focus();
+                }, 50);
+            }
 
-                    if (!document.querySelector('.ui-modal.open')) {
-                        document.documentElement.classList.remove('modal-lock');
-                        document.body.classList.remove('modal-lock');
-                    }
-                }, 170);
+            function closeCorrectionReasonModal() {
+                closeUiModal(correctionReasonModal);
             }
 
             function markProcedureDiscardDirty() {
@@ -1612,7 +1847,8 @@
 
                 if (!discardProcedureUrl) {
                     window.DiscardChanges?.closeDiscardModal?.();
-                    window.location.href = discardProcedureReturnUrl || cancelProcedureRedirectUrl;
+                    window.location.href = discardProcedureReturnUrl ||
+                        cancelProcedureRedirectUrl;
                     return false;
                 }
 
@@ -1625,7 +1861,8 @@
 
                 if (confirmButton) {
                     confirmButton.disabled = true;
-                    confirmButton.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Discarding...';
+                    confirmButton.innerHTML =
+                        '<i class="fa-solid fa-circle-notch fa-spin"></i> Discarding...';
                 }
 
                 keepButtons.forEach(button => {
@@ -1634,9 +1871,12 @@
 
                 try {
                     const payload = {
-                        context: form?.querySelector('[name="context"]')?.value || 'appointments',
-                        appointment_id: form?.querySelector('[name="appointment_id"]')?.value || null,
-                        patient_id: form?.querySelector('[name="patient_id"]')?.value || null,
+                        context: form?.querySelector('[name="context"]')?.value ||
+                            'appointments',
+                        appointment_id: form?.querySelector('[name="appointment_id"]')
+                            ?.value || null,
+                        patient_id: form?.querySelector('[name="patient_id"]')?.value ||
+                            null,
                     };
 
                     const response = await fetch(discardProcedureUrl, {
@@ -1670,7 +1910,9 @@
                     return false;
                 } catch (error) {
                     console.error(error);
-                    showProcedureToast('Something went wrong while discarding the current procedure.', 'error');
+                    showProcedureToast(
+                        'Something went wrong while discarding the current procedure.',
+                        'error');
                     return false;
                 } finally {
                     procedureDiscardPending = false;
@@ -1780,7 +2022,8 @@
                 openUiModal(finishProcedureModal);
 
                 requestAnimationFrame(() => {
-                    (confirmation ? confirmFinishProcedureBtn : finishProcedureModalActionBtn)?.focus();
+                    (confirmation ? confirmFinishProcedureBtn :
+                        finishProcedureModalActionBtn)?.focus();
                 });
             }
 
@@ -1798,7 +2041,9 @@
                 }
 
                 window.setTimeout(() => {
-                    finishProcedureBtn?.focus({ preventScroll: true });
+                    finishProcedureBtn?.focus({
+                        preventScroll: true
+                    });
                 }, 180);
             }
 
@@ -1828,11 +2073,14 @@
                     top: isUpperTooth ?
                         'Buccal Surface' : (isLowerTooth ? 'Lingual Surface' : 'Top Surface'),
                     bottom: isUpperTooth ?
-                        'Palatal Surface' : (isLowerTooth ? 'Buccal Surface' : 'Bottom Surface'),
+                        'Palatal Surface' : (isLowerTooth ? 'Buccal Surface' :
+                            'Bottom Surface'),
                     left: isPatientRightSide ?
-                        'Distal Surface' : (isPatientLeftSide ? 'Mesial Surface' : 'Left Surface'),
+                        'Distal Surface' : (isPatientLeftSide ? 'Mesial Surface' :
+                            'Left Surface'),
                     right: isPatientRightSide ?
-                        'Mesial Surface' : (isPatientLeftSide ? 'Distal Surface' : 'Right Surface'),
+                        'Mesial Surface' : (isPatientLeftSide ? 'Distal Surface' :
+                            'Right Surface'),
                     center: centerSurfaceLabel,
                     status: 'Status Box',
                     whole: 'Whole Tooth'
@@ -1843,7 +2091,8 @@
             function update3DSurfacePicker() {
                 if (!surfacePicker3D) return;
 
-                const showPicker = currentView === '3d' && !!selectedTooth && selectedScope === 'surface';
+                const showPicker = currentView === '3d' && !!selectedTooth && selectedScope ===
+                    'surface';
                 surfacePicker3D.classList.toggle('hidden', !showPicker);
 
                 if (!showPicker) {
@@ -2194,7 +2443,8 @@
                     surfaceKey
                 }, useMultiSelect);
                 ensureToothState(tooth).lastSelectedSurface = surfaceKey;
-                selectedMesh = window.Odontogram3D.getToothMesh(odontogramThreeState, selectedTooth);
+                selectedMesh = window.Odontogram3D.getToothMesh(odontogramThreeState,
+                    selectedTooth);
                 if (!useMultiSelect && selectedMesh) {
                     window.Odontogram3D.focusTooth(odontogramThreeState, selectedMesh, surfaceKey);
                 }
@@ -2229,7 +2479,8 @@
                 const numericToothNumber = Number(toothNumber);
 
                 if (!odontogramState[numericToothNumber]) {
-                    odontogramState[numericToothNumber] = createDefaultToothState(numericToothNumber);
+                    odontogramState[numericToothNumber] = createDefaultToothState(
+                        numericToothNumber);
                 } else {
                     odontogramState[numericToothNumber] = normalizeOdontogramEntry(odontogramState[
                             numericToothNumber]) ||
@@ -2471,7 +2722,8 @@
 
                     selectedToothDisplay.textContent =
                         currentView === '2d' ?
-                        (selectedScope === 'whole' ? 'Select a tooth.' : 'Select a tooth surface.') :
+                        (selectedScope === 'whole' ? 'Select a tooth.' :
+                            'Select a tooth surface.') :
                         'Select a tooth.';
 
                     selectedToothName.textContent = '';
@@ -2491,7 +2743,8 @@
                     const targetCount = selectedTargets.size;
 
                     selectedToothDisplay.textContent = `${targetCount} targets selected`;
-                    selectedToothName.textContent = 'Shift + Click to add or remove teeth and surfaces';
+                    selectedToothName.textContent =
+                        'Shift + Click to add or remove teeth and surfaces';
                     toothHoverLabel.innerText = `${targetCount} targets selected`;
                     selectedViewBadge.textContent = currentView === '2d' ? '2D View' : '3D View';
                     legendStatusNote.classList.remove('hidden');
@@ -2506,7 +2759,8 @@
                 }
 
                 if (currentView === '3d' && !selectedTargetType) {
-                    selectedToothDisplay.textContent = `Tooth #${selectedTooth} - Choose a surface below`;
+                    selectedToothDisplay.textContent =
+                        `Tooth #${selectedTooth} - Choose a surface below`;
                     selectedToothName.textContent = getToothName(selectedTooth);
                     toothHoverLabel.innerText = `Selected: #${selectedTooth}`;
                     selectedViewBadge.textContent = '3D View';
@@ -2557,8 +2811,10 @@
                         .filter(legend => {
                             if (!normalizedSearch) return true;
                             return (
-                                legend.code.toLowerCase().includes(normalizedSearch) ||
-                                legend.label.toLowerCase().includes(normalizedSearch)
+                                legend.code.toLowerCase().includes(
+                                    normalizedSearch) ||
+                                legend.label.toLowerCase().includes(
+                                    normalizedSearch)
                             );
                         });
 
@@ -2593,7 +2849,8 @@
                         btn.type = 'button';
                         btn.dataset.code = legend.code;
                         btn.className = 'legend-btn';
-                        btn.title = `${legend.displayCode || legend.code} - ${legend.label}`;
+                        btn.title =
+                            `${legend.displayCode || legend.code} - ${legend.label}`;
 
                         btn.innerHTML = `
                             <span class="legend-color-dot" style="background:${legendColors[legend.code]};"></span>
@@ -3360,7 +3617,8 @@
                     });
 
                     part.addEventListener('mouseleave', function() {
-                        toothHoverLabel.innerText = selectedTooth ? `Selected: #${selectedTooth}` :
+                        toothHoverLabel.innerText = selectedTooth ?
+                            `Selected: #${selectedTooth}` :
                             'Select a tooth';
                     });
                 });
@@ -3391,7 +3649,8 @@
                 return wrap;
             }
 
-            function createRow(leftTeeth, rightTeeth, statusPlacement = 'top', leftLabel = '', rightLabel = '',
+            function createRow(leftTeeth, rightTeeth, statusPlacement = 'top', leftLabel = '',
+                rightLabel = '',
                 surfaceOrientation = null) {
                 const row = document.createElement('div');
                 row.className = 'odontogram-row';
@@ -3422,13 +3681,15 @@
                 }
                 row.appendChild(left);
 
-                leftTeeth.forEach(tooth => row.appendChild(createToothUnit(tooth, statusPlacement)));
+                leftTeeth.forEach(tooth => row.appendChild(createToothUnit(tooth,
+                    statusPlacement)));
 
                 const spacer = document.createElement('div');
                 spacer.className = 'odontogram-arch-spacer';
                 row.appendChild(spacer);
 
-                rightTeeth.forEach(tooth => row.appendChild(createToothUnit(tooth, statusPlacement)));
+                rightTeeth.forEach(tooth => row.appendChild(createToothUnit(tooth,
+                    statusPlacement)));
 
                 const right = document.createElement('div');
                 right.className = 'status-label-right';
@@ -3452,7 +3713,8 @@
             function render2DOdontogram() {
                 board2d.innerHTML = '';
 
-                const row1 = createRow(primaryUpperRight, primaryUpperLeft, 'top', 'STATUS<br>RIGHT', 'LEFT');
+                const row1 = createRow(primaryUpperRight, primaryUpperLeft, 'top',
+                    'STATUS<br>RIGHT', 'LEFT');
                 row1.classList.add('arch-divider');
                 board2d.appendChild(row1);
 
@@ -3470,7 +3732,8 @@
                 row3.classList.add('arch-divider');
                 board2d.appendChild(row3);
 
-                const row4 = createRow(primaryLowerRight, primaryLowerLeft, 'bottom', 'STATUS<br>RIGHT', 'LEFT');
+                const row4 = createRow(primaryLowerRight, primaryLowerLeft, 'bottom',
+                    'STATUS<br>RIGHT', 'LEFT');
                 board2d.appendChild(row4);
             }
 
@@ -3532,7 +3795,8 @@
             }
 
             view2dBtn.addEventListener('click', () => switchView('2d'));
-            view3dBtn.addEventListener('click', () => switchView('3d'));
+            view3dBtn.addEventListener(
+                'click', () => switchView('3d'));
 
             function updateScopeButtons() {
                 const isWhole = selectedScope === 'whole';
@@ -3572,8 +3836,10 @@
                 renderThreeVisuals();
             }
 
-            wholeToothScopeBtn?.addEventListener('click', () => selectTargetScope('whole'));
-            toothSurfaceScopeBtn?.addEventListener('click', () => selectTargetScope('surface'));
+            wholeToothScopeBtn?.addEventListener('click', () => selectTargetScope(
+                'whole'));
+            toothSurfaceScopeBtn?.addEventListener('click', () => selectTargetScope(
+                'surface'));
 
             function showTooltip(event, mesh, surfaceKey = null) {
                 const toothNumber = mesh.userData.tooth;
@@ -3581,7 +3847,8 @@
                 const state = ensureToothState(toothNumber);
                 const hasSurfaces = Object.values(state.surfaces || {}).some(item => item?.code);
                 const wholeTreatment = state.status || (!hasSurfaces ? state.threeD : null);
-                const treatment = surfaceKey ? state.surfaces[surfaceKey] || wholeTreatment : wholeTreatment;
+                const treatment = surfaceKey ? state.surfaces[surfaceKey] || wholeTreatment :
+                    wholeTreatment;
 
                 toothTooltipContent.innerHTML = `
     <div class="tooth-tooltip-number">
@@ -3801,8 +4068,10 @@
                 openResetModal();
             });
 
-            confirmResetTreatmentBtn.addEventListener('click', clearSelectedTargetTreatment);
-            cancelResetTreatmentBtn.addEventListener('click', closeResetModal);
+            confirmResetTreatmentBtn.addEventListener('click',
+                clearSelectedTargetTreatment);
+            cancelResetTreatmentBtn.addEventListener('click',
+                closeResetModal);
 
             resetTreatmentModal.addEventListener('click', function(event) {
                 if (event.target === resetTreatmentModal) {
@@ -4169,13 +4438,15 @@
 
                         const surfaces = entry.surfaces || {};
 
-                        ['top', 'left', 'center', 'right', 'bottom'].forEach(function(surfaceKey) {
+                        ['top', 'left', 'center', 'right', 'bottom'].forEach(function(
+                            surfaceKey) {
                             if (surfaces[surfaceKey] && surfaces[surfaceKey].code) {
                                 cleanEntry.surfaces[surfaceKey] = surfaces[surfaceKey];
                             }
                         });
 
-                        const savedSurfaceKey = ['top', 'left', 'center', 'right', 'bottom'].includes(entry
+                        const savedSurfaceKey = ['top', 'left', 'center', 'right', 'bottom']
+                            .includes(entry
                                 .lastSelectedSurface) ?
                             entry.lastSelectedSurface :
                             null;
@@ -4369,7 +4640,8 @@
 
                 const procedureDurationSeconds = parseProcedureDurationSeconds();
 
-                if (!allowsProcedureCompletionWithoutOdontogramChanges && !hasAppliedTreatmentThisSession && !(
+                if (!allowsProcedureCompletionWithoutOdontogramChanges && !
+                    hasAppliedTreatmentThisSession && !(
                         savedVisitEditMode && hasAnySavedTreatment)) {
                     showProcedureToast(
                         'Apply at least one treatment to the tooth chart before finishing the procedure.',
@@ -4380,7 +4652,8 @@
                     return;
                 }
 
-                if (!allowsProcedureCompletionWithoutOdontogramChanges && cleanOdontogramData.length === 0) {
+                if (!allowsProcedureCompletionWithoutOdontogramChanges && cleanOdontogramData
+                    .length === 0) {
                     showProcedureToast(
                         'Apply at least one treatment to the tooth chart before finishing the procedure.',
                         'warning',
@@ -4398,17 +4671,28 @@
                     inventory_notes: document.getElementById('inventoryNotes').value,
                     completion_action: completionAction,
                     has_applied_treatment: allowsProcedureCompletionWithoutOdontogramChanges ||
-                        hasAppliedTreatmentThisSession,
-                    procedure_duration_hms: procedureDurationInput?.value.trim() || '00:00:00',
+                        hasAppliedTreatmentThisSession ||
+                        (savedVisitEditMode && hasAnySavedTreatment),
+                    procedure_duration_hms: procedureDurationInput?.value.trim() ||
+                        '00:00:00',
                     procedure_duration_seconds: procedureDurationSeconds,
                 };
+
+                if (savedVisitEditMode) {
+                    payload.reason_category =
+                        correctionReasonCategory?.value || '';
+
+                    payload.reason_notes =
+                        correctionReasonNotes?.value.trim() || '';
+                }
 
                 finishProcedureBtn.disabled = true;
                 if (followUpBtn) {
                     followUpBtn.disabled = true;
                 }
 
-                clickedButton.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${loadingText}`;
+                clickedButton.innerHTML =
+                    `<i class="fa-solid fa-circle-notch fa-spin"></i> ${loadingText}`;
 
                 try {
                     const response = await fetch(saveProcedureUrl, {
@@ -4507,13 +4791,18 @@
                 }
 
                 updateHiddenInput();
-                const cleanOdontogramData = getCleanOdontogramDataForSave();
-                const hasAnySavedTreatment = cleanOdontogramData.length > 0;
 
-                if (!allowsProcedureCompletionWithoutOdontogramChanges &&
+                const cleanOdontogramData =
+                    getCleanOdontogramDataForSave();
+
+                const hasAnySavedTreatment =
+                    cleanOdontogramData.length > 0;
+
+                if (
+                    !allowsProcedureCompletionWithoutOdontogramChanges &&
                     (
-                        (!hasAppliedTreatmentThisSession && !(savedVisitEditMode &&
-                            hasAnySavedTreatment)) ||
+                        (!hasAppliedTreatmentThisSession &&
+                            !(savedVisitEditMode && hasAnySavedTreatment)) ||
                         cleanOdontogramData.length === 0
                     )
                 ) {
@@ -4523,33 +4812,98 @@
                         icon: 'fa-tooth',
                         buttonText: 'Back to Odontogram',
                     });
+
+                    return;
+                }
+
+                if (savedVisitEditMode) {
+                    openCorrectionReasonModal();
                     return;
                 }
 
                 openFinishProcedureModal({
                     title: existingAppointmentMode ?
-                        'Save Existing Appointment?' : (savedVisitEditMode ?
-                            'Save Odontogram Changes?' : 'Finish Procedure?'),
+                        'Save Existing Appointment?' : 'Finish Procedure?',
 
                     message: existingAppointmentMode ?
                         'Are you sure you want to save this existing appointment? The old visit details, odontogram, and notes will be stored as a completed appointment.' :
-                        (savedVisitEditMode ?
-                            'Are you sure you want to update this saved visit? The saved 2D/3D odontogram and procedure notes will be replaced with your latest edits.' :
-                            'Are you sure you want to finish this procedure? The odontogram and procedure notes will be saved, and this appointment will be marked as completed.'
-                        ),
+                        'Are you sure you want to finish this procedure? The odontogram and procedure notes will be saved, and this appointment will be marked as completed.',
 
                     icon: 'fa-circle-question',
                     confirmation: true,
                 });
             });
 
+            dismissCorrectionReasonBtn?.addEventListener(
+                'click',
+                closeCorrectionReasonModal
+            );
+
+            confirmCorrectionReasonBtn?.addEventListener(
+                'click',
+                function() {
+                    const category =
+                        correctionReasonCategory?.value.trim() || '';
+
+                    if (!category) {
+                        window.showFormInputValidationMessage?.(
+                            correctionReasonCategory,
+                            'Please select a reason for the correction.'
+                        );
+
+                        correctionReasonCategory
+                            ?.closest('.custom-select')
+                            ?.querySelector('.custom-select-button')
+                            ?.focus();
+
+                        return;
+                    }
+
+                    window.clearFormInputValidation?.(
+                        correctionReasonCategory
+                    );
+
+                    closeCorrectionReasonModal();
+
+                    saveProcedure(
+                        'finished',
+                        finishProcedureBtn,
+                        'Saving Correction...'
+                    );
+                }
+            );
+
+            correctionReasonCategory?.addEventListener(
+                'change',
+                function() {
+                    if (
+                        correctionReasonCategory.value.trim()
+                    ) {
+                        window.clearFormInputValidation?.(
+                            correctionReasonCategory
+                        );
+                    }
+                }
+            );
+
+            correctionReasonModal?.addEventListener(
+                'click',
+                function(event) {
+                    if (event.target === correctionReasonModal) {
+                        closeCorrectionReasonModal();
+                    }
+                }
+            );
+
             confirmFinishProcedureBtn.addEventListener('click', function() {
                 closeFinishProcedureModal();
                 saveProcedure('finished', finishProcedureBtn, 'Saving Procedure...');
             });
 
-            dismissFinishProcedureBtn.addEventListener('click', closeFinishProcedureModal);
-            finishProcedureModalActionBtn.addEventListener('click', closeFinishProcedureModal);
+            dismissFinishProcedureBtn.addEventListener('click',
+                closeFinishProcedureModal);
+            finishProcedureModalActionBtn.addEventListener('click',
+                closeFinishProcedureModal);
 
             finishProcedureModal.addEventListener('click', function(event) {
                 if (event.target === finishProcedureModal) {
@@ -4592,7 +4946,8 @@
                 }
             });
 
-            document.getElementById('followUpForm')?.addEventListener('submit', async function(event) {
+            document.getElementById('followUpForm')?.addEventListener('submit', async function(
+                event) {
                 event.preventDefault();
 
                 const form =
@@ -4927,6 +5282,7 @@
                 if (event.key === 'Escape') {
                     closeResetModal();
                     closeCancelProcedureModal();
+                    closeCorrectionReasonModal();
                     closeFinishProcedureModal();
                     closeFollowUpModal();
 
@@ -4987,11 +5343,14 @@
             initSurfacePickerDrag();
             initLegendPanelResize();
 
-            if (procedureDurationInput && existingProcedureDuration && existingProcedureDuration !== '00:00:00') {
+            if (procedureDurationInput && existingProcedureDuration && existingProcedureDuration !==
+                '00:00:00') {
                 procedureDurationInput.value = existingProcedureDuration;
             }
 
-            renderLegendButtons('');
+            renderLegendButtons(
+                ''
+            );
             updateHiddenInput();
             render2DOdontogram();
             updateSelectedToothUI();
