@@ -12,13 +12,26 @@
 /.vscode
 /.zed
 /auth.json
-/node_modules
+
+# Dependencies
+node_modules/
+vendor/
+
+# Laravel Builds & Cache
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
 /public/build
 /public/hot
 /public/storage
+
+# Storage Folder Ignores
 /storage/*.key
-/storage/pail
-/vendor
+/storage/app/*
+!/storage/app/public
+/storage/framework/*
+/storage/logs/*
+
+# Environment & Configs
 Homestead.json
 Homestead.yaml
 Thumbs.db
