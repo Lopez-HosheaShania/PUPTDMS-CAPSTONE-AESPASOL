@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Models\OdontogramRevisionReasonType;
+use App\Services\ProcedureTimingService;
 
 class UpdateSavedOdontogramRequest extends FormRequest
 {
@@ -60,15 +61,7 @@ class UpdateSavedOdontogramRequest extends FormRequest
             'completion_action' => ['nullable', Rule::in(['finished'])],
             'has_applied_treatment' => ['required', 'boolean'],
 
-            'procedure_duration_hms' => [
-                'required',
-                'regex:/^\d{2}:[0-5]\d:[0-5]\d$/',
-            ],
-            'procedure_duration_seconds' => [
-                'nullable',
-                'integer',
-                'min:0',
-            ],
+            ...ProcedureTimingService::rules(),
 
             'reason_type_id' => [
                 'required',
@@ -97,6 +90,11 @@ class UpdateSavedOdontogramRequest extends FormRequest
                 'max:2000',
             ],
         ];
+    }
+
+    public function attributes(): array
+    {
+        return ProcedureTimingService::attributes();
     }
 
     public function messages(): array

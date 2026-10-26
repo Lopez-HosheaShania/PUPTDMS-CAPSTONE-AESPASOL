@@ -65,7 +65,8 @@ class PatientOdontogramPersistenceTest extends TestCase
                 ],
                 'oral_examination' => 'Initial examination',
                 'diagnosis' => 'Initial diagnosis',
-                'procedure_duration_hms' => '00:30:00',
+                'procedure_started_at' => $firstAppointment->appointment_date.'T09:00:00',
+                'procedure_completed_at' => $firstAppointment->appointment_date.'T09:30:00',
                 'completion_action' => 'finished',
                 'has_applied_treatment' => true,
             ])
@@ -82,7 +83,8 @@ class PatientOdontogramPersistenceTest extends TestCase
                 ],
                 'oral_examination' => 'Follow-up examination',
                 'diagnosis' => 'Updated diagnosis',
-                'procedure_duration_hms' => '00:30:00',
+                'procedure_started_at' => $secondAppointment->appointment_date.'T10:00:00',
+                'procedure_completed_at' => $secondAppointment->appointment_date.'T10:30:00',
                 'completion_action' => 'finished',
                 'has_applied_treatment' => true,
             ])
@@ -111,7 +113,7 @@ class PatientOdontogramPersistenceTest extends TestCase
         $this->assertSame($dentist->id, $odontogram->last_updated_by);
     }
 
-    public function test_procedure_start_is_captured_once_and_completion_uses_the_entered_duration(): void
+    public function test_procedure_times_are_entered_manually_and_retained_during_correction(): void
     {
         $this->withoutVite();
         $this->travelTo(\Carbon\Carbon::parse('2026-09-07 23:50:15'));
@@ -123,15 +125,15 @@ class PatientOdontogramPersistenceTest extends TestCase
         $startUrl = route('dentist.odontogram', ['appointment' => $appointment->id, 'start_procedure' => 1]);
 
         $this->actingAs($dentist)->withSession(['role' => 'dentist'])->get($startUrl)->assertSuccessful();
-        $this->assertSame('2026-09-07 23:50:15', session('procedure_started_at_' . $appointment->id));
+        $this->assertNull(session('procedure_started_at_' . $appointment->id));
         $this->assertNull($appointment->fresh()->procedure);
         $this->travelTo(\Carbon\Carbon::parse('2026-09-08 00:40:00'));
         $this->get($startUrl)->assertSuccessful();
-        $this->assertSame('2026-09-07 23:50:15', session('procedure_started_at_' . $appointment->id));
+        $this->assertNull(session('procedure_started_at_' . $appointment->id));
 
-        $payload = ['odontogram_data' => [$this->toothEntry(11, 'F')], 'has_applied_treatment' => true, 'procedure_duration_hms' => '00:30:00', 'completion_action' => 'finished'];
-        $this->postJson(route('dentist.odontogram.save', $appointment), array_merge($payload, ['procedure_duration_hms' => 'invalid']))->assertUnprocessable();
-        $this->assertSame('2026-09-07 23:50:15', session('procedure_started_at_' . $appointment->id));
+        $payload = ['odontogram_data' => [$this->toothEntry(11, 'F')], 'has_applied_treatment' => true, 'procedure_started_at' => '2026-09-07T23:50:15', 'procedure_completed_at' => '2026-09-08T00:20:15', 'completion_action' => 'finished'];
+        $this->postJson(route('dentist.odontogram.save', $appointment), array_merge($payload, ['procedure_completed_at' => 'invalid']))->assertUnprocessable();
+        $this->assertNull(session('procedure_started_at_' . $appointment->id));
         $this->postJson(route('dentist.odontogram.save', $appointment), $payload)->assertSuccessful();
         $procedure = $appointment->fresh()->procedure;
         $this->assertSame('2026-09-07 23:50:15', $procedure->procedure_started_at->toDateTimeString());
@@ -140,7 +142,9 @@ class PatientOdontogramPersistenceTest extends TestCase
         $this->assertNull(session('procedure_started_at_' . $appointment->id));
 
         $this->travelTo(\Carbon\Carbon::parse('2026-09-09 12:00:00'));
-        $payload['procedure_duration_hms'] = '00:45:00';
+        $payload['procedure_completed_at'] = '2026-09-08T00:35:15';
+        $payload['odontogram_data'] = [$this->toothEntry(11, 'D')];
+        $payload['reason_type_id'] = \App\Models\OdontogramRevisionReasonType::where('code', 'wrong_tooth')->value('id');
         $this->postJson(route('dentist.odontogram.saved.update', $appointment), $payload)->assertSuccessful();
         $this->assertSame('2026-09-07 23:50:15', $procedure->fresh()->procedure_started_at->toDateTimeString());
         $this->assertSame('2026-09-08 00:35:15', $procedure->fresh()->procedure_completed_at->toDateTimeString());
@@ -164,7 +168,7 @@ class PatientOdontogramPersistenceTest extends TestCase
         $this->assertSame('upcoming', $appointment->fresh()->status);
         $this->travelTo(\Carbon\Carbon::parse('2026-09-07 10:00:00'));
         $this->get($url)->assertSuccessful();
-        $this->assertSame('2026-09-07 10:00:00', session('procedure_started_at_' . $appointment->id));
+        $this->assertNull(session('procedure_started_at_' . $appointment->id));
         $this->travelBack();
     }
 

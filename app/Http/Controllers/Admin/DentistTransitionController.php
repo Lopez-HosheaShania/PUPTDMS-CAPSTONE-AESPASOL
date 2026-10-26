@@ -227,7 +227,9 @@ class DentistTransitionController extends Controller
         try {
             $this->service->finalizeTransition($transition, $request->user());
         } catch (\RuntimeException $exception) {
-            return back()->with('error', $exception->getMessage());
+            report($exception);
+
+            return back()->with('error', 'Unable to finalize this transition. Refresh the plan and try again.');
         }
 
         return back()->with('success', 'Transition finalized successfully.');
