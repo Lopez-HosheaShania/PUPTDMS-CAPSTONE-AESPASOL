@@ -97,10 +97,8 @@ $sidebarGroups = [
 'route' => 'admin.user_management',
 'permissions_any' => [
 'view_account_details',
-'create_users',
 'disable_users',
 'update_user_role',
-'update_user_password',
 ],
 'active' => ['admin.user_management*'],
 'icon' => 'fa-user-gear',
@@ -345,10 +343,8 @@ $sidebarGroups = [
 'route' => 'dentist.user_management',
 'permissions_any' => [
 'view_account_details',
-'create_users',
 'disable_users',
 'update_user_role',
-'update_user_password',
 ],
 'active' => ['dentist.user_management*'],
 'icon' => 'fa-user-gear',

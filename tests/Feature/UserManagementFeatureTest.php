@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Patient;
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,7 +14,7 @@ class UserManagementFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_create_user_with_auto_generated_password(): void
+    public function test_user_creation_and_password_reset_endpoints_are_unavailable(): void
     {
         $admin = $this->createAdminUser();
         $original = $admin->fresh()->getAttributes();
@@ -210,6 +211,14 @@ class UserManagementFeatureTest extends TestCase
         $this->createRole('Patient', 'patient');
 
         $adminRole = $this->createRole('Admin', 'admin');
+
+        foreach (['view_account_details', 'update_user_role', 'disable_users', 'delete_custom_roles'] as $slug) {
+            $permission = Permission::firstOrCreate(['slug' => $slug], [
+                'name' => ucwords(str_replace('_', ' ', $slug)),
+                'module' => 'Administration',
+            ]);
+            $adminRole->permissions()->syncWithoutDetaching([$permission->id]);
+        }
 
         return User::create([
             'name' => 'System Admin',
