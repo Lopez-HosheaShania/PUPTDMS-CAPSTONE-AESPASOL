@@ -265,7 +265,8 @@
                                             <label for="procedureDurationInput" class="odontogram-appointment-meta-label">Procedure Duration <span class="required-mark">*</span></label>
                                             <input type="text" id="procedureDurationInput" name="procedure_duration_hms" class="form-input-custom"
                                                 value="{{ $manualDuration }}" placeholder="HH:MM:SS" required
-                                                pattern="[0-9]{2,3}:[0-5][0-9]:[0-5][0-9]" maxlength="9"
+                                                inputmode="numeric" autocomplete="off"
+                                                pattern="[0-9]{2}:[0-5][0-9]:[0-5][0-9]"
                                                 data-field-label="Procedure Duration"
                                                 data-required-message="Please enter Procedure Duration."
                                                 data-pattern-message="Enter a valid duration in HH:MM:SS format, e.g. 00:30:00."
@@ -3970,6 +3971,16 @@
                 return hours * 3600 + minutes * 60 + seconds;
             }
 
+            function formatProcedureDurationInput(event) {
+                const input = procedureDurationInput;
+                const digits = input.value.replace(/\D/g, '').slice(-6);
+                const padded = digits.padStart(6, '0');
+                const clearedByDeletion = event?.inputType?.startsWith('delete') && !/[1-9]/.test(digits);
+                input.value = digits && !clearedByDeletion
+                    ? `${padded.slice(0, 2)}:${padded.slice(2, 4)}:${padded.slice(4, 6)}` : '';
+                input.setSelectionRange?.(input.value.length, input.value.length);
+            }
+
             function validateProcedureTimingFields({ focus = true } = {}) {
                 let firstInvalid = null;
                 [procedureTimeInInput, procedureDurationInput].forEach(field => {
@@ -3992,7 +4003,8 @@
             }
 
             [procedureTimeInInput, procedureDurationInput].forEach(field => {
-                const onTimeChange = () => {
+                const onTimeChange = event => {
+                    if (field === procedureDurationInput) formatProcedureDurationInput(event);
                     window.showFormInputValidationMessage?.(field, '');
                     field._flatpickr?.altInput?.classList.remove('is-invalid');
                     markProcedureDiscardDirty();

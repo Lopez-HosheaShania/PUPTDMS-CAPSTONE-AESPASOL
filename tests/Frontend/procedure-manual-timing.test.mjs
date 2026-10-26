@@ -83,3 +83,61 @@ test('validation focuses the visible Flatpickr input', () => {
     app.timeIn.listeners.change();
     assert.equal(classes.has('is-invalid'), false);
 });
+
+test('duration fills seconds first, then minutes, then hours while typing', () => {
+    const app = setup('12:00');
+    for (const [digit, expected] of [['1', '00:00:01'], ['2', '00:00:12'], ['3', '00:01:23'], ['4', '00:12:34'], ['5', '01:23:45'], ['6', '12:34:56']]) {
+        app.duration.value += digit;
+        app.duration.listeners.input();
+        assert.equal(app.duration.value, expected);
+    }
+    assert.equal(app.isDirty(), true);
+});
+
+test('pasting a formatted duration retains its value and places the caret at the end', () => {
+    const app = setup('12:00', '01:30:45');
+    app.duration.selectionStart = 5;
+    app.duration.setSelectionRange = (start, end) => {
+        assert.equal(start, 8);
+        assert.equal(end, 8);
+    };
+    app.duration.listeners.input();
+    assert.equal(app.duration.value, '01:30:45');
+    assert.equal(app.seconds(), 5445);
+});
+
+test('backspace shifts digits right and clearing restores the placeholder', () => {
+    const app = setup('12:00', '00:01:23');
+    app.duration.value = app.duration.value.slice(0, -1);
+    app.duration.listeners.input();
+    assert.equal(app.duration.value, '00:00:12');
+    app.duration.value = '';
+    app.duration.listeners.input();
+    assert.equal(app.duration.value, '');
+    assert.equal(app.validate(), false);
+    app.duration.value = 'ab1c23';
+    app.duration.listeners.input();
+    assert.equal(app.duration.value, '00:01:23');
+});
+
+test('repeated backspace restores the placeholder after the last duration digit', () => {
+    const app = setup('12:00', '00:01:23');
+    for (const expected of ['00:00:12', '00:00:01', '']) {
+        app.duration.value = app.duration.value.slice(0, -1);
+        app.duration.listeners.input({ inputType: 'deleteContentBackward' });
+        assert.equal(app.duration.value, expected);
+    }
+    app.duration.listeners.change();
+    assert.equal(app.duration.value, '');
+    assert.equal(app.validate(), false);
+});
+
+test('deleting a zero duration restores the placeholder but typing zero is retained', () => {
+    const app = setup('12:00', '00:00:00');
+    app.duration.value = '00:00:0';
+    app.duration.listeners.input({ inputType: 'deleteContentForward' });
+    assert.equal(app.duration.value, '');
+    app.duration.value = '0';
+    app.duration.listeners.input({ inputType: 'insertText' });
+    assert.equal(app.duration.value, '00:00:00');
+});

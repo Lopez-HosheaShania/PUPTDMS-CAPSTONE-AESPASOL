@@ -2276,6 +2276,11 @@ body.layout-no-sidebar #mainContent.odontogram-page {
     margin-top: .25rem;
 }
 
+#procedureDurationInput.is-valid:not(.is-invalid):not(:focus) {
+    border-color: var(--border);
+    box-shadow: none;
+}
+
 .odontogram-patient-name {
     margin-top: .2rem;
     color: var(--text-1);
