@@ -7,18 +7,15 @@ const template = readFileSync(new URL('../../resources/views/dentist/dentist-odo
 const start = template.indexOf('            function getProcedureTime24Hour(field)');
 const end = template.indexOf("            applyTreatmentBtn.addEventListener('click'", start);
 
-function setup(startValue = '', endValue = '') {
+function setup(startValue = '', durationValue = '') {
     const errors = new Map();
     const focused = [];
     let dirty = false;
-    const field = value => ({ value, dataset: {}, listeners: {}, setAttribute() {}, addEventListener(name, callback) { this.listeners[name] = callback; } });
+    const field = value => ({ value, listeners: {}, addEventListener(name, callback) { this.listeners[name] = callback; } });
     const timeIn = field(startValue);
-    const timeProcessed = field(endValue);
-    timeIn.id = 'procedure_started_at';
-    timeProcessed.id = 'procedure_completed_at';
-    const duration = field('');
+    const duration = field(durationValue);
     const context = vm.createContext({
-        procedureTimeInInput: timeIn, procedureTimeProcessedInput: timeProcessed, procedureDurationInput: duration,
+        procedureTimeInInput: timeIn, procedureDurationInput: duration,
         markProcedureDiscardDirty() { dirty = true; },
         window: {
             validateFormInputField(input) { errors.set(input, input.value ? '' : 'Required'); return !!input.value; },
@@ -27,72 +24,48 @@ function setup(startValue = '', endValue = '') {
         },
     });
     vm.runInContext(template.slice(start, end), context);
-    return { timeIn, timeProcessed, duration, errors, focused, isDirty: () => dirty,
-        time24: () => vm.runInContext('[procedureTimeInInput, procedureTimeProcessedInput].map(getProcedureTime24Hour)', context),
+    return { timeIn, duration, errors, focused, isDirty: () => dirty,
+        seconds: () => vm.runInContext('parseProcedureDurationSeconds()', context),
         validate: () => vm.runInContext('validateProcedureTimingFields()', context) };
 }
 
-test('new workspace leaves both manual values and duration empty', () => {
+test('new workspace requires a start time and duration', () => {
     const app = setup();
-    assert.equal(app.timeIn.value, '');
-    assert.equal(app.timeProcessed.value, '');
-    assert.equal(app.duration.value, '');
     assert.equal(app.validate(), false);
     assert.equal(app.focused[0], app.timeIn);
+    const missingDuration = setup('12:00');
+    assert.equal(missingDuration.validate(), false);
+    assert.equal(missingDuration.focused[0], missingDuration.duration);
 });
 
-test('typed hours and minutes calculate duration in the original HH:MM:SS format', () => {
-    const app = setup('09:50', '10:20');
-    assert.equal(app.duration.value, '00:30:00');
-    assert.equal(app.validate(), true);
-    assert.equal(app.timeIn.value, '09:50');
-    assert.equal(app.timeProcessed.value, '10:20');
-});
-
-test('earlier finish shows a field error and retains entered values', () => {
-    const app = setup('10:00', '09:00');
-    assert.equal(app.validate(), false);
-    assert.match(app.errors.get(app.timeProcessed), /on or after Time In/);
-    assert.equal(app.timeProcessed.value, '09:00');
-});
-
-test('equal times are valid', () => {
-    const app = setup('10:00', '10:00');
-    assert.equal(app.validate(), true);
-    assert.equal(app.duration.value, '00:00:00');
-});
-
-test('editing clears old feedback, updates duration, and marks unsaved changes', () => {
-    const app = setup('10:00', '09:00');
-    app.validate();
-    app.timeProcessed.value = '10:20';
-    app.timeProcessed.listeners.input();
-    assert.equal(app.errors.get(app.timeProcessed), '');
-    assert.equal(app.duration.value, '00:20:00');
-    assert.equal(app.isDirty(), true);
-});
-
-test('time-only duration is independent of the browser timezone', () => {
-    const app = setup('01:30', '03:30');
-    assert.equal(app.duration.value, '02:00:00');
-});
-
-test('malformed typed times and seconds do not produce a duration', () => {
-    for (const value of ['24:30', '25:30', '09:60', '09:30:15', 'abc']) {
-        const app = setup(value, '11:30');
-        assert.equal(app.duration.value, '');
-        assert.equal(app.validate(), false);
+test('entered duration is retained exactly including seconds and zero', () => {
+    for (const [value, seconds] of [['00:10:00', 600], ['01:02:03', 3723], ['00:00:00', 0], ['100:00:00', 360000]]) {
+        const app = setup('12:00', value);
+        assert.equal(app.duration.value, value);
+        assert.equal(app.seconds(), seconds);
+        assert.equal(app.validate(), true);
     }
 });
 
-test('Flatpickr change updates duration from the stored 24-hour value', () => {
-    const app = setup('11:30', '12:00');
-    app.timeProcessed.value = '13:00';
-    app.timeProcessed.listeners.change();
-    assert.equal(app.duration.value, '01:30:00');
-    assert.equal(app.time24()[1], '13:00');
-    assert.equal(app.validate(), true);
+test('malformed durations are rejected without changing the entered value', () => {
+    for (const value of ['-01:00:00', '00:60:00', '00:00:60', '1:30', 'abc']) {
+        const app = setup('12:00', value);
+        assert.equal(app.validate(), false);
+        assert.equal(app.focused[0], app.duration);
+        assert.equal(app.duration.value, value);
+    }
+});
+
+test('Flatpickr changes and duration edits mark unsaved changes without overwriting duration', () => {
+    const app = setup('11:30', '00:30:00');
+    app.timeIn.value = '23:30';
+    app.timeIn.listeners.change();
+    assert.equal(app.duration.value, '00:30:00');
     assert.equal(app.isDirty(), true);
+    app.duration.value = '01:30:00';
+    app.duration.listeners.input();
+    assert.equal(app.seconds(), 5400);
+    assert.equal(app.validate(), true);
 });
 
 test('validation focuses the visible Flatpickr input', () => {
@@ -110,4 +83,3 @@ test('validation focuses the visible Flatpickr input', () => {
     app.timeIn.listeners.change();
     assert.equal(classes.has('is-invalid'), false);
 });
-

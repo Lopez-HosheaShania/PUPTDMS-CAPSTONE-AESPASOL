@@ -74,16 +74,17 @@ class ProcedureManualTimingTest extends TestCase
 
         $this->get(route('dentist.odontogram', $visit))->assertOk()
             ->assertSee('type="text" id="procedure_started_at"', false)
-            ->assertSee('type="text" id="procedure_completed_at"', false)
+            ->assertDontSee('id="procedure_completed_at"', false)
+            ->assertSee('name="procedure_duration_hms"', false)
             ->assertSee('placeholder="HH:MM"', false)
             ->assertDontSee('placeholder="HH:MM AM/PM"', false)
             ->assertSee('class="form-input-custom js-flatpickr-time"', false)
             ->assertSee('data-time-minute-increment="1"', false)
             ->assertDontSee('odontogram-time-period-control', false)
-            ->assertDontSee('type="time"', false)->assertDontSee('type="datetime-local"', false)->assertSee('Time Processed');
+            ->assertDontSee('type="time"', false)->assertDontSee('type="datetime-local"', false)->assertDontSee('Time Processed');
         $this->postJson(route('dentist.odontogram.save', $visit), $this->payload([
-            'procedure_started_at' => '14:17', 'procedure_completed_at' => '14:18',
-            'procedure_duration_hms' => '99:59:59', 'procedure_duration_seconds' => 999999,
+            'procedure_started_at' => '14:17', 'procedure_completed_at' => null,
+            'procedure_duration_hms' => '00:01:00', 'procedure_duration_seconds' => 999999,
         ]))->assertOk();
 
         $procedure = $visit->fresh()->procedure;
@@ -93,7 +94,7 @@ class ProcedureManualTimingTest extends TestCase
         $this->assertSame('2026-10-23 14:18:00', DentalServicesProcedureTiming::timeProcessed($visit->fresh())->toDateTimeString());
         $this->assertSame($bookedTime, $visit->fresh()->appointment_time);
         $this->get(route('dentist.odontogram', $visit))->assertOk()
-            ->assertSee('value="14:17"', false)->assertSee('value="14:18"', false);
+            ->assertSee('value="14:17"', false)->assertSee('value="00:01:00"', false);
     }
 
     public function test_opening_workspace_does_not_capture_current_time_or_change_history(): void
@@ -110,6 +111,47 @@ class ProcedureManualTimingTest extends TestCase
         $before = $procedure->fresh()->timing->getAttributes();
         $this->get(route('dentist.odontogram', $visit))->assertOk()->assertSee('value="09:00"', false);
         $this->assertSame($before, $procedure->fresh()->timing->getAttributes());
+    }
+
+    public static function durationIntervals(): array
+    {
+        return [
+            'ten minutes' => ['12:00', '00:10:00', '2026-10-23 12:10:00', 600],
+            'crosses midnight' => ['23:50', '00:30:00', '2026-10-24 00:20:00', 1800],
+            'includes seconds' => ['09:17', '00:01:01', '2026-10-23 09:18:01', 61],
+            'zero duration' => ['09:17', '00:00:00', '2026-10-23 09:17:00', 0],
+        ];
+    }
+
+    #[DataProvider('durationIntervals')]
+    public function test_end_time_is_calculated_and_retained_for_reports(string $start, string $duration, string $end, int $seconds): void
+    {
+        $dentist = $this->actor();
+        $visit = $this->visit($dentist);
+        $payload = $this->payload(['procedure_started_at' => $start, 'procedure_duration_hms' => $duration]);
+        unset($payload['procedure_completed_at']);
+        $this->actingAs($dentist)->withSession(['role' => 'dentist'])
+            ->postJson(route('dentist.odontogram.save', $visit), $payload)->assertOk();
+
+        $saved = $visit->fresh();
+        $this->assertSame($end, $saved->procedure->procedure_completed_at->toDateTimeString());
+        $this->assertSame($seconds, $saved->procedure->procedure_duration_seconds);
+        $this->assertSame($end, DentalServicesProcedureTiming::timeProcessed($saved)->toDateTimeString());
+        $this->get(route('dentist.odontogram', $visit))->assertOk()
+            ->assertSee('value="'.$duration.'"', false)->assertDontSee('id="procedure_completed_at"', false);
+    }
+
+    public function test_invalid_duration_is_rejected_without_saving(): void
+    {
+        $dentist = $this->actor();
+        $visit = $this->visit($dentist);
+        $this->actingAs($dentist)->withSession(['role' => 'dentist']);
+        foreach (['', '-01:00:00', '00:60:00', '00:00:60', 'abc', ['00:30:00']] as $duration) {
+            $this->postJson(route('dentist.odontogram.save', $visit), $this->payload([
+                'procedure_completed_at' => null, 'procedure_duration_hms' => $duration,
+            ]))->assertUnprocessable()->assertJsonValidationErrors('procedure_duration_hms');
+        }
+        $this->assertDatabaseCount('appointment_procedures', 0);
     }
 
     public static function invalidTimes(): array
@@ -208,14 +250,16 @@ class ProcedureManualTimingTest extends TestCase
         $key = 'existing_appointment_draft_patient_'.$patient->id;
         $this->actingAs($dentist)->withSession(['role' => 'dentist', $key => $draft]);
         $this->get(route('dentist.odontogram.existing-appointment.odontogram', $patient))
-            ->assertOk()->assertSee('Time In')->assertSee('Time Processed');
+            ->assertOk()->assertSee('Time In')->assertSee('Procedure Duration')->assertDontSee('Time Processed');
         $url = route('dentist.odontogram.existing-appointment.store', $patient);
         $this->postJson($url, $this->payload(['procedure_completed_at' => null]))
             ->assertUnprocessable()->assertJsonValidationErrors('procedure_completed_at');
         $this->assertNotNull(session($key));
         $this->assertDatabaseCount('appointments', 1);
 
-        $this->postJson($url, $this->payload())->assertOk();
+        $this->postJson($url, $this->payload([
+            'procedure_completed_at' => null, 'procedure_duration_hms' => '00:01:01',
+        ]))->assertOk();
         $saved = Appointment::latest('id')->firstOrFail();
         $this->assertSame('15:00:00', $saved->appointment_time);
         $this->assertSame('2026-10-23 09:17:45', $saved->procedure->procedure_started_at->toDateTimeString());
@@ -231,7 +275,7 @@ class ProcedureManualTimingTest extends TestCase
         $this->actingAs($dentist)->withSession(['role' => 'dentist']);
         $this->postJson(route('dentist.odontogram.save', $visit), $this->payload())->assertOk();
         $this->get(route('dentist.odontogram.saved.edit', $visit))->assertOk()
-            ->assertSee('value="09:17"', false)->assertSee('value="09:18"', false);
+            ->assertSee('value="09:17"', false)->assertSee('value="00:01:01"', false);
         $reason = \App\Models\OdontogramRevisionReasonType::where('code', 'wrong_tooth')->firstOrFail();
         $payload = $this->payload(['odontogram_data' => [['tooth' => 11, 'status' => ['code' => 'F', 'label' => 'Filled']]],
             'has_applied_treatment' => true, 'reason_type_id' => $reason->id]);
@@ -239,7 +283,9 @@ class ProcedureManualTimingTest extends TestCase
         $this->postJson($url, array_replace($payload, ['procedure_completed_at' => '09:00']))
             ->assertUnprocessable()->assertJsonValidationErrors('procedure_completed_at');
         $this->assertSame('2026-10-23 09:18:46', $visit->fresh()->procedure->procedure_completed_at->toDateTimeString());
-        $this->postJson($url, $payload)->assertOk();
+        $this->postJson($url, array_replace($payload, [
+            'procedure_completed_at' => null, 'procedure_duration_hms' => '00:01:01',
+        ]))->assertOk();
         $this->assertSame('2026-10-23 09:17:45', $visit->fresh()->procedure->procedure_started_at->toDateTimeString());
         $this->assertSame('2026-10-23 09:18:46', $visit->fresh()->procedure->procedure_completed_at->toDateTimeString());
     }

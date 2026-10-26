@@ -14,13 +14,14 @@ class ProcedureTimingService
     {
         return [
             'procedure_started_at' => ['required', 'date_format:H:i,H:i:s,Y-m-d\TH:i,Y-m-d\TH:i:s'],
-            'procedure_completed_at' => ['required', 'date_format:H:i,H:i:s,Y-m-d\TH:i,Y-m-d\TH:i:s', 'after_or_equal:procedure_started_at'],
+            'procedure_duration_hms' => ['required_without:procedure_completed_at', 'nullable', 'regex:/^\d{2,3}:[0-5]\d:[0-5]\d$/'],
+            'procedure_completed_at' => ['required_without:procedure_duration_hms', 'nullable', 'date_format:H:i,H:i:s,Y-m-d\TH:i,Y-m-d\TH:i:s', 'after_or_equal:procedure_started_at'],
         ];
     }
 
     public static function attributes(): array
     {
-        return ['procedure_started_at' => 'Time In', 'procedure_completed_at' => 'Time Processed'];
+        return ['procedure_started_at' => 'Time In', 'procedure_completed_at' => 'Time Processed', 'procedure_duration_hms' => 'Procedure Duration'];
     }
 
     public function forAppointment(Appointment $appointment, array $validated): array
@@ -32,7 +33,12 @@ class ProcedureTimingService
             config('app.timezone')
         );
         $start = $parseTime($validated['procedure_started_at']);
-        $end = $parseTime($validated['procedure_completed_at']);
+        if (isset($validated['procedure_duration_hms'])) {
+            [$hours, $minutes, $durationSeconds] = array_map('intval', explode(':', $validated['procedure_duration_hms']));
+            $end = $start->copy()->addSeconds($hours * 3600 + $minutes * 60 + $durationSeconds);
+        } else {
+            $end = $parseTime($validated['procedure_completed_at']);
+        }
         $seconds = (int) $start->diffInSeconds($end, false);
 
         if ($seconds < 0 || $seconds > 4294967295) {

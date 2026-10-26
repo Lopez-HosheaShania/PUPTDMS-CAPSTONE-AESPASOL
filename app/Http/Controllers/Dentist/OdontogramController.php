@@ -2153,7 +2153,6 @@ class OdontogramController extends Controller
 
         $appointmentDate = Carbon::parse($draft['appointment_date'])->toDateString();
         $appointmentTime = $this->normalizeProcedureTime($draft['appointment_time']);
-        $procedureCompletedAt = Carbon::parse($validated['procedure_completed_at']);
 
         $serviceType = ServiceType::where(
             'name',
@@ -2169,10 +2168,6 @@ class OdontogramController extends Controller
             'appointment_time' => $appointmentTime,
             'status' => 'completed',
         ];
-
-        if (Schema::hasColumn('appointments', 'completed_at')) {
-            $appointmentPayload['completed_at'] = $procedureCompletedAt;
-        }
 
         $result = null;
 
