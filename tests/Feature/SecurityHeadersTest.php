@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Vite;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,23 +45,37 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringNotContainsString('upgrade-insecure-requests', $http->headers->get('Content-Security-Policy'));
     }
 
-    public function test_local_vite_assets_and_hmr_are_allowed_without_leaking_dev_origins_to_hosted_environments(): void
+    public static function localViteOrigins(): array
+    {
+        return [
+            'localhost' => ['http://localhost:5173', 'ws://localhost:5173'],
+            'IPv4' => ['http://127.0.0.1:5173', 'ws://127.0.0.1:5173'],
+            'IPv4 fallback port' => ['http://127.0.0.1:5174', 'ws://127.0.0.1:5174'],
+        ];
+    }
+
+    #[DataProvider('localViteOrigins')]
+    public function test_local_vite_assets_and_hmr_are_allowed_without_leaking_dev_origins_to_hosted_environments(string $assetOrigin, string $socketOrigin): void
     {
         $file = tempnam(sys_get_temp_dir(), 'clinic-vite-');
         $original = Vite::hotFile();
-        file_put_contents($file, 'http://localhost:5173');
+        file_put_contents($file, $assetOrigin);
         Vite::useHotFile($file);
         try {
             $this->app['env'] = 'local';
             $middleware = new SecurityHeaders;
             $local = $middleware->handle(Request::create('http://localhost'), fn () => new Response('ok'));
             $policy = $local->headers->get('Content-Security-Policy');
-            $this->assertStringContainsString('http://localhost:5173', $policy);
-            $this->assertStringContainsString('ws://localhost:5173', $policy);
-            $this->assertStringContainsString("font-src 'self' data: http://localhost:5173", $policy);
-            $this->app['env'] = 'staging';
-            $hosted = $middleware->handle(Request::create('https://clinic.test'), fn () => new Response('ok'));
-            $this->assertStringNotContainsString('localhost:5173', $hosted->headers->get('Content-Security-Policy'));
+            $this->assertStringContainsString($assetOrigin, $policy);
+            $this->assertStringContainsString($socketOrigin, $policy);
+            $this->assertStringContainsString("font-src 'self' data: {$assetOrigin}", $policy);
+            foreach (['staging', 'production'] as $environment) {
+                $this->app['env'] = $environment;
+                $hosted = $middleware->handle(Request::create('https://clinic.test'), fn () => new Response('ok'));
+                $hostedPolicy = $hosted->headers->get('Content-Security-Policy');
+                $this->assertStringNotContainsString($assetOrigin, $hostedPolicy);
+                $this->assertStringNotContainsString($socketOrigin, $hostedPolicy);
+            }
         } finally {
             $this->app['env'] = 'testing';
             Vite::useHotFile($original);
