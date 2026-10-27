@@ -461,13 +461,6 @@ class Appointment extends Model
             return false;
         }
 
-        if (
-            (int) $this->dentist_id !==
-            (int) $user->id
-        ) {
-            return false;
-        }
-
         return !$this->isOdontogramEditLocked();
     }
 }

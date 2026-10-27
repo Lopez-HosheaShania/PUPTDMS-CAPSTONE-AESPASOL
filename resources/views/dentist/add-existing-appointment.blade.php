@@ -120,32 +120,6 @@ $patientProfileBackUrl = $isAdminView
                                                     </p>
                                                 </div>
 
-                                                <div class="global-form-group mt-4" data-global-field>
-                                                    <label class="global-form-label" for="procedure_duration_hms">
-                                                        Procedure Duration
-                                                        <span class="required-mark">*</span>
-                                                    </label>
-
-                                                    <div class="global-control-wrap">
-                                                        <i class="fa-solid fa-stopwatch
-                   global-control-icon"></i>
-
-                                                        <input type="text" id="procedure_duration_hms"
-                                                            name="procedure_duration_hms"
-                                                            value="{{ old('procedure_duration_hms', $defaults['procedure_duration_hms'] ?? '') }}"
-                                                            placeholder="HH:MM:SS" class="
-                form-input-custom
-                global-form-icon
-            " inputmode="numeric" maxlength="8" data-validation-rule="bookingDuration" data-required-message="
-                Please enter the procedure duration.
-            " required>
-                                                    </div>
-
-                                                    <p class="field-help">
-                                                        Example: 01:15:00 for
-                                                        1 hour and 15 minutes.
-                                                    </p>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -334,7 +308,6 @@ $patientProfileBackUrl = $isAdminView
         const timeHint = document.getElementById('existingAppointmentTimeHint');
         const slotGridElement = document.getElementById('slotGrid');
         const timeInput = document.getElementById('appointment_time');
-        const durationInput = document.getElementById('procedure_duration_hms');
 
         let bookingWorkflow = null;
 
@@ -795,17 +768,6 @@ $patientProfileBackUrl = $isAdminView
             return `${hour}:${minuteText} ${suffix}`;
         }
 
-        function formatDurationInput(value) {
-            const digits = String(value || '').replace(/\D/g, '').slice(0, 6);
-            const parts = [];
-
-            if (digits.length > 0) parts.push(digits.slice(0, 2));
-            if (digits.length > 2) parts.push(digits.slice(2, 4));
-            if (digits.length > 4) parts.push(digits.slice(4, 6));
-
-            return parts.join(':');
-        }
-
         function bindConditionalBox(
             radioName,
             boxId,
@@ -1212,7 +1174,6 @@ $patientProfileBackUrl = $isAdminView
                                                                             ${row("Service", get("service_type"))}
                                                                             ${row("Date", get("appointment_date"))}
                                                                             ${row("Time", toDisplayTime(get("appointment_time")) || 'N/A')}
-                                                                            ${row("Duration", get("procedure_duration_hms"))}
                                                                         </div>
                                                                     `)}
           ${summaryCard(
@@ -1376,11 +1337,6 @@ ${summaryCard(
                 }
             }
         );
-
-        durationInput?.addEventListener('input', function () {
-            const formatted = formatDurationInput(this.value);
-            this.value = formatted;
-        });
 
         bindConditionalBox(
             'medical_answers[good_health]',
@@ -1709,22 +1665,6 @@ ${summaryCard(
                         ${appointment.date || 'N/A'}
                         ·
                         ${appointment.time || 'N/A'}
-                    </strong>
-                </div>
-            </div>
-
-            <div class="confirmed-modal-schedule-item">
-                <div class="confirmed-modal-schedule-icon">
-                    <i class="fa-solid fa-stopwatch"></i>
-                </div>
-
-                <div>
-                    <span class="confirmed-modal-schedule-label">
-                        Procedure Duration
-                    </span>
-
-                    <strong class="confirmed-modal-schedule-value">
-                        ${appointment.duration || 'N/A'}
                     </strong>
                 </div>
             </div>

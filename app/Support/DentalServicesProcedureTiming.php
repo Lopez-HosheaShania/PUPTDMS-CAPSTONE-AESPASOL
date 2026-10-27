@@ -29,6 +29,13 @@ class DentalServicesProcedureTiming
     public static function timeProcessed(Appointment $appointment): ?Carbon
     {
         $start = self::requestedTimeIn($appointment);
+        $end = $appointment->procedure?->procedure_completed_at;
+        $seconds = $appointment->procedure?->procedure_duration_seconds;
+
+        if ($start && $end && $seconds !== null && $start->diffInSeconds($end, false) === (float) $seconds) {
+            return $end->copy();
+        }
+
         $minutes = self::minutesProcessed($appointment);
 
         return $start && $minutes !== null ? $start->addMinutes($minutes) : null;

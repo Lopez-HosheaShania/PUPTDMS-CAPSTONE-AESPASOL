@@ -16,10 +16,11 @@
         $inactiveCount = $inactiveCount ?? 0;
         $authUser = auth()->user();
         $canViewAccounts = $authUser?->hasPermission('view_account_details') ?? false;
-        $canCreateUsers = $authUser?->hasPermission('create_users') ?? false;
         $canDisableUsers = $authUser?->hasPermission('disable_users') ?? false;
         $canUpdateUserRole = $authUser?->hasPermission('update_user_role') ?? false;
-        $canUpdateUserPassword = $authUser?->hasPermission('update_user_password') ?? false;
+        $patientRole = $roles->first(
+            fn($role) => strtolower($role->slug) === 'patient' || strtolower($role->name) === 'patient',
+        );
     @endphp
 
     <main id="mainContent" class="app-page-shell user-management-page page-enter mode-list">
@@ -30,14 +31,6 @@
                         <h1 class="page-title">User Management</h1>
                     </div>
 
-                    <div class="flex items-center gap-3 flex-wrap w-full sm:w-auto">
-                        @if ($canCreateUsers)
-                            <button type="button" data-ui-click="action-98b3dc94d815" class="ui-btn ui-btn-primary">
-                                <i class="fa-solid fa-user-plus"></i>
-                                <span>Add New User</span>
-                            </button>
-                        @endif
-                    </div>
                 </div>
             </div>
 
@@ -248,16 +241,6 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canUpdateUserPassword)
-                                                    <button type="button"
-                                                        data-ui-click="action-202095daf052" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
-                                                        class="ui-action-btn ui-action-reset"
-                                                        data-tooltip="Reset password" data-tooltip-tone="reset"
-                                                        aria-label="Reset password">
-                                                        <i class="fa-solid fa-key"></i>
-                                                    </button>
-                                                @endif
-
                                                 @if ($canViewAccounts)
                                                     <button type="button"
                                                         data-user-details='@json($userDetails)'
@@ -383,16 +366,6 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canUpdateUserPassword)
-                                                    <button type="button"
-                                                        data-ui-click="action-202095daf052" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
-                                                        class="ui-action-btn ui-action-reset"
-                                                        data-tooltip="Reset password" data-tooltip-tone="reset"
-                                                        aria-label="Reset password">
-                                                        <i class="fa-solid fa-key"></i>
-                                                    </button>
-                                                @endif
-
                                                 @if ($canViewAccounts)
                                                     <button type="button"
                                                         data-user-details='@json($userDetails)'
@@ -419,354 +392,6 @@
             </div>
         </div>
     </main>
-
-    <div id="addModal" class="ui-modal modal-theme-primary" aria-hidden="true">
-
-        <div class="ui-modal-card modal-xl modal-split-card">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-user-plus"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h3 class="modal-title">Add New User</h3>
-                        <p class="modal-subtitle">
-                            Create a system account and assign access permissions.
-                        </p>
-                    </div>
-                </div>
-
-                <button type="button" data-discard-close="addModal" class="modal-x" aria-label="Close add user modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form method="POST" action="{{ route($routeNames['store'] ?? 'admin.user_management.store') }}"
-                id="addUserForm" class="modal-card-form" data-global-validation data-global-selects data-discard-form
-                data-discard-title="Discard new user?" data-discard-subtitle="You have unsaved account details."
-                data-discard-message="Closing this modal will remove the user information you entered. Do you want to discard your changes?"
-                novalidate>
-                @csrf
-
-                <div class="modal-bd modal-scroll-body">
-                    @if ($errors->any())
-                        <div class="modal-error-banner show">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-
-                            <div>
-                                @foreach ($errors->all() as $error)
-                                    <p>{{ $error }}</p>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-
-                    <div class="modal-form-grid-2">
-
-                        {{-- LEFT COLUMN --}}
-                        <div class="modal-form-section">
-                            <div class="modal-section-heading">
-                                <div class="modal-section-icon">
-                                    <i class="fa-solid fa-id-card"></i>
-                                </div>
-
-                                <div>
-                                    <h4>Account Details</h4>
-                                    <p>
-                                        Basic identity and access information.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="global-form-group" data-global-field>
-                                <label class="global-form-label" for="addNameInput">
-                                    Full Name
-                                    <span class="required-mark">*</span>
-                                </label>
-
-                                <div class="modal-inline-control">
-                                    <div class="modal-inline-main">
-                                        <input type="text" id="addNameInput" name="name"
-                                            value="{{ old('name') }}" class="form-input-custom"
-                                            placeholder="e.g. Juan dela Cruz" autocomplete="name" maxlength="255"
-                                            data-field-label="Full Name" data-validation-rule="personName"
-                                            data-required-message="Please enter the user's full name."
-                                            data-pattern-message="Only letters, spaces, apostrophe, period, and hyphen are allowed."
-                                            required>
-                                    </div>
-
-                                    <x-voice-input target="#addNameInput" status-id="addNameVoiceStatus"
-                                        label="Voice input for full name" title="Voice input" />
-                                </div>
-                            </div>
-
-                            <div class="global-form-group" data-global-field>
-                                <label class="global-form-label" for="addEmailInput">
-                                    Email Address
-                                    <span class="required-mark">*</span>
-                                </label>
-
-                                <div class="global-control-wrap">
-                                    <i class="fa-solid fa-envelope global-control-icon"></i>
-
-                                    <input type="email" id="addEmailInput" name="email" value="{{ old('email') }}"
-                                        class="form-input-custom global-form-icon" placeholder="user@pup.edu.ph"
-                                        autocomplete="email" data-field-label="Email Address"
-                                        data-required-message="Please enter an email address."
-                                        data-type-message="Please enter a valid email address." required>
-                                </div>
-                            </div>
-
-                            <div class="global-form-group" data-global-field>
-                                <label class="global-form-label" for="addRoleSelect">
-                                    Role
-                                    <span class="required-mark">*</span>
-                                </label>
-
-                                <select id="addRoleSelect" name="role_id" class="js-custom-select"
-                                    data-placeholder="Select role" data-field-label="Role" required>
-
-                                    @php
-                                        $patientRole = $roles->first(
-                                            fn($role) => strtolower($role->slug) === 'patient' ||
-                                                strtolower($role->name) === 'patient',
-                                        );
-                                    @endphp
-
-                                    @if ($patientRole)
-                                        <option value="{{ $patientRole->id }}"
-                                            {{ old('role_id', $patientRole->id) == $patientRole->id ? 'selected' : '' }}>
-                                            {{ $patientRole->display_name }}
-                                        </option>
-                                    @endif
-
-                                    @foreach ($roles as $role)
-                                        @continue($patientRole && (int) $role->id === (int) $patientRole->id)
-
-                                        <option value="{{ $role->id }}"
-                                            {{ old('role_id') == $role->id ? 'selected' : '' }}>
-                                            {{ $role->display_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="global-form-group">
-                                <label class="global-form-label">
-                                    Account Type
-                                </label>
-
-                                <div class="global-readonly-field">
-                                    <i class="fa-solid fa-user-shield"></i>
-                                    <span>System-managed user account</span>
-                                </div>
-                            </div>
-
-                            <div class="global-form-group" data-global-field>
-                                <label class="global-form-label" for="addPhoneInput">
-                                    Phone Number
-                                </label>
-
-                                <div class="global-control-wrap">
-                                    <i class="fa-solid fa-phone global-control-icon"></i>
-
-                                    <input type="tel" id="addPhoneInput" name="phone" value="{{ old('phone') }}"
-                                        class="form-input-custom global-form-icon" placeholder="09XX XXX XXXX"
-                                        inputmode="numeric" autocomplete="tel" maxlength="13"
-                                        data-field-label="Phone Number">
-                                </div>
-
-                                <p id="addPhoneInputFeedback" class="modal-helper-text">
-                                    Format: 09XX XXX XXXX
-                                </p>
-                            </div>
-
-                            <div class="global-form-group" data-global-field>
-                                <label class="global-form-label" for="addBirthdateInput">
-                                    Birthdate
-                                </label>
-
-                                <input type="text" id="addBirthdateInput" name="birthdate"
-                                    value="{{ old('birthdate') }}" class="form-input-custom js-flatpickr-date-max-today"
-                                    placeholder="Select birthdate" autocomplete="off" data-field-label="Birthdate"
-                                    data-validation-rule="notFutureDate" data-flatpickr-min-year="1900" readonly>
-                            </div>
-
-                            <div class="global-form-group" data-global-field>
-                                <label class="global-form-label" for="addGenderInput">
-                                    Gender
-                                </label>
-
-                                <select id="addGenderInput" name="gender" class="js-custom-select"
-                                    data-placeholder="Select gender" data-field-label="Gender">
-
-                                    <option value="" disabled selected>
-                                        Select gender
-                                    </option>
-
-                                    <option value="Male" {{ old('gender') === 'Male' ? 'selected' : '' }}>
-                                        Male
-                                    </option>
-
-                                    <option value="Female" {{ old('gender') === 'Female' ? 'selected' : '' }}>
-                                        Female
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {{-- RIGHT COLUMN --}}
-                        <div class="modal-form-section">
-                            <div class="modal-section-heading">
-                                <div class="modal-section-icon">
-                                    <i class="fa-solid fa-lock"></i>
-                                </div>
-
-                                <div>
-                                    <h4>Security Setup</h4>
-                                    <p>
-                                        A secure temporary password will be generated.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="global-form-group" data-global-field>
-                                <label class="global-form-label" for="addPassword">
-                                    Generated Password
-                                </label>
-
-                                <div class="global-control-wrap">
-                                    <i class="fa-solid fa-lock global-control-icon"></i>
-
-                                    <input type="password" name="password" id="addPassword" minlength="8"
-                                        class="form-input-custom global-form-icon global-control-with-action"
-                                        placeholder="Auto-generated password" readonly>
-
-                                    <button type="button" class="global-input-action"
-                                        data-ui-click="action-9a066951b17a"
-                                        aria-label="Show or hide generated password">
-
-                                        <i class="fa-regular fa-eye" id="addEye"></i>
-                                    </button>
-                                </div>
-
-                                <div class="modal-inline-actions">
-                                    <button type="button" data-ui-click="action-c88265410365"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm">
-
-                                        <i class="fa-solid fa-rotate"></i>
-                                        <span>Generate New</span>
-                                    </button>
-
-                                    <button type="button" data-ui-click="action-350e508970e2"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm">
-
-                                        <i class="fa-regular fa-copy"></i>
-                                        <span>Copy</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="global-form-group" data-global-field>
-                                <label class="global-form-label" for="addPasswordConf">
-                                    Confirm Password
-                                </label>
-
-                                <div class="global-control-wrap">
-                                    <i class="fa-solid fa-lock global-control-icon"></i>
-
-                                    <input type="password" name="password_confirmation" id="addPasswordConf"
-                                        class="form-input-custom global-form-icon global-control-with-action"
-                                        placeholder="Repeat password" readonly>
-
-                                    <button type="button" class="global-input-action"
-                                        data-ui-click="action-a3dc03fc8a29"
-                                        aria-label="Show or hide confirmed password">
-
-                                        <i class="fa-regular fa-eye" id="addEye2"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="global-confirm-alert modal-theme-warning">
-                                <i class="fa-solid fa-circle-info"></i>
-                                <p>
-                                    Temporary password
-                                    <span>
-                                        The generated password shown here is the exact password
-                                        that will be saved for the account.
-                                    </span>
-                                </p>
-                            </div>
-
-                            <div class="global-form-group" data-global-field>
-                                <label class="global-form-label">
-                                    Status
-                                    <span class="required-mark">*</span>
-                                </label>
-
-                                <div class="global-choice-group" role="radiogroup" aria-label="Account status">
-
-                                    <label class="global-choice-card">
-                                        <input type="radio" name="status" id="addStatusActive" value="active"
-                                            class="global-choice-input" data-field-label="Status"
-                                            data-required-message="Please select an account status."
-                                            {{ old('status', 'active') === 'active' ? 'checked' : '' }} required>
-
-                                        <span class="global-choice-indicator">
-                                            <i class="fa-solid fa-check"></i>
-                                        </span>
-
-                                        <span class="global-choice-copy">
-                                            <strong class="global-choice-title">
-                                                Active
-                                            </strong>
-
-                                            <small class="global-choice-description">
-                                                User can access the system immediately
-                                            </small>
-                                        </span>
-                                    </label>
-
-                                    <label class="global-choice-card">
-                                        <input type="radio" name="status" id="addStatusInactive" value="inactive"
-                                            class="global-choice-input"
-                                            {{ old('status') === 'inactive' ? 'checked' : '' }}>
-
-                                        <span class="global-choice-indicator">
-                                            <i class="fa-solid fa-ban"></i>
-                                        </span>
-
-                                        <span class="global-choice-copy">
-                                            <strong class="global-choice-title">
-                                                Inactive
-                                            </strong>
-
-                                            <small class="global-choice-description">
-                                                User login will be disabled
-                                            </small>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-ft">
-                    <button type="button" data-discard-close="addModal" class="ui-btn ui-btn-secondary">
-                        Cancel
-                    </button>
-
-                    <button type="submit" class="ui-btn ui-btn-primary">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span>Save User</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <div class="ui-modal modal-theme-edit" id="editModal" aria-hidden="true">
         <div class="ui-modal-card modal-lg modal-split-card">
@@ -1015,101 +640,6 @@
         </div>
     </div>
 
-    <div id="resetModal" class="ui-modal modal-theme-reset" aria-hidden="true">
-
-        <div class="ui-modal-card modal-sm">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-key"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h3 class="modal-title">
-                            Reset Password
-                        </h3>
-
-                        <p class="modal-subtitle" id="resetModalSubtitle">
-                            Set a new password
-                        </p>
-                    </div>
-                </div>
-
-                <button type="button" data-discard-close="resetModal" class="modal-x"
-                    aria-label="Close reset password modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form method="POST" id="resetForm" class="modal-card-form" data-global-validation data-discard-form
-                data-discard-title="Discard password reset?" data-discard-subtitle="A new password has not been saved."
-                data-discard-message="Closing this modal will remove the password you entered. Do you want to discard it?"
-                novalidate>
-                @csrf
-                <div class="modal-bd modal-scroll-body">
-                    <div class="modal-form-grid">
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="resetPassword">
-                                New Password
-                                <span class="required-mark">*</span>
-                            </label>
-
-                            <div class="global-control-wrap">
-                                <i class="fa-solid fa-lock global-control-icon"></i>
-
-                                <input type="password" name="password" id="resetPassword"
-                                    class="form-input-custom global-form-icon global-control-with-action"
-                                    placeholder="Enter new password" autocomplete="new-password" minlength="8"
-                                    data-field-label="New Password" data-required-message="Please enter a new password."
-                                    data-validation-rule="strongPassword" required>
-
-                                <button type="button" class="global-input-action"
-                                    data-ui-click="action-48a2e7efa309"
-                                    aria-label="Show or hide new password">
-                                    <i class="fa-regular fa-eye" id="resetEye"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="resetPasswordConf">
-                                Confirm Password
-                                <span class="required-mark">*</span>
-                            </label>
-
-                            <div class="global-control-wrap">
-                                <i class="fa-solid fa-lock global-control-icon"></i>
-
-                                <input type="password" name="password_confirmation" id="resetPasswordConf"
-                                    class="form-input-custom global-form-icon global-control-with-action"
-                                    placeholder="Repeat new password" autocomplete="new-password"
-                                    data-field-label="Confirm Password"
-                                    data-required-message="Please confirm the new password." required>
-
-                                <button type="button" class="global-input-action"
-                                    data-ui-click="action-7a64b8647525"
-                                    aria-label="Show or hide confirmed password">
-                                    <i class="fa-regular fa-eye" id="resetEye2"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-ft modal-sticky-footer">
-                    <button type="button" data-discard-close="resetModal" class="ui-btn ui-btn-secondary">
-                        Cancel
-                    </button>
-
-                    <button type="submit" class="ui-btn ui-btn-reset-password">
-                        <i class="fa-solid fa-key"></i>
-                        <span>Reset Password</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <div id="viewModal" class="ui-modal" aria-hidden="true">
         <div class="ui-modal-card modal-xl">
             <div class="modal-hd">
@@ -1302,10 +832,8 @@
 @section('scripts')
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const umCanViewAccounts = @json($canViewAccounts);
-        const umCanCreateUsers = @json($canCreateUsers);
         const umCanDisableUsers = @json($canDisableUsers);
         const umCanUpdateUserRole = @json($canUpdateUserRole);
-        const umCanUpdateUserPassword = @json($canUpdateUserPassword);
 
         var umState = {
             search: @js($search ?? ''),
@@ -1329,10 +857,6 @@
                     }
                 });
         };
-
-        @if ($errors->any() && old('_method') !== 'PUT')
-            document.addEventListener('DOMContentLoaded', () => openModal('addModal'));
-        @endif
 
         function openToggleConfirm(
             userId,
@@ -1666,104 +1190,6 @@
             openModal('editModal');
         }
 
-        function openResetModal(source, id, name) {
-            const resetForm =
-                document.getElementById('resetForm');
-
-            const resetPassword =
-                document.getElementById('resetPassword');
-
-            const resetPasswordConf =
-                document.getElementById('resetPasswordConf');
-
-            const resetSubtitle =
-                document.getElementById('resetModalSubtitle');
-
-            if (
-                !resetForm ||
-                !resetPassword ||
-                !resetPasswordConf
-            ) {
-                return;
-            }
-
-            resetForm.action =
-                source === 'patients' ?
-                `/admin/user-management/patient/${id}/reset-password` :
-                `/admin/user-management/${id}/reset-password`;
-
-            if (resetSubtitle) {
-                resetSubtitle.textContent =
-                    `Resetting password for: ${name}`;
-            }
-
-            resetForm.reset();
-
-            window.showFormInputValidationMessage?.(
-                resetPassword,
-                ''
-            );
-
-            window.showFormInputValidationMessage?.(
-                resetPasswordConf,
-                ''
-            );
-
-            openModal('resetModal');
-        }
-
-        function buildGeneratedPassword(length = 12) {
-            const lower = 'abcdefghijkmnopqrstuvwxyz';
-            const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-            const numbers = '23456789';
-            const symbols = '@#$%*!?';
-            const all = lower + upper + numbers + symbols;
-
-            const pick = (chars) => chars.charAt(Math.floor(Math.random() * chars.length));
-            const chars = [
-                pick(lower),
-                pick(upper),
-                pick(numbers),
-                pick(symbols),
-            ];
-
-            while (chars.length < length) {
-                chars.push(pick(all));
-            }
-
-            for (let i = chars.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [chars[i], chars[j]] = [chars[j], chars[i]];
-            }
-
-            return chars.join('');
-        }
-
-        function refreshGeneratedPassword() {
-            const password = buildGeneratedPassword();
-            const passwordInput = document.getElementById('addPassword');
-            const confirmInput = document.getElementById('addPasswordConf');
-
-            if (passwordInput) passwordInput.value = password;
-            if (confirmInput) confirmInput.value = password;
-        }
-
-        async function copyFieldValue(inputId) {
-            const input = document.getElementById(inputId);
-            if (!input || !input.value) return;
-
-            try {
-                await navigator.clipboard.writeText(input.value);
-                showSuccessToast('Password copied to clipboard.');
-            } catch (error) {
-                input.removeAttribute('readonly');
-                input.select();
-                document.execCommand('copy');
-                input.setAttribute('readonly', 'readonly');
-                showSuccessToast('Password copied to clipboard.');
-            }
-        }
-
         let userPhoneFeedbackTimer = null;
 
         function formatUserPhoneDisplay(rawDigits) {
@@ -1935,18 +1361,13 @@
         window.openToggleConfirm = openToggleConfirm;
         window.openEditModal = openEditModal;
         window.openEditModalFromButton = openEditModalFromButton;
-        window.openResetModal = openResetModal;
         window.openViewModal = openViewModal;
         window.openViewModalFromButton = openViewModalFromButton;
         window.togglePassVis = togglePassVis;
-        window.refreshGeneratedPassword = refreshGeneratedPassword;
-        window.copyFieldValue = copyFieldValue;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof applyTheme === 'function') applyTheme(localStorage.getItem('theme') || 'light');
 
-            refreshGeneratedPassword();
-            bindUserPhoneValidation('addPhoneInput');
             bindUserPhoneValidation('editPhone');
 
         });
@@ -2115,18 +1536,6 @@
                 </button>
             ` : '';
 
-                const resetButton = umCanUpdateUserPassword ? `
-                <button
-                    type="button"
-                    data-ui-click="action-585011303a01" data-ui-click-arg-0="${window.uiAttribute(Number(user.id))}" data-ui-click-arg-1="${window.uiAttribute(jsAttr(user.name))}"
-                    class="ui-action-btn ui-action-reset"
-                    data-tooltip="Reset password"
-                    data-tooltip-tone="reset"
-                    aria-label="Reset password">
-                    <i class="fa-solid fa-key"></i>
-                </button>
-            ` : '';
-
                 const viewButton = umCanViewAccounts ? `
                 <button
                     type="button"
@@ -2144,7 +1553,6 @@
                     <div class="ui-action-group">
                         ${editButton}
                         ${toggleButton}
-                        ${resetButton}
                         ${viewButton}
                     </div>
                 `;
@@ -2883,100 +2291,6 @@
                 });
             }
 
-            var addUserForm =
-                document.getElementById('addUserForm');
-
-            if (addUserForm) {
-                addUserForm.addEventListener(
-                    'submit',
-                    function(event) {
-                        const validation =
-                            window.validateGlobalForm?.(this);
-
-                        if (
-                            validation &&
-                            !validation.valid
-                        ) {
-                            event.preventDefault();
-                            return;
-                        }
-
-                        const addPhoneInput =
-                            document.getElementById(
-                                'addPhoneInput'
-                            );
-
-                        if (addPhoneInput) {
-                            addPhoneInput.value =
-                                getNormalizedUserPhoneValue(
-                                    addPhoneInput
-                                );
-                        }
-                    }
-                );
-            }
-
-            var resetForm = document.getElementById('resetForm');
-            if (resetForm) {
-                resetForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    const validation = window.validateGlobalForm?.(this);
-
-                    if (validation && !validation.valid) {
-                        return;
-                    }
-
-                    var form = this;
-                    var url = form.action;
-                    var submitBtn = form.querySelector('button[type="submit"]');
-                    var originalHtml = submitBtn.innerHTML;
-
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resetting…';
-
-                    var formData = new FormData(form);
-
-                    fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json',
-                            },
-                            body: formData
-                        })
-                        .then(function(res) {
-                            return res.json().then(function(data) {
-                                return {
-                                    ok: res.ok,
-                                    status: res.status,
-                                    data: data
-                                };
-                            });
-                        })
-                        .then(function(result) {
-                            if (result.status === 422 && result.data.errors) {
-                                var msgs = Object.values(result.data.errors).flat().join(' ');
-                                showErrorToast(msgs);
-                            } else if (result.ok && result.data.success) {
-                                closeAllModals();
-                                showSuccessToast(result.data.message || 'Password reset successfully.');
-                                document.getElementById('resetPassword').value = '';
-                                document.getElementById('resetPasswordConf').value = '';
-                            } else {
-                                showErrorToast(result.data.message || 'Something went wrong.');
-                            }
-                        })
-                        .catch(function() {
-                            showErrorToast('Something went wrong. Please try again.');
-                        })
-                        .finally(function() {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = originalHtml;
-                        });
-                });
-            }
         });
     </script>
 @endsection

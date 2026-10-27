@@ -171,20 +171,6 @@
                                         </label>
                                     </div>
 
-                                    <div class="setting-row">
-                                        <div class="setting-row-info">
-                                            <div class="setting-row-label">Debug Mode</div>
-                                            <div class="setting-row-desc">Enable detailed error logging for developers
-                                            </div>
-                                        </div>
-                                        <label class="toggle-wrap">
-                                            <input type="hidden" name="debug_mode" value="0">
-                                            <input type="checkbox" name="debug_mode" value="1" {{ old('debug_mode',
-                                                $settings['debug_mode']->value ?? '0') === '1' ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
-                                        </label>
-                                    </div>
-
                                     <div class="mt-5 mb-4 pt-4 border-t border-gray-50">
                                         <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wide">AI Services</p>
                                     </div>
@@ -1012,7 +998,6 @@
     const SETTINGS_DEFAULTS = {
         language: 'English (US)',
         maintenance_mode: '0',
-        debug_mode: '0',
         ai_mode: 'normal',
         ai_chatbot_enabled: '1',
         ai_signature_enabled: '1',

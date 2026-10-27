@@ -716,20 +716,12 @@ Route::prefix('admin')
     ->group(function () {
 
         Route::get('/user-management', [UserManagementController::class, 'index'])
-            ->middleware('permission:view_account_details,create_users,disable_users,update_user_role,update_user_password')
+            ->middleware('permission:view_account_details,disable_users,update_user_role')
             ->name('admin.user_management');
-
-        Route::post('/user-management', [UserManagementController::class, 'store'])
-            ->middleware('permission:create_users')
-            ->name('admin.user_management.store');
 
         Route::put('/user-management/{user}', [UserManagementController::class, 'update'])
             ->middleware('permission:update_user_role')
             ->name('admin.user_management.update');
-
-        Route::post('/user-management/{user}/reset-password', [UserManagementController::class, 'resetPassword'])
-            ->middleware('permission:update_user_password')
-            ->name('admin.user_management.reset_password');
 
         Route::post('/user-management/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
             ->middleware('permission:disable_users')
@@ -1522,20 +1514,12 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->name('dentist.faculty.store');
 
     Route::get('/user-management', [UserManagementController::class, 'index'])
-        ->middleware('permission:view_account_details,create_users,disable_users,update_user_role,update_user_password')
+        ->middleware('permission:view_account_details,disable_users,update_user_role')
         ->name('dentist.user_management');
-
-    Route::post('/user-management', [UserManagementController::class, 'store'])
-        ->middleware('permission:create_users')
-        ->name('dentist.user_management.store');
 
     Route::put('/user-management/{user}', [UserManagementController::class, 'update'])
         ->middleware('permission:update_user_role')
         ->name('dentist.user_management.update');
-
-    Route::post('/user-management/{user}/reset-password', [UserManagementController::class, 'resetPassword'])
-        ->middleware('permission:update_user_password')
-        ->name('dentist.user_management.reset_password');
 
     Route::post('/user-management/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
         ->middleware('permission:disable_users')

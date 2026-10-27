@@ -49,8 +49,23 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontFlash(['current_password', 'password', 'password_confirmation', 'admin_current_password']);
+
         $exceptions->respond(function ($response, \Throwable $exception, $request) {
             AuditLogger::logException($exception, 'system', $response->getStatusCode());
+
+            if ($response->getStatusCode() >= 500) {
+                $status = $response->getStatusCode();
+                $message = $status === 503
+                    ? 'The system is temporarily unavailable. Please try again later.'
+                    : 'Something went wrong. Please try again later.';
+
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], $status);
+                }
+
+                return response()->view($status === 503 ? 'errors.503' : 'errors.500', [], $status);
+            }
 
             return (new SecurityHeaders)->apply($request, $response);
         });

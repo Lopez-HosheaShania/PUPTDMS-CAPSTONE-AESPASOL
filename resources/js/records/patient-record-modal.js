@@ -885,7 +885,14 @@ function showRecordOdontogramSnapshot(
     const isHistorical =
         options.historical === true;
 
+    const editUrl =
+        String(
+            modal.__recordData
+                ?.editUrl || ''
+        ).trim();
+
     const editLocked =
+        !!editUrl &&
         modal.__recordData
             ?.editLocked === true;
 
@@ -932,11 +939,6 @@ function showRecordOdontogramSnapshot(
     );
 
     if (editBtn) {
-        const editUrl =
-            String(
-                modal.__recordData
-                    ?.editUrl || ''
-            ).trim();
 
         editBtn.hidden =
             !editUrl;
