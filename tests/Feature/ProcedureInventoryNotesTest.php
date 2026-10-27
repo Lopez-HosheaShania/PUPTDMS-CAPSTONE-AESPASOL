@@ -51,7 +51,7 @@ class ProcedureInventoryNotesTest extends TestCase
     private function payload(array $overrides = []): array
     {
         return array_replace(['odontogram_data' => [['tooth' => 11, 'status' => ['code' => 'F', 'label' => 'Filled'], 'surfaces' => []]], 'has_applied_treatment' => true,
-            'procedure_duration_hms' => '00:20:00', 'completion_action' => 'finished'], $overrides);
+            'procedure_started_at' => '2026-10-23T09:00:00', 'procedure_completed_at' => '2026-10-23T09:20:00', 'completion_action' => 'finished'], $overrides);
     }
 
     private function completed(User $dentist, string $note, string $date = '2026-10-23'): AppointmentProcedure
@@ -79,9 +79,14 @@ class ProcedureInventoryNotesTest extends TestCase
         $this->assertSame(100, (int) $stock->fresh()->qty);
         $this->assertSame(5, (int) $stock->fresh()->used);
         $this->assertArrayNotHasKey('inventory_notes', $procedure->toArray());
-        $this->postJson(route('dentist.odontogram.saved.update', $appointment), $this->payload())->assertOk();
+        $reason = \App\Models\OdontogramRevisionReasonType::where('code', 'wrong_tooth')->value('id');
+        $correction = $this->payload(['reason_type_id' => $reason,
+            'odontogram_data' => [['tooth' => 12, 'status' => ['code' => 'F', 'label' => 'Filled'], 'surfaces' => []]]]);
+        $this->postJson(route('dentist.odontogram.saved.update', $appointment), $correction)->assertOk();
         $this->assertSame($note, $procedure->fresh()->inventory_notes);
-        $this->postJson(route('dentist.odontogram.saved.update', $appointment), $this->payload(['inventory_notes' => null]))->assertOk();
+        $this->postJson(route('dentist.odontogram.saved.update', $appointment), $this->payload([
+            'reason_type_id' => $reason, 'inventory_notes' => null,
+        ]))->assertOk();
         $this->assertNull($procedure->fresh()->inventory_notes);
         $this->assertDatabaseCount('appointment_procedures', 1);
     }

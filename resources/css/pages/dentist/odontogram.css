@@ -2276,13 +2276,6 @@ body.layout-no-sidebar #mainContent.odontogram-page {
     margin-top: .25rem;
 }
 
-#procedureDurationField .global-field-error {
-    width: max-content;
-    max-width: none;
-    white-space: nowrap;
-    font-size: .66rem;
-}
-
 .odontogram-patient-name {
     margin-top: .2rem;
     color: var(--text-1);
@@ -2302,9 +2295,29 @@ body.layout-no-sidebar #mainContent.odontogram-page {
 
 .odontogram-appointment-meta {
     display: grid;
-    grid-template-columns:
-        minmax(0, .85fr) minmax(0, .85fr) minmax(250px, 1.3fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: .65rem;
+}
+
+.odontogram-appointment-meta .odontogram-procedure-timing-item {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+}
+
+.odontogram-procedure-timing-item .odontogram-procedure-duration-copy {
+    margin-top: 0;
+}
+
+.odontogram-procedure-timing-item input {
+    min-width: 0;
+    margin-top: .25rem;
+}
+
+.odontogram-procedure-timing-item .global-field-error {
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .odontogram-appointment-meta-item {
@@ -2618,6 +2631,10 @@ body.layout-no-sidebar #mainContent.odontogram-page {
 }
 
 @media (max-width: 767px) {
+    .odontogram-appointment-meta .odontogram-procedure-timing-item {
+        grid-template-columns: 1fr;
+    }
+
     .odontogram-appointment-meta {
         grid-template-columns: 1fr;
     }

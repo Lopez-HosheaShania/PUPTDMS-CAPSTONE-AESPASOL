@@ -725,7 +725,7 @@ function initGlobalFlatpickr() {
 
             altInputClass: `${visibleInputClass} flatpickr-time-display form-control input`,
             time_24hr: false,
-            minuteIncrement: 5,
+            minuteIncrement: el.dataset.timeMinuteIncrement === '1' ? 1 : 5,
             defaultDate: /^([01]\d|2[0-3]):[0-5]\d$/.test(initialTime)
                 ? initialTime
                 : undefined,

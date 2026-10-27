@@ -90,17 +90,8 @@
         $pageTitle = $savedVisitEditMode ? 'Edit Saved Odontogram' : 'Patient Odontogram';
         $pageSubtitle = '2D / 3D Treatment &amp; Condition Mapping';
 
-        $existingProcedureDuration = $existingAppointmentMode
-            ? data_get($existingAppointmentDraft ?? [], 'procedure_duration_hms', '00:00:00')
-            : ($savedVisitEditMode
-                ? sprintf(
-                    '%02d:%02d:%02d',
-                    floor((int) data_get($procedure, 'procedure_duration_seconds', 0) / 3600),
-                    floor(((int) data_get($procedure, 'procedure_duration_seconds', 0) % 3600) / 60),
-                    (int) data_get($procedure, 'procedure_duration_seconds', 0) % 60,
-                )
-                : '00:00:00');
-
+        $manualTimeIn = old('procedure_started_at', $procedure?->procedure_started_at?->format('H:i') ?? '');
+        $manualTimeProcessed = old('procedure_completed_at', $procedure?->procedure_completed_at?->format('H:i') ?? '');
         $discardProcedureTitle = $existingAppointmentMode
             ? 'Discard appointment entry?'
             : ($savedVisitEditMode
@@ -250,29 +241,28 @@
                                         </div>
                                     </div>
 
-                                    <div id="procedureDurationField"
-                                        class="odontogram-appointment-meta-item odontogram-procedure-duration-item"
-                                        data-global-field>
-                                        <span class="odontogram-appointment-meta-icon">
-                                            <i class="fa-solid fa-stopwatch"></i>
-                                        </span>
-
+                                    <div class="odontogram-appointment-meta-item odontogram-procedure-timing-item">
+                                        @foreach (['procedure_started_at' => ['Time In', $manualTimeIn], 'procedure_completed_at' => ['Time Processed', $manualTimeProcessed]] as $field => [$label, $value])
+                                            <div class="odontogram-procedure-duration-copy" data-global-field>
+                                                <label for="{{ $field }}" class="odontogram-appointment-meta-label">
+                                                    {{ $label }} <span class="required-mark">*</span>
+                                                </label>
+                                                <input type="text" id="{{ $field }}" name="{{ $field }}"
+                                                    class="form-input-custom js-flatpickr-time" value="{{ $value }}" required readonly
+                                                    placeholder="HH:MM" autocomplete="off"
+                                                    data-time-minute-increment="1"
+                                                    data-field-label="{{ $label }}"
+                                                    data-required-message="Please enter {{ $label }}."
+                                                    aria-describedby="{{ $field }}_error">
+                                                <div id="{{ $field }}_error" class="global-field-error"
+                                                    data-error-for="{{ $field }}" aria-hidden="true"></div>
+                                            </div>
+                                        @endforeach
                                         <div class="odontogram-procedure-duration-copy">
-                                            <label for="procedureDurationInput" class="odontogram-appointment-meta-label">
-                                                Procedure Duration
-                                                <span class="required-mark">*</span>
-                                            </label>
-
+                                            <label for="procedureDurationInput" class="odontogram-appointment-meta-label">Procedure Duration</label>
                                             <input type="text" id="procedureDurationInput" class="form-input-custom"
-                                                value="{{ $existingProcedureDuration !== '00:00:00' ? $existingProcedureDuration : '' }}"
-                                                inputmode="numeric" placeholder="HH:MM:SS" maxlength="8" required
-                                                data-field-label="Procedure Duration"
-                                                data-required-message="Please enter the procedure duration."
-                                                data-validation-rule="bookingDuration"
-                                                aria-label="Procedure duration in HH:MM:SS format">
-
-                                            <div id="procedureDurationError" class="global-field-error"
-                                                data-error-for="procedureDurationInput" aria-hidden="true"></div>
+                                                value="" placeholder="HH:MM:SS" readonly
+                                                aria-label="Procedure duration calculated from the entered times">
                                         </div>
                                     </div>
                                 </div>
@@ -1144,7 +1134,6 @@
             const finishProcedureModalAlertMessage = document.getElementById('finishProcedureModalAlertMessage');
             const existingAppointmentMode = @json($existingAppointmentMode);
             const savedVisitEditMode = @json($savedVisitEditMode);
-            const existingProcedureDuration = @json($existingProcedureDuration);
             const allowsProcedureCompletionWithoutOdontogramChanges = @json($allowsProcedureCompletionWithoutOdontogramChanges);
             const procedureDiscardForm = document.getElementById('procedureDiscardForm');
             const procedureDiscardDirtyFlag = document.getElementById('procedureDiscardDirtyFlag');
@@ -1161,6 +1150,8 @@
             const drawerSelectedLegendPreview = document.getElementById('drawerSelectedLegendPreview');
 
             const procedureDurationInput = document.getElementById('procedureDurationInput');
+            const procedureTimeInInput = document.getElementById('procedure_started_at');
+            const procedureTimeProcessedInput = document.getElementById('procedure_completed_at');
             const container = document.getElementById('canvas-container');
             const loadingOverlay = document.getElementById('loadingOverlay');
             const legendDrawer = document.getElementById('legendDrawer');
@@ -3960,154 +3951,58 @@
                 toothTooltip.classList.remove('show');
             }
 
-            let procedureDurationDigits = procedureDurationInput?.value.replace(/\D/g, '') || '';
-
-            function formatProcedureDurationInput(digits) {
-                const normalizedDigits = String(digits || '').replace(/\D/g, '').slice(-6);
-
-                if (!normalizedDigits) {
-                    return '';
-                }
-
-                const paddedDigits = normalizedDigits.padStart(6, '0');
-
-                return `${paddedDigits.slice(0, 2)}:${paddedDigits.slice(2, 4)}:${paddedDigits.slice(4, 6)}`;
+            function getProcedureTime24Hour(field) {
+                // The shared Flatpickr shows h:i K and keeps H:i in the original input.
+                return /^([01]\d|2[0-3]):[0-5]\d$/.test(field.value) ? field.value : null;
             }
 
             function parseProcedureDurationSeconds() {
-                const rawValue = procedureDurationInput?.value.trim() || '';
-
-                if (!/^\d{2}:\d{2}:\d{2}$/.test(rawValue)) {
-                    return null;
-                }
-
-                const [hours, minutes, seconds] = rawValue.split(':').map(Number);
-
-                if (minutes > 59 || seconds > 59) {
-                    return null;
-                }
-
-                return (hours * 3600) + (minutes * 60) + seconds;
+                const values = [procedureTimeInInput, procedureTimeProcessedInput].map(getProcedureTime24Hour);
+                if (values.some(value => value === null)) return null;
+                const [start, end] = values.map(value => {
+                    const [hours, minutes] = value.split(':').map(Number);
+                    return (hours * 60 + minutes) * 60;
+                });
+                return end - start;
             }
 
-            function validateProcedureDurationField({
-                focus = true
-            } = {}) {
-                if (!procedureDurationInput) {
-                    return true;
-                }
-
-                const valid =
-                    window.validateFormInputField?.(
-                        procedureDurationInput
-                    ) ?? (
-                        parseProcedureDurationSeconds() !== null &&
-                        parseProcedureDurationSeconds() > 0
-                    );
-
-                if (
-                    !valid &&
-                    focus
-                ) {
-                    window.focusGlobalInvalidField?.(
-                        procedureDurationInput
-                    );
-                }
-
-                return valid;
+            function updateProcedureDuration() {
+                const seconds = parseProcedureDurationSeconds();
+                procedureDurationInput.value = seconds !== null && seconds >= 0
+                    ? [Math.floor(seconds / 3600), Math.floor(seconds % 3600 / 60), seconds % 60]
+                        .map(value => String(value).padStart(2, '0')).join(':')
+                    : '';
             }
 
-            procedureDurationInput?.addEventListener('keydown', function(event) {
-                if (/^\d$/.test(event.key)) {
-                    event.preventDefault();
-
-                    procedureDurationDigits =
-                        `${procedureDurationDigits}${event.key}`
-                        .slice(-6);
-
-                    procedureDurationInput.value =
-                        formatProcedureDurationInput(
-                            procedureDurationDigits
-                        );
-
-                    procedureDurationInput.dispatchEvent(
-                        new Event('input', {
-                            bubbles: true
-                        })
-                    );
-
-                    if (
-                        procedureDurationInput.getAttribute(
-                            'aria-invalid'
-                        ) === 'true'
-                    ) {
-                        window.validateFormInputField?.(
-                            procedureDurationInput
-                        );
-                    }
-
-                    return;
+            function validateProcedureTimingFields({ focus = true } = {}) {
+                let firstInvalid = null;
+                [procedureTimeInInput, procedureTimeProcessedInput].forEach(field => {
+                    const valid = window.validateFormInputField?.(field) ?? field.checkValidity();
+                    if (!valid && !firstInvalid) firstInvalid = field;
+                });
+                const seconds = parseProcedureDurationSeconds();
+                if (!firstInvalid && (seconds === null || seconds < 0)) {
+                    firstInvalid = procedureTimeProcessedInput;
+                    window.showFormInputValidationMessage?.(firstInvalid, 'Time Processed must be on or after Time In.');
                 }
+                [procedureTimeInInput, procedureTimeProcessedInput].forEach(field => {
+                    field._flatpickr?.altInput?.classList.toggle('is-invalid', field === firstInvalid);
+                });
+                if (firstInvalid && focus) window.focusGlobalInvalidField?.(firstInvalid._flatpickr?.altInput || firstInvalid);
+                return !firstInvalid;
+            }
 
-                if (event.key === 'Backspace') {
-                    event.preventDefault();
-
-                    procedureDurationDigits =
-                        procedureDurationDigits.slice(
-                            0,
-                            -1
-                        );
-
-                    procedureDurationInput.value =
-                        formatProcedureDurationInput(
-                            procedureDurationDigits
-                        );
-
-                    procedureDurationInput.dispatchEvent(
-                        new Event('input', {
-                            bubbles: true
-                        })
-                    );
-
-                    if (
-                        procedureDurationInput.getAttribute(
-                            'aria-invalid'
-                        ) === 'true'
-                    ) {
-                        window.validateFormInputField?.(
-                            procedureDurationInput
-                        );
-                    }
-                }
+            [procedureTimeInInput, procedureTimeProcessedInput].forEach(field => {
+                const onTimeChange = () => {
+                    window.showFormInputValidationMessage?.(field, '');
+                    field._flatpickr?.altInput?.classList.remove('is-invalid');
+                    updateProcedureDuration();
+                    markProcedureDiscardDirty();
+                };
+                field.addEventListener('input', onTimeChange);
+                field.addEventListener('change', onTimeChange);
             });
-
-            procedureDurationInput?.addEventListener('paste', function(event) {
-                event.preventDefault();
-
-                const pastedDigits =
-                    event.clipboardData
-                    ?.getData('text')
-                    .replace(/\D/g, '')
-                    .slice(-6) || '';
-
-                procedureDurationDigits =
-                    pastedDigits;
-
-                procedureDurationInput.value =
-                    formatProcedureDurationInput(
-                        procedureDurationDigits
-                    );
-
-                procedureDurationInput.dispatchEvent(
-                    new Event('input', {
-                        bubbles: true
-                    })
-                );
-
-                window.validateFormInputField?.(
-                    procedureDurationInput
-                );
-            });
+            updateProcedureDuration();
 
             applyTreatmentBtn.addEventListener('click', function() {
                 if (!selectedTooth || !selectedTargetType) {
@@ -4651,7 +4546,7 @@
                 }
 
                 if (
-                    !validateProcedureDurationField({
+                    !validateProcedureTimingFields({
                         focus: true
                     })
                 ) {
@@ -4707,14 +4602,13 @@
                 }
 
                 if (
-                    !validateProcedureDurationField({
+                    !validateProcedureTimingFields({
                         focus: true
                     })
                 ) {
                     return;
                 }
 
-                const procedureDurationSeconds = parseProcedureDurationSeconds();
 
                 if (!allowsProcedureCompletionWithoutOdontogramChanges && !
                     hasAppliedTreatmentThisSession && !(
@@ -4749,9 +4643,8 @@
                     has_applied_treatment: allowsProcedureCompletionWithoutOdontogramChanges ||
                         hasAppliedTreatmentThisSession ||
                         (savedVisitEditMode && hasAnySavedTreatment),
-                    procedure_duration_hms: procedureDurationInput?.value.trim() ||
-                        '00:00:00',
-                    procedure_duration_seconds: procedureDurationSeconds,
+                    procedure_started_at: getProcedureTime24Hour(procedureTimeInInput),
+                    procedure_completed_at: getProcedureTime24Hour(procedureTimeProcessedInput),
                 };
 
                 if (savedVisitEditMode) {
@@ -4826,11 +4719,10 @@
                     }
 
                     if (!response.ok) {
-                        console.error(
-                            'Procedure save failed:',
-                            response.status,
-                            responseText
-                        );
+                        Object.entries(result?.errors || {}).forEach(([name, messages]) => {
+                            const field = document.getElementById(name);
+                            if (field) window.showFormInputValidationMessage?.(field, messages[0]);
+                        });
 
                         showProcedureToast(
                             result?.message ||
@@ -4892,7 +4784,7 @@
             }
 
             finishProcedureBtn.addEventListener('click', function() {
-                if (!validateProcedureDurationField()) {
+                if (!validateProcedureTimingFields()) {
                     return;
                 }
 
@@ -5112,7 +5004,7 @@
             followUpBtn?.addEventListener('click', function() {
 
                 if (
-                    !validateProcedureDurationField({
+                    !validateProcedureTimingFields({
                         focus: true
                     })
                 ) {
@@ -5540,11 +5432,6 @@
 
             initSurfacePickerDrag();
             initLegendPanelResize();
-
-            if (procedureDurationInput && existingProcedureDuration && existingProcedureDuration !==
-                '00:00:00') {
-                procedureDurationInput.value = existingProcedureDuration;
-            }
 
             renderLegendButtons(
                 ''

@@ -16,44 +16,65 @@ class UserManagementFeatureTest extends TestCase
     public function test_admin_can_create_user_with_auto_generated_password(): void
     {
         $admin = $this->createAdminUser();
-        $patientRole = $this->createRole('Patient', 'patient');
+        $original = $admin->fresh()->getAttributes();
+        $count = User::count();
 
-        $response = $this->actingAs($admin)
-            ->withSession($this->adminSession($admin))
-            ->post(route('admin.user_management.store'), [
-                'name' => 'Juan Dela Cruz',
-                'email' => 'juan@example.com',
-                'role_id' => $patientRole->id,
-                'status' => 'active',
-                'phone' => '09123456789',
-                'birthdate' => '2000-01-01',
-                'gender' => 'Male',
-            ]);
+        foreach (['admin', 'dentist'] as $area) {
+            $this->assertFalse(\Illuminate\Support\Facades\Route::has("{$area}.user_management.store"));
+            $this->assertFalse(\Illuminate\Support\Facades\Route::has("{$area}.user_management.reset_password"));
+            $this->actingAs($admin)->postJson("/{$area}/user-management", [
+                'name' => 'Unwanted User', 'email' => 'unwanted@example.com',
+                'password' => 'ChangedPassword123!', 'password_confirmation' => 'ChangedPassword123!',
+            ])->assertStatus(405);
+            $this->actingAs($admin)->postJson("/{$area}/user-management/{$admin->id}/reset-password", [
+                'password' => 'ChangedPassword123!', 'password_confirmation' => 'ChangedPassword123!',
+            ])->assertNotFound();
+        }
 
-        $response->assertRedirect(route('admin.user_management'));
-        $response->assertSessionHas('success', 'User created successfully.');
-        $response->assertSessionHas('generated_user_password');
+        $this->assertSame($count, User::count());
+        $this->assertSame($original, $admin->fresh()->getAttributes());
+        $this->assertAuthenticatedAs($admin);
+    }
 
-        /** @var array{name:string,email:string,password:string} $generated */
-        $generated = session('generated_user_password');
+    public function test_user_management_page_keeps_applicable_actions(): void
+    {
+        $this->withoutVite();
+        $admin = $this->createAdminUser();
 
-        $this->assertSame('Juan Dela Cruz', $generated['name']);
-        $this->assertSame('juan@example.com', $generated['email']);
-        $this->assertSame(12, strlen($generated['password']));
-        $this->assertMatchesRegularExpression('/[a-z]/', $generated['password']);
-        $this->assertMatchesRegularExpression('/[A-Z]/', $generated['password']);
-        $this->assertMatchesRegularExpression('/\d/', $generated['password']);
-        $this->assertMatchesRegularExpression('/[@#$%*!\?]/', $generated['password']);
+        $this->actingAs($admin)->withSession($this->adminSession($admin))
+            ->get(route('admin.user_management'))->assertOk()
+            ->assertSee('Edit User')->assertSee('Account Details')
+            ->assertDontSee('addUserForm')->assertDontSee('resetForm')
+            ->assertDontSee('Add New User')->assertDontSee('Reset Password');
+    }
 
-        $user = User::where('email', 'juan@example.com')->firstOrFail();
-
-        $this->assertTrue(Hash::check($generated['password'], (string) $user->password));
-        $this->assertDatabaseHas('patients', [
-            'user_id' => $user->id,
-            'email' => 'juan@example.com',
-            'phone' => '09123456789',
-            'gender' => 'Male',
+    public function test_existing_account_can_be_edited_reassigned_and_disabled_without_changing_password(): void
+    {
+        $admin = $this->createAdminUser();
+        $dentistRole = $this->createRole('Dentist', 'dentist');
+        $staffRole = $this->createRole('Clinic Staff', 'clinic_staff');
+        $target = User::create([
+            'name' => 'Existing Dentist', 'email' => 'existing@example.com',
+            'password' => bcrypt('ExistingPassword123!'),
+            'role_id' => $dentistRole->id, 'status' => 'active',
         ]);
+        $password = $target->password;
+
+        $this->actingAs($admin)->withSession($this->adminSession($admin))
+            ->putJson(route('admin.user_management.update', $target), [
+                'name' => 'Updated Dentist', 'email' => $target->email,
+                'role_id' => $staffRole->id, 'status' => 'active',
+                'admin_current_password' => 'Password123!',
+            ])->assertOk()->assertJsonPath('success', true);
+
+        $this->assertSame($staffRole->id, $target->fresh()->role_id);
+        $this->assertSame('Updated Dentist', $target->fresh()->name);
+        $this->assertSame($password, $target->fresh()->password);
+
+        $this->postJson(route('admin.user_management.toggle_status', $target))
+            ->assertOk()->assertJsonPath('status', 'inactive');
+        $this->assertSame($password, $target->fresh()->password);
+        $this->assertAuthenticatedAs($admin);
     }
 
     public function test_ajax_user_management_index_returns_rich_user_details_payload(): void
@@ -165,10 +186,10 @@ class UserManagementFeatureTest extends TestCase
         ]);
     }
 
-    public function test_built_in_roles_cannot_be_deleted(): void
+    public function test_super_admin_role_cannot_be_deleted(): void
     {
         $admin = $this->createAdminUser();
-        $adminRole = Role::where('slug', 'admin')->firstOrFail();
+        $adminRole = $this->createRole('Super Admin', 'super_admin');
 
         $response = $this->actingAs($admin)
             ->withSession($this->adminSession($admin))
@@ -179,7 +200,7 @@ class UserManagementFeatureTest extends TestCase
 
         $this->assertDatabaseHas('roles', [
             'id' => $adminRole->id,
-            'slug' => 'admin',
+            'slug' => 'super_admin',
         ]);
     }
 
