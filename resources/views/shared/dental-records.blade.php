@@ -156,7 +156,7 @@
 
                             <div class="table-toolbar-actions">
                                 <button id="dentalRecordFilterBtn" type="button" class="global-filter-btn"
-                                    aria-pressed="false" onclick="openDentalRecordFilters()" data-tooltip="Filter"
+                                    aria-pressed="false" data-ui-click="action-5916d2256d78" data-tooltip="Filter"
                                     data-tooltip-tone="neutral">
                                     <i class="fa-solid fa-sliders"></i>
                                     <span>Filters</span>
@@ -169,7 +169,7 @@
 
                                 <button id="dentalRecordFilterResetBtn" type="button"
                                     class="global-filter-reset-btn hidden" title="Reset filters"
-                                    aria-label="Reset dental record filters" onclick="clearDentalRecordFilters()"
+                                    aria-label="Reset dental record filters" data-ui-click="action-451e2fc88763"
                                     data-tooltip="Reset filters" data-tooltip-tone="neutral">
                                     <i class="fa-solid fa-rotate-left"></i>
                                 </button>
@@ -292,7 +292,7 @@
                                                     <div class="ui-action-group">
                                                         @if (!empty($record->appointment_id))
                                                             <button type="button" class="ui-action-btn ui-action-view"
-                                                                onclick="event.stopPropagation(); openRecordPanel({{ $record->id }})"
+                                                                data-ui-click="action-753919bc8ad8" data-ui-click-arg-0="{{ json_encode($record->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                                 aria-label="View record" data-tooltip="View record">
                                                                 <i class="fa-solid fa-eye"></i>
                                                             </button>
@@ -417,7 +417,7 @@
                                                 <div class="ui-action-group">
                                                     @if (!empty($record->appointment_id))
                                                         <button type="button" class="ui-action-btn ui-action-view"
-                                                            onclick="event.stopPropagation(); openRecordPanel({{ $record->id }})"
+                                                            data-ui-click="action-753919bc8ad8" data-ui-click-arg-0="{{ json_encode($record->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                             aria-label="View record" data-tooltip="View record">
                                                             <i class="fa-solid fa-eye"></i>
                                                         </button>
@@ -552,10 +552,10 @@
 
 
     <x-filter-drawer id="filterModal" title="Filter Records" close-id="dentalRecordFilterCloseBtn"
-        close-callback="closeDentalRecordFilters()" clear-id="dentalRecordFilterClearBtn"
-        clear-callback="clearDentalRecordFilterDraft()" clear-label="Clear Filters"
-        cancel-id="dentalRecordFilterCancelBtn" cancel-callback="closeDentalRecordFilters()" cancel-label="Cancel"
-        apply-id="dentalRecordFilterApplyBtn" apply-callback="applyDentalRecordFilters()" apply-label="Show Results"
+        close-callback="action-b977f72cb77d" clear-id="dentalRecordFilterClearBtn"
+        clear-callback="action-46ebb44a144d" clear-label="Clear Filters"
+        cancel-id="dentalRecordFilterCancelBtn" cancel-callback="action-b977f72cb77d" cancel-label="Cancel"
+        apply-id="dentalRecordFilterApplyBtn" apply-callback="action-fdd006138fbd" apply-label="Show Results"
         results-id="dentalRecordFilterResultsText">
 
         <div id="dentalRecordActiveFiltersSection" class="filter-active-section hidden">
@@ -563,7 +563,7 @@
                 <span class="filter-active-title">Active Filters</span>
 
                 <button type="button" class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm"
-                    onclick="clearDentalRecordFilterDraft()">
+                    data-ui-click="action-46ebb44a144d">
                     <i class="fa-solid fa-rotate-left"></i>
                     <span>Clear All</span>
                 </button>
@@ -647,7 +647,7 @@
             '365' => 'Last 12 Months',
         ] as $value => $label)
                     <button type="button" class="quick-date-chip" data-record-date="{{ $value }}"
-                        onclick="setDentalRecordDraftFilter('datePreset', '{{ $value }}')">
+                        data-ui-click="action-f5aa0fb428b8" data-ui-click-arg-0="{{ $value }}">
                         {{ $label }}
                     </button>
                 @endforeach
@@ -689,7 +689,7 @@
                         </h3>
                     </div>
                 </div>
-                <button type="button" class="modal-x" onclick="closeDentalRecordDetailsModal()"
+                <button type="button" class="modal-x" data-ui-click="action-e83e40f120f5"
                     aria-label="Close dental record details">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -706,7 +706,7 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="btn-close-modal" onclick="closeDentalRecordDetailsModal()">
+                <button type="button" class="btn-close-modal" data-ui-click="action-e83e40f120f5">
                     Close
                 </button>
             </div>
@@ -732,7 +732,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
         const csrfToken = csrfMeta ? csrfMeta.content : '';
 
@@ -1316,7 +1316,7 @@
                     <button
                         type="button"
                         class="filter-chip-remove"
-                        onclick="removeDentalRecordDraftFilter('${key}')"
+                        data-ui-click="action-83507c89d4f2" data-ui-click-arg-0="${window.uiAttribute(key)}"
                         aria-label="Remove ${escapeHtml(label)}">
                         <i class="fa-solid fa-xmark"></i>
                     </button>

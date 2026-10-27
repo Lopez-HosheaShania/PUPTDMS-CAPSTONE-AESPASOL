@@ -254,7 +254,7 @@
                                 </div>
                                 <div class="progress-track">
                                     <div class="progress-fill" id="bannerFill"
-                                        style="width:{{ $activePeriod?->progress_percent ?? 0 }}%;">
+                                        data-ui-style="width:{{ $activePeriod?->progress_percent ?? 0 }}%;">
                                     </div>
                                 </div>
                                 <p class="text-[10px] mt-1" id="bannerDaysLeft">
@@ -265,7 +265,7 @@
                             </div>
 
                             <button type="button" id="manageActivePeriodBtn"
-                                onclick='@if ($activePeriodPayload) openEditModal(@json($activePeriodPayload)) @endif'
+                                data-ui-click="action-7147962c1ff8" data-ui-click-arg-0="{{ json_encode((bool) ($activePeriodPayload)) }}" data-ui-click-arg-1="{{ json_encode($activePeriodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                 class="ui-btn ui-btn-primary ">
                                 <i class="fa-solid fa-gear"></i>
                                 <span>Manage Period</span>
@@ -309,7 +309,7 @@
                                         value="{{ request('status') }}">
 
                                     <button id="filterBtn" type="button" class="global-filter-btn"
-                                        onclick="openAcademicFilterModal()">
+                                        data-ui-click="action-33d0a78d8e7b">
                                         <i class="fa-solid fa-sliders"></i>
                                         <span>Filter</span>
                                         <span id="filterBadge" class="filter-badge"></span>
@@ -318,7 +318,7 @@
                                     <x-view-toggle id="academicViewToggle" storage-key="academicView"
                                         list-view="#academicListView" grid-view="#academicGridView" />
 
-                                    <button id="externalClearFilterBtn" type="button" onclick="resetAcademicFilters()"
+                                    <button id="externalClearFilterBtn" type="button" data-ui-click="action-72beedf02378"
                                         class="global-filter-reset-btn hidden" title="Reset filters">
                                         <i class="fa-solid fa-rotate-left"></i>
                                     </button>
@@ -445,7 +445,7 @@
                                                         <div class="ui-action-group">
                                                             <button type="button" class="ui-action-btn ui-action-edit"
                                                                 data-tooltip="Edit period" aria-label="Edit period"
-                                                                onclick='openEditModal(@json($periodPayload))'>
+                                                                data-ui-click="action-e63476c3cb8d" data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                 <i class="fa-solid fa-pen"></i>
                                                             </button>
 
@@ -460,10 +460,7 @@
                                                                         class="ui-action-btn ui-action-success"
                                                                         data-tooltip="Set as active"
                                                                         aria-label="Set as active"
-                                                                        onclick="openSetActiveModal(
-                                                                            @js(route($routeNames['set_active'], $period)),
-                                                                            @js($label)
-                                                                        )">
+                                                                        data-ui-click="action-03a9835a5e25" data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                         <i class="fa-solid fa-circle-check"></i>
                                                                     </button>
                                                                 </form>
@@ -480,7 +477,7 @@
                                                                 data-tooltip="Delete period" aria-label="Delete period"
                                                                 data-delete-url="{{ route($routeNames['destroy'], $period) }}"
                                                                 data-delete-label="{{ $label }}"
-                                                                onclick="openDeleteModalFromButton(this)">
+                                                                data-ui-click="action-df6b78ee9bc8">
                                                                 <i class="fa-solid fa-trash"></i>
                                                             </button>
                                                         </div>
@@ -619,7 +616,7 @@
                                                     <div class="ui-action-group">
                                                         <button type="button" class="ui-action-btn ui-action-edit"
                                                             data-tooltip="Edit period" aria-label="Edit period"
-                                                            onclick='openEditModal(@json($periodPayload))'>
+                                                            data-ui-click="action-e63476c3cb8d" data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                             <i class="fa-solid fa-pen"></i>
                                                         </button>
 
@@ -634,10 +631,7 @@
                                                                     class="ui-action-btn ui-action-success"
                                                                     data-tooltip="Set as active"
                                                                     aria-label="Set as active"
-                                                                    onclick="openSetActiveModal(
-                                                                        @js(route($routeNames['set_active'], $period)),
-                                                                        @js($label)
-                                                                    )">
+                                                                    data-ui-click="action-8c24c81f4fa3" data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                     <i class="fa-solid fa-circle-check"></i>
                                                                 </button>
                                                             </form>
@@ -647,7 +641,7 @@
                                                             data-tooltip="Delete period" aria-label="Delete period"
                                                             data-delete-url="{{ route($routeNames['destroy'], $period) }}"
                                                             data-delete-label="{{ $label }}"
-                                                            onclick="openDeleteModalFromButton(this)">
+                                                            data-ui-click="action-df6b78ee9bc8">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </div>
@@ -785,7 +779,7 @@
                                                 <div class="ui-action-group">
                                                     <button type="button" class="ui-action-btn ui-action-edit"
                                                         data-tooltip="Edit period" aria-label="Edit period"
-                                                        onclick='openEditModal(@json($periodPayload))'>
+                                                        data-ui-click="action-e63476c3cb8d" data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
 
                                                         <i class="fa-solid fa-pen"></i>
                                                     </button>
@@ -797,10 +791,7 @@
                                                             @method('PATCH')
                                                             <button type="button" class="ui-action-btn ui-action-success"
                                                                 data-tooltip="Set as active" aria-label="Set as active"
-                                                                onclick="openSetActiveModal(
-        @js(route($routeNames['set_active'], $period)),
-        @js($period->academic_year . ' — ' . str_replace(['1st', '2nd'], ['First', 'Second'], $period->semester))
-    )">
+                                                                data-ui-click="action-09999bb5940d" data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($period->academic_year . ' — ' . str_replace(['1st', '2nd'], ['First', 'Second'], $period->semester), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
 
                                                                 <i class="fa-solid fa-circle-check"></i>
                                                             </button>
@@ -811,7 +802,7 @@
                                                         data-tooltip="Delete period" aria-label="Delete period"
                                                         data-delete-url="{{ route($routeNames['destroy'], $period) }}"
                                                         data-delete-label="{{ $label }}"
-                                                        onclick="openDeleteModalFromButton(this)">
+                                                        data-ui-click="action-df6b78ee9bc8">
 
                                                         <i class="fa-solid fa-trash"></i>
                                                     </button>
@@ -957,7 +948,7 @@
                                 </button>
 
                                 <button id="openEditPeriodQuickBtn" type="button"
-                                    onclick='@if ($activePeriodPayload) openEditModal(@json($activePeriodPayload)) @endif'
+                                    data-ui-click="action-7147962c1ff8" data-ui-click-arg-0="{{ json_encode((bool) ($activePeriodPayload)) }}" data-ui-click-arg-1="{{ json_encode($activePeriodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                     class="quick-action quick-action-card">
                                     <span class="quick-action-icon">
                                         <i class="fa-solid fa-pen"></i>
@@ -995,8 +986,8 @@
     </main>
 
     <x-filter-drawer id="filterModal" title="Filters" close-id="closeFilterModalBtn"
-        close-callback="closeAcademicFilterModal()" clear-id="clearFiltersModal" clear-label="Clear Filters"
-        cancel-id="cancelFilterBtn" cancel-callback="closeAcademicFilterModal()" cancel-label="Cancel"
+        close-callback="action-770a42e411be" clear-id="clearFiltersModal" clear-label="Clear Filters"
+        cancel-id="cancelFilterBtn" cancel-callback="action-770a42e411be" cancel-label="Cancel"
         apply-id="applyFilters" apply-label="Show {{ $academicPeriods->total() }} results" results-id="showResultsText">
 
         <div id="activeFiltersSection" class="filter-active-section hidden">
@@ -1618,7 +1609,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         window.openSetActiveModal = function(
             action,
             label
@@ -2985,7 +2976,7 @@
         <button
             type="button"
             class="empty-state-btn"
-            onclick="resetAcademicFilters()"
+            data-ui-click="action-72beedf02378"
         >
             <i class="fa-solid fa-xmark"></i>
             Clear filter

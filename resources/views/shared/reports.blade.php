@@ -138,7 +138,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             </div>
 
             <div class="report-hero-actions">
-                <button type="button" class="ui-btn ui-btn-primary" onclick="openCreateReportModal()">
+                <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-132d158d6401">
 
                     <i class="fa-solid fa-plus"></i>
                     Create Report
@@ -189,17 +189,17 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             <div class="card-body">
                 <div class="chart-legend">
                     <span>
-                        <span class="legend-dot" style="background:#378ADD;"></span>
+                        <span class="legend-dot" data-ui-presentation="presentation-e60b4e4d83de"></span>
                         Total patients
                     </span>
 
                     <span>
-                        <span class="legend-dot" style="background:#1D9E75;"></span>
+                        <span class="legend-dot" data-ui-presentation="presentation-dc9ac35f7999"></span>
                         New patients
                     </span>
                 </div>
 
-                <div class="chart-wrap" style="height:260px;">
+                <div class="chart-wrap" data-ui-presentation="presentation-6ee96a7c8fe2">
                     <canvas id="lineChart" role="img" aria-label="Line chart showing patient growth over time">
                     </canvas>
                 </div>
@@ -237,7 +237,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 
                     @foreach ($treatments['breakdown'] as $i => $proc)
                     <span>
-                        <span class="legend-dot" style="background:{{ $tColors[$i] ?? '#9ca3af' }};">
+                        <span class="legend-dot" data-ui-style="background:{{ $tColors[$i] ?? '#9ca3af' }};">
                         </span>
 
                         {{ $proc['name'] }} {{ $proc['pct'] }}%
@@ -245,7 +245,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                     @endforeach
                 </div>
 
-                <div class="chart-wrap" style="height:260px;">
+                <div class="chart-wrap" data-ui-presentation="presentation-6ee96a7c8fe2">
                     <canvas id="pieChart" role="img" aria-label="Doughnut chart of treatment distribution">
                     </canvas>
                 </div>
@@ -280,22 +280,22 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             <div class="card-body">
                 <div class="chart-legend">
                     <span>
-                        <span class="legend-dot" style="background:#1D9E75;"></span>
+                        <span class="legend-dot" data-ui-presentation="presentation-dc9ac35f7999"></span>
                         Completed {{ $appointments['completed'] }}
                     </span>
 
                     <span>
-                        <span class="legend-dot" style="background:#D85A30;"></span>
+                        <span class="legend-dot" data-ui-presentation="presentation-d89b49e27acc"></span>
                         Cancelled {{ $appointments['cancelled'] }}
                     </span>
 
                     <span>
-                        <span class="legend-dot" style="background:#EF9F27;"></span>
+                        <span class="legend-dot" data-ui-presentation="presentation-a4ece070e44f"></span>
                         No-show {{ $appointments['no_show'] }}
                     </span>
                 </div>
 
-                <div class="chart-wrap" style="height:260px;">
+                <div class="chart-wrap" data-ui-presentation="presentation-6ee96a7c8fe2">
                     <canvas id="appointmentStatusChart" role="img"
                         aria-label="Doughnut chart showing appointment status distribution">
                     </canvas>
@@ -342,22 +342,22 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             <div class="card-body">
                 <div class="chart-legend">
                     <span>
-                        <span class="legend-dot" style="background:#EF9F27;"></span>
+                        <span class="legend-dot" data-ui-presentation="presentation-a4ece070e44f"></span>
                         Pending {{ number_format($docPending) }}
                     </span>
 
                     <span>
-                        <span class="legend-dot" style="background:#1D9E75;"></span>
+                        <span class="legend-dot" data-ui-presentation="presentation-dc9ac35f7999"></span>
                         Approved {{ number_format($docApproved) }}
                     </span>
 
                     <span>
-                        <span class="legend-dot" style="background:#D85A30;"></span>
+                        <span class="legend-dot" data-ui-presentation="presentation-d89b49e27acc"></span>
                         Rejected {{ number_format($docRejected) }}
                     </span>
                 </div>
 
-                <div class="chart-wrap" style="height:250px;">
+                <div class="chart-wrap" data-ui-presentation="presentation-40d6de4b5bbc">
                     <canvas id="documentRequestChart" role="img"
                         aria-label="Bar chart showing document request statuses">
                     </canvas>
@@ -661,12 +661,12 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                         <div class="card-body">
                             <div class="chart-legend">
                                 <span>
-                                    <span class="legend-dot" style="background:#378ADD;"></span>
+                                    <span class="legend-dot" data-ui-presentation="presentation-e60b4e4d83de"></span>
                                     Completed procedures
                                 </span>
                             </div>
 
-                            <div class="chart-wrap" style="height:260px;">
+                            <div class="chart-wrap" data-ui-presentation="presentation-6ee96a7c8fe2">
                                 <canvas id="barChart" role="img"
                                     aria-label="Bar chart showing completed treatments per month">
                                 </canvas>
@@ -1260,7 +1260,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                                                     left</span>
                                             </div>
                                             <div class="stock-bar-bg">
-                                                <div class="stock-bar-fill {{ $barClass }}" style="width:{{ $pct }}%">
+                                                <div class="stock-bar-fill {{ $barClass }}" data-ui-style="width:{{ $pct }}%">
                                                 </div>
                                             </div>
                                     </div>
@@ -1281,7 +1281,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                                                 left</span>
                                         </div>
                                         <div class="stock-bar-bg">
-                                            <div class="stock-bar-fill {{ $barClass }}" style="width:{{ $pct }}%">
+                                            <div class="stock-bar-fill {{ $barClass }}" data-ui-style="width:{{ $pct }}%">
                                             </div>
                                         </div>
 
@@ -1377,7 +1377,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 @if ($isAdminView)
 <div id="aiReportConfirmModal" class="ui-modal modal-theme-primary" aria-hidden="true">
     <div class="ui-modal-card modal-md" role="dialog" aria-modal="true" aria-labelledby="aiReportConfirmTitle"
-        onclick="event.stopPropagation()">
+        data-ui-click="action-22499e15f3ee">
 
         <div class="modal-hd">
             <div class="modal-heading">
@@ -1472,7 +1472,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 <div id="createReportModal" class="ui-modal" aria-hidden="true">
 
     <div class="ui-modal-card modal-lg" role="dialog" aria-modal="true" aria-labelledby="createReportTitle"
-        onclick="event.stopPropagation()">
+        data-ui-click="action-22499e15f3ee">
 
         <form id="reportForm" class="modal-card-form" data-global-validation data-form-validation-rule="customReport"
             data-discard-form data-discard-title="Discard custom report?"
@@ -1694,7 +1694,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 <div id="downloadCompleteModal" class="ui-modal modal-theme-success" aria-hidden="true">
 
     <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true" aria-labelledby="downloadCompleteTitle"
-        onclick="event.stopPropagation()">
+        data-ui-click="action-22499e15f3ee">
 
         <div class="modal-hd">
             <div class="modal-heading">
@@ -1713,7 +1713,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                 </div>
             </div>
 
-            <button type="button" class="modal-x" onclick="closeDownloadModal()"
+            <button type="button" class="modal-x" data-ui-click="action-927eb715f561"
                 aria-label="Close download complete modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -1734,7 +1734,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 
         <div class="modal-ft">
             <button type="button" id="downloadCompleteDoneBtn" class="ui-btn ui-btn-success"
-                onclick="closeDownloadModal()">
+                data-ui-click="action-927eb715f561">
                 <i class="fa-solid fa-check"></i>
                 Done
             </button>
@@ -1746,7 +1746,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 
 @section('scripts')
 @if ($isDentistView)
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('cancellationBreakdownModal');
         const month = document.getElementById('cancellationMonth');
@@ -1833,7 +1833,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 @endif
 
 @if ($isAdminView)
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', async function () {
         try {
             await window.loadChartJs();
@@ -2340,7 +2340,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
     });
 </script>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (() => {
         const modal =
             document.getElementById(
@@ -2576,7 +2576,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 @endif
 
 @if ($isDentistView)
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     function initPrintableFormsCarousel() {
         const carousel =
             document.querySelector(
@@ -3011,7 +3011,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
     );
 </script>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     let patientSegmentChartInstance = null;
     let clinicOverviewChartInstance = null;
 
@@ -3514,9 +3514,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             <button
                 type="button"
                 class="ui-btn ui-btn-primary ui-btn-sm"
-                onclick="window.location.assign(
-                    '{{ route('dentist.dentist.inventory') }}'
-                )"
+                data-ui-click="action-4e1de46b4c89" data-ui-click-arg-0="{{ route('dentist.dentist.inventory') }}"
             >
                 <i class="fa-solid fa-plus"></i>
                 Add Item
@@ -3551,9 +3549,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             <button
                 type="button"
                 class="ui-btn ui-btn-primary ui-btn-sm"
-                onclick="window.location.assign(
-                    '{{ route('dentist.dentist.inventory') }}'
-                )"
+                data-ui-click="action-4e1de46b4c89" data-ui-click-arg-0="{{ route('dentist.dentist.inventory') }}"
             >
                 <i class="fa-solid fa-plus"></i>
                 Add Medicine
@@ -3581,9 +3577,7 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             <button
                 type="button"
                 class="ui-btn ui-btn-primary ui-btn-sm"
-                onclick="window.location.assign(
-                    '{{ route('dentist.dentist.inventory') }}'
-                )"
+                data-ui-click="action-4e1de46b4c89" data-ui-click-arg-0="{{ route('dentist.dentist.inventory') }}"
             >
                 <i class="fa-solid fa-plus"></i>
                 Add Supply

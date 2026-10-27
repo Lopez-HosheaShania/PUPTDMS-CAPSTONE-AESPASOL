@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="dentist-hero-actions">
-                    <button type="button" class="ui-btn ui-btn-primary" onclick="openDailyCreateReportModal()">
+                    <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-dd409da78ef1">
                         <i class="fa-solid fa-plus"></i>
                         <span>Create Report</span>
                     </button>
@@ -66,14 +66,14 @@
 
                         <div class="dtr-filter-actions">
                             <button id="openFilter" type="button" class="global-filter-btn" aria-pressed="false"
-                                onclick="openDailyFilterPanel()">
+                                data-ui-click="action-9203578feefb">
                                 <i class="fa-solid fa-sliders"></i>
                                 <span>Filter</span>
                                 <span id="filterBadge" class="filter-badge"></span>
                             </button>
 
                             <button id="externalClearFilterBtn" type="button" class="global-filter-reset-btn hidden"
-                                title="Reset filters" aria-label="Reset filters" onclick="clearDailyFilters()">
+                                title="Reset filters" aria-label="Reset filters" data-ui-click="action-5c1f2fa75efb">
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>
                         </div>
@@ -117,9 +117,9 @@
     </main>
 
     <x-filter-drawer id="filterModal" title="Filter Records" close-id="dailyCloseFilterBtn"
-        close-callback="closeDailyFilterPanel()" clear-id="filterResetBtn" clear-callback="clearDailyFilterPanelDraft()"
-        clear-label="Clear Filters" cancel-id="filterCloseBtn" cancel-callback="closeDailyFilterPanel()"
-        cancel-label="Cancel" apply-id="filterApplyBtn" apply-callback="applyDailyFilters()" apply-label="Show Results"
+        close-callback="action-03ef2b7a6a82" clear-id="filterResetBtn" clear-callback="action-cb96a9d9ae02"
+        clear-label="Clear Filters" cancel-id="filterCloseBtn" cancel-callback="action-03ef2b7a6a82"
+        cancel-label="Cancel" apply-id="filterApplyBtn" apply-callback="action-085002056d44" apply-label="Show Results"
         results-id="dailyShowResultsText">
 
         <div id="dailyActiveFiltersSection" class="filter-active-section hidden">
@@ -129,7 +129,7 @@
                 </span>
 
                 <button id="dailyClearAllChipsBtn" type="button" class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm"
-                    onclick="clearDailyFilterPanelDraft()">
+                    data-ui-click="action-cb96a9d9ae02">
                     <i class="fa-solid fa-rotate-left"></i>
                     <span>Clear All</span>
                 </button>
@@ -413,7 +413,7 @@
         </div>
     </div>
 
-    <div id="downloadCompleteModal" class="ui-modal" onclick="closeModalOnBackdrop(event, 'downloadCompleteModal')">
+    <div id="downloadCompleteModal" class="ui-modal" data-ui-click="action-a9193769e801">
         <div class="ui-modal-card modal-box p-0 rounded-2xl overflow-hidden bg-white shadow-2xl max-w-sm">
             <div class="h-1.5 bg-gradient-to-r from-[#8B0000] to-[#FFD700] w-full"></div>
             <div class="px-8 py-10 text-center">
@@ -425,7 +425,7 @@
                 <p class="text-gray-500 text-sm leading-relaxed mb-7">Your report has been successfully generated and
                     downloaded.
                 </p>
-                <button type="button" onclick="closeDownloadModal()"
+                <button type="button" data-ui-click="action-927eb715f561"
                     class="px-8 py-2.5 rounded-xl bg-[#8B0000] hover:bg-[#6b0000] text-white font-bold text-sm shadow-sm transition-all w-full">Done</button>
             </div>
         </div>
@@ -433,7 +433,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const DTR_LIST_URL = "{{ route('dentist.dentist.reports.daily-treatment-record.list') }}";
         const DTR_STORE_URL = "{{ route('dentist.dentist.reports.daily-treatment-record.store') }}";
         const DTR_DOWNLOAD_URL = "{{ route('dentist.dentist.report.daily-treatment-record-download') }}";
@@ -672,7 +672,7 @@
                 <button
                     type="button"
                     class="empty-state-btn"
-                    onclick="clearDailyFilters()"
+                    data-ui-click="action-5c1f2fa75efb"
                 >
                     <i class="fa-solid fa-rotate-left"></i>
                     Clear filters
@@ -944,7 +944,7 @@
       <span class="filter-chip">
         <span>${escapeDtrHtml(chip.label)}</span>
 
-        <button type="button" class="filter-chip-remove" onclick="removeDailyDraftChip('${chip.key}')"
+        <button type="button" class="filter-chip-remove" data-ui-click="action-61e482642188" data-ui-click-arg-0="${window.uiAttribute(chip.key)}"
             aria-label="Remove ${escapeDtrHtml(chip.label)} filter">
 
             <i class="fa-solid fa-xmark"></i>

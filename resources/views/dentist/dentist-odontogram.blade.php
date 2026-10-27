@@ -1114,7 +1114,7 @@
             'renderStyle' => 'dentist',
         ])
     @endunless
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
             const cancelProcedureBtn = document.getElementById('cancelProcedureBtn');
             const diagnosisSelect = document.getElementById('diagnosisNotes');
@@ -1259,6 +1259,10 @@
                     label: 'Decayed (Caries indicated for Filling)'
                 },
                 {
+                    code: 'RC',
+                    label: 'Recurrent Caries'
+                },
+                {
                     code: 'M',
                     label: 'Missing due to Caries'
                 },
@@ -1309,6 +1313,10 @@
                     label: 'Light Cure Composite'
                 },
                 {
+                    code: 'TP',
+                    label: 'Temporary Pasta'
+                },
+                {
                     code: 'RM',
                     displayCode: 'Rm',
                     label: 'Removable Denture'
@@ -1339,6 +1347,7 @@
 
             const legendColors = {
                 D: '#ef4444',
+                RC: '#ef4444',
                 M: '#111827',
                 F: '#2563eb',
                 I: '#ef4444',
@@ -1351,6 +1360,7 @@
                 P: '#2563eb',
                 IN: '#2563eb',
                 LC: '#2563eb',
+                TP: '#2563eb',
                 RM: '#2563eb',
                 X: '#2563eb',
                 XO: '#2563eb',
@@ -1361,6 +1371,7 @@
 
             const legendIcons = {
                 D: 'fa-solid fa-bug',
+                RC: 'fa-solid fa-bug',
                 M: 'fa-solid fa-ban',
                 F: 'fa-solid fa-square-check',
                 I: 'fa-solid fa-syringe',
@@ -1373,6 +1384,7 @@
                 P: 'fa-solid fa-link',
                 IN: 'fa-solid fa-puzzle-piece',
                 LC: 'fa-solid fa-wand-magic-sparkles',
+                TP: 'fa-solid fa-clock',
                 RM: 'fa-solid fa-teeth',
                 X: 'fa-solid fa-xmark',
                 XO: 'fa-solid fa-skull-crossbones',
@@ -1385,13 +1397,13 @@
                     key: 'conditions',
                     title: 'Conditions',
                     icon: 'fa-solid fa-heart-pulse',
-                    items: ['D', 'M', 'F', 'I', 'RF', 'MO', 'IM']
+                    items: ['D', 'RC', 'M', 'F', 'I', 'RF', 'MO', 'IM']
                 },
                 {
                     key: 'restoration-prosthetics',
                     title: 'Restorations & Prosthetics',
                     icon: 'fa-solid fa-screwdriver-wrench',
-                    items: ['J', 'A', 'AB', 'P', 'IN', 'LC', 'RM']
+                    items: ['J', 'A', 'AB', 'P', 'IN', 'LC', 'TP', 'RM']
                 },
                 {
                     key: 'surgery',
@@ -2702,7 +2714,7 @@
                     <span class="odontogram-preview-marking">
                         <span
                             class="odontogram-preview-marking-swatch"
-                            style="background:${legendColors[legend.code]};"
+                            data-ui-style="background:${window.uiAttribute(legendColors[legend.code])};"
                         ></span>
                         <span>
                             ${getLegendDisplayCode(legend.code)} - ${legend.label}
@@ -2725,7 +2737,7 @@
         <span class="odontogram-preview-marking">
             <span
                 class="odontogram-preview-marking-swatch"
-                style="background:${selectedRecord.colorHex};"
+                data-ui-style="background:${window.uiAttribute(selectedRecord.colorHex)};"
             ></span>
 
             <span>
@@ -2929,7 +2941,7 @@
                             `${legend.displayCode || legend.code} - ${legend.label}`;
 
                         btn.innerHTML = `
-                            <span class="legend-color-dot" style="background:${legendColors[legend.code]};"></span>
+                            <span class="legend-color-dot" data-ui-style="background:${window.uiAttribute(legendColors[legend.code])};"></span>
                             <i class="${legendIcons[legend.code]}"></i>
                             <span class="legend-meta">
                                 <span class="legend-code">${legend.displayCode || legend.code}</span>

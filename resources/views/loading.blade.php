@@ -2,12 +2,13 @@
 
 <html lang="en">
 <head>
+    @include('partials.security-bootstrap')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting to Dental System...</title>
 
 ```
-<style>
+<style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -67,7 +68,7 @@
 <div class="title">PUP Dental Management System</div>
 <div class="loading-text">Redirecting...</div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     setTimeout(function () {
         window.location.href = "{{ $redirectUrl }}";
     }, 1500);

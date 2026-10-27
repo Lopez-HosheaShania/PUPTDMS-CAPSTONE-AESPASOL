@@ -38,7 +38,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
 
                 <div class="page-banner-actions">
                     @if ($canCreateRoles)
-                    <button type="button" class="ui-btn ui-btn-primary" onclick="openNewRoleModal()">
+                    <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-39518fccd42a">
                         <i class="fa-solid fa-plus"></i>
                         <span>New Role</span>
                     </button>
@@ -111,13 +111,10 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                     <div class="card role-card {{ $isFirst ? 'active' : '' }}" data-role-id="{{ $role->id }}"
                         data-role-name="{{ $role->display_name }}" data-granted="{{ $granted }}"
                         data-total="{{ $totalPerms }}" data-pct="{{ $pct }}" data-slug="{{ $role->slug }}"
-                        data-is-super="{{ $isSuperRole ? '1' : '0' }}" onclick="selectRole(this)">
+                        data-is-super="{{ $isSuperRole ? '1' : '0' }}" data-ui-click="action-eee17b73e521">
 
                         @if (!$isProtectedRole && $canDeleteCustomRoles)
-                        <button type="button" class="ui-action-btn ui-action-delete role-delete-action" onclick="event.stopPropagation(); openDeleteModal(
-        '{{ $role->id }}',
-        @js($role->name)
-    )" data-tooltip="Delete role" data-tooltip-tone="delete" aria-label="Delete role">
+                        <button type="button" class="ui-action-btn ui-action-delete role-delete-action" data-ui-click="action-4befe37bff71" data-ui-click-arg-0="{{ $role->id }}" data-ui-click-arg-1="{{ json_encode($role->name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-tooltip="Delete role" data-tooltip-tone="delete" aria-label="Delete role">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                         @endif
@@ -131,8 +128,8 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                                         {{ $role->display_name }}
                                     </span>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:6px;">
-                                    <span class="badge-pill" style="
+                                <div data-ui-presentation="presentation-eb7a770b988a">
+                                    <span class="badge-pill" data-ui-style="
         background: {{ $c['badgeColor'] }}15;
         color: {{ $c['badgeColor'] }};
     ">
@@ -142,7 +139,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                             </div>
                         </div>
 
-                        <div style="margin-top:12px;">
+                        <div data-ui-presentation="presentation-b6d781cbbc10">
                             <div class="role-access-meta">
                                 <span>Access</span>
 
@@ -151,7 +148,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                                 </span>
                             </div>
                             <div class="progress-bar role-access-progress">
-                                <div class="progress-fill" style="width: {{ $pct }}%;"></div>
+                                <div class="progress-fill" data-ui-style="width: {{ $pct }}%;"></div>
                             </div>
                             <div class="count-label">
                                 {{ $granted }} / {{ $totalPerms }} permissions
@@ -172,15 +169,15 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                     : 0)
                     : 0;
                     @endphp
-                    <div style="font-size:15px; font-weight:800; margin-bottom:4px;" id="accentRoleName">
+                    <div data-ui-presentation="presentation-ce0a19731674" id="accentRoleName">
                         {{ $fr?->display_name ?? '' }}</div>
-                    <div style="font-size:32px; font-weight:900; margin-bottom:2px; line-height:1;" id="accentPct">
+                    <div data-ui-presentation="presentation-c633d1bd1c0e" id="accentPct">
                         {{ $fp }}%</div>
-                    <div style="font-size:11px; opacity:0.8; margin-bottom:14px;" id="accentCount">
+                    <div data-ui-presentation="presentation-a2a16eabb7d3" id="accentCount">
                         {{ $fr?->permissions->count() ?? 0 }} of {{ $totalPerms }} active</div>
-                    <div style="height:4px; background:rgba(255,255,255,0.2); border-radius:10px;">
+                    <div data-ui-presentation="presentation-547b9ec6e206">
                         <div id="accentBar"
-                            style="height:100%; width:{{ $fp }}%; background:#fff; border-radius:10px; transition:width 0.4s;">
+                            data-ui-style="height:100%; width:{{ $fp }}%; background:#fff; border-radius:10px; transition:width 0.4s;">
                         </div>
                     </div>
                 </div>
@@ -209,7 +206,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
 
                                 @if ($canViewAsRole)
                                 <button type="button" class="ui-action-btn ui-action-view role-view-as-action"
-                                    id="globalViewAsBtn" onclick="openViewAs()" data-tooltip="View as role"
+                                    id="globalViewAsBtn" data-ui-click="action-e9aac4adc59f" data-tooltip="View as role"
                                     data-tooltip-tone="view" aria-label="View as role">
                                     <i class="fa-solid fa-eye"></i>
 
@@ -220,13 +217,13 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                                 @endif
 
                                 <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm" id="collapseBtn"
-                                    onclick="toggleAllGroups()">
+                                    data-ui-click="action-b1ec55a9368e">
                                     <i class="fa-solid fa-angles-up"></i>
                                     <span>Collapse All</span>
                                 </button>
 
                                 <button type="button" class="ui-btn ui-btn-warning ui-btn-sm" id="resetDefaultsBtn"
-                                    onclick="ajaxResetDefaults()">
+                                    data-ui-click="action-93a40e63c926">
                                     <i class="fa-solid fa-rotate-left"></i>
                                     <span>Reset Defaults</span>
                                 </button>
@@ -240,11 +237,11 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                 </div>
 
                 <div class="role-permission-content">
-                    <div class="protected-banner" id="protectedBanner" style="display:none;">
-                        <i class="fa-solid fa-shield-halved" style="font-size:24px; color:#d97706;"></i>
+                    <div class="protected-banner" id="protectedBanner" data-ui-presentation="presentation-d0466aa33fa8">
+                        <i class="fa-solid fa-shield-halved" data-ui-presentation="presentation-92d1add5cab5"></i>
                         <div>
-                            <div style="font-weight:800; font-size:13px; color:#92400e;">Protected Role</div>
-                            <div style="font-size:12px; color:#b45309;">System roles stay protected from deletion, but
+                            <div data-ui-presentation="presentation-af8a65c98908">Protected Role</div>
+                            <div data-ui-presentation="presentation-edf375e4ab95">System roles stay protected from deletion, but
                                 permissions remain explicitly defined.</div>
                         </div>
                     </div>
@@ -275,7 +272,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                         data-discard-form data-discard-title="Discard permission changes?"
                         data-discard-subtitle="You have unsaved changes for this role."
                         data-discard-message="The permission changes for this role will be restored to their last saved state."
-                        style="display:{{ $isActiveRole ? 'block' : 'none' }}; height: 100%;">
+                        data-ui-style="display:{{ $isActiveRole ? 'block' : 'none' }}; height: 100%;">
                         @csrf
                         <input type="hidden" name="role_id" value="{{ $role->id }}">
 
@@ -296,11 +293,11 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
 
                             <div class="table-card permission-module-card" data-group="{{ strtolower($module) }}">
 
-                                <div class="table-toolbar perm-group-header perm-group" onclick="togglePermGroup(this)">
+                                <div class="table-toolbar perm-group-header perm-group" data-ui-click="action-47ae060a446f">
 
                                     <div class="table-toolbar-title">
 
-                                        <div class="perm-group-icon" style="--module-color: {{ $icol }};">
+                                        <div class="perm-group-icon" data-ui-style="--module-color: {{ $icol }};">
                                             <i class="fa-solid {{ $ico }}"></i>
                                         </div>
 
@@ -324,12 +321,12 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                                         <div class="dot-row" id="dots-{{ $role->id }}-{{ $mSlug }}">
                                             @for ($d = 0; $d < $mTotal; $d++) <div
                                                 class="dot {{ $d < $roleGranted ? 'is-granted' : '' }}"
-                                                style="--dot-color: {{ $icol }};">
+                                                data-ui-style="--dot-color: {{ $icol }};">
                                         </div>
                                         @endfor
                                     </div>
 
-                                    <div class="all-toggle-wrap" onclick="event.stopPropagation();">
+                                    <div class="all-toggle-wrap" data-ui-click="action-2b6cb68857e5">
                                         <span>All</span>
 
                                         <label class="global-switch">
@@ -337,7 +334,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                                                 data-role="{{ $role->id }}" data-module="{{ $mSlug }}"
                                                 data-discard-ignore="true" {{ $allOn ? 'checked' : '' }} {{ $isSuperRole
                                                 || !$canUpdateRolePermissions ? 'disabled' : '' }}
-                                                onchange="onGroupMasterChange(this)">
+                                                data-ui-change="action-76cbb6258bf9">
 
                                             <span class="global-switch-track"></span>
                                         </label>
@@ -413,7 +410,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                                                             data-perm-slug="{{ $permission->slug }}" {{ $isGranted
                                                             ? 'checked' : '' }} {{ $isSuperRole ||
                                                             !$canUpdateRolePermissions ? 'disabled' : '' }}
-                                                            onchange="onPermChange(this)">
+                                                            data-ui-change="action-f71c950e5fcd">
 
                                                         <span class="global-switch-track"></span>
 
@@ -450,7 +447,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
 
                     <div class="fsb-actions">
                         @if ($canViewAsRole)
-                        <button type="button" class="ui-action-btn ui-action-view fsb-view-as" onclick="openViewAs()"
+                        <button type="button" class="ui-action-btn ui-action-view fsb-view-as" data-ui-click="action-e9aac4adc59f"
                             data-tooltip="View as role" data-tooltip-tone="view" aria-label="View as role">
                             <i class="fa-solid fa-eye"></i>
 
@@ -461,12 +458,12 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                         @endif
 
                         <button type="button" class="ui-btn ui-btn-secondary btn-discard"
-                            onclick="requestDiscardRoleChanges('{{ $role->id }}')">
+                            data-ui-click="action-01fe488d50f6" data-ui-click-arg-0="{{ $role->id }}">
                             Discard
                         </button>
 
                         <button type="button" class="ui-btn ui-btn-primary btn-save-float" id="save-btn-{{ $role->id }}"
-                            onclick="ajaxSaveRole('{{ $role->id }}')">
+                            data-ui-click="action-e15c3c78bc8e" data-ui-click-arg-0="{{ $role->id }}">
                             <i class="fa-solid fa-floppy-disk"></i>
                             <span>Save</span>
                         </button>
@@ -574,12 +571,12 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
 @if ($canDeleteCustomRoles)
 <x-delete-confirm-modal id="deleteRoleModal" form-id="deleteRoleForm" name-id="deleteRoleName" title="Delete Role"
     subtitle="This action requires confirmation" message="Are you sure you want to delete"
-    helper="This role will be permanently removed." close-callback="closeDeleteModal()" />
+    helper="This role will be permanently removed." close-callback="action-6acb9f0eb412" />
 @endif
 
 <div id="resetConfirmModal" class="ui-modal modal-theme-warning" aria-hidden="true">
     <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle"
-        onclick="event.stopPropagation()">
+        data-ui-click="action-22499e15f3ee">
         <div class="modal-hd">
 
             <div class="modal-heading">
@@ -627,11 +624,11 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
 
         <div class="modal-ft">
 
-            <button type="button" onclick="closeResetConfirm()" class="ui-btn ui-btn-secondary">
+            <button type="button" data-ui-click="action-394b0354d213" class="ui-btn ui-btn-secondary">
                 Cancel
             </button>
 
-            <button type="button" id="resetConfirmBtn" onclick="confirmResetDefaults()" class="ui-btn ui-btn-warning">
+            <button type="button" id="resetConfirmBtn" data-ui-click="action-3fbd142ad2bd" class="ui-btn ui-btn-warning">
                 <i class="fa-solid fa-rotate-left"></i>
                 <span>Yes, Reset</span>
             </button>
@@ -657,28 +654,28 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                 </div>
             </div>
 
-            <button type="button" onclick="closeViewAs()" class="modal-x" aria-label="Close role preview modal">
+            <button type="button" data-ui-click="action-8a5c973b9806" class="modal-x" aria-label="Close role preview modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
         <div class="modal-bd">
             <div
-                style="background: linear-gradient(135deg, var(--crimson), var(--crimson-dark)); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 16px; color: #fff;">
-                <i class="fa-solid fa-shield-halved" style="font-size: 20px; opacity: .8;"></i>
+                data-ui-presentation="presentation-b82067b51cef">
+                <i class="fa-solid fa-shield-halved" data-ui-presentation="presentation-d695b66e4b16"></i>
                 <div>
                     <div
-                        style="font-size:11px; opacity:.8; margin-bottom:2px; text-transform:uppercase; font-weight:700;">
+                        data-ui-presentation="presentation-e49f4a7d996c">
                         Newly granted & saved</div>
-                    <div><strong style="font-size:20px;" id="vaTotalPerms">0</strong> permissions across <strong
-                            style="font-size:20px;" id="vaTotalRoles">0</strong> roles</div>
+                    <div><strong data-ui-presentation="presentation-bf9d57d795a3" id="vaTotalPerms">0</strong> permissions across <strong
+                            data-ui-presentation="presentation-bf9d57d795a3" id="vaTotalRoles">0</strong> roles</div>
                 </div>
             </div>
             <div id="vaRoleList"></div>
         </div>
 
         <div class="modal-ft">
-            <button type="button" onclick="closeViewAs()" class="ui-btn ui-btn-secondary">
+            <button type="button" data-ui-click="action-8a5c973b9806" class="ui-btn ui-btn-secondary">
                 Close
             </button>
         </div>
@@ -705,7 +702,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                 </div>
             </div>
 
-            <button type="button" onclick="closePatientPicker()" class="modal-x"
+            <button type="button" data-ui-click="action-d74329a746f8" class="modal-x"
                 aria-label="Close patient picker modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -723,7 +720,7 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
         </div>
 
         <div class="modal-ft">
-            <button type="button" onclick="closePatientPicker()" class="ui-btn ui-btn-secondary">
+            <button type="button" data-ui-click="action-d74329a746f8" class="ui-btn ui-btn-secondary">
                 Close
             </button>
         </div>
@@ -732,14 +729,14 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
 
 <div class="redirect-overlay" id="redirectOverlay">
     <div class="redirect-spinner"></div>
-    <div id="redirectText" style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:6px;"></div>
-    <div id="redirectSub" style="font-size:.85rem;color:rgba(255,255,255,.7);"></div>
+    <div id="redirectText" data-ui-presentation="presentation-528bc4dca1f0"></div>
+    <div id="redirectSub" data-ui-presentation="presentation-5c01c905323a"></div>
 </div>
 
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     const PERM_MODULES = [{
         module: 'Dashboard',
         color: '#8B0000'
@@ -2463,18 +2460,18 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                 .toLowerCase().includes('super');
 
             const tags = checkedPerms.map(p =>
-                `<span style="font-size:10px; font-weight:700; color:${p.color}; background:${p.color}15; padding:2px 8px; border-radius:12px;">${p.name}</span>`
+                `<span data-ui-style="font-size:10px; font-weight:700; color:${window.uiAttribute(p.color)}; background:${window.uiAttribute(p.color)}15; padding:2px 8px; border-radius:12px;">${p.name}</span>`
             ).join('');
             const goBtn = !isSuperAdmin ?
                 `<button class="va-go-btn va-redirect-btn" data-role-id="${roleId}" data-role-name="${roleName}" data-role-slug="${roleSlug}" data-color="${color}">Go to Dashboard <i class="fa-solid fa-arrow-right"></i></button>` :
                 '';
 
             list.innerHTML += `
-            <div class="va-role-row ${!isSuperAdmin ? 'va-redirect-btn' : ''}" data-role-id="${roleId}" data-role-name="${roleName}" data-role-slug="${roleSlug}" data-color="${color}" style="${isSuperAdmin ? 'cursor:default;' : ''}">
-                <div style="width:40px; height:40px; border-radius:10px; background:${color}; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;">${initials}</div>
-                <div style="flex:1;">
-                    <div style="font-size:13px; font-weight:800; color:#111827; margin-bottom:2px;">${roleName}</div>
-                    <div style="display:flex; flex-wrap:wrap; gap:5px;">${tags}</div>
+            <div class="va-role-row ${!isSuperAdmin ? 'va-redirect-btn' : ''}" data-role-id="${roleId}" data-role-name="${roleName}" data-role-slug="${roleSlug}" data-color="${color}" data-ui-style="${window.uiAttribute(isSuperAdmin ? 'cursor:default;' : '')}">
+                <div data-ui-style="width:40px; height:40px; border-radius:10px; background:${window.uiAttribute(color)}; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;">${initials}</div>
+                <div data-ui-presentation="presentation-6253876a649a">
+                    <div data-ui-presentation="presentation-893ad62d3536">${roleName}</div>
+                    <div data-ui-presentation="presentation-9cbaa781f2c4">${tags}</div>
                 </div>
                 ${goBtn}
             </div>`;
@@ -2617,11 +2614,11 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
         list.innerHTML = patients.map(p => {
             const n = (p.name || 'Patient').replace(/'/g, "\\'");
             const i = (p.name || 'P').charAt(0).toUpperCase();
-            return `<div class="va-role-row" onclick="startPatientImpersonation('patient','patient','#059669',${p.id},'${n}')">
-            <div style="width:40px; height:40px; border-radius:10px; background:#059669; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;">${i}</div>
-            <div style="flex:1;">
-                <div style="font-size:13px; font-weight:800; color:#111827;">${escapeHtml(p.name || 'Unnamed')}</div>
-                <div style="font-size:11px; color:#6b7280;">${escapeHtml(p.email || '')} | ID: ${p.id}</div>
+            return `<div class="va-role-row" data-ui-click="action-12b6df6f3044" data-ui-click-arg-0="${window.uiAttribute(p.id)}" data-ui-click-arg-1="${window.uiAttribute(n)}">
+            <div data-ui-presentation="presentation-a5ed3463ae30">${i}</div>
+            <div data-ui-presentation="presentation-6253876a649a">
+                <div data-ui-presentation="presentation-6d0e665a80a2">${escapeHtml(p.name || 'Unnamed')}</div>
+                <div data-ui-presentation="presentation-1deab25c2d59">${escapeHtml(p.email || '')} | ID: ${p.id}</div>
             </div>
             <button class="va-go-btn">Impersonate <i class="fa-solid fa-arrow-right"></i></button>
         </div>`;

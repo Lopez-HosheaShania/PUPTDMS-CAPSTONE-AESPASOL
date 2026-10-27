@@ -11,6 +11,9 @@
 @section('content')
 
     @php
+        // Consume the confirmation only when this dashboard is rendered.
+        $appointmentConfirmation = session()->pull('appointment_confirmation');
+        $appointmentDraftCompleted = (bool) session()->pull('appointment_draft_completed', false);
         $notifications = collect($notifications ?? []);
         $notifCount = $notifications->count();
         $odontogramSnapshotService = app(\App\Services\AppointmentOdontogramSnapshotService::class);
@@ -70,6 +73,8 @@
                     'diagnosis' => $r->procedure?->diagnosis ?? '',
                     'prescription' => $r->procedure?->prescriptions ?? '',
                     'odontogram' => $r->procedure?->odontogram_data ?? [],
+                    'edit_locked' => strtolower($r->status ?? '') === 'completed' && $r->isOdontogramEditLocked(),
+                    'edit_deadline' => $r->odontogramEditDeadline()?->toIso8601String(),
 
                     'previous_odontogram' => $previousOdontogramByAppointment[$r->id] ?? [],
 
@@ -259,17 +264,7 @@
 
                         <div class="greeting-banner-actions">
                             <a href="{{ route('patient.book.appointment') }}" class="ui-btn ui-btn-primary ui-btn-shimmer"
-                                onclick="
-                                if (
-                                    window.UPCOMING_DATA?.exists &&
-                                    ['upcoming', 'rescheduled'].includes(
-                                        String(window.UPCOMING_DATA.status || '').toLowerCase()
-                                    )
-                                ) {
-                                    event.preventDefault();
-                                    window.openModal?.('activeAppointmentModal');
-                                }
-                            ">
+                                data-ui-click="action-fa43d7668e58">
                                 <i class="fa-solid fa-calendar-plus"></i>
                                 <span>Book Appointment</span>
                             </a>
@@ -573,11 +568,7 @@
 
         </div>
     </template>
-    @if (session('appointment_confirmation'))
-        @php
-            $appointmentConfirmation = session('appointment_confirmation');
-        @endphp
-
+    @if ($appointmentConfirmation)
         <x-booking.confirmed-modal id="appointmentConfirmedModal" eyebrow="Appointment Booking"
             title="Appointment Confirmed" subtitle="Your appointment has been successfully scheduled."
             header-icon="fa-check" section-icon="fa-calendar-check" section-eyebrow="Booking Status"
@@ -679,11 +670,11 @@
 
             <div class="modal-ft">
 
-                <button type="button" class="btn-close-modal" onclick="closePrivateInformationModal()">
+                <button type="button" class="btn-close-modal" data-ui-click="action-a2822b6ec471">
                     Cancel
                 </button>
 
-                <button type="button" class="modal-btn-primary" onclick="confirmShowPrivateInformation()">
+                <button type="button" class="modal-btn-primary" data-ui-click="action-573f9113de2d">
                     <i class="fa-regular fa-eye" aria-hidden="true"></i>
 
                     <span>Show Information</span>
@@ -731,14 +722,14 @@
 @endsection
 
 @section('scripts')
-    <script>
-        @if (session('appointment_draft_completed'))
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+        @if ($appointmentDraftCompleted)
             localStorage.removeItem(
                 "appointmentDraft:v1"
             );
         @endif
 
-        @if (session('appointment_confirmation'))
+        @if ($appointmentConfirmation)
             document.addEventListener(
                 'DOMContentLoaded',
                 () => {
@@ -1398,7 +1389,7 @@
                 '</div>' +
 
                 '<button type="button" ' +
-                'onclick="scrollToCalendar(event)" ' +
+                'data-ui-click="action-1e919ba532ca" ' +
                 'class="ui-btn {{ collect($reservedBookingReminders ?? [])->isNotEmpty() ? 'ui-btn-secondary' : 'ui-btn-primary' }}">' +
 
                 '<i class="fa-solid fa-calendar-days"></i>' +
@@ -1470,7 +1461,7 @@
             var globalToggle =
                 '<button type="button" ' +
                 'id="dashboardProfilePrivacyToggle" ' +
-                'onclick="handlePrivateInformationToggle(this)" ' +
+                'data-ui-click="action-d64bd6053e99" ' +
                 'class="ui-icon-btn neutral patient-privacy-toggle" ' +
                 'data-masked="true" ' +
                 'data-tooltip="Show private information" ' +
@@ -1677,9 +1668,7 @@
                 '</div>' +
 
                 '<div class="patient-profile-progress">' +
-                '<span style="width:' +
-                Math.max(0, Math.min(100, Number(PROFILE_COMPLETION) || 0)) +
-                '%"></span>' +
+                '<span data-ui-style="width:' + Math.max(0, Math.min(100, Number(PROFILE_COMPLETION) || 0)) + '%"></span>' +
                 '</div>' +
 
                 '<p class="patient-profile-section-note">' +

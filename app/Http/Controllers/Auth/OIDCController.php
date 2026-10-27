@@ -80,19 +80,17 @@ class OIDCController extends Controller
             $fullUrl = $authorizeUrl . '?' . $query;
         }
 
-        Log::info('OIDC redirect URL', ['url' => $fullUrl]);
+        Log::info('OIDC sign-in redirect started');
 
         return redirect()->away($fullUrl);
     }
 
     public function callback(Request $request)
     {
-        Log::info('OIDC Callback Debug', [
-            'incoming_state' => $request->get('state'),
-            'session_state'  => session('oidc_state'),
-            'session_id'     => session()->getId(),
-            'full_url'       => $request->fullUrl(),
-            'all_params'     => $request->all(),
+        Log::info('OIDC callback received', [
+            'has_code' => $request->filled('code'),
+            'has_state' => $request->filled('state'),
+            'has_error' => $request->filled('error'),
         ]);
 
         if ($request->has('error')) {
@@ -123,12 +121,6 @@ class OIDCController extends Controller
         parse_str($rawQuery, $rawParams);
         $code = $rawParams['code'] ?? $request->get('code');
 
-        Log::info('OIDC code comparison', [
-            'raw_code'     => $rawParams['code'] ?? 'not found',
-            'request_code' => $request->get('code'),
-            'match'        => ($rawParams['code'] ?? '') === $request->get('code'),
-        ]);
-
         if (!$code) {
             return redirect()->route('login')
                 ->with('error', 'Authorization code missing.');
@@ -143,28 +135,14 @@ class OIDCController extends Controller
                 'code'          => $code,
             ]);
 
-        Log::info('OIDC token request', [
-            'token_url' => config('services.oidc.token_url'),
-            'payload'   => [
-                'client_id'         => config('services.oidc.client_id'),
-                'code'              => $code,
-                'has_client_secret' => !empty(config('services.oidc.client_secret')),
-            ],
+        Log::info('OIDC token exchange completed', [
             'response_status' => $tokenResponse->status(),
-            'response_body'   => $tokenResponse->body(),
         ]);
 
         if (!$tokenResponse->successful()) {
-            $tokenError = $tokenResponse->json();
-
             return redirect()->route('login')->with(
                 'error',
-                'Token exchange failed: ' . (
-                    $tokenError['error_description']
-                    ?? $tokenError['error']
-                    ?? $tokenResponse->body()
-                    ?? 'Unknown error'
-                )
+                'Unable to complete sign-in. Please try again.'
             );
         }
 
@@ -186,20 +164,12 @@ class OIDCController extends Controller
 
         Log::info('OIDC profile response', [
             'status' => $profileResponse->status(),
-            'body'   => $profileResponse->body(),
         ]);
 
         if (!$profileResponse->successful()) {
-            $profileError = $profileResponse->json();
-
             return redirect()->route('login')->with(
                 'error',
-                'Failed to fetch user profile: ' . (
-                    $profileError['error_description']
-                    ?? $profileError['error']
-                    ?? $profileResponse->body()
-                    ?? 'Unknown error'
-                )
+                'Unable to retrieve your sign-in profile. Please try again.'
             );
         }
 
@@ -216,16 +186,6 @@ class OIDCController extends Controller
         $fullName  = trim(implode(' ', $nameParts));
         $name      = $profile['name'] ?? ($fullName !== '' ? $fullName : $email);
 
-        Log::info('OIDC PROFILE DEBUG', [
-            'profile'      => $profile,
-            'ssoUserId'    => $ssoUserId,
-            'email'        => $email,
-            'name'         => $name,
-            'first_name'   => $firstName,
-            'middle_name'  => $middleName,
-            'last_name'    => $lastName,
-            'suffix_name'  => $suffixName,
-        ]);
 
         if (!$email) {
             return redirect()->route('login')

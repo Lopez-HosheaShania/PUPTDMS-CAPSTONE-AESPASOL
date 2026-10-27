@@ -1,4 +1,21 @@
 {
+  "_jspdf.es.min-MMuTz6kX.js": {
+    "file": "assets/jspdf.es.min-MMuTz6kX.js",
+    "name": "jspdf.es.min",
+    "isDynamicEntry": true,
+    "imports": [
+      "_preload-helper-I4rgV-VL.js"
+    ],
+    "dynamicImports": [
+      "node_modules/html2canvas/dist/html2canvas.esm.js",
+      "node_modules/dompurify/dist/purify.es.mjs",
+      "node_modules/canvg/lib/index.es.js"
+    ]
+  },
+  "_preload-helper-I4rgV-VL.js": {
+    "file": "assets/preload-helper-I4rgV-VL.js",
+    "name": "preload-helper"
+  },
   "node_modules/@fontsource-variable/inter/files/inter-cyrillic-ext-wght-normal.woff2": {
     "file": "assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2",
     "src": "node_modules/@fontsource-variable/inter/files/inter-cyrillic-ext-wght-normal.woff2"
@@ -43,10 +60,26 @@
     "file": "assets/fa-v4compatibility-CErXDOsT.woff2",
     "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.woff2"
   },
+  "node_modules/canvg/lib/index.es.js": {
+    "file": "assets/index.es-DtYG450B.js",
+    "name": "index.es",
+    "src": "node_modules/canvg/lib/index.es.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_jspdf.es.min-MMuTz6kX.js",
+      "_preload-helper-I4rgV-VL.js"
+    ]
+  },
   "node_modules/chart.js/auto/auto.js": {
     "file": "assets/auto-CquwA8NN.js",
     "name": "auto",
     "src": "node_modules/chart.js/auto/auto.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/dompurify/dist/purify.es.mjs": {
+    "file": "assets/purify.es-18JuyMri.js",
+    "name": "purify.es",
+    "src": "node_modules/dompurify/dist/purify.es.mjs",
     "isDynamicEntry": true
   },
   "node_modules/flatpickr/dist/esm/index.js": {
@@ -59,13 +92,34 @@
     "file": "assets/flatpickr-CksuuEqD.css",
     "src": "node_modules/flatpickr/dist/flatpickr.min.css"
   },
+  "node_modules/html2canvas-pro/dist/html2canvas-pro.esm.js": {
+    "file": "assets/html2canvas-pro.esm-BwsXAf2P.js",
+    "name": "html2canvas-pro.esm",
+    "src": "node_modules/html2canvas-pro/dist/html2canvas-pro.esm.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/html2canvas/dist/html2canvas.esm.js": {
+    "file": "assets/html2canvas.esm-DXEQVQnt.js",
+    "name": "html2canvas.esm",
+    "src": "node_modules/html2canvas/dist/html2canvas.esm.js",
+    "isDynamicEntry": true
+  },
   "resources/css/app.css": {
-    "file": "assets/app-CeO8bl7k.css",
+    "file": "assets/app-Dc3UFomX.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
     "names": [
       "app.css"
+    ]
+  },
+  "resources/css/csp-utilities.css": {
+    "file": "assets/csp-utilities-wpUUaHlY.css",
+    "src": "resources/css/csp-utilities.css",
+    "isEntry": true,
+    "name": "csp-utilities",
+    "names": [
+      "csp-utilities.css"
     ]
   },
   "resources/css/pages/admin/admin-dashboard.css": {
@@ -231,7 +285,7 @@
     ]
   },
   "resources/css/pages/dentist/odontogram.css": {
-    "file": "assets/odontogram-Aq5cDvct.css",
+    "file": "assets/odontogram-DSPB-yT7.css",
     "src": "resources/css/pages/dentist/odontogram.css",
     "isEntry": true,
     "name": "odontogram",
@@ -339,7 +393,7 @@
     ]
   },
   "resources/css/pages/shared/appointments.css": {
-    "file": "assets/appointments-hgYZIe02.css",
+    "file": "assets/appointments-CnFB7d7v.css",
     "src": "resources/css/pages/shared/appointments.css",
     "isEntry": true,
     "name": "appointments",
@@ -410,11 +464,23 @@
       "service-types.css"
     ]
   },
+  "resources/css/vendor-fonts.css": {
+    "file": "assets/vendor-fonts-MHcUw0Oo.css",
+    "src": "resources/css/vendor-fonts.css",
+    "isEntry": true,
+    "name": "vendor-fonts",
+    "names": [
+      "vendor-fonts.css"
+    ]
+  },
   "resources/js/app.js": {
-    "file": "assets/app-CaCEP6uq.js",
+    "file": "assets/app-COSzoAwH.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
+    "imports": [
+      "_preload-helper-I4rgV-VL.js"
+    ],
     "dynamicImports": [
       "resources/js/records/patient-record-modal.js",
       "resources/js/odontogram/odontogram-preview.js",
@@ -470,34 +536,57 @@
     "isDynamicEntry": true
   },
   "resources/js/odontogram/odontogram-preview.js": {
-    "file": "assets/odontogram-preview-Cfw6GPhL.js",
+    "file": "assets/odontogram-preview-CV46aJfD.js",
     "name": "odontogram-preview",
     "src": "resources/js/odontogram/odontogram-preview.js",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.js"
+      "_preload-helper-I4rgV-VL.js"
     ],
     "dynamicImports": [
       "resources/js/odontogram/odontogram-primary-stacked-three.js"
     ]
   },
   "resources/js/odontogram/odontogram-primary-stacked-three.js": {
-    "file": "assets/odontogram-primary-stacked-three-DXQeOMzH.js",
+    "file": "assets/odontogram-primary-stacked-three-DiyRdv8v.js",
     "name": "odontogram-primary-stacked-three",
     "src": "resources/js/odontogram/odontogram-primary-stacked-three.js",
     "isDynamicEntry": true
   },
   "resources/js/records/patient-record-modal.js": {
-    "file": "assets/patient-record-modal-D68LJGJj.js",
+    "file": "assets/patient-record-modal-BXW4gl_Y.js",
     "name": "patient-record-modal",
     "src": "resources/js/records/patient-record-modal.js",
-    "isDynamicEntry": true
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/odontogram/odontogram-preview.js",
+      "_preload-helper-I4rgV-VL.js"
+    ]
   },
   "resources/js/records/patient-records-page.js": {
     "file": "assets/patient-records-page-DdECs7Rp.js",
     "name": "patient-records-page",
     "src": "resources/js/records/patient-records-page.js",
     "isDynamicEntry": true
+  },
+  "resources/js/reports/pdf-tools.js": {
+    "file": "assets/pdf-tools-B4hmG6Cz.js",
+    "name": "pdf-tools",
+    "src": "resources/js/reports/pdf-tools.js",
+    "isEntry": true,
+    "imports": [
+      "_preload-helper-I4rgV-VL.js"
+    ],
+    "dynamicImports": [
+      "node_modules/html2canvas-pro/dist/html2canvas-pro.esm.js",
+      "_jspdf.es.min-MMuTz6kX.js"
+    ]
+  },
+  "resources/js/security.js": {
+    "file": "assets/security-DS9no7Om.js",
+    "name": "security",
+    "src": "resources/js/security.js",
+    "isEntry": true
   },
   "resources/js/ui/custom-select.js": {
     "file": "assets/custom-select-TVt4DrGw.js",
@@ -506,12 +595,12 @@
     "isDynamicEntry": true
   },
   "resources/js/ui/date-picker.js": {
-    "file": "assets/date-picker-DIMlI1an.js",
+    "file": "assets/date-picker-BhOkMUL0.js",
     "name": "date-picker",
     "src": "resources/js/ui/date-picker.js",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.js"
+      "_preload-helper-I4rgV-VL.js"
     ],
     "dynamicImports": [
       "node_modules/flatpickr/dist/esm/index.js"

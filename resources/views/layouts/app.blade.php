@@ -27,6 +27,7 @@
 <html lang="en" data-theme="{{ session('theme', 'light') }}">
 
 <head>
+    @include('partials.security-bootstrap')
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,7 +36,7 @@
         <meta name="auth-user-id" content="{{ auth()->id() }}">
     @endif
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (function() {
             const savedTheme =
                 localStorage.getItem('theme');
@@ -119,7 +120,7 @@
 
     <link rel="icon" type="image/png" href="{{ asset('images/PUPT-DMS-Logo.png') }}">
 
-    <style>
+    <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         @keyframes page-enter {
             from {
                 opacity: .92;
@@ -327,7 +328,7 @@
     @endif
 
     @if ($isPatient && !$hideMobileNav && !$hidePatientModals)
-        <script>
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             function openQuickAction(type) {
                 if (type === 'record') {
                     document
@@ -348,7 +349,7 @@
     </div>
 
     @if (!$hideFloatingActions)
-        <script src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right"
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right"
             data-offset="{{ $accessibilityOffset }}" defer></script>
 
         @include('partials.chatbot')

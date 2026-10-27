@@ -42,7 +42,7 @@
             </div>
 
             <div id="impersonationChipActions">
-                <button type="button" onclick="returnToAdmin()"
+                <button type="button" data-ui-click="action-004507b18ecc"
                     class="{{ $bannerTheme['btn'] }} rounded-lg px-3 py-1.5 text-xs font-bold shadow-sm">
                     Return
                 </button>
@@ -55,7 +55,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
             const wrap = document.getElementById('impersonationChipWrap');
             const dismissBtn = document.getElementById('dismissImpersonationChip');

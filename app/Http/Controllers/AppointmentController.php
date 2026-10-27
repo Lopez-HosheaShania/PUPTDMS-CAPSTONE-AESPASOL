@@ -1636,43 +1636,19 @@ class AppointmentController extends Controller
                 ? 'Reserved appointment booked successfully!'
                 : 'Appointment booked successfully!');
 
-        return redirect()
-            ->route('homepage')
-            ->with(
-                'success',
-                $successMessage
-            )
-            ->with(
-                'appointment_draft_completed',
-                true
-            )
-            ->with(
-                'appointment_confirmation',
-                [
-                    'date' =>
-                    Carbon::parse(
-                        $appointment
-                            ->appointment_date
-                    )->format(
-                        'F d, Y'
-                    ),
+        // Polling and other background requests must not expire the confirmation.
+        // The homepage consumes these values after the booking redirect.
+        $request->session()->put([
+            'appointment_draft_completed' => true,
+            'appointment_confirmation' => [
+                'date' => Carbon::parse($appointment->appointment_date)->format('F d, Y'),
+                'time' => Carbon::parse($appointment->appointment_time)->format('g:i A'),
+                'service' => $appointment->service_type_name,
+                'status' => 'Confirmed',
+            ],
+        ]);
 
-                    'time' =>
-                    Carbon::parse(
-                        $appointment
-                            ->appointment_time
-                    )->format(
-                        'g:i A'
-                    ),
-
-                    'service' =>
-                    $appointment
-                        ->service_type_name,
-
-                    'status' =>
-                    'Confirmed',
-                ]
-            );
+        return redirect()->route('homepage')->with('success', $successMessage);
     }
 
     public function slotsForDate(Request $request)

@@ -243,11 +243,11 @@
                                 <div class="table-scroll dt-table-wrap">
                                     <table class="data-table dt-table">
                                         <colgroup>
-                                            <col style="width: 28%;">
-                                            <col style="width: 24%;">
-                                            <col style="width: 16%;">
-                                            <col style="width: 18%;">
-                                            <col style="width: 14%;">
+                                            <col data-ui-presentation="presentation-56d1e0204546">
+                                            <col data-ui-presentation="presentation-3ca932db06e0">
+                                            <col data-ui-presentation="presentation-9fe033fb187b">
+                                            <col data-ui-presentation="presentation-370509cd083e">
+                                            <col data-ui-presentation="presentation-546d6dae843c">
                                         </colgroup>
                                         <thead>
                                             <tr>
@@ -356,7 +356,7 @@
                                             <div class="dt-grid-progress">
                                                 <div class="dt-progress">
                                                     <div class="dt-progress-bar"
-                                                        style="width: {{ $transition->progress_percentage }}%;"></div>
+                                                        data-ui-style="width: {{ $transition->progress_percentage }}%;"></div>
                                                 </div>
                                                 <span>{{ $transition->progress_percentage }}% complete</span>
                                             </div>
@@ -1115,7 +1115,7 @@
 @endsection
 
 @push('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', () => {
             const pageMode = @js($pageMode);
             const continuityToolbarForm = document.getElementById('continuityToolbarForm');
@@ -1480,7 +1480,7 @@
 
                     <div class="dt-grid-progress">
                         <div class="dt-progress">
-                            <div class="dt-progress-bar" style="width: ${Number(transition.progress_percentage || 0)}%;"></div>
+                            <div class="dt-progress-bar" data-ui-style="width: ${window.uiAttribute(Number(transition.progress_percentage || 0))}%;"></div>
                         </div>
                         <span>${Number(transition.progress_percentage || 0)}% complete</span>
                     </div>

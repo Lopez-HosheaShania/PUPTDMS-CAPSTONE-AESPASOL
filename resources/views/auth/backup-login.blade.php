@@ -124,7 +124,7 @@
     </div>
   </section>
 </div>
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
   function detectBrowserName() {
     const userAgent = navigator.userAgent || '';
 

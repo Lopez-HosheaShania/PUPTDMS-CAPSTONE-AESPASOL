@@ -90,7 +90,7 @@
         <div class="w-full">
 
             @if ($errors->any())
-                <script>
+                <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
                     document.addEventListener('DOMContentLoaded', function() {
                         const hasRuleErrors =
                             @json(
@@ -188,13 +188,13 @@
                     </div>
 
                     <div class="dentist-hero-actions">
-                        <button type="button" onclick="openRuleModal()" class="ui-btn ui-btn-primary">
+                        <button type="button" data-ui-click="action-3658b7ca536b" class="ui-btn ui-btn-primary">
 
                             <i class="fa-solid fa-plus"></i>
                             <span>Add Schedule Rule</span>
                         </button>
 
-                        <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-secondary">
+                        <button type="button" data-ui-click="action-35e136a0c602" class="ui-btn ui-btn-secondary">
 
                             <i class="fa-solid fa-ban"></i>
                             <span>Block Date</span>
@@ -211,13 +211,13 @@
                         </div>
 
                         <div class="flex items-center gap-3 flex-wrap page-actions">
-                            <button type="button" onclick="openRuleModal()" class="ui-btn ui-btn-primary">
+                            <button type="button" data-ui-click="action-3658b7ca536b" class="ui-btn ui-btn-primary">
 
                                 <i class="fa-solid fa-plus"></i>
                                 <span>Add Schedule Rule</span>
                             </button>
 
-                            <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-secondary">
+                            <button type="button" data-ui-click="action-35e136a0c602" class="ui-btn ui-btn-secondary">
 
                                 <i class="fa-solid fa-ban"></i>
                                 <span>Block Date</span>
@@ -292,7 +292,7 @@
                                 </div>
 
                                 <div class="card-header-right">
-                                    <button type="button" onclick="openRuleModal()"
+                                    <button type="button" data-ui-click="action-3658b7ca536b"
                                         class="ui-btn ui-btn-primary ui-btn-sm">
 
                                         <i class="fa-solid fa-plus"></i>
@@ -348,7 +348,7 @@
                                 </div>
 
                                 <div class="card-header-right">
-                                    <button type="button" onclick="openBlockModal()"
+                                    <button type="button" data-ui-click="action-35e136a0c602"
                                         class="ui-btn ui-btn-primary ui-btn-sm">
                                         <i class="fa-solid fa-plus"></i>
                                         <span>Add</span>
@@ -393,10 +393,7 @@
 
                                                 <button type="button" class="ui-action-btn ui-action-delete"
                                                     data-tooltip="Remove blocked date" aria-label="Remove blocked date"
-                                                    onclick='openBlockedDateDeleteModal(
-                    @json(route($clinicScheduleRouteNames['unblock'], $blocked)),
-                    @json($blockedDisplayName)
-                )'>
+                                                    data-ui-click="action-28b22a237020" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['unblock'], $blocked), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($blockedDisplayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
 
                                                     <i class="fa-solid fa-trash"></i>
 
@@ -571,7 +568,7 @@
                                                     </div>
 
                                                     <div class="text-xl font-extrabold leading-none"
-                                                        style="color: var(--text-1);">
+                                                        data-ui-presentation="presentation-23b8d2e99754">
 
                                                         {{ $hC->day }}
 
@@ -592,7 +589,7 @@
                                                     @if ($loop->first)
                                                         @if ($isBlockedHoliday)
                                                             <div class="global-info-subvalue status-cancelled mt-2"
-                                                                style="color: var(--status-text);">
+                                                                data-ui-presentation="presentation-420e169b733d">
 
                                                                 <i class="fa-solid fa-triangle-exclamation"></i>
 
@@ -601,7 +598,7 @@
                                                             </div>
                                                         @else
                                                             <div class="global-info-subvalue status-active mt-2"
-                                                                style="color: var(--status-text);">
+                                                                data-ui-presentation="presentation-420e169b733d">
 
                                                                 <i class="fa-solid fa-circle-check"></i>
 
@@ -617,7 +614,7 @@
 
                                                     @if ($isBlockedHoliday)
                                                         <div class="global-info-group status-pending flex-nowrap"
-                                                            style="color: var(--status-text);">
+                                                            data-ui-presentation="presentation-420e169b733d">
 
                                                             <i class="fa-solid fa-star text-[9px]"></i>
 
@@ -628,7 +625,7 @@
                                                         </div>
                                                     @else
                                                         <div class="global-info-group status-all flex-nowrap"
-                                                            style="color: var(--status-text);">
+                                                            data-ui-presentation="presentation-420e169b733d">
 
                                                             <i class="fa-solid fa-briefcase text-[9px]"></i>
 
@@ -648,7 +645,7 @@
 
                                 </div>
 
-                                <div class="border-t px-4 py-4" style="border-color: var(--border);">
+                                <div class="border-t px-4 py-4" data-ui-presentation="presentation-7c1d0a16a55f">
 
                                     <div class="table-record-label mb-3">
                                         Good to Know
@@ -658,7 +655,7 @@
 
                                         <div class="flex items-start gap-2">
                                             <span class="global-info-icon status-active"
-                                                style="width:20px;height:20px;min-width:20px;" aria-hidden="true">
+                                                data-ui-presentation="presentation-3d6d2187b3e9" aria-hidden="true">
 
                                                 <i class="fa-solid fa-check text-[9px]"></i>
                                             </span>
@@ -670,7 +667,7 @@
 
                                         <div class="flex items-start gap-2">
                                             <span class="global-info-icon status-active"
-                                                style="width:20px;height:20px;min-width:20px;" aria-hidden="true">
+                                                data-ui-presentation="presentation-3d6d2187b3e9" aria-hidden="true">
 
                                                 <i class="fa-solid fa-check text-[9px]"></i>
                                             </span>
@@ -682,7 +679,7 @@
 
                                         <div class="flex items-start gap-2">
                                             <span class="global-info-icon status-active"
-                                                style="width:20px;height:20px;min-width:20px;" aria-hidden="true">
+                                                data-ui-presentation="presentation-3d6d2187b3e9" aria-hidden="true">
 
                                                 <i class="fa-solid fa-check text-[9px]"></i>
                                             </span>
@@ -696,10 +693,10 @@
 
                                 </div>
 
-                                <div class="border-t px-4 py-3" style="border-color: var(--border);">
+                                <div class="border-t px-4 py-3" data-ui-presentation="presentation-7c1d0a16a55f">
 
                                     <button type="button" class="ui-btn ui-btn-secondary w-full"
-                                        onclick="window.openModal('holidayListModal')">
+                                        data-ui-click="action-62d7209e5e45">
 
                                         <i class="fa-regular fa-calendar-days"></i>
 
@@ -811,7 +808,7 @@
                                                                 @if ($rule->status !== 'closed')
                                                                     <div class="cap-bar" aria-hidden="true">
                                                                         <div class="cap-fill"
-                                                                            style="width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                            data-ui-style="width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
                                                                         </div>
                                                                     </div>
                                                                 @endif
@@ -833,11 +830,7 @@
                                                         <td data-label="Actions" class="table-action-cell">
                                                             <div class="ui-action-group">
                                                                 <button type="button"
-                                                                    onclick='openRuleModal(
-                                                                                "edit",
-                                                                                {{ $rule->id }},
-                                                                                {{ json_encode($rule) }}
-                                                                            )'
+                                                                    data-ui-click="action-5ae65e27acd4" data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule) }}"
                                                                     class="ui-action-btn ui-action-edit"
                                                                     data-tooltip="Edit schedule"
                                                                     aria-label="Edit schedule">
@@ -848,10 +841,7 @@
                                                                     class="ui-action-btn ui-action-delete"
                                                                     data-tooltip="Delete schedule"
                                                                     aria-label="Delete schedule"
-                                                                    onclick='openScheduleDeleteModal(
-                                                                                @json(route($clinicScheduleRouteNames['destroy'], $rule)),
-                                                                                @json($rule->days_label)
-                                                                            )'>
+                                                                    data-ui-click="action-6d843152ccce" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['destroy'], $rule), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>
                                                             </div>
@@ -953,7 +943,7 @@
                                                                 @if ($rule->status !== 'closed')
                                                                     <span class="cap-bar" aria-hidden="true">
                                                                         <span class="cap-fill"
-                                                                            style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                            data-ui-style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
                                                                         </span>
                                                                     </span>
                                                                 @endif
@@ -967,11 +957,7 @@
                                                     <div class="ui-action-group">
 
                                                         <button type="button"
-                                                            onclick='openRuleModal(
-                            "edit",
-                            {{ $rule->id }},
-                            {{ json_encode($rule) }}
-                        )'
+                                                            data-ui-click="action-cf79ab3d24c0" data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule) }}"
                                                             class="ui-action-btn ui-action-edit"
                                                             data-tooltip="Edit schedule" aria-label="Edit schedule">
 
@@ -980,10 +966,7 @@
 
                                                         <button type="button" class="ui-action-btn ui-action-delete"
                                                             data-tooltip="Delete schedule" aria-label="Delete schedule"
-                                                            onclick='openScheduleDeleteModal(
-                            @json(route($clinicScheduleRouteNames['destroy'], $rule)),
-                            @json($rule->days_label)
-                        )'>
+                                                            data-ui-click="action-899c015d05d8" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['destroy'], $rule), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
 
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
@@ -1082,7 +1065,7 @@
                                                                 @if ($rule->status !== 'closed')
                                                                     <span class="cap-bar" aria-hidden="true">
                                                                         <span class="cap-fill"
-                                                                            style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                            data-ui-style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
                                                                         </span>
                                                                     </span>
                                                                 @endif
@@ -1094,11 +1077,7 @@
                                                 <div class="table-record-actions">
                                                     <div class="ui-action-group">
                                                         <button type="button"
-                                                            onclick='openRuleModal(
-                                                                        "edit",
-                                                                        {{ $rule->id }},
-                                                                        {{ json_encode($rule) }}
-                                                                    )'
+                                                            data-ui-click="action-b1e8100ff8f6" data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule) }}"
                                                             class="ui-action-btn ui-action-edit"
                                                             data-tooltip="Edit schedule" aria-label="Edit schedule">
                                                             <i class="fa-solid fa-pen"></i>
@@ -1106,10 +1085,7 @@
 
                                                         <button type="button" class="ui-action-btn ui-action-delete"
                                                             data-tooltip="Delete schedule" aria-label="Delete schedule"
-                                                            onclick='openScheduleDeleteModal(
-                                                                        @json(route($clinicScheduleRouteNames['destroy'], $rule)),
-                                                                        @json($rule->days_label)
-                                                                    )'>
+                                                            data-ui-click="action-84a17b07f767" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['destroy'], $rule), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </div>
@@ -1143,7 +1119,7 @@
                                     list-view="#reservedPeriodsListView" grid-view="#reservedPeriodsGridView" />
 
                                 @if ($canCreateReservedPeriods)
-                                    <button type="button" onclick="openReservedPeriodModal()"
+                                    <button type="button" data-ui-click="action-210cc7fbd9be"
                                         class="ui-btn ui-btn-primary ui-btn-sm" data-tooltip="Add reserved booking period"
                                         aria-label="Add reserved booking period">
 
@@ -1300,7 +1276,7 @@
                                                                 <div class="ui-action-group">
                                                                     @if ($canUpdateReservedPeriods && !$isPastPeriod)
                                                                         <button type="button"
-                                                                            onclick='openReservedPeriodModal("edit", {{ $period->id }}, @json($periodPayload))'
+                                                                            data-ui-click="action-f2843b92493b" data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                                             class="ui-action-btn ui-action-edit"
                                                                             data-tooltip="Edit reserved period"
                                                                             aria-label="Edit reserved period">
@@ -1313,10 +1289,7 @@
                                                                             class="ui-action-btn ui-action-delete"
                                                                             data-tooltip="Remove reserved period"
                                                                             aria-label="Remove reserved period"
-                                                                            onclick='openReservedPeriodDeleteModal(
-                                                                                @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
-                                                                                @json($period->title)
-                                                                            )'>
+                                                                            data-ui-click="action-bad117ef6f8f" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['reserved_destroy'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                             <i class="fa-solid fa-trash"></i>
                                                                         </button>
                                                                     @endif
@@ -1451,7 +1424,7 @@
                                                         <div class="ui-action-group">
                                                             @if ($canUpdateReservedPeriods && !$isPastPeriod)
                                                                 <button type="button"
-                                                                    onclick='openReservedPeriodModal("edit", {{ $period->id }}, @json($periodPayload))'
+                                                                    data-ui-click="action-f2843b92493b" data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                                     class="ui-action-btn ui-action-edit"
                                                                     data-tooltip="Edit reserved period"
                                                                     aria-label="Edit reserved period">
@@ -1464,10 +1437,7 @@
                                                                     class="ui-action-btn ui-action-delete"
                                                                     data-tooltip="Remove reserved period"
                                                                     aria-label="Remove reserved period"
-                                                                    onclick='openReservedPeriodDeleteModal(
-                                                                        @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
-                                                                        @json($period->title)
-                                                                    )'>
+                                                                    data-ui-click="action-d584b12ca4ac" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['reserved_destroy'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>
                                                             @endif
@@ -1598,7 +1568,7 @@
                                                         <div class="ui-action-group">
                                                             @if ($canUpdateReservedPeriods && !$isPastPeriod)
                                                                 <button type="button"
-                                                                    onclick='openReservedPeriodModal("edit", {{ $period->id }}, @json($periodPayload))'
+                                                                    data-ui-click="action-f2843b92493b" data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                                     class="ui-action-btn ui-action-edit"
                                                                     data-tooltip="Edit reserved period"
                                                                     aria-label="Edit reserved period">
@@ -1611,10 +1581,7 @@
                                                                     class="ui-action-btn ui-action-delete"
                                                                     data-tooltip="Remove reserved period"
                                                                     aria-label="Remove reserved period"
-                                                                    onclick='openReservedPeriodDeleteModal(
-                                                                            @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
-                                                                            @json($period->title)
-                                                                        )'>
+                                                                    data-ui-click="action-a10af097fbc8" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['reserved_destroy'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>
                                                             @endif
@@ -1639,7 +1606,7 @@
 
     <div id="holidayListModal" class="ui-modal" aria-hidden="true">
         <div class="ui-modal-card modal-md" role="dialog" aria-modal="true" aria-labelledby="holidayListModalTitle"
-            onclick="event.stopPropagation()">
+            data-ui-click="action-22499e15f3ee">
             <div class="modal-hd">
                 <div class="modal-heading">
                     <div class="modal-icon">
@@ -1654,7 +1621,7 @@
                         </p>
                     </div>
                 </div>
-                <button type="button" class="modal-x" onclick="window.closeModal('holidayListModal')"
+                <button type="button" class="modal-x" data-ui-click="action-a96098d272f6"
                     aria-label="Close holiday list">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -1682,7 +1649,7 @@
                                         {{ $MONTHS_SHORT[$hC->month - 1] }}
                                     </div>
 
-                                    <div class="text-xl font-extrabold leading-none" style="color: var(--text-1);">
+                                    <div class="text-xl font-extrabold leading-none" data-ui-presentation="presentation-23b8d2e99754">
                                         {{ $hC->day }}
                                     </div>
                                 </div>
@@ -1716,7 +1683,7 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" onclick="window.closeModal('holidayListModal')">
+                <button type="button" class="ui-btn ui-btn-secondary" data-ui-click="action-a96098d272f6">
                     Close
                 </button>
             </div>
@@ -1724,7 +1691,7 @@
     </div>
 
     <div id="appointmentDetailModal" class="ui-modal">
-        <div class="ui-modal-card modal-md" onclick="event.stopPropagation()">
+        <div class="ui-modal-card modal-md" data-ui-click="action-22499e15f3ee">
             <div class="modal-hd">
                 <div class="modal-heading">
                     <div class="modal-icon">
@@ -1737,7 +1704,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="modal-x" onclick="closeAppointmentDetailModal()"
+                <button type="button" class="modal-x" data-ui-click="action-755e543aec03"
                     aria-label="Close appointment details">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -1763,7 +1730,7 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" onclick="closeAppointmentDetailModal()" class="ui-btn ui-btn-primary">
+                <button type="button" data-ui-click="action-755e543aec03" class="ui-btn ui-btn-primary">
                     Close
                 </button>
             </div>
@@ -1771,7 +1738,7 @@
     </div>
 
     <div id="ruleModalBackdrop" class="ui-modal modal-theme-primary">
-        <div class="ui-modal-card modal-xl" onclick="event.stopPropagation()">
+        <div class="ui-modal-card modal-xl" data-ui-click="action-22499e15f3ee">
 
             <div class="modal-hd">
                 <div class="modal-heading">
@@ -1840,7 +1807,7 @@
         ] as $abbr => $lbl)
                                         <button type="button" class="day-toggle" data-day="{{ $abbr }}"
                                             data-discard-track data-discard-key="schedule-day-{{ $abbr }}"
-                                            data-discard-value="false" onclick="toggleDay(this)" aria-pressed="false">
+                                            data-discard-value="false" data-ui-click="action-9ac08cc75f07" aria-pressed="false">
 
                                             <span class="day-toggle-label">
                                                 {{ $lbl }}
@@ -1967,7 +1934,7 @@
                                     </label>
 
                                     <select id="ruleStatus" class="form-select-custom js-custom-select"
-                                        data-placeholder="Select clinic status" onchange="toggleStatusFields(this.value)">
+                                        data-placeholder="Select clinic status" data-ui-change="action-958c6da8d111">
                                         <option value="open">Open</option>
                                         <option value="closed">Closed</option>
                                         <option value="limited">Limited Hours</option>
@@ -2102,19 +2069,19 @@
 
                                             <button type="button" class="break-chip selected" data-val="12:00-13:00"
                                                 data-discard-track data-discard-key="schedule-break-12-13"
-                                                data-discard-value="true" onclick="selectBreak(this)">
+                                                data-discard-value="true" data-ui-click="action-f9d97e5305b3">
                                                 12:00 – 1:00 PM
                                             </button>
 
                                             <button type="button" class="break-chip" data-val="13:00-14:00"
                                                 data-discard-track data-discard-key="schedule-break-13-14"
-                                                data-discard-value="false" onclick="selectBreak(this)">
+                                                data-discard-value="false" data-ui-click="action-f9d97e5305b3">
                                                 1:00 – 2:00 PM
                                             </button>
 
                                             <button type="button" class="break-chip" data-val="none" data-discard-track
                                                 data-discard-key="schedule-break-none" data-discard-value="false"
-                                                onclick="selectBreak(this)">
+                                                data-ui-click="action-f9d97e5305b3">
 
                                                 <i class="fa-solid fa-ban text-[10px]"></i>
                                                 No Break
@@ -2134,7 +2101,7 @@
                         Cancel
                     </button>
 
-                    <button type="button" onclick="submitRule()" id="ruleSubmitBtn" class="ui-btn ui-btn-primary">
+                    <button type="button" data-ui-click="action-2f4c982ff581" id="ruleSubmitBtn" class="ui-btn ui-btn-primary">
                         <i class="fa-solid fa-floppy-disk"></i>
                         <span id="ruleSubmitText">Save Rule</span>
                     </button>
@@ -2150,7 +2117,7 @@
             aria-labelledby="blockDateModalTitle" data-global-validation data-discard-form
             data-discard-title="Discard blocked date?" data-discard-subtitle="You have unsaved blocked-date details."
             data-discard-message="Closing this modal will remove the blocked-date details you entered."
-            onclick="event.stopPropagation()" novalidate>
+            data-ui-click="action-22499e15f3ee" novalidate>
             @csrf
 
             <div class="modal-hd">
@@ -2295,7 +2262,7 @@
     </div>
 
     <div id="reservedPeriodModalBackdrop" class="ui-modal modal-theme-primary" aria-hidden="true">
-        <div class="ui-modal-card modal-xl" onclick="event.stopPropagation()">
+        <div class="ui-modal-card modal-xl" data-ui-click="action-22499e15f3ee">
             <div class="modal-hd">
                 <div class="modal-heading">
                     <div class="modal-icon">
@@ -2431,7 +2398,7 @@
                                     <div id="reservedBookingModeGroup" class="reserved-booking-mode-grid">
                                         <label class="reserved-booking-mode-card">
                                             <input type="radio" name="booking_mode" value="timeslot" required
-                                                onchange="setReservedBookingMode(this.value)">
+                                                data-ui-change="action-75f748f7e0aa">
                                             <span class="reserved-booking-mode-icon"><i
                                                     class="fa-regular fa-clock"></i></span>
                                             <span>
@@ -2441,7 +2408,7 @@
                                         </label>
                                         <label class="reserved-booking-mode-card">
                                             <input type="radio" name="booking_mode" value="date_only" required
-                                                onchange="setReservedBookingMode(this.value)">
+                                                data-ui-change="action-75f748f7e0aa">
                                             <span class="reserved-booking-mode-icon"><i
                                                     class="fa-solid fa-list-ol"></i></span>
                                             <span>
@@ -2465,7 +2432,7 @@
                                     <select id="reservedActivationState" name="is_active"
                                         class="form-select-custom js-custom-select @error('is_active', 'reservedPeriod') is-invalid @enderror"
                                         data-placeholder="Select period state" data-field-label="Period State"
-                                        onchange="handleReservedPeriodStateChange()" required>
+                                        data-ui-change="action-e5dcc598a9fd" required>
                                         <option value="0" selected>Inactive</option>
                                         <option value="1">Active</option>
                                     </select>
@@ -2503,7 +2470,7 @@
                                     <select id="reservedPatientType" name="target_patient_type" required
                                         data-field-label="Patient Type" class="form-select-custom js-custom-select"
                                         data-placeholder="Select patient type"
-                                        onchange="toggleReservedStudentFields(this.value)">
+                                        data-ui-change="action-6aebdfee76f3">
                                         <option value="student">Student</option>
                                         <option value="faculty">Faculty</option>
                                         <option value="administrative">Administrative</option>
@@ -2521,7 +2488,7 @@
                                         <select id="reservedProgramCode" name="program_code"
                                             data-field-label="Program" class="form-select-custom js-custom-select"
                                             data-placeholder="Select program"
-                                            onchange="updateReservedStudentTargetDropdowns(this.value, '', '')">
+                                            data-ui-change="action-14444081b07c">
                                             <option value="">Select program</option>
                                             @foreach ($studentTargetOptions->unique('course_code') as $studentOption)
                                                 <option value="{{ $studentOption['course_code'] }}">
@@ -2542,7 +2509,7 @@
                                             <select id="reservedYearLevel" name="year_level"
                                                 class="form-select-custom js-custom-select"
                                                 data-placeholder="Select year level" data-field-label="Year Level"
-                                                onchange="updateReservedStudentTargetDropdowns(document.getElementById('reservedProgramCode').value, this.value, '')">
+                                                data-ui-change="action-a626fa8e15ce">
                                                 <option value="">Select year</option>
                                                 @foreach ($studentTargetOptions->pluck('year_level')->filter()->unique()->sort() as $year)
                                                     <option value="{{ $year }}">Year {{ $year }}
@@ -2727,7 +2694,7 @@
                                         class="global-number-stepper-input" data-field-label="Duration"
                                         data-validation-rule="wholeNumber" value="30" inputmode="numeric"
                                         autocomplete="off" data-number-stepper-input
-                                        onchange="updateReservedSlotDuration()">
+                                        data-ui-change="action-443e42f7600e">
 
                                     <button type="button" class="global-number-stepper-btn" data-number-step="1"
                                         aria-label="Increase duration">
@@ -2749,7 +2716,7 @@
                                 </div>
                             </div>
                             <button id="reservedAddTimeslotButton" type="button" class="ui-btn ui-btn-primary"
-                                onclick="addReservedTimeslot()">
+                                data-ui-click="action-9f3a82837bcb">
                                 <i class="fa-solid fa-plus"></i>
                                 <span>Add Timeslot</span>
                             </button>
@@ -2818,7 +2785,7 @@
         ]);
     @endphp
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const clinicScheduleRoutes = {
             store: @json($clinicScheduleStoreUrl),
             update: @json($clinicScheduleUpdateUrlTemplate),
@@ -3159,9 +3126,9 @@
                 const isTod = d.getTime() === today.getTime();
                 const cls = isTod ? 'today-hdr' : i >= 5 ? 'weekend-hdr' : '';
                 html += `<div class="wk-hdr ${cls}">
-                    <div style="font-size:.65rem;opacity:.75">${DAY_ABBRS[d.getDay()]}</div>
-                    <div style="font-size:1rem;font-weight:800;line-height:1.2">${d.getDate()}</div>
-                    ${isTod ? '<div style="font-size:.55rem;background:rgba(255,255,255,.25);border-radius:999px;padding:1px 6px;margin-top:2px">Today</div>' : ''}
+                    <div data-ui-presentation="presentation-ffc624773df6">${DAY_ABBRS[d.getDay()]}</div>
+                    <div data-ui-presentation="presentation-53164131daad">${d.getDate()}</div>
+                    ${isTod ? '<div data-ui-presentation="presentation-7c63aa9c4d24">Today</div>' : ''}
                 </div>`;
             });
 
@@ -3212,7 +3179,7 @@
         <button
             type="button"
             class="week-appointment ${statusMeta.className}"
-            onclick='openAppointmentDetailModal(${JSON.stringify(appt)})'
+            data-ui-click="action-d5fde1a38ad6" data-ui-click-arg-0="${window.uiAttribute(JSON.stringify(appt))}"
             title="Click to view details"
         >
             <div class="week-appointment-top">
@@ -4478,13 +4445,13 @@
                         <input id="reservedSlotTime${index}" name="timeslots[${index}][time]" type="text"
                             required readonly class="form-input-custom global-form-icon js-flatpickr-time"
                             value="${slot.time}" placeholder="Select time"
-                            onchange="updateReservedTimeslot(${index}, 'time', this.value)">
+                            data-ui-change="action-5d12ccc88311" data-ui-change-arg-0="${window.uiAttribute(index)}">
                     </div>
                 </div>
                 <span class="reserved-timeslot-one-patient">
                     <i class="fa-solid fa-user"></i> 1 patient · ${getReservedSlotDuration()} min
                 </span>
-                <button type="button" class="reserved-remove-timeslot" onclick="removeReservedTimeslot(${index})"
+                <button type="button" class="reserved-remove-timeslot" data-ui-click="action-fcae67819c6f" data-ui-click-arg-0="${window.uiAttribute(index)}"
                     aria-label="Remove timeslot" title="Remove timeslot">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
@@ -4963,7 +4930,7 @@
                     message: 'Add clinic hours and availability rules to begin scheduling appointments.',
                     className: 'empty-state-compact clinic-schedule-empty-state',
                     actionHtml: `
-                    <button type="button" onclick="openRuleModal()" class="empty-state-btn">
+                    <button type="button" data-ui-click="action-3658b7ca536b" class="empty-state-btn">
                         <i class="fa-solid fa-plus" aria-hidden="true"></i>
                         <span>Add schedule rule</span>
                     </button>
@@ -4980,7 +4947,7 @@
                     className: 'empty-state-compact clinic-schedule-empty-state',
                     @if ($canCreateReservedPeriods)
                         actionHtml: `
-                    <button type="button" onclick="openReservedPeriodModal()" class="empty-state-btn">
+                    <button type="button" data-ui-click="action-210cc7fbd9be" class="empty-state-btn">
                         <i class="fa-solid fa-plus" aria-hidden="true"></i>
                         <span>Create reserved period</span>
                     </button>

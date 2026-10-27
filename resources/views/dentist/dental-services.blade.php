@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="dentist-hero-actions">
-                    <button type="button" class="ui-btn ui-btn-primary" onclick="openDentalCreateReportModal()">
+                    <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-9d8b6b4ff613">
                         <i class="fa-solid fa-plus"></i>
                         Create Report
                     </button>
@@ -139,7 +139,7 @@
                         </div>
 
                         <button id="openFilter" type="button" class="global-filter-btn" aria-pressed="false"
-                            onclick="openDentalFilterModal()">
+                            data-ui-click="action-dafccddeeb94">
                             <i class="fa-solid fa-sliders"></i>
                             <span>Filter</span>
                             <span id="filterBadge" class="filter-badge"></span>
@@ -194,9 +194,9 @@
     </main>
 
     <x-filter-drawer id="filterModal" title="Filter Records" close-id="closeFilterModalBtn"
-        close-callback="closeDentalFilterModal()" clear-id="clearFilterBtn" clear-label="Clear Filters"
-        cancel-id="cancelFilterBtn" cancel-callback="closeDentalFilterModal()" cancel-label="Cancel"
-        apply-id="applyFiltersBtn" apply-callback="applyDentalFiltersFromDrawer()" apply-label="Show Results"
+        close-callback="action-f5118f90860f" clear-id="clearFilterBtn" clear-label="Clear Filters"
+        cancel-id="cancelFilterBtn" cancel-callback="action-f5118f90860f" cancel-label="Cancel"
+        apply-id="applyFiltersBtn" apply-callback="action-70c63ba973e1" apply-label="Show Results"
         results-id="showResultsText">
 
         <div id="activeFiltersSection" class="filter-active-section hidden">
@@ -553,7 +553,7 @@
 
                 </div>
 
-                <button type="button" class="modal-x" onclick="closeDownloadModal()"
+                <button type="button" class="modal-x" data-ui-click="action-927eb715f561"
                     aria-label="Close download complete modal">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -584,7 +584,7 @@
 
             <div class="modal-ft">
 
-                <button type="button" class="ui-btn ui-btn-success" onclick="closeDownloadModal()">
+                <button type="button" class="ui-btn ui-btn-success" data-ui-click="action-927eb715f561">
                     <i class="fa-solid fa-check"></i>
                     <span>Done</span>
                 </button>
@@ -596,7 +596,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const DENTAL_DOWNLOAD_URL = "{{ route('dentist.dentist.report.dental-services-download') }}";
         const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
             "{{ csrf_token() }}";
@@ -1373,7 +1373,7 @@
                 <button
                     type="button"
                     class="empty-state-btn"
-                    onclick="resetDentalFilters()"
+                    data-ui-click="action-c0d7a614b8c1"
                 >
                     <i class="fa-solid fa-rotate-left"></i>
                     Clear filters

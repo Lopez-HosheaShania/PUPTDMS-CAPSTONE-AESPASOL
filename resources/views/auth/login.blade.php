@@ -45,7 +45,7 @@
       </a>
 
       <button type="button" class="auth-landing-menu-btn" id="hamburgerBtn" aria-label="Toggle navigation"
-        aria-expanded="false" onclick="toggleMobileMenu()">
+        aria-expanded="false" data-ui-click="action-a21abd208743">
         <span></span>
         <span></span>
         <span></span>
@@ -55,11 +55,11 @@
 
   <div class="auth-landing-mobile-menu" id="mobileMenu">
     <nav aria-label="Mobile navigation">
-      <a href="#home" onclick="closeMobileMenu()">Home</a>
-      <a href="#about" onclick="closeMobileMenu()">About</a>
-      <a href="#services" onclick="closeMobileMenu()">Services</a>
-      <a href="#faq" onclick="closeMobileMenu()">FAQ</a>
-      <a href="#team" onclick="closeMobileMenu()">Team</a>
+      <a href="#home" data-ui-click="action-bc43f465120b">Home</a>
+      <a href="#about" data-ui-click="action-bc43f465120b">About</a>
+      <a href="#services" data-ui-click="action-bc43f465120b">Services</a>
+      <a href="#faq" data-ui-click="action-bc43f465120b">FAQ</a>
+      <a href="#team" data-ui-click="action-bc43f465120b">Team</a>
     </nav>
 
     <div class="auth-landing-mobile-login-actions">
@@ -299,7 +299,7 @@
           <div class="auth-landing-dentist-profile auth-landing-reveal">
             <div class="auth-landing-dentist-photo">
               <img src="{{ asset('images/Nelson-Angeles.jpg') }}" alt="Dr. Nelson P. Angeles"
-                onerror="this.src='https://ui-avatars.com/api/?name=Nelson+Angeles&background=660000&color=FFFFFF&size=500'">
+                data-ui-error="action-01ea3b1981b5">
             </div>
             <div class="auth-landing-dentist-profile-copy">
               <small>University Campus Dentist</small>
@@ -463,7 +463,7 @@
         <div class="auth-landing-faq-list" id="faqList">
           @foreach ($faqs as $i => $faq)
           <article class="auth-landing-faq-item auth-landing-reveal">
-            <button type="button" class="auth-landing-faq-trigger" onclick="toggleFaq(this)" aria-expanded="false">
+            <button type="button" class="auth-landing-faq-trigger" data-ui-click="action-9f9589849531" aria-expanded="false">
               <span class="auth-landing-faq-number">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
               <span class="auth-landing-faq-question">{{ $faq['q'] }}</span>
               <span class="auth-landing-faq-chevron"><i class="fa-solid fa-plus"></i></span>
@@ -499,7 +499,7 @@
           <article class="auth-landing-team-card auth-landing-reveal">
             <div class="auth-landing-team-photo">
               <img src="{{ asset('images/' . $dev['img']) }}" alt="{{ $dev['name'] }}"
-                onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($dev['name']) }}&background=660000&color=FFFFFF&size=400'">
+                data-ui-error="action-8551a98bacd1" data-ui-error-arg-0="https://ui-avatars.com/api/?name={{ urlencode($dev['name']) }}&amp;background=660000&amp;color=FFFFFF&amp;size=400">
             </div>
             <div class="auth-landing-team-copy">
               <h3>{{ $dev['name'] }}</h3>
@@ -535,7 +535,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
   function toggleMobileMenu() {
     const menu = document.getElementById('mobileMenu');
     const button = document.getElementById('hamburgerBtn');

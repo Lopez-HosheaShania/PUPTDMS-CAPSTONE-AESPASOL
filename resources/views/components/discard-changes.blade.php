@@ -42,7 +42,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (() => {
         if (window.DiscardChanges) return;
 
@@ -50,6 +50,105 @@
         let pendingDiscardCallback = null;
         let pendingDiscardForm = null;
         let lastFocusedElement = null;
+        const browserHistoryGuardKey = '__discardChangesGuard';
+        let browserHistoryGuardActive = false;
+        let browserNavigationAllowed = false;
+        let pendingBrowserBackForm = null;
+
+        function getDirtyNavigationForm() {
+            return getWatchedForms().find(form => {
+                const modal = form.closest('.ui-modal, .modal-overlay, dialog');
+
+                if (modal && !modal.classList.contains('open') && !modal.open) {
+                    return false;
+                }
+
+                return isFormDirty(form);
+            });
+        }
+
+        function guardBrowserBack(fromUserInteraction = false) {
+            browserNavigationAllowed = false;
+
+            if (!getWatchedForms().length || window.history.length < 2) return;
+            if (window.history.state?.[browserHistoryGuardKey] === 'guard') {
+                browserHistoryGuardActive = true;
+                return;
+            }
+
+            // Firefox skips entries created before a real user gesture when using browser Back.
+            if (fromUserInteraction !== true || pendingBrowserBackForm) return;
+            if (navigator.userActivation && !navigator.userActivation.isActive) return;
+            browserHistoryGuardActive = true;
+
+            window.history.replaceState({
+                ...window.history.state,
+                [browserHistoryGuardKey]: 'base',
+            }, '', window.location.href);
+
+            window.history.pushState({
+                ...window.history.state,
+                [browserHistoryGuardKey]: 'guard',
+            }, '', window.location.href);
+        }
+
+        window.addEventListener('popstate', () => {
+            if (!browserHistoryGuardActive) return;
+
+            if (browserNavigationAllowed) {
+                if (window.history.state?.[browserHistoryGuardKey] === 'base') {
+                    window.history.back();
+                }
+                return;
+            }
+
+            if (window.history.state?.[browserHistoryGuardKey] === 'guard' && pendingBrowserBackForm) {
+                const form = pendingBrowserBackForm;
+                pendingBrowserBackForm = null;
+
+                if (!getDiscardModal()?.classList.contains('open')) {
+                    openDiscardModal(form, () => {
+                        browserNavigationAllowed = true;
+                        // Skip our base entry only if the browser actually traverses it.
+                        window.history.back();
+                    });
+                }
+
+                return;
+            }
+
+            if (window.history.state?.[browserHistoryGuardKey] !== 'base') return;
+
+            const form = getDirtyNavigationForm();
+
+            if (!form) {
+                browserNavigationAllowed = true;
+                window.history.back();
+                return;
+            }
+
+            // Reuse the existing entry; pushing a replacement here can be skipped by Firefox.
+            pendingBrowserBackForm = form;
+            window.history.forward();
+        });
+
+        window.addEventListener('pageshow', guardBrowserBack);
+
+        ['pointerdown', 'pointerup', 'keydown', 'click'].forEach(type => {
+            document.addEventListener(type, event => {
+                if (event.isTrusted) guardBrowserBack(true);
+            }, true);
+        });
+
+        window.addEventListener('hashchange', () => {
+            if (!browserHistoryGuardActive || browserNavigationAllowed) return;
+
+            // Anchor navigation stays on this page and must not open the discard dialog.
+            window.history.replaceState({
+                ...window.history.state,
+                [browserHistoryGuardKey]: 'guard',
+            }, '', window.location.href);
+        });
 
         function getDiscardModal() {
             return document.getElementById('globalDiscardModal');
@@ -492,6 +591,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             captureAll(document);
+            guardBrowserBack();
 
             document.addEventListener('submit', event => {
                 const form = event.target.closest?.('form[data-discard-form]');

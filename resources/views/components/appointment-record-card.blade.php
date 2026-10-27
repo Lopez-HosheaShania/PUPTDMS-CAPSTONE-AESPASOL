@@ -273,12 +273,15 @@ $currentRevisionVersion =
 $odontogramEditLocked =
     $normalizedStatus === 'completed'
     &&
-    $appointment
-        ->isOdontogramEditLocked();
+    ($appointment instanceof \App\Models\Appointment
+        ? $appointment->isOdontogramEditLocked()
+        : (bool) $get('edit_locked', true));
 
-$odontogramEditDeadline =
-    $appointment
-        ->odontogramEditDeadline();
+$editDeadline = $appointment instanceof \App\Models\Appointment
+    ? $appointment->odontogramEditDeadline()
+    : $get('edit_deadline');
+
+$odontogramEditDeadline = $editDeadline ? Carbon::parse($editDeadline) : null;
 
 $recordPayload = [
 'id' => $get('id'),
@@ -351,7 +354,7 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
 @endphp
 
 <div {{ $attributes->class($cardClasses) }}
-    @if ($animationDelay !== null) style="animation-delay: {{ $animationDelay }}s" @endif>
+    @if ($animationDelay !== null) data-ui-style="animation-delay: {{ $animationDelay }}s" @endif>
     <div class="appt-visit-date
             {{ $isPast ? 'appt-visit-date-muted' : '' }}">
         <span class="appt-visit-day">
@@ -437,9 +440,7 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
         JSON_HEX_APOS |
         JSON_HEX_AMP |
         JSON_HEX_QUOT
-    )' onclick="openRecordModal(
-        JSON.parse(this.dataset.record)
-    )" aria-label="View details" data-tooltip="View details" data-tooltip-tone="view">
+    )' data-ui-click="action-31134d4ab8af" aria-label="View details" data-tooltip="View details" data-tooltip-tone="view">
             <i class="fa-regular fa-eye"></i>
         </button>
     </div>
