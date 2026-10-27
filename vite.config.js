@@ -67,7 +67,6 @@ export default defineConfig({
     ],
 
     server: {
-        // Use the same IPv4 origin for assets and HMR; browsers reject IPv6 CSP sources.
         host: '127.0.0.1',
         hmr: {
             host: '127.0.0.1',
