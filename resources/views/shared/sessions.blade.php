@@ -386,7 +386,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', () => {
         @if (session('success'))
             if (typeof window.showToast === 'function') {

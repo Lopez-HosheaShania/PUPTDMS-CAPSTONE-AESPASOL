@@ -420,14 +420,14 @@
 
                                 <span>Filter</span>
 
-                                <span id="appointmentFilterBadge" class="filter-badge" style="display:none;"></span>
+                                <span id="appointmentFilterBadge" class="filter-badge" data-ui-presentation="presentation-d0466aa33fa8"></span>
                             </button>
                         </div>
 
                         <x-view-toggle id="appointmentsViewToggle" root="#mainContent" storage-key="appointmentsViewMode"
                             list-label="List" grid-label="Grid" />
 
-                        <button id="appointmentClearFilterBtn" type="button" onclick="resetAppointmentFilters()"
+                        <button id="appointmentClearFilterBtn" type="button" data-ui-click="action-06d47d859fc5"
                             class="global-filter-reset-btn hidden" aria-label="Reset filters" data-tooltip="Reset filters"
                             data-tooltip-tone="neutral">
                             <i class="fa-solid fa-rotate-left"></i>
@@ -754,7 +754,7 @@
                                         data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
                                         data-status="{{ $normalizedStatus }}"
                                         data-follow-up="{{ $isFollowUpAppointment ? '1' : '0' }}" data-show-more-item
-                                        style="animation-delay:{{ $i * 0.04 }}s">
+                                        data-ui-style="animation-delay:{{ $i * 0.04 }}s">
                                         <div
                                             class="appointment-table-grid
                                            grid gap-4 items-center
@@ -885,7 +885,7 @@
 
                                                 @if (!$isActiveAppointment && $canViewTreatmentRecord)
                                                     <button type="button" class="ui-action-btn ui-action-neutral"
-                                                        data-tooltip="View details" onclick="openRecordModal(this)"
+                                                        data-tooltip="View details" data-ui-click="action-c449c32115b5"
                                                         data-appt-id="{{ $appt->id }}"
                                                         data-service="{{ $serviceLabel }}"
                                                         data-date="{{ $dateLabel }}" data-time="{{ $timeLabel }}"
@@ -923,7 +923,7 @@
                                                         data-start-locked="{{ $canStartThisAppointment ? '0' : '1' }}"
                                                         aria-disabled="{{ $canStartThisAppointment ? 'false' : 'true' }}"
                                                         {{ $canStartThisAppointment ? '' : 'disabled' }}
-                                                        onclick="openStartProcedureModal(this)"
+                                                        data-ui-click="action-27b3080a773d"
                                                         data-id="{{ $appt->id }}" data-name="{{ $patientName }}"
                                                         data-datetime="{{ $modalDatetime }}"
                                                         data-service="{{ $serviceLabel }}"
@@ -939,13 +939,7 @@
                                                         data-tooltip-tone="{{ $isActiveAppointment ? 'reschedule' : 'locked' }}"
                                                         aria-label="Reschedule appointment"
                                                         {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                        onclick="@if ($isActiveAppointment) openRescheduleModal({
-                                                        id: '{{ $appt->id }}',
-                                                        name: @js($patientName),
-                                                        datetime: @js($modalDatetime),
-                                                        serviceType: @js($appt->service_type_name),
-                                                        updateUrl: '{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}'
-                                                    }) @endif">
+                                                        data-ui-click="action-29ed24cdc40f" data-ui-click-arg-0="{{ json_encode((bool) ($isActiveAppointment)) }}" data-ui-click-arg-1="{{ $appt->id }}" data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($modalDatetime, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-4="{{ json_encode($appt->service_type_name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-5="{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}">
                                                         <i class="fa-solid fa-rotate-right"></i>
                                                     </button>
                                                 @endif
@@ -957,11 +951,7 @@
                                                         data-tooltip-tone="{{ $isActiveAppointment ? 'cancel' : 'locked' }}"
                                                         aria-label="Cancel appointment"
                                                         {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                        onclick="@if ($isActiveAppointment) cancelAppointmentFromModal(
-                                                        '{{ route('dentist.dentist.appointments.cancel', $appt->id) }}',
-                                                        @js($patientName),
-                                                        @js($dateLabel . ' | ' . $timeLabel)
-                                                    ) @endif">
+                                                        data-ui-click="action-aaaf28f0e0b0" data-ui-click-arg-0="{{ json_encode((bool) ($isActiveAppointment)) }}" data-ui-click-arg-1="{{ route('dentist.dentist.appointments.cancel', $appt->id) }}" data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($dateLabel . ' | ' . $timeLabel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                         <i class="fa-solid fa-xmark"></i>
                                                     </button>
                                                 @endif
@@ -1176,7 +1166,7 @@
                                     data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
                                     data-status="{{ $normalizedStatus }}"
                                     data-follow-up="{{ $isFollowUpAppointment ? '1' : '0' }}" data-show-more-item
-                                    style="animation-delay:{{ $i * 0.04 }}s">
+                                    data-ui-style="animation-delay:{{ $i * 0.04 }}s">
 
                                     <div class="mobile-appt-card-head">
 
@@ -1295,7 +1285,7 @@
 
                                         @if (!$isActiveAppointment && $canViewTreatmentRecord)
                                             <button type="button" class="ui-action-btn ui-action-neutral"
-                                                data-tooltip="View details" onclick="openRecordModal(this)"
+                                                data-tooltip="View details" data-ui-click="action-c449c32115b5"
                                                 data-appt-id="{{ $appt->id }}" data-service="{{ $serviceLabel }}"
                                                 data-date="{{ $dateLabel }}" data-time="{{ $timeLabel }}"
                                                 data-status="{{ $statusMeta['label'] }}"
@@ -1327,7 +1317,7 @@
                                                 data-start-locked="{{ $canStartThisAppointment ? '0' : '1' }}"
                                                 aria-disabled="{{ $canStartThisAppointment ? 'false' : 'true' }}"
                                                 {{ $canStartThisAppointment ? '' : 'disabled' }}
-                                                onclick="openStartProcedureModal(this)" data-id="{{ $appt->id }}"
+                                                data-ui-click="action-27b3080a773d" data-id="{{ $appt->id }}"
                                                 data-name="{{ $patientName }}" data-datetime="{{ $modalDatetime }}"
                                                 data-service="{{ $serviceLabel }}"
                                                 data-start-url="{{ route('dentist.odontogram', ['appointment' => $appt->id]) }}?from=appointments&start_procedure=1">
@@ -1341,13 +1331,7 @@
                                                 data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
                                                 data-tooltip-tone="{{ $isActiveAppointment ? 'reschedule' : 'locked' }}"
                                                 {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                onclick="@if ($isActiveAppointment) openRescheduleModal({
-                                                id: '{{ $appt->id }}',
-                                                name: @js($patientName),
-                                                datetime: @js($modalDatetime),
-                                                serviceType: @js($appt->service_type_name),
-                                                updateUrl: '{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}'
-                                            }) @endif">
+                                                data-ui-click="action-ab60db006e21" data-ui-click-arg-0="{{ json_encode((bool) ($isActiveAppointment)) }}" data-ui-click-arg-1="{{ $appt->id }}" data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($modalDatetime, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-4="{{ json_encode($appt->service_type_name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-5="{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}">
                                                 <i class="fa-solid fa-rotate-right"></i>
                                             </button>
                                         @endif
@@ -1358,11 +1342,7 @@
                                                 data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
                                                 data-tooltip-tone="{{ $isActiveAppointment ? 'cancel' : 'locked' }}"
                                                 {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                onclick="@if ($isActiveAppointment) cancelAppointmentFromModal(
-                                                '{{ route('dentist.dentist.appointments.cancel', $appt->id) }}',
-                                                @js($patientName),
-                                                @js($dateLabel . ' | ' . $timeLabel)
-                                            ) @endif">
+                                                data-ui-click="action-830526eaba30" data-ui-click-arg-0="{{ json_encode((bool) ($isActiveAppointment)) }}" data-ui-click-arg-1="{{ route('dentist.dentist.appointments.cancel', $appt->id) }}" data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($dateLabel . ' | ' . $timeLabel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         @endif
@@ -1398,10 +1378,10 @@
     </main>
 
     <x-filter-drawer id="filterModal" title="Filters" close-id="closeFilterModalBtn"
-        close-callback="window.closeFilterDrawer?.('filterModal')" clear-id="clearFiltersModal"
+        close-callback="action-9dac37c8b8f2" clear-id="clearFiltersModal"
         clear-label="Clear Filters" cancel-id="cancelFilterBtn"
-        cancel-callback="window.closeFilterDrawer?.('filterModal')" cancel-label="Cancel" apply-id="applyFilters"
-        apply-callback="applyAppointmentDrawerFilters()" apply-label="Show 0 results" results-id="showResultsText">
+        cancel-callback="action-9dac37c8b8f2" cancel-label="Cancel" apply-id="applyFilters"
+        apply-callback="action-e7e704b5c8bd" apply-label="Show 0 results" results-id="showResultsText">
 
         <div id="activeFiltersSection" class="filter-active-section hidden">
 
@@ -1501,7 +1481,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const APPOINTMENT_REFRESH_ITEMS = @json($appointmentRefreshItems);
         const APPOINTMENT_REFRESH_URL = window.location.href;
         let appointmentRefreshWatcher = null;

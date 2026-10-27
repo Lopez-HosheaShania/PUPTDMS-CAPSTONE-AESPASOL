@@ -2,7 +2,7 @@
     $idleTimeoutSeconds = max((int) config('session.idle_timeout_seconds', 600), 60);
 @endphp
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (function () {
         const timeoutMs = {{ $idleTimeoutSeconds * 1000 }};
 

@@ -1,5 +1,5 @@
 <div id="cancelAppointmentModal" class="ui-modal modal-theme-danger" aria-hidden="true" role="dialog" aria-modal="true"
-    aria-labelledby="cancelAppointmentModalTitle" onclick="handleCancelBackdropClick(event)">
+    aria-labelledby="cancelAppointmentModalTitle" data-ui-click="action-a8a78f310041">
 
     <div class="ui-modal-card modal-md">
 
@@ -25,7 +25,7 @@
 
             </div>
 
-            <button type="button" onclick="closeCancelAppointmentModal()" class="modal-x"
+            <button type="button" data-ui-click="action-021a85adb43d" class="modal-x"
                 aria-label="Close cancellation modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -121,11 +121,11 @@
 
             <div class="modal-ft">
 
-                <button type="button" onclick="closeCancelAppointmentModal()" class="ui-btn ui-btn-secondary">
+                <button type="button" data-ui-click="action-021a85adb43d" class="ui-btn ui-btn-secondary">
                     <span>Keep Appointment</span>
                 </button>
 
-                <button type="button" id="confirmCancelBtn" onclick="confirmCancelAppointment()"
+                <button type="button" id="confirmCancelBtn" data-ui-click="action-2428055b77ee"
                     class="ui-btn ui-btn-danger">
                     <span>Cancel Appointment</span>
                 </button>
@@ -138,7 +138,7 @@
 
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     let selectedCancelUrl = null;
     let selectedCancelAppointmentId = null;
 

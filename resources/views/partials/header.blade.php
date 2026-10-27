@@ -350,7 +350,7 @@
                 </div>
 
                 <i class="fa-solid fa-chevron-down desktop-chevron"
-                    style="font-size:.65rem; opacity:.75; margin-left:4px;"></i>
+                    data-ui-presentation="presentation-1e7752fa6c28"></i>
             </button>
 
             <div id="userMenu" class="header-dropdown-menu header-user-menu" role="menu">

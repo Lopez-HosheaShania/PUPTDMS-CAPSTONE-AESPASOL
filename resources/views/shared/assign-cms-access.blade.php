@@ -74,7 +74,7 @@
                                     </div>
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
-                                        <div id="progressUserBar" class="progress-fill" style="width: 0%;"></div>
+                                        <div id="progressUserBar" class="progress-fill" data-ui-presentation="presentation-72dd1572d65e"></div>
                                     </div>
                                 </div>
 
@@ -136,7 +136,7 @@
                                     </div>
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
-                                        <div id="progressInformationBar" class="progress-fill" style="width: 0%;"></div>
+                                        <div id="progressInformationBar" class="progress-fill" data-ui-presentation="presentation-72dd1572d65e"></div>
                                     </div>
                                 </div>
 
@@ -154,7 +154,7 @@
                                 <div id="userSyncedInformation" hidden>
                                     <div class="flex flex-col gap-5">
                                         <div class="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center"
-                                            style="border-color: var(--border);">
+                                            data-ui-presentation="presentation-7c1d0a16a55f">
                                             <div class="flex min-w-0 items-center gap-3">
                                                 <div id="summary_avatar" class="patient-avatar patient-avatar-lg">--</div>
                                                 <div class="min-w-0">
@@ -179,37 +179,37 @@
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">External Admin ID</span>
                                                     <span id="display_admin_id" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">First Name</span>
                                                     <span id="display_fname" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Last Name</span>
                                                     <span id="display_lname" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Birthday</span>
                                                     <span id="display_birthday" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Age</span>
                                                     <span id="display_age" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Gender</span>
                                                     <span id="display_gender" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                             </div>
 
@@ -220,31 +220,31 @@
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Office</span>
                                                     <span id="display_office" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Access Level</span>
                                                     <span id="display_access_level" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Email</span>
                                                     <span id="display_email" class="global-info-value min-w-0 text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Contact Number</span>
                                                     <span id="display_contact" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Senior / PWD</span>
                                                     <span id="display_senior_pwd" class="global-info-value text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                             </div>
 
@@ -255,7 +255,7 @@
                                                     <span class="ui-muted-text">Home Address</span>
                                                     <span id="display_address"
                                                         class="global-info-value min-w-0 text-right"
-                                                        style="margin-top: 0;">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -283,7 +283,7 @@
                                     </div>
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
-                                        <div id="progressAccessBar" class="progress-fill" style="width: 0%;"></div>
+                                        <div id="progressAccessBar" class="progress-fill" data-ui-presentation="presentation-72dd1572d65e"></div>
                                     </div>
                                 </div>
 
@@ -437,7 +437,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
             const assignForm = document.getElementById('assignCmsAccessForm');
             const searchInput = document.getElementById('user_search');

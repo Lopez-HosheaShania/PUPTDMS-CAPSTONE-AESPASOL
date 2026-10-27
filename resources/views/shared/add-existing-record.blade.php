@@ -133,7 +133,7 @@
         </div>
     </main>
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
             const input = document.getElementById('patientSearchInput');
             const patientGrid = document.getElementById('patientGrid');
@@ -920,10 +920,7 @@
                                         src="${escapeHtml(avatarUrl)}"
                                         alt="${escapeHtml(patientName)}"
                                         loading="lazy"
-                                        onerror="
-                                            this.parentElement.innerHTML =
-                                            '<span>${escapeHtml(patientInitials)}</span>';
-                                        "
+                                        data-ui-error="action-65226e9bb18e" data-ui-error-arg-0="&lt;span&gt;${window.uiAttribute(escapeHtml(patientInitials))}&lt;/span&gt;"
                                     >
                                 `
                     : `

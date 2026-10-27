@@ -2,17 +2,14 @@
 <html lang="en">
 
 <head>
+    @include('partials.security-bootstrap')
+    @vite('resources/css/vendor-fonts.css')
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Patient Registration</title>
   <link rel="icon" type="image/png" href="{{ asset('images/PUPT-DMS-Logo.png') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet">
 
-  <style>
+  <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     *,
     *::before,
     *::after {
@@ -1139,7 +1136,7 @@
           </div>
 
           <div class="photo-badge">
-            <i class="fa-solid fa-tooth" style="font-size:12px;"></i>
+            <i class="fa-solid fa-tooth" data-ui-presentation="presentation-c42f23b8ec8e"></i>
             Patient Portal
           </div>
         </div>
@@ -1205,7 +1202,7 @@
               <div class="pw-wrap">
                 <input id="password" type="password" name="password" placeholder="Enter your password" required
                   class="field-input">
-                <button type="button" class="pw-toggle" onclick="togglePassword('password','eyePassword')">
+                <button type="button" class="pw-toggle" data-ui-click="action-84cd2f54c0c6">
                   <svg id="eyePassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1230,7 +1227,7 @@
                 <input id="confirmPassword" type="password" name="password_confirmation"
                   placeholder="Re-enter your password" required class="field-input">
                 <button type="button" class="pw-toggle"
-                  onclick="togglePassword('confirmPassword','eyeConfirmPassword')">
+                  data-ui-click="action-5817faec28d5">
                   <svg id="eyeConfirmPassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1242,16 +1239,16 @@
               </div>
               <p id="passwordMismatch" class="field-error"><i class="fa-solid fa-circle-xmark"></i> Passwords do not
                 match</p>
-              <p id="passwordMatch" class="field-error" style="color:#16A34A;display:none;"><i
+              <p id="passwordMatch" class="field-error" data-ui-presentation="presentation-9ce5128fda59"><i
                   class="fa-solid fa-circle-check"></i> Passwords match</p>
             </div>
 
             <!-- Submit -->
-            <div class="col-span-2" style="margin-top:4px;">
+            <div class="col-span-2" data-ui-presentation="presentation-36e81f861247">
               <button type="submit" class="btn-submit">
                 Register
                 <div class="btn-arrow">
-                  <i class="fa-solid fa-user-plus" style="font-size:11px;"></i>
+                  <i class="fa-solid fa-user-plus" data-ui-presentation="presentation-025fe5129171"></i>
                 </div>
               </button>
             </div>
@@ -1289,7 +1286,7 @@
   </footer>
 
   @if($errors->any())
-  <script>
+  <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', function () {
       @foreach($errors -> all() as $error)
       showToast('Validation Error', "{{ $error }}", 'error');
@@ -1299,14 +1296,14 @@
   @endif
 
   @if(session('error'))
-  <script>
+  <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', function () {
       showToast('Error', "{{ session('error') }}", 'error');
     });
   </script>
   @endif
 
-  <script>
+  <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     /* ══════ STARS ══════ */
     (function () {
       const canvas = document.getElementById('stars');
@@ -1358,7 +1355,7 @@
                     <div class="toast-title">${title}</div>
                     <div class="toast-msg">${message}</div>
                 </div>
-                <button class="toast-close" onclick="dismissToast(this.parentElement)">
+                <button class="toast-close" data-ui-click="action-6f467bb30429">
                     <i class="fa-solid fa-xmark"></i>
                 </button>`;
       container.appendChild(t);
@@ -1559,19 +1556,19 @@
 
   {{-- SESSION TOASTS --}}
   @if(session('error'))
-  <script>
+  <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', () => showToast('Error', "{{ session('error') }}", 'error'));
   </script>
   @endif
 
   @if(session('success'))
-  <script>
+  <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', () => showToast('Account Created!', "{{ session('success') }}", 'success'));
   </script>
   @endif
 
   @if(session('registered'))
-  <script>
+  <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', function () {
       showToast('Account Created Successfully!', 'Redirecting you to login&hellip;', 'success');
       setTimeout(() => { window.location.href = '/login'; }, 3000);

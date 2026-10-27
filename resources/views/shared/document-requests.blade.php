@@ -228,17 +228,17 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                         :options="$docRequestStatusOptions" callback="handleDocumentRequestStatusSelect" searchable
                         multiple search-placeholder="Search status..." />
 
-                    <button id="filterBtn" type="button" onclick="openFilterModal()" class="global-filter-btn"
+                    <button id="filterBtn" type="button" data-ui-click="action-6f3d9ae5533d" class="global-filter-btn"
                         data-tooltip="Filter" data-tooltip-tone="neutral" aria-label="Filter requests">
                         <i class="fa-solid fa-sliders"></i>
                         <span>Filter</span>
-                        <span id="filterBadge" class="filter-badge" style="display:none;"></span>
+                        <span id="filterBadge" class="filter-badge" data-ui-presentation="presentation-d0466aa33fa8"></span>
                     </button>
 
                     <x-view-toggle id="documentRequestsViewToggle" root="#mainContent"
                         storage-key="documentRequestsViewMode" list-label="List" grid-label="Grid" />
 
-                    <button id="externalClearFilterBtn" type="button" onclick="resetAdvancedFilters()"
+                    <button id="externalClearFilterBtn" type="button" data-ui-click="action-3c9443718a88"
                         class="global-filter-reset-btn hidden" aria-label="Reset filters" data-tooltip="Reset filters"
                         data-tooltip-tone="neutral">
                         <i class="fa-solid fa-rotate-left"></i>
@@ -402,7 +402,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
 <div id="approveModal" class="ui-modal modal-theme-success" aria-hidden="true">
 
-    <div class="ui-modal-card modal-md" onclick="event.stopPropagation()">
+    <div class="ui-modal-card modal-md" data-ui-click="action-22499e15f3ee">
 
         <div class="modal-hd">
             <div class="modal-heading">
@@ -502,7 +502,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
 <div id="rejectModal" class="ui-modal modal-theme-danger" aria-hidden="true">
 
-    <div class="ui-modal-card modal-md" onclick="event.stopPropagation()">
+    <div class="ui-modal-card modal-md" data-ui-click="action-22499e15f3ee">
 
         <form id="rejectRequestForm" data-global-validation data-discard-form novalidate>
 
@@ -631,7 +631,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
     const ADMIN_DOC_REQUESTS = @json($docRequestsPayload -> values());
     const ADMIN_DOC_STATS = @json($docRequestStats);
@@ -1326,7 +1326,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         if (filterSort !== 'newest') parts.push('Sort');
         const label = parts.length ? `Clear filter${parts.length > 1 ? 's' : ''} (${parts.join(', ')})` :
             'Reset';
-        return `<div style="margin-top:1.25rem;"><button class="btn-clear-filter" onclick="resetAllFilters()"><i class="fa-solid fa-filter-circle-xmark"></i>${label}</button></div>`;
+        return `<div data-ui-presentation="presentation-a3c9c5afaa4d"><button class="btn-clear-filter" data-ui-click="action-339eff24b32d"><i class="fa-solid fa-filter-circle-xmark"></i>${label}</button></div>`;
     }
 
     function resetAllFilters() {
@@ -1704,7 +1704,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     }
 
     function jsStringArg(value) {
-        return JSON.stringify(String(value ?? '')).replace(/"/g, '&quot;');
+        return JSON.stringify(String(value ?? ''));
     }
 
     function getStatusBadgeClass(status) {
@@ -1739,7 +1739,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 class="ui-action-btn ui-action-success"
                 data-tooltip="Approve request" data-tooltip-tone="start"
                 aria-label="Approve request"
-                onclick="event.stopPropagation(); openApprove(${request.id}, ${patientArg})">
+                data-ui-click="action-6f1c12e1421c" data-ui-click-arg-0="${window.uiAttribute(request.id)}" data-ui-click-arg-1="${window.uiAttribute(patientArg)}">
                 <i class="fa-solid fa-check"></i>
             </button>
 
@@ -1748,7 +1748,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 class="ui-action-btn ui-action-delete"
                 data-tooltip="Reject request" data-tooltip-tone="cancel"
                 aria-label="Reject request"
-                onclick="event.stopPropagation(); openReject(${request.id}, ${patientArg})">
+                data-ui-click="action-b2e920847258" data-ui-click-arg-0="${window.uiAttribute(request.id)}" data-ui-click-arg-1="${window.uiAttribute(patientArg)}">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -1781,12 +1781,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         return `
         <tr
             id="row-d-${r.id}"
-            onclick="
-                selectDocumentCard(
-                    'd',
-                    ${r.id}
-                )
-            "
+            data-ui-click="action-34bf4e6b59e3" data-ui-click-arg-0="${window.uiAttribute(r.id)}"
         >
             <td class="table-cell-main">
                 <div class="table-primary">
@@ -1872,7 +1867,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         <article
             class="docreq-responsive-record"
             id="row-m-${r.id}"
-            onclick="selectDocumentCard('m', ${r.id})"
+            data-ui-click="action-3d5d881f4339" data-ui-click-arg-0="${window.uiAttribute(r.id)}"
         >
             <div class="docreq-responsive-record-head">
                 <div class="table-primary docreq-responsive-patient">
@@ -1973,7 +1968,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         <article
             class="table-record-card docreq-grid-card"
             id="row-g-${r.id}"
-            onclick="selectDocumentCard('g', ${r.id})"
+            data-ui-click="action-88c34ac00542" data-ui-click-arg-0="${window.uiAttribute(r.id)}"
         >
             <div class="table-record-card-layout">
 

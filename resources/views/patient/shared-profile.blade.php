@@ -174,7 +174,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                 </a>
                 @endif
                 @if ($canStartProcedure)
-                <button type="button" onclick="openStartModal()" class="ui-btn ui-btn-success">
+                <button type="button" data-ui-click="action-0c1e6fd96db0" class="ui-btn ui-btn-success">
                     <i class="fa-solid fa-play"></i>
                     <span>Start Procedure</span>
                 </button>
@@ -203,7 +203,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                     class="ui-icon-btn neutral patient-privacy-toggle" data-masked="true"
                                     data-tooltip="Show private information" data-tooltip-tone="neutral"
                                     aria-label="Show private information" aria-pressed="false"
-                                    onclick="togglePatientProfilePrivacy(this)">
+                                    data-ui-click="action-c2a93914d63a">
                                     <i class="fa-regular fa-eye"></i>
                                 </button>
                             </div>
@@ -376,7 +376,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                         @if ($isPendingManualReview && $canReviewSignature)
                                         <form method="POST"
                                             action="{{ $profileMode === 'admin' ? route('admin.patient.signature.invalid', $patient) : route('dentist.patient.signature.invalid', $patient) }}"
-                                            onsubmit="return confirm('Mark this uploaded signature as invalid and notify the patient to upload a new one?');"
+                                            data-ui-submit="action-fe04d3a0df1b"
                                             class="ml-auto">
                                             @csrf
                                             <button type="submit" class="ui-btn ui-btn-secondary ui-btn-sm">
@@ -475,7 +475,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                         <div class="treatment-tabs" role="tablist" aria-label="Treatment history">
                             <button id="futureTab" type="button" class="treatment-tab is-active" role="tab"
                                 aria-selected="true" aria-controls="futureContent"
-                                onclick="switchTreatmentTab('future')">
+                                data-ui-click="action-52d5565ec9b2">
                                 <i class="fa-regular fa-calendar"></i>
 
                                 <span>Upcoming</span>
@@ -486,7 +486,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                             </button>
 
                             <button id="pastTab" type="button" class="treatment-tab" role="tab" aria-selected="false"
-                                aria-controls="pastContent" onclick="switchTreatmentTab('past')">
+                                aria-controls="pastContent" data-ui-click="action-b3866f05a448">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
 
                                 <span>Past Visits</span>
@@ -1017,7 +1017,7 @@ $procedureAppointment->service_type_name
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
 
     function maskPatientPhone(value) {
         const raw = String(value || '').trim();

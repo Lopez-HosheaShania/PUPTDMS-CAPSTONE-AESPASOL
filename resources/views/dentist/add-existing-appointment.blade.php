@@ -280,7 +280,7 @@ $patientProfileBackUrl = $isAdminView
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', async function () {
         const reviewGrid = document.getElementById('existingAppointmentReviewGrid');
         const timeField = document.getElementById('existing_time_input');

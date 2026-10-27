@@ -35,7 +35,7 @@
             </div>
 
             @if (session('success'))
-                <script>
+                <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
                     document.addEventListener('DOMContentLoaded', function() {
                         showSuccessToast("{{ session('success') }}");
                     });
@@ -43,7 +43,7 @@
             @endif
 
             @if (session('error'))
-                <script>
+                <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
                     document.addEventListener('DOMContentLoaded', function() {
                         showErrorToast("{{ session('error') }}");
                     });
@@ -222,7 +222,7 @@
                                                 @if ($canUpdateUserRole)
                                                     <button type="button"
                                                         data-user-details='@json($userDetails)'
-                                                        onclick="openEditModalFromButton(this, 'users', {{ $user->id }}, @js($displayName), @js($user->email), @js($user->role_id), @js($user->status))"
+                                                        data-ui-click="action-0c508fb9e874" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-2="{{ json_encode($user->email, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($user->role_id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-4="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                         class="ui-action-btn ui-action-edit" data-tooltip="Edit account"
                                                         data-tooltip-tone="edit" aria-label="Edit account">
                                                         <i class="fa-solid fa-pen"></i>
@@ -231,7 +231,7 @@
 
                                                 @if ($canDisableUsers)
                                                     <button type="button"
-                                                        onclick="openToggleConfirm({{ $user->id }}, @js($user->status), @js($displayName))"
+                                                        data-ui-click="action-43aabb4c9c5a" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-2="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                         class="ui-action-btn {{ $user->status === 'active' ? 'ui-action-warning' : 'ui-action-success' }}"
                                                         data-tooltip="{{ $user->status === 'active' ? 'Deactivate account' : 'Activate account' }}"
                                                         data-tooltip-tone="{{ $user->status === 'active' ? 'reschedule' : 'start' }}"
@@ -244,7 +244,7 @@
                                                 @if ($canViewAccounts)
                                                     <button type="button"
                                                         data-user-details='@json($userDetails)'
-                                                        onclick="openViewModalFromButton(this)"
+                                                        data-ui-click="action-ff8f8b5ad104"
                                                         class="ui-action-btn ui-action-view" data-tooltip="View details"
                                                         data-tooltip-tone="view" aria-label="View details">
                                                         <i class="fa-solid fa-eye"></i>
@@ -347,7 +347,7 @@
                                                 @if ($canUpdateUserRole)
                                                     <button type="button"
                                                         data-user-details='@json($userDetails)'
-                                                        onclick="openEditModalFromButton(this, 'users', {{ $user->id }}, @js($displayName), @js($user->email), @js($user->role_id), @js($user->status))"
+                                                        data-ui-click="action-0c508fb9e874" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-2="{{ json_encode($user->email, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($user->role_id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-4="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                         class="ui-action-btn ui-action-edit" data-tooltip="Edit account"
                                                         data-tooltip-tone="edit" aria-label="Edit account">
                                                         <i class="fa-solid fa-pen"></i>
@@ -356,7 +356,7 @@
 
                                                 @if ($canDisableUsers)
                                                     <button type="button"
-                                                        onclick="openToggleConfirm({{ $user->id }}, @js($user->status), @js($displayName))"
+                                                        data-ui-click="action-43aabb4c9c5a" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-2="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                         class="ui-action-btn {{ $user->status === 'active' ? 'ui-action-warning' : 'ui-action-success' }}"
                                                         data-tooltip="{{ $user->status === 'active' ? 'Deactivate account' : 'Activate account' }}"
                                                         data-tooltip-tone="{{ $user->status === 'active' ? 'reschedule' : 'start' }}"
@@ -369,7 +369,7 @@
                                                 @if ($canViewAccounts)
                                                     <button type="button"
                                                         data-user-details='@json($userDetails)'
-                                                        onclick="openViewModalFromButton(this)"
+                                                        data-ui-click="action-ff8f8b5ad104"
                                                         class="ui-action-btn ui-action-view" data-tooltip="View details"
                                                         data-tooltip-tone="view" aria-label="View details">
                                                         <i class="fa-solid fa-eye"></i>
@@ -514,10 +514,7 @@
                                             data-required-message="Enter your current admin password.">
 
                                         <button type="button" class="global-input-action"
-                                            onclick="togglePassVis(
-                        'editAdminCurrentPassword',
-                        'editAdminPasswordEye'
-                    )"
+                                            data-ui-click="action-3f17fa1e4fa6"
                                             aria-label="Show or hide current admin password">
                                             <i class="fa-regular fa-eye" id="editAdminPasswordEye"></i>
                                         </button>
@@ -659,7 +656,7 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="closeModal('viewModal')" class="modal-x"
+                <button type="button" data-ui-click="action-21e03f3cb038" class="modal-x"
                     aria-label="Close account details modal">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -777,7 +774,7 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" onclick="closeModal('viewModal')" class="ui-btn ui-btn-secondary">
+                <button type="button" data-ui-click="action-21e03f3cb038" class="ui-btn ui-btn-secondary">
                     Close
                 </button>
             </div>
@@ -817,7 +814,7 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" onclick="closeModal('toggleConfirmModal')" class="ui-btn ui-btn-secondary">
+                <button type="button" data-ui-click="action-5630b39be24d" class="ui-btn ui-btn-secondary">
                     Cancel
                 </button>
 
@@ -833,7 +830,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const umCanViewAccounts = @json($canViewAccounts);
         const umCanDisableUsers = @json($canDisableUsers);
         const umCanUpdateUserRole = @json($canUpdateUserRole);
@@ -1421,7 +1418,7 @@
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
+
                 .replace(/'/g, '&#039;');
         }
 
@@ -1466,9 +1463,7 @@
 
         function umRenderRows(users) {
             function jsAttr(value) {
-                return JSON
-                    .stringify(value ?? '')
-                    .replace(/"/g, '&quot;');
+                return JSON.stringify(value ?? '');
             }
 
             function buildDetails(user, roleLabel, statusLabel, createdFull) {
@@ -1520,15 +1515,7 @@
                 <button
                     type="button"
                     data-user-details="${detailsPayload}"
-                    onclick="openEditModalFromButton(
-                        this,
-                        'users',
-                        ${Number(user.id)},
-                        ${jsAttr(user.name)},
-                        ${jsAttr(user.email)},
-                        ${jsAttr(user.role_id)},
-                        ${jsAttr(user.status)}
-                    )"
+                    data-ui-click="action-300bbde9a403" data-ui-click-arg-0="${window.uiAttribute(Number(user.id))}" data-ui-click-arg-1="${window.uiAttribute(jsAttr(user.name))}" data-ui-click-arg-2="${window.uiAttribute(jsAttr(user.email))}" data-ui-click-arg-3="${window.uiAttribute(jsAttr(user.role_id))}" data-ui-click-arg-4="${window.uiAttribute(jsAttr(user.status))}"
                     class="ui-action-btn ui-action-edit"
                     data-tooltip="Edit account"
                     data-tooltip-tone="edit"
@@ -1540,11 +1527,7 @@
                 const toggleButton = umCanDisableUsers ? `
                 <button
                     type="button"
-                    onclick="openToggleConfirm(
-                        ${Number(user.id)},
-                        ${jsAttr(user.status)},
-                        ${jsAttr(user.name)}
-                    )"
+                    data-ui-click="action-1818b87d7b42" data-ui-click-arg-0="${window.uiAttribute(Number(user.id))}" data-ui-click-arg-1="${window.uiAttribute(jsAttr(user.status))}" data-ui-click-arg-2="${window.uiAttribute(jsAttr(user.name))}"
                     class="ui-action-btn ${toggleClass}"
                     data-tooltip="${toggleTooltip}"
                     data-tooltip-tone="${toggleTone}"
@@ -1557,7 +1540,7 @@
                 <button
                     type="button"
                     data-user-details="${detailsPayload}"
-                    onclick="openViewModalFromButton(this)"
+                    data-ui-click="action-ff8f8b5ad104"
                     class="ui-action-btn ui-action-view"
                     data-tooltip="View details"
                     data-tooltip-tone="view"

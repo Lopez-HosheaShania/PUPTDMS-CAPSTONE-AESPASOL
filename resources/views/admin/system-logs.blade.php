@@ -195,14 +195,14 @@
                                     ],
                                 ]" />
 
-                            <button type="button" id="slFilterBtn" class="global-filter-btn" onclick="openSlFilterPanel()"
+                            <button type="button" id="slFilterBtn" class="global-filter-btn" data-ui-click="action-23adcae5c050"
                                 aria-pressed="false">
                                 <i class="fa-solid fa-sliders"></i>
                                 <span>Filter</span>
                                 <span id="slFilterBadge" class="filter-badge hidden"></span>
                             </button>
 
-                            <button id="slExternalClearFilterBtn" type="button" onclick="clearOnlySlFilters()"
+                            <button id="slExternalClearFilterBtn" type="button" data-ui-click="action-2f4e0d8e81f5"
                                 class="global-filter-reset-btn hidden" title="Reset filters" aria-label="Reset filters">
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>
@@ -211,14 +211,14 @@
                                 <button type="button" id="slOverflowTrigger" class="ui-action-btn"
                                     aria-label="More actions" aria-haspopup="menu" aria-expanded="false"
                                     data-tooltip="More actions" data-tooltip-tone="neutral"
-                                    onclick="toggleSlOverflowMenu(event)">
+                                    data-ui-click="action-d8c154b64c66">
                                     <i class="fa-solid fa-ellipsis-vertical"></i>
                                 </button>
 
                                 <div id="slOverflowPanel" class="sl-overflow-panel" role="menu"
                                     aria-label="System log actions">
                                     <button type="button" id="slArchiveBtn" class="sl-overflow-item" role="menuitem"
-                                        onclick="closeSlOverflowMenu(); openSlArchiveModal()">
+                                        data-ui-click="action-478b7a7c7da5">
                                         <span class="sl-overflow-item-icon">
                                             <i class="fa-solid fa-box-archive"></i>
                                         </span>
@@ -230,7 +230,7 @@
                                     </button>
 
                                     <button type="button" id="slExportBtn" class="sl-overflow-item" role="menuitem"
-                                        onclick="closeSlOverflowMenu(); handleSlExportButtonClick()">
+                                        data-ui-click="action-9294a71d2860">
                                         <span class="sl-overflow-item-icon">
                                             <i class="fa-solid fa-file-pdf"></i>
                                         </span>
@@ -562,10 +562,10 @@
         </div>
     </main>
 
-    <x-filter-drawer id="filterModal" title="Filters" close-callback="closeSlFilterPanel()"
-        clear-id="slClearFilterPanelBtn" clear-callback="clearSlFilterPanelDraft()" clear-label="Clear Filters"
-        cancel-id="filterCloseBtn" cancel-callback="closeSlFilterPanel()" cancel-label="Cancel"
-        apply-id="filterApplyBtn" apply-callback="applySlFilters()" apply-label="Show 0 results"
+    <x-filter-drawer id="filterModal" title="Filters" close-callback="action-463079bd5291"
+        clear-id="slClearFilterPanelBtn" clear-callback="action-1e0663440b55" clear-label="Clear Filters"
+        cancel-id="filterCloseBtn" cancel-callback="action-463079bd5291" cancel-label="Cancel"
+        apply-id="filterApplyBtn" apply-callback="action-c059940c46c7" apply-label="Show 0 results"
         results-id="slShowResultsText">
 
         <div id="slActiveFiltersSection" class="filter-active-section hidden">
@@ -616,17 +616,17 @@
             <div id="slDatePresetGroup" class="filter-chip-row">
 
                 <button type="button" class="quick-date-chip" data-sl-date-preset="today"
-                    onclick="setSlQuickDate('today')">
+                    data-ui-click="action-ae64a4dd44f5">
                     Today
                 </button>
 
                 <button type="button" class="quick-date-chip" data-sl-date-preset="week"
-                    onclick="setSlQuickDate('week')">
+                    data-ui-click="action-c457a107a6f8">
                     Last 7 Days
                 </button>
 
                 <button type="button" class="quick-date-chip" data-sl-date-preset="month"
-                    onclick="setSlQuickDate('month')">
+                    data-ui-click="action-673f2e1d1880">
                     Last 30 Days
                 </button>
 
@@ -776,7 +776,7 @@
                     </button>
 
                     <button type="button" id="slArchiveConfirmBtn" class="ui-btn ui-btn-warning"
-                        onclick="submitSlArchiveModal()">
+                        data-ui-click="action-215d4806d34c">
 
                         <i class="fa-solid fa-box-archive"></i>
                         <span>Archive Logs</span>
@@ -999,7 +999,7 @@
                     </button>
 
                     <button type="button" id="slExportConfirmBtn" class="ui-btn ui-btn-primary"
-                        onclick="submitSlExportModal()">
+                        data-ui-click="action-6a1c2afb8e04">
                         <i class="fa-solid fa-file-pdf"></i>
 
                         <span>
@@ -1014,7 +1014,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         var slArchiveDaysInput = null;
         var slArchiveError = null;
         var slArchiveConfirmBtn = null;

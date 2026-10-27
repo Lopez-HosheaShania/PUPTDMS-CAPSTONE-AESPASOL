@@ -207,7 +207,7 @@
 </div>
 
 @once
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         function initBookingDentalHistoryConditionals() {
             document
                 .querySelectorAll(

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    @include('partials.security-bootstrap')
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -31,7 +32,7 @@
         $primaryLabel = $customPrimaryLabel ?: 'Back to Dashboard';
     @endphp
 
-    <main class="error-stage" style="--error-background-image: url('{{ asset('images/PUP-Pylon.jpg') }}');">
+    <main class="error-stage" data-ui-style="--error-background-image: url(&#39;{{ asset('images/PUP-Pylon.jpg') }}&#39;);">
 
         <div class="error-ripples" aria-hidden="true">
             <span></span>
@@ -115,7 +116,7 @@
                         </span>
                     </a>
 
-                    <button type="button" class="error-action error-action--secondary" onclick="history.back()">
+                    <button type="button" class="error-action error-action--secondary" data-ui-click="action-1f0252ba48f2">
 
                         <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
 

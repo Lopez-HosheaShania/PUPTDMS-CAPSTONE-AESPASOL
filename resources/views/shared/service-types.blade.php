@@ -451,7 +451,7 @@
             aria-labelledby="manageServiceTitle" data-global-validation data-discard-form
             data-discard-title="Discard service changes?" data-discard-subtitle="You have unsaved service updates."
             data-discard-message="Closing this modal will remove your changes to this service. Do you want to discard them?"
-            novalidate onclick="event.stopPropagation()">
+            novalidate data-ui-click="action-22499e15f3ee">
             @csrf
             @method('PUT')
 
@@ -598,7 +598,7 @@
 
     <div id="serviceDetailsModal" class="ui-modal modal-theme-primary" aria-hidden="true">
         <div class="ui-modal-card modal-md" role="dialog" aria-modal="true" aria-labelledby="serviceDetailsTitle"
-            onclick="event.stopPropagation()">
+            data-ui-click="action-22499e15f3ee">
             <div class="modal-hd">
                 <div class="modal-heading">
                     <div class="modal-icon">
@@ -616,7 +616,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="modal-x" onclick="closeModal('serviceDetailsModal')"
+                <button type="button" class="modal-x" data-ui-click="action-e9850a0605f8"
                     aria-label="Close service details">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -713,7 +713,7 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" onclick="closeModal('serviceDetailsModal')">
+                <button type="button" class="ui-btn ui-btn-secondary" data-ui-click="action-e9850a0605f8">
                     Close
                 </button>
             </div>
@@ -745,7 +745,7 @@
 @endphp
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         function copyTextToClipboard(text) {
             if (navigator.clipboard && window.isSecureContext) {
                 return navigator.clipboard.writeText(text);

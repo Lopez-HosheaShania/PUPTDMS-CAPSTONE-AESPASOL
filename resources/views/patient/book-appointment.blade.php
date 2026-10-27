@@ -482,7 +482,7 @@
                 </a>
 
                 <button type="button" id="introContinueDraftBtn" class="ui-btn ui-btn-secondary ui-btn-sm"
-                    style="display: none;">
+                    data-ui-presentation="presentation-6e22c58a7a6a">
 
                     <i class="fa-solid fa-clock-rotate-left"></i>
                     Continue Draft
@@ -635,7 +635,7 @@
 
 @section('scripts')
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const diseaseLabelByCode = @json($diseases->pluck('label', 'code'));
         const isFemalePatient = @json($isFemalePatient);
         const isReservedBooking = @json((bool) $isReservedBooking);
@@ -2497,7 +2497,7 @@ const summaryCard = (
                 <button
                     type="button"
                     class="ui-btn ui-btn-secondary ui-btn-sm"
-                    onclick="${editAction}">
+                    data-ui-click="action-0bcc7b50f274" data-ui-click-arg-0="${window.uiAttribute(editAction)}">
                     <i class="fa-solid fa-pen" aria-hidden="true"></i>
                     <span>Edit</span>
                 </button>
@@ -2793,7 +2793,7 @@ const summaryCard = (
                                                         <button
                                                             type="button"
                                                             class="ui-btn ui-btn-primary ui-btn-sm"
-                                                            onclick="saveGlobalContactInformation()"
+                                                            data-ui-click="action-9247f8a4a5d1"
                                                         >
                                                             <i class="fa-solid fa-check"></i>
                                                             Save Changes
@@ -2802,7 +2802,7 @@ const summaryCard = (
                                                         <button
                                                             type="button"
                                                             class="ui-btn ui-btn-secondary ui-btn-sm"
-                                                            onclick="cancelContactInformationEdit()"
+                                                            data-ui-click="action-ef7c4934d238"
                                                         >
                                                             Cancel
                                                         </button>

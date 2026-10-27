@@ -16,6 +16,9 @@
 /public/build
 /public/hot
 /public/storage
+# Generated from the pinned Sienna package by scripts/vendor-assets.mjs.
+/public/vendor/sienna/locales/
+/public/vendor/sienna/fonts/
 /storage/*.key
 /storage/pail
 /vendor

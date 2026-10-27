@@ -35,7 +35,7 @@
         ];
     @endphp
 
-    <script id="patientRecordsPageData" type="application/json">
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" id="patientRecordsPageData" type="application/json">
     {!! json_encode(
         $patientRecordsPageData,
         JSON_HEX_TAG
@@ -45,7 +45,7 @@
     ) !!}
 </script>
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         window.patientRecordsPageData =
             JSON.parse(
                 document.getElementById(
@@ -271,7 +271,7 @@
                                     @endphp
 
                                     <article class="global-record-card document-request-item"
-                                        style="
+                                        data-ui-style="
                             --record-accent:
                             {{ $displayStatus === 'approved'
                                 ? 'var(--status-approved-solid)'

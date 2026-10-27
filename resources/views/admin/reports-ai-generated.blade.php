@@ -685,7 +685,7 @@
     <div id="printReportModal" class="ui-modal" aria-hidden="true">
 
         <div class="ui-modal-card modal-xl air-modal" role="dialog" aria-modal="true"
-            aria-labelledby="printReportTitle" onclick="event.stopPropagation()">
+            aria-labelledby="printReportTitle" data-ui-click="action-22499e15f3ee">
 
             <div class="air-modal-preview modal-preview-body" data-global-preview-zoom data-preview-min="0.5"
                 data-preview-max="2" data-preview-step="0.1">
@@ -1155,10 +1155,9 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    @vite('resources/js/reports/pdf-tools.js')
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('printReportModal');
             const openButton = document.getElementById('openPrintReportModal');
@@ -1279,6 +1278,12 @@
             }
 
             async function savePreviewAsPdf() {
+                try {
+                    await window.loadReportPdfTools?.();
+                } catch (error) {
+                    window.showToast?.({ type: 'error', title: 'PDF export unavailable', message: 'Please retry loading the PDF tools.' });
+                    return;
+                }
                 const canvasRenderer = window.html2canvas || window.html2canvasPro;
 
                 if (!canvasRenderer || !window.jspdf) {
@@ -1374,6 +1379,7 @@
                             removeContainer: true,
                             onclone: function(clonedDocument) {
                                 const style = clonedDocument.createElement('style');
+                                style.nonce = document.querySelector('meta[name="csp-nonce"]')?.content || '';
 
                                 style.textContent = `
                         html,

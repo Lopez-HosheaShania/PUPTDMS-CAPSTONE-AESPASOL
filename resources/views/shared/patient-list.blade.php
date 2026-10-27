@@ -179,7 +179,7 @@
                                             aria-label="Filter patients" data-tooltip="Filter" data-tooltip-tone="neutral">
                                             <i class="fa-solid fa-sliders"></i>
                                             <span>Filter</span>
-                                            <span id="filterBadge" class="filter-badge" style="display:none;"></span>
+                                            <span id="filterBadge" class="filter-badge" data-ui-presentation="presentation-d0466aa33fa8"></span>
                                         </button>
                                     </div>
 
@@ -986,7 +986,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener("DOMContentLoaded", function() {
             let patientFilterModal = null;
             let patientSearchInput = null;

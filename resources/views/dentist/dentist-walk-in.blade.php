@@ -595,7 +595,7 @@
 
 @section('scripts')
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const diseaseLabelByCode = @json($diseases->pluck('label', 'code'));
 
         let selectedWalkInPatient = null;
@@ -3753,7 +3753,7 @@
                                                     <button
         type="button"
         class="ui-btn ui-btn-secondary ui-btn-sm"
-        onclick="${editAction}"
+        data-ui-click="action-0bcc7b50f274" data-ui-click-arg-0="${window.uiAttribute(editAction)}"
     >
         <i class="fa-solid fa-pen" aria-hidden="true"></i>
         <span>Edit</span>

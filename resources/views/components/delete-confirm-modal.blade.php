@@ -11,7 +11,7 @@
 
 <div id="{{ $id }}" class="ui-modal modal-theme-danger global-delete-modal" aria-hidden="true">
     <form id="{{ $formId }}" method="POST" action="" class="ui-modal-card modal-md global-delete-card"
-        role="dialog" aria-modal="true" aria-labelledby="{{ $id }}Title" onclick="event.stopPropagation()">
+        role="dialog" aria-modal="true" aria-labelledby="{{ $id }}Title" data-ui-click="action-22499e15f3ee">
         @csrf
         @method('DELETE')
 
@@ -63,7 +63,7 @@
 
         <div class="modal-ft">
             <button type="button" class="ui-btn ui-btn-secondary"
-                onclick="{{ $closeCallback ?: "closeModal('$id')" }}">
+                data-ui-click="{{ $closeCallback ?: 'close-modal' }}" data-ui-click-arg-0="{{ $id }}">
                 Cancel
             </button>
 

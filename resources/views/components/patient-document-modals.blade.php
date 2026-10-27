@@ -19,7 +19,7 @@
                 </div>
             </div>
 
-            <button type="button" class="patient-doc-x" onclick="closeDocModal('dentalClearanceModal')"
+            <button type="button" class="patient-doc-x" data-ui-click="action-3321670b58fc"
                 aria-label="Close clearance request modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -96,7 +96,7 @@
 
         <div class="patient-doc-modal-footer">
             <button type="button" class="patient-doc-btn patient-doc-btn-secondary"
-                onclick="closeDocModal('dentalClearanceModal')">
+                data-ui-click="action-3321670b58fc">
                 Cancel
             </button>
             <button type="submit" class="patient-doc-btn patient-doc-btn-primary">
@@ -128,7 +128,7 @@
                 </div>
             </div>
 
-            <button type="button" class="patient-doc-x" onclick="closeDocModal('dentalHealthRecordModal')"
+            <button type="button" class="patient-doc-x" data-ui-click="action-2bb633a6f172"
                 aria-label="Close health record request modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -199,7 +199,7 @@
 
         <div class="patient-doc-modal-footer">
             <button type="button" class="patient-doc-btn patient-doc-btn-secondary"
-                onclick="closeDocModal('dentalHealthRecordModal')">
+                data-ui-click="action-2bb633a6f172">
                 Cancel
             </button>
             <button type="submit" class="patient-doc-btn patient-doc-btn-primary">
@@ -240,13 +240,13 @@
             </div>
         </div>
 
-        <button type="button" onclick="closeDocSuccessModal()" class="doc-success-btn">
+        <button type="button" data-ui-click="action-2b8f389ffdda" class="doc-success-btn">
             Okay, got it!
         </button>
     </div>
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     function setDocModalLock(isLocked) {
         document.body.classList.toggle('doc-modal-lock', Boolean(isLocked));
         document.documentElement.classList.toggle('doc-modal-lock', Boolean(isLocked));

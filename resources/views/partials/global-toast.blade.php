@@ -108,7 +108,7 @@
         </div>
     </div>
 @elseif (\Illuminate\Support\Facades\Auth::check())
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {
             const activityUrl = @json(route('session.activity'));
             const csrfToken = @json(csrf_token());
@@ -129,7 +129,7 @@
     </script>
 @endif
 
-<script type="application/json" id="flashToastPayload">
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" type="application/json" id="flashToastPayload">
 {!! json_encode(
     $flashToasts,
     JSON_HEX_TAG |

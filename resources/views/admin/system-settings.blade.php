@@ -36,7 +36,7 @@
 
                 <div class="settings-banner-actions">
 
-                    <button type="button" id="settingsBannerSaveBtn" data-settings-save onclick="submitSettingsForm();"
+                    <button type="button" id="settingsBannerSaveBtn" data-settings-save data-ui-click="action-57cd63974b29"
                         class="ui-btn ui-btn-secondary settings-banner-save">
                         <i class="fa-solid fa-floppy-disk"></i>
                         Save Changes
@@ -59,32 +59,32 @@
                             <div class="p-2">
                                 @if ($canManageGeneralSettings)
                                 <a href="#" class="settings-nav-item {{ $defaultSettingsTab === 'general' ? 'active' : '' }}"
-                                    onclick="switchTab('general', this); return false;"><i
+                                    data-ui-click="action-524cbe50222f" data-settings-tab="general"><i
                                         class="fa-solid fa-sliders"></i> General</a>
                                 @endif
                                 {{-- Temporarily hidden: Clinic Info
                                 <a href="#" class="settings-nav-item"
-                                    onclick="switchTab('clinic', this); return false;"><i
+                                    data-ui-click="action-aba23a6c84ff" data-settings-tab="clinic"><i
                                         class="fa-solid fa-hospital"></i> Clinic Info</a>
                                 --}}
                                 @if ($canManageNotificationSettings)
                                 <a href="#" class="settings-nav-item {{ $defaultSettingsTab === 'notifications' ? 'active' : '' }}"
-                                    onclick="switchTab('notifications', this); return false;"><i
+                                    data-ui-click="action-3360e45d2f7f" data-settings-tab="notifications"><i
                                         class="fa-solid fa-bell"></i> Notifications</a>
                                 @endif
                                 @if ($canManageRetention)
                                 <a href="?tab=retention" class="settings-nav-item {{ $defaultSettingsTab === 'retention' ? 'active' : '' }}"
-                                    onclick="switchTab('retention', this); return false;"><i
+                                    data-ui-click="action-e48f4aaf6db9" data-settings-tab="retention"><i
                                         class="fa-solid fa-shield-halved"></i> Data Retention</a>
                                 @endif
                                 {{-- Temporarily hidden: Email/SMTP
                                 <a href="#" class="settings-nav-item"
-                                    onclick="switchTab('email', this); return false;"><i
+                                    data-ui-click="action-bb4a13913035" data-settings-tab="email"><i
                                         class="fa-solid fa-envelope"></i> Email / SMTP</a>
                                 --}}
                                 {{-- Temporarily hidden: Integrations
                                 <a href="#" class="settings-nav-item"
-                                    onclick="switchTab('integrations', this); return false;"><i
+                                    data-ui-click="action-5a9e853d1e90" data-settings-tab="integrations"><i
                                         class="fa-solid fa-plug"></i> Integrations</a>
                                 --}}
                             </div>
@@ -581,18 +581,18 @@
 
                             <div class="fsb-actions">
                                 <button type="button" id="settingsResetDefaultsBtn" class="btn-reset-defaults"
-                                    onclick="resetSettingsToDefaults()">
+                                    data-ui-click="action-96e8179179ff">
                                     <i class="fa-solid fa-rotate-left"></i>
                                     Reset Defaults
                                 </button>
 
                                 <button type="button" id="settingsDiscardBtn" class="btn-discard"
-                                    onclick="discardSettingsChanges()" disabled>
+                                    data-ui-click="action-22c2e1201b39" disabled>
                                     Discard
                                 </button>
 
                                 <button type="button" id="settingsSaveFloatBtn" data-settings-save
-                                    class="btn-save-float" onclick="submitSettingsForm();">
+                                    class="btn-save-float" data-ui-click="action-57cd63974b29">
                                     <i class="fa-solid fa-floppy-disk"></i>
                                     Save Changes
                                 </button>
@@ -657,7 +657,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     function initRetentionPasswordConfirmation() {
         const dialog = document.getElementById('retentionPasswordDialog');
         if (!dialog) return;
@@ -722,8 +722,8 @@
 
     function setActiveNav(tabId, clickedItem = null) {
         document.querySelectorAll('#settingsListView .settings-nav-item').forEach(item => {
-            const onclickAttr = item.getAttribute('onclick') || '';
-            const isCurrent = clickedItem === item || onclickAttr.includes("'" + tabId + "'");
+            const itemTabId = item.dataset.settingsTab;
+            const isCurrent = clickedItem === item || itemTabId === tabId;
 
             item.classList.toggle('active', isCurrent);
         });

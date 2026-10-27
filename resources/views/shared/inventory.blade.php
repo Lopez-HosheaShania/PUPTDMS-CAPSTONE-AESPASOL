@@ -122,17 +122,17 @@
                             <div class="tab-group" role="tablist" aria-label="Inventory category">
 
                                 <button type="button" data-tab="all" aria-selected="true" class="tab-btn active"
-                                    onclick="setTab('all', this)">
+                                    data-ui-click="action-0f4a99c12b4d">
                                     All
                                 </button>
 
                                 <button type="button" data-tab="medicine" aria-selected="false" class="tab-btn"
-                                    onclick="setTab('medicine', this)">
+                                    data-ui-click="action-6af6d8c34f27">
                                     Medicine
                                 </button>
 
                                 <button type="button" data-tab="supplies" aria-selected="false" class="tab-btn"
-                                    onclick="setTab('supplies', this)">
+                                    data-ui-click="action-527a7d205eda">
                                     Supplies
                                 </button>
 
@@ -153,7 +153,7 @@
 
                         <div class="table-toolbar-actions">
 
-                            <button id="filterBtn" type="button" onclick="openFilterDrawer('filterModal')"
+                            <button id="filterBtn" type="button" data-ui-click="action-3b869f2f8687"
                                 class="global-filter-btn">
 
                                 <i class="fa-solid fa-sliders"></i>
@@ -164,13 +164,13 @@
 
                             <x-view-toggle id="inventoryViewToggle" root="#mainContent" storage-key="inventoryViewMode" />
 
-                            <button id="externalClearFilterBtn" type="button" onclick="clearFilterPanel()"
+                            <button id="externalClearFilterBtn" type="button" data-ui-click="action-eb2a40caced3"
                                 class="global-filter-reset-btn hidden" title="Reset filters">
 
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>
 
-                            <button type="button" onclick="openAddModal()"
+                            <button type="button" data-ui-click="action-0d547826d7f9"
                                 class="ui-btn ui-btn-primary ui-btn-sm table-toolbar-primary-action">
 
                                 <i class="fa-solid fa-plus"></i>
@@ -215,10 +215,10 @@
         </div>
     </main>
 
-    <x-filter-drawer id="filterModal" title="Filters" close-callback="closeFilterDrawer('filterModal')"
-        clear-id="clearFilterPanelBtn" clear-callback="clearFilterPanelModal()" clear-label="Clear Filters"
-        cancel-callback="closeFilterDrawer('filterModal')" cancel-label="Cancel" apply-id="saveFilterPanelBtn"
-        apply-callback="saveFilterPanel()" apply-label="Show 0 results" results-id="showResultsText">
+    <x-filter-drawer id="filterModal" title="Filters" close-callback="action-945b15a06543"
+        clear-id="clearFilterPanelBtn" clear-callback="action-109110749c54" clear-label="Clear Filters"
+        cancel-callback="action-945b15a06543" cancel-label="Cancel" apply-id="saveFilterPanelBtn"
+        apply-callback="action-362188adc405" apply-label="Show 0 results" results-id="showResultsText">
 
         <div id="activeFiltersSection" class="filter-active-section hidden">
 
@@ -444,7 +444,7 @@
                                     maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
                                     data-required-message="Please enter a stock number."
                                     data-pattern-message="Stock number must use the format 00-000."
-                                    data-validation-rule="uniqueInventoryStock" oninput="formatStockNo(this)" required>
+                                    data-validation-rule="uniqueInventoryStock" data-ui-input="action-32e9868b0600" required>
                             </div>
 
                             <x-voice-input target="#addStock" status-id="addStockVoiceStatus"
@@ -521,7 +521,7 @@
                                     value="1" min="1" max="99999" step="1" inputmode="numeric"
                                     data-number-stepper-input data-field-label="Quantity"
                                     data-required-message="Please enter a quantity." data-validation-rule="wholeNumber"
-                                    oninput="computeAddBalance()" required>
+                                    data-ui-input="action-ea53196008ea" required>
 
                                 <button type="button" class="global-number-stepper-btn" data-number-step="1"
                                     aria-label="Increase quantity">
@@ -557,7 +557,7 @@
                                     value="0" min="0" max="99999" step="1" inputmode="numeric"
                                     data-number-stepper-input data-field-label="Consumed"
                                     data-required-message="Please enter the consumed quantity."
-                                    data-validation-rule="inventoryConsumed" oninput="computeAddBalance()" required>
+                                    data-validation-rule="inventoryConsumed" data-ui-input="action-ea53196008ea" required>
 
                                 <button type="button" class="global-number-stepper-btn" data-number-step="1"
                                     aria-label="Increase consumed quantity">
@@ -682,7 +682,7 @@
                                     maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
                                     data-required-message="Please enter a stock number."
                                     data-pattern-message="Stock number must use the format 00-000."
-                                    data-validation-rule="uniqueInventoryStockEdit" oninput="formatStockNo(this)"
+                                    data-validation-rule="uniqueInventoryStockEdit" data-ui-input="action-32e9868b0600"
                                     required>
                             </div>
 
@@ -767,7 +767,7 @@
                                     min="1" max="99999" step="1" inputmode="numeric"
                                     data-number-stepper-input data-field-label="Quantity"
                                     data-required-message="Please enter a quantity." data-validation-rule="wholeNumber"
-                                    oninput="computeEditBalance()" required>
+                                    data-ui-input="action-8fba7d16f720" required>
 
                                 <button type="button" class="global-number-stepper-btn" data-number-step="1"
                                     aria-label="Increase quantity">
@@ -803,7 +803,7 @@
                                     min="0" max="99999" step="1" inputmode="numeric"
                                     data-number-stepper-input data-field-label="Consumed"
                                     data-required-message="Please enter the consumed quantity."
-                                    data-validation-rule="inventoryConsumed" oninput="computeEditBalance()" required>
+                                    data-validation-rule="inventoryConsumed" data-ui-input="action-8fba7d16f720" required>
 
                                 <button type="button" class="global-number-stepper-btn" data-number-step="1"
                                     aria-label="Increase consumed quantity">
@@ -876,7 +876,7 @@
 @section('scripts')
 
     @if ($canViewProcedureInventoryNotes)
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (() => {
             const endpoint = @json(route('dentist.inventory.procedure-notes'));
             const modal = document.getElementById('procedureInventoryNotesModal');
@@ -963,7 +963,7 @@
         $inventoryDestroyUrlTemplate = route($inventoryRouteNames['destroy'], ['inventory' => '__ID__']);
     @endphp
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         var currentViewMode = 'list';
 
         function bindInventoryGlobalViewToggle() {
@@ -1890,7 +1890,7 @@
             class="ui-action-btn ui-action-edit"
             data-tooltip="Edit inventory item"
             aria-label="Edit inventory item"
-            onclick="openEdit(${id})">
+            data-ui-click="action-640c3ab8383f" data-ui-click-arg-0="${window.uiAttribute(id)}">
             <i class="fa-solid fa-pen"></i>
         </button>
 
@@ -1898,7 +1898,7 @@
             class="ui-action-btn ui-action-delete"
             data-tooltip="Delete inventory item"
 aria-label="Delete inventory item"
-            onclick="deleteItem(${id})">
+            data-ui-click="action-a48d004fa9c4" data-ui-click-arg-0="${window.uiAttribute(id)}">
             <i class="fa-solid fa-trash"></i>
         </button>
     `;
@@ -2494,7 +2494,7 @@ aria-label="Delete inventory item"
                         </div>
 
                         <div class="inventory-usage-track" aria-hidden="true">
-                            <span style="width:${usagePercent}%"></span>
+                            <span data-ui-style="width:${window.uiAttribute(usagePercent)}%"></span>
                         </div>
                     </div>
                 `;

@@ -1,18 +1,18 @@
 <div class="assistive-fab-group" id="assistiveFabGroup">
 
-    <button type="button" class="assistive-main-fab" id="assistiveMainFab" onclick="toggleAssistiveMenu()"
+    <button type="button" class="assistive-main-fab" id="assistiveMainFab" data-ui-click="action-907ec5cc753e"
         aria-label="Open assistance tools" aria-expanded="false">
         <i class="fa-solid fa-wand-magic-sparkles"></i>
     </button>
 
     <div class="assistive-mini-menu" id="assistiveMiniMenu" aria-hidden="true">
 
-        <button type="button" class="assistive-mini-fab chatbot-fab" onclick="closeAssistiveMenu(); toggleChat();"
+        <button type="button" class="assistive-mini-fab chatbot-fab" data-ui-click="action-15220cbe0457"
             aria-label="Open dental chatbot" data-tooltip="Chatbot" data-tooltip-tone="view">
             <i class="fas fa-comments"></i>
         </button>
 
-        <button type="button" class="assistive-mini-fab accessibility-fab" onclick="toggleAccessibilityFromMain()"
+        <button type="button" class="assistive-mini-fab accessibility-fab" data-ui-click="action-257d14926763"
             aria-label="Open accessibility tools" data-tooltip="Accessibility" data-tooltip-tone="view">
             <i class="fa-solid fa-universal-access"></i>
         </button>
@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <button type="button" class="chatbot-close" onclick="toggleChat()" aria-label="Close chatbot">
+        <button type="button" class="chatbot-close" data-ui-click="action-a1629b68d2fa" aria-label="Close chatbot">
             <i class="fas fa-times"></i>
         </button>
     </div>
@@ -50,7 +50,7 @@
             <p id="chat-warning-message"></p>
         </div>
 
-        <button type="button" class="chat-warning-close" onclick="hideChatWarning()" aria-label="Close warning">
+        <button type="button" class="chat-warning-close" data-ui-click="action-0d26e7107f0a" aria-label="Close warning">
             <i class="fa-solid fa-xmark"></i>
         </button>
     </div>
@@ -71,19 +71,19 @@
 
     <div class="chatbot-quick-chips">
         <button type="button" class="chatbot-chip"
-            onclick="sendQuickMessage('Where can I view my odontogram in the Dental Records page?')">
+            data-ui-click="action-cfe2cb05f09d">
             <i class="fas fa-tooth"></i>
             <span>Odontogram</span>
         </button>
 
         <button type="button" class="chatbot-chip"
-            onclick="sendQuickMessage('How do I book an appointment from the patient dashboard?')">
+            data-ui-click="action-9aa4327f110d">
             <i class="fas fa-calendar-check"></i>
             <span>Book</span>
         </button>
 
         <button type="button" class="chatbot-chip"
-            onclick="sendQuickMessage('Where can I request a dental clearance document?')">
+            data-ui-click="action-4f7aad6a7b70">
             <i class="fas fa-file-medical"></i>
             <span>Documents</span>
         </button>
@@ -95,26 +95,30 @@
                 aria-describedby="chat-input-counter">
 
             <span id="chat-input-counter" class="chat-input-counter">0/300</span>
-            <button type="button" id="send-btn" class="chatbot-send" onclick="sendMessage()">
+            <button type="button" id="send-btn" class="chatbot-send" data-ui-click="action-75963eb3acd5">
                 <i class="fas fa-paper-plane"></i>
             </button>
         </div>
     </div>
 </div>
 
-<script>
-    window.authUserName = "{{ optional(auth()->user())->name ?? '' }}";
-    window.authUserId = "{{ auth()->id() ?? 'guest' }}";
-    window.authUserRole =
-        "{{ session('impersonated_role') ?? (optional(optional(auth()->user())->role)->slug ?? 'guest') }}";
-    window.chatbotSessionId = "{{ session()->getId() }}";
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+    window.authUserName = @js(optional(auth()->user())->name ?? '');
+    window.authUserId = @js((string) (auth()->id() ?? 'guest'));
+    window.authUserRole = @js(session('impersonated_role') ?? (optional(optional(auth()->user())->role)->slug ?? 'guest'));
+    @php
+        if (! session()->has('chatbot_storage_id')) {
+            session()->put('chatbot_storage_id', (string) \Illuminate\Support\Str::uuid());
+        }
+    @endphp
+    window.chatbotSessionId = @json(session('chatbot_storage_id'));
     window.chatbotBotName = 'PUP SmileGuide AI';
 
     window.chatbotDocumentRequestStoreUrl =
         @json(route('patient.document.requests.store'));
 </script>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     const chatWindow = document.getElementById('chat-window');
     const input = document.getElementById('user-input');
     const msgDiv = document.getElementById('chat-messages');
@@ -1574,7 +1578,7 @@
                 <button
                     type="button"
                     class="chatbot-chip"
-                    onclick="sendQuickMessage('${message.replace(/'/g, "\\'")}')"
+                    data-ui-click="action-6ad3825239b7" data-ui-click-arg-0="${window.uiAttribute(message.replace(/'/g, "\\'"))}"
                 >
                     ${label}
                 </button>
@@ -1596,7 +1600,7 @@
         bubble.className = 'chat-action-bubble';
 
         bubble.innerHTML = `
-        <button type="button" class="chat-action-btn" onclick="window.location.href='${url}'">
+        <button type="button" class="chat-action-btn" data-ui-click="action-9469f0eb28d2" data-ui-click-arg-0="${window.uiAttribute(url)}">
             ${label}
         </button>
     `;

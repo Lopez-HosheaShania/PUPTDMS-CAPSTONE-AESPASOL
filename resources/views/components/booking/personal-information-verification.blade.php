@@ -89,7 +89,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (() => {
         let verifying = false;
 

@@ -482,7 +482,7 @@
         </div>
     </div>
 
-    <form onsubmit="return false;" id="sessionFilterForm">
+    <form data-ui-submit="action-44daeba3893a" id="sessionFilterForm">
         <x-filter-drawer id="filterModal" title="Filters" closeCallback="window.cancelSessionFilters()"
             clearCallback="window.clearSessionFilterDraft()" clearLabel="Clear Filters"
             cancelCallback="window.cancelSessionFilters()" cancelLabel="Cancel"
@@ -585,7 +585,7 @@
         </x-filter-drawer>
     </form>
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('sessionSearchInput');
             const sessionItems = document.querySelectorAll('#sessionAdminList .session-admin-item');

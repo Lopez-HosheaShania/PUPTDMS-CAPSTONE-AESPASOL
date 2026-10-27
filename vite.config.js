@@ -8,6 +8,10 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/security.js',
+                'resources/css/csp-utilities.css',
+                'resources/css/vendor-fonts.css',
+                'resources/js/reports/pdf-tools.js',
                 'resources/css/pages/error-pages.css',
                 'resources/css/pages/auth/login.css',
                 'resources/css/pages/auth/backup-login.css',

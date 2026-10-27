@@ -126,7 +126,7 @@
                         </div>
                         <div class="dt-transition-overview-bar dt-transition-overview-bar-wide">
                             <div class="admin-progress-track">
-                                <div class="admin-progress-bar" style="width: {{ $transition->progress_percentage }}%;"></div>
+                                <div class="admin-progress-bar" data-ui-style="width: {{ $transition->progress_percentage }}%;"></div>
                             </div>
                         </div>
                     </div>
@@ -345,7 +345,7 @@
                 <div class="dt-checklist-progress-wrap">
                     <div class="dt-checklist-progress-scale">0%</div>
                     <div class="dt-checklist-progress-track">
-                        <div class="dt-checklist-progress-fill" style="width: {{ $transition->progress_percentage }}%;"></div>
+                        <div class="dt-checklist-progress-fill" data-ui-style="width: {{ $transition->progress_percentage }}%;"></div>
                     </div>
                     <div class="dt-checklist-progress-scale">100%</div>
                 </div>
@@ -353,7 +353,7 @@
                 <div class="dt-checklist-grid">
                     @foreach ($transition->checklistItems as $item)
                     <div class="dt-checklist-item dt-checklist-card {{ $item->is_completed ? 'is-complete' : '' }}">
-                        <div class="dt-checklist-card-top" style="grid-template-columns: 38px minmax(0, 1fr) auto;">
+                        <div class="dt-checklist-card-top" data-ui-presentation="presentation-4199b6098b99">
                             <div class="dt-checklist-icon">
                                 <i class="fa-solid {{ $item->is_completed ? 'fa-circle-check' : 'fa-circle-xmark' }}"></i>
                             </div>
@@ -446,7 +446,7 @@
                             </td>
                             <td>
                                 <div class="dt-progress">
-                                    <div class="dt-progress-bar" style="width: {{ $transition->progress_percentage }}%;"></div>
+                                    <div class="dt-progress-bar" data-ui-style="width: {{ $transition->progress_percentage }}%;"></div>
                                 </div>
                                 <div class="dt-cell-sub">{{ $transition->progress_percentage }}%</div>
                             </td>

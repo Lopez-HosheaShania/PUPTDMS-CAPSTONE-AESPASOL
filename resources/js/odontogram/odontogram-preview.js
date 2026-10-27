@@ -19,6 +19,7 @@ async function loadOdontogramThreeModule() {
 
 const ODONTOGRAM_PREVIEW_COLORS = {
     D: '#ef4444',
+    RC: '#ef4444',
     M: '#111827',
     F: '#2563eb',
     I: '#ef4444',
@@ -31,6 +32,7 @@ const ODONTOGRAM_PREVIEW_COLORS = {
     P: '#2563eb',
     IN: '#2563eb',
     LC: '#2563eb',
+    TP: '#2563eb',
     RM: '#2563eb',
     X: '#2563eb',
     XO: '#2563eb',

@@ -225,7 +225,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const sigInput = document.getElementById("patient_signature");
         const signatureSourceInput = document.getElementById("signature_source");
         const sigName = document.getElementById("signature_filename");

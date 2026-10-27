@@ -102,7 +102,7 @@
         }
     @endphp
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         window.patientOdontogramTeeth = @json($odontogramTeeth ?? []);
         window.apptActivityChartData = @json($appointmentActivityChart ?? []);
     </script>
@@ -241,7 +241,7 @@
 
                         </div>
 
-                        <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm" onclick="handleScheduleCheckup()">
+                        <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm" data-ui-click="action-9eb7d8dc0629">
                             <i class="fa-solid fa-calendar-plus"></i>
                             <span>Schedule Check-Up</span>
                         </button>
@@ -355,12 +355,12 @@
                     </a>
 
                     <button type="button" class="ui-btn ui-btn-secondary "
-                        onclick="apptShowPast(); document.getElementById('apptPastPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });">
+                        data-ui-click="action-3581bd1ec7b5">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>View Past Visits</span>
                     </button>
 
-                    <button type="button" class="ui-btn ui-btn-secondary " onclick="scrollToAppointmentCalendar()">
+                    <button type="button" class="ui-btn ui-btn-secondary " data-ui-click="action-8d572863bc05">
                         <i class="fa-solid fa-calendar-days"></i>
                         <span>Focus Calendar</span>
                     </button>
@@ -393,7 +393,7 @@
 
                     <div class="appt-list-tabs" id="apptListTabs">
 
-                        <button type="button" class="appt-tab appt-active" id="apptFutureTab" onclick="apptShowFuture()">
+                        <button type="button" class="appt-tab appt-active" id="apptFutureTab" data-ui-click="action-2600bc4012b8">
                             <i class="fa-regular fa-calendar"></i>
 
                             <span>Future Visits</span>
@@ -404,7 +404,7 @@
                             </span>
                         </button>
 
-                        <button type="button" class="appt-tab" id="apptPastTab" onclick="apptShowPast()">
+                        <button type="button" class="appt-tab" id="apptPastTab" data-ui-click="action-15d0e1e6763b">
                             <i class="fa-solid fa-clock-rotate-left"></i>
 
                             <span>Past Visits</span>
@@ -526,7 +526,7 @@
                                         Schedule Now
                                     </a>
 
-                                    <button type="button" onclick="scrollToAppointmentCalendar()"
+                                    <button type="button" data-ui-click="action-8d572863bc05"
                                         class="mt-2 w-full text-xs font-bold text-white/80 hover:text-white transition">
                                         Check available dates
                                     </button>
@@ -536,7 +536,7 @@
                     @endif
                 </div>
 
-                <div id="apptPastPanel" style="display:none;">
+                <div id="apptPastPanel" data-ui-presentation="presentation-d0466aa33fa8">
                     @if ($pastVisits->count())
                         <div class="appt-list-divider">
                             <span>Recent History</span>
@@ -568,7 +568,7 @@
                                 Your completed appointments will appear here.
                             </p>
 
-                            <button type="button" onclick="apptShowFuture()" class="ui-btn ui-btn-secondary mt-4">
+                            <button type="button" data-ui-click="action-2600bc4012b8" class="ui-btn ui-btn-secondary mt-4">
                                 <i class="fa-solid fa-calendar-plus"></i>
                                 Book First Appointment
                             </button>
@@ -716,7 +716,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         let apptActivityChartInstance = null;
 
         async function initAppointmentActivityChart() {
@@ -1095,7 +1095,7 @@
                 const condition = voConditionFromRecord(record);
 
                 return `
-            <button type="button" class="vo-tooth ${condition}" onclick="openViewToothModal(${n})">
+            <button type="button" class="vo-tooth ${condition}" data-ui-click="action-265f97b3419b" data-ui-click-arg-0="${window.uiAttribute(n)}">
                 ${bottom ? '<div class="vo-root"></div>' : ''}
                 <div class="vo-num">${n}</div>
                 <div class="vo-box">${condition === 'extracted' ? '<i class="fa-solid fa-xmark"></i>' : ''}</div>

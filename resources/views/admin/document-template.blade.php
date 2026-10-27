@@ -82,7 +82,7 @@
                     </div>
 
                     <button id="templateFilterBtn" type="button" class="global-filter-btn"
-                        onclick="openTemplateFilterDrawer()" aria-label="Filter templates" data-tooltip="Filter"
+                        data-ui-click="action-4faee489e166" aria-label="Filter templates" data-tooltip="Filter"
                         data-tooltip-tone="neutral">
                         <i class="fa-solid fa-sliders"></i>
                         <span>Filter</span>
@@ -91,7 +91,7 @@
                     </button>
 
                     <button id="templateFilterResetBtn" type="button" class="global-filter-reset-btn hidden"
-                        onclick="resetTemplateFilters()" aria-label="Clear template filters"
+                        data-ui-click="action-9525fd19c356" aria-label="Clear template filters"
                         data-tooltip="Reset filters" data-tooltip-tone="neutral">
                         <i class="fa-solid fa-rotate-left"></i>
                     </button>
@@ -145,7 +145,7 @@
                         data-archive-url="{{ route(($routeNames['archive'] ?? 'admin.document-template.archive'), $tpl->id) }}"
                         data-activate-url="{{ route(($routeNames['activate'] ?? 'admin.document-template.activate'), $tpl->id) }}"
                         tabindex="0" role="button" aria-label="Preview {{ $tpl->name }}"
-                        onclick="openTemplatePreview({{ $tpl->id }})">
+                        data-ui-click="action-27fedc7b9d1d" data-ui-click-arg-0="{{ json_encode($tpl->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                         <div class="template-card-top">
                             <div class="template-top-row">
                                 <div class="template-doc-icon">
@@ -196,7 +196,7 @@
                                     <button type="button" class="ui-action-btn ui-action-view"
                                         data-tooltip="Preview template" data-tooltip-tone="view"
                                         aria-label="Preview template"
-                                        onclick="event.stopPropagation(); openTemplatePreview({{ $tpl->id }})">
+                                        data-ui-click="action-cc1085fad7b8" data-ui-click-arg-0="{{ json_encode($tpl->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
 
@@ -204,14 +204,14 @@
                                     <button type="button" class="ui-action-btn ui-action-warning"
                                         data-tooltip="Archive template" aria-label="Archive template"
                                         data-template-action="archive" data-template-id="{{ $tpl->id }}"
-                                        onclick="event.stopPropagation(); window.handleTemplateActionClick(this)">
+                                        data-ui-click="action-7286019d3d89">
                                         <i class="fa-solid fa-box-archive"></i>
                                     </button>
                                     @elseif ($tpl->status === 'archived')
                                     <button type="button" class="ui-action-btn ui-action-success"
                                         data-tooltip="Activate template" aria-label="Activate template"
                                         data-template-action="activate" data-template-id="{{ $tpl->id }}"
-                                        onclick="event.stopPropagation(); window.handleTemplateActionClick(this)">
+                                        data-ui-click="action-7286019d3d89">
                                         <i class="fa-solid fa-circle-check"></i>
                                     </button>
                                     @endif
@@ -235,8 +235,8 @@
 </main>
 
 <x-filter-drawer id="templateFilterDrawer" title="Template Filters" close-id="closeTemplateFilterDrawer"
-    close-callback="closeTemplateFilterDrawer()" clear-id="clearTemplateFiltersDrawer" clear-label="Clear Filters"
-    cancel-id="cancelTemplateFilterDrawer" cancel-callback="closeTemplateFilterDrawer()" cancel-label="Cancel"
+    close-callback="action-cb61e864b11d" clear-id="clearTemplateFiltersDrawer" clear-label="Clear Filters"
+    cancel-id="cancelTemplateFilterDrawer" cancel-callback="action-cb61e864b11d" cancel-label="Cancel"
     apply-id="applyTemplateFilters" apply-label="Show Results">
 
     <div id="templateActiveFilters" class="filter-active-section hidden">
@@ -417,7 +417,7 @@
                 <div class="modal-preview-canvas" id="templatePreviewCanvas" data-preview-canvas>
 
                     <iframe id="templatePreviewFrame" class="modal-preview-frame" data-preview-content
-                        title="Document template preview" scrolling="no">
+                        title="Document template preview" scrolling="no" sandbox="allow-same-origin">
                     </iframe>
                 </div>
             </div>
@@ -497,7 +497,7 @@
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     const csrfMeta = document.querySelector('meta[name="csrf-token"]');
     const csrfToken = csrfMeta ? csrfMeta.content : '';
     let pendingTemplateAction = null;
@@ -519,7 +519,7 @@
     }
 
     function buildPreviewDocument(d) {
-        return d.content || '<p style="padding:1rem;color:#9ca3af;">No preview available.</p>';
+        return window.prepareDocumentPreview(d.content || '<p>No preview available.</p>');
     }
 
     function openPreviewModal() {
@@ -611,7 +611,7 @@
             data-tooltip="Preview template"
             data-tooltip-tone="view"
             aria-label="Preview template"
-            onclick="event.stopPropagation(); openTemplatePreview(${id})">
+            data-ui-click="action-cc1085fad7b8" data-ui-click-arg-0="${window.uiAttribute(id)}">
             <i class="fa-solid fa-eye"></i>
         </button>
         ${status === 'active' ? `
@@ -621,7 +621,7 @@
             data-tooltip-tone="reschedule"
             aria-label="Archive template"
                         data-template-action="archive" data-template-id="${id}"
-                        onclick="event.stopPropagation(); window.handleTemplateActionClick(this)">
+                        data-ui-click="action-7286019d3d89">
                         <i class="fa-solid fa-box-archive"></i>
                     </button>
                 ` : `
@@ -629,7 +629,7 @@
             class="ui-action-btn ui-action-success"
             data-tooltip="Activate template" data-tooltip-tone="start"
             aria-label="Activate template" data-template-action="activate" data-template-id="${id}"
-            onclick="event.stopPropagation(); window.handleTemplateActionClick(this)">
+            data-ui-click="action-7286019d3d89">
                         <i class="fa-solid fa-circle-check"></i>
                     </button>
                 `}
@@ -746,7 +746,7 @@
         footerEl.innerHTML = `
         <button type="button"
             class="ui-btn ui-btn-secondary"
-            onclick="closePreviewModal()">
+            data-ui-click="action-0efe3e880025">
 
             <i class="fa-solid fa-xmark"></i>
             <span>Close</span>
@@ -796,7 +796,7 @@
         footerEl.innerHTML = '';
 
         frameEl.srcdoc =
-            '<p style="padding:2rem;text-align:center;color:#94a3b8;font-family:Arial,sans-serif;">Loading preview...</p>';
+            '<p data-ui-presentation="presentation-c9730b18220d">Loading preview...</p>';
 
         try {
             const res = await fetch(`/admin/document-template/${id}`, {
@@ -821,7 +821,7 @@
             titleEl.textContent = 'Template Preview';
             subtitleEl.textContent = 'Failed to load';
             frameEl.srcdoc =
-                '<p style="padding:2rem;text-align:center;color:#dc2626;font-family:Arial,sans-serif;">Failed to load template preview.</p>';
+                '<p data-ui-presentation="presentation-0b97713c0ae4">Failed to load template preview.</p>';
         }
     }
 
@@ -1301,7 +1301,7 @@
                 <button
                     type="button"
                     class="empty-state-btn"
-                    onclick="resetTemplateFilters()"
+                    data-ui-click="action-9525fd19c356"
                 >
                     <i class="fa-solid fa-rotate-left"></i>
                     Clear filters
