@@ -32,11 +32,11 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/admin/patient-directory.blade.php
     'action-36814e8a29cf': function (event) {
-        window.location.href='/patient/record'
+        window.location.href = '/patient/record'
     },
     // resources/views/admin/patient-directory.blade.php
     'action-d58a9c6e6bde': function (event) {
-        window.location.href='/patient/dashboard'
+        window.location.href = '/patient/dashboard'
     },
     // resources/views/admin/patient-directory.blade.php
     'action-297be29dcc37': function (event) {
@@ -52,7 +52,7 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/admin/role-permissions.blade.php
     'action-12b6df6f3044': function (event) {
-        startPatientImpersonation('patient','patient','#059669',readActionArg(this, 'click', 0, true),readActionArg(this, 'click', 1, false))
+        startPatientImpersonation('patient', 'patient', '#059669', readActionArg(this, 'click', 0, true), readActionArg(this, 'click', 1, false))
     },
     // resources/views/admin/role-permissions.blade.php
     'action-d74329a746f8': function (event) {
@@ -109,9 +109,9 @@ export const actionHandlers = Object.freeze({
     // resources/views/admin/role-permissions.blade.php
     'action-4befe37bff71': function (event) {
         event.stopPropagation(); openDeleteModal(
-        readActionArg(this, 'click', 0, false),
-        readActionArg(this, 'click', 1, true)
-    )
+            readActionArg(this, 'click', 0, false),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/admin/role-permissions.blade.php
     'action-eee17b73e521': function (event) {
@@ -220,30 +220,30 @@ export const actionHandlers = Object.freeze({
     // resources/views/admin/user-management.blade.php
     'action-585011303a01': function (event) {
         openResetModal(
-                        'users',
-                        readActionArg(this, 'click', 0, true),
-                        readActionArg(this, 'click', 1, true)
-                    )
+            'users',
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/admin/user-management.blade.php
     'action-1818b87d7b42': function (event) {
         openToggleConfirm(
-                        readActionArg(this, 'click', 0, true),
-                        readActionArg(this, 'click', 1, true),
-                        readActionArg(this, 'click', 2, true)
-                    )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true),
+            readActionArg(this, 'click', 2, true)
+        )
     },
     // resources/views/admin/user-management.blade.php
     'action-300bbde9a403': function (event) {
         openEditModalFromButton(
-                        this,
-                        'users',
-                        readActionArg(this, 'click', 0, true),
-                        readActionArg(this, 'click', 1, true),
-                        readActionArg(this, 'click', 2, true),
-                        readActionArg(this, 'click', 3, true),
-                        readActionArg(this, 'click', 4, true)
-                    )
+            this,
+            'users',
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true),
+            readActionArg(this, 'click', 2, true),
+            readActionArg(this, 'click', 3, true),
+            readActionArg(this, 'click', 4, true)
+        )
     },
     // resources/views/admin/user-management.blade.php
     'action-5630b39be24d': function (event) {
@@ -264,9 +264,9 @@ export const actionHandlers = Object.freeze({
     // resources/views/admin/user-management.blade.php
     'action-3f17fa1e4fa6': function (event) {
         togglePassVis(
-                        'editAdminCurrentPassword',
-                        'editAdminPasswordEye'
-                    )
+            'editAdminCurrentPassword',
+            'editAdminPasswordEye'
+        )
     },
     // resources/views/admin/user-management.blade.php
     'action-a3dc03fc8a29': function (event) {
@@ -302,7 +302,7 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/auth/login.blade.php
     'action-8551a98bacd1': function (event) {
-        this.src=readActionArg(this, 'error', 0, false)
+        this.src = readActionArg(this, 'error', 0, false)
     },
     // resources/views/auth/login.blade.php
     'action-9f9589849531': function (event) {
@@ -310,7 +310,7 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/auth/login.blade.php
     'action-01ea3b1981b5': function (event) {
-        this.src='https://ui-avatars.com/api/?name=Nelson+Angeles&background=660000&color=FFFFFF&size=500'
+        this.src = 'https://ui-avatars.com/api/?name=Nelson+Angeles&background=660000&color=FFFFFF&size=500'
     },
     // resources/views/auth/login.blade.php
     'action-bc43f465120b': function (event) {
@@ -326,17 +326,17 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/auth/register.blade.php
     'action-5817faec28d5': function (event) {
-        togglePassword('confirmPassword','eyeConfirmPassword')
+        togglePassword('confirmPassword', 'eyeConfirmPassword')
     },
     // resources/views/auth/register.blade.php
     'action-84cd2f54c0c6': function (event) {
-        togglePassword('password','eyePassword')
+        togglePassword('password', 'eyePassword')
     },
     // resources/views/components/appointment-record-card.blade.php
     'action-31134d4ab8af': function (event) {
         openRecordModal(
-        JSON.parse(this.dataset.record)
-    )
+            JSON.parse(this.dataset.record)
+        )
     },
     // resources/views/components/cancel-modal.blade.php
     'action-2428055b77ee': function (event) {
@@ -429,20 +429,20 @@ export const actionHandlers = Object.freeze({
     // resources/views/dentist/dentist-dashboard.blade.php
     'action-69de2f9aeac1': function (event) {
         cancelAppointmentFromModal(
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 0, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 1, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 2, false)
-                                                                                                                                                                                                                                                                                        )
+            readActionArg(this, 'click', 0, false),
+            readActionArg(this, 'click', 1, false),
+            readActionArg(this, 'click', 2, false)
+        )
     },
     // resources/views/dentist/dentist-dashboard.blade.php
     'action-c90ced68deff': function (event) {
         openRescheduleModalFromDay(
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 0, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 1, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 2, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 3, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 4, false)
-                                                                                                                                                                                                                                                                                        )
+            readActionArg(this, 'click', 0, false),
+            readActionArg(this, 'click', 1, false),
+            readActionArg(this, 'click', 2, false),
+            readActionArg(this, 'click', 3, false),
+            readActionArg(this, 'click', 4, false)
+        )
     },
     // resources/views/dentist/dentist-dashboard.blade.php
     'action-3f1275e108e2': function (event) {
@@ -451,24 +451,24 @@ export const actionHandlers = Object.freeze({
     // resources/views/dentist/dentist-dashboard.blade.php
     'action-74913bcfd525': function (event) {
         event.preventDefault();
-                                                                                                                                                                                                                                                                                        event.stopPropagation();
-                                                                                                                                                                                                                                                                                        cancelAppointmentFromModal(
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 0, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 1, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 2, false)
-                                                                                                                                                                                                                                                                                        );
+        event.stopPropagation();
+        cancelAppointmentFromModal(
+            readActionArg(this, 'click', 0, false),
+            readActionArg(this, 'click', 1, false),
+            readActionArg(this, 'click', 2, false)
+        );
     },
     // resources/views/dentist/dentist-dashboard.blade.php
     'action-9ac3a192f5ae': function (event) {
         event.preventDefault();
-                                                                                                                                                                                                                                                                                        event.stopPropagation();
-                                                                                                                                                                                                                                                                                        openRescheduleModalFromDay(
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 0, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 1, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 2, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 3, false),
-                                                                                                                                                                                                                                                                                        readActionArg(this, 'click', 4, false)
-                                                                                                                                                                                                                                                                                        );
+        event.stopPropagation();
+        openRescheduleModalFromDay(
+            readActionArg(this, 'click', 0, false),
+            readActionArg(this, 'click', 1, false),
+            readActionArg(this, 'click', 2, false),
+            readActionArg(this, 'click', 3, false),
+            readActionArg(this, 'click', 4, false)
+        );
     },
     // resources/views/dentist/dentist-dashboard.blade.php
     'action-bf29fd6dc371': function (event) {
@@ -500,7 +500,36 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/dentist/dentist-walk-in.blade.php
     'action-0bcc7b50f274': function (event) {
-        readActionArg(this, 'click', 0, true)
+        const action = readActionArg(
+            this,
+            'click',
+            0,
+            false
+        );
+
+        switch (action) {
+            case 'editDentalHistoryFromReview()':
+                window.editDentalHistoryFromReview?.();
+                break;
+
+            case 'editMedicalHistoryFromReview()':
+                window.editMedicalHistoryFromReview?.();
+                break;
+
+            case 'editSignatureFromReview()':
+                window.editSignatureFromReview?.();
+                break;
+
+            case 'editContactInformationFromReview()':
+                window.editContactInformationFromReview?.();
+                break;
+
+            default:
+                console.warn(
+                    'Unknown booking review action:',
+                    action
+                );
+        }
     },
     // resources/views/errors/layout.blade.php
     'action-1f0252ba48f2': function (event) {
@@ -508,7 +537,7 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/partials/chatbot.blade.php
     'action-9469f0eb28d2': function (event) {
-        window.location.href=readActionArg(this, 'click', 0, false)
+        window.location.href = readActionArg(this, 'click', 0, false)
     },
     // resources/views/partials/chatbot.blade.php
     'action-6ad3825239b7': function (event) {
@@ -605,14 +634,14 @@ export const actionHandlers = Object.freeze({
     // resources/views/patient/index.blade.php
     'action-fa43d7668e58': function (event) {
         if (
-                                    window.UPCOMING_DATA?.exists &&
-                                    ['upcoming', 'rescheduled'].includes(
-                                        String(window.UPCOMING_DATA.status || '').toLowerCase()
-                                    )
-                                ) {
-                                    event.preventDefault();
-                                    window.openModal?.('activeAppointmentModal');
-                                }
+            window.UPCOMING_DATA?.exists &&
+            ['upcoming', 'rescheduled'].includes(
+                String(window.UPCOMING_DATA.status || '').toLowerCase()
+            )
+        ) {
+            event.preventDefault();
+            window.openModal?.('activeAppointmentModal');
+        }
     },
     // resources/views/patient/shared-profile.blade.php
     'action-b3866f05a448': function (event) {
@@ -653,9 +682,9 @@ export const actionHandlers = Object.freeze({
     // resources/views/shared/academic-period.blade.php
     'action-09999bb5940d': function (event) {
         openSetActiveModal(
-        readActionArg(this, 'click', 0, true),
-        readActionArg(this, 'click', 1, true)
-    )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/academic-period.blade.php
     'action-e63476c3cb8d': function (event) {
@@ -664,16 +693,16 @@ export const actionHandlers = Object.freeze({
     // resources/views/shared/academic-period.blade.php
     'action-8c24c81f4fa3': function (event) {
         openSetActiveModal(
-                                                                        readActionArg(this, 'click', 0, true),
-                                                                        readActionArg(this, 'click', 1, true)
-                                                                    )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/academic-period.blade.php
     'action-03a9835a5e25': function (event) {
         openSetActiveModal(
-                                                                            readActionArg(this, 'click', 0, true),
-                                                                            readActionArg(this, 'click', 1, true)
-                                                                        )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/academic-period.blade.php
     'action-33d0a78d8e7b': function (event) {
@@ -682,7 +711,7 @@ export const actionHandlers = Object.freeze({
     // resources/views/shared/add-existing-record.blade.php
     'action-65226e9bb18e': function (event) {
         this.parentElement.innerHTML =
-                                            readActionArg(this, 'error', 0, false);
+            readActionArg(this, 'error', 0, false);
     },
     // resources/views/shared/appointments.blade.php
     'action-9dac37c8b8f2': function (event) {
@@ -694,21 +723,25 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/shared/appointments.blade.php
     'action-830526eaba30': function (event) {
-        if (readActionArg(this, 'click', 0, true)) { cancelAppointmentFromModal(
-                                                readActionArg(this, 'click', 1, false),
-                                                readActionArg(this, 'click', 2, true),
-                                                readActionArg(this, 'click', 3, true)
-                                            ) }
+        if (readActionArg(this, 'click', 0, true)) {
+            cancelAppointmentFromModal(
+                readActionArg(this, 'click', 1, false),
+                readActionArg(this, 'click', 2, true),
+                readActionArg(this, 'click', 3, true)
+            )
+        }
     },
     // resources/views/shared/appointments.blade.php
     'action-ab60db006e21': function (event) {
-        if (readActionArg(this, 'click', 0, true)) { openRescheduleModal({
-                                                id: readActionArg(this, 'click', 1, false),
-                                                name: readActionArg(this, 'click', 2, true),
-                                                datetime: readActionArg(this, 'click', 3, true),
-                                                serviceType: readActionArg(this, 'click', 4, true),
-                                                updateUrl: readActionArg(this, 'click', 5, false)
-                                            }) }
+        if (readActionArg(this, 'click', 0, true)) {
+            openRescheduleModal({
+                id: readActionArg(this, 'click', 1, false),
+                name: readActionArg(this, 'click', 2, true),
+                datetime: readActionArg(this, 'click', 3, true),
+                serviceType: readActionArg(this, 'click', 4, true),
+                updateUrl: readActionArg(this, 'click', 5, false)
+            })
+        }
     },
     // resources/views/shared/appointments.blade.php
     'action-27b3080a773d': function (event) {
@@ -720,21 +753,25 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/shared/appointments.blade.php
     'action-aaaf28f0e0b0': function (event) {
-        if (readActionArg(this, 'click', 0, true)) { cancelAppointmentFromModal(
-                                                        readActionArg(this, 'click', 1, false),
-                                                        readActionArg(this, 'click', 2, true),
-                                                        readActionArg(this, 'click', 3, true)
-                                                    ) }
+        if (readActionArg(this, 'click', 0, true)) {
+            cancelAppointmentFromModal(
+                readActionArg(this, 'click', 1, false),
+                readActionArg(this, 'click', 2, true),
+                readActionArg(this, 'click', 3, true)
+            )
+        }
     },
     // resources/views/shared/appointments.blade.php
     'action-29ed24cdc40f': function (event) {
-        if (readActionArg(this, 'click', 0, true)) { openRescheduleModal({
-                                                        id: readActionArg(this, 'click', 1, false),
-                                                        name: readActionArg(this, 'click', 2, true),
-                                                        datetime: readActionArg(this, 'click', 3, true),
-                                                        serviceType: readActionArg(this, 'click', 4, true),
-                                                        updateUrl: readActionArg(this, 'click', 5, false)
-                                                    }) }
+        if (readActionArg(this, 'click', 0, true)) {
+            openRescheduleModal({
+                id: readActionArg(this, 'click', 1, false),
+                name: readActionArg(this, 'click', 2, true),
+                datetime: readActionArg(this, 'click', 3, true),
+                serviceType: readActionArg(this, 'click', 4, true),
+                updateUrl: readActionArg(this, 'click', 5, false)
+            })
+        }
     },
     // resources/views/shared/appointments.blade.php
     'action-06d47d859fc5': function (event) {
@@ -815,9 +852,9 @@ export const actionHandlers = Object.freeze({
     // resources/views/shared/clinic-schedule.blade.php
     'action-a10af097fbc8': function (event) {
         openReservedPeriodDeleteModal(
-                                                                            readActionArg(this, 'click', 0, true),
-                                                                            readActionArg(this, 'click', 1, true)
-                                                                        )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-f2843b92493b': function (event) {
@@ -826,61 +863,61 @@ export const actionHandlers = Object.freeze({
     // resources/views/shared/clinic-schedule.blade.php
     'action-d584b12ca4ac': function (event) {
         openReservedPeriodDeleteModal(
-                                                                        readActionArg(this, 'click', 0, true),
-                                                                        readActionArg(this, 'click', 1, true)
-                                                                    )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-bad117ef6f8f': function (event) {
         openReservedPeriodDeleteModal(
-                                                                                readActionArg(this, 'click', 0, true),
-                                                                                readActionArg(this, 'click', 1, true)
-                                                                            )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-84a17b07f767': function (event) {
         openScheduleDeleteModal(
-                                                                        readActionArg(this, 'click', 0, true),
-                                                                        readActionArg(this, 'click', 1, true)
-                                                                    )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-b1e8100ff8f6': function (event) {
         openRuleModal(
-                                                                        "edit",
-                                                                        readActionArg(this, 'click', 0, true),
-                                                                        readActionArg(this, 'click', 1, true)
-                                                                    )
+            "edit",
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-899c015d05d8': function (event) {
         openScheduleDeleteModal(
-                            readActionArg(this, 'click', 0, true),
-                            readActionArg(this, 'click', 1, true)
-                        )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-cf79ab3d24c0': function (event) {
         openRuleModal(
-                            "edit",
-                            readActionArg(this, 'click', 0, true),
-                            readActionArg(this, 'click', 1, true)
-                        )
+            "edit",
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-6d843152ccce': function (event) {
         openScheduleDeleteModal(
-                                                                                readActionArg(this, 'click', 0, true),
-                                                                                readActionArg(this, 'click', 1, true)
-                                                                            )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-5ae65e27acd4': function (event) {
         openRuleModal(
-                                                                                "edit",
-                                                                                readActionArg(this, 'click', 0, true),
-                                                                                readActionArg(this, 'click', 1, true)
-                                                                            )
+            "edit",
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-62d7209e5e45': function (event) {
@@ -889,9 +926,9 @@ export const actionHandlers = Object.freeze({
     // resources/views/shared/clinic-schedule.blade.php
     'action-28b22a237020': function (event) {
         openBlockedDateDeleteModal(
-                    readActionArg(this, 'click', 0, true),
-                    readActionArg(this, 'click', 1, true)
-                )
+            readActionArg(this, 'click', 0, true),
+            readActionArg(this, 'click', 1, true)
+        )
     },
     // resources/views/shared/clinic-schedule.blade.php
     'action-35e136a0c602': function (event) {
@@ -944,9 +981,9 @@ export const actionHandlers = Object.freeze({
     // resources/views/shared/document-requests.blade.php
     'action-34bf4e6b59e3': function (event) {
         selectDocumentCard(
-                    'd',
-                    readActionArg(this, 'click', 0, true)
-                )
+            'd',
+            readActionArg(this, 'click', 0, true)
+        )
     },
     // resources/views/shared/document-requests.blade.php
     'action-b2e920847258': function (event) {
@@ -1027,8 +1064,8 @@ export const actionHandlers = Object.freeze({
     // resources/views/shared/reports.blade.php
     'action-4e1de46b4c89': function (event) {
         window.location.assign(
-                    readActionArg(this, 'click', 0, false)
-                )
+            readActionArg(this, 'click', 0, false)
+        )
     },
     // resources/views/shared/reports.blade.php
     'action-132d158d6401': function (event) {

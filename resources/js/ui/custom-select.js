@@ -196,6 +196,49 @@ function positionCustomSelectMenu(
         `${maxHeight}px`
     );
 
+    const filterPanel =
+        wrapper.closest(
+            '.filter-drawer-panel'
+        );
+
+    if (filterPanel) {
+        const panelRect =
+            filterPanel.getBoundingClientRect();
+
+        menu.classList.add(
+            'is-floating'
+        );
+
+        menu.style.left =
+            `${buttonRect.left - panelRect.left}px`;
+
+        menu.style.right =
+            'auto';
+
+        menu.style.width =
+            `${buttonRect.width}px`;
+
+        if (shouldOpenUp) {
+            menu.style.top =
+                'auto';
+
+            menu.style.bottom =
+                `${panelRect.bottom -
+                buttonRect.top +
+                8
+                }px`;
+        } else {
+            menu.style.top =
+                `${buttonRect.bottom -
+                panelRect.top +
+                8
+                }px`;
+
+            menu.style.bottom =
+                'auto';
+        }
+    }
+
     menu.style.display =
         previousDisplay;
 
@@ -368,6 +411,21 @@ export function initCustomSelects(root = document) {
         syncCustomSelect(wrapper);
     });
 }
+
+document.addEventListener(
+    'scroll',
+    event => {
+        if (
+            event.target instanceof Element &&
+            event.target.closest(
+                '.filter-drawer-body'
+            )
+        ) {
+            closeCustomSelects();
+        }
+    },
+    true
+);
 
 document.addEventListener('click', event => {
     if (event.target.closest('.custom-select')) return;

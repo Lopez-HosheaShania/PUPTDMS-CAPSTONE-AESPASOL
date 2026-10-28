@@ -9,6 +9,7 @@ import './core/session';
 
 import './ui/accordion';
 import './ui/header';
+import './ui/floating-save-bar';
 
 const featurePromises = new Map();
 
@@ -998,6 +999,30 @@ document.addEventListener(
         const modal =
             event.detail?.modal ||
             document;
+
+        if (
+            hasAny(
+                [
+                    '[data-global-voice-trigger]',
+                    '.voice-search-mic.external[data-voice-trigger]'
+                ].join(','),
+                modal
+            )
+        ) {
+            try {
+                await loadVoiceModule();
+
+                window
+                    .initGlobalVoiceInputs?.(
+                        modal
+                    );
+            } catch (error) {
+                console.error(
+                    'Unable to initialize modal voice inputs.',
+                    error
+                );
+            }
+        }
 
         if (
             hasAny(

@@ -24,6 +24,7 @@
 @import './components/flatpickr.css';
 @import './components/calendar.css';
 @import './components/floating-actions.css';
+@import './components/floating-save-bar.css';
 @import './components/accessibility.css';
 @import './components/view-toggle.css';
 @import './components/voice-input.css';

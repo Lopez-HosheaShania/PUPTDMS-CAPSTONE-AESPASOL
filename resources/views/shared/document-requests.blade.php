@@ -2942,9 +2942,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 });
         });
 
-        ['approveModal', 'rejectModal', 'filterModal']
-
-            .forEach(id => outside(id));
+        ['approveModal', 'rejectModal'].forEach(id => outside(id));
 
         const filterModal = document.getElementById('filterModal');
         document.getElementById('filterCloseBtn').addEventListener('click', closeFilterModal);
