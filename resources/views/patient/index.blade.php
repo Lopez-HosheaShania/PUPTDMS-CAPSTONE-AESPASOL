@@ -166,7 +166,15 @@
 
         $recordCount = collect($homeRecords ?? [])->count();
 
-        $latestRecordDate = $recordCount ? collect($homeRecords)->first()['date'] ?? null : null;
+        $completedHomeRecords = collect($homeRecords ?? [])
+            ->filter(function ($record) {
+                return strtolower($record['status'] ?? '') === 'completed';
+            })
+            ->values();
+
+        $completedVisitCount = $completedHomeRecords->count();
+
+        $latestCompletedVisitDate = $completedVisitCount ? $completedHomeRecords->first()['date'] ?? null : null;
 
         $pendingDocumentRequests = collect($documentRequests ?? [])
             ->whereIn('status', ['pending', 'processing'])
@@ -253,10 +261,9 @@
                                 <span
                                     class="greeting-insight-chip inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-semibold text-white">
                                     <i class="fa-solid fa-tooth"></i>
-                                    {{ $recordCount > 0
-                                        ? 'Last Visit: ' . ($latestRecordDate ?? 'Available')
-                                        : 'No dental
-                                                                                                                                                                                                                                                                                                                                                                    record yet' }}
+                                    {{ $completedVisitCount > 0
+                                        ? 'Last Visit: ' . ($latestCompletedVisitDate ?? 'Available')
+                                        : 'No completed visit yet' }}
                                 </span>
 
                             </div>
@@ -899,10 +906,9 @@
 
         var UPCOMING_DATA = @json($upcomingJs);
         var PATIENT_NAME = "{{ urlencode($patient->name ?? 'Guest') }}";
-
         var PROFILE_COMPLETION = {{ $profileCompletionPercent }};
         var TOTAL_VISITS = {{ $recordCount }};
-        var LAST_VISIT = @json($latestRecordDate ?? 'No record yet');
+        var LAST_VISIT = @json($latestCompletedVisitDate ?? 'No completed visit yet');
         var NEXT_VISIT = @json($nextVisitText);
 
         var PROFILE_DATA = {
@@ -1170,7 +1176,9 @@
 
             modal.querySelector(
                 '[data-modal-initial-focus]'
-            )?.focus({ preventScroll: true });
+            )?.focus({
+                preventScroll: true
+            });
         }
 
         function hideActiveGlobalTooltip() {
@@ -1199,7 +1207,9 @@
             pendingPrivateInformationButton = null;
 
             if (previousButton?.isConnected) {
-                previousButton.focus({ preventScroll: true });
+                previousButton.focus({
+                    preventScroll: true
+                });
             }
         }
 
@@ -1668,7 +1678,8 @@
                 '</div>' +
 
                 '<div class="patient-profile-progress">' +
-                '<span data-ui-style="width:' + Math.max(0, Math.min(100, Number(PROFILE_COMPLETION) || 0)) + '%"></span>' +
+                '<span data-ui-style="width:' + Math.max(0, Math.min(100, Number(PROFILE_COMPLETION) || 0)) +
+                '%"></span>' +
                 '</div>' +
 
                 '<p class="patient-profile-section-note">' +
@@ -1921,13 +1932,41 @@
 
             if (!container) return;
 
-            var count = HOME_RECORDS && HOME_RECORDS.length ? HOME_RECORDS.length : 0;
-            var latestRecord = count ? HOME_RECORDS[0] : null;
+            var recordCount =
+                Array.isArray(HOME_RECORDS) ?
+                HOME_RECORDS.length :
+                0;
 
-            var dispLatestDate = latestRecord && latestRecord.date ? latestRecord.date : "No record yet";
-            var dispOverviewStatus = count === 0 ?
+            var completedRecords =
+                Array.isArray(HOME_RECORDS) ?
+                HOME_RECORDS.filter(
+                    record =>
+                    String(
+                        record.status || ''
+                    ).toLowerCase() ===
+                    'completed'
+                ) : [];
+
+            var completedCount = completedRecords.length;
+
+            var latestCompletedRecord =
+                completedCount ?
+                completedRecords[0] :
+                null;
+
+            var dispLatestDate =
+                latestCompletedRecord?.date ||
+                "No completed visit yet";
+
+            var dispOverviewStatus =
+                completedCount === 0 ?
                 "Waiting for first completed visit" :
-                (count === 1 ? "1 completed visit recorded" : count + " completed visits recorded");
+                (
+                    completedCount === 1 ?
+                    "1 completed visit recorded" :
+                    completedCount +
+                    " completed visits recorded"
+                );
 
             if (!HOME_RECORDS || HOME_RECORDS.length === 0) {
                 window.swapSkeletonContent(
@@ -1946,7 +1985,7 @@
                     '<div class="min-w-0">' +
 
                     '<h2 class="card-title">' +
-                    'Dental Overview' +
+                    'Dental Activity Overview' +
                     '</h2>' +
 
                     '<p class="card-subtitle">' +
@@ -2048,7 +2087,7 @@
                 '<div class="min-w-0">' +
 
                 '<h2 class="card-title">' +
-                'Dental Overview' +
+                'Dental Activity Overview' +
                 '</h2>' +
 
                 '<p class="card-subtitle">' +
@@ -2072,12 +2111,12 @@
                 '<div class="dental-summary-stat">' +
                 '<span class="dental-summary-stat-label">Total Visits</span>' +
                 '<strong class="dental-summary-stat-value">' +
-                count +
+                recordCount +
                 '</strong>' +
                 '</div>' +
 
                 '<div class="dental-summary-stat">' +
-                '<span class="dental-summary-stat-label">Latest Record</span>' +
+                '<span class="dental-summary-stat-label">Latest Completed Visit</span>' +
                 '<strong class="dental-summary-stat-value dental-summary-stat-value-sm">' +
                 window.escapeHtml(dispLatestDate) +
                 '</strong>' +

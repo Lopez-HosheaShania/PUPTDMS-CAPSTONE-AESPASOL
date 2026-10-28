@@ -21,8 +21,7 @@
 ])
 
 <div id="{{ $id }}" {{ $attributes->class(['filter-drawer-wrapper']) }} aria-hidden="true">
-    <div class="filter-drawer-overlay" aria-hidden="true"
-        @if ($closeCallback) data-ui-click="{{ $closeCallback }}" @endif></div>
+    <div class="filter-drawer-overlay" aria-hidden="true"></div>
 
     <div class="filter-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="{{ $id }}Title">
 

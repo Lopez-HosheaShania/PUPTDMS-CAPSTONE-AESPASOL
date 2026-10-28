@@ -195,8 +195,8 @@
                                     ],
                                 ]" />
 
-                            <button type="button" id="slFilterBtn" class="global-filter-btn" data-ui-click="action-23adcae5c050"
-                                aria-pressed="false">
+                            <button type="button" id="slFilterBtn" class="global-filter-btn"
+                                data-ui-click="action-23adcae5c050" aria-pressed="false">
                                 <i class="fa-solid fa-sliders"></i>
                                 <span>Filter</span>
                                 <span id="slFilterBadge" class="filter-badge hidden"></span>
@@ -378,7 +378,9 @@
                                         <td><span
                                                 class="sl-desc">{{ $log->description ?? 'No description provided.' }}</span>
                                             @if ($log->full_description !== $log->description)
-                                                <details><summary>Full details</summary>{{ $log->full_description }}</details>
+                                                <details>
+                                                    <summary>Full details</summary>{{ $log->full_description }}
+                                                </details>
                                             @endif
                                         </td>
                                     </tr>
@@ -525,13 +527,15 @@
                                                     Description
                                                 </span>
 
-                                            <span class="table-record-value">
-                                                {{ $log->description ?? 'No description provided.' }}
-                                                @if ($log->full_description !== $log->description)
-                                                    <details><summary>Full details</summary>{{ $log->full_description }}</details>
-                                                @endif
-                                            </span>
-                                        </div>
+                                                <span class="table-record-value">
+                                                    {{ $log->description ?? 'No description provided.' }}
+                                                    @if ($log->full_description !== $log->description)
+                                                        <details>
+                                                            <summary>Full details</summary>{{ $log->full_description }}
+                                                        </details>
+                                                    @endif
+                                                </span>
+                                            </div>
 
                                         </div>
 
@@ -564,9 +568,8 @@
 
     <x-filter-drawer id="filterModal" title="Filters" close-callback="action-463079bd5291"
         clear-id="slClearFilterPanelBtn" clear-callback="action-1e0663440b55" clear-label="Clear Filters"
-        cancel-id="filterCloseBtn" cancel-callback="action-463079bd5291" cancel-label="Cancel"
-        apply-id="filterApplyBtn" apply-callback="action-c059940c46c7" apply-label="Show 0 results"
-        results-id="slShowResultsText">
+        cancel-id="filterCloseBtn" cancel-callback="action-463079bd5291" cancel-label="Cancel" apply-id="filterApplyBtn"
+        apply-callback="action-c059940c46c7" apply-label="Show 0 results" results-id="slShowResultsText">
 
         <div id="slActiveFiltersSection" class="filter-active-section hidden">
 
@@ -670,9 +673,10 @@
 
         </x-filter-group>
 
-        <x-filter-group title="Module" class="filter-group-last">
+        <x-filter-group title="Module">
             <div class="global-control-wrap">
                 <i class="fa-solid fa-cube global-control-icon"></i>
+
                 <input type="text" id="slModuleFilter" class="form-input-custom global-form-icon"
                     placeholder="e.g. appointments">
             </div>
@@ -3171,8 +3175,9 @@
                         '';
                     var actorName = escapeSlHtml(log.actor_name ?? log.actor_identifier ?? 'Unknown User');
                     var description = escapeSlHtml(log.description || 'No description provided.');
-                    var fullDetails = log.full_description && log.full_description !== log.description
-                        ? '<details><summary>Full details</summary>' + escapeSlHtml(log.full_description) + '</details>' : '';
+                    var fullDetails = log.full_description && log.full_description !== log.description ?
+                        '<details><summary>Full details</summary>' + escapeSlHtml(log.full_description) +
+                        '</details>' : '';
                     var createdDay = escapeSlHtml(log.created_at_day || '');
                     var createdTime = escapeSlHtml(log.created_at_time || '');
 

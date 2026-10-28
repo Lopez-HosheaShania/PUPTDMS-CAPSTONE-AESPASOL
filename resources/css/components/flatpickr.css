@@ -364,20 +364,29 @@ span.flatpickr-weekday {
 }
 
 @media (max-width: 640px) {
+
     .flatpickr-mobile-backdrop {
-        position: fixed;
+        position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, .52);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
+
+        z-index: 20;
+
+        background:
+            rgba(15, 23, 42, 0.32);
+
         opacity: 0;
+        visibility: hidden;
         pointer-events: none;
-        transition: opacity .22s ease;
-        z-index: 99998;
+
+        transition:
+            opacity 150ms ease,
+            visibility 150ms ease;
     }
 
     .flatpickr-mobile-backdrop.show {
         opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
     }
 
     .flatpickr-mobile-backdrop.show[data-ready="true"] {
@@ -428,6 +437,37 @@ span.flatpickr-weekday {
 
     body.flatpickr-sheet-open {
         overflow: hidden !important;
+    }
+
+    .flatpickr-calendar.flatpickr-mobile-centered {
+        position: fixed !important;
+
+        top: 50% !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+
+        z-index: 30 !important;
+
+        width:
+            min(calc(100vw - 32px),
+                340px);
+
+        max-width:
+            calc(100vw - 32px);
+
+        margin: 0 !important;
+
+        transform:
+            translate(-50%,
+                -50%) !important;
+
+        border-radius: 18px;
+    }
+
+    .flatpickr-calendar.flatpickr-mobile-centered::before,
+    .flatpickr-calendar.flatpickr-mobile-centered::after {
+        display: none;
     }
 }
 
@@ -701,20 +741,6 @@ span.flatpickr-weekday {
     width: 30px !important;
     height: 30px !important;
     transform: translateY(-50%) !important;
-}
-
-@media (max-width: 640px) {
-    .flatpickr-calendar {
-        width: calc(100vw - 24px) !important;
-        min-width: calc(100vw - 24px) !important;
-        max-width: calc(100vw - 24px) !important;
-    }
-
-    .flatpickr-calendar.flatpickr-month-only {
-        width: min(280px, calc(100vw - 24px)) !important;
-        min-width: min(280px, calc(100vw - 24px)) !important;
-        max-width: calc(100vw - 24px) !important;
-    }
 }
 
 dialog .flatpickr-calendar,

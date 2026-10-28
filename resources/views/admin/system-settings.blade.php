@@ -10,228 +10,278 @@
 
 @section('content')
 
-@php
-    $canManageRetention = $canManageRetention ?? false;
-    $allowedSettingGroups = $allowedSettingGroups ?? ['general', 'notifications'];
-    $canManageGeneralSettings = in_array('general', $allowedSettingGroups, true);
-    $canManageNotificationSettings = in_array('notifications', $allowedSettingGroups, true);
-    $defaultSettingsTab = $canManageGeneralSettings
-        ? 'general'
-        : ($canManageNotificationSettings ? 'notifications' : 'general');
-    if ($canManageRetention && (request('tab') === 'retention' || old('retention_policy_id'))) {
-        $defaultSettingsTab = 'retention';
-    }
-@endphp
+    @php
+        $canManageRetention = $canManageRetention ?? false;
+        $allowedSettingGroups = $allowedSettingGroups ?? ['general', 'notifications'];
+        $canManageGeneralSettings = in_array('general', $allowedSettingGroups, true);
+        $canManageNotificationSettings = in_array('notifications', $allowedSettingGroups, true);
+        $defaultSettingsTab = $canManageGeneralSettings
+            ? 'general'
+            : ($canManageNotificationSettings
+                ? 'notifications'
+                : 'general');
+        if ($canManageRetention && (request('tab') === 'retention' || old('retention_policy_id'))) {
+            $defaultSettingsTab = 'retention';
+        }
+    @endphp
 
-<main id="mainContent" class="system-settings-page app-page-shell page-enter">
-    <div class="w-full">
+    <main id="mainContent" class="system-settings-page app-page-shell page-enter">
+        <div class="w-full">
 
-        <div class="page-banner">
-            <div class="page-banner-inner">
+            <div class="page-banner">
+                <div class="page-banner-inner">
 
-                <div>
-                    <h1 class="page-title">System Settings</h1>
-                    <p class="page-subtitle">Manage notification preferences, backups, and system behavior.</p>
-                </div>
+                    <div>
+                        <h1 class="page-title">System Settings</h1>
+                        <p class="page-subtitle">Manage notification preferences, backups, and system behavior.</p>
+                    </div>
 
-                <div class="settings-banner-actions">
+                    <div class="settings-banner-actions">
 
-                    <button type="button" id="settingsBannerSaveBtn" data-settings-save data-ui-click="action-57cd63974b29"
-                        class="ui-btn ui-btn-secondary settings-banner-save">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        Save Changes
-                    </button>
+                        <button type="button" id="settingsBannerSaveBtn" data-settings-save
+                            data-ui-click="action-57cd63974b29" class="ui-btn ui-btn-secondary settings-banner-save">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Save Changes
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <form id="settingsForm" action="{{ route($updateRoute ?? 'admin.system_settings.update') }}" method="POST">
-            @csrf
+            <form id="settingsForm" action="{{ route($updateRoute ?? 'admin.system_settings.update') }}" method="POST"
+                data-global-selects>
+                @csrf
 
-            <div class="settings-view" id="settingsListView">
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div class="settings-view" id="settingsListView">
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-                    <div class="settings-sidebar-col lg:col-span-1">
-                        <div class="settings-sidebar-card sticky top-[82px]">
-                            <div class="settings-sidebar-head">
-                                <p class="settings-sidebar-kicker">Settings Menu</p>
-                            </div>
-                            <div class="p-2">
-                                @if ($canManageGeneralSettings)
-                                <a href="#" class="settings-nav-item {{ $defaultSettingsTab === 'general' ? 'active' : '' }}"
-                                    data-ui-click="action-524cbe50222f" data-settings-tab="general"><i
-                                        class="fa-solid fa-sliders"></i> General</a>
-                                @endif
-                                {{-- Temporarily hidden: Clinic Info
+                        <div class="settings-sidebar-col lg:col-span-1">
+                            <div class="settings-sidebar-card sticky top-[82px]">
+                                <div class="settings-sidebar-head">
+                                    <p class="settings-sidebar-kicker">Settings Menu</p>
+                                </div>
+                                <div class="p-2">
+                                    @if ($canManageGeneralSettings)
+                                        <a href="#"
+                                            class="settings-nav-item {{ $defaultSettingsTab === 'general' ? 'active' : '' }}"
+                                            data-ui-click="action-524cbe50222f" data-settings-tab="general"><i
+                                                class="fa-solid fa-sliders"></i> General</a>
+                                    @endif
+                                    {{-- Temporarily hidden: Clinic Info
                                 <a href="#" class="settings-nav-item"
                                     data-ui-click="action-aba23a6c84ff" data-settings-tab="clinic"><i
                                         class="fa-solid fa-hospital"></i> Clinic Info</a>
                                 --}}
-                                @if ($canManageNotificationSettings)
-                                <a href="#" class="settings-nav-item {{ $defaultSettingsTab === 'notifications' ? 'active' : '' }}"
-                                    data-ui-click="action-3360e45d2f7f" data-settings-tab="notifications"><i
-                                        class="fa-solid fa-bell"></i> Notifications</a>
-                                @endif
-                                @if ($canManageRetention)
-                                <a href="?tab=retention" class="settings-nav-item {{ $defaultSettingsTab === 'retention' ? 'active' : '' }}"
-                                    data-ui-click="action-e48f4aaf6db9" data-settings-tab="retention"><i
-                                        class="fa-solid fa-shield-halved"></i> Data Retention</a>
-                                @endif
-                                {{-- Temporarily hidden: Email/SMTP
+                                    @if ($canManageNotificationSettings)
+                                        <a href="#"
+                                            class="settings-nav-item {{ $defaultSettingsTab === 'notifications' ? 'active' : '' }}"
+                                            data-ui-click="action-3360e45d2f7f" data-settings-tab="notifications"><i
+                                                class="fa-solid fa-bell"></i> Notifications</a>
+                                    @endif
+                                    @if ($canManageRetention)
+                                        <a href="?tab=retention"
+                                            class="settings-nav-item {{ $defaultSettingsTab === 'retention' ? 'active' : '' }}"
+                                            data-ui-click="action-e48f4aaf6db9" data-settings-tab="retention"><i
+                                                class="fa-solid fa-shield-halved"></i> Data Retention</a>
+                                    @endif
+                                    {{-- Temporarily hidden: Email/SMTP
                                 <a href="#" class="settings-nav-item"
                                     data-ui-click="action-bb4a13913035" data-settings-tab="email"><i
                                         class="fa-solid fa-envelope"></i> Email / SMTP</a>
                                 --}}
-                                {{-- Temporarily hidden: Integrations
+                                    {{-- Temporarily hidden: Integrations
                                 <a href="#" class="settings-nav-item"
                                     data-ui-click="action-5a9e853d1e90" data-settings-tab="integrations"><i
                                         class="fa-solid fa-plug"></i> Integrations</a>
                                 --}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-3 space-y-0">
-
-                        @if ($canManageRetention)
-                            @include('admin.partials.retention-settings')
-                        @endif
-
-                        @if ($canManageGeneralSettings)
-                        <div id="tab-general" class="settings-section {{ $defaultSettingsTab === 'general' ? 'active' : '' }}">
-                            <div class="section-card">
-                                <div class="section-card-hdr">
-                                    <div class="section-card-hdr-left">
-                                        <i class="fa-solid fa-sliders text-[#8B0000]"></i>
-                                        <h2 class="font-bold text-gray-800 text-sm">General Preferences</h2>
-                                    </div>
-                                </div>
-                                <div class="section-card-body">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        <div>
-                                            <label class="form-label">System Language</label>
-                                            <select name="language" class="form-ctrl form-sel">
-                                                @foreach (['English (US)', 'Filipino'] as $opt)
-                                                <option {{ old('language', $settings['language']->value ?? 'English
-                                                    (US)') === $opt ? 'selected' : '' }}>
-                                                    {{ $opt }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label class="form-label">Timezone</label>
-                                            <select name="timezone" class="form-ctrl form-sel" disabled>
-                                                @foreach (['Asia/Manila (UTC+8)', 'UTC'] as $opt)
-                                                <option {{ old('timezone', $settings['timezone']->value ?? 'Asia/Manila
-                                                    (UTC+8)') === $opt ? 'selected' : '' }}>
-                                                    {{ $opt }}</option>
-                                                @endforeach
-                                            </select>
-                                            <div class="setting-note">This setting is locked for now.</div>
-                                        </div>
-
-                                        <div>
-                                            <label class="form-label">Date Format</label>
-                                            <select name="date_format" class="form-ctrl form-sel" disabled>
-                                                @foreach (['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'] as $opt)
-                                                <option {{ old('date_format', $settings['date_format']->value ??
-                                                    'MM/DD/YYYY') === $opt ? 'selected' : '' }}>
-                                                    {{ $opt }}</option>
-                                                @endforeach
-                                            </select>
-                                            <div class="setting-note">This setting is locked for now.</div>
-                                        </div>
-
-                                        <div>
-                                            <label class="form-label">Time Format</label>
-                                            <select name="time_format" class="form-ctrl form-sel" disabled>
-                                                @foreach (['12-hour (AM/PM)', '24-hour'] as $opt)
-                                                <option {{ old('time_format', $settings['time_format']->value ??
-                                                    '12-hour (AM/PM)') === $opt ? 'selected' : '' }}>
-                                                    {{ $opt }}</option>
-                                                @endforeach
-                                            </select>
-                                            <div class="setting-note">This setting is locked for now.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="setting-row">
-                                        <div class="setting-row-info">
-                                            <div class="setting-row-label">Maintenance Mode</div>
-                                            <div class="setting-row-desc">Temporarily disable appointment booking.
-                                                Patients can still access their dashboard.</div>
-                                        </div>
-                                        <label class="toggle-wrap">
-                                            <input type="hidden" name="maintenance_mode" value="0">
-                                            <input type="checkbox" name="maintenance_mode" value="1" {{
-                                                old('maintenance_mode', $settings['maintenance_mode']->value ?? '0') ===
-                                            '1' ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
-                                        </label>
-                                    </div>
-
-                                    <div class="mt-5 mb-4 pt-4 border-t border-gray-50">
-                                        <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wide">AI Services</p>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        <div>
-                                            <label class="form-label">AI Operating Mode</label>
-                                            <select name="ai_mode" class="form-ctrl form-sel">
-                                                @foreach (['normal' => 'Normal', 'degraded' => 'Degraded', 'offline' => 'Offline'] as $value => $label)
-                                                <option value="{{ $value }}" {{ old('ai_mode', $settings['ai_mode']->value ?? 'normal') === $value ? 'selected' : '' }}>
-                                                    {{ $label }}</option>
-                                                @endforeach
-                                            </select>
-                                            <div class="setting-note">Offline disables AI calls and uses fallback workflows only.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="setting-row">
-                                        <div class="setting-row-info">
-                                            <div class="setting-row-label">AI Chatbot</div>
-                                            <div class="setting-row-desc">Allow the chatbot to call the AI service when available</div>
-                                        </div>
-                                        <label class="toggle-wrap">
-                                            <input type="hidden" name="ai_chatbot_enabled" value="0">
-                                            <input type="checkbox" name="ai_chatbot_enabled" value="1" {{
-                                                old('ai_chatbot_enabled', $settings['ai_chatbot_enabled']->value ?? '1') === '1' ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
-                                        </label>
-                                    </div>
-
-                                    <div class="setting-row">
-                                        <div class="setting-row-info">
-                                            <div class="setting-row-label">AI Signature Verification</div>
-                                            <div class="setting-row-desc">If unavailable, signatures are accepted and flagged for manual review</div>
-                                        </div>
-                                        <label class="toggle-wrap">
-                                            <input type="hidden" name="ai_signature_enabled" value="0">
-                                            <input type="checkbox" name="ai_signature_enabled" value="1" {{
-                                                old('ai_signature_enabled', $settings['ai_signature_enabled']->value ?? '1') === '1' ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
-                                        </label>
-                                    </div>
-
-                                    <div class="setting-row">
-                                        <div class="setting-row-info">
-                                            <div class="setting-row-label">AI Report Narratives</div>
-                                            <div class="setting-row-desc">If unavailable, reports will still generate using the built-in fallback narrative</div>
-                                        </div>
-                                        <label class="toggle-wrap">
-                                            <input type="hidden" name="ai_reports_enabled" value="0">
-                                            <input type="checkbox" name="ai_reports_enabled" value="1" {{
-                                                old('ai_reports_enabled', $settings['ai_reports_enabled']->value ?? '1') === '1' ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
-                                        </label>
-                                    </div>
                                 </div>
                             </div>
                         </div>
-                        @endif
 
-                        {{-- Temporarily hidden: Clinic Info
+                        <div class="lg:col-span-3 space-y-0">
+
+                            @if ($canManageRetention)
+                                @include('admin.partials.retention-settings')
+                            @endif
+
+                            @if ($canManageGeneralSettings)
+                                <div id="tab-general"
+                                    class="settings-section {{ $defaultSettingsTab === 'general' ? 'active' : '' }}">
+                                    <div class="section-card">
+                                        <div class="section-card-hdr">
+                                            <div class="section-card-hdr-left">
+                                                <i class="fa-solid fa-sliders text-[#8B0000]"></i>
+                                                <h2 class="font-bold text-gray-800 text-sm">General Preferences</h2>
+                                            </div>
+                                        </div>
+                                        <div class="section-card-body">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                <div>
+                                                    <label class="form-label">System Language</label>
+                                                    <select name="language" class="form-ctrl form-sel">
+                                                        @foreach (['English (US)', 'Filipino'] as $opt)
+                                                            <option
+                                                                {{ old(
+                                                                    'language',
+                                                                    $settings['language']->value ??
+                                                                        'English
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    (US)',
+                                                                ) === $opt
+                                                                    ? 'selected'
+                                                                    : '' }}>
+                                                                {{ $opt }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <div>
+                                                    <label class="form-label">Timezone</label>
+                                                    <select name="timezone" class="form-ctrl form-sel" disabled>
+                                                        @foreach (['Asia/Manila (UTC+8)', 'UTC'] as $opt)
+                                                            <option
+                                                                {{ old(
+                                                                    'timezone',
+                                                                    $settings['timezone']->value ??
+                                                                        'Asia/Manila
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    (UTC+8)',
+                                                                ) === $opt
+                                                                    ? 'selected'
+                                                                    : '' }}>
+                                                                {{ $opt }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div class="setting-note">This setting is locked for now.</div>
+                                                </div>
+
+                                                <div>
+                                                    <label class="form-label">Date Format</label>
+                                                    <select name="date_format" class="form-ctrl form-sel" disabled>
+                                                        @foreach (['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'] as $opt)
+                                                            <option
+                                                                {{ old('date_format', $settings['date_format']->value ?? 'MM/DD/YYYY') === $opt ? 'selected' : '' }}>
+                                                                {{ $opt }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div class="setting-note">This setting is locked for now.</div>
+                                                </div>
+
+                                                <div>
+                                                    <label class="form-label">Time Format</label>
+                                                    <select name="time_format" class="form-ctrl form-sel" disabled>
+                                                        @foreach (['12-hour (AM/PM)', '24-hour'] as $opt)
+                                                            <option
+                                                                {{ old('time_format', $settings['time_format']->value ?? '12-hour (AM/PM)') === $opt ? 'selected' : '' }}>
+                                                                {{ $opt }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div class="setting-note">This setting is locked for now.</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="setting-row">
+                                                <div class="setting-row-info">
+                                                    <div class="setting-row-label">Maintenance Mode</div>
+                                                    <div class="setting-row-desc">Temporarily disable appointment booking.
+                                                        Patients can still access their dashboard.</div>
+                                                </div>
+                                                <label class="global-switch">
+                                                    <input type="hidden" name="maintenance_mode" value="0">
+
+                                                    <input type="checkbox" name="maintenance_mode" value="1"
+                                                        class="global-switch-input"
+                                                        {{ old('maintenance_mode', $settings['maintenance_mode']->value ?? '0') === '1' ? 'checked' : '' }}>
+
+                                                    <span class="global-switch-track"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="mt-5 mb-4 pt-4 border-t border-gray-50">
+                                                <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wide">AI
+                                                    Services</p>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                <div>
+                                                    <label class="form-label">AI Operating Mode</label>
+                                                    <select name="ai_mode" class="form-ctrl form-sel">
+                                                        @foreach (['normal' => 'Normal', 'degraded' => 'Degraded', 'offline' => 'Offline'] as $value => $label)
+                                                            <option value="{{ $value }}"
+                                                                {{ old('ai_mode', $settings['ai_mode']->value ?? 'normal') === $value ? 'selected' : '' }}>
+                                                                {{ $label }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div class="setting-note">Offline disables AI calls and uses fallback
+                                                        workflows only.</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="setting-row">
+                                                <div class="setting-row-info">
+                                                    <div class="setting-row-label">AI Chatbot</div>
+                                                    <div class="setting-row-desc">Allow the chatbot to call the AI service
+                                                        when available</div>
+                                                </div>
+                                                <label class="global-switch">
+                                                    <input type="hidden" name="ai_chatbot_enabled" value="0">
+
+                                                    <input type="checkbox" name="ai_chatbot_enabled" value="1"
+                                                        class="global-switch-input"
+                                                        {{ old('ai_chatbot_enabled', $settings['ai_chatbot_enabled']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                    <span class="global-switch-track"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="setting-row">
+                                                <div class="setting-row-info">
+                                                    <div class="setting-row-label">
+                                                        AI Signature Verification
+                                                    </div>
+
+                                                    <div class="setting-row-desc">
+                                                        If unavailable, signatures are accepted
+                                                        and flagged for manual review
+                                                    </div>
+                                                </div>
+
+                                                <label class="global-switch">
+                                                    <input type="hidden" name="ai_signature_enabled" value="0">
+
+                                                    <input type="checkbox" name="ai_signature_enabled" value="1"
+                                                        class="global-switch-input"
+                                                        {{ old('ai_signature_enabled', $settings['ai_signature_enabled']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                    <span class="global-switch-track"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="setting-row">
+                                                <div class="setting-row-info">
+                                                    <div class="setting-row-label">
+                                                        AI Report Narratives
+                                                    </div>
+
+                                                    <div class="setting-row-desc">
+                                                        If unavailable, reports will still
+                                                        generate using the built-in fallback narrative
+                                                    </div>
+                                                </div>
+
+                                                <label class="global-switch">
+                                                    <input type="hidden" name="ai_reports_enabled" value="0">
+
+                                                    <input type="checkbox" name="ai_reports_enabled" value="1"
+                                                        class="global-switch-input"
+                                                        {{ old('ai_reports_enabled', $settings['ai_reports_enabled']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                    <span class="global-switch-track"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Temporarily hidden: Clinic Info
                         <div id="tab-clinic" class="settings-section">
                             <div class="section-card">
                                 <div class="section-card-hdr">
@@ -310,211 +360,302 @@
 
                         --}}
 
-                        @if ($canManageNotificationSettings)
-                        <div id="tab-notifications" class="settings-section {{ $defaultSettingsTab === 'notifications' ? 'active' : '' }}">
-                            <div class="section-card">
-                                <div class="section-card-hdr">
-                                    <div class="section-card-hdr-left">
-                                        <i class="fa-solid fa-bell text-[#8B0000]"></i>
-                                        <h2 class="font-bold text-gray-800 text-sm">Notification Preferences</h2>
+                            @if ($canManageNotificationSettings)
+                                <div id="tab-notifications"
+                                    class="settings-section {{ $defaultSettingsTab === 'notifications' ? 'active' : '' }}">
+                                    <div class="section-card">
+                                        <div class="section-card-hdr">
+                                            <div class="section-card-hdr-left">
+                                                <i class="fa-solid fa-bell text-[#8B0000]"></i>
+                                                <h2 class="font-bold text-gray-800 text-sm">Notification Preferences</h2>
+                                            </div>
+                                        </div>
+                                        <div class="section-card-body">
+                                            <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wide">Admin
+                                                Alerts</p>
+
+                                            <div class="setting-row">
+                                                <div class="setting-row-info">
+                                                    <div class="setting-row-label">
+                                                        New Appointment Booked
+                                                    </div>
+
+                                                    <div class="setting-row-desc">
+                                                        Notify admin when a patient books an
+                                                        appointment
+                                                    </div>
+                                                </div>
+
+                                                <label class="global-switch">
+                                                    <input type="hidden" name="notif_new_appointment" value="0">
+
+                                                    <input type="checkbox" name="notif_new_appointment" value="1"
+                                                        class="global-switch-input"
+                                                        {{ old('notif_new_appointment', $settings['notif_new_appointment']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                    <span class="global-switch-track"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="setting-row">
+                                                <div class="setting-row-info">
+                                                    <div class="setting-row-label">
+                                                        Appointment Cancellation
+                                                    </div>
+
+                                                    <div class="setting-row-desc">
+                                                        Notify when a patient cancels or no-shows
+                                                    </div>
+                                                </div>
+
+                                                <label class="global-switch">
+                                                    <input type="hidden" name="notif_cancellation" value="0">
+
+                                                    <input type="checkbox" name="notif_cancellation" value="1"
+                                                        class="global-switch-input"
+                                                        {{ old('notif_cancellation', $settings['notif_cancellation']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                    <span class="global-switch-track"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="setting-row">
+                                                <div class="setting-row-info">
+                                                    <div class="setting-row-label">
+                                                        Document Request Submitted
+                                                    </div>
+
+                                                    <div class="setting-row-desc">
+                                                        Alert when a patient requests a dental
+                                                        certificate
+                                                    </div>
+                                                </div>
+
+                                                <label class="global-switch">
+                                                    <input type="hidden" name="notif_document_request" value="0">
+
+                                                    <input type="checkbox" name="notif_document_request" value="1"
+                                                        class="global-switch-input"
+                                                        {{ old('notif_document_request', $settings['notif_document_request']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                    <span class="global-switch-track"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="mt-5 mb-4 pt-4 border-t border-gray-50">
+                                                <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wide">
+                                                    Patient Status Updates</p>
+
+                                                <div class="setting-row">
+                                                    <div class="setting-row-info">
+                                                        <div class="setting-row-label">
+                                                            Appointment Rescheduled
+                                                        </div>
+
+                                                        <div class="setting-row-desc">
+                                                            Notify patient when an appointment
+                                                            schedule is changed
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="global-switch">
+                                                        <input type="hidden" name="notif_rescheduled" value="0">
+
+                                                        <input type="checkbox" name="notif_rescheduled" value="1"
+                                                            class="global-switch-input"
+                                                            {{ old('notif_rescheduled', $settings['notif_rescheduled']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                        <span class="global-switch-track"></span>
+                                                    </label>
+                                                </div>
+
+                                                <div class="setting-row">
+                                                    <div class="setting-row-info">
+                                                        <div class="setting-row-label">
+                                                            Appointment Confirmation
+                                                        </div>
+
+                                                        <div class="setting-row-desc">
+                                                            Notify patient immediately after a
+                                                            booking is successfully recorded
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="global-switch">
+                                                        <input type="hidden" name="notif_confirmation" value="0">
+
+                                                        <input type="checkbox" name="notif_confirmation" value="1"
+                                                            class="global-switch-input"
+                                                            {{ old('notif_confirmation', $settings['notif_confirmation']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                        <span class="global-switch-track"></span>
+                                                    </label>
+                                                </div>
+
+                                                <div class="setting-row">
+                                                    <div class="setting-row-info">
+                                                        <div class="setting-row-label">
+                                                            Follow-up Appointment Scheduled
+                                                        </div>
+
+                                                        <div class="setting-row-desc">
+                                                            Notify patient when the dentist sets
+                                                            a follow-up appointment
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="global-switch">
+                                                        <input type="hidden" name="notif_follow_up_scheduled"
+                                                            value="0">
+
+                                                        <input type="checkbox" name="notif_follow_up_scheduled"
+                                                            value="1" class="global-switch-input"
+                                                            {{ old('notif_follow_up_scheduled', $settings['notif_follow_up_scheduled']->value ?? '1') === '1'
+                                                                ? 'checked'
+                                                                : '' }}>
+
+                                                        <span class="global-switch-track"></span>
+                                                    </label>
+                                                </div>
+
+                                                <div class="setting-row">
+                                                    <div class="setting-row-info">
+                                                        <div class="setting-row-label">
+                                                            Document Request Approved
+                                                        </div>
+
+                                                        <div class="setting-row-desc">
+                                                            Notify patient when a document
+                                                            request is approved and ready for
+                                                            pickup
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="global-switch">
+                                                        <input type="hidden" name="notif_document_approved"
+                                                            value="0">
+
+                                                        <input type="checkbox" name="notif_document_approved"
+                                                            value="1" class="global-switch-input"
+                                                            {{ old('notif_document_approved', $settings['notif_document_approved']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                        <span class="global-switch-track"></span>
+                                                    </label>
+                                                </div>
+
+                                                <div class="setting-row">
+                                                    <div class="setting-row-info">
+                                                        <div class="setting-row-label">
+                                                            Document Request Rejected
+                                                        </div>
+
+                                                        <div class="setting-row-desc">
+                                                            Notify patient when a document
+                                                            request is rejected
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="global-switch">
+                                                        <input type="hidden" name="notif_document_rejected"
+                                                            value="0">
+
+                                                        <input type="checkbox" name="notif_document_rejected"
+                                                            value="1" class="global-switch-input"
+                                                            {{ old('notif_document_rejected', $settings['notif_document_rejected']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                        <span class="global-switch-track"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-5 mb-4 pt-4 border-t border-gray-50">
+                                                <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wide">
+                                                    Patient Reminders</p>
+
+                                                <div class="setting-row">
+                                                    <div class="setting-row-info">
+                                                        <div class="setting-row-label">
+                                                            Appointment Reminder (24 Hours
+                                                            Before Appointment)
+                                                        </div>
+
+                                                        <div class="setting-row-desc">
+                                                            Notify the patient 24 hours before
+                                                            the scheduled appointment time
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="global-switch">
+                                                        <input type="hidden" name="notif_reminder_24h" value="0">
+
+                                                        <input type="checkbox" name="notif_reminder_24h" value="1"
+                                                            class="global-switch-input"
+                                                            {{ old('notif_reminder_24h', $settings['notif_reminder_24h']->value ?? '1') === '1' ? 'checked' : '' }}>
+
+                                                        <span class="global-switch-track"></span>
+                                                    </label>
+                                                </div>
+
+                                                <div class="setting-row">
+                                                    <div class="setting-row-info">
+                                                        <div class="setting-row-label">
+                                                            Follow-up Reminder (48 Hours Before
+                                                            Appointment)
+                                                        </div>
+
+                                                        <div class="setting-row-desc">
+                                                            Notify the patient 48 hours before
+                                                            the scheduled follow-up appointment
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="global-switch">
+                                                        <input type="hidden" name="notif_follow_up_reminder"
+                                                            value="0">
+
+                                                        <input type="checkbox" name="notif_follow_up_reminder"
+                                                            value="1" class="global-switch-input"
+                                                            {{ old('notif_follow_up_reminder', $settings['notif_follow_up_reminder']->value ?? '1') === '1'
+                                                                ? 'checked'
+                                                                : '' }}>
+
+                                                        <span class="global-switch-track"></span>
+                                                    </label>
+                                                </div>
+
+                                                <div class="setting-row">
+                                                    <div class="setting-row-info">
+                                                        <div class="setting-row-label">
+                                                            Follow-up Reminder (On the Day of
+                                                            the Appointment)
+                                                        </div>
+
+                                                        <div class="setting-row-desc">
+                                                            Notify the patient on the day of
+                                                            their scheduled follow-up appointment
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="global-switch">
+                                                        <input type="hidden" name="notif_follow_up_today_reminder"
+                                                            value="0">
+
+                                                        <input type="checkbox" name="notif_follow_up_today_reminder"
+                                                            value="1" class="global-switch-input"
+                                                            {{ old('notif_follow_up_today_reminder', $settings['notif_follow_up_today_reminder']->value ?? '1') === '1'
+                                                                ? 'checked'
+                                                                : '' }}>
+
+                                                        <span class="global-switch-track"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="section-card-body">
-                                    <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wide">Admin
-                                        Alerts</p>
+                            @endif
 
-                                    <div class="setting-row">
-                                        <div class="setting-row-info">
-                                            <div class="setting-row-label">New Appointment Booked</div>
-                                            <div class="setting-row-desc">Notify admin when a patient books an
-                                                appointment</div>
-                                        </div>
-                                        <label class="toggle-wrap">
-                                            <input type="hidden" name="notif_new_appointment" value="0">
-                                            <input type="checkbox" name="notif_new_appointment" value="1" {{
-                                                old('notif_new_appointment', $settings['notif_new_appointment']->value
-                                            ?? '1') === '1' ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
-                                        </label>
-                                    </div>
-
-                                    <div class="setting-row">
-                                        <div class="setting-row-info">
-                                            <div class="setting-row-label">Appointment Cancellation</div>
-                                            <div class="setting-row-desc">Notify when a patient cancels or no-shows
-                                            </div>
-                                        </div>
-                                        <label class="toggle-wrap">
-                                            <input type="hidden" name="notif_cancellation" value="0">
-                                            <input type="checkbox" name="notif_cancellation" value="1" {{
-                                                old('notif_cancellation', $settings['notif_cancellation']->value ?? '1')
-                                            === '1' ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
-                                        </label>
-                                    </div>
-
-                                    <div class="setting-row">
-                                        <div class="setting-row-info">
-                                            <div class="setting-row-label">Document Request Submitted</div>
-                                            <div class="setting-row-desc">Alert when a patient requests a dental
-                                                certificate</div>
-                                        </div>
-                                        <label class="toggle-wrap">
-                                            <input type="hidden" name="notif_document_request" value="0">
-                                            <input type="checkbox" name="notif_document_request" value="1" {{
-                                                old('notif_document_request', $settings['notif_document_request']->value
-                                            ?? '1') === '1' ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
-                                        </label>
-                                    </div>
-
-                                    <div class="mt-5 mb-4 pt-4 border-t border-gray-50">
-                                        <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wide">
-                                            Patient Status Updates</p>
-
-                                        <div class="setting-row">
-                                            <div class="setting-row-info">
-                                                <div class="setting-row-label">Appointment Rescheduled</div>
-                                                <div class="setting-row-desc">Notify patient when an appointment
-                                                    schedule is changed</div>
-                                            </div>
-                                            <label class="toggle-wrap">
-                                                <input type="hidden" name="notif_rescheduled" value="0">
-                                                <input type="checkbox" name="notif_rescheduled" value="1" {{
-                                                    old('notif_rescheduled', $settings['notif_rescheduled']->value ??
-                                                '1') === '1' ? 'checked' : '' }}>
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                        </div>
-
-                                        <div class="setting-row">
-                                            <div class="setting-row-info">
-                                                <div class="setting-row-label">Appointment Confirmation</div>
-                                                <div class="setting-row-desc">Notify patient immediately after a
-                                                    booking is successfully recorded</div>
-                                            </div>
-                                            <label class="toggle-wrap">
-                                                <input type="hidden" name="notif_confirmation" value="0">
-                                                <input type="checkbox" name="notif_confirmation" value="1" {{
-                                                    old('notif_confirmation', $settings['notif_confirmation']->value ??
-                                                '1') === '1' ? 'checked' : '' }}>
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                        </div>
-
-                                        <div class="setting-row">
-                                            <div class="setting-row-info">
-                                                <div class="setting-row-label">Follow-up Appointment Scheduled</div>
-                                                <div class="setting-row-desc">Notify patient when the dentist sets a
-                                                    follow-up appointment</div>
-                                            </div>
-                                            <label class="toggle-wrap">
-                                                <input type="hidden" name="notif_follow_up_scheduled" value="0">
-                                                <input type="checkbox" name="notif_follow_up_scheduled" value="1" {{
-                                                    old('notif_follow_up_scheduled',
-                                                    $settings['notif_follow_up_scheduled']->value ?? '1') === '1'
-                                                ? 'checked'
-                                                : '' }}>
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                        </div>
-
-                                        <div class="setting-row">
-                                            <div class="setting-row-info">
-                                                <div class="setting-row-label">Document Request Approved</div>
-                                                <div class="setting-row-desc">Notify patient when a document request is
-                                                    approved and ready for
-                                                    pickup</div>
-                                            </div>
-                                            <label class="toggle-wrap">
-                                                <input type="hidden" name="notif_document_approved" value="0">
-                                                <input type="checkbox" name="notif_document_approved" value="1" {{
-                                                    old('notif_document_approved',
-                                                    $settings['notif_document_approved']->value ?? '1') === '1' ?
-                                                'checked' : '' }}>
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                        </div>
-
-                                        <div class="setting-row">
-                                            <div class="setting-row-info">
-                                                <div class="setting-row-label">Document Request Rejected</div>
-                                                <div class="setting-row-desc">Notify patient when a document request is
-                                                    rejected</div>
-                                            </div>
-                                            <label class="toggle-wrap">
-                                                <input type="hidden" name="notif_document_rejected" value="0">
-                                                <input type="checkbox" name="notif_document_rejected" value="1" {{
-                                                    old('notif_document_rejected',
-                                                    $settings['notif_document_rejected']->value ?? '1') === '1' ?
-                                                'checked' : '' }}>
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-5 mb-4 pt-4 border-t border-gray-50">
-                                        <p class="text-xs text-gray-400 mb-4 font-medium uppercase tracking-wide">
-                                            Patient Reminders</p>
-
-                                        <div class="setting-row">
-                                            <div class="setting-row-info">
-                                                <div class="setting-row-label">Appointment Reminder (24 Hours Before
-                                                    Appointment)</div>
-                                                <div class="setting-row-desc">Notify the patient 24 hours before the
-                                                    scheduled appointment time</div>
-                                            </div>
-                                            <label class="toggle-wrap">
-                                                <input type="hidden" name="notif_reminder_24h" value="0">
-                                                <input type="checkbox" name="notif_reminder_24h" value="1" {{
-                                                    old('notif_reminder_24h', $settings['notif_reminder_24h']->value ??
-                                                '1') === '1' ? 'checked' : '' }}>
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                        </div>
-
-                                        <div class="setting-row">
-                                            <div class="setting-row-info">
-                                                <div class="setting-row-label">Follow-up Reminder (48 Hours Before
-                                                    Appointment)</div>
-                                                <div class="setting-row-desc">Notify the patient 48 hours before the
-                                                    scheduled follow-up appointment</div>
-                                            </div>
-                                            <label class="toggle-wrap">
-                                                <input type="hidden" name="notif_follow_up_reminder" value="0">
-                                                <input type="checkbox" name="notif_follow_up_reminder" value="1" {{
-                                                    old('notif_follow_up_reminder',
-                                                    $settings['notif_follow_up_reminder']->value ?? '1') === '1'
-                                                ? 'checked'
-                                                : '' }}>
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                        </div>
-
-                                        <div class="setting-row">
-                                            <div class="setting-row-info">
-                                                <div class="setting-row-label">Follow-up Reminder (On the Day of the
-                                                    Appointment)</div>
-                                                <div class="setting-row-desc">Notify the patient on the day of their
-                                                    scheduled follow-up appointment</div>
-                                            </div>
-                                            <label class="toggle-wrap">
-                                                <input type="hidden" name="notif_follow_up_today_reminder" value="0">
-                                                <input type="checkbox" name="notif_follow_up_today_reminder" value="1"
-                                                    {{ old('notif_follow_up_today_reminder',
-                                                    $settings['notif_follow_up_today_reminder']->value ?? '1') === '1'
-                                                ? 'checked'
-                                                : '' }}>
-                                                <span class="toggle-slider"></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-
-                        {{-- Temporarily hidden: Security
+                            {{-- Temporarily hidden: Security
                         <div id="tab-security" class="settings-section">
                             <div class="section-card">
                                 <div class="section-card-hdr">
@@ -533,7 +674,7 @@
 
                         --}}
 
-                        {{-- Temporarily hidden: Email/SMTP
+                            {{-- Temporarily hidden: Email/SMTP
                         <div id="tab-email" class="settings-section">
                             <div class="section-card">
                                 <div class="section-card-hdr">
@@ -553,7 +694,7 @@
 
                         --}}
 
-                        {{-- Temporarily hidden: Integrations
+                            {{-- Temporarily hidden: Integrations
                         <div id="tab-integrations" class="settings-section">
                             <div class="section-card">
                                 <div class="section-card-hdr">
@@ -572,749 +713,665 @@
 
                         --}}
 
-                        <div id="settingsFloatingActions" class="floating-save-bar settings-floating-save-bar"
-                            aria-live="polite">
-                            <div class="fsb-text">
-                                <span class="fsb-title">System controls</span>
-                                <span class="fsb-sub">Save changes before navigating away.</span>
-                            </div>
+                            <x-floating-save-bar id="settingsFloatingActions" title="System controls"
+                                subtitle="Save changes before navigating away.">
+                                <x-slot:actions>
 
-                            <div class="fsb-actions">
-                                <button type="button" id="settingsResetDefaultsBtn" class="btn-reset-defaults"
-                                    data-ui-click="action-96e8179179ff">
-                                    <i class="fa-solid fa-rotate-left"></i>
-                                    Reset Defaults
-                                </button>
+                                    <button type="button" id="settingsResetDefaultsBtn" class="btn-reset-defaults"
+                                        data-ui-click="action-96e8179179ff">
+                                        <i class="fa-solid fa-rotate-left"></i>
+                                        <span>Reset Defaults</span>
+                                    </button>
 
-                                <button type="button" id="settingsDiscardBtn" class="btn-discard"
-                                    data-ui-click="action-22c2e1201b39" disabled>
-                                    Discard
-                                </button>
+                                    <button type="button" id="settingsDiscardBtn" class="btn-discard"
+                                        data-ui-click="action-22c2e1201b39" disabled>
+                                        Discard
+                                    </button>
 
-                                <button type="button" id="settingsSaveFloatBtn" data-settings-save
-                                    class="btn-save-float" data-ui-click="action-57cd63974b29">
-                                    <i class="fa-solid fa-floppy-disk"></i>
-                                    Save Changes
-                                </button>
-                            </div>
+                                    <button type="button" id="settingsSaveFloatBtn" class="btn-save-float"
+                                        data-settings-save data-ui-click="action-57cd63974b29">
+                                        <i class="fa-solid fa-floppy-disk"></i>
+                                        <span>Save Changes</span>
+                                    </button>
+
+                                </x-slot:actions>
+                            </x-floating-save-bar>
+
                         </div>
-
                     </div>
                 </div>
-            </div>
-        </form>
-    </div>
-</main>
+            </form>
+        </div>
+    </main>
 
-        @if ($canManageRetention)
-            <div id="retentionPasswordDialog" class="ui-modal modal-theme-primary" aria-hidden="true">
-                <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true"
-                    aria-labelledby="retentionPasswordTitle" aria-describedby="retentionPasswordDescription">
-                    <div class="modal-hd">
-                        <div class="modal-heading">
-                            <div class="modal-icon"><i class="fa-solid fa-lock" aria-hidden="true"></i></div>
-                            <div class="modal-copy">
-                                <h2 id="retentionPasswordTitle" class="modal-title">Confirm retention change</h2>
-                                <p id="retentionPasswordDescription" class="modal-subtitle">Enter your current admin password to save this retention period.</p>
-                            </div>
-                        </div>
-                        <button type="button" class="modal-x" data-modal-close="retentionPasswordDialog" aria-label="Close password confirmation">
-                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                    <div class="modal-bd modal-form-grid">
-                        <div class="global-confirm-alert">
-                            <i class="fa-solid fa-clock" aria-hidden="true"></i>
-                            <div><p>Retention period</p><strong id="retentionPasswordSummary"></strong></div>
-                        </div>
-                        <div class="global-form-group">
-                            <label for="retentionPassword" class="global-form-label">Your admin password <span class="required-mark">*</span></label>
-                            <div class="global-control-wrap">
-                                <i class="fa-solid fa-lock global-control-icon" aria-hidden="true"></i>
-                                <input id="retentionPassword" name="password" type="password" class="form-input-custom global-form-icon"
-                                    autocomplete="current-password" required maxlength="1024" data-modal-initial-focus>
-                            </div>
+    @if ($canManageRetention)
+        <div id="retentionPasswordDialog" class="ui-modal modal-theme-primary" aria-hidden="true">
+            <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true"
+                aria-labelledby="retentionPasswordTitle" aria-describedby="retentionPasswordDescription">
+                <div class="modal-hd">
+                    <div class="modal-heading">
+                        <div class="modal-icon"><i class="fa-solid fa-lock" aria-hidden="true"></i></div>
+                        <div class="modal-copy">
+                            <h2 id="retentionPasswordTitle" class="modal-title">Confirm retention change</h2>
+                            <p id="retentionPasswordDescription" class="modal-subtitle">Enter your current admin password
+                                to save this retention period.</p>
                         </div>
                     </div>
-                    <div class="modal-ft">
-                        <button id="retentionPasswordCancel" type="button" class="ui-btn ui-btn-secondary" data-modal-close="retentionPasswordDialog">Cancel</button>
-                        <button id="retentionPasswordConfirm" type="button" class="ui-btn ui-btn-primary">Confirm and save</button>
+                    <button type="button" class="modal-x" data-modal-close="retentionPasswordDialog"
+                        aria-label="Close password confirmation">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="modal-bd modal-form-grid">
+                    <div class="global-confirm-alert">
+                        <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                        <div>
+                            <p>Retention period</p><strong id="retentionPasswordSummary"></strong>
+                        </div>
+                    </div>
+                    <div class="global-form-group">
+                        <label for="retentionPassword" class="global-form-label">Your admin password <span
+                                class="required-mark">*</span></label>
+                        <div class="global-control-wrap">
+                            <i class="fa-solid fa-lock global-control-icon" aria-hidden="true"></i>
+                            <input id="retentionPassword" name="password" type="password"
+                                class="form-input-custom global-form-icon" autocomplete="current-password" required
+                                maxlength="1024" data-modal-initial-focus>
+                        </div>
                     </div>
                 </div>
+                <div class="modal-ft">
+                    <button id="retentionPasswordCancel" type="button" class="ui-btn ui-btn-secondary"
+                        data-modal-close="retentionPasswordDialog">Cancel</button>
+                    <button id="retentionPasswordConfirm" type="button" class="ui-btn ui-btn-primary">Confirm and
+                        save</button>
+                </div>
             </div>
-            @foreach ($retentionPolicies as $policy)
-                <form id="retention-period-{{ $policy->id }}" action="{{ route('admin.retention.update', $policy) }}" method="POST" hidden
-                    data-retention-label="{{ config('retention.categories.'.$policy->category.'.label', $policy->category) }}">
-                    @csrf @method('PUT')
-                    <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="version" value="{{ $policy->version }}">
-                    <input type="hidden" name="confirmed" value="1">
-                    <input type="hidden" name="return_to" value="system_settings">
-                    <input type="hidden" name="retention_policy_id" value="{{ $policy->id }}">
-                </form>
-            @endforeach
-        @endif
+        </div>
+        @foreach ($retentionPolicies as $policy)
+            <form id="retention-period-{{ $policy->id }}" action="{{ route('admin.retention.update', $policy) }}"
+                method="POST" hidden
+                data-retention-label="{{ config('retention.categories.' . $policy->category . '.label', $policy->category) }}">
+                @csrf @method('PUT')
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="version" value="{{ $policy->version }}">
+                <input type="hidden" name="confirmed" value="1">
+                <input type="hidden" name="return_to" value="system_settings">
+                <input type="hidden" name="retention_policy_id" value="{{ $policy->id }}">
+            </form>
+        @endforeach
+    @endif
 @endsection
 
 @section('scripts')
-<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
-    function initRetentionPasswordConfirmation() {
-        const dialog = document.getElementById('retentionPasswordDialog');
-        if (!dialog) return;
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+        function initRetentionPasswordConfirmation() {
+            const dialog = document.getElementById('retentionPasswordDialog');
+            if (!dialog) return;
 
-        const password = document.getElementById('retentionPassword');
-        const confirm = document.getElementById('retentionPasswordConfirm');
-        let pendingForm = null;
-        let submitting = false;
+            const password = document.getElementById('retentionPassword');
+            const confirm = document.getElementById('retentionPasswordConfirm');
+            let pendingForm = null;
+            let submitting = false;
 
-        document.querySelectorAll('form[data-retention-label]').forEach(form => {
-            form.addEventListener('submit', event => {
-                event.preventDefault();
-                if (submitting) return;
-                pendingForm = form;
-                password.value = '';
-                password.setAttribute('form', form.id);
-                const duration = form.elements.namedItem('duration').value;
-                const unit = form.elements.namedItem('unit').selectedOptions[0].textContent;
-                document.getElementById('retentionPasswordSummary').textContent =
-                    `${form.dataset.retentionLabel}: ${duration} ${unit}`;
-                window.openModal(dialog.id);
+            document.querySelectorAll('form[data-retention-label]').forEach(form => {
+                form.addEventListener('submit', event => {
+                    event.preventDefault();
+                    if (submitting) return;
+                    pendingForm = form;
+                    password.value = '';
+                    password.setAttribute('form', form.id);
+                    const duration = form.elements.namedItem('duration').value;
+                    const unit = form.elements.namedItem('unit').selectedOptions[0].textContent;
+                    document.getElementById('retentionPasswordSummary').textContent =
+                        `${form.dataset.retentionLabel}: ${duration} ${unit}`;
+                    window.openModal(dialog.id);
+                });
             });
-        });
 
-        function saveRetentionPeriod() {
-            if (submitting || !pendingForm || !pendingForm.reportValidity()) return;
-            submitting = true;
-            confirm.disabled = true;
-            // Submit the associated password with this policy only. A full reload
-            // obtains the new version and requires a fresh password on the next save.
-            HTMLFormElement.prototype.submit.call(pendingForm);
-            password.value = '';
+            function saveRetentionPeriod() {
+                if (submitting || !pendingForm || !pendingForm.reportValidity()) return;
+                submitting = true;
+                confirm.disabled = true;
+                // Submit the associated password with this policy only. A full reload
+                // obtains the new version and requires a fresh password on the next save.
+                HTMLFormElement.prototype.submit.call(pendingForm);
+                password.value = '';
+            }
+
+            confirm.addEventListener('click', saveRetentionPeriod);
+            password.addEventListener('keydown', event => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    saveRetentionPeriod();
+                }
+            });
+            document.addEventListener('ui-modal:closed', event => {
+                if (event.detail.modal !== dialog) return;
+                password.value = '';
+                password.removeAttribute('form');
+                pendingForm = null;
+            });
+            window.addEventListener('pageshow', () => {
+                password.value = '';
+                submitting = false;
+                confirm.disabled = false;
+                if (dialog.classList.contains('open')) window.closeModal(dialog.id);
+            });
         }
 
-        confirm.addEventListener('click', saveRetentionPeriod);
-        password.addEventListener('keydown', event => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                saveRetentionPeriod();
-            }
-        });
-        document.addEventListener('ui-modal:closed', event => {
-            if (event.detail.modal !== dialog) return;
-            password.value = '';
-            password.removeAttribute('form');
-            pendingForm = null;
-        });
-        window.addEventListener('pageshow', () => {
-            password.value = '';
-            submitting = false;
-            confirm.disabled = false;
-            if (dialog.classList.contains('open')) window.closeModal(dialog.id);
-        });
-    }
+        function getActiveSettingsTabId() {
+            const activeSection = document.querySelector('#settingsListView .settings-section.active');
+            if (!activeSection) return 'general';
 
-    function getActiveSettingsTabId() {
-        const activeSection = document.querySelector('#settingsListView .settings-section.active');
-        if (!activeSection) return 'general';
-
-        return activeSection.id.replace('tab-', '');
-    }
-
-    function setActiveNav(tabId, clickedItem = null) {
-        document.querySelectorAll('#settingsListView .settings-nav-item').forEach(item => {
-            const itemTabId = item.dataset.settingsTab;
-            const isCurrent = clickedItem === item || itemTabId === tabId;
-
-            item.classList.toggle('active', isCurrent);
-        });
-    }
-
-    function switchTab(tabId, clickedItem = null) {
-        document.querySelectorAll('#settingsListView .settings-section').forEach(section => {
-            section.classList.remove('active');
-        });
-
-        const section = document.getElementById('tab-' + tabId);
-        if (section) {
-            section.classList.add('active');
+            return activeSection.id.replace('tab-', '');
         }
 
-        setActiveNav(tabId, clickedItem);
-        const url = new URL(window.location.href);
-        if (tabId === 'retention') url.searchParams.set('tab', 'retention');
-        else url.searchParams.delete('tab');
-        window.history.replaceState(null, '', url);
-        updateSettingsFloatingBar();
+        function setActiveNav(tabId, clickedItem = null) {
+            document.querySelectorAll('#settingsListView .settings-nav-item').forEach(item => {
+                const itemTabId = item.dataset.settingsTab;
+                const isCurrent = clickedItem === item || itemTabId === tabId;
 
-    }
+                item.classList.toggle('active', isCurrent);
+            });
+        }
 
-    function initializeClinicVoiceClearButtons(root = document) {
-        const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
-        const wrappers = scope.querySelectorAll('#tab-clinic .voice-input-wrap');
+        function switchTab(tabId, clickedItem = null) {
+            document.querySelectorAll('#settingsListView .settings-section').forEach(section => {
+                section.classList.remove('active');
+            });
 
-        wrappers.forEach((wrapper) => {
-            if (wrapper.dataset.clinicVoiceClearReady === 'true') return;
-
-            const field = wrapper.querySelector('input.form-ctrl, textarea.form-ctrl');
-            if (!field || field.readOnly || field.disabled) return;
-
-            const isTextarea = field.tagName.toLowerCase() === 'textarea';
-
-            let row = wrapper.parentElement && wrapper.parentElement.classList.contains('clinic-voice-row') ?
-                wrapper.parentElement :
-                null;
-
-            if (!row) {
-                row = document.createElement('div');
-                row.className = 'clinic-voice-row';
-                wrapper.parentNode.insertBefore(row, wrapper);
-                row.appendChild(wrapper);
+            const section = document.getElementById('tab-' + tabId);
+            if (section) {
+                section.classList.add('active');
             }
 
-            row.classList.toggle('is-textarea', isTextarea);
+            setActiveNav(tabId, clickedItem);
+            const url = new URL(window.location.href);
+            if (tabId === 'retention') url.searchParams.set('tab', 'retention');
+            else url.searchParams.delete('tab');
+            window.history.replaceState(null, '', url);
+            updateSettingsFloatingBar();
 
-            let clearBtn = row.querySelector('.clinic-voice-clear-btn');
-            if (!clearBtn) {
-                clearBtn = document.createElement('button');
-                clearBtn.type = 'button';
-                clearBtn.className = 'clinic-voice-clear-btn hidden';
-                clearBtn.setAttribute('aria-label', 'Clear field');
-                clearBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                row.appendChild(clearBtn);
+        }
+
+        function initializeClinicVoiceClearButtons(root = document) {
+            const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+            const wrappers = scope.querySelectorAll('#tab-clinic .voice-input-wrap');
+
+            wrappers.forEach((wrapper) => {
+                if (wrapper.dataset.clinicVoiceClearReady === 'true') return;
+
+                const field = wrapper.querySelector('input.form-ctrl, textarea.form-ctrl');
+                if (!field || field.readOnly || field.disabled) return;
+
+                const isTextarea = field.tagName.toLowerCase() === 'textarea';
+
+                let row = wrapper.parentElement && wrapper.parentElement.classList.contains('clinic-voice-row') ?
+                    wrapper.parentElement :
+                    null;
+
+                if (!row) {
+                    row = document.createElement('div');
+                    row.className = 'clinic-voice-row';
+                    wrapper.parentNode.insertBefore(row, wrapper);
+                    row.appendChild(wrapper);
+                }
+
+                row.classList.toggle('is-textarea', isTextarea);
+
+                let clearBtn = row.querySelector('.clinic-voice-clear-btn');
+                if (!clearBtn) {
+                    clearBtn = document.createElement('button');
+                    clearBtn.type = 'button';
+                    clearBtn.className = 'clinic-voice-clear-btn hidden';
+                    clearBtn.setAttribute('aria-label', 'Clear field');
+                    clearBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                    row.appendChild(clearBtn);
+                }
+
+                const status = wrapper.querySelector('[data-voice-status]');
+
+                function toggleClear() {
+                    clearBtn.classList.toggle('hidden', (field.value || '').trim().length === 0);
+                }
+
+                clearBtn.addEventListener('click', () => {
+                    field.value = '';
+                    field.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                    field.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
+
+                    if (status) status.classList.add('hidden');
+
+                    clearBtn.classList.add('hidden');
+                    field.focus();
+                });
+
+                field.addEventListener('input', toggleClear);
+                toggleClear();
+
+                wrapper.dataset.clinicVoiceClearReady = 'true';
+            });
+        }
+
+        function serializeSettingsForm(form) {
+            if (!form) return '';
+
+            const data = new FormData(form);
+            const normalized = {};
+
+            data.forEach((value, key) => {
+                if (!key || key === '_token' || key === '_method') return;
+
+                const cleanKey = key.endsWith('[]') ? key.slice(0, -2) : key;
+
+                if (key.endsWith('[]')) {
+                    if (!Array.isArray(normalized[cleanKey])) {
+                        normalized[cleanKey] = [];
+                    }
+
+                    normalized[cleanKey].push(String(value));
+                    return;
+                }
+
+                normalized[cleanKey] = String(value);
+            });
+
+            Object.keys(normalized).forEach(key => {
+                if (Array.isArray(normalized[key])) {
+                    normalized[key].sort();
+                }
+            });
+
+            return JSON.stringify(
+                Object.keys(normalized)
+                .sort()
+                .map(key => [key, normalized[key]])
+            );
+        }
+
+        const SETTINGS_DEFAULTS = {
+            language: 'English (US)',
+            maintenance_mode: '0',
+            ai_mode: 'normal',
+            ai_chatbot_enabled: '1',
+            ai_signature_enabled: '1',
+            ai_reports_enabled: '1',
+
+            notif_new_appointment: '1',
+            notif_cancellation: '1',
+            notif_document_request: '1',
+            notif_rescheduled: '1',
+            notif_follow_up_scheduled: '1',
+            notif_document_approved: '1',
+            notif_document_rejected: '1',
+            notif_reminder_24h: '1',
+            notif_confirmation: '1',
+            notif_follow_up_reminder: '1',
+            notif_follow_up_today_reminder: '1',
+
+            backup_frequency: 'Daily',
+            backup_retention_days: '30',
+            backup_storage: 'Local Server',
+            backup_time: '02:00',
+            auto_backup_enabled: '1',
+            backup_include_files: '1',
+            backup_encrypt: '1',
+        };
+
+        let settingsInitialState = '';
+        let settingsIsDirty = false;
+        let settingsIsSubmitting = false;
+
+        function syncSettingsVisualState() {
+            document
+                .querySelectorAll(
+                    '#settingsForm .permission-chip input[type="checkbox"]'
+                )
+                .forEach(input => {
+                    input
+                        .closest(
+                            '.permission-chip'
+                        )
+                        ?.classList.toggle(
+                            'active',
+                            input.checked
+                        );
+                });
+
+            document
+                .querySelectorAll(
+                    '#settingsForm .custom-select'
+                )
+                .forEach(wrapper => {
+                    window.syncCustomSelect
+                        ?.(wrapper);
+                });
+        }
+
+        function updateSettingsButtons() {
+            const discardBtn = document.getElementById('settingsDiscardBtn');
+            const resetBtn = document.getElementById('settingsResetDefaultsBtn');
+            const saveButtons = document.querySelectorAll('[data-settings-save]');
+            const bannerSave = document.getElementById('settingsBannerSaveBtn');
+            if (bannerSave) bannerSave.style.display = getActiveSettingsTabId() === 'retention' ? 'none' : '';
+
+            if (discardBtn) {
+                discardBtn.disabled = !settingsIsDirty || settingsIsSubmitting;
+                discardBtn.classList.toggle('is-disabled', discardBtn.disabled);
             }
 
-            const status = wrapper.querySelector('[data-voice-status]');
-
-            function toggleClear() {
-                clearBtn.classList.toggle('hidden', (field.value || '').trim().length === 0);
+            if (resetBtn) {
+                resetBtn.disabled = settingsIsSubmitting;
+                resetBtn.classList.toggle('is-disabled', resetBtn.disabled);
             }
 
-            clearBtn.addEventListener('click', () => {
-                field.value = '';
+            saveButtons.forEach(button => {
+                if (!button.dataset.defaultHtml) {
+                    button.dataset.defaultHtml = button.innerHTML;
+                }
+
+                button.disabled = settingsIsSubmitting;
+                button.classList.toggle('is-disabled', settingsIsSubmitting);
+
+                button.innerHTML = settingsIsSubmitting ?
+                    '<i class="fa-solid fa-spinner spin"></i> Saving...' :
+                    button.dataset.defaultHtml;
+            });
+        }
+
+        function updateSettingsFloatingBar() {
+            const form =
+                document.getElementById(
+                    'settingsForm'
+                );
+
+            const bar =
+                document.getElementById(
+                    'settingsFloatingActions'
+                );
+
+            if (
+                !form ||
+                !bar
+            ) {
+                return;
+            }
+
+            settingsIsDirty =
+                serializeSettingsForm(
+                    form
+                ) !==
+                settingsInitialState;
+
+            bar.classList.toggle(
+                'is-dirty',
+                settingsIsDirty
+            );
+
+            bar.classList.toggle(
+                'is-clean',
+                !settingsIsDirty
+            );
+
+            if (
+                !settingsIsDirty ||
+                getActiveSettingsTabId() ===
+                'retention'
+            ) {
+                window.FloatingSaveBar
+                    ?.hide(bar);
+
+                updateSettingsButtons();
+
+                return;
+            }
+
+            const title =
+                bar.querySelector(
+                    '.fsb-title'
+                );
+
+            const sub =
+                bar.querySelector(
+                    '.fsb-sub'
+                );
+
+            if (title) {
+                title.textContent =
+                    'Unsaved changes';
+            }
+
+            if (sub) {
+                sub.textContent =
+                    'Review your changes before leaving this page.';
+            }
+
+            window.FloatingSaveBar
+                ?.show(bar);
+
+            updateSettingsButtons();
+        }
+
+        function setNamedFieldValue(form, name, value) {
+            const fields = Array.from(form.querySelectorAll('input, select, textarea'))
+                .filter(field => field.form === form && (field.name === name || field.name === `${name}[]`));
+
+            if (!fields.length) return;
+
+            fields.forEach(field => {
+                const type = (field.type || '').toLowerCase();
+
+                if (type === 'hidden' && fields.some(item => item !== field && item.name === field.name)) {
+                    return;
+                }
+
+                if (Array.isArray(value)) {
+                    if (type === 'checkbox' || type === 'radio') {
+                        field.checked = value.includes(field.value);
+                    }
+                } else if (type === 'checkbox' || type === 'radio') {
+                    field.checked = String(value) === String(field.value) || String(value) === '1' || value ===
+                        true;
+                } else {
+                    if (field._flatpickr && field.classList.contains('js-flatpickr-time')) {
+                        field._flatpickr.setDate(String(value), true, 'H:i');
+                    } else {
+                        field.value = value;
+                    }
+                }
+
                 field.dispatchEvent(new Event('input', {
                     bubbles: true
                 }));
                 field.dispatchEvent(new Event('change', {
                     bubbles: true
                 }));
-
-                if (status) status.classList.add('hidden');
-
-                clearBtn.classList.add('hidden');
-                field.focus();
             });
-
-            field.addEventListener('input', toggleClear);
-            toggleClear();
-
-            wrapper.dataset.clinicVoiceClearReady = 'true';
-        });
-    }
-
-    function closeSettingsCustomDropdowns(except = null) {
-        document.querySelectorAll('.settings-custom-select.is-open').forEach(wrapper => {
-            if (wrapper === except) return;
-            wrapper.classList.remove('is-open');
-            wrapper.querySelector('.settings-custom-select-btn')?.setAttribute('aria-expanded', 'false');
-        });
-    }
-
-    function syncSettingsCustomSelects(root = document) {
-        const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
-
-        const wrappers = [];
-
-        if (scope.matches && scope.matches('.settings-custom-select')) {
-            wrappers.push(scope);
         }
 
-        scope.querySelectorAll?.('.settings-custom-select').forEach(wrapper => {
-            if (!wrappers.includes(wrapper)) wrappers.push(wrapper);
-        });
+        async function resetSettingsToDefaults() {
+            const form = document.getElementById('settingsForm');
+            if (!form || settingsIsSubmitting) return;
 
-        wrappers.forEach(wrapper => {
-            const select = wrapper.querySelector('select');
-            const valueText = wrapper.querySelector('[data-custom-select-value]');
-            const button = wrapper.querySelector('.settings-custom-select-btn');
-
-            if (!select || !valueText || !button) return;
-
-            const selectedOption = select.options[select.selectedIndex];
-
-            valueText.textContent = selectedOption?.textContent?.trim() || 'Select option';
-
-            wrapper.classList.toggle('is-disabled', select.disabled);
-            button.disabled = select.disabled;
-
-            wrapper.querySelectorAll('.settings-custom-select-option').forEach(option => {
-                const isActive = Number(option.dataset.index) === select.selectedIndex;
-
-                option.classList.toggle('is-active', isActive);
-                option.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            Object.entries(SETTINGS_DEFAULTS).forEach(([name, value]) => {
+                setNamedFieldValue(form, name, value);
             });
-        });
-    }
 
-    function initSettingsCustomDropdowns(root = document) {
-        const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+            syncSettingsVisualState();
 
-        scope.querySelectorAll('#settingsForm select.form-sel').forEach(select => {
-            if (select.dataset.customDropdownReady === 'true') return;
+            settingsIsDirty = serializeSettingsForm(form) !== settingsInitialState;
+            updateSettingsFloatingBar();
 
-            select.dataset.customDropdownReady = 'true';
-            select.classList.add('settings-native-select');
+            if (!settingsIsDirty) {
+                window.showToast?.({
+                    type: 'info',
+                    title: 'Already using defaults',
+                    message: 'Your system settings are already set to the default values.',
+                    duration: 4500,
+                });
+                return;
+            }
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'settings-custom-select';
+            await submitSettingsForm({
+                successTitle: 'Defaults restored',
+                successMessage: 'System settings were reset to defaults and saved successfully.',
+                noChangesTitle: 'Already using defaults',
+                noChangesMessage: 'Your system settings are already set to the default values.',
+            });
+        }
 
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'settings-custom-select-btn';
-            button.setAttribute('aria-haspopup', 'listbox');
-            button.setAttribute('aria-expanded', 'false');
-            button.innerHTML = `
-      <span data-custom-select-value></span>
-      <i class="fa-solid fa-chevron-down"></i>
-    `;
+        function discardSettingsChanges() {
+            const form = document.getElementById('settingsForm');
+            if (!form || !settingsIsDirty || settingsIsSubmitting) return;
 
-            const menu = document.createElement('div');
-            menu.className = 'settings-custom-select-menu';
-            menu.setAttribute('role', 'listbox');
+            form.reset();
 
-            Array.from(select.options).forEach(option => {
-                const item = document.createElement('button');
-                item.type = 'button';
-                item.className = 'settings-custom-select-option';
-                item.dataset.value = option.value;
-                item.dataset.index = String(option.index);
-                item.setAttribute('role', 'option');
+            requestAnimationFrame(() => {
+                syncSettingsVisualState();
+                updateSettingsFloatingBar();
 
-                const labelSpan = document.createElement('span');
-                labelSpan.textContent = option.textContent.trim();
+                window.showToast?.({
+                    type: 'info',
+                    title: 'Changes discarded',
+                    message: 'Your settings were restored to their last saved values.',
+                    duration: 5000,
+                });
+            });
+        }
 
-                const checkIcon = document.createElement('i');
-                checkIcon.className = 'fa-solid fa-check settings-custom-select-check';
-                checkIcon.setAttribute('aria-hidden', 'true');
+        function getSettingsErrorMessage(error, fallback = 'Unable to save settings. Please try again.') {
+            const data = error?.data;
 
-                item.appendChild(labelSpan);
-                item.appendChild(checkIcon);
+            if (data?.message) return data.message;
 
-                item.addEventListener('click', event => {
-                    event.preventDefault();
-                    event.stopPropagation();
+            if (data?.errors) {
+                const firstError = Object.values(data.errors).flat()[0];
+                if (firstError) return firstError;
+            }
 
-                    if (select.disabled) return;
+            return fallback;
+        }
 
-                    select.selectedIndex = option.index;
+        async function submitSettingsForm(options = {}) {
+            const form = document.getElementById('settingsForm');
+            if (!form || settingsIsSubmitting) return;
 
-                    select.dispatchEvent(new Event('input', {
-                        bubbles: true
-                    }));
-                    select.dispatchEvent(new Event('change', {
-                        bubbles: true
-                    }));
+            settingsIsDirty = serializeSettingsForm(form) !== settingsInitialState;
 
-                    wrapper.classList.remove('is-open');
-                    button.setAttribute('aria-expanded', 'false');
+            if (!settingsIsDirty) {
+                window.showToast?.({
+                    type: 'info',
+                    title: options.noChangesTitle || 'No changes to save',
+                    message: options.noChangesMessage || 'Edit any setting first before saving.',
+                    duration: 4500,
+                });
+                return;
+            }
 
-                    syncSettingsCustomSelects(wrapper);
-                    updateSettingsFloatingBar();
+            settingsIsSubmitting = true;
+            updateSettingsButtons();
+
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+                const response = await fetch(form.action, {
+                    method: form.method || 'POST',
+                    body: new FormData(form),
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        ...(token ? {
+                            'X-CSRF-TOKEN': token
+                        } : {}),
+                    },
                 });
 
-                menu.appendChild(item);
-            });
+                const contentType = response.headers.get('content-type') || '';
+                const data = contentType.includes('application/json') ?
+                    await response.json().catch(() => null) :
+                    null;
 
-            select.parentNode.insertBefore(wrapper, select);
-            wrapper.appendChild(select);
-            wrapper.appendChild(button);
-            wrapper.appendChild(menu);
-
-            button.addEventListener('click', event => {
-                event.preventDefault();
-                event.stopPropagation();
-
-                if (select.disabled) return;
-
-                const willOpen = !wrapper.classList.contains('is-open');
-
-                closeSettingsCustomDropdowns(wrapper);
-
-                wrapper.classList.toggle('is-open', willOpen);
-                button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-            });
-
-            select.addEventListener('change', () => syncSettingsCustomSelects(wrapper));
-
-            syncSettingsCustomSelects(wrapper);
-        });
-    }
-
-    document.addEventListener('click', event => {
-        if (event.target.closest('.settings-custom-select')) return;
-        closeSettingsCustomDropdowns();
-    });
-
-    document.addEventListener('keydown', event => {
-        if (event.key !== 'Escape') return;
-        closeSettingsCustomDropdowns();
-    });
-
-    function serializeSettingsForm(form) {
-        if (!form) return '';
-
-        const data = new FormData(form);
-        const normalized = {};
-
-        data.forEach((value, key) => {
-            if (!key || key === '_token' || key === '_method') return;
-
-            const cleanKey = key.endsWith('[]') ? key.slice(0, -2) : key;
-
-            if (key.endsWith('[]')) {
-                if (!Array.isArray(normalized[cleanKey])) {
-                    normalized[cleanKey] = [];
+                if (!response.ok) {
+                    const error = new Error('Settings save failed');
+                    error.data = data;
+                    error.response = response;
+                    throw error;
                 }
 
-                normalized[cleanKey].push(String(value));
-                return;
+                settingsInitialState = serializeSettingsForm(form);
+                settingsIsDirty = false;
+
+                updateSettingsFloatingBar();
+
+                window.showToast?.({
+                    type: 'success',
+                    title: options.successTitle || 'Settings saved',
+                    message: options.successMessage || data?.message ||
+                        'System settings were saved successfully.',
+                    duration: 6000,
+                });
+            } catch (error) {
+                window.showToast?.({
+                    type: 'error',
+                    title: 'Save failed',
+                    message: getSettingsErrorMessage(error),
+                    duration: 7000,
+                });
+            } finally {
+                settingsIsSubmitting = false;
+                updateSettingsFloatingBar();
             }
-
-            normalized[cleanKey] = String(value);
-        });
-
-        Object.keys(normalized).forEach(key => {
-            if (Array.isArray(normalized[key])) {
-                normalized[key].sort();
-            }
-        });
-
-        return JSON.stringify(
-            Object.keys(normalized)
-                .sort()
-                .map(key => [key, normalized[key]])
-        );
-    }
-
-    const SETTINGS_DEFAULTS = {
-        language: 'English (US)',
-        maintenance_mode: '0',
-        ai_mode: 'normal',
-        ai_chatbot_enabled: '1',
-        ai_signature_enabled: '1',
-        ai_reports_enabled: '1',
-
-        notif_new_appointment: '1',
-        notif_cancellation: '1',
-        notif_document_request: '1',
-        notif_rescheduled: '1',
-        notif_follow_up_scheduled: '1',
-        notif_document_approved: '1',
-        notif_document_rejected: '1',
-        notif_reminder_24h: '1',
-        notif_confirmation: '1',
-        notif_follow_up_reminder: '1',
-        notif_follow_up_today_reminder: '1',
-
-        backup_frequency: 'Daily',
-        backup_retention_days: '30',
-        backup_storage: 'Local Server',
-        backup_time: '02:00',
-        auto_backup_enabled: '1',
-        backup_include_files: '1',
-        backup_encrypt: '1',
-    };
-
-    let settingsInitialState = '';
-    let settingsIsDirty = false;
-    let settingsIsSubmitting = false;
-
-    function syncSettingsVisualState() {
-        document.querySelectorAll('#settingsForm .permission-chip input[type="checkbox"]').forEach(input => {
-            input.closest('.permission-chip')?.classList.toggle('active', input.checked);
-        });
-
-        syncSettingsCustomSelects(document);
-    }
-
-    function mountSettingsFloatingBar() {
-        const bar = document.getElementById('settingsFloatingActions');
-        if (!bar) return;
-
-        bar.classList.add('settings-floating-save-bar');
-
-        if (bar.parentElement !== document.body) {
-            document.body.appendChild(bar);
-        }
-    }
-
-    function updateSettingsButtons() {
-        const discardBtn = document.getElementById('settingsDiscardBtn');
-        const resetBtn = document.getElementById('settingsResetDefaultsBtn');
-        const saveButtons = document.querySelectorAll('[data-settings-save]');
-        const bannerSave = document.getElementById('settingsBannerSaveBtn');
-        if (bannerSave) bannerSave.style.display = getActiveSettingsTabId() === 'retention' ? 'none' : '';
-
-        if (discardBtn) {
-            discardBtn.disabled = !settingsIsDirty || settingsIsSubmitting;
-            discardBtn.classList.toggle('is-disabled', discardBtn.disabled);
         }
 
-        if (resetBtn) {
-            resetBtn.disabled = settingsIsSubmitting;
-            resetBtn.classList.toggle('is-disabled', resetBtn.disabled);
-        }
+        function initSettingsFloatingActions() {
+            const form = document.getElementById('settingsForm');
+            if (!form) return;
 
-        saveButtons.forEach(button => {
-            if (!button.dataset.defaultHtml) {
-                button.dataset.defaultHtml = button.innerHTML;
-            }
-
-            button.disabled = settingsIsSubmitting;
-            button.classList.toggle('is-disabled', settingsIsSubmitting);
-
-            button.innerHTML = settingsIsSubmitting ?
-                '<i class="fa-solid fa-spinner spin"></i> Saving...' :
-                button.dataset.defaultHtml;
-        });
-    }
-
-    function updateSettingsFloatingBar() {
-        const form = document.getElementById('settingsForm');
-        const bar = document.getElementById('settingsFloatingActions');
-        if (!form || !bar) return;
-
-        settingsIsDirty = serializeSettingsForm(form) !== settingsInitialState;
-
-        bar.classList.remove('show');
-        bar.classList.toggle('is-dirty', settingsIsDirty);
-        bar.classList.toggle('is-clean', !settingsIsDirty);
-
-        if (!settingsIsDirty || getActiveSettingsTabId() === 'retention') {
-            updateSettingsButtons();
-            return;
-        }
-
-        bar.classList.add('show');
-
-        const title = bar.querySelector('.fsb-title');
-        const sub = bar.querySelector('.fsb-sub');
-
-        if (title) {
-            title.textContent = 'Unsaved changes';
-        }
-
-        if (sub) {
-            sub.textContent = 'Review your changes before leaving this page.';
-        }
-
-        updateSettingsButtons();
-    }
-
-    function setNamedFieldValue(form, name, value) {
-        const fields = Array.from(form.querySelectorAll('input, select, textarea'))
-            .filter(field => field.form === form && (field.name === name || field.name === `${name}[]`));
-
-        if (!fields.length) return;
-
-        fields.forEach(field => {
-            const type = (field.type || '').toLowerCase();
-
-            if (type === 'hidden' && fields.some(item => item !== field && item.name === field.name)) {
-                return;
-            }
-
-            if (Array.isArray(value)) {
-                if (type === 'checkbox' || type === 'radio') {
-                    field.checked = value.includes(field.value);
-                }
-            } else if (type === 'checkbox' || type === 'radio') {
-                field.checked = String(value) === String(field.value) || String(value) === '1' || value ===
-                    true;
-            } else {
-                if (field._flatpickr && field.classList.contains('js-flatpickr-time')) {
-                    field._flatpickr.setDate(String(value), true, 'H:i');
-                } else {
-                    field.value = value;
-                }
-            }
-
-            field.dispatchEvent(new Event('input', {
-                bubbles: true
-            }));
-            field.dispatchEvent(new Event('change', {
-                bubbles: true
-            }));
-        });
-    }
-
-    async function resetSettingsToDefaults() {
-        const form = document.getElementById('settingsForm');
-        if (!form || settingsIsSubmitting) return;
-
-        Object.entries(SETTINGS_DEFAULTS).forEach(([name, value]) => {
-            setNamedFieldValue(form, name, value);
-        });
-
-        syncSettingsVisualState();
-
-        settingsIsDirty = serializeSettingsForm(form) !== settingsInitialState;
-        updateSettingsFloatingBar();
-
-        if (!settingsIsDirty) {
-            window.showToast?.({
-                type: 'info',
-                title: 'Already using defaults',
-                message: 'Your system settings are already set to the default values.',
-                duration: 4500,
-            });
-            return;
-        }
-
-        await submitSettingsForm({
-            successTitle: 'Defaults restored',
-            successMessage: 'System settings were reset to defaults and saved successfully.',
-            noChangesTitle: 'Already using defaults',
-            noChangesMessage: 'Your system settings are already set to the default values.',
-        });
-    }
-
-    function discardSettingsChanges() {
-        const form = document.getElementById('settingsForm');
-        if (!form || !settingsIsDirty || settingsIsSubmitting) return;
-
-        form.reset();
-
-        requestAnimationFrame(() => {
-            syncSettingsVisualState();
-            updateSettingsFloatingBar();
-
-            window.showToast?.({
-                type: 'info',
-                title: 'Changes discarded',
-                message: 'Your settings were restored to their last saved values.',
-                duration: 5000,
-            });
-        });
-    }
-
-    function getSettingsErrorMessage(error, fallback = 'Unable to save settings. Please try again.') {
-        const data = error?.data;
-
-        if (data?.message) return data.message;
-
-        if (data?.errors) {
-            const firstError = Object.values(data.errors).flat()[0];
-            if (firstError) return firstError;
-        }
-
-        return fallback;
-    }
-
-    async function submitSettingsForm(options = {}) {
-        const form = document.getElementById('settingsForm');
-        if (!form || settingsIsSubmitting) return;
-
-        settingsIsDirty = serializeSettingsForm(form) !== settingsInitialState;
-
-        if (!settingsIsDirty) {
-            window.showToast?.({
-                type: 'info',
-                title: options.noChangesTitle || 'No changes to save',
-                message: options.noChangesMessage || 'Edit any setting first before saving.',
-                duration: 4500,
-            });
-            return;
-        }
-
-        settingsIsSubmitting = true;
-        updateSettingsButtons();
-
-        try {
-            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-            const response = await fetch(form.action, {
-                method: form.method || 'POST',
-                body: new FormData(form),
-                credentials: 'same-origin',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    ...(token ? {
-                        'X-CSRF-TOKEN': token
-                    } : {}),
-                },
-            });
-
-            const contentType = response.headers.get('content-type') || '';
-            const data = contentType.includes('application/json') ?
-                await response.json().catch(() => null) :
-                null;
-
-            if (!response.ok) {
-                const error = new Error('Settings save failed');
-                error.data = data;
-                error.response = response;
-                throw error;
-            }
+            window.FloatingSaveBar
+                ?.mount(document);
 
             settingsInitialState = serializeSettingsForm(form);
-            settingsIsDirty = false;
+            syncSettingsVisualState();
 
-            updateSettingsFloatingBar();
+            document.querySelectorAll('[data-settings-save]').forEach(button => {
+                button.dataset.defaultHtml = button.innerHTML;
+            });
 
-            window.showToast?.({
-                type: 'success',
-                title: options.successTitle || 'Settings saved',
-                message: options.successMessage || data?.message ||
-                    'System settings were saved successfully.',
-                duration: 6000,
+            form.addEventListener('input', updateSettingsFloatingBar);
+            form.addEventListener('change', updateSettingsFloatingBar);
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                submitSettingsForm();
             });
-        } catch (error) {
-            window.showToast?.({
-                type: 'error',
-                title: 'Save failed',
-                message: getSettingsErrorMessage(error),
-                duration: 7000,
-            });
-        } finally {
-            settingsIsSubmitting = false;
+
             updateSettingsFloatingBar();
         }
-    }
 
-    function initSettingsFloatingActions() {
-        const form = document.getElementById('settingsForm');
-        if (!form) return;
+        document.addEventListener(
+            'DOMContentLoaded',
+            async function() {
+                initRetentionPasswordConfirmation();
 
-        mountSettingsFloatingBar();
+                await window.initCustomSelects
+                    ?.(document);
 
-        settingsInitialState = serializeSettingsForm(form);
-        syncSettingsVisualState();
+                initializeClinicVoiceClearButtons(
+                    document
+                );
 
-        document.querySelectorAll('[data-settings-save]').forEach(button => {
-            button.dataset.defaultHtml = button.innerHTML;
+                initSettingsFloatingActions();
+            }
+        );
+
+        document.addEventListener('voice:refresh', function(event) {
+            initializeClinicVoiceClearButtons(event && event.detail ? event.detail.root : document);
         });
-
-        form.addEventListener('input', updateSettingsFloatingBar);
-        form.addEventListener('change', updateSettingsFloatingBar);
-
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            submitSettingsForm();
-        });
-
-        updateSettingsFloatingBar();
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        initRetentionPasswordConfirmation();
-        initSettingsCustomDropdowns(document);
-        initializeClinicVoiceClearButtons(document);
-        initSettingsFloatingActions();
-    });
-
-    document.addEventListener('voice:refresh', function (event) {
-        initializeClinicVoiceClearButtons(event && event.detail ? event.detail.root : document);
-    });
-</script>
+    </script>
 @endsection
