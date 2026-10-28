@@ -680,6 +680,8 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     let currentViewMode = 'list';
 
     const DOCREQ_ROUTES = @json($routes ?? []);
+    const CAN_APPROVE_DOCUMENT_REQUESTS = @json(auth()->user()?->hasPermission('approve_document_requests') ?? false);
+    const CAN_REJECT_DOCUMENT_REQUESTS = @json(auth()->user()?->hasPermission('reject_document_requests') ?? false);
     const DOCREQ_METHODS = @json($methods ?? []);
     const DOCREQ_REFRESH_ITEMS = @json($refreshItems ?? []);
     const DOCREQ_INDEX_URL = DOCREQ_ROUTES.index || window.location.pathname;
@@ -1728,12 +1730,13 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 request.status
             );
 
-        if (status !== 'pending') {
+        if (status !== 'pending' || (!CAN_APPROVE_DOCUMENT_REQUESTS && !CAN_REJECT_DOCUMENT_REQUESTS)) {
             return '';
         }
 
         return `
         <div class="ui-action-group">
+            ${CAN_APPROVE_DOCUMENT_REQUESTS ? `
             <button
                 type="button"
                 class="ui-action-btn ui-action-success"
@@ -1742,7 +1745,9 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 data-ui-click="action-6f1c12e1421c" data-ui-click-arg-0="${window.uiAttribute(request.id)}" data-ui-click-arg-1="${window.uiAttribute(patientArg)}">
                 <i class="fa-solid fa-check"></i>
             </button>
+            ` : ''}
 
+            ${CAN_REJECT_DOCUMENT_REQUESTS ? `
             <button
                 type="button"
                 class="ui-action-btn ui-action-delete"
@@ -1751,6 +1756,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 data-ui-click="action-b2e920847258" data-ui-click-arg-0="${window.uiAttribute(request.id)}" data-ui-click-arg-1="${window.uiAttribute(patientArg)}">
                 <i class="fa-solid fa-xmark"></i>
             </button>
+            ` : ''}
         </div>
     `;
     }

@@ -285,16 +285,9 @@ class StudentApiService
     public function getStudentByEmail(string $email, bool $allowCachedFallback = true): array
     {
         try {
-            $token = $this->getAccessToken();
-
             $url = $this->baseUrl . '/integrations/students/profile';
 
-            $response = Http::acceptJson()
-                ->withToken($token)
-                ->timeout(15)
-                ->get($url, [
-                    'email' => $email,
-                ]);
+            $response = $this->getStudentInformation($url, ['email' => $email]);
 
             if (! $response->successful()) {
                 Log::error('Student fetch by email failed', [
@@ -339,8 +332,6 @@ class StudentApiService
     public function getPersonalInfoByStudentNumber(string $studentNumber, bool $allowCachedFallback = true): array
     {
         try {
-            $token = $this->getAccessToken();
-
             $url = $this->baseUrl . '/integrations/students/' . urlencode($studentNumber) . '/personal-info';
 
             Log::info('DEBUG Personal Info Request', [
@@ -348,10 +339,7 @@ class StudentApiService
                 'url' => $url,
             ]);
 
-            $response = Http::acceptJson()
-                ->withToken($token)
-                ->timeout(15)
-                ->get($url);
+            $response = $this->getStudentInformation($url);
 
             Log::info('DEBUG Personal Info Response', [
                 'student_number' => $studentNumber,
@@ -386,6 +374,20 @@ class StudentApiService
 
             throw $e;
         }
+    }
+
+    private function getStudentInformation(string $url, array $query = []): \Illuminate\Http\Client\Response
+    {
+        $response = Http::acceptJson()->withToken($this->getAccessToken())
+            ->timeout(15)->get($url, $query);
+
+        if ($response->status() === 401) {
+            Cache::forget('ogos_student_api_access_token');
+            $response = Http::acceptJson()->withToken($this->getAccessToken())
+                ->timeout(15)->get($url, $query);
+        }
+
+        return $response;
     }
 
     public function getPersonalInformationCompletion(string $studentNumber, array $profile = []): ?float

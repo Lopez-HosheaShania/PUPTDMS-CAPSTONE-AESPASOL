@@ -27,7 +27,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Services\AppointmentOdontogramSnapshotService;
 $isDentistProfile = $profileMode === 'dentist';
-$canViewClinicalRecords = $isDentistProfile;
+$canViewClinicalRecords = $isDentistProfile && !(auth()->user()?->hasAnyRole(['admin', 'super_admin']) ?? false);
 
 $patientName = $patient->name ?? 'Unknown Patient';
 $displayName = $patient->name ?? 'Guest';
@@ -127,7 +127,7 @@ Carbon::parse($visit->appointment_date)->isToday();
 });
 
 $canStartProcedure =
-$isDentistProfile &&
+$canViewClinicalRecords &&
 !empty($procedureAppointment);
 $odontogramData = $canViewClinicalRecords ? (optional($patient->odontogram)->odontogram_data ?? []) : [];
 $odontogramLastUpdatedAt = $canViewClinicalRecords ? optional($patient->odontogram)->updated_at : null;

@@ -33,11 +33,23 @@ class ProcedureTimingService
             config('app.timezone')
         );
         $start = $parseTime($validated['procedure_started_at']);
+
+        User::whereKey($appointment->dentist_id)->lockForUpdate()->first();
+        Patient::whereKey($appointment->patient_id)->lockForUpdate()->firstOrFail();
+        $lockedAppointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
+        $timing = $lockedAppointment->procedure?->timing;
+        $preserveSeconds = function (Carbon $parsed, string $input, ?Carbon $stored): Carbon {
+            return $stored && preg_match('/(?:^|T)\d{2}:\d{2}$/', $input)
+                && $parsed->equalTo($stored->copy()->startOfMinute())
+                    ? $stored->copy() : $parsed;
+        };
+        $start = $preserveSeconds($start, $validated['procedure_started_at'], $timing?->started_at);
         if (isset($validated['procedure_duration_hms'])) {
             [$hours, $minutes, $durationSeconds] = array_map('intval', explode(':', $validated['procedure_duration_hms']));
             $end = $start->copy()->addSeconds($hours * 3600 + $minutes * 60 + $durationSeconds);
         } else {
             $end = $parseTime($validated['procedure_completed_at']);
+            $end = $preserveSeconds($end, $validated['procedure_completed_at'], $timing?->completed_at);
         }
         $seconds = (int) $start->diffInSeconds($end, false);
 
@@ -47,9 +59,11 @@ class ProcedureTimingService
             ]);
         }
 
-        User::whereKey($appointment->dentist_id)->lockForUpdate()->first();
-        Patient::whereKey($appointment->patient_id)->lockForUpdate()->firstOrFail();
-        Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
+        if ($timing?->started_at?->equalTo($start)
+            && $timing?->completed_at?->equalTo($end)
+            && $timing->duration_seconds === $seconds) {
+            return [$start, $end, $seconds];
+        }
 
         if ($seconds > 0 && Appointment::withoutGlobalScope('clinical_patients')
             ->whereKeyNot($appointment->id)

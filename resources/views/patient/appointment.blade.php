@@ -78,7 +78,7 @@
 
                 'dentist' =>
                     $appt->dentist_name ??
-                    (optional($appt->dentist)->name ?? (optional($clinicDentist)->name ?? 'Assigned Dentist')),
+                    'Not assigned',
 
                 'duration' => $appt->procedure?->procedure_duration_seconds
                     ? \Carbon\CarbonInterval::seconds((int) $appt->procedure->procedure_duration_seconds)

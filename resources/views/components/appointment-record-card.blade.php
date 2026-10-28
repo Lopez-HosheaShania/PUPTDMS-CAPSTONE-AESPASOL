@@ -66,7 +66,7 @@ $statusLabel =
 $normalizedStatus === 'default' ? Str::headline($rawStatus ?: 'Status') : Str::headline($normalizedStatus);
 
 $dentistName =
-$get('dentist.name') ??
+$get('dentist_name') ?? $get('dentist.name') ??
 ($get('originalDentist.name') ??
 ($get('dentist_name') ?? ((is_string($get('dentist')) ? $get('dentist') : null) ?? 'Not assigned')));
 

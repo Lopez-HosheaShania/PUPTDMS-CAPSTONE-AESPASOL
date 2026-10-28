@@ -38,7 +38,7 @@ class InventoryController extends SharedInventoryController
                     'procedure_date' => $procedure->procedure_completed_at?->format('M d, Y h:i A')
                         ?? \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y'),
                     'visit_date' => \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y'),
-                    'dentist_name' => $appointment->dentist?->name,
+                    'dentist_name' => $appointment->dentist_name,
                     'inventory_notes' => $procedure->inventory_notes,
                 ];
             }),

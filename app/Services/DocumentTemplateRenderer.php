@@ -5,6 +5,10 @@ namespace App\Services;
 use App\Models\DocumentTemplate;
 use App\Models\DocumentTemplateField;
 use App\Models\Inventory;
+use App\Models\Appointment;
+use App\Models\DocumentRequest;
+use App\Models\User;
+use App\Support\DentistName;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -42,6 +46,37 @@ class DocumentTemplateRenderer
 
     private function buildTemplateContext(DocumentTemplate $template, array $context): array
     {
+        $actor = auth()->user();
+        $signatories = app(ReportSignatory::class);
+        $preparer = $signatories->currentPreparerProfile();
+        $profile = match (true) {
+            ($context['document_request'] ?? null) instanceof DocumentRequest => $signatories->documentProfile($context['document_request']),
+            ($context['appointment'] ?? null) instanceof Appointment => $signatories->profileForDentist(DentistName::clinicianForAppointment($context['appointment'])),
+            ($context['dentist'] ?? null) instanceof User => $signatories->profileForDentist($context['dentist']),
+            default => $signatories->currentProfile(),
+        };
+        $dentistName = match (true) {
+            ($context['document_request'] ?? null) instanceof DocumentRequest => DentistName::forDocumentRequest($context['document_request']),
+            ($context['appointment'] ?? null) instanceof Appointment => DentistName::forAppointment($context['appointment']),
+            ($context['dentist'] ?? null) instanceof User => DentistName::forUser($context['dentist']),
+            default => $this->reportDentists($template, $context),
+        };
+        $dentistName = $profile?->name ?? $dentistName;
+        $signature = $profile?->signatureDataUri() ?? '';
+        $context = array_merge([
+            'dentist_name' => $dentistName,
+            'submitted_by' => $dentistName,
+            'noted_by' => $dentistName,
+            'prepared_by' => $preparer?->name ?? DentistName::forUser($actor),
+            'prepared_by_role' => $preparer ? ReportSignatory::preparerLabel($preparer->user) : ($actor?->display_role_name ?? ''),
+            'dentist_signature' => $signature,
+            'submitted_by_signature' => $signature,
+            'noted_by_signature' => $signature,
+            'prepared_by_signature' => $preparer?->signatureDataUri() ?? '',
+            'lic_no' => $profile?->license_number ?? '',
+            'dentist_license_no' => $profile?->license_number ?? '',
+        ], $context);
+
         if ($template->document_type === 'dental_cases') {
             return array_merge($this->buildDentalCasesContext(), $context);
         }
@@ -67,6 +102,29 @@ class DocumentTemplateRenderer
         }
 
         return $context;
+    }
+
+    private function reportDentists(DocumentTemplate $template, array $context): string
+    {
+        if (isset($context['records']) && is_iterable($context['records'])) {
+            return implode('; ', DentistName::forRecords($context['records']));
+        }
+
+        if (! in_array($template->document_type, ['dental_cases', 'gad_report', 'daily_treatment_record', 'dental_services'], true)) {
+            return '';
+        }
+
+        [$from, $to] = $template->document_type === 'gad_report'
+            ? $this->resolveGadReportRange($context)
+            : [now()->startOfMonth(), now()->endOfMonth()];
+        $records = app(AppointmentReportRecords::class)->between($from, $to);
+        $records = match ($template->document_type) {
+            'daily_treatment_record' => $records->take(12),
+            'dental_services' => $records->take(15),
+            default => $records,
+        };
+
+        return implode('; ', DentistName::forRecords($records));
     }
 
     private function buildDentalCasesContext(): array
@@ -262,12 +320,12 @@ class DocumentTemplateRenderer
             'total_administrative' => $this->formatGadCount($headers['administrative'] ?? 0),
             'total_dependent' => $this->formatGadCount($headers['dependent'] ?? 0),
             'grand_total' => $this->formatGadCount($grandTotal),
-            'prepared_by_signature' => asset('images/sir.lim-sign.png'),
-            'prepared_by' => 'Ronilo I. Lim',
+            'prepared_by_signature' => '',
+            'prepared_by' => '',
             'prepared_by_role' => 'Dental Aide',
-            'submitted_by_signature' => asset('images/dr.angeles-sign.png'),
-            'submitted_by' => 'Nelson P. Angeles, DMD',
-            'submitted_by_role' => 'Dentist II',
+            'submitted_by_signature' => '',
+            'submitted_by' => '',
+            'submitted_by_role' => 'Dentist',
         ];
     }
 
@@ -398,11 +456,11 @@ class DocumentTemplateRenderer
             'bagong_pilipinas_logo' => asset('images/bagong-pilipinas.png'),
             'report_month_year' => strtoupper($currentMonth->format('F Y')),
             'clinic_name' => strtoupper($clinicName),
-            'prepared_by_signature' => asset('images/sir.lim-sign.png'),
-            'prepared_by' => 'Ronilo I. Lim',
+            'prepared_by_signature' => '',
+            'prepared_by' => '',
             'prepared_by_role' => 'Dental Aide',
-            'noted_by_signature' => asset('images/dr.angeles-sign.png'),
-            'noted_by' => 'Nelson P. Angeles, DMD',
+            'noted_by_signature' => '',
+            'noted_by' => '',
             'noted_by_role' => 'Dentist',
         ];
 
@@ -498,6 +556,14 @@ class DocumentTemplateRenderer
 
     private function resolveValue(string $fieldKey, ?DocumentTemplateField $field, array $context): mixed
     {
+        if (array_key_exists($fieldKey, $context) && in_array($fieldKey, [
+            'dentist_name', 'submitted_by', 'noted_by', 'prepared_by', 'prepared_by_role',
+            'dentist_signature', 'submitted_by_signature', 'noted_by_signature', 'prepared_by_signature',
+            'lic_no', 'dentist_license_no',
+        ], true)) {
+            return $context[$fieldKey];
+        }
+
         if (array_key_exists($fieldKey, $context) && $context[$fieldKey] !== null && $context[$fieldKey] !== '') {
             return $context[$fieldKey];
         }

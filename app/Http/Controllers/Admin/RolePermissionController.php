@@ -272,8 +272,6 @@ class RolePermissionController extends Controller
             'create_clinic_schedule',
             'delete_clinic_schedule',
             'view_document_requests',
-            'approve_document_requests',
-            'reject_document_requests',
             'view_academic_periods',
             'update_academic_period',
             'create_academic_period',
@@ -525,9 +523,8 @@ class RolePermissionController extends Controller
             $permissionIds = array_map('intval', $request->input("permissions.{$role->id}", []));
         }
 
-        $role->permissions()->sync(
-            $this->normalizePermissionIdsForRole($role, $permissionIds)
-        );
+        $permissionIds = $this->normalizePermissionIdsForRole($role, $permissionIds);
+        $role->permissions()->sync($permissionIds);
 
         AuditLogger::log(
             'update',
@@ -812,15 +809,13 @@ class RolePermissionController extends Controller
 
         Role::with('permissions')
             ->get()
-            ->each(function (Role $role) use ($adminOnlyPermissionIds): void {
+            ->each(function (Role $role): void {
                 $currentPermissionIds = $role->permissions
                     ->pluck('id')
                     ->map(fn ($id) => (int) $id)
                     ->all();
 
-                $normalizedPermissionIds = $role->slug === 'admin'
-                    ? array_values(array_unique(array_merge($currentPermissionIds, $adminOnlyPermissionIds)))
-                    : array_values(array_diff($currentPermissionIds, $adminOnlyPermissionIds));
+                $normalizedPermissionIds = $this->normalizePermissionIdsForRole($role, $currentPermissionIds);
 
                 sort($currentPermissionIds);
 

@@ -225,6 +225,9 @@ Route::post(
     ->middleware('auth')
     ->name('session.activity');
 
+Route::put('/reports/signatory', [\App\Http\Controllers\Dentist\ReportSignatoryController::class, 'update'])
+    ->middleware('auth')->name('reports.signatory.update');
+
 Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
     Route::get('/poll', [NotificationController::class, 'poll'])
         ->name('poll');

@@ -283,6 +283,7 @@ class DentistReportController extends Controller
 
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($templatePage, 0, 0, $size['width'], $size['height'], true);
+            app(\App\Services\ReportSignatory::class)->draw($pdf, $template->document_type);
         }
 
         AuditLogger::log(
@@ -441,7 +442,11 @@ class DentistReportController extends Controller
             abort(404, 'GAD report PDF template was not found.');
         }
 
-        $counts = $this->buildGadPdfCounts($from, $to);
+        $appointments = Appointment::with(['patient', 'procedure', 'dentist'])
+            ->where('status', 'completed')->whereHas('patient')
+            ->whereDate('appointment_date', '>=', $from->toDateString())
+            ->whereDate('appointment_date', '<=', $to->toDateString())->get();
+        $counts = $this->buildGadPdfCounts($from, $to, $appointments);
 
         $pdf = new Fpdi('P', 'pt');
         $pdf->SetAutoPageBreak(false);
@@ -477,6 +482,7 @@ class DentistReportController extends Controller
                 $from,
                 $to
             );
+            app(\App\Services\ReportSignatory::class)->draw($pdf, 'gad_report', $appointments);
         }
         AuditLogger::log(
             'download',
@@ -1130,6 +1136,7 @@ class DentistReportController extends Controller
                     $chunk->values(),
                     strtoupper(trim((string) ($templateRecord->code ?? '')))
                 );
+                app(\App\Services\ReportSignatory::class)->draw($pdf, 'daily_treatment_record', $chunk);
             }
         }
 
@@ -1342,6 +1349,7 @@ class DentistReportController extends Controller
                     $from,
                     $to
                 );
+                app(\App\Services\ReportSignatory::class)->draw($pdf, 'dental_cases', $appointments);
             }
         }
 
@@ -1433,6 +1441,7 @@ class DentistReportController extends Controller
             $pdf->useTemplate($template, 0, 0, $size['width'], $size['height'], true);
 
             $this->drawMonthlyReportPage($pdf, $reportData, $from, $to);
+            app(\App\Services\ReportSignatory::class)->draw($pdf, 'monthly_report', $appointments);
         }
 
         AuditLogger::log(
@@ -2491,7 +2500,7 @@ class DentistReportController extends Controller
                 $treatment = 'Dental Service';
             }
 
-            $attending = trim((string) ($appointment->dentist->name ?? ''));
+            $attending = (string) $appointment->dentist_name;
 
             if ($attending === '') {
                 $attending = 'Not assigned';
@@ -3696,7 +3705,7 @@ class DentistReportController extends Controller
         $pdf->Cell($width, $height, $text, 0, 0, 'C');
     }
 
-    private function buildGadPdfCounts(Carbon $from, Carbon $to): array
+    private function buildGadPdfCounts(Carbon $from, Carbon $to, ?\Illuminate\Support\Collection $appointments = null): array
     {
         $counts = [
             'gad_male' => [0, 0, 0, 0, 0],
@@ -3708,7 +3717,7 @@ class DentistReportController extends Controller
             'total' => [0, 0, 0, 0, 0],
         ];
 
-        $appointments = Appointment::with('patient')
+        $appointments ??= Appointment::with('patient')
             ->where('status', 'completed')
             ->whereDate('appointment_date', '>=', $from->toDateString())
             ->whereDate('appointment_date', '<=', $to->toDateString())
@@ -3895,8 +3904,13 @@ class DentistReportController extends Controller
             ? Carbon::parse($documentRequest->approved_at)->format('F d, Y')
             : Carbon::parse($documentRequest->updated_at)->format('F d, Y');
 
-        $dentistName = $this->getCurrentDentistNameForPdf();
-        $licenseNumber = (string) config('app.dentist_license_no', '');
+        $dentistName = \App\Support\DentistName::forDocumentRequest($documentRequest);
+        $signatoryProfile = app(\App\Services\ReportSignatory::class)->documentProfile($documentRequest);
+        $dentistName = $signatoryProfile?->name ?? $dentistName;
+        $licenseNumber = $signatoryProfile?->license_number ?? '';
+        if ($signaturePath = $signatoryProfile?->signaturePath()) {
+            $this->drawPdfImageInBox($pdf, $signaturePath, 448, 401, 125, 26, false);
+        }
 
         $pdf->SetTextColor(0, 0, 0);
 
@@ -3920,30 +3934,6 @@ class DentistReportController extends Controller
         }
     }
 
-    private function getCurrentDentistNameForPdf(): string
-    {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        if (! $user) {
-            return '';
-        }
-
-        $directName = trim((string) ($user->name ?? ''));
-
-        if ($directName !== '') {
-            return $directName;
-        }
-
-        $parts = array_filter([
-            $user->first_name ?? null,
-            $user->middle_name ?? null,
-            $user->last_name ?? null,
-        ]);
-
-        return trim(implode(' ', $parts));
-    }
-
     private function drawDentalClearancePage(Fpdi $pdf, DocumentRequest $documentRequest): void
     {
         $patient = $documentRequest->patient;
@@ -3957,8 +3947,13 @@ class DentistReportController extends Controller
             ? Carbon::parse($documentRequest->approved_at)->format('F d, Y')
             : Carbon::parse($documentRequest->updated_at)->format('F d, Y');
 
-        $dentistName = $this->getCurrentDentistNameForPdf();
-        $licenseNumber = (string) config('app.dentist_license_no', '');
+        $dentistName = \App\Support\DentistName::forDocumentRequest($documentRequest);
+        $signatoryProfile = app(\App\Services\ReportSignatory::class)->documentProfile($documentRequest);
+        $dentistName = $signatoryProfile?->name ?? $dentistName;
+        $licenseNumber = $signatoryProfile?->license_number ?? '';
+        if ($signaturePath = $signatoryProfile?->signaturePath()) {
+            $this->drawPdfImageInBox($pdf, $signaturePath, 448, 401, 125, 26, false);
+        }
 
         $pdf->SetTextColor(0, 0, 0);
 

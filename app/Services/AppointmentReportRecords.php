@@ -12,7 +12,7 @@ class AppointmentReportRecords
 {
     public function between(Carbon $from, Carbon $to): Collection
     {
-        return Appointment::with(['patient.user.profile', 'patient.information', 'patient.medicalHistory', 'procedure'])
+        return Appointment::with(['patient.user.profile', 'patient.information', 'patient.medicalHistory', 'procedure', 'dentist'])
             ->where('status', 'completed')->whereHas('patient')
             ->whereDate('appointment_date', '>=', $from->toDateString())
             ->whereDate('appointment_date', '<=', $to->toDateString())
@@ -37,6 +37,7 @@ class AppointmentReportRecords
 
                 return (object) [
                     'id' => $appointment->id,
+                    'dentist_name' => $appointment->dentist_name,
                     'treatment_date' => $date,
                     'time_in' => $appointment->appointment_time ? Carbon::parse($date->toDateString().' '.$appointment->appointment_time) : null,
                     'time_out' => $procedure?->procedure_completed_at ? Carbon::parse($procedure->procedure_completed_at) : null,

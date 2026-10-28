@@ -888,7 +888,7 @@
                     'date' => $uD->format('M d, Y'),
                     'time_raw' => $upcomingAppointment->appointment_time,
                     'time_fmt' => $uT->format('g:i A'),
-                    'dentist' => $upcomingAppointment->dentist_name ?? 'Dr. Nelson P. Angeles',
+                    'dentist' => $upcomingAppointment->dentist_name ?? 'Not assigned',
                     'status' => ucfirst($upcomingAppointment->status),
                     'isRescheduled' => strtolower($upcomingAppointment->status) === 'rescheduled',
                     'indexUrl' => route('patient.appointment.index'),

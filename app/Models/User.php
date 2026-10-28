@@ -502,6 +502,12 @@ class User extends Authenticatable implements JWTSubject
         ]));
 
         $actualRoleSlug = optional($this->role)->slug;
+        if (session()->has('impersonated_role')
+            && ! in_array($permissionSlug, ['access_dentist_dashboard', 'access_patient_dashboard'], true)
+            && ! $this->role->permissions()->whereIn('slug', $candidateSlugs)->exists()) {
+            return false;
+        }
+
         $activeRoleSlug = session('impersonated_role')
             ?: session('role')
             ?: $actualRoleSlug;

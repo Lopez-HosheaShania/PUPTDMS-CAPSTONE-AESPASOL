@@ -119,6 +119,10 @@ class DentistPatientController extends Controller
 
     public function profile(Patient $patient)
     {
+        if (Auth::user()?->hasAnyRole(['admin', 'super_admin'])) {
+            return app(\App\Http\Controllers\Admin\AdminPatientController::class)->show($patient, 'dentist');
+        }
+
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {

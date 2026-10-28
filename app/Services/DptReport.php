@@ -44,7 +44,7 @@ class DptReport
                     'surname' => $patient->user?->last_name ?: $patient->name,
                     'minutes' => $appointment->procedure?->procedure_duration_seconds !== null
                         ? max(0, $appointment->procedure->procedure_duration_seconds) / 60 : null,
-                    'dentist' => $appointment->dentist?->name ?? '',
+                    'dentist' => $appointment->dentist_name ?? '',
                 ];
             });
     }
@@ -66,6 +66,8 @@ class DptReport
             for ($page = 0; $page < $pages; $page++) {
                 $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
                 $pdf->useTemplate($template);
+                $pageRecords = $upperPages->get($page, collect())->merge($lowerPages->get($page, collect()));
+                app(ReportSignatory::class)->draw($pdf, $type, $pageRecords);
                 $pdf->SetFillColor(255, 255, 255);
                 $pdf->Rect(225, 136, 100, 13, 'F');
                 $date = $from->format('m/d/Y');
