@@ -458,6 +458,10 @@
     color: currentColor;
 }
 
+.card-header-icon .fa-swing {
+    --fa-animation-duration: 2s;
+}
+
 .card-title {
     font-size: .82rem;
     font-weight: 800;

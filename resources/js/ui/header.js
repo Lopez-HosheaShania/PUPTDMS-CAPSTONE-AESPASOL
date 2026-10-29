@@ -339,91 +339,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if (
             !modal ||
             !confirmButton ||
-            modal.dataset.initialized === 'true'
+            modal.dataset.initialized ===
+            'true'
         ) {
             return;
         }
 
-        modal.dataset.initialized = 'true';
+        modal.dataset.initialized =
+            'true';
 
         let pendingLogoutForm = null;
-        let lastFocusedElement = null;
-        let closingTimer = null;
 
-        const openModal = form => {
-            if (!form) return;
-
-            clearTimeout(closingTimer);
-
-            pendingLogoutForm = form;
-            lastFocusedElement =
-                document.activeElement;
-
-            closeAllMenus();
-
-            document
-                .getElementById('mobileDrawer')
-                ?.classList.remove('open');
-
-            document
-                .getElementById('mobileDrawerOverlay')
-                ?.classList.remove('open');
-
-            document.body.style.overflow = '';
-
-            window.closeModal?.(
-                modal.id
-            );
-            window.openModal?.(
-                modal.id
-            );
-
-            document.documentElement.classList.add(
-                'modal-lock'
-            );
-
-            document.body.classList.add(
-                'modal-lock'
-            );
-
-            requestAnimationFrame(() => {
-                confirmButton.focus();
-            });
-        };
-
-        const closeModal = () => {
-
-            if (
-                !modal.classList.contains('open') &&
-                !modal.classList.contains('closing')
-            ) {
-                return;
-            }
-
-            window.closeModal?.(
-                modal.id
-            );
-
-            clearTimeout(
-                closingTimer
-            );
-
-            closingTimer = setTimeout(() => {
-
-                document.documentElement.classList.remove(
-                    'modal-lock'
-                );
-
-                document.body.classList.remove(
-                    'modal-lock'
-                );
-
-                pendingLogoutForm = null;
-
-                lastFocusedElement?.focus?.();
-
-            }, 180);
-        };
+        const defaultConfirmContent =
+            confirmButton.innerHTML;
 
         document.addEventListener(
             'submit',
@@ -433,10 +361,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         '.js-logout-form'
                     );
 
-                if (!form) return;
+                if (!form) {
+                    return;
+                }
 
                 if (
-                    form.dataset.logoutConfirmed ===
+                    form.dataset
+                        .logoutConfirmed ===
                     'true'
                 ) {
                     return;
@@ -445,61 +376,76 @@ document.addEventListener('DOMContentLoaded', function () {
                 event.preventDefault();
                 event.stopPropagation();
 
-                openModal(form);
-            }
-        );
+                pendingLogoutForm =
+                    form;
 
-        modal
-            .querySelectorAll(
-                '[data-logout-modal-close]'
-            )
-            .forEach(button => {
-                button.addEventListener(
-                    'click',
-                    closeModal
+                closeAllMenus();
+
+                window.closeDrawer?.();
+
+                confirmButton.disabled =
+                    false;
+
+                confirmButton.innerHTML =
+                    defaultConfirmContent;
+
+                window.openModal?.(
+                    modal.id
                 );
-            });
-
-        modal.addEventListener(
-            'click',
-            event => {
-                if (event.target === modal) {
-                    closeModal();
-                }
             }
         );
 
         confirmButton.addEventListener(
             'click',
             () => {
-                if (!pendingLogoutForm) return;
+                if (
+                    !pendingLogoutForm
+                ) {
+                    return;
+                }
 
-                confirmButton.disabled = true;
+                confirmButton.disabled =
+                    true;
 
                 confirmButton.innerHTML = `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                <span>Logging Out...</span>
+                <i
+                    class="fa-solid
+                           fa-spinner
+                           fa-spin">
+                </i>
+
+                <span>
+                    Logging Out...
+                </span>
             `;
 
-                pendingLogoutForm.dataset.logoutConfirmed =
+                pendingLogoutForm
+                    .dataset
+                    .logoutConfirmed =
                     'true';
 
-                pendingLogoutForm.submit();
+                pendingLogoutForm
+                    .submit();
             }
         );
 
         document.addEventListener(
-            'keydown',
+            'ui-modal:closed',
             event => {
                 if (
-                    event.key === 'Escape' &&
-                    (
-                        modal.classList.contains('open') ||
-                        modal.classList.contains('closing')
-                    )
+                    event.detail?.modal !==
+                    modal
                 ) {
-                    closeModal();
+                    return;
                 }
+
+                pendingLogoutForm = null;
+
+                confirmButton.disabled =
+                    false;
+
+                confirmButton.innerHTML =
+                    defaultConfirmContent;
             }
         );
     }

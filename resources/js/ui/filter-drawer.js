@@ -167,17 +167,3 @@ if (
         .__filterDrawerOutsideClickBound =
         true;
 }
-
-export function openFilterPanel() {
-    openFilterDrawer(
-        'filterPanel',
-        'filterOverlay'
-    );
-}
-
-export function closeFilterPanel() {
-    closeFilterDrawer(
-        'filterPanel',
-        'filterOverlay'
-    );
-}

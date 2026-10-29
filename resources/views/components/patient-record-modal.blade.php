@@ -265,7 +265,7 @@
         </div>
 
         <div class="modal-ft">
-            <button type="button" class="btn-close-modal" id="modalCloseFooter">
+            <button type="button" class="ui-btn ui-btn-secondary" id="modalCloseFooter">
                 Close
             </button>
         </div>

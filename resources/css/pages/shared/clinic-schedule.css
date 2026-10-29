@@ -717,10 +717,6 @@
     margin-top: 0;
 }
 
-#reservedPeriodModalBackdrop .custom-select-menu {
-    z-index: 30;
-}
-
 #reservedStudentFields .custom-select-menu {
     max-height: min(var(--custom-select-max-height, 240px), 240px);
     padding: .5rem;
@@ -749,6 +745,35 @@
 
 #reservedStudentFields .custom-select-check {
     margin-top: .15rem;
+}
+
+#reservedStudentFields {
+    width: 100%;
+    min-width: 0;
+}
+
+#reservedStudentFields [data-global-field],
+#reservedStudentFields .custom-select,
+#reservedStudentFields .custom-select-button {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+#reservedStudentFields .custom-select-button {
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#reservedStudentFields .custom-select-button [data-custom-select-value] {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    flex: 1 1 auto;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .reserved-booking-mode-grid {

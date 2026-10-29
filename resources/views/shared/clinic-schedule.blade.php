@@ -37,10 +37,15 @@
         $openRules = $activeSchedules->where('status', '!=', 'closed');
         $openDays = $openRules->sum(fn($s) => count($s->days ?? []));
         $maxSlots = $openRules->max('max_slots') ?? 0;
-        $blockedThisMonth = $blockedDates->filter(fn($b) => \Carbon\Carbon::parse($b->date)->isCurrentMonth())->count();
-        $holidaysThisMonth = collect($philippineHolidays)
-            ->filter(fn($holiday, $date) => \Carbon\Carbon::parse($date)->isCurrentMonth())
-            ->count();
+        $blockedDatesCount = $blockedDates->count();
+
+        $today = \Carbon\Carbon::now('Asia/Manila')->startOfDay();
+
+        $allUpcomingHolidays = collect($philippineHolidays)
+            ->filter(fn($holiday, $date) => \Carbon\Carbon::parse($date, 'Asia/Manila')->startOfDay()->gte($today))
+            ->sortKeys();
+
+        $upcomingHolidaysCount = $allUpcomingHolidays->count();
 
         $scheduleByDay = [];
         foreach ($activeSchedules as $s) {
@@ -237,28 +242,24 @@
                                 'class' => 's-crimson',
                                 'val' => $openDays,
                                 'label' => 'Open Days/Week',
-                                'sub' => 'Active schedule days',
                             ],
                             [
                                 'icon' => 'fa-clock',
                                 'class' => 's-blue',
                                 'val' => $maxSlots,
                                 'label' => 'Daily Slot Cap',
-                                'sub' => 'Max patients/day',
                             ],
                             [
                                 'icon' => 'fa-ban',
                                 'class' => 's-green',
-                                'val' => $blockedThisMonth,
+                                'val' => $blockedDatesCount,
                                 'label' => 'Blocked Dates',
-                                'sub' => 'This month',
                             ],
                             [
                                 'icon' => 'fa-umbrella-beach',
                                 'class' => 's-amber',
-                                'val' => $holidaysThisMonth,
-                                'label' => 'Holidays',
-                                'sub' => 'This month',
+                                'val' => $upcomingHolidaysCount,
+                                'label' => 'Upcoming Holidays',
                             ],
                         ];
                     @endphp
@@ -268,7 +269,6 @@
                             <div class="stat-card-info">
                                 <div class="stat-label">{{ $card['label'] }}</div>
                                 <div class="stat-num">{{ $card['val'] }}</div>
-                                <div class="stat-footer">{{ $card['sub'] }}</div>
                             </div>
 
                             <div class="stat-icon-wrapper">
@@ -393,7 +393,9 @@
 
                                                 <button type="button" class="ui-action-btn ui-action-delete"
                                                     data-tooltip="Remove blocked date" aria-label="Remove blocked date"
-                                                    data-ui-click="action-28b22a237020" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['unblock'], $blocked), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($blockedDisplayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                    data-ui-click="action-28b22a237020"
+                                                    data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['unblock'], $blocked), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                    data-ui-click-arg-1="{{ json_encode($blockedDisplayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
 
                                                     <i class="fa-solid fa-trash"></i>
 
@@ -490,8 +492,6 @@
                         <section id="holidaysCard" class="card flex flex-col xl:self-start">
 
                             @php
-                                $today = now()->startOfDay();
-
                                 $MONTHS_SHORT = [
                                     'Jan',
                                     'Feb',
@@ -506,12 +506,6 @@
                                     'Nov',
                                     'Dec',
                                 ];
-
-                                $allUpcomingHolidays = collect($philippineHolidays)
-                                    ->filter(
-                                        fn($holiday, $date) => \Carbon\Carbon::parse($date)->startOfDay()->gte($today),
-                                    )
-                                    ->sortKeys();
 
                                 $upcoming = $allUpcomingHolidays->take(5);
                             @endphp
@@ -829,8 +823,9 @@
                                                         </td>
                                                         <td data-label="Actions" class="table-action-cell">
                                                             <div class="ui-action-group">
-                                                                <button type="button"
-                                                                    data-ui-click="action-5ae65e27acd4" data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule) }}"
+                                                                <button type="button" data-ui-click="action-5ae65e27acd4"
+                                                                    data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($rule) }}"
                                                                     class="ui-action-btn ui-action-edit"
                                                                     data-tooltip="Edit schedule"
                                                                     aria-label="Edit schedule">
@@ -841,7 +836,9 @@
                                                                     class="ui-action-btn ui-action-delete"
                                                                     data-tooltip="Delete schedule"
                                                                     aria-label="Delete schedule"
-                                                                    data-ui-click="action-6d843152ccce" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['destroy'], $rule), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                                    data-ui-click="action-6d843152ccce"
+                                                                    data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['destroy'], $rule), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>
                                                             </div>
@@ -956,8 +953,9 @@
                                                 <div class="table-record-actions">
                                                     <div class="ui-action-group">
 
-                                                        <button type="button"
-                                                            data-ui-click="action-cf79ab3d24c0" data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule) }}"
+                                                        <button type="button" data-ui-click="action-cf79ab3d24c0"
+                                                            data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule) }}"
                                                             class="ui-action-btn ui-action-edit"
                                                             data-tooltip="Edit schedule" aria-label="Edit schedule">
 
@@ -966,7 +964,9 @@
 
                                                         <button type="button" class="ui-action-btn ui-action-delete"
                                                             data-tooltip="Delete schedule" aria-label="Delete schedule"
-                                                            data-ui-click="action-899c015d05d8" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['destroy'], $rule), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                            data-ui-click="action-899c015d05d8"
+                                                            data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['destroy'], $rule), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
 
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
@@ -1076,8 +1076,9 @@
 
                                                 <div class="table-record-actions">
                                                     <div class="ui-action-group">
-                                                        <button type="button"
-                                                            data-ui-click="action-b1e8100ff8f6" data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule) }}"
+                                                        <button type="button" data-ui-click="action-b1e8100ff8f6"
+                                                            data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule) }}"
                                                             class="ui-action-btn ui-action-edit"
                                                             data-tooltip="Edit schedule" aria-label="Edit schedule">
                                                             <i class="fa-solid fa-pen"></i>
@@ -1085,7 +1086,9 @@
 
                                                         <button type="button" class="ui-action-btn ui-action-delete"
                                                             data-tooltip="Delete schedule" aria-label="Delete schedule"
-                                                            data-ui-click="action-84a17b07f767" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['destroy'], $rule), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                            data-ui-click="action-84a17b07f767"
+                                                            data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['destroy'], $rule), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </div>
@@ -1276,7 +1279,9 @@
                                                                 <div class="ui-action-group">
                                                                     @if ($canUpdateReservedPeriods && !$isPastPeriod)
                                                                         <button type="button"
-                                                                            data-ui-click="action-f2843b92493b" data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                            data-ui-click="action-f2843b92493b"
+                                                                            data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                            data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                                             class="ui-action-btn ui-action-edit"
                                                                             data-tooltip="Edit reserved period"
                                                                             aria-label="Edit reserved period">
@@ -1289,7 +1294,9 @@
                                                                             class="ui-action-btn ui-action-delete"
                                                                             data-tooltip="Remove reserved period"
                                                                             aria-label="Remove reserved period"
-                                                                            data-ui-click="action-bad117ef6f8f" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['reserved_destroy'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                                            data-ui-click="action-bad117ef6f8f"
+                                                                            data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['reserved_destroy'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                            data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                             <i class="fa-solid fa-trash"></i>
                                                                         </button>
                                                                     @endif
@@ -1423,8 +1430,9 @@
                                                     <div class="reserved-periods-list-actions table-action-cell">
                                                         <div class="ui-action-group">
                                                             @if ($canUpdateReservedPeriods && !$isPastPeriod)
-                                                                <button type="button"
-                                                                    data-ui-click="action-f2843b92493b" data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                <button type="button" data-ui-click="action-f2843b92493b"
+                                                                    data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                                     class="ui-action-btn ui-action-edit"
                                                                     data-tooltip="Edit reserved period"
                                                                     aria-label="Edit reserved period">
@@ -1437,7 +1445,9 @@
                                                                     class="ui-action-btn ui-action-delete"
                                                                     data-tooltip="Remove reserved period"
                                                                     aria-label="Remove reserved period"
-                                                                    data-ui-click="action-d584b12ca4ac" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['reserved_destroy'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                                    data-ui-click="action-d584b12ca4ac"
+                                                                    data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['reserved_destroy'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>
                                                             @endif
@@ -1567,8 +1577,9 @@
                                                     <div class="table-record-actions">
                                                         <div class="ui-action-group">
                                                             @if ($canUpdateReservedPeriods && !$isPastPeriod)
-                                                                <button type="button"
-                                                                    data-ui-click="action-f2843b92493b" data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                <button type="button" data-ui-click="action-f2843b92493b"
+                                                                    data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                                     class="ui-action-btn ui-action-edit"
                                                                     data-tooltip="Edit reserved period"
                                                                     aria-label="Edit reserved period">
@@ -1581,7 +1592,9 @@
                                                                     class="ui-action-btn ui-action-delete"
                                                                     data-tooltip="Remove reserved period"
                                                                     aria-label="Remove reserved period"
-                                                                    data-ui-click="action-a10af097fbc8" data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['reserved_destroy'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                                    data-ui-click="action-a10af097fbc8"
+                                                                    data-ui-click-arg-0="{{ json_encode(route($clinicScheduleRouteNames['reserved_destroy'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>
                                                             @endif
@@ -1649,7 +1662,8 @@
                                         {{ $MONTHS_SHORT[$hC->month - 1] }}
                                     </div>
 
-                                    <div class="text-xl font-extrabold leading-none" data-ui-presentation="presentation-23b8d2e99754">
+                                    <div class="text-xl font-extrabold leading-none"
+                                        data-ui-presentation="presentation-23b8d2e99754">
                                         {{ $hC->day }}
                                     </div>
                                 </div>
@@ -1807,7 +1821,8 @@
         ] as $abbr => $lbl)
                                         <button type="button" class="day-toggle" data-day="{{ $abbr }}"
                                             data-discard-track data-discard-key="schedule-day-{{ $abbr }}"
-                                            data-discard-value="false" data-ui-click="action-9ac08cc75f07" aria-pressed="false">
+                                            data-discard-value="false" data-ui-click="action-9ac08cc75f07"
+                                            aria-pressed="false">
 
                                             <span class="day-toggle-label">
                                                 {{ $lbl }}
@@ -1850,7 +1865,7 @@
                             <div class="global-label-row">
                                 <label class="form-label" for="ruleNotes">
                                     Notes
-                                    <span class="field-optional">optional</span>
+                                    <span class="field-optional">(Optional)</span>
                                 </label>
                             </div>
 
@@ -2039,13 +2054,13 @@
                                             </button>
 
                                             <input type="number" id="ruleSlotDuration"
-                                                class="global-number-stepper-input" value="60" min="5" max="240"
-                                                step="5" inputmode="numeric" autocomplete="off"
+                                                class="global-number-stepper-input" value="60" min="5"
+                                                max="240" step="5" inputmode="numeric" autocomplete="off"
                                                 data-number-stepper-input data-field-label="Slot Duration"
                                                 data-validation-rule="wholeNumber">
 
-                                            <button type="button" class="global-number-stepper-btn"
-                                                data-number-step="5" aria-label="Increase slot duration">
+                                            <button type="button" class="global-number-stepper-btn" data-number-step="5"
+                                                aria-label="Increase slot duration">
                                                 <i class="fa-solid fa-plus"></i>
                                             </button>
                                         </div>
@@ -2101,7 +2116,8 @@
                         Cancel
                     </button>
 
-                    <button type="button" data-ui-click="action-2f4c982ff581" id="ruleSubmitBtn" class="ui-btn ui-btn-primary">
+                    <button type="button" data-ui-click="action-2f4c982ff581" id="ruleSubmitBtn"
+                        class="ui-btn ui-btn-primary">
                         <i class="fa-solid fa-floppy-disk"></i>
                         <span id="ruleSubmitText">Save Rule</span>
                     </button>
@@ -2215,7 +2231,7 @@
                         <div class="global-label-row">
                             <label class="form-label" for="blockNote">
                                 Notes
-                                <span class="field-optional">optional</span>
+                                <span class="field-optional">(Optional)</span>
                             </label>
 
                             <span id="blockNoteCount" class="char-counter">
@@ -2378,8 +2394,8 @@
                                                 class="text-red-500">*</span></label>
                                         <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
                                             <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
-                                            <input id="reservedEndTime" name="end_time" type="text" required readonly
-                                                data-field-label="End Time"
+                                            <input id="reservedEndTime" name="end_time" type="text" required
+                                                readonly data-field-label="End Time"
                                                 class="form-input-custom global-form-icon js-flatpickr-time @error('end_time', 'reservedPeriod') is-invalid @enderror"
                                                 placeholder="Select end time">
                                         </div>
@@ -2469,8 +2485,7 @@
                                             class="text-red-500">*</span></label>
                                     <select id="reservedPatientType" name="target_patient_type" required
                                         data-field-label="Patient Type" class="form-select-custom js-custom-select"
-                                        data-placeholder="Select patient type"
-                                        data-ui-change="action-6aebdfee76f3">
+                                        data-placeholder="Select patient type" data-ui-change="action-6aebdfee76f3">
                                         <option value="student">Student</option>
                                         <option value="faculty">Faculty</option>
                                         <option value="administrative">Administrative</option>
@@ -2487,8 +2502,7 @@
                                                 class="text-red-500">*</span></label>
                                         <select id="reservedProgramCode" name="program_code"
                                             data-field-label="Program" class="form-select-custom js-custom-select"
-                                            data-placeholder="Select program"
-                                            data-ui-change="action-14444081b07c">
+                                            data-placeholder="Select program" data-ui-change="action-14444081b07c">
                                             <option value="">Select program</option>
                                             @foreach ($studentTargetOptions->unique('course_code') as $studentOption)
                                                 <option value="{{ $studentOption['course_code'] }}">
@@ -2574,10 +2588,13 @@
                                 <i class="fa-solid fa-tooth"></i>
                             </div>
                             <div>
-                                <div class="modal-section-title">Allowed Dental Services</div>
-                                <div class="modal-section-sub">
+                                <h4>
+                                    Allowed Dental Services
+                                </h4>
+
+                                <p>
                                     Select every service patients may choose during this reserved period.
-                                </div>
+                                </p>
                             </div>
                         </div>
 
@@ -2630,7 +2647,7 @@
                         <div class="global-label-row">
                             <label for="reservedNotes" class="form-label">
                                 Notes
-                                <span class="field-optional">optional</span>
+                                <span class="field-optional">(Optional)</span>
                             </label>
 
                             <span id="reservedNotesCount" class="char-counter">
@@ -2783,7 +2800,18 @@
         $reservedPeriodUpdateUrlTemplate = route($clinicScheduleRouteNames['reserved_update'], [
             'reservedBookingPeriod' => '__PERIOD_ID__',
         ]);
+
+        $clinicScheduleAjaxState = [
+            'schedules' => $schedules,
+            'weeklyAppointments' => $weeklyAppointments ?? [],
+            'reservedBookingPeriods' => $reservedBookingPeriods,
+        ];
     @endphp
+
+    <script type="application/json" id="clinicScheduleAjaxState"
+    nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+    @json($clinicScheduleAjaxState)
+</script>
 
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const clinicScheduleRoutes = {
@@ -2800,9 +2828,548 @@
         const reservedPeriodMaxCapacity = @json(\App\Models\ReservedBookingPeriod::MAX_CAPACITY);
         const reservedStudentTargetOptions = @json($studentTargetOptions->values());
 
-        const scheduleRules = @json($schedules);
-        const weeklyAppointments = @json($weeklyAppointments ?? []);
-        const reservedBookingPeriods = @json($reservedBookingPeriods);
+        function readClinicScheduleAjaxState(root = document) {
+            const stateElement =
+                root.getElementById('clinicScheduleAjaxState');
+
+            if (!stateElement) {
+                return {};
+            }
+
+            try {
+                return JSON.parse(
+                    stateElement.textContent || '{}'
+                );
+            } catch (error) {
+                console.error(
+                    'Unable to parse clinic schedule state.',
+                    error
+                );
+
+                return {};
+            }
+        }
+
+        const initialClinicScheduleState = readClinicScheduleAjaxState();
+
+        let scheduleRules =
+            initialClinicScheduleState.schedules ??
+            @json($schedules);
+
+        let weeklyAppointments =
+            initialClinicScheduleState.weeklyAppointments ??
+            @json($weeklyAppointments ?? []);
+
+        let reservedBookingPeriods =
+            initialClinicScheduleState.reservedBookingPeriods ??
+            @json($reservedBookingPeriods);
+
+        const clinicScheduleLiveSelectors = [
+            '#statCards',
+            '#clinicHoursCard',
+            '#blockedDatesCard',
+            '#scheduleRulesCard',
+            '#reservedPeriodsCard',
+        ];
+
+        function clearClinicScheduleAjaxErrors(form) {
+            if (!form) return;
+
+            form
+                .querySelectorAll('.global-field-error')
+                .forEach(error => {
+                    error.textContent = '';
+                    error.classList.remove('show');
+                    error.setAttribute('aria-hidden', 'true');
+                });
+
+            form
+                .querySelectorAll('.is-invalid')
+                .forEach(element => {
+                    element.classList.remove('is-invalid');
+                });
+        }
+
+        function showClinicScheduleAjaxErrors(
+            form,
+            errors = {}
+        ) {
+            if (!form || !errors) {
+                return;
+            }
+
+            const fieldMaps = {
+                ruleForm: {
+                    days: {
+                        groupId: 'ruleDaysGroup',
+                        groupKey: 'rule-days',
+                    },
+                    is_active: {
+                        inputId: 'ruleActivationState',
+                    },
+                    status: {
+                        inputId: 'ruleStatus',
+                    },
+                    open_time: {
+                        inputId: 'ruleOpenTime',
+                    },
+                    close_time: {
+                        inputId: 'ruleCloseTime',
+                    },
+                    max_slots: {
+                        inputId: 'ruleMaxSlots',
+                    },
+                    slot_duration_minutes: {
+                        inputId: 'ruleSlotDuration',
+                    },
+                    notes: {
+                        inputId: 'ruleNotes',
+                    },
+                },
+
+                blockDateForm: {
+                    date: {
+                        inputId: 'blockDate',
+                    },
+                    reason: {
+                        inputId: 'blockReason',
+                    },
+                    note: {
+                        inputId: 'blockNote',
+                    },
+                },
+
+                reservedPeriodForm: {
+                    title: {
+                        inputId: 'reservedTitle',
+                    },
+                    reserved_date: {
+                        inputId: 'reservedDate',
+                    },
+                    start_time: {
+                        inputId: 'reservedStartTime',
+                    },
+                    end_time: {
+                        inputId: 'reservedEndTime',
+                    },
+                    booking_mode: {
+                        groupId: 'reservedBookingModeGroup',
+                        groupKey: 'reserved-booking-mode',
+                    },
+                    is_active: {
+                        inputId: 'reservedActivationState',
+                    },
+                    target_patient_type: {
+                        inputId: 'reservedPatientType',
+                    },
+                    program_code: {
+                        inputId: 'reservedProgramCode',
+                    },
+                    year_level: {
+                        inputId: 'reservedYearLevel',
+                    },
+                    section: {
+                        inputId: 'reservedSection',
+                    },
+                    max_capacity: {
+                        inputId: 'reservedMaxCapacity',
+                    },
+                    timeslot_duration_minutes: {
+                        inputId: 'reservedSlotDuration',
+                    },
+                    allowed_services: {
+                        groupId: 'reservedAllowedServicesGroup',
+                        groupKey: 'reserved-allowed-services',
+                    },
+                    timeslots: {
+                        groupId: 'reservedNewSlotTime',
+                        groupKey: 'reserved-timeslots',
+                    },
+                    notes: {
+                        inputId: 'reservedNotes',
+                    },
+                },
+            };
+
+            const formMap =
+                fieldMaps[form.id] || {};
+
+            let firstInvalid = null;
+
+            Object.entries(errors).forEach(
+                ([fieldName, messages]) => {
+                    const rootField =
+                        String(fieldName).split('.')[0];
+
+                    const message =
+                        Array.isArray(messages) ?
+                        messages[0] :
+                        messages;
+
+                    const fieldConfig =
+                        formMap[rootField];
+
+                    if (!fieldConfig) {
+                        return;
+                    }
+
+                    if (fieldConfig.groupId) {
+                        const group =
+                            document.getElementById(
+                                fieldConfig.groupId
+                            );
+
+                        window.showGlobalGroupError?.(
+                            group,
+                            fieldConfig.groupKey,
+                            message
+                        );
+
+                        firstInvalid ||= group;
+
+                        return;
+                    }
+
+                    const input =
+                        document.getElementById(
+                            fieldConfig.inputId
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    window.showFormInputValidationMessage?.(
+                        input,
+                        message
+                    );
+
+                    input.classList.add('is-invalid');
+
+                    firstInvalid ||= input;
+                }
+            );
+
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView?.({
+                    behavior: 'smooth',
+                    block: 'center',
+                });
+
+                firstInvalid.focus?.({
+                    preventScroll: true,
+                });
+            }
+        }
+
+        function applyClinicScheduleAjaxState(
+            nextDocument
+        ) {
+            const nextState =
+                readClinicScheduleAjaxState(
+                    nextDocument
+                );
+
+            scheduleRules =
+                Array.isArray(nextState.schedules) ?
+                nextState.schedules : [];
+
+            weeklyAppointments =
+                Array.isArray(
+                    nextState.weeklyAppointments
+                ) ?
+                nextState.weeklyAppointments : [];
+
+            reservedBookingPeriods =
+                Array.isArray(
+                    nextState.reservedBookingPeriods
+                ) ?
+                nextState.reservedBookingPeriods : [];
+
+            const currentStateElement =
+                document.getElementById(
+                    'clinicScheduleAjaxState'
+                );
+
+            const nextStateElement =
+                nextDocument.getElementById(
+                    'clinicScheduleAjaxState'
+                );
+
+            if (
+                currentStateElement &&
+                nextStateElement
+            ) {
+                currentStateElement.textContent =
+                    nextStateElement.textContent;
+            }
+        }
+
+        function refreshClinicScheduleSectionsFromHtml(
+            html
+        ) {
+            const parser =
+                new DOMParser();
+
+            const nextDocument =
+                parser.parseFromString(
+                    html,
+                    'text/html'
+                );
+
+            applyClinicScheduleAjaxState(
+                nextDocument
+            );
+
+            clinicScheduleLiveSelectors.forEach(
+                selector => {
+                    const currentElement =
+                        document.querySelector(
+                            selector
+                        );
+
+                    const nextElement =
+                        nextDocument.querySelector(
+                            selector
+                        );
+
+                    if (
+                        !currentElement ||
+                        !nextElement
+                    ) {
+                        return;
+                    }
+
+                    currentElement.replaceWith(
+                        nextElement.cloneNode(true)
+                    );
+                }
+            );
+
+            renderClinicScheduleEmptyStates();
+
+            buildWeekGrid();
+
+            syncReservedDateAvailability(
+                document
+                .getElementById(
+                    'reservedPeriodId'
+                )
+                ?.value || null
+            );
+        }
+
+        async function fetchFreshClinicScheduleHtml() {
+            const response =
+                await fetch(
+                    window.location.href, {
+                        method: 'GET',
+
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+
+                            Accept: 'text/html',
+                        },
+
+                        cache: 'no-store',
+                    }
+                );
+
+            if (!response.ok) {
+                throw new Error(
+                    'Unable to refresh clinic schedule.'
+                );
+            }
+
+            return response.text();
+        }
+
+        async function submitClinicScheduleAjax(
+            form, {
+                modalId = null,
+                successMessage = 'Changes saved successfully.',
+                submitButton = null,
+            } = {}
+        ) {
+            if (
+                !form ||
+                form.dataset.ajaxSubmitting ===
+                'true'
+            ) {
+                return;
+            }
+
+            clearClinicScheduleAjaxErrors(
+                form
+            );
+
+            if (
+                form.hasAttribute(
+                    'data-global-validation'
+                )
+            ) {
+                const validation =
+                    window.validateGlobalForm?.(
+                        form
+                    );
+
+                if (
+                    validation &&
+                    !validation.valid
+                ) {
+                    return;
+                }
+            }
+
+            form.dataset.ajaxSubmitting =
+                'true';
+
+            const button =
+                submitButton ||
+                form.querySelector(
+                    '[type="submit"]'
+                );
+
+            if (button) {
+                button.disabled = true;
+                button.setAttribute(
+                    'aria-busy',
+                    'true'
+                );
+            }
+
+            try {
+                const response =
+                    await fetch(
+                        form.action, {
+                            method: (
+                                form.method ||
+                                'POST'
+                            ).toUpperCase(),
+
+                            body: new FormData(
+                                form
+                            ),
+
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+
+                                Accept: 'application/json',
+                            },
+                        }
+                    );
+
+                const contentType =
+                    response.headers.get(
+                        'content-type'
+                    ) || '';
+
+                if (
+                    response.status === 422
+                ) {
+                    const payload =
+                        await response.json();
+
+                    showClinicScheduleAjaxErrors(
+                        form,
+                        payload.errors || {}
+                    );
+
+                    window.showToast?.({
+                        type: 'warning',
+                        title: 'Check the form',
+                        message: payload.message ||
+                            'Please correct the highlighted fields.',
+                        duration: 5000,
+                    });
+
+                    return;
+                }
+
+                if (!response.ok) {
+                    let message =
+                        'Unable to save the changes.';
+
+                    if (
+                        contentType.includes(
+                            'application/json'
+                        )
+                    ) {
+                        const payload =
+                            await response
+                            .json()
+                            .catch(() => null);
+
+                        message =
+                            payload?.message ||
+                            message;
+                    }
+
+                    throw new Error(
+                        message
+                    );
+                }
+
+                let html = '';
+
+                if (
+                    contentType.includes(
+                        'text/html'
+                    )
+                ) {
+                    html =
+                        await response.text();
+                } else {
+                    html =
+                        await fetchFreshClinicScheduleHtml();
+                }
+
+                refreshClinicScheduleSectionsFromHtml(
+                    html
+                );
+
+                window.DiscardChanges
+                    ?.markSubmitting?.(
+                        form
+                    );
+
+                if (modalId) {
+                    window.closeModal?.(
+                        modalId
+                    );
+                }
+
+                window.showToast?.({
+                    type: 'success',
+                    title: 'Saved',
+                    message: successMessage,
+                    duration: 4000,
+                });
+            } catch (error) {
+                console.error(
+                    'Clinic schedule AJAX error:',
+                    error
+                );
+
+                window.showToast?.({
+                    type: 'error',
+                    title: 'Unable to save',
+                    message: error.message ||
+                        'Something went wrong while saving the changes.',
+                    duration: 5000,
+                });
+            } finally {
+                form.dataset.ajaxSubmitting =
+                    'false';
+
+                if (button) {
+                    button.disabled = false;
+                    button.removeAttribute(
+                        'aria-busy'
+                    );
+                }
+            }
+        }
 
         function reservedPeriodStateIsActive() {
             const value = document.getElementById('reservedActivationState')?.value ?? '0';
@@ -3681,8 +4248,7 @@
 
                 const ruleDays =
                     Array.isArray(rule.days) ?
-                    rule.days :
-                    [];
+                    rule.days : [];
 
                 return selectedDays.some(day =>
                     ruleDays.includes(day)
@@ -4048,8 +4614,6 @@
                 document.getElementById('ruleNotes')?.value || ''
             );
 
-            window.DiscardChanges?.markSubmitting?.(form);
-
             form.requestSubmit();
         }
 
@@ -4094,6 +4658,19 @@
                 document.getElementById('blockReason'),
                 'Holiday'
             );
+
+            const blockNote =
+                document.getElementById('blockNote');
+
+            if (blockNote) {
+                blockNote.value = '';
+
+                blockNote.dispatchEvent(
+                    new Event('input', {
+                        bubbles: true
+                    })
+                );
+            }
 
             window.openModal('blockModalBackdrop');
 
@@ -4698,10 +5275,23 @@
             setReservedBookingMode(values.booking_mode || 'timeslot');
 
             toggleReservedStudentFields(
-                document.getElementById('reservedPatientType').value
+                document.getElementById(
+                    'reservedPatientType'
+                ).value
             );
 
             window.openModal('reservedPeriodModalBackdrop');
+
+            Promise.resolve(
+                window.initGlobalDatePickers?.(
+                    modal
+                )
+            ).catch(error => {
+                console.error(
+                    'Unable to initialize reserved period date picker.',
+                    error
+                );
+            });
         }
 
         function openReservedPeriodDeleteModal(action, title) {
@@ -4957,15 +5547,153 @@
             }
         }
 
+        function bindClinicScheduleAjaxForms() {
+            const bindAjaxForm = (
+                formId,
+                optionsFactory
+            ) => {
+                const form =
+                    document.getElementById(
+                        formId
+                    );
+
+                if (
+                    !form ||
+                    form.dataset.ajaxBound ===
+                    'true'
+                ) {
+                    return;
+                }
+
+                form.dataset.ajaxBound =
+                    'true';
+
+                form.addEventListener(
+                    'submit',
+                    event => {
+                        event.preventDefault();
+
+                        const options =
+                            typeof optionsFactory ===
+                            'function' ?
+                            optionsFactory(event) :
+                            optionsFactory;
+
+                        submitClinicScheduleAjax(
+                            form,
+                            options
+                        );
+                    }
+                );
+            };
+
+            bindAjaxForm(
+                'ruleForm',
+                () => ({
+                    modalId: 'ruleModalBackdrop',
+
+                    submitButton: document.getElementById(
+                        'ruleSubmitBtn'
+                    ),
+
+                    successMessage: editingId ?
+                        'Schedule rule updated successfully.' : 'Schedule rule added successfully.',
+                })
+            );
+
+            bindAjaxForm(
+                'blockDateForm',
+                event => ({
+                    modalId: 'blockModalBackdrop',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Date blocked successfully.',
+                })
+            );
+
+            bindAjaxForm(
+                'reservedPeriodForm',
+                event => {
+                    const periodId =
+                        document
+                        .getElementById(
+                            'reservedPeriodId'
+                        )
+                        ?.value;
+
+                    return {
+                        modalId: 'reservedPeriodModalBackdrop',
+
+                        submitButton: event.submitter ||
+                            document.getElementById(
+                                'reservedPeriodSubmitButton'
+                            ),
+
+                        successMessage: periodId ?
+                            'Reserved booking period updated successfully.' :
+                            'Reserved booking period created successfully.',
+                    };
+                }
+            );
+
+            bindAjaxForm(
+                'scheduleDeleteForm',
+                event => ({
+                    modalId: 'scheduleDeleteModal',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Schedule rule deleted successfully.',
+                })
+            );
+
+            bindAjaxForm(
+                'blockedDateDeleteForm',
+                event => ({
+                    modalId: 'blockedDateDeleteModal',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Blocked date removed successfully.',
+                })
+            );
+
+            /*
+             * Remove Reserved Period
+             */
+            bindAjaxForm(
+                'reservedPeriodDeleteForm',
+                event => ({
+                    modalId: 'reservedPeriodDeleteModal',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Reserved booking period removed successfully.',
+                })
+            );
+        }
+
         function initializeClinicScheduleDynamicUi() {
+            bindClinicScheduleAjaxForms();
+
             renderClinicScheduleEmptyStates();
 
-            if (!reservedPeriodValidationFailed) return;
+            if (
+                !reservedPeriodValidationFailed
+            ) {
+                return;
+            }
 
-            const periodId = reservedPeriodOldInput.reserved_period_id || null;
+            const periodId =
+                reservedPeriodOldInput
+                .reserved_period_id ||
+                null;
 
             openReservedPeriodModal(
-                periodId ? 'edit' : 'create',
+                periodId ?
+                'edit' :
+                'create',
                 periodId,
                 reservedPeriodOldInput
             );

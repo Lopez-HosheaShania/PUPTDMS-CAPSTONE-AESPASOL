@@ -177,9 +177,10 @@
     box-shadow: none;
 
     transition:
+        background-color .8s ease,
         transform .18s ease,
-        border-color .18s ease,
-        box-shadow .18s ease;
+        border-color .8s ease,
+        box-shadow .8s ease;
 }
 
 .table-record-card:hover {
@@ -194,6 +195,29 @@
         0 8px 22px var(--alpha-slate-900-6);
 
     transform: translateY(-1px);
+}
+
+.data-table tbody tr.global-live-highlight>td {
+    background:
+        color-mix(in srgb,
+            var(--status-all-bg) 85%,
+            var(--card));
+}
+
+.table-record-card.global-live-highlight {
+    background:
+        color-mix(in srgb,
+            var(--status-all-bg) 76%,
+            var(--card));
+
+    border-color:
+        var(--status-all-border);
+
+    box-shadow:
+        0 0 0 2px color-mix(in srgb,
+            var(--status-all-solid) 12%,
+            transparent),
+        var(--table-shadow);
 }
 
 .data-table {
@@ -223,15 +247,13 @@
 
 .data-table tbody td {
     padding: 13px 16px;
-
     background: var(--card);
     color: var(--text-1);
-
     border-bottom: 1px solid var(--border);
-
     font-size: .76rem;
-
     vertical-align: middle;
+    transition:
+        background-color .8s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1198,7 +1220,7 @@
 
     color: var(--table-text);
     font-size: .76rem;
-    font-weight: 650;
+    font-weight: 500;
     line-height: 1.35;
     text-align: right;
     white-space: nowrap;

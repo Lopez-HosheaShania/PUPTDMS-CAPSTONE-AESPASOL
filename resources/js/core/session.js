@@ -14,8 +14,36 @@ function initSessionTimeoutModal() {
     modal.dataset.sessionTimeoutInitialized =
         'true';
 
-    const primaryButton = modal.querySelector(
-        '[data-session-timeout-primary]'
+    const stateIcon = modal.querySelector(
+        '[data-session-state-icon] i'
+    );
+
+    const stateTitle = modal.querySelector(
+        '[data-session-state-title]'
+    );
+
+    const stateDescription = modal.querySelector(
+        '[data-session-state-description]'
+    );
+
+    const countdown = modal.querySelector(
+        '[data-session-countdown]'
+    );
+
+    const warningActions = modal.querySelector(
+        '[data-session-warning-actions]'
+    );
+
+    const staySignedInButton = modal.querySelector(
+        '[data-session-stay-signed-in]'
+    );
+
+    const signOutNowButton = modal.querySelector(
+        '[data-session-sign-out-now]'
+    );
+
+    const signInAgainButton = modal.querySelector(
+        '[data-session-sign-in-again]'
     );
 
     const timeoutSeconds = Math.max(
@@ -25,8 +53,15 @@ function initSessionTimeoutModal() {
         ) || 600
     );
 
-    const timeoutMilliseconds =
-        timeoutSeconds * 1000;
+    const warningSeconds = Math.max(
+        1,
+        Math.min(
+            timeoutSeconds - 1,
+            Number(
+                modal.dataset.sessionWarningSeconds
+            ) || 120
+        )
+    );
 
     const activityUrl =
         modal.dataset.sessionActivityUrl;
@@ -34,224 +69,699 @@ function initSessionTimeoutModal() {
     const expireUrl =
         modal.dataset.sessionExpireUrl;
 
-    const redirectUrl =
+    const loginUrl =
+        modal.dataset.sessionLoginUrl ||
+        '/login';
+
+    const idleRedirectUrl =
         modal.dataset.sessionRedirectUrl ||
-        '/';
+        loginUrl;
 
     const sharedActivityKey =
         modal.dataset.sessionActivityKey ||
         '';
 
-    const activitySyncInterval = 60000;
+    const userActivitySyncInterval = 10000;
+    const serverStatusSyncInterval = 15000;
 
-    let idleTimer = null;
-    let sessionExpired = false;
+    let terminalState = null;
+    let modalState = 'active';
     let redirectStarted = false;
-    const expiredByServer =
-        modal.dataset.sessionExpired === 'true';
 
     let activityRequestRunning = false;
+    let queuedTouchRequest = false;
+    let expiryVerificationRunning = false;
 
-    let lastActivityAt = Date.now();
     let lastHandledActivityAt = 0;
-    let lastServerSyncAt = 0;
-    let lastSharedActivityWriteAt = 0;
+    let lastTouchSyncAt = 0;
+    let deferredTouchTimer = null;
 
-    const readSharedActivity = () => {
-        if (!sharedActivityKey) return 0;
+    let statusInterval = null;
+    let countdownInterval = null;
 
-        try {
-            const timestamp = Number(
-                window.localStorage.getItem(
-                    sharedActivityKey
-                )
-            );
-
-            if (
-                !Number.isFinite(timestamp) ||
-                timestamp <= 0 ||
-                timestamp > Date.now() + 5000
-            ) {
-                return 0;
-            }
-
-            return timestamp;
-        } catch (_) {
-            return 0;
-        }
-    };
-
-    const writeSharedActivity = timestamp => {
-        if (
-            !sharedActivityKey ||
-            timestamp - lastSharedActivityWriteAt < 1000
-        ) {
-            return;
-        }
-
-        lastSharedActivityWriteAt = timestamp;
-
-        try {
-            window.localStorage.setItem(
-                sharedActivityKey,
-                String(timestamp)
-            );
-        } catch (_) {
-        }
-    };
-
-    lastActivityAt = Math.max(
-        lastActivityAt,
-        readSharedActivity()
-    );
-
-    writeSharedActivity(lastActivityAt);
+    let serverNowAtSyncMs = null;
+    let performanceAtSyncMs = null;
+    let expiresAtMs = null;
 
     const requestHeaders = () => ({
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': window.getCsrfToken?.() || '',
+        'X-CSRF-TOKEN':
+            window.getCsrfToken?.() || '',
     });
 
-    const showSessionTimeoutModal = () => {
-        if (sessionExpired) return;
+    const setButtonLoading = (
+        button,
+        label
+    ) => {
+        if (!button) return;
 
-        sessionExpired = true;
-        window.__SESSION_EXPIRED__ = true;
+        button.disabled = true;
 
-        window.clearTimeout(idleTimer);
+        button.innerHTML = `
+            <i
+                class="fa-solid fa-spinner fa-spin"
+                aria-hidden="true">
+            </i>
 
-        document.documentElement.classList.add(
-            'session-expired'
+            <span>${label}</span>
+        `;
+    };
+
+    const restoreStayButton = () => {
+        if (!staySignedInButton) return;
+
+        staySignedInButton.disabled = false;
+
+        staySignedInButton.innerHTML = `
+            <span>Stay signed in</span>
+        `;
+    };
+
+    const setServerTiming = payload => {
+        const serverNow = Number(
+            payload?.server_now
         );
 
-        document.body.classList.add(
-            'session-expired'
+        const expiresAt = Number(
+            payload?.expires_at
         );
 
-        document
-            .querySelectorAll('dialog[open]')
-            .forEach(dialog => {
-                try {
-                    dialog.close();
-                } catch (_) {
-                    dialog.removeAttribute('open');
-                }
-            });
+        if (
+            !Number.isFinite(serverNow) ||
+            !Number.isFinite(expiresAt)
+        ) {
+            return false;
+        }
 
-        document.documentElement.classList.remove(
-            'intro-modal-open'
-        );
+        serverNowAtSyncMs =
+            serverNow * 1000;
 
-        document.body.classList.remove(
-            'intro-modal-open'
-        );
+        performanceAtSyncMs =
+            window.performance.now();
 
-        document.body.style.removeProperty(
-            'position'
-        );
+        expiresAtMs =
+            expiresAt * 1000;
 
-        document.body.style.removeProperty(
-            'width'
-        );
+        return true;
+    };
 
-        window.openModal?.(modal.id);
+    const estimatedServerNowMs = () => {
+        if (
+            serverNowAtSyncMs === null ||
+            performanceAtSyncMs === null
+        ) {
+            return null;
+        }
 
-        requestAnimationFrame(() => {
-            primaryButton?.focus({
-                preventScroll: true,
-            });
-        });
-
-        document.dispatchEvent(
-            new CustomEvent(
-                'session:expired'
+        return (
+            serverNowAtSyncMs +
+            (
+                window.performance.now() -
+                performanceAtSyncMs
             )
         );
     };
 
-    const scheduleIdleTimeout = () => {
-        if (sessionExpired) return;
+    const getRemainingSeconds = () => {
+        const serverNowMs =
+            estimatedServerNowMs();
 
-        window.clearTimeout(idleTimer);
-
-        const elapsed =
-            Date.now() - lastActivityAt;
-
-        const remaining =
-            timeoutMilliseconds - elapsed;
-
-        if (remaining <= 0) {
-            showSessionTimeoutModal();
-            return;
+        if (
+            serverNowMs === null ||
+            expiresAtMs === null
+        ) {
+            return null;
         }
 
-        idleTimer = window.setTimeout(
-            showSessionTimeoutModal,
-            remaining
+        return Math.max(
+            0,
+            Math.ceil(
+                (
+                    expiresAtMs -
+                    serverNowMs
+                ) / 1000
+            )
         );
     };
 
-    const syncActivityWithServer = async () => {
+    const formatCountdown = seconds => {
+        const safeSeconds = Math.max(
+            0,
+            Number(seconds) || 0
+        );
+
+        const minutes = Math.floor(
+            safeSeconds / 60
+        );
+
+        const remainder =
+            safeSeconds % 60;
+
+        return `${minutes}:${String(
+            remainder
+        ).padStart(2, '0')}`;
+    };
+
+    const updateCountdown = () => {
+        if (!countdown) return;
+
+        const remaining =
+            getRemainingSeconds();
+
+        countdown.textContent =
+            formatCountdown(
+                remaining ?? 0
+            );
+    };
+
+    const closeWarningModal = () => {
         if (
-            sessionExpired ||
-            activityRequestRunning ||
-            !activityUrl
+            modalState !== 'warning'
         ) {
             return;
         }
 
-        activityRequestRunning = true;
-        lastServerSyncAt = Date.now();
+        modalState = 'active';
 
-        try {
-            const response = await fetch(
-                activityUrl,
-                {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: requestHeaders(),
-                    cache: 'no-store',
+        window.closeModal?.(
+            modal.id,
+            {
+                force: true,
+            }
+        );
+    };
+
+    const renderState = state => {
+        if (
+            terminalState &&
+            state === 'warning'
+        ) {
+            return;
+        }
+
+        modalState = state;
+
+        if (state === 'warning') {
+            stateIcon?.setAttribute(
+                'class',
+                'fa-regular fa-clock fa-swing'
+            );
+
+            if (stateTitle) {
+                stateTitle.textContent =
+                    'Still there?';
+            }
+
+            if (stateDescription) {
+                stateDescription.textContent =
+                    'You will be signed out soon because there has been no activity.';
+            }
+
+            if (countdown) {
+                countdown.hidden = false;
+            }
+
+            if (warningActions) {
+                warningActions.hidden = false;
+            }
+
+            if (signInAgainButton) {
+                signInAgainButton.hidden = true;
+            }
+
+            updateCountdown();
+
+            window.openModal?.(
+                modal.id
+            );
+
+            requestAnimationFrame(
+                () => {
+                    staySignedInButton?.focus({
+                        preventScroll: true,
+                    });
                 }
             );
 
-            if (
-                response.status === 401 ||
-                response.status === 419
-            ) {
-                showSessionTimeoutModal();
-            }
-        } catch (_) {
-        } finally {
-            activityRequestRunning = false;
-        }
-    };
-
-    const registerUserActivity = () => {
-        if (sessionExpired) return;
-
-        const now = Date.now();
-
-        if (
-            now - lastHandledActivityAt <
-            800
-        ) {
             return;
         }
 
-        lastHandledActivityAt = now;
-        lastActivityAt = now;
-        writeSharedActivity(now);
+        terminalState = state;
 
-        scheduleIdleTimeout();
+        window.__SESSION_EXPIRED__ =
+            true;
+
+        document.documentElement
+            .classList
+            .add(
+                'session-expired'
+            );
+
+        document.body
+            .classList
+            .add(
+                'session-expired'
+            );
+
+        if (countdown) {
+            countdown.hidden = true;
+        }
+
+        if (warningActions) {
+            warningActions.hidden = true;
+        }
+
+        if (signInAgainButton) {
+            signInAgainButton.hidden =
+                false;
+
+            signInAgainButton.disabled =
+                false;
+
+            signInAgainButton.innerHTML = `
+                <span>Sign in again</span>
+            `;
+        }
 
         if (
-            now - lastServerSyncAt >=
-            activitySyncInterval
+            state === 'admin-ended'
         ) {
-            syncActivityWithServer();
+            stateIcon?.setAttribute(
+                'class',
+                'fa-solid fa-shield-halved fa-swing'
+            );
+
+            if (stateTitle) {
+                stateTitle.textContent =
+                    'Session ended';
+            }
+
+            if (stateDescription) {
+                stateDescription.innerHTML =
+                    'Your session was ended by an administrator.<br>Please sign in again to continue.';
+            }
+        } else {
+            stateIcon?.setAttribute(
+                'class',
+                'fa-regular fa-clock fa-swing'
+            );
+
+            if (stateTitle) {
+                stateTitle.textContent =
+                    'Session expired';
+            }
+
+            if (stateDescription) {
+                stateDescription.innerHTML =
+                    'You were inactive for a while.<br>Please sign in again to continue.';
+            }
         }
+
+        window.openModal?.(
+            modal.id
+        );
+
+        requestAnimationFrame(
+            () => {
+                signInAgainButton?.focus({
+                    preventScroll: true,
+                });
+            }
+        );
+
+        document.dispatchEvent(
+            new CustomEvent(
+                'session:expired',
+                {
+                    detail: {
+                        reason:
+                            state ===
+                                'admin-ended'
+                                ? 'admin_ended'
+                                : 'idle',
+                    },
+                }
+            )
+        );
     };
+
+    window.testSessionWarning = () => {
+        renderState('warning');
+    };
+
+    window.testSessionExpired = () => {
+        renderState('expired');
+    };
+
+    window.testAdminSessionEnded = () => {
+        renderState('admin-ended');
+    };
+
+    const classifyInvalidSession =
+        payload => {
+            if (
+                payload?.reason ===
+                'idle'
+            ) {
+                return 'expired';
+            }
+
+            const remaining =
+                getRemainingSeconds();
+
+            if (
+                remaining !== null &&
+                remaining <= 0
+            ) {
+                return 'expired';
+            }
+
+            return 'admin-ended';
+        };
+
+    const writeSharedActivitySignal =
+        () => {
+            if (!sharedActivityKey) {
+                return;
+            }
+
+            try {
+                window.localStorage
+                    .setItem(
+                        sharedActivityKey,
+                        String(
+                            Date.now()
+                        )
+                    );
+            } catch (_) {
+            }
+        };
+
+    const syncActivityWithServer =
+        async ({
+            touch = false,
+            force = false,
+        } = {}) => {
+            if (
+                terminalState ||
+                !activityUrl
+            ) {
+                return false;
+            }
+
+            if (
+                activityRequestRunning
+            ) {
+                if (touch) {
+                    queuedTouchRequest =
+                        true;
+                }
+
+                return false;
+            }
+
+            if (
+                touch &&
+                !force &&
+                Date.now() -
+                lastTouchSyncAt <
+                userActivitySyncInterval
+            ) {
+                return false;
+            }
+
+            activityRequestRunning =
+                true;
+
+            if (touch) {
+                lastTouchSyncAt =
+                    Date.now();
+            }
+
+            try {
+                const url = new URL(
+                    activityUrl,
+                    window.location.origin
+                );
+
+                url.searchParams.set(
+                    'touch',
+                    touch ? '1' : '0'
+                );
+
+                const response =
+                    await fetch(
+                        url.toString(),
+                        {
+                            method: 'POST',
+                            credentials:
+                                'same-origin',
+                            headers:
+                                requestHeaders(),
+                            cache: 'no-store',
+                        }
+                    );
+
+                let payload = {};
+
+                try {
+                    payload =
+                        await response.json();
+                } catch (_) {
+                }
+
+                if (
+                    response.status ===
+                    401 ||
+                    response.status ===
+                    419
+                ) {
+                    renderState(
+                        classifyInvalidSession(
+                            payload
+                        )
+                    );
+
+                    return false;
+                }
+
+                if (!response.ok) {
+                    return false;
+                }
+
+                if (
+                    payload?.expired ===
+                    true
+                ) {
+                    renderState(
+                        payload?.reason ===
+                            'idle'
+                            ? 'expired'
+                            : 'admin-ended'
+                    );
+
+                    return false;
+                }
+
+                if (
+                    !setServerTiming(
+                        payload
+                    )
+                ) {
+                    return false;
+                }
+
+                if (touch) {
+                    writeSharedActivitySignal();
+
+                    if (
+                        modalState ===
+                        'warning'
+                    ) {
+                        closeWarningModal();
+                    }
+                }
+
+                return true;
+            } catch (_) {
+                return false;
+            } finally {
+                activityRequestRunning =
+                    false;
+
+                if (
+                    queuedTouchRequest &&
+                    !terminalState
+                ) {
+                    queuedTouchRequest =
+                        false;
+
+                    window.setTimeout(
+                        () => {
+                            syncActivityWithServer(
+                                {
+                                    touch: true,
+                                    force: true,
+                                }
+                            );
+                        },
+                        0
+                    );
+                }
+            }
+        };
+
+    const scheduleDeferredTouch =
+        () => {
+            if (
+                terminalState ||
+                deferredTouchTimer
+            ) {
+                return;
+            }
+
+            const elapsed =
+                Date.now() -
+                lastTouchSyncAt;
+
+            const delay = Math.max(
+                0,
+                userActivitySyncInterval -
+                elapsed
+            );
+
+            deferredTouchTimer =
+                window.setTimeout(
+                    async () => {
+                        deferredTouchTimer =
+                            null;
+
+                        await syncActivityWithServer(
+                            {
+                                touch: true,
+                                force: true,
+                            }
+                        );
+                    },
+                    delay
+                );
+        };
+
+    const registerUserActivity =
+        event => {
+            if (terminalState) {
+                return;
+            }
+
+            if (
+                modalState ===
+                'warning' &&
+                event?.target?.closest?.(
+                    '#sessionTimeoutModal'
+                )
+            ) {
+                return;
+            }
+
+            const now = Date.now();
+
+            if (
+                now -
+                lastHandledActivityAt <
+                800
+            ) {
+                return;
+            }
+
+            lastHandledActivityAt =
+                now;
+
+            if (
+                now -
+                lastTouchSyncAt >=
+                userActivitySyncInterval
+            ) {
+                syncActivityWithServer({
+                    touch: true,
+                });
+
+                return;
+            }
+
+            scheduleDeferredTouch();
+        };
+
+    const verifyExpiredDeadline =
+        async () => {
+            if (
+                terminalState ||
+                expiryVerificationRunning
+            ) {
+                return;
+            }
+
+            expiryVerificationRunning =
+                true;
+
+            try {
+                await syncActivityWithServer(
+                    {
+                        touch: false,
+                        force: true,
+                    }
+                );
+            } finally {
+                expiryVerificationRunning =
+                    false;
+            }
+        };
+
+    const checkServerDeadline =
+        () => {
+            if (terminalState) {
+                return;
+            }
+
+            const remaining =
+                getRemainingSeconds();
+
+            if (
+                remaining === null
+            ) {
+                return;
+            }
+
+            if (remaining <= 0) {
+                verifyExpiredDeadline();
+                return;
+            }
+
+            if (
+                remaining <=
+                warningSeconds
+            ) {
+                if (
+                    modalState !==
+                    'warning'
+                ) {
+                    renderState(
+                        'warning'
+                    );
+                }
+
+                updateCountdown();
+
+                return;
+            }
+
+            if (
+                modalState ===
+                'warning'
+            ) {
+                closeWarningModal();
+            }
+        };
 
     [
         'pointerdown',
@@ -270,31 +780,14 @@ function initSessionTimeoutModal() {
         );
     });
 
-    const checkIdleState = () => {
-        if (sessionExpired) return;
-
-        lastActivityAt = Math.max(
-            lastActivityAt,
-            readSharedActivity()
-        );
-
-        const idleDuration =
-            Date.now() - lastActivityAt;
-
-        if (
-            idleDuration >=
-            timeoutMilliseconds
-        ) {
-            showSessionTimeoutModal();
-            return;
-        }
-
-        scheduleIdleTimeout();
-    };
-
     window.addEventListener(
         'focus',
-        checkIdleState
+        () => {
+            syncActivityWithServer({
+                touch: false,
+                force: true,
+            });
+        }
     );
 
     document.addEventListener(
@@ -303,12 +796,15 @@ function initSessionTimeoutModal() {
             if (
                 document.visibilityState !==
                 'visible' ||
-                sessionExpired
+                terminalState
             ) {
                 return;
             }
 
-            checkIdleState();
+            syncActivityWithServer({
+                touch: false,
+                force: true,
+            });
         }
     );
 
@@ -316,32 +812,27 @@ function initSessionTimeoutModal() {
         'storage',
         event => {
             if (
-                sessionExpired ||
+                terminalState ||
                 !sharedActivityKey ||
-                event.key !== sharedActivityKey
+                event.key !==
+                sharedActivityKey
             ) {
                 return;
             }
 
-            const timestamp = Number(event.newValue);
-
-            if (
-                !Number.isFinite(timestamp) ||
-                timestamp <= lastActivityAt ||
-                timestamp > Date.now() + 5000
-            ) {
-                return;
-            }
-
-            lastActivityAt = timestamp;
-            scheduleIdleTimeout();
+            syncActivityWithServer({
+                touch: false,
+                force: true,
+            });
         }
     );
 
     document.addEventListener(
         'submit',
         event => {
-            if (!sessionExpired) return;
+            if (!terminalState) {
+                return;
+            }
 
             event.preventDefault();
             event.stopImmediatePropagation();
@@ -352,14 +843,16 @@ function initSessionTimeoutModal() {
     document.addEventListener(
         'click',
         event => {
-            if (!sessionExpired) return;
+            if (!terminalState) {
+                return;
+            }
 
-            const signInAgainButton =
+            const signInAgain =
                 event.target.closest(
-                    '[data-session-timeout-primary]'
+                    '[data-session-sign-in-again]'
                 );
 
-            if (signInAgainButton) {
+            if (signInAgain) {
                 return;
             }
 
@@ -369,79 +862,215 @@ function initSessionTimeoutModal() {
         true
     );
 
-    primaryButton?.addEventListener(
-        'click',
-        async () => {
-            if (redirectStarted) return;
+    staySignedInButton
+        ?.addEventListener(
+            'click',
+            async () => {
+                if (terminalState) {
+                    return;
+                }
 
-            redirectStarted = true;
-            primaryButton.disabled = true;
+                setButtonLoading(
+                    staySignedInButton,
+                    'Staying signed in...'
+                );
 
-            primaryButton.innerHTML = `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                <span>Opening Sign In...</span>
-            `;
-
-            try {
-                if (expireUrl) {
-                    await fetch(
-                        expireUrl,
+                const active =
+                    await syncActivityWithServer(
                         {
-                            method: 'POST',
-                            credentials: 'same-origin',
-                            headers: requestHeaders(),
-                            cache: 'no-store',
+                            touch: true,
+                            force: true,
                         }
                     );
-                }
-            } catch (_) {
-            } finally {
-                window.location.assign(
-                    redirectUrl
-                );
-            }
-        }
-    );
 
-    if (expiredByServer) {
-        showSessionTimeoutModal();
-    } else {
-        scheduleIdleTimeout();
-    }
+                if (
+                    !terminalState &&
+                    !active
+                ) {
+                    restoreStayButton();
+
+                    return;
+                }
+
+                if (
+                    !terminalState
+                ) {
+                    restoreStayButton();
+                }
+            }
+        );
+
+    signOutNowButton
+        ?.addEventListener(
+            'click',
+            async () => {
+                if (
+                    redirectStarted
+                ) {
+                    return;
+                }
+
+                redirectStarted =
+                    true;
+
+                setButtonLoading(
+                    signOutNowButton,
+                    'Signing out...'
+                );
+
+                try {
+                    if (expireUrl) {
+                        await fetch(
+                            expireUrl,
+                            {
+                                method:
+                                    'POST',
+                                credentials:
+                                    'same-origin',
+                                headers:
+                                    requestHeaders(),
+                                cache:
+                                    'no-store',
+                            }
+                        );
+                    }
+                } catch (_) {
+                } finally {
+                    window.location.assign(
+                        idleRedirectUrl
+                    );
+                }
+            }
+        );
+
+    signInAgainButton
+        ?.addEventListener(
+            'click',
+            async () => {
+                if (
+                    redirectStarted
+                ) {
+                    return;
+                }
+
+                redirectStarted =
+                    true;
+
+                setButtonLoading(
+                    signInAgainButton,
+                    'Opening Sign In...'
+                );
+
+                try {
+                    if (
+                        terminalState ===
+                        'expired' &&
+                        expireUrl
+                    ) {
+                        await fetch(
+                            expireUrl,
+                            {
+                                method:
+                                    'POST',
+                                credentials:
+                                    'same-origin',
+                                headers:
+                                    requestHeaders(),
+                                cache:
+                                    'no-store',
+                            }
+                        );
+                    }
+                } catch (_) {
+                } finally {
+                    window.location.assign(
+                        loginUrl
+                    );
+                }
+            }
+        );
+
+    countdownInterval =
+        window.setInterval(
+            checkServerDeadline,
+            500
+        );
+
+    statusInterval =
+        window.setInterval(
+            () => {
+                syncActivityWithServer({
+                    touch: false,
+                });
+            },
+            serverStatusSyncInterval
+        );
+
+    syncActivityWithServer({
+        touch: true,
+        force: true,
+    }).then(() => {
+        checkServerDeadline();
+    });
 }
 
 function acceptTerms() {
-    const modal = document.getElementById('termsModal');
-
-    if (modal?.open) {
-        modal.close();
-    }
+    window.closeModal?.(
+        'termsModal'
+    );
 }
 
 function initTermsModal() {
-    const modal = document.getElementById('termsModal');
+    const modal =
+        document.getElementById(
+            'termsModal'
+        );
+
     if (!modal) return;
 
-    const checkbox = modal.querySelector('#termsCheckbox, [data-terms-checkbox]');
-    const continueBtn = modal.querySelector('#termsContinueBtn, [data-terms-continue]');
+    const checkbox =
+        modal.querySelector(
+            '#termsCheckbox, [data-terms-checkbox]'
+        );
 
-    if (checkbox && continueBtn) {
+    const continueBtn =
+        modal.querySelector(
+            '#termsContinueBtn, [data-terms-continue]'
+        );
+
+    if (
+        checkbox &&
+        continueBtn
+    ) {
         checkbox.checked = false;
         continueBtn.disabled = true;
 
-        checkbox.addEventListener('change', () => {
-            continueBtn.disabled = !checkbox.checked;
-        });
+        checkbox.addEventListener(
+            'change',
+            () => {
+                continueBtn.disabled =
+                    !checkbox.checked;
+            }
+        );
 
-        continueBtn.addEventListener('click', acceptTerms);
+        continueBtn.addEventListener(
+            'click',
+            acceptTerms
+        );
     }
 
-    const shouldShow = modal.dataset.showTerms === 'true';
+    const shouldShow =
+        modal.dataset.showTerms ===
+        'true';
 
-    if (shouldShow && typeof modal.showModal === 'function' && !modal.open) {
-        requestAnimationFrame(() => {
-            modal.showModal();
-        });
+    if (shouldShow) {
+        requestAnimationFrame(
+            () => {
+                window.openModal?.(
+                    'termsModal'
+                );
+            }
+        );
     }
 }
 

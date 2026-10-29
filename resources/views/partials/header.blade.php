@@ -359,7 +359,7 @@
                     @if ($isPatientHeader)
                         <label id="darkModeToggleItem" class="dropdown-menu-item patient-mobile-theme-item">
                             <div class="dropdown-item-content">
-                                <span class="dropdown-item-icon">
+                                <span class="sidebar-group-icon">
                                     <i id="themeIcon" class="fa-solid fa-moon"></i>
                                 </span>
 
@@ -381,7 +381,7 @@
                     @if ($showSettings && Route::has('admin.system_settings'))
                         <a href="{{ route('admin.system_settings') }}" class="dropdown-menu-item" role="menuitem">
                             <div class="dropdown-item-content">
-                                <span class="dropdown-item-icon">
+                                <span class="sidebar-group-icon">
                                     <i class="fa-solid fa-gear"></i>
                                 </span>
 
@@ -407,7 +407,7 @@
                     @if (Route::has('security.sessions.index'))
                         <a href="{{ route('security.sessions.index') }}" class="dropdown-menu-item" role="menuitem">
                             <div class="dropdown-item-content">
-                                <span class="dropdown-item-icon">
+                                <span class="sidebar-group-icon">
                                     <i class="fa-solid fa-shield-halved"></i>
                                 </span>
 
@@ -418,19 +418,37 @@
 
                             <i class="fa-solid fa-chevron-right dropdown-item-chevron" aria-hidden="true"></i>
                         </a>
-                    @endif
 
+                        <div class="dropdown-menu-divider header-desktop-logout-divider" role="separator"></div>
+
+                        <form action="{{ route('logout') }}" method="POST"
+                            class="js-logout-form header-logout-form header-desktop-logout-form">
+                            @csrf
+
+                            <button type="submit" class="dropdown-menu-item header-logout-item">
+                                <div class="dropdown-item-content">
+                                    <span class="sidebar-group-icon">
+                                        <i class="fa-solid fa-right-from-bracket"></i>
+                                    </span>
+
+                                    <span class="dropdown-item-text">
+                                        Log Out
+                                    </span>
+                                </div>
+                            </button>
+                        </form>
+                    @endif
 
                     @if ($isPatientHeader)
                         <div class="dropdown-menu-divider patient-mobile-logout-divider" role="separator"></div>
 
                         <form action="{{ route('logout') }}" method="POST"
-                            class="js-logout-form patient-mobile-logout-form">
+                            class="js-logout-form header-logout-form patient-mobile-logout-form">
                             @csrf
 
-                            <button type="submit" class="dropdown-menu-item patient-mobile-logout-item">
+                            <button type="submit" class="dropdown-menu-item header-logout-item">
                                 <div class="dropdown-item-content">
-                                    <span class="dropdown-item-icon">
+                                    <span class="sidebar-group-icon">
                                         <i class="fa-solid fa-right-from-bracket"></i>
                                     </span>
 

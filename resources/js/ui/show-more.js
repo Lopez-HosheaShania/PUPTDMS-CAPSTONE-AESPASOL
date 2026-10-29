@@ -1,5 +1,189 @@
-const ROOT_SELECTOR =
-    '[data-show-more]';
+const ROOT_SELECTOR = '[data-show-more]';
+const DISCLOSURE_MODE = 'disclosure';
+
+function isDisclosureShowMore(
+    root
+) {
+    return (
+        root?.dataset.showMoreMode ===
+        DISCLOSURE_MODE
+    );
+}
+
+function getDisclosureTarget(
+    root
+) {
+    const button =
+        root?.querySelector(
+            '[data-show-more-button]'
+        );
+
+    const targetId =
+        button?.getAttribute(
+            'aria-controls'
+        );
+
+    if (!targetId) {
+        return null;
+    }
+
+    return document.getElementById(
+        targetId
+    );
+}
+
+function setDisclosureExpanded(
+    root,
+    expanded,
+    options = {}
+) {
+    if (!root) {
+        return;
+    }
+
+    const button =
+        root.querySelector(
+            '[data-show-more-button]'
+        );
+
+    if (!button) {
+        return;
+    }
+
+    const text =
+        button.querySelector(
+            '[data-show-more-text]'
+        );
+
+    const summary =
+        root.querySelector(
+            '[data-show-more-summary]'
+        );
+
+    const target =
+        getDisclosureTarget(
+            root
+        );
+
+    const isExpanded =
+        Boolean(expanded);
+
+    root.dataset.showMoreExpanded =
+        String(isExpanded);
+
+    button.setAttribute(
+        'aria-expanded',
+        String(isExpanded)
+    );
+
+    button.dataset.mode =
+        isExpanded
+            ? 'less'
+            : 'more';
+
+    if (text) {
+        text.textContent =
+            isExpanded
+                ? 'Show less'
+                : 'Show more';
+    }
+
+    if (target) {
+        target.hidden =
+            !isExpanded;
+
+        target.setAttribute(
+            'aria-hidden',
+            String(!isExpanded)
+        );
+    }
+
+    if (
+        summary &&
+        root.dataset
+            .showMoreReplaceSummary ===
+        'true'
+    ) {
+        summary.hidden =
+            isExpanded;
+    }
+
+    if (
+        options.emit !== false
+    ) {
+        root.dispatchEvent(
+            new CustomEvent(
+                'global-show-more:change',
+                {
+                    bubbles: true,
+
+                    detail: {
+                        expanded:
+                            isExpanded,
+
+                        targetId:
+                            button.getAttribute(
+                                'aria-controls'
+                            ),
+                    },
+                }
+            )
+        );
+    }
+}
+
+function bindDisclosureShowMore(
+    root
+) {
+    const button =
+        root.querySelector(
+            '[data-show-more-button]'
+        );
+
+    if (!button) {
+        return;
+    }
+
+    button.addEventListener(
+        'click',
+        () => {
+            setDisclosureExpanded(
+                root,
+                button.getAttribute(
+                    'aria-expanded'
+                ) !== 'true'
+            );
+        }
+    );
+
+    setDisclosureExpanded(
+        root,
+        root.dataset
+            .showMoreExpanded ===
+        'true',
+        {
+            emit: false,
+        }
+    );
+}
+
+function collapseShowMoreDisclosures(
+    scope = document
+) {
+    scope
+        ?.querySelectorAll?.(
+            '[data-show-more][data-show-more-mode="disclosure"]'
+        )
+        .forEach(root => {
+            setDisclosureExpanded(
+                root,
+                false,
+                {
+                    emit: false,
+                }
+            );
+        });
+}
 
 function getStep(root) {
     return Math.max(
@@ -74,6 +258,24 @@ function getReferenceList(root) {
 
 function refreshShowMore(root) {
     if (!root) return;
+
+    if (
+        isDisclosureShowMore(
+            root
+        )
+    ) {
+        setDisclosureExpanded(
+            root,
+            root.dataset
+                .showMoreExpanded ===
+            'true',
+            {
+                emit: false,
+            }
+        );
+
+        return;
+    }
 
     const step =
         getStep(root);
@@ -195,17 +397,6 @@ function refreshShowMore(root) {
         text.textContent =
             'Show more';
 
-        const icon =
-            button.querySelector('i');
-
-        icon?.classList.remove(
-            'fa-chevron-up'
-        );
-
-        icon?.classList.add(
-            'fa-chevron-down'
-        );
-
         return;
     }
 
@@ -222,14 +413,6 @@ function refreshShowMore(root) {
         button.dataset.mode =
             'less';
 
-        icon?.classList.remove(
-            'fa-chevron-down'
-        );
-
-        icon?.classList.add(
-            'fa-chevron-up'
-        );
-
         return;
     }
 
@@ -244,18 +427,23 @@ function refreshShowMore(root) {
 
     button.dataset.mode =
         'more';
-
-    icon?.classList.remove(
-        'fa-chevron-up'
-    );
-
-    icon?.classList.add(
-        'fa-chevron-down'
-    );
 }
 
 function resetShowMore(root) {
     if (!root) return;
+
+    if (
+        isDisclosureShowMore(
+            root
+        )
+    ) {
+        setDisclosureExpanded(
+            root,
+            false
+        );
+
+        return;
+    }
 
     root.dataset.showMoreVisible =
         String(
@@ -276,6 +464,18 @@ function bindShowMore(root) {
 
     root.dataset.showMoreReady =
         'true';
+
+    if (
+        isDisclosureShowMore(
+            root
+        )
+    ) {
+        bindDisclosureShowMore(
+            root
+        );
+
+        return;
+    }
 
     const step =
         getStep(root);
@@ -342,6 +542,7 @@ window.ShowMore = {
     init: initShowMore,
     refresh: refreshShowMore,
     reset: resetShowMore,
+    collapseDisclosures: collapseShowMoreDisclosures,
 };
 
 function bootShowMore() {

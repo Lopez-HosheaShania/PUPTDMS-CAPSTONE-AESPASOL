@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Security;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\ConcurrentSessionService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\View\View;
-use Illuminate\Http\JsonResponse;
 
 class SessionManagementController extends Controller
 {
@@ -45,6 +45,32 @@ class SessionManagementController extends Controller
     public function activity(
         Request $request
     ): JsonResponse {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'active' => false,
+            ], 401);
+        }
+
+        $activeRoleSlug = (string) (
+            $request->session()->get('impersonated_role')
+            ?: $request->session()->get('role')
+            ?: optional($user->role)->slug
+        );
+
+        $timeoutSeconds =
+            $user->idleTimeoutSeconds(
+                $activeRoleSlug
+            );
+
+        if ($timeoutSeconds <= 0) {
+            return response()->json([
+                'active' => true,
+                'exempt' => true,
+            ]);
+        }
+
         if (
             (bool) $request->session()->get(
                 'session_idle_locked',
@@ -53,16 +79,63 @@ class SessionManagementController extends Controller
         ) {
             return response()->json([
                 'expired' => true,
+                'reason' => 'idle',
             ], 401);
         }
 
-        $request->session()->put(
-            'last_activity_at',
-            now()->getTimestamp()
-        );
+        $serverNow =
+            now()->getTimestamp();
+
+        $lastActivityAt =
+            (int) $request->session()->get(
+                'last_activity_at',
+                $serverNow
+            );
+
+        $expiresAt =
+            $lastActivityAt +
+            $timeoutSeconds;
+
+        if ($serverNow >= $expiresAt) {
+            $request->session()->put(
+                'session_idle_locked',
+                true
+            );
+
+            return response()->json([
+                'expired' => true,
+                'reason' => 'idle',
+                'server_now' => $serverNow,
+                'expires_at' => $expiresAt,
+                'remaining_seconds' => 0,
+                'timeout_seconds' => $timeoutSeconds,
+            ], 401);
+        }
+
+        if ($request->boolean('touch')) {
+            $lastActivityAt =
+                $serverNow;
+
+            $request->session()->put(
+                'last_activity_at',
+                $lastActivityAt
+            );
+
+            $expiresAt =
+                $lastActivityAt +
+                $timeoutSeconds;
+        }
 
         return response()->json([
             'active' => true,
+            'server_now' => $serverNow,
+            'last_activity_at' => $lastActivityAt,
+            'expires_at' => $expiresAt,
+            'remaining_seconds' => max(
+                0,
+                $expiresAt - $serverNow
+            ),
+            'timeout_seconds' => $timeoutSeconds,
         ]);
     }
 
@@ -75,6 +148,7 @@ class SessionManagementController extends Controller
             return response()->json([
                 'expired' => false,
                 'active' => true,
+                'server_now' => now()->getTimestamp(),
             ]);
         }
 
@@ -87,6 +161,9 @@ class SessionManagementController extends Controller
 
         return response()->json([
             'expired' => true,
+            'active' => false,
+            'reason' => 'idle',
+            'server_now' => now()->getTimestamp(),
         ]);
     }
 
@@ -155,6 +232,53 @@ class SessionManagementController extends Controller
         ])->with('success', 'All devices have been logged out.');
     }
 
+    private function idleExpiredResponse(
+        Request $request,
+        int $serverNow,
+        int $timeoutSeconds,
+        ?int $lastActivityAt = null
+    ): JsonResponse {
+        $lastActivityAt ??= (int) $request->session()->get(
+            'last_activity_at',
+            $serverNow - $timeoutSeconds
+        );
+
+        return response()->json([
+            'active' => false,
+            'expired' => true,
+            'reason' => 'idle',
+            'server_now' => $serverNow,
+            'timeout_seconds' => $timeoutSeconds,
+            'last_activity_at' => $lastActivityAt,
+            'expires_at' => $lastActivityAt + $timeoutSeconds,
+            'remaining_seconds' => 0,
+        ], 401);
+    }
+
+    private function idleTimeoutSeconds(
+        Request $request
+    ): int {
+        $user = $request->user();
+
+        if (!$user) {
+            return 0;
+        }
+
+        $role = (string) (
+            $request->session()->get('impersonated_role')
+            ?: $request->session()->get('role')
+            ?: optional($user->role)->slug
+        );
+
+        return max(
+            0,
+            (int) (
+                $user->idleTimeoutSeconds($role) ??
+                config('session.idle_timeout_seconds', 600)
+            )
+        );
+    }
+
     private function normalizeRole(string $role): string
     {
         return $role === 'super_admin' ? 'admin' : ($role !== '' ? $role : 'patient');
@@ -170,8 +294,8 @@ class SessionManagementController extends Controller
 
         return $user->isExemptFromIdleTimeout((string) (
             $request->session()->get('impersonated_role')
-                ?: $request->session()->get('role')
-                ?: optional($user->role)->slug
+            ?: $request->session()->get('role')
+            ?: optional($user->role)->slug
         ));
     }
 
@@ -180,8 +304,7 @@ class SessionManagementController extends Controller
         ?User $user,
         bool $alreadyRevokedAll,
         string $reason
-    ): void
-    {
+    ): void {
         if ($user && !$alreadyRevokedAll) {
             $this->concurrentSessionService->revokeAllSessions(
                 $user,

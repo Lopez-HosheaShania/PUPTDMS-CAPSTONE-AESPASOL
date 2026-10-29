@@ -18,6 +18,108 @@ function removeGlobalRefreshNotice(key = 'global') {
     document.getElementById(getGlobalRefreshNoticeId(key))?.remove();
 }
 
+function collectGlobalLiveItemIds(
+    root = document
+) {
+    const scope =
+        root?.querySelectorAll ?
+            root :
+            document;
+
+    return new Set(
+        Array.from(
+            scope.querySelectorAll(
+                '[data-live-item-id]'
+            )
+        )
+            .map(element =>
+                String(
+                    element.dataset
+                        .liveItemId || ''
+                ).trim()
+            )
+            .filter(Boolean)
+    );
+}
+
+function highlightGlobalLiveItems(
+    root = document,
+    ids = [],
+    options = {}
+) {
+    const scope =
+        root?.querySelectorAll ?
+            root :
+            document;
+
+    const targetIds =
+        new Set(
+            Array.from(ids || [])
+                .map(id =>
+                    String(id)
+                )
+        );
+
+    if (!targetIds.size) {
+        return;
+    }
+
+    const insertDuration =
+        Number(
+            options.insertDuration
+        ) || 420;
+
+    const highlightDuration =
+        Number(
+            options.highlightDuration
+        ) || 5000;
+
+    scope.querySelectorAll(
+        '[data-live-item-id]'
+    )
+        .forEach(element => {
+            const id =
+                String(
+                    element.dataset
+                        .liveItemId || ''
+                );
+
+            if (!targetIds.has(id)) {
+                return;
+            }
+
+            element.classList.remove(
+                'global-live-insert',
+                'global-live-highlight'
+            );
+
+            void element.offsetWidth;
+
+            element.classList.add(
+                'global-live-insert',
+                'global-live-highlight'
+            );
+
+            window.setTimeout(
+                () => {
+                    element.classList.remove(
+                        'global-live-insert'
+                    );
+                },
+                insertDuration
+            );
+
+            window.setTimeout(
+                () => {
+                    element.classList.remove(
+                        'global-live-highlight'
+                    );
+                },
+                highlightDuration
+            );
+        });
+}
+
 function initGlobalRefreshWatcher(config = {}) {
     const key = config.key || 'global';
 
@@ -35,7 +137,12 @@ function initGlobalRefreshWatcher(config = {}) {
     const noticeId = getGlobalRefreshNoticeId(key);
 
     let pendingPayload = null;
+    let pendingItems = [];
     let timer = null;
+    let checking = false;
+    let cursor = config.initialCursor ?? null;
+    let requestController = null;
+    let lifecycleVersion = 0;
 
     let knownIds = new Set(
         normalizeGlobalRefreshItems(config.initialItems || [], getItems)
@@ -92,44 +199,181 @@ function initGlobalRefreshWatcher(config = {}) {
     const controller = {
         sync(source = []) {
             knownIds = new Set(
-                normalizeGlobalRefreshItems(source, getItems)
+                normalizeGlobalRefreshItems(
+                    source,
+                    getItems
+                )
                     .map(getItemId)
-                    .filter((id) => id !== null && id !== undefined)
+                    .filter(
+                        id =>
+                            id !== null &&
+                            id !== undefined
+                    )
                     .map(String)
             );
 
+            if (
+                typeof config.getCursor ===
+                'function'
+            ) {
+                const nextCursor =
+                    config.getCursor(
+                        source
+                    );
+
+                if (
+                    nextCursor !== null &&
+                    nextCursor !== undefined &&
+                    nextCursor !== ''
+                ) {
+                    cursor =
+                        nextCursor;
+                }
+            }
+
             pendingPayload = null;
-            removeGlobalRefreshNotice(key);
+            pendingItems = [];
+
+            removeGlobalRefreshNotice(
+                key
+            );
+        },
+
+        getCursor() {
+            return cursor;
         },
 
         async check() {
-            if (!config.url) return;
+            const checkVersion = lifecycleVersion;
+
+            const url =
+                typeof config.url ===
+                    'function'
+                    ? config.url({
+                        cursor,
+                        key,
+                        controller,
+                    })
+                    : config.url;
+
+            if (
+                !url ||
+                checking
+            ) {
+                return;
+            }
+
+            checking = true;
+            requestController = new AbortController();
+            const activeRequest = requestController;
 
             try {
-                const response = await fetch(config.url, {
-                    cache: 'no-store',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
+                const response =
+                    await fetch(
+                        url,
+                        {
+                            cache: 'no-store',
+                            signal: activeRequest.signal,
 
-                if (!response.ok) return;
+                            headers: {
+                                'Accept':
+                                    'application/json',
+
+                                'X-Requested-With':
+                                    'XMLHttpRequest'
+                            }
+                        }
+                    );
+
+                if (!response.ok) {
+                    return;
+                }
 
                 const payload = await response.json();
-                const incoming = normalizeGlobalRefreshItems(payload, getItems);
 
-                const newItems = incoming.filter((item) => {
-                    const id = getItemId(item);
-                    return id !== null && id !== undefined && !knownIds.has(String(id));
-                });
+                if (
+                    checkVersion !==
+                    lifecycleVersion
+                ) {
+                    return;
+                }
 
-                if (!newItems.length) return;
+                const incoming =
+                    normalizeGlobalRefreshItems(
+                        payload,
+                        getItems
+                    );
+
+                const newItems =
+                    incoming.filter(
+                        item => {
+                            const id =
+                                getItemId(item);
+
+                            return (
+                                id !== null &&
+                                id !== undefined &&
+                                !knownIds.has(
+                                    String(id)
+                                )
+                            );
+                        }
+                    );
+
+                const shouldApplyWithoutItems =
+                    typeof config.shouldApply ===
+                    'function' &&
+                    config.shouldApply(
+                        payload,
+                        {
+                            newItems,
+                            cursor,
+                        }
+                    );
+
+                if (
+                    !newItems.length &&
+                    !shouldApplyWithoutItems
+                ) {
+                    return;
+                }
 
                 pendingPayload = payload;
+                pendingItems = newItems;
+
+                if (
+                    config.autoApply ===
+                    true
+                ) {
+                    await controller.apply();
+                    return;
+                }
+
                 showNotice(newItems.length);
+
             } catch (error) {
-                console.warn(`${key} refresh check failed:`, error);
+                if (
+                    error.name ===
+                    'AbortError'
+                ) {
+                    return;
+                }
+
+                console.warn(
+                    `${key} refresh check failed:`,
+                    error
+                );
+
+            } finally {
+                if (
+                    requestController ===
+                    activeRequest
+                ) {
+                    requestController =
+                        null;
+                }
+
+                checking = false;
             }
         },
 
@@ -138,8 +382,9 @@ function initGlobalRefreshWatcher(config = {}) {
                 return;
             }
 
-            const payload =
-                pendingPayload;
+            const payload = pendingPayload;
+            const newItems = pendingItems.slice();
+            const applyVersion = lifecycleVersion;
 
             try {
                 if (
@@ -147,13 +392,28 @@ function initGlobalRefreshWatcher(config = {}) {
                     'function'
                 ) {
                     await config.onRefresh(
-                        payload
+                        payload, newItems,
+                        {
+                            cursor,
+
+                            isCurrent() {
+                                return (
+                                    applyVersion ===
+                                    lifecycleVersion
+                                );
+                            },
+                        }
                     );
                 }
 
-                this.sync(
-                    payload
-                );
+                if (
+                    applyVersion !==
+                    lifecycleVersion
+                ) {
+                    return;
+                }
+
+                this.sync(payload);
 
                 if (
                     config.toast !== false &&
@@ -195,14 +455,50 @@ function initGlobalRefreshWatcher(config = {}) {
         },
 
         start() {
-            if (timer) clearInterval(timer);
-            timer = setInterval(() => this.check(), interval);
+            lifecycleVersion += 1;
+
+            if (timer) {
+                clearInterval(
+                    timer
+                );
+            }
+
+            requestController
+                ?.abort();
+
+            timer =
+                setInterval(
+                    () =>
+                        this.check(),
+                    interval
+                );
         },
 
         stop() {
-            if (timer) clearInterval(timer);
+            lifecycleVersion += 1;
+
+            if (timer) {
+                clearInterval(
+                    timer
+                );
+            }
+
             timer = null;
-            removeGlobalRefreshNotice(key);
+
+            requestController
+                ?.abort();
+
+            requestController =
+                null;
+
+            pendingPayload =
+                null;
+
+            pendingItems = [];
+
+            removeGlobalRefreshNotice(
+                key
+            );
         }
     };
 
@@ -222,3 +518,8 @@ function syncGlobalRefreshWatcher(key = 'global', source = []) {
 window.initGlobalRefreshWatcher = initGlobalRefreshWatcher;
 window.syncGlobalRefreshWatcher = syncGlobalRefreshWatcher;
 window.removeGlobalRefreshNotice = removeGlobalRefreshNotice;
+
+window.GlobalLiveUpdate = {
+    collectIds: collectGlobalLiveItemIds,
+    highlightItems: highlightGlobalLiveItems,
+};
