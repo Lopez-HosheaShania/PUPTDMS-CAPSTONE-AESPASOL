@@ -108,7 +108,7 @@ class DentistAttributionTest extends TestCase
             $this->assertStringNotContainsString('dr.angeles-sign', $html);
         }
         $appointment = $this->appointment($first);
-        $this->assertStringStartsWith('First Dentist | First Dentist', $renderer->render($template, ['appointment' => $appointment]));
+        $this->assertStringStartsWith('Dr. First Dentist, DMD | Dr. First Dentist, DMD', $renderer->render($template, ['appointment' => $appointment]));
     }
 
     public function test_clearance_reprints_use_the_recorded_approver_in_both_pdf_forms(): void
@@ -131,8 +131,8 @@ class DentistAttributionTest extends TestCase
             (new ReflectionMethod(DentistReportController::class, $method))
                 ->invoke(app(DentistReportController::class), $pdf, $request);
             $content = $pdf->Output('S');
-            $this->assertStringContainsString('(Approving Dentist)', $content);
-            $this->assertStringNotContainsString('(Downloading Dentist)', $content);
+            $this->assertStringContainsString('(Dr. Approving Dentist)', $content);
+            $this->assertStringNotContainsString('(Dr. Downloading Dentist)', $content);
         }
     }
 

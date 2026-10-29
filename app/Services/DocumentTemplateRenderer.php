@@ -29,14 +29,27 @@ class DocumentTemplateRenderer
             ->get()
             ->keyBy('field_key');
 
-        return preg_replace_callback('/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/', function (array $matches) use ($fields, $context) {
-            $fieldKey = $matches[1];
+        $replacementCount = 0;
+        return preg_replace_callback('/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/', function (array $matches) use ($fields, $context, $content) {
+            $fieldKey = $matches[1][0];
             $field = $fields->get($fieldKey);
 
             $value = $this->resolveValue($fieldKey, $field, $context);
 
+            if (in_array($fieldKey, ['dentist_name', 'submitted_by', 'noted_by'], true)) {
+                $offset = $matches[0][1];
+                $before = html_entity_decode(strip_tags(substr($content, max(0, $offset - 512), min(512, $offset))), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $after = html_entity_decode(strip_tags(substr($content, $offset + strlen($matches[0][0]), 512)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $hasPrefix = preg_match('/(?:^|[^\p{L}])Dr\.?\s*$/iu', $before) === 1;
+                $hasSuffix = preg_match('/^\s*,?\s*(?:D\.?\s*M\.?\s*D\.?|M\.?\s*D\.?)(?!\p{L})/iu', $after) === 1;
+                $value = implode('; ', array_map(
+                    fn (string $name) => ReportSignatory::dentistNameForReport($name, ! $hasPrefix, ! $hasSuffix),
+                    explode('; ', (string) $value),
+                ));
+            }
+
             return e((string) $value);
-        }, $content) ?? $content;
+        }, $content, -1, $replacementCount, PREG_OFFSET_CAPTURE) ?? $content;
     }
 
     public function renderForPreview(DocumentTemplate $template): string
@@ -62,6 +75,7 @@ class DocumentTemplateRenderer
             default => $this->reportDentists($template, $context),
         };
         $dentistName = $profile?->name ?? $dentistName;
+        $dentistName = implode('; ', array_map([ReportSignatory::class, 'dentistNameForReport'], explode('; ', $dentistName)));
         $signature = $profile?->signatureDataUri() ?? '';
         $context = array_merge([
             'dentist_name' => $dentistName,

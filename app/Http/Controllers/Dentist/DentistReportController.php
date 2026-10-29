@@ -3904,14 +3904,6 @@ class DentistReportController extends Controller
             ? Carbon::parse($documentRequest->approved_at)->format('F d, Y')
             : Carbon::parse($documentRequest->updated_at)->format('F d, Y');
 
-        $dentistName = \App\Support\DentistName::forDocumentRequest($documentRequest);
-        $signatoryProfile = app(\App\Services\ReportSignatory::class)->documentProfile($documentRequest);
-        $dentistName = $signatoryProfile?->name ?? $dentistName;
-        $licenseNumber = $signatoryProfile?->license_number ?? '';
-        if ($signaturePath = $signatoryProfile?->signaturePath()) {
-            $this->drawPdfImageInBox($pdf, $signaturePath, 448, 401, 125, 26, false);
-        }
-
         $pdf->SetTextColor(0, 0, 0);
 
         $pdf->SetFont('Helvetica', '', 10.5);
@@ -3923,15 +3915,7 @@ class DentistReportController extends Controller
         $pdf->SetFont('Helvetica', '', 10.5);
         $this->drawCenteredPdfText($pdf, 492, 302, $examinedDate, 140, 12);
 
-        if ($dentistName !== '') {
-            $pdf->SetFont('Helvetica', 'B', 10.5);
-            $this->drawCenteredPdfText($pdf, 448, 418, $dentistName, 134, 12);
-        }
-
-        if ($licenseNumber !== '') {
-            $pdf->SetFont('Helvetica', '', 10.5);
-            $this->drawCenteredPdfText($pdf, 492, 440, $licenseNumber, 129, 12);
-        }
+        $this->drawClearanceSignatory($pdf, $documentRequest, 419.611, 441.68);
     }
 
     private function drawDentalClearancePage(Fpdi $pdf, DocumentRequest $documentRequest): void
@@ -3947,14 +3931,6 @@ class DentistReportController extends Controller
             ? Carbon::parse($documentRequest->approved_at)->format('F d, Y')
             : Carbon::parse($documentRequest->updated_at)->format('F d, Y');
 
-        $dentistName = \App\Support\DentistName::forDocumentRequest($documentRequest);
-        $signatoryProfile = app(\App\Services\ReportSignatory::class)->documentProfile($documentRequest);
-        $dentistName = $signatoryProfile?->name ?? $dentistName;
-        $licenseNumber = $signatoryProfile?->license_number ?? '';
-        if ($signaturePath = $signatoryProfile?->signaturePath()) {
-            $this->drawPdfImageInBox($pdf, $signaturePath, 448, 401, 125, 26, false);
-        }
-
         $pdf->SetTextColor(0, 0, 0);
 
         $pdf->SetFont('Helvetica', '', 10.5);
@@ -3966,14 +3942,33 @@ class DentistReportController extends Controller
         $pdf->SetFont('Helvetica', '', 10.5);
         $this->drawCenteredPdfText($pdf, 492, 302, $examinedDate, 140, 12);
 
-        if ($dentistName !== '') {
-            $pdf->SetFont('Helvetica', 'B', 10.5);
-            $this->drawCenteredPdfText($pdf, 448, 418, $dentistName, 134, 12);
-        }
+        $this->drawClearanceSignatory($pdf, $documentRequest, 423.766, 445.835);
+    }
 
-        if ($licenseNumber !== '') {
+    private function drawClearanceSignatory(Fpdi $pdf, DocumentRequest $documentRequest, float $nameLineY, float $licenseLineY): void
+    {
+        $profile = app(\App\Services\ReportSignatory::class)->documentProfile($documentRequest);
+        $name = $this->preparePdfText(\App\Services\ReportSignatory::dentistNameForReport(
+            $profile?->name ?? \App\Support\DentistName::forDocumentRequest($documentRequest),
+            addSuffix: false,
+        ));
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFont('Helvetica', 'B', 10.5);
+        $nameWidth = $pdf->GetStringWidth($name);
+        if ($nameWidth > 134) {
+            $pdf->SetFont('Helvetica', 'B', 10.5 * 134 / $nameWidth);
+            $nameWidth = $pdf->GetStringWidth($name);
+        }
+        if ($path = $profile?->signaturePath()) {
+            $this->drawPdfImageInBox($pdf, $path, 448, $nameLineY - 19, min(125, max(1, $nameWidth)), 26, false);
+        }
+        if ($name !== '') {
+            $pdf->Text(448 - $nameWidth / 2, $nameLineY - 1.5, $name);
+        }
+        if ($profile?->license_number) {
             $pdf->SetFont('Helvetica', '', 10.5);
-            $this->drawCenteredPdfText($pdf, 492, 440, $licenseNumber, 129, 12);
+            $license = $this->preparePdfText($profile->license_number);
+            $pdf->Text(491.64 - $pdf->GetStringWidth($license) / 2, $licenseLineY - 1.5, $license);
         }
     }
 

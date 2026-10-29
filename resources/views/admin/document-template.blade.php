@@ -450,7 +450,7 @@
                 </div>
             </div>
 
-            <button type="button" class="modal-x" data-close-modal="templateArchiveModal"
+            <button type="button" class="modal-x" data-modal-close="templateArchiveModal"
                 aria-label="Close archive modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -482,7 +482,7 @@
         </div>
 
         <div class="modal-ft">
-            <button type="button" class="ui-btn ui-btn-secondary" data-close-modal="templateArchiveModal">
+            <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="templateArchiveModal">
                 <i class="fa-solid fa-arrow-left"></i>
                 <span>Keep</span>
             </button>
@@ -996,7 +996,6 @@
                             )
                         );
                     }
-                }
                 }
             );
     }
@@ -1718,6 +1717,12 @@
             );
 
         document.getElementById('closeTemplatePreview')?.addEventListener('click', closePreviewModal);
+
+        document.getElementById('confirmTemplateArchiveBtn')?.addEventListener('click', () => {
+            if (pendingTemplateAction) {
+                submitTemplateAction(pendingTemplateAction);
+            }
+        });
 
         window.handleTemplateSearch =
             function () {

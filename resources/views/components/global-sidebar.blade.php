@@ -79,6 +79,13 @@ $sidebarGroups = [
 'label' => 'Document Requests',
 ],
 [
+'route' => 'admin.report-files',
+'permission' => 'create_report_files',
+'active' => ['admin.report-files'],
+'icon' => 'fa-file',
+'label' => 'Reports',
+],
+[
 'route' => 'admin.reports',
 'permission' => 'view_ai_reports',
 'active' => ['admin.reports', 'admin.reports.ai-generated'],
@@ -529,6 +536,7 @@ $sidebarCategoryMap = [
 'icon' => 'fa-boxes-stacked',
 'item_labels' => [
 'Inventory',
+'Reports',
 'AI Reports',
 ],
 ],

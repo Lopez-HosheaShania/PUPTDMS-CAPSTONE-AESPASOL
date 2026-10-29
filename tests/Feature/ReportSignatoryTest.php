@@ -480,7 +480,7 @@ class ReportSignatoryTest extends TestCase
             $this->assertSame($profile->id, app(SignatoryRenderer::class)->currentPreparerProfile()?->id);
             $this->assertSame($dentistProfile->id, app(SignatoryRenderer::class)->currentProfile()?->id);
             $template = new DocumentTemplate(['document_type' => 'monthly_report', 'content' => '{{prepared_by}}|{{prepared_by_role}}|{{dentist_name}}']);
-            $this->assertSame('Intern Report Preparer|Dental Intern|New Dentist', app(DocumentTemplateRenderer::class)->render($template));
+            $this->assertSame('Intern Report Preparer|Dental Intern|Dr. New Dentist, DMD', app(DocumentTemplateRenderer::class)->render($template));
 
             $pdf = new Fpdi('P', 'pt', 'A3');
             $pdf->SetAutoPageBreak(false);
@@ -490,7 +490,7 @@ class ReportSignatoryTest extends TestCase
             $content = $pdf->Output('S');
             $this->assertStringContainsString('(Intern Report Preparer)', $content);
             $this->assertStringContainsString('(Dental Intern)', $content);
-            $this->assertStringContainsString('(New Dentist)', $content);
+            $this->assertStringContainsString('(Dr. New Dentist, DMD)', $content);
             $this->assertStringNotContainsString('(Dental Aide)', $content);
         }
     }
@@ -515,7 +515,7 @@ class ReportSignatoryTest extends TestCase
             $this->assertSame('Aide Report Author', $parts[0]);
             $this->assertSame('Dental Aide', $parts[1]);
             $this->assertSame($aideProfile->signatureDataUri(), $parts[2]);
-            $this->assertSame('New Dentist', $parts[3]);
+            $this->assertSame('Dr. New Dentist, DMD', $parts[3]);
             $this->assertSame($dentistProfile->signatureDataUri(), $parts[4]);
             $this->assertSame('0012345', $parts[5]);
 
@@ -536,7 +536,7 @@ class ReportSignatoryTest extends TestCase
                 $content = $pdf->Output('S');
                 $this->assertStringContainsString('(Aide Report Author)', $content, $type);
                 $this->assertStringContainsString('(Dental Aide)', $content, $type);
-                $this->assertStringContainsString('(New Dentist)', $content, $type);
+                $this->assertStringContainsString('(Dr. New Dentist, DMD)', $content, $type);
                 $this->assertStringContainsString('0012345', $content, $type);
                 $this->assertGreaterThanOrEqual(2, substr_count($content, '/Subtype /Image'), $type);
             }
@@ -561,7 +561,7 @@ class ReportSignatoryTest extends TestCase
             ->assertSessionHasNoErrors();
         $template = new DocumentTemplate(['document_type' => 'dental_clearance', 'content' => '{{dentist_name}}|{{dentist_signature}}|{{lic_no}}']);
         foreach ([['dentist' => $author], ['appointment' => $appointment]] as $context) {
-            $this->assertSame('New Dentist|'.$profile->signatureDataUri().'|0012345', app(DocumentTemplateRenderer::class)->render($template, $context));
+            $this->assertSame('Dr. New Dentist, DMD|'.$profile->signatureDataUri().'|0012345', app(DocumentTemplateRenderer::class)->render($template, $context));
         }
     }
 
@@ -581,7 +581,7 @@ class ReportSignatoryTest extends TestCase
         $pdf->SetCompression(false);
         $pdf->AddPage();
         app(SignatoryRenderer::class)->draw($pdf, 'monthly_report');
-        $this->assertStringContainsString('(PNG Signatory)', $pdf->Output('S'));
+        $this->assertStringContainsString('(Dr. PNG Signatory, DMD)', $pdf->Output('S'));
     }
 
     public function test_upload_requires_complete_details_and_rejects_non_images(): void
@@ -634,7 +634,108 @@ class ReportSignatoryTest extends TestCase
         }
         $template = new DocumentTemplate(['document_type' => 'monthly_report', 'content' => '{{dentist_name}}|{{lic_no}}|{{dentist_signature}}']);
         $html = app(DocumentTemplateRenderer::class)->render($template);
-        $this->assertStringStartsWith('New Dentist|0012345|data:image/png;base64,', $html);
+        $this->assertStringStartsWith('Dr. New Dentist, DMD|0012345|data:image/png;base64,', $html);
+    }
+
+    public function test_dentist_report_name_adds_titles_once_without_changing_the_saved_name(): void
+    {
+        foreach (['Juan Dela Cruz', 'Dr. Juan Dela Cruz', 'DR Juan Dela Cruz, MD', 'Dr. Juan Dela Cruz, DMD.', 'DR. Juan Dela Cruz, MD'] as $name) {
+            $this->assertSame('Dr. Juan Dela Cruz, DMD', SignatoryRenderer::dentistNameForReport($name));
+        }
+        $this->assertSame('', SignatoryRenderer::dentistNameForReport(''));
+        Storage::fake('local');
+        $profile = $this->saveProfile($this->user());
+        $html = app(DocumentTemplateRenderer::class)->render(new DocumentTemplate([
+            'document_type' => 'monthly_report', 'content' => '{{dentist_name}}',
+        ]));
+        $this->assertSame('Dr. New Dentist, DMD', $html);
+        $this->assertSame('New Dentist', $profile->fresh()->name);
+        $this->assertStringContainsString('value="New Dentist"', Blade::render('@include("shared.report-signatory")'));
+    }
+
+    public function test_template_titles_are_added_only_when_the_name_placeholder_does_not_already_have_them(): void
+    {
+        Storage::fake('local');
+        $this->saveProfile($this->user());
+        $renderer = app(DocumentTemplateRenderer::class);
+        foreach ([
+            '{{dentist_name}}' => 'Dr. New Dentist, DMD',
+            'Dr. {{dentist_name}}' => 'Dr. New Dentist, DMD',
+            '{{dentist_name}}, DMD' => 'Dr. New Dentist, DMD',
+            'Dr. {{dentist_name}}, DMD' => 'Dr. New Dentist, DMD',
+            '<span>Dr.</span> <strong>{{dentist_name}}</strong> <span>D.M.D.</span>' => '<span>Dr.</span> <strong>New Dentist</strong> <span>D.M.D.</span>',
+            '{{dentist_name}}<span>D.M.D.</span>' => 'Dr. New Dentist<span>D.M.D.</span>',
+            '{{dentist_name}} | {{dentist_name}} DMD' => 'Dr. New Dentist, DMD | Dr. New Dentist DMD',
+            'Dr. {{submitted_by}}, DMD | {{noted_by}}' => 'Dr. New Dentist, DMD | Dr. New Dentist, DMD',
+        ] as $content => $expected) {
+            $template = new DocumentTemplate(['document_type' => 'monthly_report', 'content' => $content]);
+            $this->assertSame($expected, $renderer->render($template));
+        }
+        foreach (['annual-dental-clearance', 'dental-clearance'] as $file) {
+            $template = new DocumentTemplate([
+                'document_type' => str_replace('-', '_', $file),
+                'content' => file_get_contents(resource_path('views/admin/document-templates-defaults/'.$file.'.blade.php')),
+            ]);
+            $html = $renderer->render($template);
+            $this->assertStringContainsString('>Dr. New Dentist</span>', $html);
+            $this->assertStringContainsString('D.M.D.', $html);
+            $this->assertStringNotContainsString('Dr. New Dentist, DMD', $html);
+        }
+    }
+
+    public function test_updated_signatories_keep_original_template_text_positions_and_sign_above_the_name(): void
+    {
+        Storage::fake('local');
+        $dentist = $this->user();
+        $dentistProfile = $this->saveProfile($dentist);
+        $aide = $this->user('dental_aide');
+        $this->actingAs($aide)->put(route('reports.signatory.update'), [
+            'signatory_name' => 'Aide Template Signatory',
+            'signature' => UploadedFile::fake()->image('aide.png', 240, 60),
+        ])->assertSessionHasNoErrors();
+        $aideProfile = ReportSignatory::where('user_id', $aide->id)->firstOrFail();
+        $positions = [
+            'gad_report' => [[128.4, 518.569], [466.65, 518.569]],
+            'daily_treatment_record' => [[61.226, 425.967], [430.949, 426.287]],
+            'dental_cases' => [[72.024, 666.7], [324.07, 666.7]],
+            'monthly_report' => [null, [30.48, 355.56]],
+            'dpt_emergency' => [null, [386.684, 578.4]],
+            'dpt_non_emergency' => [null, [386.684, 578.4]],
+        ];
+        foreach (['New Dentist', 'Angela Jane Raymundo Dela Cruz'] as $name) {
+            $dentistProfile->update(['name' => $name]);
+            foreach ($positions as $type => $slots) {
+                $pdf = new class('P', 'pt', 'A3') extends Fpdi {
+                    public array $placedTexts = [];
+                    public array $placedImages = [];
+
+                    public function Text($x, $y, $txt)
+                    {
+                        $this->placedTexts[$txt] = [$x, $y, $this->GetStringWidth($txt)];
+                        parent::Text($x, $y, $txt);
+                    }
+
+                    public function Image($file, $x = null, $y = null, $w = 0, $h = 0, $type = '', $link = '')
+                    {
+                        $this->placedImages[$file] = [$x, $y, $w, $h];
+                        parent::Image($file, $x, $y, $w, $h, $type, $link);
+                    }
+                };
+                $pdf->AddPage();
+                app(SignatoryRenderer::class)->draw($pdf, $type);
+                foreach ([$aideProfile, $dentistProfile] as $index => $profile) {
+                    if (! $slots[$index]) {
+                        continue;
+                    }
+                    [$x, $y, $textWidth] = $pdf->placedTexts[$index === 1 ? SignatoryRenderer::dentistNameForReport($profile->name) : $profile->name];
+                    [$imageX, $imageY, $imageWidth, $imageHeight] = $pdf->placedImages[$profile->signaturePath()];
+                    $this->assertEqualsWithDelta($slots[$index][0], $x, 0.01, $type);
+                    $this->assertEqualsWithDelta($slots[$index][1], $y, 0.01, $type);
+                    $this->assertEqualsWithDelta($x + $textWidth / 2, $imageX + $imageWidth / 2, 0.01, $type);
+                    $this->assertLessThan($y - 3, $imageY + $imageHeight, $type);
+                }
+            }
+        }
     }
 
     public function test_clearance_reprint_uses_approvers_saved_signature_and_license(): void
@@ -655,7 +756,7 @@ class ReportSignatoryTest extends TestCase
             $pdf->AddPage();
             (new ReflectionMethod(DentistReportController::class, $method))->invoke(app(DentistReportController::class), $pdf, $request);
             $content = $pdf->Output('S');
-            $this->assertStringContainsString('New Dentist', $content);
+            $this->assertStringContainsString('(Dr. New Dentist)', $content);
             $this->assertStringContainsString('0012345', $content);
             $this->assertStringContainsString('/Subtype /Image', $content);
         }
