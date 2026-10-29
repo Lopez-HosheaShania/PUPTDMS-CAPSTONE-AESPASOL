@@ -175,7 +175,8 @@ class ReportSignatory
         if ($path = $profile->signaturePath()) {
             [$imageWidth, $imageHeight] = getimagesize($path);
             $scale = min(($width - 4) / $imageWidth, $signatureHeight / $imageHeight);
-            $pdf->Image($path, $x + 2, $y, $imageWidth * $scale, $imageHeight * $scale);
+            $renderedWidth = $imageWidth * $scale;
+            $pdf->Image($path, $x + ($width - $renderedWidth) / 2, $y, $renderedWidth, $imageHeight * $scale);
         }
         $pdf->SetTextColor(0, 0, 0);
         $name = mb_convert_encoding($profile->name, 'Windows-1252', 'UTF-8');
@@ -184,7 +185,7 @@ class ReportSignatory
             $pdf->SetFont('Helvetica', 'B', $fontSize -= 0.25);
         }
         $pdf->SetXY($x + 2, $y + $signatureHeight + 1);
-        $pdf->Cell($width - 4, $fontSize + 1, $name);
+        $pdf->Cell($width - 4, $fontSize + 1, $name, 0, 0, 'C');
         $nameHeight = $fontSize + 2;
         $pdf->SetFont('Helvetica', '', max(5, $fontSize - 1));
         $license = mb_convert_encoding($designation === 'Dentist' ? 'Dentist | Lic. No. '.$profile->license_number : $designation, 'Windows-1252', 'UTF-8');
@@ -192,7 +193,7 @@ class ReportSignatory
             $pdf->SetFont('Helvetica', '', $fontSize -= 0.25);
         }
         $pdf->SetXY($x + 2, $y + $signatureHeight + 1 + $nameHeight);
-        $pdf->Cell($width - 4, $fontSize + 1, $license);
+        $pdf->Cell($width - 4, $fontSize + 1, $license, 0, 0, 'C');
     }
 
     private function lineCount(Fpdi $pdf, string $text, float $width): int

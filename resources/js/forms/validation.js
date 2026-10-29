@@ -316,7 +316,7 @@ function getFormInputValidationMessage(field) {
         field.hasAttribute('minlength') &&
         value.length < Number(field.getAttribute('minlength'))
     ) {
-        return `${label} must contain at least ${field.getAttribute('minlength')} characters.`;
+        return field.dataset.minlengthMessage || `${label} must contain at least ${field.getAttribute('minlength')} characters.`;
     }
     if (
         field.name === 'password_confirmation' &&
@@ -336,7 +336,7 @@ function getFormInputValidationMessage(field) {
         field.hasAttribute('maxlength') &&
         value.length > Number(field.getAttribute('maxlength'))
     ) {
-        return `${label} must not exceed ${field.getAttribute('maxlength')} characters.`;
+        return field.dataset.maxlengthMessage || `${label} must not exceed ${field.getAttribute('maxlength')} characters.`;
     }
 
     if (field.validity.patternMismatch) {

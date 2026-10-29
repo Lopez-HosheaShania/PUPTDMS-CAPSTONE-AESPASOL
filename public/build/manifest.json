@@ -1,4 +1,9 @@
 {
+  "_booking-signature-2G5OvK7m.js": {
+    "file": "assets/booking-signature-2G5OvK7m.js",
+    "name": "booking-signature",
+    "isDynamicEntry": true
+  },
   "_jspdf.es.min-MMuTz6kX.js": {
     "file": "assets/jspdf.es.min-MMuTz6kX.js",
     "name": "jspdf.es.min",
@@ -105,7 +110,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-BO40DKGL.css",
+    "file": "assets/app-DJBW2zNA.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -474,7 +479,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-fewbzmEO.js",
+    "file": "assets/app-B_74Ief-.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -489,7 +494,8 @@
       "resources/js/forms/booking-workflow.js",
       "resources/js/ui/skeleton.js",
       "resources/js/records/patient-records-page.js",
-      "resources/js/forms/booking-signature.js",
+      "_booking-signature-2G5OvK7m.js",
+      "resources/js/reports/report-signatory.js",
       "resources/js/ui/search-bar.js",
       "resources/js/ui/show-more.js",
       "resources/js/ui/view-toggle.js",
@@ -517,12 +523,6 @@
       "resources/js/ui/profile-avatar.js"
     ]
   },
-  "resources/js/forms/booking-signature.js": {
-    "file": "assets/booking-signature-ybFhv8Yn.js",
-    "name": "booking-signature",
-    "src": "resources/js/forms/booking-signature.js",
-    "isDynamicEntry": true
-  },
   "resources/js/forms/booking-workflow.js": {
     "file": "assets/booking-workflow-wYn_WgZJ.js",
     "name": "booking-workflow",
@@ -530,7 +530,7 @@
     "isDynamicEntry": true
   },
   "resources/js/forms/validation.js": {
-    "file": "assets/validation-C47oGeTr.js",
+    "file": "assets/validation-DxcLbcNC.js",
     "name": "validation",
     "src": "resources/js/forms/validation.js",
     "isDynamicEntry": true
@@ -580,6 +580,16 @@
     "dynamicImports": [
       "node_modules/html2canvas-pro/dist/html2canvas-pro.esm.js",
       "_jspdf.es.min-MMuTz6kX.js"
+    ]
+  },
+  "resources/js/reports/report-signatory.js": {
+    "file": "assets/report-signatory-gIgLeYOF.js",
+    "name": "report-signatory",
+    "src": "resources/js/reports/report-signatory.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/forms/validation.js",
+      "_booking-signature-2G5OvK7m.js"
     ]
   },
   "resources/js/security.js": {

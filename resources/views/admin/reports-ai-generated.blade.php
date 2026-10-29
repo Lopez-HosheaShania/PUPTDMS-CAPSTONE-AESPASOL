@@ -1154,7 +1154,7 @@
 
 @endsection
 
-@push('scripts')
+@section('scripts')
     @vite('resources/js/reports/pdf-tools.js')
 
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
@@ -1539,4 +1539,4 @@
             updatePreviewSettings();
         });
     </script>
-@endpush
+@endsection

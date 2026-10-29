@@ -14,6 +14,7 @@ use App\Services\ReportSignatory as SignatoryRenderer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use ReflectionMethod;
 use setasign\Fpdi\Fpdi;
@@ -22,6 +23,16 @@ use Tests\TestCase;
 class ReportSignatoryTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->mock(\App\Services\SignatureAiVerifier::class, function ($mock) {
+            $mock->shouldReceive('verify')->andReturn([
+                'accepted' => true, 'valid' => true, 'message' => 'Signature verified and accepted',
+            ])->byDefault();
+        });
+    }
 
     private function user(string $slug = 'dentist'): User
     {
@@ -33,11 +44,322 @@ class ReportSignatoryTest extends TestCase
     private function saveProfile(User $dentist): ReportSignatory
     {
         $this->actingAs($dentist)->from('/dentist/reports')->put(route('reports.signatory.update'), [
-            'signatory_name' => 'Dr. New Dentist', 'license_number' => 'PRC-123456',
+            'signatory_name' => 'New Dentist', 'license_number' => '0012345',
             'signature' => UploadedFile::fake()->image('signature.png', 240, 60),
         ])->assertRedirect('/dentist/reports')->assertSessionHasNoErrors();
 
         return ReportSignatory::where('user_id', $dentist->id)->firstOrFail();
+    }
+
+    public function test_name_and_license_validation_preserves_existing_profile_and_leading_zeros(): void
+    {
+        Storage::fake('local');
+        $profile = $this->saveProfile($this->user());
+        foreach (['Juan123', 'Maria@Santos', '12345'] as $name) {
+            $this->put(route('reports.signatory.update'), ['signatory_name' => $name, 'license_number' => '1234567'])
+                ->assertSessionHasErrorsIn('reportSignatory', ['signatory_name']);
+        }
+        foreach (['', '0', '12345', 'ABC123', '123-456', '12.34', '-123', '1e7', '+123', '12345678', '123456789@', '12345-7890'] as $license) {
+            $this->put(route('reports.signatory.update'), ['signatory_name' => 'Juan Dela Cruz', 'license_number' => $license])
+                ->assertSessionHasErrorsIn('reportSignatory', ['license_number']);
+        }
+        $this->assertSame('New Dentist', $profile->fresh()->name);
+        foreach (['Juan Dela Cruz', 'Maria Santos', 'Angela Jane Raymundo', 'José Peña'] as $name) {
+            $this->put(route('reports.signatory.update'), ['signatory_name' => '  '.$name.'  ', 'license_number' => '0012345'])
+                ->assertSessionHasNoErrors();
+            $this->assertSame($name, $profile->fresh()->name);
+            $this->assertSame('0012345', $profile->fresh()->license_number);
+        }
+        foreach (['123344', '000123', '123456', '1234567', '0012345'] as $license) {
+            $this->put(route('reports.signatory.update'), ['signatory_name' => 'Juan Dela Cruz', 'license_number' => $license])
+                ->assertSessionHasNoErrors();
+            $this->assertSame($license, $profile->fresh()->license_number);
+        }
+        $this->put(route('reports.signatory.update'), ['signatory_name' => 'Juan Dela Cruz', 'license_number' => '12345'])
+            ->assertSessionHasErrorsIn('reportSignatory', [
+                'license_number' => 'License number is incomplete. Please enter at least 6 digits.',
+            ]);
+        $this->put(route('reports.signatory.update'), ['signatory_name' => 'Juan Dela Cruz', 'license_number' => '12345678'])
+            ->assertSessionHasErrorsIn('reportSignatory', [
+                'license_number' => 'License number must not exceed 7 digits.',
+            ]);
+    }
+
+    public function test_ai_rejection_is_enforced_on_preview_and_save_without_replacing_saved_signature(): void
+    {
+        Storage::fake('local');
+        $profile = $this->saveProfile($this->user());
+        $this->mock(\App\Services\SignatureAiVerifier::class, function ($mock) {
+            $mock->shouldReceive('verify')->twice()->andReturn([
+                'accepted' => false, 'reason' => 'The image contains a photo, not a signature.',
+            ]);
+        });
+        $this->postJson(route('reports.signatory.validate-signature'), [
+            'signature' => UploadedFile::fake()->image('photo.png', 240, 120),
+        ])->assertUnprocessable()->assertJsonPath('valid', false);
+        $this->put(route('reports.signatory.update'), [
+            'signatory_name' => 'Juan Dela Cruz', 'license_number' => '1234567',
+            'signature' => UploadedFile::fake()->image('drawn-signature-photo.png', 240, 120),
+        ])->assertSessionHasErrorsIn('reportSignatory', ['signature']);
+        $this->assertSame('New Dentist', $profile->fresh()->name);
+        Storage::disk('local')->assertExists($profile->signature_path);
+        $this->assertCount(1, Storage::disk('local')->allFiles());
+    }
+
+    public function test_drawings_save_and_can_be_retained_without_calling_ai_for_each_signatory_role(): void
+    {
+        Storage::fake('local');
+        $this->mock(\App\Services\SignatureAiVerifier::class, function ($mock) {
+            $mock->shouldNotReceive('verify');
+        });
+        foreach (['dentist', 'dental_aide', 'dental_intern'] as $role) {
+            $user = $this->user($role);
+            $this->actingAs($user)->put(route('reports.signatory.update'), [
+                'signatory_name' => 'Juan Dela Cruz', 'license_number' => '123344',
+                'signature_source' => 'drawn',
+                'signature' => UploadedFile::fake()->image('drawn-signature-123.png', 100, 50),
+            ])->assertSessionHasNoErrors();
+            $profile = ReportSignatory::where('user_id', $user->id)->firstOrFail();
+            $this->assertStringStartsWith('report-signatures/'.$user->id.'/drawn/', $profile->signature_path);
+            Storage::disk('local')->assertExists($profile->signature_path);
+
+            $this->put(route('reports.signatory.update'), [
+                'signatory_name' => 'Updated Name', 'license_number' => '123344',
+            ])->assertSessionHasNoErrors();
+            $this->assertSame($profile->signature_path, $profile->fresh()->signature_path);
+            $this->assertSame('Updated Name', $profile->fresh()->name);
+        }
+    }
+
+    public function test_drawing_replaces_saved_upload_and_reopened_modal_shows_the_new_signature(): void
+    {
+        Storage::fake('local');
+        $user = $this->user();
+        $profile = $this->saveProfile($user);
+        $oldPath = $profile->signature_path;
+        $oldPreview = $profile->signatureDataUri();
+        $this->mock(\App\Services\SignatureAiVerifier::class, function ($mock) {
+            $mock->shouldNotReceive('verify');
+        });
+        $this->from('/dentist/reports')->put(route('reports.signatory.update'), [
+            'signatory_name' => 'Juan Dela Cruz', 'license_number' => '123344',
+            'signature_source' => 'drawn',
+            'signature' => UploadedFile::fake()->image('drawn-signature-123.png', 300, 100),
+        ])->assertRedirect('/dentist/reports')->assertSessionHasNoErrors()
+            ->assertSessionHas('report_signatory_saved');
+        $profile->refresh();
+        $this->assertNotSame($oldPath, $profile->signature_path);
+        $this->assertStringStartsWith('report-signatures/'.$user->id.'/drawn/', $profile->signature_path);
+        Storage::disk('local')->assertMissing($oldPath);
+        Storage::disk('local')->assertExists($profile->signature_path);
+        $html = Blade::render('@include("shared.report-signatory")');
+        $this->assertStringContainsString($profile->signatureDataUri(), $html);
+        $this->assertStringNotContainsString($oldPreview, $html);
+        $this->assertStringContainsString('data-signature-drawn-prefix="drawn-signature"', $html);
+    }
+
+    public function test_upload_replacing_a_drawing_still_requires_ai_and_preserves_drawing_when_rejected(): void
+    {
+        Storage::fake('local');
+        $user = $this->user();
+        $this->actingAs($user)->put(route('reports.signatory.update'), [
+            'signatory_name' => 'Juan Dela Cruz', 'license_number' => '123344',
+            'signature_source' => 'drawn',
+            'signature' => UploadedFile::fake()->image('drawn-signature-123.png', 240, 120),
+        ])->assertSessionHasNoErrors();
+        $profile = ReportSignatory::where('user_id', $user->id)->firstOrFail();
+        $this->mock(\App\Services\SignatureAiVerifier::class, function ($mock) {
+            $mock->shouldReceive('verify')->once()->andReturn([
+                'accepted' => false, 'reason' => 'The image contains a photo, not a signature.',
+            ]);
+        });
+        $this->put(route('reports.signatory.update'), [
+            'signatory_name' => 'Juan Dela Cruz', 'license_number' => '123344',
+            'signature_source' => 'upload',
+            'signature' => UploadedFile::fake()->image('photo.png', 240, 120),
+        ])->assertSessionHasErrorsIn('reportSignatory', ['signature']);
+        $this->assertSame($profile->signature_path, $profile->fresh()->signature_path);
+        Storage::disk('local')->assertExists($profile->signature_path);
+        $this->assertCount(1, Storage::disk('local')->allFiles());
+    }
+
+    public function test_signature_preview_checks_permissions_files_dimensions_and_ai_result(): void
+    {
+        $url = route('reports.signatory.validate-signature');
+        $this->postJson($url)->assertUnauthorized();
+        $this->actingAs($this->user('admin'))->postJson($url)->assertForbidden();
+        $this->actingAs($this->user());
+        foreach ([
+            UploadedFile::fake()->create('signature.txt', 1, 'text/plain'),
+            UploadedFile::fake()->image('oversize.png', 240, 60)->size(2049),
+            UploadedFile::fake()->image('tiny.png', 10, 10),
+            UploadedFile::fake()->image('wide.png', 4001, 60),
+        ] as $file) {
+            $this->postJson($url, ['signature' => $file])->assertUnprocessable()->assertJsonValidationErrors('signature');
+        }
+        $this->postJson($url, ['signature' => UploadedFile::fake()->image('signature.png', 240, 60)])
+            ->assertOk()->assertJsonPath('valid', true)->assertJsonPath('accepted', true);
+    }
+
+    private function useRealSignatureVerifier(bool $available = true): void
+    {
+        $manager = \Mockery::mock(\App\Services\AiServiceManager::class);
+        $manager->shouldReceive('shouldUse')->with('signature')->andReturn($available);
+        $manager->shouldReceive('recordSuccess', 'recordFailure', 'recordFallback')->zeroOrMoreTimes();
+        $this->instance(\App\Services\SignatureAiVerifier::class, new \App\Services\SignatureAiVerifier($manager));
+        config(['services.openai.api_key' => 'test-key', 'services.signature_ai.threshold' => 0.8]);
+        Http::preventStrayRequests();
+    }
+
+    public function test_reports_apply_the_real_booking_ai_conditions_to_preview_and_save(): void
+    {
+        Storage::fake('local');
+        $this->actingAs($this->user());
+        $this->useRealSignatureVerifier();
+        $classification = [];
+        Http::fake(['api.openai.com/*' => function () use (&$classification) {
+            return Http::response(['output_text' => json_encode($classification)]);
+        }]);
+        foreach ([
+            ['photo', 0.99, true, false],
+            ['screenshot', 0.99, true, false],
+            ['typed_text', 0.99, true, false],
+            ['signature', 0.79, true, false],
+            ['handwritten_signature', 0.98, false, true],
+        ] as [$type, $confidence, $aiBoolean, $accepted]) {
+            $classification = [
+                'detected_type' => $type, 'confidence' => $confidence,
+                'is_signature' => $aiBoolean, 'reason' => 'AI classification: '.$type,
+            ];
+            $this->postJson(route('reports.signatory.validate-signature'), [
+                'signature' => UploadedFile::fake()->image('upload.png', 240, 120),
+            ])->assertStatus($accepted ? 200 : 422)->assertJsonPath('accepted', $accepted);
+            $response = $this->put(route('reports.signatory.update'), [
+                'signatory_name' => 'Juan Dela Cruz', 'license_number' => '0012345',
+                'signature' => UploadedFile::fake()->image('upload.png', 240, 120),
+            ]);
+            if ($accepted) {
+                $response->assertSessionHasNoErrors();
+                $this->assertDatabaseCount('report_signatories', 1);
+            } else {
+                $response->assertSessionHasErrorsIn('reportSignatory', ['signature']);
+                $this->assertDatabaseCount('report_signatories', 0);
+                $this->assertCount(0, Storage::disk('local')->allFiles());
+            }
+        }
+    }
+
+    public function test_exhausted_api_credits_cannot_approve_a_report_signature(): void
+    {
+        Storage::fake('local');
+        $this->actingAs($this->user());
+        $this->useRealSignatureVerifier();
+        Http::fake(['api.openai.com/*' => Http::response([
+            'error' => ['code' => 'credit_balance_exhausted', 'type' => 'insufficient_quota'],
+        ], 429)]);
+        $this->postJson(route('reports.signatory.validate-signature'), [
+            'signature' => UploadedFile::fake()->image('poster.png', 240, 120),
+        ])->assertUnprocessable()->assertJsonPath('accepted', false)
+            ->assertJsonPath('review_required', true);
+        $this->put(route('reports.signatory.update'), [
+            'signatory_name' => 'Juan Dela Cruz', 'license_number' => '1234567',
+            'signature' => UploadedFile::fake()->image('poster.png', 240, 120),
+        ])->assertSessionHasErrorsIn('reportSignatory', ['signature']);
+        $this->assertDatabaseCount('report_signatories', 0);
+        $this->assertCount(0, Storage::disk('local')->allFiles());
+    }
+
+    public function test_saved_legacy_image_is_rechecked_and_offline_ai_cannot_approve_it(): void
+    {
+        Storage::fake('local');
+        $profile = $this->saveProfile($this->user());
+        $this->useRealSignatureVerifier(false);
+        $this->put(route('reports.signatory.update'), [
+            'signatory_name' => 'Updated Name', 'license_number' => '1234567',
+        ])->assertSessionHasErrorsIn('reportSignatory', ['signature']);
+        $this->assertSame('New Dentist', $profile->fresh()->name);
+        Storage::disk('local')->assertExists($profile->signature_path);
+        Http::assertNothingSent();
+
+        $this->useRealSignatureVerifier();
+        Http::fake(['api.openai.com/*' => Http::response(['output_text' => json_encode([
+            'is_signature' => false, 'confidence' => 0.99,
+            'detected_type' => 'typed_text', 'reason' => 'The saved image is a poster.',
+        ])])]);
+        $this->put(route('reports.signatory.update'), [
+            'signatory_name' => 'Updated Name', 'license_number' => '1234567',
+        ])->assertSessionHasErrorsIn('reportSignatory', ['signature']);
+        $this->assertSame('New Dentist', $profile->fresh()->name);
+        Storage::disk('local')->assertExists($profile->signature_path);
+        Http::assertSentCount(1);
+    }
+
+    public function test_dentist_and_dental_aide_signatories_share_name_and_ai_validation(): void
+    {
+        Storage::fake('local');
+        $this->useRealSignatureVerifier();
+        $type = 'signature';
+        $status = 200;
+        Http::fake(['api.openai.com/*' => function () use (&$type, &$status) {
+            return Http::response($status === 200 ? ['output_text' => json_encode([
+                'is_signature' => $type === 'signature', 'confidence' => 0.99,
+                'detected_type' => $type, 'reason' => 'AI classification: '.$type,
+            ])] : ['error' => ['code' => 'credit_balance_exhausted']], $status);
+        }]);
+
+        foreach (['dentist', 'dentist_role', 'head_dentist', 'dental_aide', 'dental-aide', 'dental_aide_role', 'dental_intern', 'dental-intern'] as $role) {
+            $user = $this->user($role);
+            $this->actingAs($user);
+            $html = Blade::render('@include("shared.report-signatory")', ['errors' => new \Illuminate\Support\ViewErrorBag]);
+            $this->assertStringContainsString('data-global-validation', $html);
+            $this->assertStringContainsString('data-report-signature-drawing', $html);
+            $this->assertStringContainsString('data-signature-drawn-prefix="drawn-signature"', $html);
+            $this->assertStringContainsString('id="reportDrawnSignature" data-signature-input', $html);
+            $this->assertStringContainsString('data-signature-undo', $html);
+            $this->assertStringNotContainsString('name="patient_signature"', $html);
+            $isDentist = \App\Services\AssignedDentistService::isDentist($user);
+            if ($isDentist) {
+                $this->assertStringContainsString('pattern="[0-9]{6,7}"', $html);
+                $this->assertStringContainsString('minlength="6" maxlength="7"', $html);
+            } else {
+                $this->assertStringNotContainsString('name="license_number"', $html);
+            }
+            $this->put(route('reports.signatory.update'), [
+                'signatory_name' => 'Juan123', 'license_number' => '0012345',
+            ])->assertSessionHasErrorsIn('reportSignatory', ['signatory_name']);
+
+            foreach ([['photo', 200, false], ['signature', 429, false], ['signature', 200, true]] as [$type, $status, $accepted]) {
+                $this->postJson(route('reports.signatory.validate-signature'), [
+                    'signature' => UploadedFile::fake()->image('upload.png', 240, 120),
+                ])->assertStatus($accepted ? 200 : 422)->assertJsonPath('accepted', $accepted);
+                $response = $this->put(route('reports.signatory.update'), [
+                    'signatory_name' => 'Juan Dela Cruz', 'license_number' => '0012345',
+                    'signature' => UploadedFile::fake()->image('upload.png', 240, 120),
+                ]);
+                if ($accepted) {
+                    $response->assertSessionHasNoErrors();
+                    $profile = ReportSignatory::where('user_id', $user->id)->firstOrFail();
+                    $this->assertSame($isDentist ? '0012345' : null, $profile->license_number);
+                } else {
+                    $response->assertSessionHasErrorsIn('reportSignatory', ['signature']);
+                    $this->assertNull(ReportSignatory::where('user_id', $user->id)->first());
+                }
+            }
+        }
+    }
+
+    public function test_booking_signature_component_keeps_its_default_upload_and_drawing_contract(): void
+    {
+        \Illuminate\Support\Facades\View::share('errors', new \Illuminate\Support\ViewErrorBag);
+        $html = Blade::render('<x-booking.signature />');
+        $this->assertStringContainsString('name="patient_signature"', $html);
+        $this->assertStringContainsString('id="patient_signature" data-signature-input', $html);
+        $this->assertStringContainsString('name="signature_source"', $html);
+        $this->assertStringContainsString('id="signature_result_box"', $html);
+        $this->assertStringContainsString(route('book.appointment.validate-signature'), $html);
+        $this->assertStringContainsString('data-signature-use-drawn', $html);
+        $drawOnly = Blade::render('<x-booking.signature mode="draw-only" />');
+        $this->assertStringContainsString('data-signature-drawn-prefix="walk-in-signature"', $drawOnly);
     }
 
     public function test_legacy_template_migration_replaces_embedded_signatories_and_preserves_custom_content(): void
@@ -61,7 +383,7 @@ class ReportSignatoryTest extends TestCase
         Storage::fake('local');
         $this->saveProfile($this->user());
         $html = app(DocumentTemplateRenderer::class)->render($template);
-        $this->assertStringContainsString('Dr. New Dentist', $html);
+        $this->assertStringContainsString('New Dentist', $html);
         $this->assertStringContainsString('data:image/png;base64,', $html);
         $this->assertStringNotContainsString('Nelson', $html);
     }
@@ -75,9 +397,9 @@ class ReportSignatoryTest extends TestCase
         $this->assertSame('Account Name', $dentist->fresh()->name);
         $html = Blade::render('@include("shared.report-signatory")');
         $this->assertStringContainsString('data:image/png;base64,', $html);
-        $this->assertStringContainsString('PRC-123456', $html);
+        $this->assertStringContainsString('0012345', $html);
 
-        $this->put(route('reports.signatory.update'), ['signatory_name' => 'Updated Name', 'license_number' => '0099'])
+        $this->put(route('reports.signatory.update'), ['signatory_name' => 'Updated Name', 'license_number' => '000099'])
             ->assertSessionHasNoErrors();
         $this->assertSame($profile->signature_path, $profile->fresh()->signature_path);
         $this->saveProfile($dentist);
@@ -91,10 +413,10 @@ class ReportSignatoryTest extends TestCase
         $profile = $this->saveProfile($owner);
         $other = $this->user();
         $this->actingAs($other)->put(route('reports.signatory.update'), [
-            'user_id' => $owner->id, 'signatory_name' => 'Someone Else', 'license_number' => '777',
-            'signature' => UploadedFile::fake()->image('signature.jpg'),
+            'user_id' => $owner->id, 'signatory_name' => 'Someone Else', 'license_number' => '0000777',
+            'signature' => UploadedFile::fake()->image('signature.jpg', 240, 60),
         ])->assertSessionHasNoErrors();
-        $this->assertSame('Dr. New Dentist', $profile->fresh()->name);
+        $this->assertSame('New Dentist', $profile->fresh()->name);
         $this->assertDatabaseHas('report_signatories', ['user_id' => $other->id, 'name' => 'Someone Else']);
         $other->update(['status' => 'inactive']);
         $this->put(route('reports.signatory.update'), [])->assertForbidden();
@@ -111,18 +433,18 @@ class ReportSignatoryTest extends TestCase
         $html = Blade::render('@include("shared.report-signatory")');
         $this->assertStringContainsString('Dental Aide name', $html);
         $this->assertStringNotContainsString('name="license_number"', $html);
-        $this->assertStringNotContainsString('Dr. New Dentist', $html);
+        $this->assertStringNotContainsString('New Dentist', $html);
         $this->put(route('reports.signatory.update'), ['signatory_name' => 'Aide Signatory'])
             ->assertSessionHasErrorsIn('reportSignatory', ['signature']);
 
         $this->put(route('reports.signatory.update'), [
             'user_id' => $dentist->id, 'signatory_name' => 'Aide Signatory',
-            'signature' => UploadedFile::fake()->image('aide.png', 180, 50),
+            'signature' => UploadedFile::fake()->image('aide.png', 180, 60),
             'license_number' => 'Ignore this injected license',
         ])->assertSessionHasNoErrors()->assertSessionHas('report_signatory_saved');
         $profile = ReportSignatory::where('user_id', $aide->id)->firstOrFail();
         $this->assertNull($profile->license_number);
-        $this->assertSame('Dr. New Dentist', $dentistProfile->fresh()->name);
+        $this->assertSame('New Dentist', $dentistProfile->fresh()->name);
         $this->assertSame($profile->id, app(SignatoryRenderer::class)->ownProfile()?->id);
         $this->assertSame($dentistProfile->id, app(SignatoryRenderer::class)->currentProfile()?->id);
         $this->assertStringContainsString('Aide Signatory', Blade::render('@include("shared.report-signatory")'));
@@ -151,14 +473,14 @@ class ReportSignatoryTest extends TestCase
 
             $this->put(route('reports.signatory.update'), [
                 'signatory_name' => 'Intern Report Preparer',
-                'signature' => UploadedFile::fake()->image('intern.png', 170, 45),
+                'signature' => UploadedFile::fake()->image('intern.png', 170, 60),
             ])->assertSessionHasNoErrors();
             $profile = ReportSignatory::where('user_id', $intern->id)->firstOrFail();
             $this->assertNull($profile->license_number);
             $this->assertSame($profile->id, app(SignatoryRenderer::class)->currentPreparerProfile()?->id);
             $this->assertSame($dentistProfile->id, app(SignatoryRenderer::class)->currentProfile()?->id);
             $template = new DocumentTemplate(['document_type' => 'monthly_report', 'content' => '{{prepared_by}}|{{prepared_by_role}}|{{dentist_name}}']);
-            $this->assertSame('Intern Report Preparer|Dental Intern|Dr. New Dentist', app(DocumentTemplateRenderer::class)->render($template));
+            $this->assertSame('Intern Report Preparer|Dental Intern|New Dentist', app(DocumentTemplateRenderer::class)->render($template));
 
             $pdf = new Fpdi('P', 'pt', 'A3');
             $pdf->SetAutoPageBreak(false);
@@ -168,7 +490,7 @@ class ReportSignatoryTest extends TestCase
             $content = $pdf->Output('S');
             $this->assertStringContainsString('(Intern Report Preparer)', $content);
             $this->assertStringContainsString('(Dental Intern)', $content);
-            $this->assertStringContainsString('(Dr. New Dentist)', $content);
+            $this->assertStringContainsString('(New Dentist)', $content);
             $this->assertStringNotContainsString('(Dental Aide)', $content);
         }
     }
@@ -180,7 +502,7 @@ class ReportSignatoryTest extends TestCase
         $dentistProfile = $this->saveProfile($dentist);
         $aide = $this->user('dental_aide');
         $this->actingAs($aide)->put(route('reports.signatory.update'), [
-            'signatory_name' => 'Aide Report Author', 'signature' => UploadedFile::fake()->image('aide.png', 180, 50),
+            'signatory_name' => 'Aide Report Author', 'signature' => UploadedFile::fake()->image('aide.png', 180, 60),
         ])->assertSessionHasNoErrors();
         $aideProfile = ReportSignatory::where('user_id', $aide->id)->firstOrFail();
         $template = new DocumentTemplate([
@@ -193,9 +515,9 @@ class ReportSignatoryTest extends TestCase
             $this->assertSame('Aide Report Author', $parts[0]);
             $this->assertSame('Dental Aide', $parts[1]);
             $this->assertSame($aideProfile->signatureDataUri(), $parts[2]);
-            $this->assertSame('Dr. New Dentist', $parts[3]);
+            $this->assertSame('New Dentist', $parts[3]);
             $this->assertSame($dentistProfile->signatureDataUri(), $parts[4]);
-            $this->assertSame('PRC-123456', $parts[5]);
+            $this->assertSame('0012345', $parts[5]);
 
             foreach ([
                 'gad_report' => 'gad-accomplishment-template.pdf',
@@ -214,8 +536,8 @@ class ReportSignatoryTest extends TestCase
                 $content = $pdf->Output('S');
                 $this->assertStringContainsString('(Aide Report Author)', $content, $type);
                 $this->assertStringContainsString('(Dental Aide)', $content, $type);
-                $this->assertStringContainsString('(Dr. New Dentist)', $content, $type);
-                $this->assertStringContainsString('PRC-123456', $content, $type);
+                $this->assertStringContainsString('(New Dentist)', $content, $type);
+                $this->assertStringContainsString('0012345', $content, $type);
                 $this->assertGreaterThanOrEqual(2, substr_count($content, '/Subtype /Image'), $type);
             }
         }
@@ -235,11 +557,11 @@ class ReportSignatoryTest extends TestCase
         ]);
         $viewer = $this->user();
         $this->saveProfile($viewer);
-        $this->put(route('reports.signatory.update'), ['signatory_name' => 'Viewer Signatory', 'license_number' => 'OTHER'])
+        $this->put(route('reports.signatory.update'), ['signatory_name' => 'Viewer Signatory', 'license_number' => '9999999'])
             ->assertSessionHasNoErrors();
         $template = new DocumentTemplate(['document_type' => 'dental_clearance', 'content' => '{{dentist_name}}|{{dentist_signature}}|{{lic_no}}']);
         foreach ([['dentist' => $author], ['appointment' => $appointment]] as $context) {
-            $this->assertSame('Dr. New Dentist|'.$profile->signatureDataUri().'|PRC-123456', app(DocumentTemplateRenderer::class)->render($template, $context));
+            $this->assertSame('New Dentist|'.$profile->signatureDataUri().'|0012345', app(DocumentTemplateRenderer::class)->render($template, $context));
         }
     }
 
@@ -253,7 +575,7 @@ class ReportSignatoryTest extends TestCase
         imagepng($image, $file->getRealPath());
         imagedestroy($image);
         $this->actingAs($dentist)->put(route('reports.signatory.update'), [
-            'signatory_name' => 'PNG Signatory', 'license_number' => '123', 'signature' => $file,
+            'signatory_name' => 'PNG Signatory', 'license_number' => '0000123', 'signature' => $file,
         ])->assertSessionHasNoErrors();
         $pdf = new Fpdi('P', 'pt');
         $pdf->SetCompression(false);
@@ -305,14 +627,14 @@ class ReportSignatoryTest extends TestCase
             $pdf->useTemplate($page);
             app(SignatoryRenderer::class)->draw($pdf, $type, [(object) ['dentist_name' => 'Historical Provider']]);
             $content = $pdf->Output('S');
-            $this->assertStringContainsString('Dr. New Dentist', $content, $type);
-            $this->assertStringContainsString('PRC-123456', $content, $type);
+            $this->assertStringContainsString('New Dentist', $content, $type);
+            $this->assertStringContainsString('0012345', $content, $type);
             $this->assertStringContainsString('/Subtype /Image', $content, $type);
             $this->assertStringNotContainsString('(Historical Provider)', $content, $type);
         }
         $template = new DocumentTemplate(['document_type' => 'monthly_report', 'content' => '{{dentist_name}}|{{lic_no}}|{{dentist_signature}}']);
         $html = app(DocumentTemplateRenderer::class)->render($template);
-        $this->assertStringStartsWith('Dr. New Dentist|PRC-123456|data:image/png;base64,', $html);
+        $this->assertStringStartsWith('New Dentist|0012345|data:image/png;base64,', $html);
     }
 
     public function test_clearance_reprint_uses_approvers_saved_signature_and_license(): void
@@ -333,8 +655,8 @@ class ReportSignatoryTest extends TestCase
             $pdf->AddPage();
             (new ReflectionMethod(DentistReportController::class, $method))->invoke(app(DentistReportController::class), $pdf, $request);
             $content = $pdf->Output('S');
-            $this->assertStringContainsString('Dr. New Dentist', $content);
-            $this->assertStringContainsString('PRC-123456', $content);
+            $this->assertStringContainsString('New Dentist', $content);
+            $this->assertStringContainsString('0012345', $content);
             $this->assertStringContainsString('/Subtype /Image', $content);
         }
     }
