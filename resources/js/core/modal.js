@@ -37,16 +37,33 @@ function getFocusableElements(modal) {
 }
 
 function focusModal(modal) {
+    if (
+        modal.hasAttribute(
+            'data-modal-no-initial-focus'
+        )
+    ) {
+        return;
+    }
+
     const target =
-        modal.querySelector('[data-modal-initial-focus]') ||
+        modal.querySelector(
+            '[data-modal-initial-focus]'
+        ) ||
         getFocusableElements(modal)[0] ||
         modal;
 
-    if (target === modal && !modal.hasAttribute('tabindex')) {
+    if (
+        target === modal &&
+        !modal.hasAttribute(
+            'tabindex'
+        )
+    ) {
         modal.tabIndex = -1;
     }
 
-    target.focus({ preventScroll: true });
+    target.focus({
+        preventScroll: true
+    });
 }
 
 function syncModalBackground() {

@@ -157,9 +157,41 @@
 
     border-radius: 9px;
 
-    background: var(--status-default-bg);
-    border: 1px solid var(--status-default-border);
-    color: var(--status-default-text);
+    background:
+        var(--action-bg,
+            var(--status-default-bg));
+
+    border:
+        1px solid var(--action-border,
+            var(--status-default-border));
+
+    color:
+        var(--action-color,
+            var(--status-default-text));
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .15s ease;
+}
+
+.system-logs-page .sl-overflow-item:hover .sl-overflow-item-icon,
+.system-logs-page .sl-overflow-item:focus-visible .sl-overflow-item-icon {
+    background:
+        var(--action-hover-bg,
+            var(--status-default-solid));
+
+    border-color:
+        var(--action-hover-border,
+            var(--status-default-solid));
+
+    color:
+        var(--action-hover-color,
+            var(--text-on-brand));
+
+    transform:
+        translateY(-1px);
 }
 
 .system-logs-page .sl-overflow-item-icon i {
@@ -429,69 +461,14 @@
     width: 12px;
     min-width: 12px;
     height: 12px;
-
     color: currentColor;
-
     font-size: .68rem;
     line-height: 1;
-
     transform-origin: center;
-
-    animation: sl-error-alert-pulse 1.05s ease-in-out infinite;
-
     filter:
         drop-shadow(0 0 5px color-mix(in srgb,
                 var(--status-failed-solid) 36%,
                 transparent));
-}
-
-@keyframes sl-error-alert-pulse {
-
-    0%,
-    100% {
-        transform: scale(1);
-        opacity: 1;
-
-        filter:
-            drop-shadow(0 0 4px color-mix(in srgb,
-                    var(--status-failed-solid) 28%,
-                    transparent));
-    }
-
-    50% {
-        transform: scale(1.16);
-        opacity: .86;
-
-        filter:
-            drop-shadow(0 0 10px color-mix(in srgb,
-                    var(--status-failed-solid) 52%,
-                    transparent));
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .sl-action-alert {
-        animation: none;
-    }
-}
-
-.sl-status-count {
-    min-width: 20px;
-    height: 20px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 0 6px;
-    border-radius: 999px;
-
-    background:
-        color-mix(in srgb,
-            currentColor 12%,
-            transparent);
-
-    font-size: .62rem;
 }
 
 .system-logs-page .page-banner,
@@ -628,6 +605,69 @@
 
 #slExportModal .modal-ft .ui-btn i {
     font-size: 0.75rem;
+}
+
+.system-logs-page #slTable .sl-log-detail-cell {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    white-space: normal;
+
+    overflow: hidden;
+}
+
+.system-logs-page #slTable .sl-log-detail-box {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    align-items: flex-start;
+}
+
+.system-logs-page #slTable .sl-log-detail-box .global-info-copy {
+    min-width: 0;
+
+    flex: 1 1 auto;
+}
+
+.system-logs-page #slTable .sl-log-detail-value {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.system-logs-page #slGridView [data-system-log-description-row] {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: .25rem;
+
+    width: 100%;
+    min-width: 0;
+}
+
+.system-logs-page #slGridView [data-system-log-description-row] .table-record-value {
+    width: 100%;
+    min-width: 0;
+
+    justify-content: flex-start;
+
+    text-align: left;
+}
+
+.system-logs-page #slGridView [data-system-log-description-row] .sl-desc {
+    display: block;
+
+    width: 100%;
+    max-width: none;
+    min-width: 0;
 }
 
 @media (max-width: 1280px) {

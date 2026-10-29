@@ -51,19 +51,10 @@
                 </div>
             </div>
         @else
-            <div class="page-banner">
+            <div class="page-banner mb-4">
                 <div class="page-banner-inner">
                     <div>
                         <h1 class="page-title">Service Types</h1>
-                    </div>
-
-                    <div class="admin-banner-actions">
-                        <span class="admin-banner-pill" id="serviceActiveCountPill">
-                            Active Services:
-                            <span data-service-count>
-                                {{ $services->where('is_active_for_booking', true)->count() }}
-                            </span>
-                        </span>
                     </div>
                 </div>
             </div>

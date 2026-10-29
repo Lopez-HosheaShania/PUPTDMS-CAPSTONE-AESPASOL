@@ -159,13 +159,16 @@ function positionCustomSelectMenu(
     menu.style.transition =
         'none';
 
+    const naturalHeight =
+        Math.max(
+            menu.scrollHeight,
+            96
+        );
+
     const preferredHeight =
         Math.min(
-            Math.max(
-                menu.scrollHeight,
-                96
-            ),
-            260
+            naturalHeight,
+            360
         );
 
     const shouldOpenUp =
@@ -186,7 +189,7 @@ function positionCustomSelectMenu(
         Math.max(
             96,
             Math.min(
-                260,
+                360,
                 availableSpace
             )
         );
@@ -412,26 +415,31 @@ export function initCustomSelects(root = document) {
     });
 }
 
-document.addEventListener(
-    'scroll',
-    event => {
-        if (
-            event.target instanceof Element &&
-            event.target.closest(
-                '.filter-drawer-body'
-            )
-        ) {
-            closeCustomSelects();
-        }
-    },
+document.addEventListener('scroll', event => {
+    if (
+        event.target instanceof Element &&
+        event.target.closest(
+            '.filter-drawer-body'
+        )
+    ) {
+        closeCustomSelects();
+    }
+},
     true
 );
 
-document.addEventListener('click', event => {
-    if (event.target.closest('.custom-select')) return;
+document.addEventListener('pointerdown', event => {
+    if (
+        event.target.closest?.(
+            '.custom-select'
+        )
+    ) {
+        return;
+    }
 
     closeCustomSelects();
-});
+}
+);
 
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
@@ -439,11 +447,8 @@ document.addEventListener('keydown', event => {
     }
 });
 
-window.initCustomSelects =
-    initCustomSelects;
-
-window.syncCustomSelect =
-    syncCustomSelect;
+window.initCustomSelects = initCustomSelects;
+window.syncCustomSelect = syncCustomSelect;
 
 function bootCustomSelects() {
     initCustomSelects(

@@ -677,11 +677,11 @@
 
             <div class="modal-ft">
 
-                <button type="button" class="btn-close-modal" data-ui-click="action-a2822b6ec471">
+                <button type="button" class="ui-btn ui-btn-secondary" data-ui-click="action-a2822b6ec471">
                     Cancel
                 </button>
 
-                <button type="button" class="modal-btn-primary" data-ui-click="action-573f9113de2d">
+                <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-573f9113de2d">
                     <i class="fa-regular fa-eye" aria-hidden="true"></i>
 
                     <span>Show Information</span>

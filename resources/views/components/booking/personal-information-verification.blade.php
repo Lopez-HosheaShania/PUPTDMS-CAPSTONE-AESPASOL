@@ -71,12 +71,12 @@
 
         <footer class="modal-ft">
 
-            <button id="personalInformationVerificationClose" type="button" class="btn-close-modal"
+            <button id="personalInformationVerificationClose" type="button" class="ui-btn ui-btn-secondary"
                 data-modal-close="personalInformationVerificationModal">
                 Close
             </button>
 
-            <a id="personalInformationVerificationGuisis" class="modal-btn-primary"
+            <a id="personalInformationVerificationGuisis" class="ui-btn ui-btn-primary"
                 href="https://www.guisis.dllbsit2027.com/" target="_blank" rel="noopener noreferrer"
                 aria-describedby="personalInformationVerificationExternalNote">
                 <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>

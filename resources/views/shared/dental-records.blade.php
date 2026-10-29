@@ -706,7 +706,7 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="btn-close-modal" data-ui-click="action-e83e40f120f5">
+                <button type="button" class="ui-btn ui-btn-secondary" data-ui-click="action-e83e40f120f5">
                     Close
                 </button>
             </div>

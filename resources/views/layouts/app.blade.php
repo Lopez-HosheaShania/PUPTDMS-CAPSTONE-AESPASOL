@@ -231,55 +231,54 @@
 
     @include('partials.global-toast')
 
-    <div id="logoutConfirmModal" class="ui-modal logout-confirm-modal" role="dialog" aria-modal="true"
-        aria-labelledby="logoutConfirmTitle" aria-describedby="logoutConfirmDescription" aria-hidden="true">
-        <div class="ui-modal-card modal-sm logout-confirm-card">
+    <div id="logoutConfirmModal" class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle"
+        aria-describedby="logoutConfirmDescription" aria-hidden="true">
+
+        <div class="ui-modal-card modal-sm">
+
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon logout-confirm-icon">
+
+                    <div class="modal-icon">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </div>
 
                     <div class="modal-copy">
                         <h2 id="logoutConfirmTitle" class="modal-title">
-                            Confirm Logout
+                            Are you sure you want to log out?
                         </h2>
-
-                        <p class="modal-subtitle">
-                            You are about to end your current session.
-                        </p>
                     </div>
+
                 </div>
             </div>
 
             <div class="modal-bd">
-                <div class="logout-confirm-message">
-                    <div class="logout-confirm-message-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
+                <div>
 
                     <div>
-                        <p id="logoutConfirmDescription">
-                            Are you sure you want to log out?
+                        <p id="logoutConfirmDescription" class="confirmed-modal-message">
+                            You will need to sign in again to continue.
                         </p>
-
-                        <span>
-                            You will need to sign in again to access your account.
-                        </span>
                     </div>
+
                 </div>
             </div>
 
-            <div class="modal-ft logout-confirm-actions">
-                <button type="button" class="btn-close-modal" data-logout-modal-close>
-                    Stay Signed In
-                </button>
+            <div class="modal-ft">
+                <div class="modal-actions">
 
-                <button type="button" id="confirmLogoutBtn" class="modal-btn-confirm danger">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Log Out</span>
-                </button>
+                    <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="logoutConfirmModal">
+                        Stay Logged In
+                    </button>
+
+                    <button type="button" id="confirmLogoutBtn" class="ui-btn ui-btn-primary" data-modal-initial-focus>
+                        <span>Log Out</span>
+
+                    </button>
+
+                </div>
             </div>
+
         </div>
     </div>
 
@@ -349,7 +348,8 @@
     </div>
 
     @if (!$hideFloatingActions)
-        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right"
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}"
+            src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right"
             data-offset="{{ $accessibilityOffset }}" defer></script>
 
         @include('partials.chatbot')

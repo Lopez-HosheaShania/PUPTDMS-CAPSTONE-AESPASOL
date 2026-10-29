@@ -431,7 +431,7 @@ textarea.form-input-custom.global-form-textarea {
 }
 
 .required-mark {
-    color: #dc2626;
+    color: var(--crimson-1);
     margin-left: 2px;
 }
 

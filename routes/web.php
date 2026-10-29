@@ -407,6 +407,10 @@ Route::prefix('admin')
             ->middleware('permission:manage_audit_trail')
             ->name('admin.session_management.index');
 
+        Route::get('/session-management/check', [AdminSessionManagementController::class, 'checkLatest'])
+            ->middleware('permission:manage_audit_trail')
+            ->name('admin.session_management.check');
+
         Route::delete('/session-management/sessions/{reference}', [AdminSessionManagementController::class, 'destroySession'])
             ->middleware('permission:manage_audit_trail')
             ->name('admin.session_management.destroy_session');
@@ -775,7 +779,6 @@ Route::prefix('admin')
         Route::post('/dentist-transitions/{transition}/end-temporary', [DentistTransitionController::class, 'endTemporary'])
             ->middleware('permission:finalize_dentist_transitions')
             ->name('admin.dentist-transitions.end-temporary');
-
     });
 
 Route::prefix('admin')

@@ -536,26 +536,6 @@ window.closeFilterDrawer =
         );
     };
 
-window.openFilterPanel =
-    async function (...args) {
-        const module =
-            await loadFilterDrawerModule();
-
-        return module.openFilterPanel(
-            ...args
-        );
-    };
-
-window.closeFilterPanel =
-    async function (...args) {
-        const module =
-            await loadFilterDrawerModule();
-
-        return module.closeFilterPanel(
-            ...args
-        );
-    };
-
 window.initGlobalFilterSelects =
     async function (...args) {
         const module =
@@ -793,6 +773,7 @@ if (
     hasAny(
         [
             'form[data-global-validation]',
+            '[data-global-field]',
             '[data-char-limit]',
             '[data-global-number-stepper]'
         ].join(',')
@@ -1063,6 +1044,7 @@ document.addEventListener(
         if (
             hasAny(
                 [
+                    '[data-global-field]',
                     '[data-char-limit]',
                     'form[data-global-validation]',
                     '[data-global-number-stepper]'

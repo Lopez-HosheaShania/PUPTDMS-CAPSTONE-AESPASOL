@@ -404,6 +404,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="addCategory" class="inventory-field-label">
                                 Category
+                                <span class="required-mark">*</span>
                             </label>
 
                             <select id="addCategory" name="category" class="js-custom-select"
@@ -418,6 +419,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="addStock" class="inventory-field-label">
                                 Stock Number
+                                <span class="required-mark">*</span>
                             </label>
 
                             <div class="global-voice-row" data-voice-field>
@@ -471,10 +473,12 @@
                         <span class="h-px flex-1 bg-[var(--border)]" aria-hidden="true"></span>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-[0.85rem]">
+                    <div id="addStockFieldsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-[0.85rem]">
+
                         <div class="inventory-field" data-global-field>
                             <label for="addUnit" class="inventory-field-label">
                                 Unit
+                                <span class="required-mark">*</span>
                             </label>
 
                             <input id="addUnit" name="unit" type="text" class="form-input-custom"
@@ -486,20 +490,38 @@
                             <div class="inventory-field" data-global-field>
                                 <label for="addBottleCapacity" class="inventory-field-label">
                                     Volume per Bottle (mL)
+                                    <span class="required-mark">*</span>
                                 </label>
 
-                                <input id="addBottleCapacity" name="volume_per_bottle_ml" type="number"
-                                    class="form-input-custom" placeholder="e.g. 100" min="0.01" max="99999999.99"
-                                    step="0.01" inputmode="decimal" disabled>
+                                <div class="global-number-stepper" data-global-number-stepper>
+
+                                    <button type="button" class="global-number-stepper-btn" data-number-step="-1"
+                                        aria-label="Decrease volume per bottle">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+
+                                    <input id="addBottleCapacity" name="volume_per_bottle_ml" type="number"
+                                        class="global-number-stepper-input" placeholder="e.g. 100" min="0.01"
+                                        max="99999999.99" step="1" inputmode="decimal" data-number-stepper-input
+                                        data-field-label="Volume per Bottle"
+                                        data-required-message="Please enter the volume per bottle." disabled>
+
+                                    <button type="button" class="global-number-stepper-btn" data-number-step="1"
+                                        aria-label="Increase volume per bottle">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <div class="inventory-field" data-global-field>
                             <label for="addQty" class="inventory-field-label">
                                 <span id="addQtyLabel">Quantity</span>
+                                <span class="required-mark">*</span>
                             </label>
 
                             <div class="global-number-stepper" data-global-number-stepper>
+
                                 <button type="button" class="global-number-stepper-btn" data-number-step="-1"
                                     aria-label="Decrease quantity">
                                     <i class="fa-solid fa-minus"></i>
@@ -517,17 +539,32 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="inventory-field" data-global-field hidden>
-                        <label for="addUsed" class="inventory-field-label">
-                            <span id="addUsedLabel">Consumed</span>
-                        </label>
+                        <div class="inventory-field" data-global-field>
+                            <label for="addUsed" class="inventory-field-label">
+                                <span id="addUsedLabel">Consumed</span>
+                                <span class="field-optional">(Optional)</span>
+                            </label>
 
-                        <input id="addUsed" name="used" type="number" value="0" min="0"
-                            max="99999" step="1" inputmode="numeric" data-field-label="Consumed"
-                            data-required-message="Please enter the consumed quantity."
-                            data-validation-rule="inventoryConsumed" data-ui-input="action-ea53196008ea" required>
+                            <div class="global-number-stepper" data-global-number-stepper>
+
+                                <button type="button" class="global-number-stepper-btn" data-number-step="-1"
+                                    aria-label="Decrease consumed quantity">
+                                    <i class="fa-solid fa-minus"></i>
+                                </button>
+
+                                <input id="addUsed" name="used" type="number" class="global-number-stepper-input"
+                                    value="0" min="0" max="99999" step="1" inputmode="numeric"
+                                    data-number-stepper-input data-field-label="Consumed"
+                                    data-required-message="Please enter the consumed quantity."
+                                    data-validation-rule="inventoryConsumed" data-ui-input="action-ea53196008ea" required>
+
+                                <button type="button" class="global-number-stepper-btn" data-number-step="1"
+                                    aria-label="Increase consumed quantity">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <input id="addBalance" type="hidden" value="0">
@@ -553,6 +590,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="addDate" class="inventory-field-label">
                                 Date Received
+                                <span class="required-mark">*</span>
                             </label>
 
                             <div class="inventory-date-control">
@@ -632,6 +670,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="editCategory" class="inventory-field-label">
                                 Category
+                                <span class="required-mark">*</span>
                             </label>
 
                             <select id="editCategory" name="category" class="js-custom-select"
@@ -646,6 +685,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="editStock" class="inventory-field-label">
                                 Stock Number
+                                <span class="required-mark">*</span>
                             </label>
 
                             <div class="global-voice-row" data-voice-field>
@@ -703,6 +743,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="editQty" class="inventory-field-label">
                                 <span id="editQtyLabel">Quantity</span>
+                                <span class="required-mark">*</span>
                             </label>
 
                             <div class="global-number-stepper" data-global-number-stepper>
@@ -727,6 +768,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="editUsed" class="inventory-field-label">
                                 <span id="editUsedLabel">Consumed</span>
+                                <span class="field-optional">(Optional)</span>
                             </label>
 
                             <div class="global-number-stepper" data-global-number-stepper>
@@ -752,6 +794,7 @@
                     <div class="global-info-group mt-3">
                         <span class="global-info-pill">
                             Unit <strong id="editUnitSummary">—</strong>
+                            <span class="required-mark">*</span>
                         </span>
 
                         <div id="editBottleFields" class="global-info-group" hidden>
@@ -803,6 +846,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="editDate" class="inventory-field-label">
                                 Date Received
+                                <span class="required-mark">*</span>
                             </label>
 
                             <div class="inventory-date-control">
@@ -1287,7 +1331,7 @@
                             table.hidden = true;
                             showing.hidden = true;
                             emptyState.hidden = false;
-                            
+
                             window.EmptyState?.render({
                                 host: emptyState,
                                 icon: 'fa-triangle-exclamation',
@@ -1822,15 +1866,9 @@
         }
 
         function closeFilterPanel() {
-            if (window.closeFilterDrawer) {
-                window.closeFilterDrawer('filterModal');
-                return;
-            }
-
-            var modal = document.getElementById('filterModal');
-            if (modal) modal.classList.remove('open', 'closing');
-            document.documentElement.classList.remove('filter-lock');
-            document.body.classList.remove('filter-lock');
+            window.closeFilterDrawer(
+                'filterModal'
+            );
         }
 
         function syncInventoryFilterGroups() {
@@ -2871,7 +2909,11 @@ aria-label="Delete inventory item"
                     <div class="inventory-usage-block">
                         <div class="inventory-usage-label">
                             <strong>${item.is_volume_bottle ? formatMl(activeBottleUsed) : used}</strong>
-                            <span>/ ${item.is_volume_bottle ? formatMl(item.volume_per_bottle_ml) + " mL (active bottle)" : quantity + " " + unit}</span>
+                            <span>
+                                / ${item.is_volume_bottle
+                                    ? formatMl(item.volume_per_bottle_ml) + " mL (active bottle)"
+                                    : quantity + " " + getInventoryUnitLabel(unit, quantity)}
+                            </span>
                         </div>
 
                         <div class="inventory-usage-track" aria-hidden="true">
@@ -2905,8 +2947,8 @@ aria-label="Delete inventory item"
                                     </strong>
 
                                     <span class="inventory-grid-balance-unit">
-                                        ${unit} left
-                                    </span>
+    ${getInventoryUnitLabel(unit, balance)} left
+</span>
                                 </div>
 
                                 <div class="inventory-grid-details">
@@ -2940,7 +2982,9 @@ aria-label="Delete inventory item"
                                         </span>
 
                                         <span class="inventory-grid-detail-value">
-                                            ${item.is_volume_bottle ? `${formatMl(activeBottleUsed)} / ${formatMl(item.volume_per_bottle_ml)} mL (active bottle)` : `${used}/${quantity} ${unit}`}
+                                            ${item.is_volume_bottle
+    ? `${formatMl(activeBottleUsed)} / ${formatMl(item.volume_per_bottle_ml)} mL (active bottle)`
+    : `${used}/${quantity} ${getInventoryUnitLabel(unit, quantity)}`}
                                         </span>
                                     </div>
                                 </div>
@@ -3517,6 +3561,63 @@ aria-label="Delete inventory item"
             return String(unit || '').trim().toLowerCase() === 'bottle';
         }
 
+        function getInventoryUnitLabel(unit, amount) {
+            const rawUnit =
+                String(unit || 'item')
+                .trim()
+                .toLowerCase();
+
+            const count = Number(amount);
+
+            const singularOverrides = {
+                pieces: 'piece',
+                boxes: 'box'
+            };
+
+            let singular =
+                singularOverrides[rawUnit] ||
+                rawUnit;
+
+            if (!singularOverrides[rawUnit]) {
+                if (
+                    singular.endsWith('ies') &&
+                    singular.length > 3
+                ) {
+                    singular =
+                        singular.slice(0, -3) +
+                        'y';
+                } else if (
+                    /(ches|shes|xes|zes)$/.test(singular)
+                ) {
+                    singular =
+                        singular.slice(0, -2);
+                } else if (
+                    singular.endsWith('s') &&
+                    !singular.endsWith('ss')
+                ) {
+                    singular =
+                        singular.slice(0, -1);
+                }
+            }
+
+            if (count === 1) {
+                return singular;
+            }
+
+            if (/[^aeiou]y$/.test(singular)) {
+                return (
+                    singular.slice(0, -1) +
+                    'ies'
+                );
+            }
+
+            if (/(s|x|z|ch|sh)$/.test(singular)) {
+                return singular + 'es';
+            }
+
+            return singular + 's';
+        }
+
         function formatMl(value) {
             const number = Number(value);
             return Number.isFinite(number) ? number.toLocaleString('en-US', {
@@ -3526,6 +3627,26 @@ aria-label="Delete inventory item"
 
         function syncBottleFields(prefix) {
             const bottle = isBottleUnit(document.getElementById(prefix + 'Unit').value);
+
+            if (prefix === 'add') {
+                const stockGrid =
+                    document.getElementById(
+                        'addStockFieldsGrid'
+                    );
+
+                if (stockGrid) {
+                    stockGrid.classList.toggle(
+                        'md:grid-cols-2',
+                        bottle
+                    );
+
+                    stockGrid.classList.toggle(
+                        'md:grid-cols-3',
+                        !bottle
+                    );
+                }
+            }
+
             const wrapper = document.getElementById(prefix + 'BottleFields');
             const capacity = document.getElementById(prefix + 'BottleCapacity');
             const used = document.getElementById(prefix + 'Used');
@@ -3567,10 +3688,28 @@ aria-label="Delete inventory item"
                 const currentBottleRemaining = remaining >= 0 && cap > 0 ?
                     formatMl((bottles > 0 ? remaining - (bottles - 1) * cap : 0) / 100) :
                     'Unavailable';
-                const balanceValue = bottle ?
-                    (remaining < 0 ? 'Consumption exceeds available volume' :
-                        `${bottles} bottles · ${formatMl(remaining / 100)} mL`) :
-                    `${Math.max(0, quantity - Number(used.value || 0))} ${document.getElementById('editUnit').value || 'items'}`;
+
+                const remainingQuantity =
+                    Math.max(
+                        0,
+                        quantity -
+                        Number(used.value || 0)
+                    );
+
+                const balanceValue =
+                    bottle ?
+                    (
+                        remaining < 0 ?
+                        'Consumption exceeds available volume' :
+                        `${bottles} ${getInventoryUnitLabel(
+                            'bottle',
+                            bottles
+                        )} · ${formatMl(remaining / 100)} mL`
+                    ) :
+                    `${remainingQuantity} ${getInventoryUnitLabel(
+                        document.getElementById('editUnit').value || 'item',
+                        remainingQuantity
+                    )}`;
 
                 document.getElementById('editBottleRemaining').value = currentBottleRemaining;
                 document.getElementById('editBalance').value = balanceValue;
@@ -3603,9 +3742,32 @@ aria-label="Delete inventory item"
                 const balanceSummary = document.getElementById('addBalanceSummary');
 
                 if (balanceSummary) {
-                    const unit = String(document.getElementById('addUnit').value || 'item').trim();
-                    const unitLabel = quantity === 1 ? unit : `${unit}s`;
-                    balanceSummary.textContent = `${quantity} ${unitLabel.toLowerCase()}`;
+                    if (bottle) {
+                        balanceSummary.textContent =
+                            balanceValue;
+                    } else {
+                        const unit =
+                            document.getElementById(
+                                'addUnit'
+                            ).value || 'item';
+
+                        const consumed =
+                            Number(
+                                used.value || 0
+                            );
+
+                        const available =
+                            Math.max(
+                                0,
+                                quantity - consumed
+                            );
+
+                        balanceSummary.textContent =
+                            `${available} ${getInventoryUnitLabel(
+                unit,
+                available
+            )}`;
+                    }
                 }
             }
         }
@@ -3621,11 +3783,31 @@ aria-label="Delete inventory item"
         document.addEventListener('DOMContentLoaded', () => {
             for (const prefix of ['add', 'edit']) {
                 for (const suffix of ['Unit', 'BottleCapacity']) {
-                    document.getElementById(prefix + suffix).addEventListener('input', () => syncBottleFields(
-                        prefix));
+                    document
+                        .getElementById(prefix + suffix)
+                        ?.addEventListener(
+                            'input',
+                            () => syncBottleFields(prefix)
+                        );
                 }
             }
-            document.getElementById('editUsed').addEventListener('input', computeEditBalance);
+
+            [
+                ['addQty', computeAddBalance],
+                ['addUsed', computeAddBalance],
+                ['editQty', computeEditBalance],
+                ['editUsed', computeEditBalance]
+            ].forEach(function([
+                fieldId,
+                callback
+            ]) {
+                document
+                    .getElementById(fieldId)
+                    ?.addEventListener(
+                        'input',
+                        callback
+                    );
+            });
         });
     </script>
 @endsection

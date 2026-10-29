@@ -1202,6 +1202,25 @@
     animation: authLandingFloatBottom 4.8s ease-in-out .35s infinite;
 }
 
+@keyframes globalLiveInsertIn {
+    from {
+        opacity: 0;
+        transform:
+            translateY(-10px) scale(.992);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0) scale(1);
+    }
+}
+
+.global-live-insert {
+    animation:
+        globalLiveInsertIn .42s cubic-bezier(.22, 1, .36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
     .page-enter,
@@ -1221,7 +1240,8 @@
     .global-carousel-out-left,
     .global-carousel-out-right,
     .global-carousel-in-left,
-    .global-carousel-in-right {
+    .global-carousel-in-right,
+    .global-live-insert {
         animation: none;
     }
 

@@ -4,14 +4,10 @@
 
 @section('title', 'Session Dashboard')
 
-@section('styles')
-    @vite('resources/css/pages/admin/session-management.css')
-@endsection
-
 @section('content')
-    <main id="mainContent" class="app-page-shell session-admin-page">
+    <main id="mainContent" class="app-page-shell pb-11">
         <div class="w-full">
-            <section class="page-banner">
+            <section class="page-banner mb-4">
                 <div class="page-banner-inner">
                     <div class="page-banner-copy">
                         <h1 class="page-title">Session Dashboard</h1>
@@ -23,10 +19,19 @@
             <section id="statCards" class="stat-grid">
                 <article class="stat-card s-crimson">
                     <div class="stat-card-info">
-                        <span class="stat-label">Active Sessions</span>
-                        <span class="stat-num">{{ $stats['total_sessions'] ?? 0 }}</span>
-                        <div class="stat-footer">All currently tracked browser sessions</div>
+                        <span class="stat-label">
+                            Active Sessions
+                        </span>
+
+                        <span id="activeSessionsStat" class="stat-num">
+                            {{ $stats['total_sessions'] ?? 0 }}
+                        </span>
+
+                        <div class="stat-footer">
+                            All currently tracked browser sessions
+                        </div>
                     </div>
+
                     <div class="stat-icon">
                         <i class="fa-solid fa-signal"></i>
                     </div>
@@ -34,63 +39,109 @@
 
                 <article class="stat-card s-purple">
                     <div class="stat-card-info">
-                        <span class="stat-label">Active Users</span>
-                        <span class="stat-num">{{ $stats['active_users'] ?? 0 }}</span>
-                        <div class="stat-footer">Accounts with active sessions</div>
+                        <span class="stat-label">
+                            Active Users
+                        </span>
+
+                        <span id="activeUsersStat" class="stat-num">
+                            {{ $stats['active_users'] ?? 0 }}
+                        </span>
+
+                        <div class="stat-footer">
+                            Accounts with active sessions
+                        </div>
                     </div>
+
                     <div class="stat-icon">
                         <i class="fa-solid fa-users"></i>
                     </div>
                 </article>
 
-                <article class="stat-card admin">
+                <article class="stat-card s-amber">
                     <div class="stat-card-info">
-                        <span class="stat-label">Admin Sessions</span>
-                        <span class="stat-num">{{ $stats['admin_sessions'] ?? 0 }}</span>
-                        <div class="stat-footer">Privileged access accounts</div>
+                        <span class="stat-label">
+                            Other Sessions
+                        </span>
+
+                        <span id="otherSessionsStat" class="stat-num">
+                            {{ $stats['other_sessions'] ?? 0 }}
+                        </span>
+
+                        <div class="stat-footer">
+                            Sessions outside the current admin session
+                        </div>
                     </div>
+
                     <div class="stat-icon">
-                        <i class="fa-solid fa-user-shield"></i>
+                        <i class="fa-solid fa-window-restore"></i>
                     </div>
                 </article>
 
-                <article class="stat-card dentist">
+                <article class="stat-card s-blue">
                     <div class="stat-card-info">
-                        <span class="stat-label">Dentist Sessions</span>
-                        <span class="stat-num">{{ $stats['dentist_sessions'] ?? 0 }}</span>
-                        <div class="stat-footer">Clinic-side operational accounts</div>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="fa-solid fa-user-doctor"></i>
-                    </div>
-                </article>
+                        <span class="stat-label">
+                            Active Devices
+                        </span>
 
-                <article class="stat-card patient">
-                    <div class="stat-card-info">
-                        <span class="stat-label">Patient Sessions</span>
-                        <span class="stat-num">{{ $stats['patient_sessions'] ?? 0 }}</span>
-                        <div class="stat-footer">Self-service access online</div>
+                        <span id="activeDevicesStat" class="stat-num">
+                            {{ $stats['active_devices'] ?? 0 }}
+                        </span>
+
+                        <div class="stat-footer">
+                            Devices currently connected to the system
+                        </div>
                     </div>
+
                     <div class="stat-icon">
-                        <i class="fa-solid fa-user"></i>
+                        <i class="fa-solid fa-display"></i>
                     </div>
                 </article>
             </section>
 
-            <section class="session-admin-card table-card">
-                <div class="session-admin-toolbar table-toolbar">
-                    <div class="session-admin-toolbar-copy">
-                        <h2>All Active User Sessions</h2>
-                        <p>Monitor and manage active user sessions across roles and devices.</p>
-                    </div>
-
-                    <div class="flex items-center gap-3">
+            <section class="table-card">
+                <div class="table-toolbar">
+                    <div class="table-toolbar-search">
                         <div class="voice-search-row">
                             <x-search-bar id="sessionSearchInput" name="search" :value="$filters['search'] ?? ''"
                                 placeholder="Search user, email, IP, or browser" />
                             <x-voice-input target="#sessionSearchInput" status-id="sessionSearchVoiceStatus"
                                 label="Use voice search" title="Voice search" />
                         </div>
+                    </div>
+
+                    @php
+                        $sessionRoleFilterOptions = [
+                            [
+                                'value' => 'all',
+                                'label' => 'All Roles',
+                                'icon' => 'fa-users',
+                                'count' => $stats['total_sessions'] ?? 0,
+                            ],
+                            [
+                                'value' => 'admin',
+                                'label' => 'Admin',
+                                'icon' => 'fa-user-shield',
+                                'count' => $stats['admin_sessions'] ?? 0,
+                            ],
+                            [
+                                'value' => 'dentist',
+                                'label' => 'Dentist',
+                                'icon' => 'fa-user-doctor',
+                                'count' => $stats['dentist_sessions'] ?? 0,
+                            ],
+                            [
+                                'value' => 'patient',
+                                'label' => 'Patient',
+                                'icon' => 'fa-user',
+                                'count' => $stats['patient_sessions'] ?? 0,
+                            ],
+                        ];
+                    @endphp
+
+                    <div class="table-toolbar-actions">
+                        <x-filter-select id="sessionRoleFilter" name="session_roles" label="User Role" value="all"
+                            :options="$sessionRoleFilterOptions" callback="handleSessionRoleFilter" menu-align="right" :searchable="true"
+                            :multiple="true" search-placeholder="Search role..." />
 
                         <button type="button" id="sessionFilterBtn" class="global-filter-btn" aria-pressed="false">
                             <i class="fa-solid fa-sliders"></i>
@@ -105,108 +156,90 @@
 
                         <x-view-toggle id="sessionViewToggle" root="#mainContent"
                             storage-key="admin_session_management_view" list-view="#sessionAdminList"
-                            grid-view="#sessionAdminGridView" list-label="List" grid-label="Grid"
-                            class="session-view-toggle" />
+                            grid-view="#sessionAdminGridView" list-label="List" grid-label="Grid" />
                     </div>
                 </div>
 
-                <div class="session-admin-resultsbar" id="sessionResultsBar">
-                    <div id="sessionTopPagebarWrap" class="session-admin-top-pagebar"
-                        {{ $sessions->count() === 0 ? 'style=display:none;' : '' }}>
-                        <x-pagination-bar id="sessionAdminTopPagebar" infoId="sessionAdminTopPagebarInfo"
-                            paginationId="sessionAdminTopPaginationNav" position="top" :showEntries="true"
-                            pageSizeId="sessionPageSizeSelect" pageSizeCallback="window.changeSessionPageSize"
-                            pageSizeValue="{{ $perPage ?? 10 }}" pageSizeLabel="entries" label="sessions" :total="$sessions->total()"
-                            :from="$sessions->firstItem() ?? 0" :to="$sessions->lastItem() ?? 0" />
-                    </div>
-
-                    <div class="global-info-group" id="sessionRoleQuickFilters">
-                        <button type="button" class="global-info-pill session-role-filter" data-role="admin">
-                            <i class="fa-solid fa-user-shield"></i>
-                            Admin {{ $stats['admin_sessions'] ?? 0 }}
-                        </button>
-
-                        <button type="button" class="global-info-pill session-role-filter" data-role="dentist">
-                            <i class="fa-solid fa-user-doctor"></i>
-                            Dentist {{ $stats['dentist_sessions'] ?? 0 }}
-                        </button>
-
-                        <button type="button" class="global-info-pill session-role-filter" data-role="patient">
-                            <i class="fa-solid fa-user"></i>
-                            Patient {{ $stats['patient_sessions'] ?? 0 }}
-                        </button>
-                    </div>
+                <div id="sessionTopPagebarWrap" {{ $sessions->count() === 0 ? 'style=display:none;' : '' }}>
+                    <x-pagination-bar id="sessionAdminTopPagebar" infoId="sessionAdminTopPagebarInfo"
+                        paginationId="sessionAdminTopPaginationNav" position="top" :showEntries="true"
+                        pageSizeId="sessionPageSizeSelect" pageSizeCallback="window.changeSessionPageSize"
+                        pageSizeValue="{{ $perPage ?? 10 }}" pageSizeLabel="entries" label="sessions" :total="$sessions->total()"
+                        :from="$sessions->firstItem() ?? 0" :to="$sessions->lastItem() ?? 0" />
                 </div>
 
-                <div class="session-admin-list" id="sessionAdminList"
+                <div id="sessionAdminList" class="table-list-view"
                     {{ $sessions->count() === 0 ? 'style=display:none;' : '' }}>
-                    @foreach ($sessions as $session)
-                        @php
-                            $roleClass = match ($session->role_slug) {
-                                'admin', 'super_admin' => 'role-admin',
-                                'dentist' => 'role-dentist',
-                                'patient' => 'role-patient',
-                                default => 'role-none',
-                            };
+                    <div
+                        class="table-list-header grid grid-cols-[minmax(0,1.65fr)_minmax(0,.65fr)_minmax(0,.8fr)_minmax(0,1.05fr)_minmax(0,1fr)_minmax(0,1.15fr)] items-center gap-3">
+                        <div>User</div>
+                        <div>Role</div>
+                        <div>Account Status</div>
+                        <div>Device</div>
+                        <div>IP and Last Activity</div>
+                        <div class="text-right">Actions</div>
+                    </div>
 
-                            $statusClass =
-                                strtolower((string) $session->user_status) === 'active' ? 's-active' : 's-inactive';
+                    <div data-session-list>
+                        @foreach ($sessions as $session)
+                            @php
+                                $roleClass = match ($session->role_slug) {
+                                    'admin', 'super_admin' => 'role-admin',
+                                    'dentist' => 'role-dentist',
+                                    'patient' => 'role-patient',
+                                    default => 'role-none',
+                                };
 
-                        @endphp
+                                $filterRole = in_array($session->role_slug, ['admin', 'super_admin'], true)
+                                    ? 'admin'
+                                    : strtolower((string) $session->role_slug);
 
-                        <article
-                            class="session-admin-item table-record-card {{ $session->is_current ? 'session-admin-item-current' : '' }}"
-                            data-session-key="{{ $session->reference }}"
-                            data-role="{{ strtolower((string) $session->role_slug) }}"
-                            data-device="{{ strtolower((string) $session->device_type) }}"
-                            data-current="{{ $session->is_current ? '1' : '0' }}"
-                            data-last-activity="{{ $session->last_activity_at->getTimestamp() }}">
-                            <div class="session-admin-item-shell">
-                                <div class="session-admin-userblock">
-                                    <span class="patient-avatar patient-avatar-sm" data-patient-avatar
-                                        data-patient-name="{{ $session->user_name }}"></span>
+                                $statusClass =
+                                    strtolower((string) $session->user_status) === 'active' ? 's-active' : 's-inactive';
+                            @endphp
 
-                                    <div>
-                                        <div class="session-admin-userhead">
-                                            <span class="session-admin-user-name">{{ $session->user_name }}</span>
-                                        </div>
+                            <div class="table-list-row grid grid-cols-[minmax(0,1.65fr)_minmax(0,.65fr)_minmax(0,.8fr)_minmax(0,1.05fr)_minmax(0,1fr)_minmax(0,1.15fr)] items-center gap-3 px-5 py-3 {{ $session->is_current ? 'bg-[var(--status-approved-bg)]' : '' }}"
+                                data-session-list-item data-session-key="{{ $session->reference }}"
+                                data-live-item-id="{{ $session->reference }}" data-role="{{ $filterRole }}"
+                                data-device="{{ strtolower((string) $session->device_type) }}"
+                                data-current="{{ $session->is_current ? '1' : '0' }}"
+                                data-last-activity="{{ $session->last_activity_at->getTimestamp() }}">
 
-                                        <div class="session-admin-user-email">{{ $session->user_email }}</div>
+                                <div class="min-w-0">
+                                    <div class="table-primary w-full">
+                                        <span class="patient-avatar patient-avatar-sm" data-patient-avatar
+                                            data-patient-name="{{ $session->user_name }}"></span>
 
-                                        @if ($session->is_current)
-                                            <div class="mt-1">
-                                                <span
-                                                    class="session-admin-current-pill session-admin-current-pill status-pill s-active">
+                                        <div class="min-w-0">
+                                            <strong class="block truncate">{{ $session->user_name }}</strong>
+                                            <span class="global-info-subvalue truncate">
+                                                {{ $session->user_email }}
+                                            </span>
+
+                                            @if ($session->is_current)
+                                                <span class="status-pill s-active mt-1">
                                                     <i class="fa-solid fa-circle-check"></i>
                                                     Current Admin Session
                                                 </span>
-                                            </div>
-                                        @endif
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="session-admin-meta-col session-admin-role-col">
-                                    <span class="global-info-label">Role</span>
-                                    <div>
-                                        <span class="badge-role {{ $roleClass }}">
-                                            {{ $session->role_label }}
-                                        </span>
-                                    </div>
+                                <div class="min-w-0">
+                                    <span class="badge-role {{ $roleClass }}">
+                                        {{ $session->role_label }}
+                                    </span>
                                 </div>
 
-                                <div class="session-admin-meta-col session-admin-status-col">
-                                    <span class="global-info-label">Account Status</span>
-                                    <div>
-                                        <span class="session-admin-status status-pill {{ $statusClass }}">
-                                            {{ ucfirst((string) $session->user_status) }}
-                                        </span>
-                                    </div>
+                                <div class="min-w-0">
+                                    <span class="status-pill {{ $statusClass }}">
+                                        {{ ucfirst((string) $session->user_status) }}
+                                    </span>
                                 </div>
 
-                                <div class="session-admin-meta-col">
-                                    <span class="global-info-label">Device</span>
-
-                                    <span class="session-admin-device-title global-info-value">
+                                <div class="global-info-copy min-w-0">
+                                    <span class="global-info-value mt-0 truncate">
                                         @if ($session->device_type === 'mobile')
                                             <i class="fa-solid fa-mobile-screen-button"></i>
                                         @elseif ($session->device_type === 'tablet')
@@ -214,186 +247,185 @@
                                         @else
                                             <i class="fa-solid fa-desktop"></i>
                                         @endif
-
                                         {{ $session->device_label }}
                                     </span>
-
-                                    <span class="session-admin-device-sub global-info-subvalue">
+                                    <span class="global-info-subvalue truncate">
                                         {{ $session->browser_label }} · {{ $session->os_label }}
                                     </span>
                                 </div>
 
-                                <div class="session-admin-meta-col">
-                                    <span class="global-info-label">IP and Last Activity</span>
-
-                                    <span class="session-admin-ip global-info-value">
-                                        {{ $session->ip_address }}
-                                    </span>
-
-                                    <span class="session-admin-activity global-info-subvalue">
-                                        {{ $session->last_activity_label }}
-                                    </span>
+                                <div class="global-info-copy min-w-0">
+                                    <span class="global-info-value mt-0 truncate">{{ $session->ip_address }}</span>
+                                    <span class="global-info-subvalue truncate">{{ $session->last_activity_label }}</span>
                                 </div>
 
-                                <div class="session-admin-actions">
+                                <div class="ui-action-group justify-end">
                                     @if (!$session->is_current)
-                                        <button type="button" class="ui-btn ui-btn-secondary trigger-session-logout"
+                                        <button type="button"
+                                            class="ui-action-btn ui-action-warning trigger-session-logout"
+                                            aria-label="Log out this session" data-tooltip="Log out this session"
+                                            data-tooltip-tone="neutral"
                                             data-action="{{ route('admin.session_management.destroy_session', $session->reference) }}"
                                             data-title="Terminate This Session?" data-user="{{ $session->user_name }}"
                                             data-email="{{ $session->user_email }}"
                                             data-device="{{ $session->device_label }} ({{ $session->browser_label }})"
                                             data-type="single">
-                                            Log Out This Session
+                                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
                                         </button>
                                     @else
-                                        <button type="button" class="ui-btn ui-btn-warning" disabled>
+                                        <span class="status-pill status-pending"
+                                            data-tooltip="Current session is protected" data-tooltip-tone="neutral">
+                                            <i class="fa-solid fa-shield-halved"></i>
                                             Protected
-                                        </button>
+                                        </span>
                                     @endif
 
                                     <button type="button"
-                                        class="ui-btn {{ $session->is_current ? 'ui-btn-secondary' : 'ui-btn-danger' }} trigger-session-logout"
+                                        class="ui-action-btn {{ $session->is_current ? 'ui-action-neutral' : 'ui-action-delete' }} trigger-session-logout"
+                                        aria-label="{{ $session->is_current ? 'Log out other sessions' : 'Log out all sessions' }}"
+                                        data-tooltip="{{ $session->is_current ? 'Log out other sessions' : 'Log out all sessions' }}"
+                                        data-tooltip-tone="{{ $session->is_current ? 'neutral' : 'delete' }}"
                                         data-action="{{ route('admin.session_management.destroy_user_sessions', $session->user_id) }}"
                                         data-title="{{ $session->is_current ? 'Log Out Other Sessions?' : 'Log Out All Sessions?' }}"
                                         data-user="{{ $session->user_name }}" data-email="{{ $session->user_email }}"
                                         data-device="{{ $session->is_current ? 'All other active devices except this current session.' : 'All active devices logged into this account.' }}"
                                         data-type="all">
-                                        {{ $session->is_current ? 'Log Out Other Sessions' : 'Log Out All Sessions' }}
+                                        <i class="fa-solid fa-right-from-bracket"></i>
                                     </button>
                                 </div>
                             </div>
-                        </article>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
 
-                <div id="sessionAdminGridView" class="session-admin-grid-view table-record-grid" hidden>
-                    @foreach ($sessions as $session)
-                        @php
-                            $roleClass = match ($session->role_slug) {
-                                'admin', 'super_admin' => 'role-admin',
-                                'dentist' => 'role-dentist',
-                                'patient' => 'role-patient',
-                                default => 'role-none',
-                            };
+                <div id="sessionAdminGridView" class="table-grid-view" hidden>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" data-session-grid>
+                        @foreach ($sessions as $session)
+                            @php
+                                $roleClass = match ($session->role_slug) {
+                                    'admin', 'super_admin' => 'role-admin',
+                                    'dentist' => 'role-dentist',
+                                    'patient' => 'role-patient',
+                                    default => 'role-none',
+                                };
 
-                            $statusClass =
-                                strtolower((string) $session->user_status) === 'active' ? 's-active' : 's-inactive';
+                                $filterRole = in_array($session->role_slug, ['admin', 'super_admin'], true)
+                                    ? 'admin'
+                                    : strtolower((string) $session->role_slug);
 
-                        @endphp
+                                $statusClass =
+                                    strtolower((string) $session->user_status) === 'active' ? 's-active' : 's-inactive';
+                            @endphp
 
-                        <article
-                            class="session-admin-grid-item table-record-card {{ $session->is_current ? 'session-admin-item-current' : '' }}"
-                            data-session-key="{{ $session->reference }}"
-                            data-role="{{ strtolower((string) $session->role_slug) }}"
-                            data-device="{{ strtolower((string) $session->device_type) }}"
-                            data-current="{{ $session->is_current ? '1' : '0' }}"
-                            data-last-activity="{{ $session->last_activity_at->getTimestamp() }}">
-                            <div class="table-record-card-layout">
-                                <div class="table-record-content">
-                                    <div class="table-record-header">
-                                        <div class="table-primary">
-                                            <span class="patient-avatar patient-avatar-md" data-patient-avatar
-                                                data-patient-name="{{ $session->user_name }}"></span>
+                            <article class="table-record-card h-full {{ $session->is_current ? 'is-active' : '' }}"
+                                data-session-grid-item data-live-item-id="{{ $session->reference }}"
+                                data-session-key="{{ $session->reference }}" data-role="{{ $filterRole }}"
+                                data-device="{{ strtolower((string) $session->device_type) }}"
+                                data-current="{{ $session->is_current ? '1' : '0' }}"
+                                data-last-activity="{{ $session->last_activity_at->getTimestamp() }}">
+                                <div class="table-record-card-layout">
+                                    <div class="table-record-content">
+                                        <div class="table-record-header">
+                                            <div class="table-primary">
+                                                <span class="patient-avatar patient-avatar-md" data-patient-avatar
+                                                    data-patient-name="{{ $session->user_name }}"></span>
 
-                                            <div class="min-w-0">
-                                                <h3 class="table-record-title">
-                                                    {{ $session->user_name }}
-                                                </h3>
+                                                <div class="min-w-0">
+                                                    <h3 class="table-record-title">{{ $session->user_name }}</h3>
+                                                    <span class="global-info-subvalue">{{ $session->user_email }}</span>
+                                                </div>
+                                            </div>
 
-                                                <span class="global-info-subvalue">
-                                                    {{ $session->user_email }}
+                                            @if ($session->is_current)
+                                                <span class="status-pill s-active">
+                                                    <i class="fa-solid fa-circle-check"></i>
+                                                    Current Admin Session
                                                 </span>
+                                            @endif
+                                        </div>
 
-                                                @if ($session->is_current)
-                                                    <div class="mt-1">
-                                                        <span class="session-admin-current-pill status-pill s-active">
-                                                            <i class="fa-solid fa-circle-check"></i>
-                                                            Current Admin Session
-                                                        </span>
-                                                    </div>
-                                                @endif
+                                        <div class="table-record-meta">
+                                            <div class="table-record-row">
+                                                <span class="table-record-label">Role</span>
+                                                <span class="table-record-value">
+                                                    <span class="badge-role {{ $roleClass }}">
+                                                        {{ $session->role_label }}
+                                                    </span>
+                                                </span>
+                                            </div>
+
+                                            <div class="table-record-row">
+                                                <span class="table-record-label">Account Status</span>
+                                                <span class="table-record-value">
+                                                    <span class="status-pill {{ $statusClass }}">
+                                                        {{ ucfirst((string) $session->user_status) }}
+                                                    </span>
+                                                </span>
+                                            </div>
+
+                                            <div class="table-record-row">
+                                                <span class="table-record-label">Device</span>
+                                                <span class="table-record-value">
+                                                    {{ $session->device_label }} · {{ $session->browser_label }}
+                                                </span>
+                                            </div>
+
+                                            <div class="table-record-row">
+                                                <span class="table-record-label">IP Address</span>
+                                                <span class="table-record-value">{{ $session->ip_address }}</span>
+                                            </div>
+
+                                            <div class="table-record-row">
+                                                <span class="table-record-label">Last Activity</span>
+                                                <span
+                                                    class="table-record-value">{{ $session->last_activity_label }}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="table-record-meta">
-                                        <div class="table-record-row">
-                                            <span class="table-record-label">
-                                                Role
-                                            </span>
-
-                                            <span class="table-record-value">
-                                                <span class="badge-role {{ $roleClass }}">
-                                                    {{ $session->role_label }}
+                                    <div class="table-record-actions">
+                                        <div class="ui-action-group">
+                                            @if (!$session->is_current)
+                                                <button type="button"
+                                                    class="ui-action-btn ui-action-warning trigger-session-logout"
+                                                    aria-label="Log out this session" data-tooltip="Log out this session"
+                                                    data-tooltip-tone="neutral"
+                                                    data-action="{{ route('admin.session_management.destroy_session', $session->reference) }}"
+                                                    data-title="Terminate This Session?"
+                                                    data-user="{{ $session->user_name }}"
+                                                    data-email="{{ $session->user_email }}"
+                                                    data-device="{{ $session->device_label }} ({{ $session->browser_label }})"
+                                                    data-type="single">
+                                                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                                </button>
+                                            @else
+                                                <span class="status-pill status-pending"
+                                                    data-tooltip="Current session is protected"
+                                                    data-tooltip-tone="neutral">
+                                                    <i class="fa-solid fa-shield-halved"></i>
+                                                    Protected
                                                 </span>
-                                            </span>
-                                        </div>
+                                            @endif
 
-                                        <div class="table-record-row">
-                                            <span class="table-record-label">Account Status</span>
-                                            <span class="table-record-value">
-                                                <span class="status-pill {{ $statusClass }}">
-                                                    {{ ucfirst((string) $session->user_status) }}
-                                                </span>
-                                            </span>
-                                        </div>
-
-                                        <div class="table-record-row">
-                                            <span class="table-record-label">Device</span>
-                                            <span class="table-record-value">
-                                                {{ $session->device_label }}
-                                                ·
-                                                {{ $session->browser_label }}
-                                            </span>
-                                        </div>
-
-                                        <div class="table-record-row">
-                                            <span class="table-record-label">IP Address</span>
-                                            <span class="table-record-value">
-                                                {{ $session->ip_address }}
-                                            </span>
-                                        </div>
-
-                                        <div class="table-record-row">
-                                            <span class="table-record-label">Last Activity</span>
-                                            <span class="table-record-value">
-                                                {{ $session->last_activity_label }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="session-admin-grid-actions">
-                                        @if (!$session->is_current)
-                                            <button type="button" class="ui-btn ui-btn-secondary trigger-session-logout"
-                                                data-action="{{ route('admin.session_management.destroy_session', $session->reference) }}"
-                                                data-title="Terminate This Session?"
+                                            <button type="button"
+                                                class="ui-action-btn {{ $session->is_current ? 'ui-action-neutral' : 'ui-action-delete' }} trigger-session-logout"
+                                                aria-label="{{ $session->is_current ? 'Log out other sessions' : 'Log out all sessions' }}"
+                                                data-tooltip="{{ $session->is_current ? 'Log out other sessions' : 'Log out all sessions' }}"
+                                                data-tooltip-tone="{{ $session->is_current ? 'neutral' : 'delete' }}"
+                                                data-action="{{ route('admin.session_management.destroy_user_sessions', $session->user_id) }}"
+                                                data-title="{{ $session->is_current ? 'Log Out Other Sessions?' : 'Log Out All Sessions?' }}"
                                                 data-user="{{ $session->user_name }}"
                                                 data-email="{{ $session->user_email }}"
-                                                data-device="{{ $session->device_label }} ({{ $session->browser_label }})"
-                                                data-type="single">
-                                                Log Out This Session
+                                                data-device="{{ $session->is_current ? 'All other active devices except this current session.' : 'All active devices logged into this account.' }}"
+                                                data-type="all">
+                                                <i class="fa-solid fa-right-from-bracket"></i>
                                             </button>
-                                        @else
-                                            <button type="button" class="ui-btn ui-btn-warning" disabled>
-                                                Protected
-                                            </button>
-                                        @endif
-
-                                        <button type="button"
-                                            class="ui-btn {{ $session->is_current ? 'ui-btn-secondary' : 'ui-btn-danger' }} trigger-session-logout"
-                                            data-action="{{ route('admin.session_management.destroy_user_sessions', $session->user_id) }}"
-                                            data-title="{{ $session->is_current ? 'Log Out Other Sessions?' : 'Log Out All Sessions?' }}"
-                                            data-user="{{ $session->user_name }}"
-                                            data-email="{{ $session->user_email }}"
-                                            data-device="{{ $session->is_current ? 'All other active devices except this current session.' : 'All active devices logged into this account.' }}"
-                                            data-type="all">
-                                            {{ $session->is_current ? 'Log Out Other Sessions' : 'Log Out All Sessions' }}
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </article>
-                    @endforeach
+                            </article>
+                        @endforeach
+                    </div>
                 </div>
 
                 <div class="empty-state" id="sessionEmptyState"
@@ -404,27 +436,27 @@
 
                     <h3 class="empty-state-title" id="emptyTitle">
                         @if (!empty($filters['search']))
-                            No results for "{{ $filters['search'] }}"
+                            No Matching Sessions
                         @else
-                            No Active Sessions Found
+                            No Active Sessions
                         @endif
                     </h3>
 
                     <p class="empty-state-sub" id="emptySub">
                         @if (!empty($filters['search']))
-                            Try a different name, email, IP, or browser.
+                            No active sessions match your search.
+                            Try using a different name, email, IP address, or browser.
                         @else
-                            The current filters did not match any active sessions.
-                            Try changing the role filter or clearing the search query.
+                            There are currently no active user sessions to display.
                         @endif
                     </p>
-
                     <button type="button" class="empty-state-btn" id="clearSearchBtn">
-                        <i class="fa-solid fa-xmark"></i> Clear search
+                        <i class="fa-solid fa-xmark"></i>
+                        Clear search
                     </button>
                 </div>
-                <div id="sessionBottomPagebarWrap" class="session-admin-bottom-pagebar"
-                    {{ $sessions->count() === 0 ? 'style=display:none;' : '' }}>
+
+                <div id="sessionBottomPagebarWrap" {{ $sessions->count() === 0 ? 'style=display:none;' : '' }}>
                     <x-pagination-bar id="sessionAdminBottomPagebar" infoId="sessionAdminBottomPagebarInfo"
                         paginationId="sessionAdminBottomPaginationNav" position="bottom" :showEntries="false"
                         label="sessions" :total="$sessions->total()" :from="$sessions->firstItem() ?? 0" :to="$sessions->lastItem() ?? 0" />
@@ -433,53 +465,70 @@
         </div>
     </main>
 
-    <div class="ui-modal logout-confirm-modal" id="sessionConfirmModal" role="dialog" aria-modal="true"
-        aria-hidden="true">
-        <div class="ui-modal-card logout-confirm-card">
+    <div id="sessionConfirmModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"
+        aria-labelledby="confirmModalTitle">
+
+        <form id="sessionConfirmForm" method="POST" action="" class="ui-modal-card modal-sm">
+
+            @csrf
+            @method('DELETE')
+
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon logout-confirm-icon">
+                    <div class="modal-icon">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     </div>
+
                     <div class="modal-copy">
-                        <h3 class="modal-title" id="confirmModalTitle">Terminate Active Session?</h3>
-                        <p class="modal-subtitle">Security verification confirmation</p>
+                        <h3 id="confirmModalTitle" class="modal-title">
+                            Terminate Active Session?
+                        </h3>
+
+                        <p class="modal-subtitle">
+                            Security verification confirmation
+                        </p>
                     </div>
                 </div>
+
+                <button type="button" class="modal-x" data-modal-close="sessionConfirmModal"
+                    aria-label="Close session confirmation">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
             <div class="modal-bd">
-                <div class="logout-confirm-message mb-4">
-                    <div class="logout-confirm-message-icon">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
+                <div class="global-confirm-alert">
                     <div>
-                        <p id="confirmModalTargetName">User Account Session</p>
-                        <span id="confirmModalTargetEmail">user@example.com</span>
+                        <strong id="confirmModalTargetName">
+                            User Account Session
+                        </strong>
+
+                        <span id="confirmModalTargetEmail">
+                            user@example.com
+                        </span>
                     </div>
                 </div>
 
                 <div class="confirmed-modal-schedule-note">
                     <i class="fa-solid fa-circle-info"></i>
-                    <span id="confirmModalDevice">Device info will appear here.</span>
+
+                    <span id="confirmModalDevice">
+                        Device information will appear here.
+                    </span>
                 </div>
             </div>
 
-            <div class="modal-ft logout-confirm-actions">
-                <button type="button" class="btn-close-modal close-session-modal">
+            <div class="modal-ft">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="sessionConfirmModal">
                     Cancel
                 </button>
 
-                <form id="sessionConfirmForm" method="POST" action="">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="modal-btn-confirm danger">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        Confirm Log Out
-                    </button>
-                </form>
+                <button type="submit" class="ui-btn ui-btn-danger">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    Confirm Log Out
+                </button>
             </div>
-        </div>
+        </form>
     </div>
 
     <form data-ui-submit="action-44daeba3893a" id="sessionFilterForm">
@@ -519,20 +568,6 @@
                 </div>
             </x-filter-group>
 
-            <div class="filter-soft-divider"></div>
-
-            <x-filter-group title="User Role">
-                <div class="filter-chip-row" id="fStatusGroup">
-                    @foreach (['all' => 'All Roles', 'admin' => 'Admin', 'dentist' => 'Dentist', 'patient' => 'Patient'] as $val => $lbl)
-                        <label class="choice-chip">
-                            <input type="radio" name="role" value="{{ $val }}"
-                                class="filter-input radio-red chip-radio"
-                                {{ ($filters['role'] ?? 'all') === $val ? 'checked' : '' }}>
-                            <span>{{ $lbl }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </x-filter-group>
 
             <div class="filter-soft-divider"></div>
 
@@ -588,13 +623,10 @@
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('sessionSearchInput');
-            const sessionItems = document.querySelectorAll('#sessionAdminList .session-admin-item');
-            const sessionGridItems = document.querySelectorAll('#sessionAdminGridView .session-admin-grid-item');
-
             const sessionList = document.getElementById('sessionAdminList');
-            const resultsBar = document.getElementById('sessionResultsBar');
+            const sessionListBody = document.querySelector('#sessionAdminList [data-session-list]');
+            const sessionGrid = document.querySelector('#sessionAdminGridView [data-session-grid]');
             const emptyState = document.getElementById('sessionEmptyState');
-
             const topPagebarWrap = document.getElementById('sessionTopPagebarWrap');
             const bottomPagebarWrap = document.getElementById('sessionBottomPagebarWrap');
             const topPaginationContainer = document.getElementById('sessionAdminTopPaginationNav');
@@ -603,6 +635,26 @@
             const bottomPaginationInfo = document.getElementById('sessionAdminBottomPagebarInfo');
             const topPaginationBar = document.getElementById('sessionAdminTopPagebar');
             const bottomPaginationBar = document.getElementById('sessionAdminBottomPagebar');
+
+            const SESSION_MANAGEMENT_CHECK_URL =
+                @json(route('admin.session_management.check'));
+
+            const SESSION_MANAGEMENT_INDEX_URL =
+                @json(route('admin.session_management.index'));
+
+            function getSessionItems() {
+                return document.querySelectorAll(
+                    '#sessionAdminList ' +
+                    '[data-session-list-item]'
+                );
+            }
+
+            function getSessionGridItems() {
+                return document.querySelectorAll(
+                    '#sessionAdminGridView ' +
+                    '[data-session-grid-item]'
+                );
+            }
 
             function goToSessionPage(page) {
                 const url = new URL(window.location.href);
@@ -652,12 +704,10 @@
             const emptySub = document.getElementById('emptySub');
             const clearSearchBtn = document.getElementById('clearSearchBtn');
 
-            const drawer = document.getElementById('filterModal');
             const filterForm = document.getElementById('sessionFilterForm');
             const filterButton = document.getElementById('sessionFilterBtn');
             const filterResetButton = document.getElementById('sessionFilterResetBtn');
 
-            const confirmModal = document.getElementById('sessionConfirmModal');
             const confirmForm = document.getElementById('sessionConfirmForm');
             const confirmTitle = document.getElementById('confirmModalTitle');
             const confirmName = document.getElementById('confirmModalTargetName');
@@ -679,29 +729,57 @@
             const showResultsText =
                 document.getElementById('sessionShowResultsText');
 
+            const SESSION_ROLE_VALUES = ['admin', 'dentist', 'patient'];
+
+            function normalizeSessionRoleValues(values) {
+                const rawValues = Array.isArray(values) ?
+                    values :
+                    String(values || '').split(',');
+
+                const normalized = Array.from(
+                    new Set(
+                        rawValues
+                        .map(value => String(value).trim().toLowerCase())
+                        .filter(Boolean)
+                    )
+                );
+
+                if (normalized.includes('all')) {
+                    return ['all'];
+                }
+
+                const validRoles = normalized.filter(value =>
+                    SESSION_ROLE_VALUES.includes(value)
+                );
+
+                return validRoles.length ? validRoles : ['all'];
+            }
+
+            const roleQuery = new URL(window.location.href)
+                .searchParams
+                .get('roles');
+
+            const initialRoleValues = normalizeSessionRoleValues(
+                roleQuery || @json($filters['role'] ?? 'all')
+            );
+
             let sessionFilterState = {
-                sort: filterForm?.querySelector('input[name="sort"]:checked')?.value ||
-                    'recent',
-
-                role: filterForm?.querySelector('input[name="role"]:checked')?.value ||
-                    'all',
-
-                device: filterForm?.querySelector('input[name="device"]:checked')?.value ||
-                    'all',
-
-                scope: filterForm?.querySelector('input[name="scope"]:checked')?.value ||
-                    'all'
+                sort: filterForm?.querySelector('input[name="sort"]:checked')?.value || 'recent',
+                roles: initialRoleValues,
+                device: filterForm?.querySelector('input[name="device"]:checked')?.value || 'all',
+                scope: filterForm?.querySelector('input[name="scope"]:checked')?.value || 'all'
             };
 
-
             let sessionFilterDraft = {
-                ...sessionFilterState
+                ...sessionFilterState,
+                roles: [...sessionFilterState.roles]
             };
 
             function syncSessionFilterInputs() {
                 if (!filterForm) return;
 
-                Object.entries(sessionFilterDraft).forEach(([name, value]) => {
+                ['sort', 'device', 'scope'].forEach(name => {
+                    const value = sessionFilterDraft[name];
                     const input = filterForm.querySelector(
                         `input[name="${name}"][value="${value}"]`
                     );
@@ -712,11 +790,14 @@
                 });
             }
 
+            function hasSpecificSessionRoles(state = sessionFilterState) {
+                return !normalizeSessionRoleValues(state.roles).includes('all');
+            }
+
             function getSessionFilterCount(state = sessionFilterState) {
                 let count = 0;
 
                 if (state.sort !== 'recent') count++;
-                if (state.role !== 'all') count++;
                 if (state.device !== 'all') count++;
                 if (state.scope !== 'all') count++;
 
@@ -775,10 +856,21 @@
                 const url = new URL(window.location.href);
                 url.searchParams.delete('page');
 
+                const selectedRoles = normalizeSessionRoleValues(
+                    sessionFilterState.roles
+                );
+
+                url.searchParams.delete('role');
+
+                if (selectedRoles.includes('all')) {
+                    url.searchParams.delete('roles');
+                } else {
+                    url.searchParams.set('roles', selectedRoles.join(','));
+                }
+
                 const filters = {
                     search: searchInput?.value?.trim() || '',
                     sort: sessionFilterState.sort,
-                    role: sessionFilterState.role,
                     device: sessionFilterState.device,
                     scope: sessionFilterState.scope,
                 };
@@ -798,6 +890,131 @@
                 });
 
                 return url;
+            }
+
+            async function refreshSessionManagement(
+                payload,
+                context
+            ) {
+                const root =
+                    document.getElementById(
+                        'mainContent'
+                    );
+
+                const beforeIds =
+                    window
+                    .GlobalLiveUpdate
+                    ?.collectIds(root) ||
+                    new Set();
+
+                const url =
+                    buildSessionUrl();
+
+                url.pathname =
+                    new URL(
+                        SESSION_MANAGEMENT_INDEX_URL,
+                        window.location.origin
+                    ).pathname;
+
+                const response =
+                    await fetch(
+                        url.toString(), {
+                            cache: 'no-store',
+
+                            credentials: 'same-origin',
+
+                            headers: {
+                                'Accept': 'text/html',
+
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                        }
+                    );
+
+                if (!response.ok) {
+                    throw new Error(
+                        'Unable to refresh active sessions.'
+                    );
+                }
+
+                const html =
+                    await response.text();
+
+                if (
+                    !context
+                    ?.isCurrent?.()
+                ) {
+                    return;
+                }
+
+                const documentParser =
+                    new DOMParser();
+
+                const nextDocument =
+                    documentParser.parseFromString(
+                        html,
+                        'text/html'
+                    );
+
+                const nextList =
+                    nextDocument.querySelector(
+                        '#sessionAdminList ' +
+                        '[data-session-list]'
+                    );
+
+                const nextGrid =
+                    nextDocument.querySelector(
+                        '#sessionAdminGridView ' +
+                        '[data-session-grid]'
+                    );
+
+                if (
+                    sessionListBody &&
+                    nextList
+                ) {
+                    sessionListBody.innerHTML =
+                        nextList.innerHTML;
+                }
+
+                if (
+                    sessionGrid &&
+                    nextGrid
+                ) {
+                    sessionGrid.innerHTML =
+                        nextGrid.innerHTML;
+                }
+
+                window.PatientUI
+                    ?.initAvatars?.(
+                        root
+                    );
+
+                applySessionFilters();
+
+                const afterIds =
+                    window
+                    .GlobalLiveUpdate
+                    ?.collectIds(root) ||
+                    new Set();
+
+                const newIds =
+                    Array
+                    .from(afterIds)
+                    .filter(
+                        id =>
+                        !beforeIds.has(id)
+                    );
+
+                window
+                    .GlobalLiveUpdate
+                    ?.highlightItems(
+                        root,
+                        newIds, {
+                            highlightDuration: 5000,
+
+                            insertDuration: 420,
+                        }
+                    );
             }
 
             function syncSessionUrlState() {
@@ -823,10 +1040,12 @@
                 let deviceMatch = true;
                 let scopeMatch = true;
 
-                if (state.role !== 'all') {
-                    roleMatch =
-                        role ===
-                        state.role.toLowerCase();
+                const selectedRoles = normalizeSessionRoleValues(
+                    state.roles
+                );
+
+                if (!selectedRoles.includes('all')) {
+                    roleMatch = selectedRoles.includes(role);
                 }
 
                 if (state.device !== 'all') {
@@ -855,7 +1074,7 @@
             function getSessionDraftResultCount() {
                 let count = 0;
 
-                sessionItems.forEach(item => {
+                getSessionItems().forEach(item => {
                     if (
                         sessionMatchesFilters(
                             item,
@@ -892,18 +1111,6 @@
                     });
                 }
 
-                if (sessionFilterDraft.role !== 'all') {
-                    chips.push({
-                        key: 'role',
-                        label: 'Role: ' +
-                            sessionFilterDraft.role
-                            .charAt(0)
-                            .toUpperCase() +
-                            sessionFilterDraft.role.slice(1),
-
-                        reset: 'all'
-                    });
-                }
 
                 if (sessionFilterDraft.device !== 'all') {
                     chips.push({
@@ -988,9 +1195,6 @@
                     'input[name="sort"]:checked'
                 )?.value || 'recent';
 
-                sessionFilterDraft.role = filterForm?.querySelector(
-                    'input[name="role"]:checked'
-                )?.value || 'all';
 
                 sessionFilterDraft.device = filterForm?.querySelector(
                     'input[name="device"]:checked'
@@ -1003,77 +1207,26 @@
 
             function openSessionDrawer() {
                 sessionFilterDraft = {
-                    ...sessionFilterState
+                    ...sessionFilterState,
+                    roles: [...sessionFilterState.roles]
                 };
 
                 syncSessionFilterInputs();
                 renderSessionFilterChips();
                 updateSessionShowResults();
 
-                if (
-                    typeof window.openFilterDrawer ===
-                    'function'
-                ) {
-                    window.openFilterDrawer(
-                        'filterModal'
-                    );
-                    return;
-                }
-
-                if (!drawer) return;
-
-                drawer.classList.remove('closing');
-                drawer.classList.add('open');
-                drawer.setAttribute(
-                    'aria-hidden',
-                    'false'
-                );
-
-                document.documentElement.classList.add(
-                    'modal-lock'
-                );
-                document.body.classList.add(
-                    'modal-lock'
-                );
+                window.openFilterDrawer?.('filterModal');
             }
 
             function closeSessionDrawer() {
-                if (
-                    typeof window.closeFilterDrawer ===
-                    'function'
-                ) {
-                    window.closeFilterDrawer(
-                        'filterModal'
-                    );
-                    return;
-                }
-
-                if (!drawer) return;
-
-                drawer.classList.add('closing');
-                drawer.classList.remove('open');
-
-                setTimeout(() => {
-                    drawer.classList.remove('closing');
-
-                    drawer.setAttribute(
-                        'aria-hidden',
-                        'true'
-                    );
-
-                    document.documentElement.classList.remove(
-                        'modal-lock'
-                    );
-                    document.body.classList.remove(
-                        'modal-lock'
-                    );
-                }, 300);
+                window.closeFilterDrawer?.('filterModal');
             }
 
             window.cancelSessionFilters = function() {
 
                 sessionFilterDraft = {
-                    ...sessionFilterState
+                    ...sessionFilterState,
+                    roles: [...sessionFilterState.roles]
                 };
 
                 syncSessionFilterInputs();
@@ -1082,8 +1235,8 @@
 
             window.clearSessionFilterDraft = function() {
                 sessionFilterDraft = {
+                    ...sessionFilterDraft,
                     sort: 'recent',
-                    role: 'all',
                     device: 'all',
                     scope: 'all'
                 };
@@ -1097,7 +1250,8 @@
                 readSessionDraftFromInputs();
 
                 sessionFilterState = {
-                    ...sessionFilterDraft
+                    ...sessionFilterDraft,
+                    roles: [...sessionFilterDraft.roles]
                 };
 
                 closeSessionDrawer();
@@ -1111,7 +1265,7 @@
 
                 applySessionFilters();
                 updateSessionFilterButton();
-                updateSessionRoleQuickFilters();
+                syncSessionRoleFilterSelect();
             };
 
             function applySessionFilters() {
@@ -1126,7 +1280,7 @@
 
                 let visibleCount = 0;
 
-                sessionItems.forEach(item => {
+                getSessionItems().forEach(item => {
                     const searchText =
                         item.textContent
                         .toLowerCase();
@@ -1153,7 +1307,7 @@
                     const sessionKey =
                         item.dataset.sessionKey;
 
-                    sessionGridItems.forEach(gridItem => {
+                    getSessionGridItems().forEach(gridItem => {
                         if (
                             gridItem.dataset.sessionKey ===
                             sessionKey
@@ -1170,14 +1324,17 @@
                     }
                 });
 
-                if (topPaginationInfo) {
-                    if (visibleCount === 0) {
-                        topPaginationInfo.textContent = 'Showing 0 sessions';
-                    } else {
-                        topPaginationInfo.textContent =
-                            `Showing ${visibleCount} ${visibleCount === 1 ? 'session' : 'sessions'}`;
-                    }
-                }
+                [
+                    topPaginationInfo,
+                    bottomPaginationInfo
+                ].forEach(info => {
+                    if (!info) return;
+
+                    info.textContent =
+                        visibleCount === 0 ?
+                        'Showing 0 sessions' :
+                        `Showing ${visibleCount} ${visibleCount === 1 ? 'session' : 'sessions'}`;
+                });
 
                 const sortDirection =
                     sessionFilterState.sort === 'oldest' ?
@@ -1200,10 +1357,14 @@
                         .forEach(item => container.appendChild(item));
                 };
 
-                sortVisibleItems(sessionItems, sessionList);
                 sortVisibleItems(
-                    sessionGridItems,
-                    document.getElementById('sessionAdminGridView')
+                    getSessionItems(),
+                    sessionListBody
+                );
+
+                sortVisibleItems(
+                    getSessionGridItems(),
+                    sessionGrid
                 );
 
                 if (visibleCount === 0) {
@@ -1222,6 +1383,9 @@
                         gridView.style.removeProperty('display');
                     }
 
+                    topPagebarWrap &&
+                        (topPagebarWrap.style.display = 'none');
+
                     bottomPagebarWrap &&
                         (bottomPagebarWrap.style.display = 'none');
 
@@ -1230,8 +1394,14 @@
                             'flex';
                     }
 
-                    const hasActiveFilters =
+                    const hasPanelFilters =
                         getSessionFilterCount() > 0;
+
+                    const hasRoleFilters =
+                        hasSpecificSessionRoles();
+
+                    const hasActiveFilters =
+                        hasPanelFilters || hasRoleFilters;
 
                     if (query !== '') {
                         if (emptyTitle) {
@@ -1242,8 +1412,8 @@
                         if (emptySub) {
                             emptySub.textContent =
                                 hasActiveFilters ?
-                                'No sessions match this search with the selected filters.' :
-                                'Try a different name, email, IP, or browser.';
+                                'No active sessions match your search and selected filters.' :
+                                'No active sessions match your search. Try a different name, email, IP address, or browser.';
                         }
 
                         if (clearSearchBtn) {
@@ -1254,7 +1424,7 @@
                                 'search';
                         }
 
-                    } else if (hasActiveFilters) {
+                    } else if (hasPanelFilters) {
                         if (emptyTitle) {
                             emptyTitle.textContent =
                                 'No Matching Sessions';
@@ -1262,26 +1432,45 @@
 
                         if (emptySub) {
                             emptySub.textContent =
-                                'The selected filters did not match any active sessions.';
+                                'The selected panel filters did not match any active sessions.';
                         }
 
                         if (clearSearchBtn) {
                             clearSearchBtn.innerHTML =
-                                '<i class="fa-solid fa-rotate-left"></i> Clear filters';
+                                '<i class="fa-solid fa-rotate-left"></i> Clear panel filters';
 
                             clearSearchBtn.dataset.emptyAction =
                                 'filters';
                         }
 
-                    } else {
+                    } else if (hasRoleFilters) {
                         if (emptyTitle) {
                             emptyTitle.textContent =
-                                'No Active Sessions Found';
+                                'No Matching Sessions';
                         }
 
                         if (emptySub) {
                             emptySub.textContent =
-                                'There are no active sessions to display.';
+                                'No active sessions are available for the selected user roles.';
+                        }
+
+                        if (clearSearchBtn) {
+                            clearSearchBtn.style.display =
+                                'none';
+
+                            clearSearchBtn.dataset.emptyAction =
+                                'none';
+                        }
+
+                    } else {
+                        if (emptyTitle) {
+                            emptyTitle.textContent =
+                                'No Active Sessions';
+                        }
+
+                        if (emptySub) {
+                            emptySub.textContent =
+                                'There are currently no active user sessions to display.';
                         }
 
                         if (clearSearchBtn) {
@@ -1293,15 +1482,15 @@
                         }
                     }
 
-                    if (
-                        clearSearchBtn &&
-                        (
+                    if (clearSearchBtn) {
+                        const shouldShowEmptyAction =
                             query !== '' ||
-                            hasActiveFilters
-                        )
-                    ) {
+                            hasPanelFilters;
+
                         clearSearchBtn.style.display =
-                            '';
+                            shouldShowEmptyAction ?
+                            '' :
+                            'none';
                     }
 
                 } else {
@@ -1310,18 +1499,33 @@
                             'sessionAdminGridView'
                         );
 
-                    sessionList?.style.removeProperty(
-                        'display'
-                    );
-
-                    gridView?.style.removeProperty(
-                        'display'
-                    );
+                    const storedMode =
+                        localStorage.getItem(
+                            'admin_session_management_view'
+                        ) || 'list';
 
                     const activeMode =
-                        window.getGlobalViewMode?.(
-                            'sessionViewToggle'
-                        ) || 'list';
+                        storedMode === 'grid' ?
+                        'grid' :
+                        'list';
+
+                    if (sessionList) {
+                        sessionList.hidden =
+                            activeMode !== 'list';
+
+                        sessionList.style.removeProperty(
+                            'display'
+                        );
+                    }
+
+                    if (gridView) {
+                        gridView.hidden =
+                            activeMode !== 'grid';
+
+                        gridView.style.removeProperty(
+                            'display'
+                        );
+                    }
 
                     window.setGlobalViewMode?.(
                         'sessionViewToggle',
@@ -1329,6 +1533,9 @@
                             persist: false,
                         }
                     );
+
+                    topPagebarWrap &&
+                        (topPagebarWrap.style.display = '');
 
                     bottomPagebarWrap &&
                         (bottomPagebarWrap.style.display = '');
@@ -1378,20 +1585,20 @@
                     event.stopPropagation();
 
                     sessionFilterState = {
+                        ...sessionFilterState,
                         sort: 'recent',
-                        role: 'all',
                         device: 'all',
                         scope: 'all'
                     };
 
                     sessionFilterDraft = {
-                        ...sessionFilterState
+                        ...sessionFilterState,
+                        roles: [...sessionFilterState.roles]
                     };
 
                     syncSessionFilterInputs();
                     applySessionFilters();
                     updateSessionFilterButton();
-                    updateSessionRoleQuickFilters();
                 }
             );
 
@@ -1459,20 +1666,20 @@
 
                     if (action === 'filters') {
                         sessionFilterState = {
+                            ...sessionFilterState,
                             sort: 'recent',
-                            role: 'all',
                             device: 'all',
                             scope: 'all'
                         };
 
                         sessionFilterDraft = {
-                            ...sessionFilterState
+                            ...sessionFilterState,
+                            roles: [...sessionFilterState.roles]
                         };
 
                         syncSessionFilterInputs();
                         applySessionFilters();
                         updateSessionFilterButton();
-                        updateSessionRoleQuickFilters();
                         return;
                     }
 
@@ -1511,93 +1718,299 @@
                 }
             );
 
-            const sessionRoleQuickFilters =
-                document.querySelectorAll('.session-role-filter');
+            function syncSessionRoleFilterSelect() {
+                const root = document.getElementById('sessionRoleFilter');
+                if (!root) return;
 
-            function updateSessionRoleQuickFilters() {
-                sessionRoleQuickFilters.forEach(button => {
-                    const role = button.dataset.role;
+                const selectedRoles = normalizeSessionRoleValues(
+                    sessionFilterState.roles
+                );
 
-                    button.classList.toggle(
-                        'active',
-                        sessionFilterState.role === role
+                const input = root.querySelector('[data-filter-select-input]');
+                const label = root.querySelector('[data-filter-select-label]');
+                const count = root.querySelector('[data-filter-select-count]');
+                const options = Array.from(
+                    root.querySelectorAll('[data-filter-select-option]')
+                );
+
+                options.forEach(option => {
+                    const value = String(option.dataset.value || '');
+                    const active = selectedRoles.includes('all') ?
+                        value === 'all' :
+                        selectedRoles.includes(value);
+
+                    option.classList.toggle('is-active', active);
+                    option.setAttribute(
+                        'aria-selected',
+                        active ? 'true' : 'false'
                     );
                 });
+
+                const serialized = selectedRoles.join(',');
+
+                if (input) {
+                    input.value = serialized;
+                }
+
+                root.dataset.filterSelectValue = serialized;
+
+                if (label) {
+                    if (selectedRoles.includes('all')) {
+                        label.textContent = 'All Roles';
+                    } else if (selectedRoles.length === 1) {
+                        const selectedOption = options.find(option =>
+                            selectedRoles.includes(
+                                String(option.dataset.value || '')
+                            )
+                        );
+
+                        label.textContent =
+                            selectedOption?.dataset.label || '1 selected';
+                    } else {
+                        label.textContent = `${selectedRoles.length} selected`;
+                    }
+                }
+
+                if (count) {
+                    const selectedCount = selectedRoles.includes('all') ?
+                        0 :
+                        selectedRoles.length;
+
+                    count.textContent = selectedCount ?
+                        String(selectedCount) :
+                        '';
+
+                    count.classList.toggle('hidden', selectedCount === 0);
+                }
             }
 
-            sessionRoleQuickFilters.forEach(button => {
-                button.addEventListener('click', function() {
-                    const role = this.dataset.role;
+            window.handleSessionRoleFilter = function(values) {
+                sessionFilterState.roles = normalizeSessionRoleValues(values);
+                sessionFilterDraft = {
+                    ...sessionFilterState,
+                    roles: [...sessionFilterState.roles]
+                };
 
-                    sessionFilterState.role =
-                        sessionFilterState.role === role ?
-                        'all' :
-                        role;
+                syncSessionRoleFilterSelect();
+                applySessionFilters();
+            };
 
-                    sessionFilterDraft = {
-                        ...sessionFilterState
-                    };
-
-                    syncSessionFilterInputs();
-                    applySessionFilters();
-                    updateSessionFilterButton();
-                    updateSessionRoleQuickFilters();
-                });
-            });
-
-            window.initSearchClearButtons?.(document);
-
-            window.initGlobalVoiceInputs?.(document);
-
-            window.initGlobalViewToggles?.(document);
-
-            window.PatientUI?.initAvatars?.(document);
 
             updateSessionFilterButton();
-            updateSessionRoleQuickFilters();
+            syncSessionRoleFilterSelect();
             applySessionFilters();
 
-            document.querySelectorAll('.trigger-session-logout').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const action = this.dataset.action;
-                    const title = this.dataset.title;
-                    const user = this.dataset.user;
-                    const email = this.dataset.email;
-                    const device = this.dataset.device;
+            async function initializeSessionRefreshWatcher() {
+                if (!sessionRefreshWatcher) {
+                    return;
+                }
 
-                    if (confirmForm) confirmForm.action = action;
-                    if (confirmTitle) confirmTitle.textContent = title;
-                    if (confirmName) confirmName.textContent = user;
-                    if (confirmEmail) confirmEmail.textContent = email;
-                    if (confirmDevice) confirmDevice.textContent = device;
+                try {
+                    const response =
+                        await fetch(
+                            getSessionManagementCheckUrl(), {
+                                cache: 'no-store',
 
-                    if (confirmModal) {
-                        confirmModal.classList.add('open');
-                        confirmModal.setAttribute('aria-hidden', 'false');
+                                credentials: 'same-origin',
+
+                                headers: {
+                                    'Accept': 'application/json',
+
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                            }
+                        );
+
+                    if (!response.ok) {
+                        return;
                     }
-                });
-            });
 
-            function closeConfirmModal() {
-                if (!confirmModal) return;
-                confirmModal.classList.add('closing');
-                confirmModal.classList.remove('open');
+                    const payload =
+                        await response.json();
 
-                setTimeout(() => {
-                    confirmModal.classList.remove('closing');
-                    confirmModal.setAttribute('aria-hidden', 'true');
-                }, 200);
+                    sessionRefreshWatcher.sync(
+                        payload
+                    );
+
+                    sessionRefreshWatcher.start();
+
+                } catch (error) {
+                    console.warn(
+                        'Unable to initialize session refresh watcher:',
+                        error
+                    );
+                }
             }
 
-            document.querySelectorAll('.close-session-modal').forEach(btn => {
-                btn.addEventListener('click', closeConfirmModal);
-            });
+            initializeSessionRefreshWatcher();
 
-            if (confirmModal) {
-                confirmModal.addEventListener('click', function(e) {
-                    if (e.target === this) closeConfirmModal();
+            let sessionRefreshWatcher = window
+                .initGlobalRefreshWatcher?.({
+                    key: 'session-management',
+
+                    url: getSessionManagementCheckUrl,
+
+                    interval: 5000,
+
+                    initialItems: [],
+
+                    autoStart: false,
+
+                    autoApply: false,
+
+                    anchorSelector: '#mainContent .table-card',
+
+                    itemLabel: 'session update',
+
+                    getItems: function(payload) {
+                        const signature =
+                            String(
+                                payload
+                                ?.signature ||
+                                ''
+                            );
+
+                        return signature ? [{
+                            id: signature,
+                        }] : [];
+                    },
+
+                    getItemId: function(item) {
+                        return item?.id;
+                    },
+
+                    title: function() {
+                        return (
+                            'Session activity changed'
+                        );
+                    },
+
+                    subtitle: function() {
+                        return (
+                            'Refresh to load the latest active sessions.'
+                        );
+                    },
+
+                    onRefresh: async function(
+                        payload,
+                        newItems,
+                        context
+                    ) {
+                        updateSessionStats(
+                            payload?.stats || {}
+                        );
+
+                        await refreshSessionManagement(
+                            payload,
+                            context
+                        );
+                    },
+
+                    toast: {
+                        type: 'success',
+
+                        title: 'Sessions updated',
+
+                        message: 'Latest active sessions are now shown.',
+                    },
                 });
+
+            function updateSessionStats(
+                stats = {}
+            ) {
+                const statValues = {
+                    activeSessionsStat: stats.total_sessions,
+
+                    activeUsersStat: stats.active_users,
+
+                    otherSessionsStat: stats.other_sessions,
+
+                    activeDevicesStat: stats.active_devices,
+                };
+
+                Object.entries(
+                    statValues
+                ).forEach(
+                    ([id, value]) => {
+                        const element =
+                            document.getElementById(
+                                id
+                            );
+
+                        if (
+                            !element ||
+                            value === undefined ||
+                            value === null
+                        ) {
+                            return;
+                        }
+
+                        element.textContent =
+                            Number(value)
+                            .toLocaleString();
+                    }
+                );
             }
+
+            document.addEventListener(
+                'click',
+                function(event) {
+                    const btn =
+                        event.target.closest(
+                            '.trigger-session-logout'
+                        );
+
+                    if (!btn) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    const action =
+                        btn.dataset.action;
+
+                    const title =
+                        btn.dataset.title;
+
+                    const user =
+                        btn.dataset.user;
+
+                    const email =
+                        btn.dataset.email;
+
+                    const device =
+                        btn.dataset.device;
+
+                    if (confirmForm) {
+                        confirmForm.action =
+                            action;
+                    }
+
+                    if (confirmTitle) {
+                        confirmTitle.textContent =
+                            title;
+                    }
+
+                    if (confirmName) {
+                        confirmName.textContent =
+                            user;
+                    }
+
+                    if (confirmEmail) {
+                        confirmEmail.textContent =
+                            email;
+                    }
+
+                    if (confirmDevice) {
+                        confirmDevice.textContent =
+                            device;
+                    }
+
+                    window.openModal?.(
+                        'sessionConfirmModal'
+                    );
+                }
+            );
         });
     </script>
 @endsection

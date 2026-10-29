@@ -331,22 +331,37 @@ body.role-patient #sidebar .nav-section-label {
         transform .18s ease;
 }
 
-#sidebar .sidebar-group-icon {
+.sidebar-group-icon {
     width: 30px;
     height: 30px;
     min-width: 30px;
     flex: 0 0 30px;
+
     display: grid;
     place-items: center;
-    border: 1px solid var(--sidebar-icon-border);
+
+    border:
+        1px solid var(--sidebar-icon-border);
+
     border-radius: 10px;
-    background: var(--sidebar-icon-surface);
-    color: var(--sidebar-icon-color);
+
+    background:
+        var(--sidebar-icon-surface);
+
+    color:
+        var(--sidebar-icon-color);
+
     font-size: 12px;
-    transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+
+    transition:
+        background-color .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
 }
 
-#sidebar .sidebar-group-icon i {
+.sidebar-group-icon i {
     color: inherit;
 }
 
@@ -946,52 +961,6 @@ body.sidebar-collapsed #sidebar .sidebar-control-icon {
 .sidebar-theme-popover-option.active {
     background: linear-gradient(135deg, var(--sidebar-active-from), var(--sidebar-active-to));
     color: var(--sidebar-active-text);
-}
-
-#sidebar:not(.collapsed) .logout-btn {
-    position: relative;
-    width: 100%;
-    min-height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 11px;
-    margin: 0;
-    padding: 7px 10px;
-    border: 1px solid var(--sidebar-logout-border);
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--sidebar-logout-bg-start), var(--sidebar-logout-bg-end));
-    color: var(--sidebar-logout-text);
-    cursor: pointer;
-    overflow: hidden;
-    font-size: 12px;
-    font-weight: 800;
-    transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
-}
-
-#sidebar:not(.collapsed) .logout-btn .sidebar-control-icon {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    display: grid;
-    place-items: center;
-    border-radius: 9px;
-    background: var(--sidebar-logout-icon-bg);
-    color: var(--sidebar-logout-text);
-    transition: background .18s ease, color .18s ease, transform .18s ease;
-}
-
-#sidebar:not(.collapsed) .logout-btn:hover {
-    background: linear-gradient(135deg, var(--sidebar-logout-hover-start), var(--sidebar-logout-hover-end));
-    border-color: transparent;
-    color: var(--sidebar-logout-hover-text);
-    transform: translateY(-1px);
-    box-shadow: none;
-}
-
-#sidebar:not(.collapsed) .logout-btn:hover .sidebar-control-icon {
-    background: var(--sidebar-logout-hover-icon-bg);
-    color: var(--sidebar-logout-hover-text);
 }
 
 #mobileMenuBtn {

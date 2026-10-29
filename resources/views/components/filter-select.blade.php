@@ -170,6 +170,12 @@
 
                 <span class="global-filter-select-option-meta">
 
+                    @if (($option['count'] ?? null) !== null)
+                        <span class="global-filter-select-option-count">
+                            {{ $option['count'] }}
+                        </span>
+                    @endif
+
                     @if ($multiple)
                         <span class="global-filter-select-checkbox" aria-hidden="true">
                             <i class="fa-solid fa-check"></i>

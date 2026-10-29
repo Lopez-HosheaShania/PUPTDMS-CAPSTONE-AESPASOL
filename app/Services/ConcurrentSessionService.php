@@ -214,6 +214,132 @@ class ConcurrentSessionService
             ->get();
     }
 
+    public function getAdminSessionLiveSignature(): string
+    {
+        if (!$this->isEnabled()) {
+            return hash(
+                'sha256',
+                'session-management-disabled'
+            );
+        }
+
+        $query = DB::table(
+            $this->sessionTable() .
+                ' as sessions'
+        )
+            ->leftJoin(
+                'users',
+                'users.id',
+                '=',
+                'sessions.user_id'
+            )
+            ->leftJoin(
+                'roles',
+                'roles.id',
+                '=',
+                'users.role_id'
+            )
+            ->select([
+                'sessions.id',
+                'sessions.user_id',
+                'sessions.ip_address',
+                'sessions.user_agent',
+                'users.status as user_status',
+                'roles.slug as role_slug',
+            ])
+            ->whereNotNull(
+                'sessions.user_id'
+            )
+            ->where(
+                'sessions.last_activity',
+                '>=',
+                $this->activeCutoffTimestamp()
+            );
+
+        if (
+            $this->supportsSessionBrowserNameColumn()
+        ) {
+            $query->addSelect(
+                'sessions.browser_name'
+            );
+        }
+
+        if (
+            $this->supportsSessionDeviceColumns()
+        ) {
+            $query->addSelect([
+                'sessions.device_type',
+                'sessions.device_name',
+                'sessions.os_name',
+            ]);
+        }
+
+        $snapshot = $query
+            ->orderBy('sessions.id')
+            ->get()
+            ->map(function (object $session) {
+                return [
+                    'id' =>
+                    (string) $session->id,
+
+                    'user_id' =>
+                    (int) $session->user_id,
+
+                    'status' =>
+                    (string) (
+                        $session->user_status ??
+                        ''
+                    ),
+
+                    'role' =>
+                    (string) (
+                        $session->role_slug ??
+                        ''
+                    ),
+
+                    'ip' =>
+                    (string) (
+                        $session->ip_address ??
+                        ''
+                    ),
+
+                    'device_type' =>
+                    (string) (
+                        $session->device_type ??
+                        ''
+                    ),
+
+                    'device_name' =>
+                    (string) (
+                        $session->device_name ??
+                        ''
+                    ),
+
+                    'os' =>
+                    (string) (
+                        $session->os_name ??
+                        ''
+                    ),
+
+                    'browser' =>
+                    (string) (
+                        $session->browser_name ??
+                        ''
+                    ),
+                ];
+            })
+            ->values()
+            ->all();
+
+        return hash(
+            'sha256',
+            json_encode(
+                $snapshot,
+                JSON_UNESCAPED_SLASHES
+            )
+        );
+    }
+
     public function sessionsForDisplay(User $user, string $currentSessionId): Collection
     {
         return $this->activeSessionsForUser($user)
@@ -388,13 +514,30 @@ class ConcurrentSessionService
         }
 
         $sort = $this->normalizeSessionSort($filters['sort'] ?? 'recent');
-        $role = trim((string) ($filters['role'] ?? ''));
+        $roles = $this->normalizeAdminSessionRoles(
+            $filters['roles'] ??
+                $filters['role'] ??
+                'all'
+        );
         $device = $this->normalizeSessionDeviceType($filters['device'] ?? 'all');
         $scope = $this->normalizeSessionScope($filters['scope'] ?? 'all');
         $search = trim((string) ($filters['search'] ?? ''));
 
-        if ($role !== '' && $role !== 'all') {
-            $query->where('roles.slug', $role);
+        if (!in_array('all', $roles, true)) {
+            $databaseRoles = $roles;
+
+            if (in_array('admin', $roles, true)) {
+                $databaseRoles[] = 'super_admin';
+            }
+
+            $query->whereIn(
+                'roles.slug',
+                array_values(
+                    array_unique(
+                        $databaseRoles
+                    )
+                )
+            );
         }
 
         if ($scope === 'current') {
@@ -482,20 +625,145 @@ class ConcurrentSessionService
         return $paginator;
     }
 
-    public function getAdminSessionStats(): array
-    {
-        $baseQuery = DB::table($this->sessionTable() . ' as sessions')
-            ->leftJoin('users', 'users.id', '=', 'sessions.user_id')
-            ->leftJoin('roles', 'roles.id', '=', 'users.role_id')
+    public function getAdminSessionStats(
+        ?string $currentSessionId = null
+    ): array {
+        $currentSessionId ??= session()->getId();
+
+        $baseQuery = DB::table(
+            $this->sessionTable() . ' as sessions'
+        )
+            ->leftJoin(
+                'users',
+                'users.id',
+                '=',
+                'sessions.user_id'
+            )
+            ->leftJoin(
+                'roles',
+                'roles.id',
+                '=',
+                'users.role_id'
+            )
             ->whereNotNull('sessions.user_id')
-            ->where('sessions.last_activity', '>=', $this->activeCutoffTimestamp());
+            ->where(
+                'sessions.last_activity',
+                '>=',
+                $this->activeCutoffTimestamp()
+            );
+
+        $deviceQuery = clone $baseQuery;
+
+        $deviceQuery->select([
+            'sessions.id',
+            'sessions.user_id',
+            'sessions.ip_address',
+            'sessions.user_agent',
+        ]);
+
+        if ($this->supportsSessionDeviceColumns()) {
+            $deviceQuery->addSelect([
+                'sessions.device_type',
+                'sessions.device_name',
+                'sessions.os_name',
+            ]);
+        }
+
+        $activeDevices = $deviceQuery
+            ->get()
+            ->map(function (object $session) {
+                $userAgent =
+                    (string) (
+                        $session->user_agent ?? ''
+                    );
+
+                $deviceName =
+                    $session->device_name ??
+                    BrowserDetection::deviceNameForDisplay(
+                        null,
+                        $userAgent
+                    );
+
+                $osName =
+                    $session->os_name ??
+                    BrowserDetection::detectOperatingSystem(
+                        $userAgent
+                    );
+
+                return implode('|', [
+                    (string) $session->user_id,
+                    (string) (
+                        $session->ip_address ??
+                        'unknown'
+                    ),
+                    strtolower(
+                        trim(
+                            (string) $deviceName
+                        )
+                    ),
+                    strtolower(
+                        trim(
+                            (string) $osName
+                        )
+                    ),
+                ]);
+            })
+            ->filter()
+            ->unique()
+            ->count();
+
+        $totalSessions =
+            (clone $baseQuery)
+            ->count();
+
+        $otherSessions =
+            $currentSessionId
+            ? (clone $baseQuery)
+            ->where(
+                'sessions.id',
+                '!=',
+                $currentSessionId
+            )
+            ->count()
+            : $totalSessions;
 
         return [
-            'total_sessions' => (clone $baseQuery)->count(),
-            'active_users' => (clone $baseQuery)->distinct('sessions.user_id')->count('sessions.user_id'),
-            'admin_sessions' => (clone $baseQuery)->whereIn('roles.slug', ['admin', 'super_admin'])->count(),
-            'dentist_sessions' => (clone $baseQuery)->where('roles.slug', 'dentist')->count(),
-            'patient_sessions' => (clone $baseQuery)->where('roles.slug', 'patient')->count(),
+            'total_sessions' => $totalSessions,
+
+            'active_users' => (clone $baseQuery)
+                ->distinct(
+                    'sessions.user_id'
+                )
+                ->count(
+                    'sessions.user_id'
+                ),
+
+            'other_sessions' => $otherSessions,
+            'active_devices' => $activeDevices,
+
+            'admin_sessions' => (clone $baseQuery)
+                ->whereIn(
+                    'roles.slug',
+                    [
+                        'admin',
+                        'super_admin',
+                    ]
+                )
+                ->count(),
+
+            'dentist_sessions' => (clone $baseQuery)
+                ->where(
+                    'roles.slug',
+                    'dentist'
+                )
+                ->count(),
+
+            'patient_sessions' => (clone $baseQuery)
+                ->where(
+                    'roles.slug',
+                    'patient'
+                )
+                ->count(),
         ];
     }
 
@@ -678,6 +946,52 @@ class ConcurrentSessionService
         }
 
         return $supportsColumns;
+    }
+
+    protected function normalizeAdminSessionRoles(
+        mixed $roles
+    ): array {
+        $values = is_array($roles)
+            ? $roles
+            : explode(
+                ',',
+                (string) $roles
+            );
+
+        $values = collect($values)
+            ->map(
+                fn($role) =>
+                strtolower(
+                    trim(
+                        (string) $role
+                    )
+                )
+            )
+            ->filter(
+                fn($role) =>
+                in_array(
+                    $role,
+                    [
+                        'all',
+                        'admin',
+                        'dentist',
+                        'patient',
+                    ],
+                    true
+                )
+            )
+            ->unique()
+            ->values()
+            ->all();
+
+        if (
+            empty($values) ||
+            in_array('all', $values, true)
+        ) {
+            return ['all'];
+        }
+
+        return $values;
     }
 
     protected function normalizeSessionSort(mixed $sort): string

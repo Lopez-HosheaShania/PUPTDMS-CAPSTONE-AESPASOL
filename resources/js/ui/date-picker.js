@@ -632,19 +632,23 @@ function initGlobalFlatpickr() {
             ).matches;
 
         const shouldPortalToBody =
-            !parentPopup &&
-            (
-                isMobileFlatpickr ||
-                el.hasAttribute(
-                    'data-flatpickr-append-to-body'
-                )
+            isMobileFlatpickr ||
+            el.hasAttribute(
+                'data-flatpickr-append-to-body'
             );
 
         options.appendTo =
-            parentPopup ||
-            document.body;
+            shouldPortalToBody
+                ? document.body
+                : (
+                    parentPopup ||
+                    document.body
+                );
 
-        if (parentPopup) {
+        if (
+            parentPopup &&
+            !shouldPortalToBody
+        ) {
             options.positionElement =
                 el;
         }
