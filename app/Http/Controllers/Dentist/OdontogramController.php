@@ -702,6 +702,13 @@ class OdontogramController extends Controller
         array $validated,
         bool $allowUnassignedDentistCorrection = false
     ): array {
+        $assigned = $appointment->dentist;
+        if ($assigned && $assigned->role && ! \App\Services\AssignedDentistService::isDentist($assigned)) {
+            $appointment->dentist_id = app(\App\Services\AssignedDentistService::class)
+                ->requireForPatient($appointment->patient_id, Auth::user())->id;
+            $appointment->unsetRelation('dentist');
+        }
+
         if (!$allowUnassignedDentistCorrection) {
             abort_if(
                 in_array(
@@ -981,6 +988,7 @@ class OdontogramController extends Controller
 
             $appointmentUpdate = [
                 'status' => 'completed',
+                'dentist_id' => $appointment->dentist_id,
                 'updated_at' => now(),
             ];
 
@@ -2161,7 +2169,7 @@ class OdontogramController extends Controller
 
         $appointmentPayload = [
             'patient_id' => $patient->id,
-            'dentist_id' => auth()->id(),
+            'dentist_id' => app(\App\Services\AssignedDentistService::class)->requireForPatient($patient->id, Auth::user())->id,
             'service_type_id' => $serviceType->id,
             'service_type' => $serviceType->name,
             'appointment_date' => $appointmentDate,

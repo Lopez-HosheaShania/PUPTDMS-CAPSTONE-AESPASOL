@@ -70,7 +70,7 @@ class PermissionMiddleware
                 return true;
             }
 
-            if (!$activeRoleSlug) {
+            if (!$activeRoleSlug || session()->has('impersonated_role')) {
                 return false;
             }
 

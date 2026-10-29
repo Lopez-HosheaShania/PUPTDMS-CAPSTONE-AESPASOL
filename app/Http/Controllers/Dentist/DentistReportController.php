@@ -283,6 +283,7 @@ class DentistReportController extends Controller
 
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($templatePage, 0, 0, $size['width'], $size['height'], true);
+            app(\App\Services\ReportSignatory::class)->draw($pdf, $template->document_type);
         }
 
         AuditLogger::log(
@@ -441,7 +442,11 @@ class DentistReportController extends Controller
             abort(404, 'GAD report PDF template was not found.');
         }
 
-        $counts = $this->buildGadPdfCounts($from, $to);
+        $appointments = Appointment::with(['patient', 'procedure', 'dentist'])
+            ->where('status', 'completed')->whereHas('patient')
+            ->whereDate('appointment_date', '>=', $from->toDateString())
+            ->whereDate('appointment_date', '<=', $to->toDateString())->get();
+        $counts = $this->buildGadPdfCounts($from, $to, $appointments);
 
         $pdf = new Fpdi('P', 'pt');
         $pdf->SetAutoPageBreak(false);
@@ -477,6 +482,7 @@ class DentistReportController extends Controller
                 $from,
                 $to
             );
+            app(\App\Services\ReportSignatory::class)->draw($pdf, 'gad_report', $appointments);
         }
         AuditLogger::log(
             'download',
@@ -1130,6 +1136,7 @@ class DentistReportController extends Controller
                     $chunk->values(),
                     strtoupper(trim((string) ($templateRecord->code ?? '')))
                 );
+                app(\App\Services\ReportSignatory::class)->draw($pdf, 'daily_treatment_record', $chunk);
             }
         }
 
@@ -1342,6 +1349,7 @@ class DentistReportController extends Controller
                     $from,
                     $to
                 );
+                app(\App\Services\ReportSignatory::class)->draw($pdf, 'dental_cases', $appointments);
             }
         }
 
@@ -1433,6 +1441,7 @@ class DentistReportController extends Controller
             $pdf->useTemplate($template, 0, 0, $size['width'], $size['height'], true);
 
             $this->drawMonthlyReportPage($pdf, $reportData, $from, $to);
+            app(\App\Services\ReportSignatory::class)->draw($pdf, 'monthly_report', $appointments);
         }
 
         AuditLogger::log(
@@ -2491,7 +2500,7 @@ class DentistReportController extends Controller
                 $treatment = 'Dental Service';
             }
 
-            $attending = trim((string) ($appointment->dentist->name ?? ''));
+            $attending = (string) $appointment->dentist_name;
 
             if ($attending === '') {
                 $attending = 'Not assigned';
@@ -3696,7 +3705,7 @@ class DentistReportController extends Controller
         $pdf->Cell($width, $height, $text, 0, 0, 'C');
     }
 
-    private function buildGadPdfCounts(Carbon $from, Carbon $to): array
+    private function buildGadPdfCounts(Carbon $from, Carbon $to, ?\Illuminate\Support\Collection $appointments = null): array
     {
         $counts = [
             'gad_male' => [0, 0, 0, 0, 0],
@@ -3708,7 +3717,7 @@ class DentistReportController extends Controller
             'total' => [0, 0, 0, 0, 0],
         ];
 
-        $appointments = Appointment::with('patient')
+        $appointments ??= Appointment::with('patient')
             ->where('status', 'completed')
             ->whereDate('appointment_date', '>=', $from->toDateString())
             ->whereDate('appointment_date', '<=', $to->toDateString())
@@ -3895,9 +3904,6 @@ class DentistReportController extends Controller
             ? Carbon::parse($documentRequest->approved_at)->format('F d, Y')
             : Carbon::parse($documentRequest->updated_at)->format('F d, Y');
 
-        $dentistName = $this->getCurrentDentistNameForPdf();
-        $licenseNumber = (string) config('app.dentist_license_no', '');
-
         $pdf->SetTextColor(0, 0, 0);
 
         $pdf->SetFont('Helvetica', '', 10.5);
@@ -3909,39 +3915,7 @@ class DentistReportController extends Controller
         $pdf->SetFont('Helvetica', '', 10.5);
         $this->drawCenteredPdfText($pdf, 492, 302, $examinedDate, 140, 12);
 
-        if ($dentistName !== '') {
-            $pdf->SetFont('Helvetica', 'B', 10.5);
-            $this->drawCenteredPdfText($pdf, 448, 418, $dentistName, 134, 12);
-        }
-
-        if ($licenseNumber !== '') {
-            $pdf->SetFont('Helvetica', '', 10.5);
-            $this->drawCenteredPdfText($pdf, 492, 440, $licenseNumber, 129, 12);
-        }
-    }
-
-    private function getCurrentDentistNameForPdf(): string
-    {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        if (! $user) {
-            return '';
-        }
-
-        $directName = trim((string) ($user->name ?? ''));
-
-        if ($directName !== '') {
-            return $directName;
-        }
-
-        $parts = array_filter([
-            $user->first_name ?? null,
-            $user->middle_name ?? null,
-            $user->last_name ?? null,
-        ]);
-
-        return trim(implode(' ', $parts));
+        $this->drawClearanceSignatory($pdf, $documentRequest, 419.611, 441.68);
     }
 
     private function drawDentalClearancePage(Fpdi $pdf, DocumentRequest $documentRequest): void
@@ -3957,9 +3931,6 @@ class DentistReportController extends Controller
             ? Carbon::parse($documentRequest->approved_at)->format('F d, Y')
             : Carbon::parse($documentRequest->updated_at)->format('F d, Y');
 
-        $dentistName = $this->getCurrentDentistNameForPdf();
-        $licenseNumber = (string) config('app.dentist_license_no', '');
-
         $pdf->SetTextColor(0, 0, 0);
 
         $pdf->SetFont('Helvetica', '', 10.5);
@@ -3971,14 +3942,33 @@ class DentistReportController extends Controller
         $pdf->SetFont('Helvetica', '', 10.5);
         $this->drawCenteredPdfText($pdf, 492, 302, $examinedDate, 140, 12);
 
-        if ($dentistName !== '') {
-            $pdf->SetFont('Helvetica', 'B', 10.5);
-            $this->drawCenteredPdfText($pdf, 448, 418, $dentistName, 134, 12);
-        }
+        $this->drawClearanceSignatory($pdf, $documentRequest, 423.766, 445.835);
+    }
 
-        if ($licenseNumber !== '') {
+    private function drawClearanceSignatory(Fpdi $pdf, DocumentRequest $documentRequest, float $nameLineY, float $licenseLineY): void
+    {
+        $profile = app(\App\Services\ReportSignatory::class)->documentProfile($documentRequest);
+        $name = $this->preparePdfText(\App\Services\ReportSignatory::dentistNameForReport(
+            $profile?->name ?? \App\Support\DentistName::forDocumentRequest($documentRequest),
+            addSuffix: false,
+        ));
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFont('Helvetica', 'B', 10.5);
+        $nameWidth = $pdf->GetStringWidth($name);
+        if ($nameWidth > 134) {
+            $pdf->SetFont('Helvetica', 'B', 10.5 * 134 / $nameWidth);
+            $nameWidth = $pdf->GetStringWidth($name);
+        }
+        if ($path = $profile?->signaturePath()) {
+            $this->drawPdfImageInBox($pdf, $path, 448, $nameLineY - 19, min(125, max(1, $nameWidth)), 26, false);
+        }
+        if ($name !== '') {
+            $pdf->Text(448 - $nameWidth / 2, $nameLineY - 1.5, $name);
+        }
+        if ($profile?->license_number) {
             $pdf->SetFont('Helvetica', '', 10.5);
-            $this->drawCenteredPdfText($pdf, 492, 440, $licenseNumber, 129, 12);
+            $license = $this->preparePdfText($profile->license_number);
+            $pdf->Text(491.64 - $pdf->GetStringWidth($license) / 2, $licenseLineY - 1.5, $license);
         }
     }
 

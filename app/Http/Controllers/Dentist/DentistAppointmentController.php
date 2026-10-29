@@ -163,6 +163,13 @@ class DentistAppointmentController extends Controller
 
     public function patientProfile(Appointment $appointment)
     {
+        if (Auth::user()?->hasAnyRole(['admin', 'super_admin'])) {
+            $patient = $appointment->patient;
+            abort_unless($patient, 404);
+
+            return app(\App\Http\Controllers\Admin\AdminPatientController::class)->show($patient, 'dentist');
+        }
+
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
@@ -517,7 +524,8 @@ class DentistAppointmentController extends Controller
 
         $followUpAppointment = Appointment::create([
             'patient_id' => $originalAppointment->patient_id,
-            'dentist_id' => auth()->id(),
+            'dentist_id' => app(\App\Services\AssignedDentistService::class)
+                ->requireForPatient($originalAppointment->patient_id, Auth::user())->id,
             'service_type_id' => $originalAppointment->service_type_id,
             'service_type' => $originalAppointment->service_type_name
                 ?? $originalAppointment->service_type,

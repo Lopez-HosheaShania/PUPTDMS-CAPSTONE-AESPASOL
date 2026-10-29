@@ -298,13 +298,8 @@ class AppointmentController extends Controller
             "Patient viewed appointment page"
         );
 
-        $clinicDentist = \App\Models\User::with('role')
-            ->whereHas('role', fn($q) => $q->where('slug', 'dentist'))
-            ->first();
-
         return view('patient.appointment', compact(
             'appointments',
-            'clinicDentist',
             'futureVisits',
             'pastVisits',
             'patient',
@@ -331,7 +326,7 @@ class AppointmentController extends Controller
         $patient = Patient::findOrFail($patientId);
         $availableReservedSlots = collect();
 
-        if ($failure = $this->maintenanceBookingFailure()) {
+        if ($failure = $this->maintenanceBookingFailure() ?? $this->personalInformationBookingFailure($patient)) {
             return $this->rejectPersonalInformationBooking($request, $failure);
         }
 
@@ -831,6 +826,10 @@ class AppointmentController extends Controller
             'medicalHistory.answers.question',
             'medicalHistory.diseaseAnswers.disease',
         ])->findOrFail($patientId);
+
+        if ($failure = $this->personalInformationBookingFailure($patient)) {
+            return $this->rejectPersonalInformationBooking($request, $failure);
+        }
 
         Appointment::cancelElapsedScheduledAppointments();
 

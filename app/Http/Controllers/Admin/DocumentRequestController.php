@@ -389,7 +389,7 @@ class DocumentRequestController extends Controller
         $dateTo   = trim((string) $request->get('date_to', ''));
         $sort     = trim((string) $request->get('sort', 'newest'));
 
-        $query = DocumentRequest::withStateColumns()->with('patient');
+        $query = DocumentRequest::withStateColumns()->with(['patient.studentInformation', 'patient.facultyInformation']);
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -428,20 +428,19 @@ class DocumentRequestController extends Controller
                                     "%{$search}%"
                                 )
                                 ->orWhereHas(
-                                    'information',
+                                    'studentInformation',
                                     function ($informationQuery) use ($search) {
                                         $informationQuery
                                             ->where(
                                                 'student_no',
                                                 'like',
                                                 "%{$search}%"
-                                            )
-                                            ->orWhere(
-                                                'faculty_code',
-                                                'like',
-                                                "%{$search}%"
                                             );
                                     }
+                                )
+                                ->orWhereHas(
+                                    'facultyInformation',
+                                    fn ($query) => $query->where('faculty_code', 'like', "%{$search}%")
                                 );
                         }
                     );
@@ -537,13 +536,10 @@ class DocumentRequestController extends Controller
         $patient = $documentRequest->patient;
         $createdAt = $documentRequest->created_at;
 
-        $patient?->loadMissing('information');
-
-        $patientIdentifier =
-            $patient?->information?->student_no
-            ?? $patient?->information?->faculty_code
-            ?? $patient?->id
-            ?? 'No ID set';
+        $studentNumber = trim((string) $patient?->student_no);
+        $facultyCode = trim((string) $patient?->faculty_code);
+        $patientIdentifier = $studentNumber !== '' ? $studentNumber
+            : ($facultyCode !== '' ? 'Faculty: ' . $facultyCode : 'No identity number');
 
         return [
             'id' => $documentRequest->id,

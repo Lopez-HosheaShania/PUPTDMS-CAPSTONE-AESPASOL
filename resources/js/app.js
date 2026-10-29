@@ -348,6 +348,10 @@ if (
     );
 }
 
+if (hasAny('#reportSignatoryModal')) {
+    import('./reports/report-signatory.js');
+}
+
 function loadSearchBarModule() {
     return loadFeature(
         'search-bar',
@@ -693,6 +697,14 @@ function loadDatePickerModule() {
 }
 
 window.loadDatePickerModule = loadDatePickerModule;
+
+if ([...document.querySelectorAll('.js-flatpickr-time')].some(input => input.value.trim())) {
+    loadDatePickerModule()
+        .then(module => module.initGlobalDatePickers(document))
+        .catch(error => {
+            console.error('Unable to initialize saved time display.', error);
+        });
+}
 
 async function ensureDatePickerReady(
     input

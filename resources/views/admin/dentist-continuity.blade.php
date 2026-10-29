@@ -1114,7 +1114,7 @@
     </main>
 @endsection
 
-@push('scripts')
+@section('scripts')
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', () => {
             const pageMode = @js($pageMode);
@@ -1657,4 +1657,4 @@
             }
         });
     </script>
-@endpush
+@endsection

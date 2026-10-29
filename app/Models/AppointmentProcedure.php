@@ -9,6 +9,21 @@ class AppointmentProcedure extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $procedure): void {
+            $actor = auth()->user();
+            if ($actor?->hasAnyRole(['dentist', 'dentist_role', 'head_dentist'])) {
+                $procedure->recorded_by = $actor->id;
+            }
+        });
+    }
+
+    public function recordedBy()
+    {
+        return $this->belongsTo(User::class, 'recorded_by');
+    }
+
     public function scopeForPatient($query, $patientId)
     {
         return $query->whereHas('appointment', fn ($appointment) => $appointment->where('appointments.patient_id', $patientId));
@@ -33,9 +48,9 @@ class AppointmentProcedure extends Model
         'procedure_duration_seconds' => 'integer',
     ];
 
-    protected $with = ['odontogram', 'timing'];
+    protected $with = ['odontogram', 'timing', 'recordedBy'];
 
-    protected $hidden = ['odontogram', 'timing', 'inventory_notes'];
+    protected $hidden = ['odontogram', 'timing', 'recordedBy', 'inventory_notes'];
 
     protected $appends = ['odontogram_data', 'procedure_started_at', 'procedure_completed_at', 'procedure_duration_seconds'];
 

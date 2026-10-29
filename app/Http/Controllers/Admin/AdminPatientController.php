@@ -99,7 +99,7 @@ class AdminPatientController extends Controller
         ]);
     }
 
-    public function show(Patient $patient)
+    public function show(Patient $patient, string $profileMode = 'admin')
     {
         $isBookingMode = request()->routeIs('admin.book_appointments.*');
 
@@ -152,8 +152,8 @@ class AdminPatientController extends Controller
             'lastVisit' => $lastVisit,
             'nextAppointment' => $nextAppointment,
             'notifications' => $notifications,
-            'profileLayout' => 'layouts.admin',
-            'profileMode' => 'admin',
+            'profileLayout' => 'layouts.' . $profileMode,
+            'profileMode' => $profileMode,
             'bookingMode' => $isBookingMode,
         ]);
     }

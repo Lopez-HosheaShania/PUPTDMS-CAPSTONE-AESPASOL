@@ -138,6 +138,11 @@ $customReportTemplates = collect($customReportTemplates ?? []);
             </div>
 
             <div class="report-hero-actions">
+                @if (\App\Services\ReportSignatory::canManage(auth()->user()))
+                <button type="button" class="ui-btn ui-btn-primary" data-open-modal="reportSignatoryModal" aria-haspopup="dialog" aria-controls="reportSignatoryModal">
+                    <i class="fa-solid fa-signature" aria-hidden="true"></i> Report signatory
+                </button>
+                @endif
                 <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-132d158d6401">
 
                     <i class="fa-solid fa-plus"></i>
@@ -154,12 +159,19 @@ $customReportTemplates = collect($customReportTemplates ?? []);
                     </h1>
                 </div>
 
+                <div class="report-hero-actions">
+                @if (\App\Services\ReportSignatory::canManage(auth()->user()))
+                <button type="button" class="ui-btn ui-btn-primary" data-open-modal="reportSignatoryModal" aria-haspopup="dialog" aria-controls="reportSignatoryModal">
+                    <i class="fa-solid fa-signature" aria-hidden="true"></i> Report signatory
+                </button>
+                @endif
                 @if ($canGenerateAiReports)
                 <button type="button" id="openAiReportConfirmModal" class="ui-btn ui-btn-primary">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     AI Generated Report
                 </button>
                 @endif
+                </div>
             </div>
         </div>
         @endif
@@ -1306,6 +1318,8 @@ $customReportTemplates = collect($customReportTemplates ?? []);
 
                     </div>
 </main>
+
+@include('shared.report-signatory')
 
 @if ($isDentistView)
 <div id="cancellationBreakdownModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"

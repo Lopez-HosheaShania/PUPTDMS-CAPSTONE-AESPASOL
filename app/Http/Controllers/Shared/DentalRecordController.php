@@ -272,6 +272,9 @@ class DentalRecordController extends Controller
                     })
                     ->orWhereHas('dentist', function (Builder $dentistQuery) use ($search) {
                         $dentistQuery->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('procedure.recordedBy', function (Builder $dentistQuery) use ($search) {
+                        $dentistQuery->where('name', 'like', "%{$search}%");
                     });
             });
         }
@@ -470,7 +473,7 @@ class DentalRecordController extends Controller
                 ? $appointment->service_type_name
                 : 'No service recorded',
 
-            'dentist_name' => $appointment->dentist?->name ?: '—',
+            'dentist_name' => $appointment->dentist_name ?: '—',
             'status' => $status,
 
             'date' => $appointmentDateTime

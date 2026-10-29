@@ -1,3 +1,5 @@
+import { validateSignatureUpload } from './signature-validation.js';
+
 function escapeSignatureHtml(value = '') {
     return String(value)
         .replaceAll('&', '&amp;')
@@ -516,64 +518,7 @@ function createBookingSignature(root) {
             };
         }
 
-        const formData =
-            new FormData();
-
-        formData.append(
-            'patient_signature',
-            file
-        );
-
-        const csrfToken =
-            document
-                .querySelector(
-                    'meta[name="csrf-token"]'
-                )
-                ?.getAttribute(
-                    'content'
-                ) || '';
-
-        const response =
-            await fetch(
-                validationUrl,
-                {
-                    method: 'POST',
-
-                    headers: {
-                        'X-CSRF-TOKEN':
-                            csrfToken,
-
-                        Accept:
-                            'application/json',
-                    },
-
-                    body:
-                        formData,
-                }
-            );
-
-        const data =
-            await response
-                .json()
-                .catch(() => ({}));
-
-        if (
-            !response.ok ||
-            data.valid === false ||
-            data.accepted === false
-        ) {
-            const error =
-                new Error(
-                    data.message ||
-                    declinedMessage
-                );
-
-            error.data = data;
-
-            throw error;
-        }
-
-        return data;
+        return validateSignatureUpload(file, validationUrl, { declinedMessage });
     }
 
     async function handleSignatureFile() {

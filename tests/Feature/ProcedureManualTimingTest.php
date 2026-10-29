@@ -225,6 +225,47 @@ class ProcedureManualTimingTest extends TestCase
         ]))->assertOk();
     }
 
+    #[DataProvider('sharedResources')]
+    public function test_odontogram_correction_preserves_unchanged_times_despite_existing_overlap(bool $samePatient): void
+    {
+        $dentist = $this->actor();
+        $visit = $this->visit($dentist);
+        $this->actingAs($dentist)->withSession(['role' => 'dentist']);
+        $this->postJson(route('dentist.odontogram.save', $visit), $this->payload([
+            'procedure_started_at' => '11:05:37', 'procedure_completed_at' => '11:06:38',
+        ]))->assertOk();
+
+        $overlapping = $this->visit($samePatient ? $this->actor() : $dentist, $samePatient ? $visit->patient : null);
+        $overlapping->update(['status' => 'completed']);
+        AppointmentProcedure::create([
+            'appointment_id' => $overlapping->id,
+            'procedure_started_at' => '2026-10-23 11:05:00',
+            'procedure_completed_at' => '2026-10-23 11:15:00',
+            'procedure_duration_seconds' => 600,
+        ]);
+        $this->get(route('dentist.odontogram.saved.edit', $visit))
+            ->assertOk()->assertSee('value="11:05"', false)->assertSee('value="00:01:01"', false);
+        $reason = \App\Models\OdontogramRevisionReasonType::where('code', 'wrong_tooth')->firstOrFail();
+        $payload = $this->payload([
+            'odontogram_data' => [['tooth' => 11, 'status' => ['code' => 'F', 'label' => 'Filled']]],
+            'has_applied_treatment' => true, 'reason_type_id' => $reason->id,
+            'procedure_started_at' => '11:05', 'procedure_completed_at' => null,
+            'procedure_duration_hms' => '00:01:01',
+        ]);
+        $url = route('dentist.odontogram.saved.update', $visit);
+
+        $this->postJson($url, array_replace($payload, ['procedure_started_at' => '11:07']))
+            ->assertUnprocessable()->assertJsonValidationErrors('procedure_started_at');
+        $this->assertSame([], $visit->fresh()->procedure->odontogram_data);
+
+        $this->postJson($url, $payload)->assertOk();
+        $procedure = $visit->fresh()->procedure;
+        $this->assertSame('2026-10-23 11:05:37', $procedure->procedure_started_at->toDateTimeString());
+        $this->assertSame('2026-10-23 11:06:38', $procedure->procedure_completed_at->toDateTimeString());
+        $this->assertSame(61, $procedure->procedure_duration_seconds);
+        $this->assertSame('F', $procedure->odontogram_data[0]['status']['code']);
+    }
+
     public function test_wrong_dentist_and_admin_cannot_change_clinical_timing(): void
     {
         $dentist = $this->actor();

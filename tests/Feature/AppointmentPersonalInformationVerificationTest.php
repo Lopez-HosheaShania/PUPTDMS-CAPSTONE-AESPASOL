@@ -50,6 +50,58 @@ class AppointmentPersonalInformationVerificationTest extends TestCase
         $this->assertDatabaseCount('appointments', 0);
     }
 
+    public function test_expired_token_is_refreshed_before_verifying_a_complete_profile(): void
+    {
+        config(['services.ogos.token_url' => 'https://ogos.test/token']);
+        Http::fake([
+            'https://ogos.test/token' => Http::response(['data' => ['accessToken' => 'fresh-token']]),
+            'https://ogos.test/api/v1/integrations/students/*/personal-info' => Http::sequence()
+                ->push(['error' => 'Unauthorized'], 401)
+                ->push(['data' => ['completionPercentage' => 100]]),
+        ]);
+
+        $this->getJson(route('book.appointment.verify-personal-information'))
+            ->assertOk()->assertJson(['verified' => true]);
+        $this->assertSame('fresh-token', Cache::get('ogos_student_api_access_token'));
+        Http::assertSent(fn ($request) => str_ends_with($request->url(), '/personal-info')
+            && $request->hasHeader('Authorization', 'Bearer fresh-token'));
+        Http::assertSentCount(3);
+    }
+
+    public function test_email_lookup_refreshes_an_expired_token_and_continues_verification(): void
+    {
+        auth()->user()->patient->update(['student_no' => null]);
+        config(['services.ogos.token_url' => 'https://ogos.test/token']);
+        Http::fake([
+            'https://ogos.test/token' => Http::response(['data' => ['accessToken' => 'fresh-token']]),
+            'https://ogos.test/api/v1/integrations/students/profile*' => Http::sequence()
+                ->push(['error' => 'Unauthorized'], 401)
+                ->push(['data' => ['studentNumber' => '2026-002']]),
+            'https://ogos.test/api/v1/integrations/students/2026-002/personal-info' => Http::response([
+                'data' => ['completionPercentage' => 100],
+            ]),
+        ]);
+
+        $this->getJson(route('book.appointment.verify-personal-information'))
+            ->assertOk()->assertJson(['verified' => true]);
+        Http::assertSentCount(4);
+    }
+
+    public function test_persistent_authentication_failure_stops_after_one_refresh_and_remains_unverified(): void
+    {
+        config(['services.ogos.token_url' => 'https://ogos.test/token']);
+        Http::fake([
+            'https://ogos.test/token' => Http::response(['data' => ['accessToken' => 'fresh-token']]),
+            'https://ogos.test/api/v1/integrations/students/*/personal-info' => Http::response(['error' => 'Unauthorized'], 401),
+        ]);
+
+        $this->getJson(route('book.appointment.verify-personal-information'))
+            ->assertStatus(503)->assertJson(['verified' => false, 'code' => 'personal_information_unverified'])
+            ->assertJsonPath('message', 'We could not verify your Personal Information from GUISIS.');
+        Http::assertSentCount(3);
+        $this->assertDatabaseCount('appointments', 0);
+    }
+
     private function personalInformationDetails(): array
     {
         return [

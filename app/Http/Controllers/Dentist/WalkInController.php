@@ -2937,7 +2937,7 @@ class WalkInController extends Controller
 
         $appointmentData = [
             'patient_id' => $patient->id,
-            'dentist_id' => Auth::id(),
+            'dentist_id' => app(\App\Services\AssignedDentistService::class)->requireForPatient($patient->id, Auth::user())->id,
             'service_type_id' => $serviceType->id,
             'appointment_date' => $now->toDateString(),
             'appointment_time' => $now->format('H:i:s'),

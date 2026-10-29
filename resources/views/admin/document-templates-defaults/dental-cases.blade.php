@@ -424,16 +424,16 @@
             <div class="signatures-row">
                 <div class="signature-card">
                     <div class="signature-label">Prepared by:</div>
-                    <img class="signature-image" src="/images/sir.lim-sign.png" alt="Dental Aide Signature" onerror="this.style.display='none'">
-                    <div class="signature-name">Ronilo I. Lim</div>
-                    <div class="signature-role">Dental Aide</div>
+                    <img class="signature-image" src="{{prepared_by_signature}}" alt="Prepared by signature" onerror="this.style.display='none'">
+                    <div class="signature-name">{{prepared_by}}</div>
+                    <div class="signature-role">{{prepared_by_role}}</div>
                 </div>
 
                 <div class="signature-card">
                     <div class="signature-label">Submitted by:</div>
-                    <img class="signature-image" src="/images/dr.angeles-sign.png" alt="Dentist Signature" onerror="this.style.display='none'">
-                    <div class="signature-name">Nelson P. Angeles, DMD</div>
-                    <div class="signature-role">Dentist II</div>
+                    <img class="signature-image" src="{{dentist_signature}}" alt="Dentist Signature" onerror="this.style.display='none'">
+                    <div class="signature-name">{{dentist_name}}</div>
+                    <div class="signature-role">Dentist</div>
                 </div>
             </div>
         </div>

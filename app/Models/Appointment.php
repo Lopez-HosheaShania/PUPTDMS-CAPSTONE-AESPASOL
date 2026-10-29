@@ -337,6 +337,13 @@ class Appointment extends Model
         return $this->belongsTo(User::class, 'dentist_id');
     }
 
+    public function getDentistNameAttribute(): ?string
+    {
+        $name = \App\Support\DentistName::forAppointment($this);
+
+        return $name !== '' ? $name : null;
+    }
+
     public function originalDentist()
     {
         return $this->belongsTo(User::class, 'original_dentist_id');

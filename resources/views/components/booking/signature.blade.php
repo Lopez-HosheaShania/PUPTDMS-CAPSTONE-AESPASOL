@@ -5,6 +5,11 @@
     'drawHelp' => null,
     'hasExistingSignature' => false,
     'existingSignatureUrl' => null,
+    'inputName' => 'patient_signature',
+    'inputId' => 'patient_signature',
+    'required' => true,
+    'showResult' => true,
+    'drawnFilePrefix' => null,
 ])
 
 @php
@@ -21,7 +26,7 @@
 <div class="booking-section-card signature-booking-section-card" data-global-field data-booking-signature
     data-signature-mode="{{ $mode }}" data-has-existing-signature="{{ $hasExistingSignature ? 'true' : 'false' }}"
     data-signature-validation-url="{{ $mode === 'patient' ? route('book.appointment.validate-signature') : '' }}"
-    data-signature-drawn-prefix="{{ $isDrawOnly ? 'walk-in-signature' : 'drawn-signature' }}">
+    data-signature-drawn-prefix="{{ $drawnFilePrefix ?? ($isDrawOnly ? 'walk-in-signature' : 'drawn-signature') }}">
 
     <div class="signature-full-row">
 
@@ -65,7 +70,7 @@
         </div>
 
         @if (!$isReadOnly)
-            <input type="hidden" name="reuse_existing_signature" id="reuse_existing_signature"
+            <input type="hidden" @if ($inputName) name="reuse_existing_signature" @endif id="reuse_existing_signature"
                 value="{{ $hasExistingSignature ? '1' : '0' }}">
         @endif
 
@@ -73,18 +78,20 @@
 
             <div id="signatureEditorWrapper" class="{{ $hasExistingSignature ? 'hidden' : '' }}">
 
-                <label class="global-form-label" for="patient_signature">
+                <label class="global-form-label" for="{{ $inputId }}">
                     {{ $label }}
+                    @if ($required)
                     <span class="required-mark">
                         *
                     </span>
+                    @endif
                 </label>
 
                 @if ($isDrawOnly)
-                    <input type="file" name="patient_signature" id="patient_signature" class="hidden"
+                    <input type="file" @if ($inputName) name="{{ $inputName }}" @endif id="{{ $inputId }}" data-signature-input class="hidden"
                         accept=".png,image/png">
 
-                    <input type="hidden" name="signature_source" id="signature_source" value="drawn">
+                    <input type="hidden" @if ($inputName) name="signature_source" @endif id="signature_source" value="drawn">
 
                     <div class="signature-methods-grid signature-drawing-only">
 
@@ -186,9 +193,9 @@
                                 <label class="ui-btn ui-btn-primary ui-btn-sm cursor-pointer">
                                     <i class="fa-solid fa-upload"></i>
                                     Browse
-                                    <input type="file" name="patient_signature" id="patient_signature" class="hidden"
+                                    <input type="file" @if ($inputName) name="{{ $inputName }}" @endif id="{{ $inputId }}" data-signature-input class="hidden"
                                         accept=".jpg,.jpeg,.png">
-                                    <input type="hidden" name="signature_source" id="signature_source"
+                                    <input type="hidden" @if ($inputName) name="signature_source" @endif id="signature_source"
                                         value="">
                                 </label>
 
@@ -323,20 +330,24 @@
                     </div>
                 </div>
 
+                @if ($showResult)
                 <div id="signature_result_box" class="signature-result-box hidden">
                     <p id="signature_filename"></p>
                     <div id="signature_error" class="signature-result-message hidden">
                     </div>
                 </div>
+                @endif
 
             </div>
         @endif
-        @error('patient_signature')
+        @if ($inputName)
+        @error($inputName)
             <p class="global-field-error show">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 {{ $message }}
             </p>
         @enderror
+        @endif
 
     </div>
 </div>
