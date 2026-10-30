@@ -168,259 +168,411 @@
                         :from="$sessions->firstItem() ?? 0" :to="$sessions->lastItem() ?? 0" />
                 </div>
 
+                @php
+                    $sortOldest = ($filters['sort'] ?? 'recent') === 'oldest';
+
+                    $sessionGroups = $sessions
+                        ->getCollection()
+                        ->groupBy(fn($session) => (string) $session->user_id)
+                        ->map(function ($group) use ($sortOldest) {
+                            return $sortOldest
+                                ? $group->sortBy(fn($session) => $session->last_activity_at->getTimestamp())->values()
+                                : $group
+                                    ->sortByDesc(fn($session) => $session->last_activity_at->getTimestamp())
+                                    ->values();
+                        });
+
+                    $sessionGroups = $sortOldest
+                        ? $sessionGroups->sortBy(fn($group) => $group->first()?->last_activity_at?->getTimestamp() ?? 0)
+                        : $sessionGroups->sortByDesc(
+                            fn($group) => $group->first()?->last_activity_at?->getTimestamp() ?? 0,
+                        );
+                @endphp
+
                 <div id="sessionAdminList" class="table-list-view"
                     {{ $sessions->count() === 0 ? 'style=display:none;' : '' }}>
-                    <div
-                        class="table-list-header grid grid-cols-[minmax(0,1.65fr)_minmax(0,.65fr)_minmax(0,.8fr)_minmax(0,1.05fr)_minmax(0,1fr)_minmax(0,1.15fr)] items-center gap-3">
-                        <div>User</div>
-                        <div>Role</div>
-                        <div>Account Status</div>
-                        <div>Device</div>
-                        <div>IP and Last Activity</div>
-                        <div class="text-right">Actions</div>
-                    </div>
 
-                    <div data-session-list>
-                        @foreach ($sessions as $session)
-                            @php
-                                $roleClass = match ($session->role_slug) {
-                                    'admin', 'super_admin' => 'role-admin',
-                                    'dentist' => 'role-dentist',
-                                    'patient' => 'role-patient',
-                                    default => 'role-none',
-                                };
-
-                                $filterRole = in_array($session->role_slug, ['admin', 'super_admin'], true)
-                                    ? 'admin'
-                                    : strtolower((string) $session->role_slug);
-
-                                $statusClass =
-                                    strtolower((string) $session->user_status) === 'active' ? 's-active' : 's-inactive';
-                            @endphp
-
-                            <div class="table-list-row grid grid-cols-[minmax(0,1.65fr)_minmax(0,.65fr)_minmax(0,.8fr)_minmax(0,1.05fr)_minmax(0,1fr)_minmax(0,1.15fr)] items-center gap-3 px-5 py-3 {{ $session->is_current ? 'bg-[var(--status-approved-bg)]' : '' }}"
-                                data-session-list-item data-session-key="{{ $session->reference }}"
-                                data-live-item-id="{{ $session->reference }}" data-role="{{ $filterRole }}"
-                                data-device="{{ strtolower((string) $session->device_type) }}"
-                                data-current="{{ $session->is_current ? '1' : '0' }}"
-                                data-last-activity="{{ $session->last_activity_at->getTimestamp() }}">
-
-                                <div class="min-w-0">
-                                    <div class="table-primary w-full">
-                                        <span class="patient-avatar patient-avatar-sm" data-patient-avatar
-                                            data-patient-name="{{ $session->user_name }}"></span>
-
-                                        <div class="min-w-0">
-                                            <strong class="block truncate">{{ $session->user_name }}</strong>
-                                            <span class="global-info-subvalue truncate">
-                                                {{ $session->user_email }}
-                                            </span>
-
-                                            @if ($session->is_current)
-                                                <span class="status-pill s-active mt-1">
-                                                    <i class="fa-solid fa-circle-check"></i>
-                                                    Current Admin Session
-                                                </span>
-                                            @endif
+                    <div class="table-scroll">
+                        <table class="data-table" data-session-list>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Device</th>
+                                    <th>IP and Last Activity</th>
+                                    <th>
+                                        <div class="flex justify-end">
+                                            Manage
                                         </div>
-                                    </div>
-                                </div>
+                                    </th>
+                                </tr>
+                            </thead>
 
-                                <div class="min-w-0">
-                                    <span class="badge-role {{ $roleClass }}">
-                                        {{ $session->role_label }}
-                                    </span>
-                                </div>
+                            @foreach ($sessionGroups as $userId => $groupSessions)
+                                @php
+                                    $firstSession = $groupSessions->first();
 
-                                <div class="min-w-0">
-                                    <span class="status-pill {{ $statusClass }}">
-                                        {{ ucfirst((string) $session->user_status) }}
-                                    </span>
-                                </div>
+                                    $sessionCount = $groupSessions->count();
 
-                                <div class="global-info-copy min-w-0">
-                                    <span class="global-info-value mt-0 truncate">
-                                        @if ($session->device_type === 'mobile')
-                                            <i class="fa-solid fa-mobile-screen-button"></i>
-                                        @elseif ($session->device_type === 'tablet')
-                                            <i class="fa-solid fa-tablet-screen-button"></i>
-                                        @else
-                                            <i class="fa-solid fa-desktop"></i>
-                                        @endif
-                                        {{ $session->device_label }}
-                                    </span>
-                                    <span class="global-info-subvalue truncate">
-                                        {{ $session->browser_label }} · {{ $session->os_label }}
-                                    </span>
-                                </div>
+                                    $filterRole = in_array($firstSession->role_slug, ['admin', 'super_admin'], true)
+                                        ? 'admin'
+                                        : strtolower((string) $firstSession->role_slug);
 
-                                <div class="global-info-copy min-w-0">
-                                    <span class="global-info-value mt-0 truncate">{{ $session->ip_address }}</span>
-                                    <span class="global-info-subvalue truncate">{{ $session->last_activity_label }}</span>
-                                </div>
+                                    $roleClass = match ($firstSession->role_slug) {
+                                        'admin', 'super_admin' => 'role-admin',
 
-                                <div class="ui-action-group justify-end">
-                                    @if (!$session->is_current)
-                                        <button type="button"
-                                            class="ui-action-btn ui-action-warning trigger-session-logout"
-                                            aria-label="Log out this session" data-tooltip="Log out this session"
-                                            data-tooltip-tone="neutral"
-                                            data-action="{{ route('admin.session_management.destroy_session', $session->reference) }}"
-                                            data-title="Terminate This Session?" data-user="{{ $session->user_name }}"
-                                            data-email="{{ $session->user_email }}"
-                                            data-device="{{ $session->device_label }} ({{ $session->browser_label }})"
-                                            data-type="single">
-                                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                                        </button>
-                                    @else
-                                        <span class="status-pill status-pending"
-                                            data-tooltip="Current session is protected" data-tooltip-tone="neutral">
-                                            <i class="fa-solid fa-shield-halved"></i>
-                                            Protected
-                                        </span>
+                                        'dentist' => 'role-dentist',
+
+                                        'patient' => 'role-patient',
+
+                                        default => 'role-none',
+                                    };
+
+                                    $hasCurrentSession = $groupSessions->contains(
+                                        fn($session) => (bool) $session->is_current,
+                                    );
+                                @endphp
+
+                                <tbody data-session-user-group data-session-view="list" data-user-id="{{ $userId }}"
+                                    data-show-more data-show-more-list data-show-more-step="3"
+                                    data-show-more-label="sessions">
+                                    @if ($sessionCount > 1)
+                                        <tr data-session-group-header>
+                                            <td>
+                                                <div class="table-primary">
+                                                    <div class="min-w-0">
+                                                        <strong>
+                                                            {{ $firstSession->user_name }}
+                                                        </strong>
+
+                                                        <span class="global-info-subvalue block truncate">
+                                                            {{ $firstSession->user_email }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <span class="badge-role {{ $roleClass }}">
+                                                    {{ $firstSession->role_label }}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <span class="global-info-subvalue">
+                                                    {{ $sessionCount }}
+                                                    active sessions
+                                                </span>
+                                            </td>
+
+                                            <td></td>
+
+                                            <td>
+                                                <div class="flex justify-end">
+                                                    @if (!$hasCurrentSession)
+                                                        <button type="button"
+                                                            class="ui-btn ui-btn-danger ui-btn-sm trigger-session-logout-all"
+                                                            data-action="{{ route('admin.session_management.destroy_user_sessions', $firstSession->user_id) }}"
+                                                            data-user="{{ $firstSession->user_name }}"
+                                                            data-count="{{ $sessionCount }}"
+                                                            aria-label="Sign out all {{ $sessionCount }} sessions for {{ $firstSession->user_name }}">
+                                                            Sign out all
+                                                            ({{ $sessionCount }})
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
                                     @endif
 
-                                    <button type="button"
-                                        class="ui-action-btn {{ $session->is_current ? 'ui-action-neutral' : 'ui-action-delete' }} trigger-session-logout"
-                                        aria-label="{{ $session->is_current ? 'Log out other sessions' : 'Log out all sessions' }}"
-                                        data-tooltip="{{ $session->is_current ? 'Log out other sessions' : 'Log out all sessions' }}"
-                                        data-tooltip-tone="{{ $session->is_current ? 'neutral' : 'delete' }}"
-                                        data-action="{{ route('admin.session_management.destroy_user_sessions', $session->user_id) }}"
-                                        data-title="{{ $session->is_current ? 'Log Out Other Sessions?' : 'Log Out All Sessions?' }}"
-                                        data-user="{{ $session->user_name }}" data-email="{{ $session->user_email }}"
-                                        data-device="{{ $session->is_current ? 'All other active devices except this current session.' : 'All active devices logged into this account.' }}"
-                                        data-type="all">
-                                        <i class="fa-solid fa-right-from-bracket"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        @endforeach
+                                    @foreach ($groupSessions as $session)
+                                        @php
+                                            $searchText = strtolower(
+                                                implode(' ', [
+                                                    $session->user_name,
+                                                    $session->user_email,
+                                                    $session->role_label,
+                                                    $session->device_label,
+                                                    $session->browser_label,
+                                                    $session->os_label,
+                                                    $session->ip_address,
+                                                ]),
+                                            );
+                                        @endphp
+
+                                        <tr data-show-more-item data-session-list-item
+                                            data-session-key="{{ $session->reference }}"
+                                            data-live-item-id="{{ $session->reference }}"
+                                            data-search-text="{{ $searchText }}" data-role="{{ $filterRole }}"
+                                            data-device="{{ strtolower((string) $session->device_type) }}"
+                                            data-current="{{ $session->is_current ? '1' : '0' }}"
+                                            data-last-activity="{{ $session->last_activity_at->getTimestamp() }}">
+                                            <td>
+                                                @if ($sessionCount === 1)
+                                                    <div class="table-primary">
+                                                        <div class="min-w-0">
+                                                            <strong>
+                                                                {{ $session->user_name }}
+                                                            </strong>
+
+                                                            <span class="global-info-subvalue block truncate">
+                                                                {{ $session->user_email }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                @if ($sessionCount === 1)
+                                                    <span class="badge-role {{ $roleClass }}">
+                                                        {{ $session->role_label }}
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                <div class="global-info-copy">
+                                                    <span class="global-info-value">
+                                                        @if ($session->device_type === 'mobile')
+                                                            <i class="fa-solid fa-mobile-screen-button">
+                                                            </i>
+                                                        @elseif ($session->device_type === 'tablet')
+                                                            <i class="fa-solid fa-tablet-screen-button">
+                                                            </i>
+                                                        @else
+                                                            <i class="fa-solid fa-desktop">
+                                                            </i>
+                                                        @endif
+
+                                                        {{ $session->device_label }}
+                                                    </span>
+
+                                                    <span class="global-info-subvalue">
+                                                        {{ $session->browser_label }}
+                                                        ·
+                                                        {{ $session->os_label }}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <div class="global-info-copy">
+                                                    <span class="global-info-value">
+                                                        {{ $session->ip_address }}
+                                                    </span>
+
+                                                    <span class="global-info-subvalue">
+                                                        {{ $session->last_activity_label }}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <div class="flex justify-end">
+                                                    @if ($session->is_current)
+                                                        <span class="status-badge s-active">
+                                                            This session
+                                                        </span>
+                                                    @else
+                                                        <form method="POST"
+                                                            action="{{ route('admin.session_management.destroy_session', $session->reference) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+
+                                                            <button type="submit"
+                                                                class="ui-btn ui-btn-secondary ui-btn-sm"
+                                                                aria-label="Sign out {{ $session->user_name }} on {{ $session->browser_label }}, {{ $session->os_label }}">
+                                                                Sign out
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+
+                                    @if ($sessionCount > 3)
+                                        <tr data-session-show-more-control>
+                                            <td colspan="5">
+                                                <x-show-more label="sessions" />
+                                            </td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            @endforeach
+                        </table>
                     </div>
                 </div>
 
                 <div id="sessionAdminGridView" class="table-grid-view" hidden>
+
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" data-session-grid>
-                        @foreach ($sessions as $session)
+
+                        @foreach ($sessionGroups as $userId => $groupSessions)
                             @php
-                                $roleClass = match ($session->role_slug) {
+                                $firstSession = $groupSessions->first();
+
+                                $sessionCount = $groupSessions->count();
+
+                                $filterRole = in_array($firstSession->role_slug, ['admin', 'super_admin'], true)
+                                    ? 'admin'
+                                    : strtolower((string) $firstSession->role_slug);
+
+                                $roleClass = match ($firstSession->role_slug) {
                                     'admin', 'super_admin' => 'role-admin',
                                     'dentist' => 'role-dentist',
                                     'patient' => 'role-patient',
                                     default => 'role-none',
                                 };
 
-                                $filterRole = in_array($session->role_slug, ['admin', 'super_admin'], true)
-                                    ? 'admin'
-                                    : strtolower((string) $session->role_slug);
-
-                                $statusClass =
-                                    strtolower((string) $session->user_status) === 'active' ? 's-active' : 's-inactive';
+                                $hasCurrentSession = $groupSessions->contains(
+                                    fn($session) => (bool) $session->is_current,
+                                );
                             @endphp
 
-                            <article class="table-record-card h-full {{ $session->is_current ? 'is-active' : '' }}"
-                                data-session-grid-item data-live-item-id="{{ $session->reference }}"
-                                data-session-key="{{ $session->reference }}" data-role="{{ $filterRole }}"
-                                data-device="{{ strtolower((string) $session->device_type) }}"
-                                data-current="{{ $session->is_current ? '1' : '0' }}"
-                                data-last-activity="{{ $session->last_activity_at->getTimestamp() }}">
+                            <article class="table-record-card" data-session-user-group data-session-view="grid"
+                                data-user-id="{{ $userId }}" data-show-more data-show-more-step="3"
+                                data-show-more-label="sessions">
                                 <div class="table-record-card-layout">
                                     <div class="table-record-content">
+
                                         <div class="table-record-header">
-                                            <div class="table-primary">
-                                                <span class="patient-avatar patient-avatar-md" data-patient-avatar
-                                                    data-patient-name="{{ $session->user_name }}"></span>
+                                            <div class="min-w-0">
+                                                <h3 class="table-record-title">
+                                                    {{ $firstSession->user_name }}
+                                                </h3>
 
-                                                <div class="min-w-0">
-                                                    <h3 class="table-record-title">{{ $session->user_name }}</h3>
-                                                    <span class="global-info-subvalue">{{ $session->user_email }}</span>
-                                                </div>
+                                                <span class="global-info-subvalue">
+                                                    {{ $firstSession->user_email }}
+                                                </span>
                                             </div>
 
-                                            @if ($session->is_current)
-                                                <span class="status-pill s-active">
-                                                    <i class="fa-solid fa-circle-check"></i>
-                                                    Current Admin Session
-                                                </span>
-                                            @endif
+                                            <span class="badge-role {{ $roleClass }}">
+                                                {{ $firstSession->role_label }}
+                                            </span>
                                         </div>
 
-                                        <div class="table-record-meta">
-                                            <div class="table-record-row">
-                                                <span class="table-record-label">Role</span>
-                                                <span class="table-record-value">
-                                                    <span class="badge-role {{ $roleClass }}">
-                                                        {{ $session->role_label }}
-                                                    </span>
-                                                </span>
-                                            </div>
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="global-info-subvalue">
+                                                {{ $sessionCount }}
+                                                active
+                                                {{ $sessionCount === 1 ? 'session' : 'sessions' }}
+                                            </span>
 
-                                            <div class="table-record-row">
-                                                <span class="table-record-label">Account Status</span>
-                                                <span class="table-record-value">
-                                                    <span class="status-pill {{ $statusClass }}">
-                                                        {{ ucfirst((string) $session->user_status) }}
-                                                    </span>
-                                                </span>
-                                            </div>
-
-                                            <div class="table-record-row">
-                                                <span class="table-record-label">Device</span>
-                                                <span class="table-record-value">
-                                                    {{ $session->device_label }} · {{ $session->browser_label }}
-                                                </span>
-                                            </div>
-
-                                            <div class="table-record-row">
-                                                <span class="table-record-label">IP Address</span>
-                                                <span class="table-record-value">{{ $session->ip_address }}</span>
-                                            </div>
-
-                                            <div class="table-record-row">
-                                                <span class="table-record-label">Last Activity</span>
-                                                <span
-                                                    class="table-record-value">{{ $session->last_activity_label }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="table-record-actions">
-                                        <div class="ui-action-group">
-                                            @if (!$session->is_current)
+                                            @if ($sessionCount > 1 && !$hasCurrentSession)
                                                 <button type="button"
-                                                    class="ui-action-btn ui-action-warning trigger-session-logout"
-                                                    aria-label="Log out this session" data-tooltip="Log out this session"
-                                                    data-tooltip-tone="neutral"
-                                                    data-action="{{ route('admin.session_management.destroy_session', $session->reference) }}"
-                                                    data-title="Terminate This Session?"
-                                                    data-user="{{ $session->user_name }}"
-                                                    data-email="{{ $session->user_email }}"
-                                                    data-device="{{ $session->device_label }} ({{ $session->browser_label }})"
-                                                    data-type="single">
-                                                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                                    class="ui-btn ui-btn-danger ui-btn-sm trigger-session-logout-all"
+                                                    data-action="{{ route('admin.session_management.destroy_user_sessions', $firstSession->user_id) }}"
+                                                    data-user="{{ $firstSession->user_name }}"
+                                                    data-count="{{ $sessionCount }}"
+                                                    aria-label="Sign out all {{ $sessionCount }} sessions for {{ $firstSession->user_name }}">
+                                                    Sign out all ({{ $sessionCount }})
                                                 </button>
-                                            @else
-                                                <span class="status-pill status-pending"
-                                                    data-tooltip="Current session is protected"
-                                                    data-tooltip-tone="neutral">
-                                                    <i class="fa-solid fa-shield-halved"></i>
-                                                    Protected
-                                                </span>
                                             @endif
-
-                                            <button type="button"
-                                                class="ui-action-btn {{ $session->is_current ? 'ui-action-neutral' : 'ui-action-delete' }} trigger-session-logout"
-                                                aria-label="{{ $session->is_current ? 'Log out other sessions' : 'Log out all sessions' }}"
-                                                data-tooltip="{{ $session->is_current ? 'Log out other sessions' : 'Log out all sessions' }}"
-                                                data-tooltip-tone="{{ $session->is_current ? 'neutral' : 'delete' }}"
-                                                data-action="{{ route('admin.session_management.destroy_user_sessions', $session->user_id) }}"
-                                                data-title="{{ $session->is_current ? 'Log Out Other Sessions?' : 'Log Out All Sessions?' }}"
-                                                data-user="{{ $session->user_name }}"
-                                                data-email="{{ $session->user_email }}"
-                                                data-device="{{ $session->is_current ? 'All other active devices except this current session.' : 'All active devices logged into this account.' }}"
-                                                data-type="all">
-                                                <i class="fa-solid fa-right-from-bracket"></i>
-                                            </button>
                                         </div>
+
+                                        <div class="table-record-meta" data-show-more-list>
+
+                                            @foreach ($groupSessions as $session)
+                                                @php
+                                                    $searchText = strtolower(
+                                                        implode(' ', [
+                                                            $session->user_name,
+                                                            $session->user_email,
+                                                            $session->role_label,
+                                                            $session->device_label,
+                                                            $session->browser_label,
+                                                            $session->os_label,
+                                                            $session->ip_address,
+                                                        ]),
+                                                    );
+                                                @endphp
+
+                                                <div class="table-list-row px-4 py-3" data-show-more-item
+                                                    data-session-grid-item data-session-key="{{ $session->reference }}"
+                                                    data-live-item-id="{{ $session->reference }}"
+                                                    data-search-text="{{ $searchText }}"
+                                                    data-role="{{ $filterRole }}"
+                                                    data-device="{{ strtolower((string) $session->device_type) }}"
+                                                    data-current="{{ $session->is_current ? '1' : '0' }}"
+                                                    data-last-activity="{{ $session->last_activity_at->getTimestamp() }}">
+                                                    <div class="table-record-row">
+                                                        <span class="table-record-label">
+                                                            Device
+                                                        </span>
+
+                                                        <span class="table-record-value">
+                                                            @if ($session->device_type === 'mobile')
+                                                                <i class="fa-solid fa-mobile-screen-button mr-1"></i>
+                                                            @elseif ($session->device_type === 'tablet')
+                                                                <i class="fa-solid fa-tablet-screen-button mr-1"></i>
+                                                            @else
+                                                                <i class="fa-solid fa-desktop mr-1"></i>
+                                                            @endif
+
+                                                            {{ $session->device_label }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="table-record-row mt-2">
+                                                        <span class="table-record-label">
+                                                            Browser
+                                                        </span>
+
+                                                        <span class="table-record-value">
+                                                            {{ $session->browser_label }}
+                                                            ·
+                                                            {{ $session->os_label }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="table-record-row mt-2">
+                                                        <span class="table-record-label">
+                                                            IP
+                                                        </span>
+
+                                                        <span class="table-record-value">
+                                                            {{ $session->ip_address }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="table-record-row mt-2">
+                                                        <span class="table-record-label">
+                                                            Activity
+                                                        </span>
+
+                                                        <span class="table-record-value">
+                                                            {{ $session->last_activity_label }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="flex justify-end mt-3">
+                                                        @if ($session->is_current)
+                                                            <span class="status-badge s-active">
+                                                                This session
+                                                            </span>
+                                                        @else
+                                                            <form method="POST"
+                                                                action="{{ route('admin.session_management.destroy_session', $session->reference) }}">
+                                                                @csrf
+                                                                @method('DELETE')
+
+                                                                <button type="submit"
+                                                                    class="ui-btn ui-btn-secondary ui-btn-sm"
+                                                                    aria-label="Sign out {{ $session->user_name }} on {{ $session->browser_label }}, {{ $session->os_label }}">
+                                                                    Sign out
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+                                        @if ($sessionCount > 3)
+                                            <x-show-more label="sessions" />
+                                        @endif
                                     </div>
                                 </div>
                             </article>
@@ -467,31 +619,29 @@
 
     <div id="sessionConfirmModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"
         aria-labelledby="confirmModalTitle">
-
         <form id="sessionConfirmForm" method="POST" action="" class="ui-modal-card modal-sm">
-
             @csrf
             @method('DELETE')
 
             <div class="modal-hd">
                 <div class="modal-heading">
                     <div class="modal-icon">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <i class="fa-solid fa-right-from-bracket"></i>
                     </div>
 
                     <div class="modal-copy">
                         <h3 id="confirmModalTitle" class="modal-title">
-                            Terminate Active Session?
+                            Sign out all sessions?
                         </h3>
 
                         <p class="modal-subtitle">
-                            Security verification confirmation
+                            This action affects every active device for this user.
                         </p>
                     </div>
                 </div>
 
                 <button type="button" class="modal-x" data-modal-close="sessionConfirmModal"
-                    aria-label="Close session confirmation">
+                    aria-label="Close sign out confirmation">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -499,21 +649,21 @@
             <div class="modal-bd">
                 <div class="global-confirm-alert">
                     <div>
-                        <strong id="confirmModalTargetName">
-                            User Account Session
+                        <strong id="confirmModalAffected">
+                            Multiple devices will be signed out.
                         </strong>
 
-                        <span id="confirmModalTargetEmail">
-                            user@example.com
+                        <span>
+                            The user will need to sign in again on those devices.
                         </span>
                     </div>
                 </div>
 
                 <div class="confirmed-modal-schedule-note">
-                    <i class="fa-solid fa-circle-info"></i>
+                    <i class="fa-solid fa-triangle-exclamation"></i>
 
-                    <span id="confirmModalDevice">
-                        Device information will appear here.
+                    <span>
+                        Any unsaved changes on those devices will be lost.
                     </span>
                 </div>
             </div>
@@ -524,18 +674,17 @@
                 </button>
 
                 <button type="submit" class="ui-btn ui-btn-danger">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    Confirm Log Out
+                    Sign out all
                 </button>
             </div>
         </form>
     </div>
 
     <form data-ui-submit="action-44daeba3893a" id="sessionFilterForm">
-        <x-filter-drawer id="filterModal" title="Filters" closeCallback="window.cancelSessionFilters()"
-            clearCallback="window.clearSessionFilterDraft()" clearLabel="Clear Filters"
-            cancelCallback="window.cancelSessionFilters()" cancelLabel="Cancel"
-            applyCallback="window.applySessionFilters()" applyLabel="Show 0 results" resultsId="sessionShowResultsText">
+        <x-filter-drawer id="filterModal" title="Filters" close-id="sessionFilterCloseBtn"
+            clear-id="sessionFilterClearBtn" clear-label="Clear Filters" cancel-id="sessionFilterCancelBtn"
+            cancel-label="Cancel" apply-id="sessionFilterApplyBtn" apply-label="Show 0 results"
+            results-id="sessionShowResultsText">
 
             <div id="sessionActiveFiltersSection" class="filter-active-section hidden">
                 <div class="filter-active-header">
@@ -558,16 +707,18 @@
                     <label class="choice-chip">
                         <input type="radio" name="sort" value="recent" class="filter-input radio-red chip-radio"
                             {{ ($filters['sort'] ?? 'recent') === 'recent' ? 'checked' : '' }}>
-                        <span><i class="fa-solid fa-arrow-down-short-wide"></i> Most Recent Activity</span>
+
+                        <span>Most Recent Activity</span>
                     </label>
+
                     <label class="choice-chip">
                         <input type="radio" name="sort" value="oldest" class="filter-input radio-red chip-radio"
                             {{ ($filters['sort'] ?? '') === 'oldest' ? 'checked' : '' }}>
-                        <span><i class="fa-solid fa-arrow-up-wide-short"></i> Oldest Activity</span>
+
+                        <span>Oldest Activity</span>
                     </label>
                 </div>
             </x-filter-group>
-
 
             <div class="filter-soft-divider"></div>
 
@@ -576,22 +727,29 @@
                     <label class="choice-chip">
                         <input type="radio" name="device" value="all" class="filter-input radio-red chip-radio"
                             {{ ($filters['device'] ?? 'all') === 'all' ? 'checked' : '' }}>
+
                         <span>All Devices</span>
                     </label>
+
                     <label class="choice-chip">
                         <input type="radio" name="device" value="desktop" class="filter-input radio-red chip-radio"
                             {{ ($filters['device'] ?? '') === 'desktop' ? 'checked' : '' }}>
-                        <span><i class="fa-solid fa-desktop"></i> Desktop</span>
+
+                        <span>Desktop</span>
                     </label>
+
                     <label class="choice-chip">
                         <input type="radio" name="device" value="mobile" class="filter-input radio-red chip-radio"
                             {{ ($filters['device'] ?? '') === 'mobile' ? 'checked' : '' }}>
-                        <span><i class="fa-solid fa-mobile-screen-button"></i> Mobile</span>
+
+                        <span>Mobile</span>
                     </label>
+
                     <label class="choice-chip">
                         <input type="radio" name="device" value="tablet" class="filter-input radio-red chip-radio"
                             {{ ($filters['device'] ?? '') === 'tablet' ? 'checked' : '' }}>
-                        <span><i class="fa-solid fa-tablet-screen-button"></i> Tablet</span>
+
+                        <span>Tablet</span>
                     </label>
                 </div>
             </x-filter-group>
@@ -603,17 +761,22 @@
                     <label class="choice-chip">
                         <input type="radio" name="scope" value="all" class="filter-input radio-red chip-radio"
                             {{ ($filters['scope'] ?? 'all') === 'all' ? 'checked' : '' }}>
+
                         <span>All Sessions</span>
                     </label>
+
                     <label class="choice-chip">
                         <input type="radio" name="scope" value="current" class="filter-input radio-red chip-radio"
                             {{ ($filters['scope'] ?? '') === 'current' ? 'checked' : '' }}>
-                        <span><i class="fa-solid fa-user-shield"></i> Current Session Only</span>
+
+                        <span>Current Session Only</span>
                     </label>
+
                     <label class="choice-chip">
                         <input type="radio" name="scope" value="others" class="filter-input radio-red chip-radio"
                             {{ ($filters['scope'] ?? '') === 'others' ? 'checked' : '' }}>
-                        <span><i class="fa-solid fa-users-gear"></i> Other Active Sessions</span>
+
+                        <span>Other Active Sessions</span>
                     </label>
                 </div>
             </x-filter-group>
@@ -642,6 +805,22 @@
             const SESSION_MANAGEMENT_INDEX_URL =
                 @json(route('admin.session_management.index'));
 
+            function getSessionManagementCheckUrl() {
+                const url =
+                    buildSessionUrl();
+
+                const checkUrl =
+                    new URL(
+                        SESSION_MANAGEMENT_CHECK_URL,
+                        window.location.origin
+                    );
+
+                url.pathname =
+                    checkUrl.pathname;
+
+                return url.toString();
+            }
+
             function getSessionItems() {
                 return document.querySelectorAll(
                     '#sessionAdminList ' +
@@ -653,6 +832,12 @@
                 return document.querySelectorAll(
                     '#sessionAdminGridView ' +
                     '[data-session-grid-item]'
+                );
+            }
+
+            function getSessionGroups() {
+                return document.querySelectorAll(
+                    '[data-session-user-group]'
                 );
             }
 
@@ -707,27 +892,20 @@
             const filterForm = document.getElementById('sessionFilterForm');
             const filterButton = document.getElementById('sessionFilterBtn');
             const filterResetButton = document.getElementById('sessionFilterResetBtn');
+            const filterCloseButton = document.getElementById('sessionFilterCloseBtn');
+            const filterClearButton = document.getElementById('sessionFilterClearBtn');
+            const filterCancelButton = document.getElementById('sessionFilterCancelBtn');
+            const filterApplyButton = document.getElementById('sessionFilterApplyBtn');
 
             const confirmForm = document.getElementById('sessionConfirmForm');
             const confirmTitle = document.getElementById('confirmModalTitle');
-            const confirmName = document.getElementById('confirmModalTargetName');
-            const confirmEmail = document.getElementById('confirmModalTargetEmail');
-            const confirmDevice = document.getElementById('confirmModalDevice');
+            const confirmAffected = document.getElementById('confirmModalAffected');
 
-            const sessionFilterBadge =
-                document.getElementById('sessionFilterBadge');
-
-            const activeFiltersSection =
-                document.getElementById('sessionActiveFiltersSection');
-
-            const activeChipsContainer =
-                document.getElementById('sessionActiveChipsContainer');
-
-            const clearAllChipsBtn =
-                document.getElementById('sessionClearAllChipsBtn');
-
-            const showResultsText =
-                document.getElementById('sessionShowResultsText');
+            const sessionFilterBadge = document.getElementById('sessionFilterBadge');
+            const activeFiltersSection = document.getElementById('sessionActiveFiltersSection');
+            const activeChipsContainer = document.getElementById('sessionActiveChipsContainer');
+            const clearAllChipsBtn = document.getElementById('sessionClearAllChipsBtn');
+            const showResultsText = document.getElementById('sessionShowResultsText');
 
             const SESSION_ROLE_VALUES = ['admin', 'dentist', 'patient'];
 
@@ -901,6 +1079,22 @@
                         'mainContent'
                     );
 
+                const showMoreState = new Map();
+
+                getSessionGroups()
+                    .forEach(group => {
+                        const key =
+                            `${group.dataset.sessionView}:` +
+                            `${group.dataset.userId}`;
+
+                        showMoreState.set(
+                            key,
+                            group.dataset
+                            .showMoreVisible ||
+                            '3'
+                        );
+                    });
+
                 const beforeIds =
                     window
                     .GlobalLiveUpdate
@@ -947,11 +1141,11 @@
                     return;
                 }
 
-                const documentParser =
+                const parser =
                     new DOMParser();
 
                 const nextDocument =
-                    documentParser.parseFromString(
+                    parser.parseFromString(
                         html,
                         'text/html'
                     );
@@ -984,10 +1178,25 @@
                         nextGrid.innerHTML;
                 }
 
-                window.PatientUI
-                    ?.initAvatars?.(
-                        root
-                    );
+                getSessionGroups().forEach(group => {
+                    const key =
+                        `${group.dataset.sessionView}:` +
+                        `${group.dataset.userId}`;
+
+                    const previousVisible =
+                        showMoreState.get(
+                            key
+                        );
+
+                    if (previousVisible) {
+                        group.dataset
+                            .showMoreVisible =
+                            previousVisible;
+                    }
+                });
+
+                window.ShowMore?.init?.(sessionListBody);
+                window.ShowMore?.init?.(sessionGrid);
 
                 applySessionFilters();
 
@@ -1009,11 +1218,7 @@
                     .GlobalLiveUpdate
                     ?.highlightItems(
                         root,
-                        newIds, {
-                            highlightDuration: 5000,
-
-                            insertDuration: 420,
-                        }
+                        newIds
                     );
             }
 
@@ -1033,8 +1238,7 @@
                         item.dataset.device || ''
                     );
 
-                const isCurrent =
-                    item.dataset.current === '1';
+                const isCurrent = item.dataset.current === '1';
 
                 let roleMatch = true;
                 let deviceMatch = true;
@@ -1089,8 +1293,19 @@
             }
 
             function updateSessionShowResults() {
-                if (!showResultsText) return;
-                showResultsText.textContent = 'Apply filters';
+                if (!showResultsText) {
+                    return;
+                }
+
+                const count =
+                    getSessionDraftResultCount();
+
+                showResultsText.textContent =
+                    `Show ${count} ${
+            count === 1
+                ? 'result'
+                : 'results'
+        }`;
             }
 
             function renderSessionFilterChips() {
@@ -1272,136 +1487,175 @@
                 syncSessionUrlState();
 
                 const query =
-                    searchInput ?
-                    searchInput.value
-                    .trim()
-                    .toLowerCase() :
+                    searchInput
+                    ?.value
+                    ?.trim()
+                    .toLowerCase() ||
                     '';
+
+                const hasPanelFilters =
+                    getSessionFilterCount() > 0;
+
+                const hasRoleFilters =
+                    hasSpecificSessionRoles();
 
                 let visibleCount = 0;
 
-                getSessionItems().forEach(item => {
-                    const searchText =
-                        item.textContent
-                        .toLowerCase();
+                const processItems =
+                    function(
+                        items,
+                        countResults = false
+                    ) {
+                        items.forEach(item => {
+                            const searchText =
+                                String(
+                                    item.dataset
+                                    .searchText ||
+                                    ''
+                                )
+                                .toLowerCase();
 
-                    const searchMatch =
-                        query === '' ||
-                        searchText.includes(query);
+                            const searchMatch =
+                                query === '' ||
+                                searchText.includes(
+                                    query
+                                );
 
-                    const filterMatch =
-                        sessionMatchesFilters(
-                            item,
-                            sessionFilterState
+                            const filterMatch =
+                                sessionMatchesFilters(
+                                    item,
+                                    sessionFilterState
+                                );
+
+                            const matches =
+                                searchMatch &&
+                                filterMatch;
+
+                            item.dataset.filterMatch =
+                                matches ?
+                                '1' :
+                                '0';
+
+                            if (
+                                countResults &&
+                                matches
+                            ) {
+                                visibleCount++;
+                            }
+                        });
+                    };
+
+                processItems(
+                    Array.from(
+                        getSessionItems()
+                    ),
+                    true
+                );
+
+                processItems(
+                    Array.from(
+                        getSessionGridItems()
+                    )
+                );
+
+                getSessionGroups()
+                    .forEach(group => {
+                        const selector =
+                            group.dataset
+                            .sessionView ===
+                            'grid' ?
+                            '[data-session-grid-item]' :
+                            '[data-session-list-item]';
+
+                        const matchingItems =
+                            Array.from(
+                                group.querySelectorAll(
+                                    selector
+                                )
+                            )
+                            .filter(
+                                item =>
+                                item.dataset
+                                .filterMatch !==
+                                '0'
+                            );
+
+                        const hasMatches =
+                            matchingItems.length > 0;
+
+                        group.hidden = !hasMatches;
+
+                        group.classList.toggle(
+                            'hidden',
+                            !hasMatches
                         );
 
-                    const isVisible =
-                        searchMatch &&
-                        filterMatch;
-
-                    item.style.display =
-                        isVisible ?
-                        '' :
-                        'none';
-
-                    const sessionKey =
-                        item.dataset.sessionKey;
-
-                    getSessionGridItems().forEach(gridItem => {
-                        if (
-                            gridItem.dataset.sessionKey ===
-                            sessionKey
-                        ) {
-                            gridItem.style.display =
-                                isVisible ?
-                                '' :
-                                'none';
-                        }
+                        window.ShowMore
+                            ?.refresh?.(
+                                group
+                            );
                     });
-
-                    if (isVisible) {
-                        visibleCount++;
-                    }
-                });
 
                 [
                     topPaginationInfo,
                     bottomPaginationInfo
                 ].forEach(info => {
-                    if (!info) return;
+                    if (!info) {
+                        return;
+                    }
 
                     info.textContent =
                         visibleCount === 0 ?
                         'Showing 0 sessions' :
-                        `Showing ${visibleCount} ${visibleCount === 1 ? 'session' : 'sessions'}`;
+                        `Showing ${visibleCount} ${
+                    visibleCount === 1
+                        ? 'session'
+                        : 'sessions'
+                }`;
                 });
 
-                const sortDirection =
-                    sessionFilterState.sort === 'oldest' ?
-                    'asc' :
-                    'desc';
-
-                const sortVisibleItems = (items, container) => {
-                    if (!container) return;
-
-                    Array.from(items)
-                        .filter(item => item.style.display !== 'none')
-                        .sort((a, b) => {
-                            const aTimestamp = getSessionLastActivity(a);
-                            const bTimestamp = getSessionLastActivity(b);
-
-                            return sortDirection === 'asc' ?
-                                aTimestamp - bTimestamp :
-                                bTimestamp - aTimestamp;
-                        })
-                        .forEach(item => container.appendChild(item));
-                };
-
-                sortVisibleItems(
-                    getSessionItems(),
-                    sessionListBody
-                );
-
-                sortVisibleItems(
-                    getSessionGridItems(),
-                    sessionGrid
-                );
-
                 if (visibleCount === 0) {
+                    if (sessionList) {
+                        sessionList.hidden =
+                            true;
+
+                        sessionList
+                            .style
+                            .removeProperty(
+                                'display'
+                            );
+                    }
+
                     const gridView =
                         document.getElementById(
                             'sessionAdminGridView'
                         );
 
-                    if (sessionList) {
-                        sessionList.hidden = true;
-                        sessionList.style.removeProperty('display');
-                    }
-
                     if (gridView) {
-                        gridView.hidden = true;
-                        gridView.style.removeProperty('display');
+                        gridView.hidden =
+                            true;
+
+                        gridView
+                            .style
+                            .removeProperty(
+                                'display'
+                            );
                     }
 
-                    topPagebarWrap &&
-                        (topPagebarWrap.style.display = 'none');
+                    if (topPagebarWrap) {
+                        topPagebarWrap.style.display =
+                            'none';
+                    }
 
-                    bottomPagebarWrap &&
-                        (bottomPagebarWrap.style.display = 'none');
+                    if (bottomPagebarWrap) {
+                        bottomPagebarWrap.style.display =
+                            'none';
+                    }
 
                     if (emptyState) {
                         emptyState.style.display =
                             'flex';
                     }
-
-                    const hasPanelFilters =
-                        getSessionFilterCount() > 0;
-
-                    const hasRoleFilters =
-                        hasSpecificSessionRoles();
-
-                    const hasActiveFilters =
-                        hasPanelFilters || hasRoleFilters;
 
                     if (query !== '') {
                         if (emptyTitle) {
@@ -1411,20 +1665,31 @@
 
                         if (emptySub) {
                             emptySub.textContent =
-                                hasActiveFilters ?
+                                hasPanelFilters ||
+                                hasRoleFilters ?
                                 'No active sessions match your search and selected filters.' :
-                                'No active sessions match your search. Try a different name, email, IP address, or browser.';
+                                'No active sessions match your search.';
                         }
 
                         if (clearSearchBtn) {
                             clearSearchBtn.innerHTML =
                                 '<i class="fa-solid fa-xmark"></i> Clear search';
 
-                            clearSearchBtn.dataset.emptyAction =
+                            clearSearchBtn
+                                .dataset
+                                .emptyAction =
                                 'search';
+
+                            clearSearchBtn
+                                .style
+                                .display =
+                                '';
                         }
 
-                    } else if (hasPanelFilters) {
+                        return;
+                    }
+
+                    if (hasPanelFilters) {
                         if (emptyTitle) {
                             emptyTitle.textContent =
                                 'No Matching Sessions';
@@ -1432,123 +1697,105 @@
 
                         if (emptySub) {
                             emptySub.textContent =
-                                'The selected panel filters did not match any active sessions.';
-                        }
-
-                        if (clearSearchBtn) {
-                            clearSearchBtn.innerHTML =
-                                '<i class="fa-solid fa-rotate-left"></i> Clear panel filters';
-
-                            clearSearchBtn.dataset.emptyAction =
-                                'filters';
-                        }
-
-                    } else if (hasRoleFilters) {
-                        if (emptyTitle) {
-                            emptyTitle.textContent =
-                                'No Matching Sessions';
-                        }
-
-                        if (emptySub) {
-                            emptySub.textContent =
-                                'No active sessions are available for the selected user roles.';
+                                'The selected filters did not match any active sessions.';
                         }
 
                         if (clearSearchBtn) {
                             clearSearchBtn.style.display =
                                 'none';
 
-                            clearSearchBtn.dataset.emptyAction =
+                            clearSearchBtn
+                                .dataset
+                                .emptyAction =
                                 'none';
                         }
 
-                    } else {
-                        if (emptyTitle) {
-                            emptyTitle.textContent =
-                                'No Active Sessions';
-                        }
+                        return;
+                    }
 
-                        if (emptySub) {
-                            emptySub.textContent =
-                                'There are currently no active user sessions to display.';
-                        }
+                    if (emptyTitle) {
+                        emptyTitle.textContent =
+                            'No Active Sessions';
+                    }
 
-                        if (clearSearchBtn) {
-                            clearSearchBtn.style.display =
-                                'none';
-
-                            clearSearchBtn.dataset.emptyAction =
-                                'none';
-                        }
+                    if (emptySub) {
+                        emptySub.textContent =
+                            hasRoleFilters ?
+                            'No active sessions are available for the selected roles.' :
+                            'There are currently no active user sessions to display.';
                     }
 
                     if (clearSearchBtn) {
-                        const shouldShowEmptyAction =
-                            query !== '' ||
-                            hasPanelFilters;
-
                         clearSearchBtn.style.display =
-                            shouldShowEmptyAction ?
-                            '' :
                             'none';
                     }
 
-                } else {
-                    const gridView =
-                        document.getElementById(
-                            'sessionAdminGridView'
-                        );
+                    return;
+                }
 
-                    const storedMode =
-                        localStorage.getItem(
-                            'admin_session_management_view'
-                        ) || 'list';
+                const storedMode =
+                    localStorage.getItem(
+                        'admin_session_management_view'
+                    ) || 'list';
 
-                    const activeMode =
-                        storedMode === 'grid' ?
-                        'grid' :
-                        'list';
+                const activeMode =
+                    storedMode === 'grid' ?
+                    'grid' :
+                    'list';
 
-                    if (sessionList) {
-                        sessionList.hidden =
-                            activeMode !== 'list';
-
-                        sessionList.style.removeProperty(
-                            'display'
-                        );
-                    }
-
-                    if (gridView) {
-                        gridView.hidden =
-                            activeMode !== 'grid';
-
-                        gridView.style.removeProperty(
-                            'display'
-                        );
-                    }
-
-                    window.setGlobalViewMode?.(
-                        'sessionViewToggle',
-                        activeMode, {
-                            persist: false,
-                        }
+                const gridView =
+                    document.getElementById(
+                        'sessionAdminGridView'
                     );
 
-                    topPagebarWrap &&
-                        (topPagebarWrap.style.display = '');
+                if (sessionList) {
+                    sessionList.hidden =
+                        activeMode !==
+                        'list';
 
-                    bottomPagebarWrap &&
-                        (bottomPagebarWrap.style.display = '');
+                    sessionList
+                        .style
+                        .removeProperty(
+                            'display'
+                        );
+                }
 
-                    emptyState &&
-                        (emptyState.style.display = 'none');
+                if (gridView) {
+                    gridView.hidden =
+                        activeMode !==
+                        'grid';
+
+                    gridView
+                        .style
+                        .removeProperty(
+                            'display'
+                        );
+                }
+
+                window.setGlobalViewMode?.(
+                    'sessionViewToggle',
+                    activeMode, {
+                        persist: false,
+                    }
+                );
+
+                if (topPagebarWrap) {
+                    topPagebarWrap.style.display =
+                        '';
+                }
+
+                if (bottomPagebarWrap) {
+                    bottomPagebarWrap.style.display =
+                        '';
+                }
+
+                if (emptyState) {
+                    emptyState.style.display =
+                        'none';
                 }
             }
 
-            filterForm
-                ?.querySelectorAll(
-                    'input[type="radio"]'
-                )
+            filterForm?.querySelectorAll('input[type="radio"]')
                 .forEach(input => {
 
                     input.addEventListener(
@@ -1562,45 +1809,81 @@
                     );
                 });
 
-            clearAllChipsBtn?.addEventListener(
-                'click',
-                function() {
-                    window.clearSessionFilterDraft();
+            clearAllChipsBtn?.addEventListener('click', function() {
+                window.clearSessionFilterDraft();
+            });
+
+            filterButton?.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                openSessionDrawer();
+            });
+
+            filterCloseButton?.addEventListener('click', function(event) {
+                event.preventDefault();
+                window.cancelSessionFilters();
+            });
+
+            filterClearButton?.addEventListener('click', function(event) {
+                event.preventDefault();
+                window.clearSessionFilterDraft();
+            });
+
+            filterCancelButton?.addEventListener('click', function(event) {
+                event.preventDefault();
+                window.cancelSessionFilters();
+            });
+
+            filterApplyButton?.addEventListener('click', function(event) {
+                event.preventDefault();
+                window.applySessionFilters();
+            });
+
+            filterResetButton?.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                sessionFilterState = {
+                    ...sessionFilterState,
+                    sort: 'recent',
+                    device: 'all',
+                    scope: 'all'
+                };
+
+                sessionFilterDraft = {
+                    ...sessionFilterState,
+                    roles: [
+                        ...sessionFilterState.roles
+                    ]
+                };
+
+                syncSessionFilterInputs();
+                updateSessionFilterButton();
+
+                const url =
+                    new URL(
+                        window.location.href
+                    );
+
+                url.searchParams.delete('sort');
+                url.searchParams.delete('device');
+                url.searchParams.delete('scope');
+                url.searchParams.delete('page');
+
+                const targetUrl = url.toString();
+
+                if (
+                    targetUrl !==
+                    window.location.href
+                ) {
+                    window.location.href =
+                        targetUrl;
+
+                    return;
                 }
-            );
 
-            filterButton?.addEventListener(
-                'click',
-                function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    openSessionDrawer();
-                }
-            );
-
-            filterResetButton?.addEventListener(
-                'click',
-                function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    sessionFilterState = {
-                        ...sessionFilterState,
-                        sort: 'recent',
-                        device: 'all',
-                        scope: 'all'
-                    };
-
-                    sessionFilterDraft = {
-                        ...sessionFilterState,
-                        roles: [...sessionFilterState.roles]
-                    };
-
-                    syncSessionFilterInputs();
-                    applySessionFilters();
-                    updateSessionFilterButton();
-                }
-            );
+                applySessionFilters();
+            });
 
             if (searchInput) {
 
@@ -1654,69 +1937,44 @@
                 );
             }
 
-            clearSearchBtn?.addEventListener(
-                'click',
-                function(event) {
+            clearSearchBtn?.addEventListener('click', function(event) {
 
-                    event.preventDefault();
+                event.preventDefault();
+                const action = this.dataset.emptyAction || 'search';
 
-                    const action =
-                        this.dataset.emptyAction ||
-                        'search';
+                if (action === 'search') {
+                    if (
+                        searchInput &&
+                        typeof window.clearSearchInput ===
+                        'function'
+                    ) {
+                        window.clearSearchInput(
+                            searchInput
+                        );
 
-                    if (action === 'filters') {
-                        sessionFilterState = {
-                            ...sessionFilterState,
-                            sort: 'recent',
-                            device: 'all',
-                            scope: 'all'
-                        };
+                        window.setTimeout(
+                            applySessionFilters,
+                            0
+                        );
 
-                        sessionFilterDraft = {
-                            ...sessionFilterState,
-                            roles: [...sessionFilterState.roles]
-                        };
-
-                        syncSessionFilterInputs();
-                        applySessionFilters();
-                        updateSessionFilterButton();
                         return;
                     }
 
-                    if (action === 'search') {
-                        if (
-                            searchInput &&
-                            typeof window.clearSearchInput ===
-                            'function'
-                        ) {
-                            window.clearSearchInput(
-                                searchInput
-                            );
+                    if (searchInput) {
+                        searchInput.value = '';
 
-                            window.setTimeout(
-                                applySessionFilters,
-                                0
-                            );
+                        searchInput.dispatchEvent(
+                            new Event(
+                                'input', {
+                                    bubbles: true,
+                                }
+                            )
+                        );
 
-                            return;
-                        }
-
-                        if (searchInput) {
-                            searchInput.value = '';
-
-                            searchInput.dispatchEvent(
-                                new Event(
-                                    'input', {
-                                        bubbles: true,
-                                    }
-                                )
-                            );
-
-                            searchInput.focus();
-                        }
+                        searchInput.focus();
                     }
                 }
-            );
+            });
 
             function syncSessionRoleFilterSelect() {
                 const root = document.getElementById('sessionRoleFilter');
@@ -1800,6 +2058,8 @@
             syncSessionRoleFilterSelect();
             applySessionFilters();
 
+            let sessionRefreshWatcher = null;
+
             async function initializeSessionRefreshWatcher() {
                 if (!sessionRefreshWatcher) {
                     return;
@@ -1842,24 +2102,15 @@
                 }
             }
 
-            initializeSessionRefreshWatcher();
-
-            let sessionRefreshWatcher = window
+            sessionRefreshWatcher = window
                 .initGlobalRefreshWatcher?.({
                     key: 'session-management',
-
                     url: getSessionManagementCheckUrl,
-
                     interval: 5000,
-
                     initialItems: [],
-
                     autoStart: false,
-
-                    autoApply: false,
-
+                    autoApply: true,
                     anchorSelector: '#mainContent .table-card',
-
                     itemLabel: 'session update',
 
                     getItems: function(payload) {
@@ -1879,18 +2130,6 @@
                         return item?.id;
                     },
 
-                    title: function() {
-                        return (
-                            'Session activity changed'
-                        );
-                    },
-
-                    subtitle: function() {
-                        return (
-                            'Refresh to load the latest active sessions.'
-                        );
-                    },
-
                     onRefresh: async function(
                         payload,
                         newItems,
@@ -1906,14 +2145,10 @@
                         );
                     },
 
-                    toast: {
-                        type: 'success',
-
-                        title: 'Sessions updated',
-
-                        message: 'Latest active sessions are now shown.',
-                    },
+                    toast: false,
                 });
+
+            initializeSessionRefreshWatcher();
 
             function updateSessionStats(
                 stats = {}
@@ -1952,65 +2187,54 @@
                 );
             }
 
-            document.addEventListener(
-                'click',
-                function(event) {
-                    const btn =
-                        event.target.closest(
-                            '.trigger-session-logout'
-                        );
-
-                    if (!btn) {
-                        return;
-                    }
-
-                    event.preventDefault();
-
-                    const action =
-                        btn.dataset.action;
-
-                    const title =
-                        btn.dataset.title;
-
-                    const user =
-                        btn.dataset.user;
-
-                    const email =
-                        btn.dataset.email;
-
-                    const device =
-                        btn.dataset.device;
-
-                    if (confirmForm) {
-                        confirmForm.action =
-                            action;
-                    }
-
-                    if (confirmTitle) {
-                        confirmTitle.textContent =
-                            title;
-                    }
-
-                    if (confirmName) {
-                        confirmName.textContent =
-                            user;
-                    }
-
-                    if (confirmEmail) {
-                        confirmEmail.textContent =
-                            email;
-                    }
-
-                    if (confirmDevice) {
-                        confirmDevice.textContent =
-                            device;
-                    }
-
-                    window.openModal?.(
-                        'sessionConfirmModal'
+            document.addEventListener('click', function(event) {
+                const button =
+                    event.target.closest(
+                        '.trigger-session-logout-all'
                     );
+
+                if (!button) {
+                    return;
                 }
-            );
+
+                event.preventDefault();
+
+                const action =
+                    button.dataset.action;
+
+                const user =
+                    button.dataset.user ||
+                    'this user';
+
+                const count =
+                    Number(
+                        button.dataset.count ||
+                        0
+                    );
+
+                if (confirmForm) {
+                    confirmForm.action =
+                        action;
+                }
+
+                if (confirmTitle) {
+                    confirmTitle.textContent =
+                        `Sign out ${user} everywhere?`;
+                }
+
+                if (confirmAffected) {
+                    confirmAffected.textContent =
+                        `${count} ${
+                    count === 1
+                        ? 'device'
+                        : 'devices'
+                } will be signed out.`;
+                }
+
+                window.openModal?.(
+                    'sessionConfirmModal'
+                );
+            });
         });
     </script>
 @endsection

@@ -198,11 +198,23 @@ function getStep(root) {
 function getLists(root) {
     if (!root) return [];
 
-    return Array.from(
-        root.querySelectorAll(
+    const lists = [];
+
+    if (
+        root.matches?.(
+            '[data-show-more-list]'
+        )
+    ) {
+        lists.push(root);
+    }
+
+    lists.push(
+        ...root.querySelectorAll(
             '[data-show-more-list]'
         )
     );
+
+    return lists;
 }
 
 function getItems(list) {

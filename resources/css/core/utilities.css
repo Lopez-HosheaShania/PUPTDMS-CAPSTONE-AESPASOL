@@ -1186,7 +1186,6 @@
 
 .status-dot,
 .pill-dot,
-.status-badge::before,
 .entry-badge::before {
     width: var(--status-pill-dot-size);
     height: var(--status-pill-dot-size);

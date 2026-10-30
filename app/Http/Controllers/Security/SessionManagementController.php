@@ -139,6 +139,67 @@ class SessionManagementController extends Controller
         ]);
     }
 
+    public function status(
+        Request $request
+    ): JsonResponse {
+        $sessionId =
+            (string) $request
+                ->session()
+                ->getId();
+
+        if (
+            $sessionId !== '' &&
+            $this
+            ->concurrentSessionService
+            ->wasSessionRevokedByAdmin(
+                $sessionId
+            )
+        ) {
+            return response()->json([
+                'active' => false,
+                'expired' => true,
+                'reason' => 'admin_ended',
+                'server_now' =>
+                now()->getTimestamp(),
+            ]);
+        }
+
+        if (
+            (bool) $request
+                ->session()
+                ->get(
+                    'session_idle_locked',
+                    false
+                )
+        ) {
+            return response()->json([
+                'active' => false,
+                'expired' => true,
+                'reason' => 'idle',
+                'server_now' =>
+                now()->getTimestamp(),
+            ]);
+        }
+
+        if (!$request->user()) {
+            return response()->json([
+                'active' => false,
+                'expired' => true,
+                'reason' => 'invalid',
+                'server_now' =>
+                now()->getTimestamp(),
+            ]);
+        }
+
+        return response()->json([
+            'active' => true,
+            'expired' => false,
+            'reason' => null,
+            'server_now' =>
+            now()->getTimestamp(),
+        ]);
+    }
+
     public function expire(
         Request $request
     ): JsonResponse {
