@@ -652,10 +652,6 @@ export const actionHandlers = Object.freeze({
         switchTreatmentTab('future')
     },
     // resources/views/patient/shared-profile.blade.php
-    'action-fe04d3a0df1b': function (event) {
-        return confirm('Mark this uploaded signature as invalid and notify the patient to upload a new one?');
-    },
-    // resources/views/patient/shared-profile.blade.php
     'action-c2a93914d63a': function (event) {
         togglePatientProfilePrivacy(this)
     },

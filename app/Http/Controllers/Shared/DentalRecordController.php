@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shared;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Patient;
+use App\Support\DentalServicesProcedureTiming;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -496,9 +497,7 @@ class DentalRecordController extends Controller
                 ? $procedure->procedure_completed_at->toDateString()
                 : '',
 
-            'time' => $appointment->appointment_time
-                ? Carbon::parse($appointment->appointment_time)->format('g:i A')
-                : '',
+            'time' => DentalServicesProcedureTiming::requestedTimeIn($appointment)?->format('g:i A') ?? '',
 
             'notes' => $this->buildTreatmentSummary($procedure),
             'visit_count' => 1,
@@ -827,7 +826,7 @@ class DentalRecordController extends Controller
                 ? $latestAppointment->service_type_name
                 : 'No service recorded'],
             ['label' => 'Date', 'value' => $latestAppointment?->appointment_date ? Carbon::parse($latestAppointment->appointment_date)->format('F d, Y') : 'N/A'],
-            ['label' => 'Time', 'value' => $latestAppointment?->appointment_time ? Carbon::parse($latestAppointment->appointment_time)->format('g:i A') : 'N/A'],
+            ['label' => 'Time', 'value' => $latestAppointment ? (DentalServicesProcedureTiming::requestedTimeIn($latestAppointment)?->format('g:i A') ?? 'N/A') : 'N/A'],
             ['label' => 'Duration', 'value' => $this->formatProcedureDurationForDisplay($latestProcedure?->procedure_duration_seconds)],
             ['label' => 'Status', 'value' => ucfirst($this->normalizeRecordStatus($latestAppointment?->status))],
             ['label' => 'Follow-up', 'value' => $this->buildFollowUpSummary($followUpAppointment),],

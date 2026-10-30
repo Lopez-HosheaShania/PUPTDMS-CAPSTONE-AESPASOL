@@ -55,6 +55,8 @@ class AppointmentReportRecords
                     'age' => $age, 'gender' => ucfirst(strtolower((string) ($patient->gender ?? $patient->user?->gender))),
                     'is_senior' => (bool) $patient->is_senior, 'is_pwd' => (bool) $patient->is_pwd,
                     'treatment_done' => $appointment->service_type ?? 'Dental Service',
+                    'diagnosis' => preg_replace('/\s+/', ' ', trim((string) $procedure?->diagnosis)),
+                    'dental_case_teeth_count' => \App\Support\DentalCaseTeeth::count($procedure?->odontogram_data),
                     'minutes_processed' => round(($procedure?->procedure_duration_seconds ?? 0) / 60, 2),
                     'has_signature' => filled($signature), 'signature_path' => $signature,
                     'is_walk_in' => (bool) $appointment->is_walk_in,

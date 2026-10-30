@@ -1473,12 +1473,6 @@
                 ['Booking', 'What do I need to complete my appointment booking?']
             ],
 
-            '/signature-review': [
-                ['Signature', 'What should I check on the signature review page?'],
-                ['Booking', 'How do I complete my appointment booking?'],
-                ['Edit', 'What should I do if my signature information is incorrect?']
-            ],
-
             '/record': [
                 ['Records', 'What information can I see on the Dental Records page?'],
                 ['Odontogram', 'Where can I view my odontogram in the Dental Records page?'],

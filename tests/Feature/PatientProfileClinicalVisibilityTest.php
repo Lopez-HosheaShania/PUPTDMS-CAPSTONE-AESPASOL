@@ -33,6 +33,8 @@ class PatientProfileClinicalVisibilityTest extends TestCase
             'patient_id' => $patient->id, 'emergency_person' => 'Emergency Contact',
             'emergency_number' => '09123456789', 'emergency_relation' => 'Parent',
             'signature_review_notes' => 'PRIVATE_SIGNATURE_NOTE',
+            'signature_review_status' => 'pending_manual_review',
+            'patient_signature' => 'signatures/legacy-pending.png',
         ]);
         DentalHistory::create([
             'patient_id' => $patient->id, 'previous_dentist' => 'PRIVATE_DENTAL_HISTORY',
@@ -93,6 +95,8 @@ class PatientProfileClinicalVisibilityTest extends TestCase
         session()->forget(['impersonated_role', 'impersonator_role']);
         $response = $this->actingAs($dentist)->withSession(['role' => 'dentist'])
             ->get(route('dentist.dentist.patient.profile', $patient))->assertOk();
+        $response->assertDontSee('Pending Manual Review')->assertDontSee('Signature Review Required')
+            ->assertDontSee('signature/invalid')->assertDontSee('PRIVATE_SIGNATURE_NOTE');
         foreach (['Health & Lifestyle Information', 'PRIVATE_DENTAL_HISTORY', 'PRIVATE_EXAMINATION',
             'PRIVATE_DIAGNOSIS', 'PRIVATE_PRESCRIPTION', 'data-record='] as $text) {
             $this->assertTrue(str_contains($response->getContent(), $text), 'Dentist profile missing: ' . $text);
@@ -124,7 +128,7 @@ class PatientProfileClinicalVisibilityTest extends TestCase
             'name' => 'Restricted Patient', 'email' => 'restricted@example.test',
             'password' => bcrypt('password'), 'birthdate' => '2000-01-01',
         ]);
-        $this->post(route('dentist.patient.signature.invalid', $patient))->assertForbidden();
+        $this->post('/dentist/patients/'.$patient->id.'/signature/invalid')->assertNotFound();
 
         session()->forget(['impersonated_role', 'impersonator_role']);
         $this->actingAs($dentist)->withSession(['role' => 'dentist']);

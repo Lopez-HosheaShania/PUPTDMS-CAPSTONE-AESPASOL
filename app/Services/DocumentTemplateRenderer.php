@@ -147,9 +147,10 @@ class DocumentTemplateRenderer
         $clinicName = setting('clinic_name', 'Taguig Dental Clinic');
 
         $records = app(AppointmentReportRecords::class)->between($currentMonth->copy()->startOfMonth(), $currentMonth->copy()->endOfMonth())
-            ->groupBy(fn ($row) => json_encode([$row->office_type, $row->treatment_done]))
+            ->filter(fn ($row) => filled($row->diagnosis))
+            ->groupBy(fn ($row) => json_encode([$row->office_type, $row->diagnosis]))
             ->map(fn ($rows) => (object) ['office_type' => $rows->first()->office_type,
-                'treatment_done' => $rows->first()->treatment_done, 'total' => $rows->count()])
+                'diagnosis' => $rows->first()->diagnosis, 'total' => $rows->sum('dental_case_teeth_count')])
             ->sortByDesc('total')->values();
 
         $groups = [
@@ -182,7 +183,7 @@ class DocumentTemplateRenderer
                 $row = $groupRows->get($i);
                 $slot = $i + 1;
 
-                $group['diagnosis'][$slot] = $row?->treatment_done ?? '—';
+                $group['diagnosis'][$slot] = $row?->diagnosis ?? '—';
                 $group['cases'][$slot] = $row ? (string) $row->total : '—';
             }
         }

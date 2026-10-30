@@ -34,6 +34,8 @@ class AppointmentReportSourceTest extends TestCase
         AppointmentProcedure::create([
             'appointment_id' => $appointment->id, 'procedure_started_at' => $date.' 09:00:00',
             'procedure_completed_at' => $date.' 09:30:00', 'procedure_duration_seconds' => 1800,
+            'diagnosis' => 'Dental Caries',
+            'odontogram_data' => [['tooth' => 11, 'status' => ['code' => 'D', 'label' => 'Decayed']]],
         ]);
 
         return $appointment;

@@ -25,6 +25,7 @@
     $notifCount = $notifications->count();
     $isFemalePatient = strtolower($patient->gender ?? '') === 'female';
     $isReservedBooking = isset($reservedBookingPeriod) && $reservedBookingPeriod;
+    $signatureUploadsEnabled = app(\App\Services\AiServiceManager::class)->featureEnabled('signature');
 @endphp
 
 @section('content')
@@ -287,7 +288,7 @@
                                         <x-booking.medical-history-fields :questions="$medicalQuestions" :diseases="$diseases"
                                             mode="standard" :defaults="$medicalDefaults" :selected-diseases="$selectedDiseases" :is-female="$isFemalePatient" />
 
-                                        <x-booking.signature :has-existing-signature="$hasReusableSignature" :existing-signature-url="$patient->medicalHistory?->patient_signature
+                                        <x-booking.signature :allow-upload="$signatureUploadsEnabled" :draw-title="$signatureUploadsEnabled ? null : 'Draw your signature here'" :has-existing-signature="$hasReusableSignature" :existing-signature-url="$patient->medicalHistory?->patient_signature
                                             ? asset('storage/' . $patient->medicalHistory->patient_signature)
                                             : null" />
                                     </div>
@@ -454,7 +455,7 @@
                             </div>
 
                             <p>
-                                Upload or draw your patient signature
+                                {{ $signatureUploadsEnabled ? 'Upload or draw your patient signature' : 'Draw your patient signature' }}
                                 before confirmation.
                             </p>
                         </div>

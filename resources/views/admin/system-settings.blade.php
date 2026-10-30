@@ -238,8 +238,8 @@
                                                     </div>
 
                                                     <div class="setting-row-desc">
-                                                        If unavailable, signatures are accepted
-                                                        and flagged for manual review
+                                                        When disabled, patients can only draw their signature.
+                                                        Uploaded signatures require successful AI verification.
                                                     </div>
                                                 </div>
 

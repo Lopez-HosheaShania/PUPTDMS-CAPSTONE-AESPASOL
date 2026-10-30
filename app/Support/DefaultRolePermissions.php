@@ -189,6 +189,7 @@ final class DefaultRolePermissions
         'dentist' => [
             'access_dentist_dashboard',
             'view_patient_profiles',
+            'view_dental_records',
             'view_appointments',
             'reschedule_appointments',
             'cancel_appointments',
