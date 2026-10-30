@@ -14,6 +14,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class ConcurrentSessionService
@@ -783,49 +784,173 @@ class ConcurrentSessionService
             return false;
         }
 
-        $deleted = DB::table($this->sessionTable())
-            ->where('id', $session->id)
+        $sessionId =
+            (string) $session->id;
+
+        $this->markSessionRevokedByAdmin(
+            $sessionId
+        );
+
+        $deleted = DB::table(
+            $this->sessionTable()
+        )
+            ->where(
+                'id',
+                $sessionId
+            )
             ->delete();
 
-        if ($deleted > 0) {
-            AuditLogger::log(
-                'admin_session_revoked',
-                'authentication',
-                sprintf('Admin #%d revoked an active session for user #%d.', $actor->id, (int) $session->user_id)
+        if ($deleted <= 0) {
+            $this->forgetAdminRevokedSessionMarker(
+                $sessionId
             );
+
+            return false;
         }
 
-        return $deleted > 0;
+        AuditLogger::log(
+            'admin_session_revoked',
+            'authentication',
+            sprintf(
+                'Admin #%d revoked an active session for user #%d.',
+                $actor->id,
+                (int) $session->user_id
+            )
+        );
+
+        return true;
     }
 
-    public function revokeAllSessionsForUserAsAdmin(User $actor, User $targetUser, ?string $exceptSessionId = null): int
-    {
+    public function revokeAllSessionsForUserAsAdmin(
+        User $actor,
+        User $targetUser,
+        ?string $exceptSessionId = null
+    ): int {
         if (!$this->isEnabled()) {
             return 0;
         }
 
-        $query = DB::table($this->sessionTable())->where('user_id', $targetUser->id);
+        $query = DB::table(
+            $this->sessionTable()
+        )
+            ->where(
+                'user_id',
+                $targetUser->id
+            );
 
         if ($exceptSessionId) {
-            $query->where('id', '!=', $exceptSessionId);
-        }
-
-        $deleted = $query->delete();
-
-        if ($deleted > 0) {
-            AuditLogger::log(
-                'admin_user_sessions_revoked',
-                'authentication',
-                sprintf(
-                    'Admin #%d revoked %d active session(s) for user #%d.',
-                    $actor->id,
-                    $deleted,
-                    $targetUser->id
-                )
+            $query->where(
+                'id',
+                '!=',
+                $exceptSessionId
             );
         }
 
+        $sessionIds = (clone $query)
+            ->pluck('id')
+            ->map(
+                fn($sessionId) =>
+                (string) $sessionId
+            )
+            ->filter()
+            ->values();
+
+        if ($sessionIds->isEmpty()) {
+            return 0;
+        }
+
+        $sessionIds->each(
+            function (
+                string $sessionId
+            ): void {
+                $this->markSessionRevokedByAdmin(
+                    $sessionId
+                );
+            }
+        );
+
+        $deleted = $query->delete();
+
+        if ($deleted <= 0) {
+            $sessionIds->each(
+                function (
+                    string $sessionId
+                ): void {
+                    $this->forgetAdminRevokedSessionMarker(
+                        $sessionId
+                    );
+                }
+            );
+
+            return 0;
+        }
+
+        AuditLogger::log(
+            'admin_user_sessions_revoked',
+            'authentication',
+            sprintf(
+                'Admin #%d revoked %d active session(s) for user #%d.',
+                $actor->id,
+                $deleted,
+                $targetUser->id
+            )
+        );
+
         return $deleted;
+    }
+
+    public function wasSessionRevokedByAdmin(
+        string $sessionId
+    ): bool {
+        if ($sessionId === '') {
+            return false;
+        }
+
+        return Cache::has(
+            $this->adminRevokedSessionCacheKey(
+                $sessionId
+            )
+        );
+    }
+
+    private function markSessionRevokedByAdmin(
+        string $sessionId
+    ): void {
+        if ($sessionId === '') {
+            return;
+        }
+
+        Cache::put(
+            $this->adminRevokedSessionCacheKey(
+                $sessionId
+            ),
+            true,
+            now()->addMinutes(15)
+        );
+    }
+
+    private function adminRevokedSessionCacheKey(
+        string $sessionId
+    ): string {
+        return 'admin-revoked-session:' .
+            hash(
+                'sha256',
+                $sessionId
+            );
+    }
+
+    private function forgetAdminRevokedSessionMarker(
+        string $sessionId
+    ): void {
+        if ($sessionId === '') {
+            return;
+        }
+
+        Cache::forget(
+            $this->adminRevokedSessionCacheKey(
+                $sessionId
+            )
+        );
     }
 
     protected function activeSessionsQuery(int $userId)

@@ -207,21 +207,13 @@ Route::post('/login', [BackupLoginController::class, 'store'])->name('login.stor
 // Logout (all roles)
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
-Route::post(
-    '/session/expire',
-    [
-        SessionManagementController::class,
-        'expire',
-    ]
-)->name('session.expire');
+Route::post('/session/expire', [SessionManagementController::class, 'expire',])
+    ->name('session.expire');
 
-Route::post(
-    '/session/activity',
-    [
-        SessionManagementController::class,
-        'activity',
-    ]
-)
+Route::get('/session/status', [SessionManagementController::class, 'status',])
+    ->name('session.status');
+
+Route::post('/session/activity', [SessionManagementController::class, 'activity',])
     ->middleware('auth')
     ->name('session.activity');
 

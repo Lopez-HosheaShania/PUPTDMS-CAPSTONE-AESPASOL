@@ -61,7 +61,8 @@
         data-session-timeout-modal data-session-timeout-seconds="{{ $idleTimeoutSeconds }}"
         data-session-warning-seconds="{{ $idleWarningSeconds }}"
         data-session-activity-url="{{ route('session.activity') }}"
-        data-session-expire-url="{{ route('session.expire') }}" data-session-login-url="{{ route('login') }}"
+        data-session-status-url="{{ route('session.status') }}" data-session-expire-url="{{ route('session.expire') }}"
+        data-session-login-url="{{ route('login') }}"
         data-session-redirect-url="{{ route('login', [
             'logged_out' => 1,
             'reason' => 'idle',

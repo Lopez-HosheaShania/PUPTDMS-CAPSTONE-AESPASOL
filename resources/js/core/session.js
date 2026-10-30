@@ -63,15 +63,10 @@ function initSessionTimeoutModal() {
         )
     );
 
-    const activityUrl =
-        modal.dataset.sessionActivityUrl;
-
-    const expireUrl =
-        modal.dataset.sessionExpireUrl;
-
-    const loginUrl =
-        modal.dataset.sessionLoginUrl ||
-        '/login';
+    const activityUrl = modal.dataset.sessionActivityUrl;
+    const statusUrl = modal.dataset.sessionStatusUrl;
+    const expireUrl = modal.dataset.sessionExpireUrl;
+    const loginUrl = modal.dataset.sessionLoginUrl || '/login';
 
     const idleRedirectUrl =
         modal.dataset.sessionRedirectUrl ||
@@ -422,7 +417,14 @@ function initSessionTimeoutModal() {
         payload => {
             if (
                 payload?.reason ===
-                'idle'
+                'admin_ended'
+            ) {
+                return 'admin-ended';
+            }
+
+            if (
+                payload?.reason === 'idle' ||
+                payload?.expired === true
             ) {
                 return 'expired';
             }
@@ -437,7 +439,69 @@ function initSessionTimeoutModal() {
                 return 'expired';
             }
 
-            return 'admin-ended';
+            return 'expired';
+        };
+
+    const resolveInvalidSession =
+        async payload => {
+            if (
+                payload?.reason === 'idle' ||
+                payload?.reason === 'admin_ended'
+            ) {
+                return classifyInvalidSession(
+                    payload
+                );
+            }
+
+            if (!statusUrl) {
+                return classifyInvalidSession(
+                    payload
+                );
+            }
+
+            try {
+                const response =
+                    await fetch(
+                        statusUrl,
+                        {
+                            method: 'GET',
+                            credentials:
+                                'same-origin',
+                            headers: {
+                                Accept:
+                                    'application/json',
+
+                                'X-Requested-With':
+                                    'XMLHttpRequest',
+                            },
+                            cache: 'no-store',
+                        }
+                    );
+
+                if (!response.ok) {
+                    return classifyInvalidSession(
+                        payload
+                    );
+                }
+
+                const statusPayload =
+                    await response.json();
+
+                if (
+                    statusPayload?.active === true &&
+                    statusPayload?.expired !== true
+                ) {
+                    return null;
+                }
+
+                return classifyInvalidSession(
+                    statusPayload
+                );
+            } catch (_) {
+                return classifyInvalidSession(
+                    payload
+                );
+            }
         };
 
     const writeSharedActivitySignal =
@@ -537,11 +601,16 @@ function initSessionTimeoutModal() {
                     response.status ===
                     419
                 ) {
-                    renderState(
-                        classifyInvalidSession(
+                    const invalidState =
+                        await resolveInvalidSession(
                             payload
-                        )
-                    );
+                        );
+
+                    if (invalidState) {
+                        renderState(
+                            invalidState
+                        );
+                    }
 
                     return false;
                 }
@@ -555,10 +624,9 @@ function initSessionTimeoutModal() {
                     true
                 ) {
                     renderState(
-                        payload?.reason ===
-                            'idle'
-                            ? 'expired'
-                            : 'admin-ended'
+                        classifyInvalidSession(
+                            payload
+                        )
                     );
 
                     return false;
@@ -962,11 +1030,7 @@ function initSessionTimeoutModal() {
                 );
 
                 try {
-                    if (
-                        terminalState ===
-                        'expired' &&
-                        expireUrl
-                    ) {
+                    if (expireUrl) {
                         await fetch(
                             expireUrl,
                             {
@@ -983,9 +1047,7 @@ function initSessionTimeoutModal() {
                     }
                 } catch (_) {
                 } finally {
-                    window.location.assign(
-                        loginUrl
-                    );
+                    window.location.replace(loginUrl);
                 }
             }
         );
