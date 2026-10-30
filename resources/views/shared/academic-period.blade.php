@@ -1530,20 +1530,32 @@
             </div>
 
             <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <div>
-                        <p>
-                            Set
-                            <strong id="setActivePeriodName" class="global-confirm-value">
-                            </strong>
-                            as the active academic period?
-                        </p>
 
-                        <span">
-                            The currently active period will be deactivated.
-                        </span>
+                <div class="modal-option-panel">
+
+                    <div class="modal-form-section">
+
+                        <div class="modal-section-heading">
+
+                            <div>
+
+                                <h4 id="setActivePeriodName">
+                                    Selected Academic Period
+                                </h4>
+
+                                <p>
+                                    This academic period will be set as active.
+                                    The currently active period will be deactivated.
+                                </p>
+
+                            </div>
+
+                        </div>
+
                     </div>
+
                 </div>
+
             </div>
 
             <div class="modal-ft">

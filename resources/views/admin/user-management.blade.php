@@ -220,9 +220,13 @@
                                         <div class="um-actions-cell table-action-cell">
                                             <div class="ui-action-group">
                                                 @if ($canUpdateUserRole)
-                                                    <button type="button"
-                                                        data-user-details='@json($userDetails)'
-                                                        data-ui-click="action-0c508fb9e874" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-2="{{ json_encode($user->email, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($user->role_id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-4="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                    <button type="button" data-user-details='@json($userDetails)'
+                                                        data-ui-click="action-0c508fb9e874"
+                                                        data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-2="{{ json_encode($user->email, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-3="{{ json_encode($user->role_id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-4="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                         class="ui-action-btn ui-action-edit" data-tooltip="Edit account"
                                                         data-tooltip-tone="edit" aria-label="Edit account">
                                                         <i class="fa-solid fa-pen"></i>
@@ -230,8 +234,10 @@
                                                 @endif
 
                                                 @if ($canDisableUsers)
-                                                    <button type="button"
-                                                        data-ui-click="action-43aabb4c9c5a" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-2="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                    <button type="button" data-ui-click="action-43aabb4c9c5a"
+                                                        data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-1="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-2="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                         class="ui-action-btn {{ $user->status === 'active' ? 'ui-action-warning' : 'ui-action-success' }}"
                                                         data-tooltip="{{ $user->status === 'active' ? 'Deactivate account' : 'Activate account' }}"
                                                         data-tooltip-tone="{{ $user->status === 'active' ? 'reschedule' : 'start' }}"
@@ -347,7 +353,12 @@
                                                 @if ($canUpdateUserRole)
                                                     <button type="button"
                                                         data-user-details='@json($userDetails)'
-                                                        data-ui-click="action-0c508fb9e874" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-2="{{ json_encode($user->email, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($user->role_id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-4="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click="action-0c508fb9e874"
+                                                        data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-2="{{ json_encode($user->email, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-3="{{ json_encode($user->role_id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-4="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                         class="ui-action-btn ui-action-edit" data-tooltip="Edit account"
                                                         data-tooltip-tone="edit" aria-label="Edit account">
                                                         <i class="fa-solid fa-pen"></i>
@@ -355,8 +366,10 @@
                                                 @endif
 
                                                 @if ($canDisableUsers)
-                                                    <button type="button"
-                                                        data-ui-click="action-43aabb4c9c5a" data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-2="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                    <button type="button" data-ui-click="action-43aabb4c9c5a"
+                                                        data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-1="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-2="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                                         class="ui-action-btn {{ $user->status === 'active' ? 'ui-action-warning' : 'ui-action-success' }}"
                                                         data-tooltip="{{ $user->status === 'active' ? 'Deactivate account' : 'Activate account' }}"
                                                         data-tooltip-tone="{{ $user->status === 'active' ? 'reschedule' : 'start' }}"
@@ -803,14 +816,31 @@
             </div>
 
             <div class="modal-bd">
-                <div id="toggleModalBody" class="global-confirm-alert">
-                    <i id="toggleModalBodyIcon" class="fa-solid fa-triangle-exclamation"></i>
-                    <p>
-                        <span id="toggleModalUserName" class="global-confirm-value">
-                        </span>
-                        <span id="toggleModalMessage"></span>
-                    </p>
+
+                <div id="toggleModalBody" class="modal-option-panel">
+
+                    <div class="modal-form-section">
+
+                        <div class="modal-section-heading">
+
+                            <div>
+
+                                <h4 id="toggleModalUserName">
+                                    Selected User
+                                </h4>
+
+                                <p id="toggleModalMessage">
+                                    Please confirm this account status change.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
 
             <div class="modal-ft">
@@ -886,11 +916,6 @@
                     'toggleModalSubtitle'
                 );
 
-            const bodyIcon =
-                document.getElementById(
-                    'toggleModalBodyIcon'
-                );
-
             const name =
                 document.getElementById(
                     'toggleModalUserName'
@@ -916,7 +941,6 @@
                 !icon ||
                 !title ||
                 !subtitle ||
-                !bodyIcon ||
                 !name ||
                 !message ||
                 !button ||
@@ -956,9 +980,6 @@
                 icon.innerHTML =
                     '<i class="fa-solid fa-user-slash"></i>';
 
-                bodyIcon.className =
-                    'fa-solid fa-triangle-exclamation';
-
                 title.textContent =
                     'Deactivate User';
 
@@ -966,13 +987,13 @@
                     'This will restrict their access';
 
                 message.textContent =
-                    'will be deactivated. They will no longer be able to log in until reactivated.';
+                    'This account will be deactivated and will no longer be able to access the system until reactivated.';
 
                 button.className =
                     'ui-btn ui-btn-warning';
 
                 button.innerHTML =
-                    '<i class="fa-solid fa-user-slash"></i><span>Deactivate</span>';
+                    '<span>Deactivate</span>';
             } else {
                 modal.classList.add(
                     'modal-theme-success',
@@ -982,9 +1003,6 @@
                 icon.innerHTML =
                     '<i class="fa-solid fa-user-check"></i>';
 
-                bodyIcon.className =
-                    'fa-solid fa-circle-check';
-
                 title.textContent =
                     'Activate User';
 
@@ -992,13 +1010,13 @@
                     'This will restore their access';
 
                 message.textContent =
-                    'will be activated. They will regain access to the system.';
+                    'This account will be activated and will regain access to the system.';
 
                 button.className =
                     'ui-btn ui-btn-success';
 
                 button.innerHTML =
-                    '<i class="fa-solid fa-user-check"></i><span>Activate</span>';
+                    '<span>Activate</span>';
             }
 
             button.dataset.originalHtml =

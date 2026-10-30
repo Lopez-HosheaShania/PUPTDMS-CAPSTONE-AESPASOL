@@ -130,17 +130,6 @@
     gap: .75rem;
 }
 
-.role-card:has(.role-delete-action) .role-card-header {
-    padding-right: 2.75rem;
-}
-
-.role-delete-action {
-    position: absolute;
-    top: .85rem;
-    right: .85rem;
-    z-index: 3;
-}
-
 .role-card-copy {
     flex: 1 1 auto;
     min-width: 0;

@@ -115,14 +115,6 @@
                                     data-role-theme="{{ $roleMeta['theme'] }}" data-granted="{{ $granted }}"
                                     data-total="{{ $totalPerms }}" data-pct="{{ $pct }}"
                                     data-slug="{{ $role->slug }}" data-ui-click="action-eee17b73e521">
-                                    @if (!$isProtectedRole && $canDeleteCustomRoles)
-                                        <button type="button" class="ui-action-btn ui-action-delete role-delete-action"
-                                            data-ui-click="action-4befe37bff71" data-ui-click-arg-0="{{ $role->id }}"
-                                            data-ui-click-arg-1="{{ json_encode($role->name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
-                                            data-tooltip="Delete role" data-tooltip-tone="delete" aria-label="Delete role">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    @endif
 
                                     <div class="role-card-header">
 
@@ -137,6 +129,17 @@
                                         <div class="count-label">
                                             Permissions: {{ $granted }} / {{ $totalPerms }}
                                         </div>
+
+                                        @if (!$isProtectedRole && $canDeleteCustomRoles)
+                                            <button type="button" class="ui-action-btn ui-action-delete"
+                                                data-ui-click="action-4befe37bff71"
+                                                data-ui-click-arg-0="{{ $role->id }}"
+                                                data-ui-click-arg-1="{{ json_encode($role->name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-tooltip="Delete role" data-tooltip-tone="delete"
+                                                aria-label="Delete role">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        @endif
 
                                     </div>
 
@@ -520,6 +523,7 @@
     <div id="resetConfirmModal" class="ui-modal modal-theme-warning" aria-hidden="true">
         <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle"
             data-ui-click="action-22499e15f3ee">
+
             <div class="modal-hd">
 
                 <div class="modal-heading">
@@ -548,15 +552,21 @@
 
                 <div class="global-confirm-alert">
                     <div>
+
                         <p>
-                            Reset permissions for <strong>Admin, Dentist, and Patient?</strong>
+                            Reset permissions for
+                            <strong>
+                                Admin, Dentist, and Patient?
+                            </strong>
                         </p>
 
                         <span>
                             Custom permission changes will be lost.
                             This action cannot be undone.
                         </span>
+
                     </div>
+
                 </div>
 
             </div>
@@ -573,6 +583,7 @@
                 </button>
 
             </div>
+
         </div>
     </div>
 
