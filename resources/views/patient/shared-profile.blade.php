@@ -101,7 +101,7 @@ $emergencyRelation = optional($patient->medicalHistory)->emergency_relation;
 
 $profileIsActive = true;
 
-$patientType = ($patient->classification === 'faculty' || $patient->faculty_code) ? 'Faculty' : (($patient->classification === 'student' || $patient->student_no) ? 'Student' : 'Patient');
+$patientType = \App\Support\PatientClassification::label($patient);
 
 $procedureAppointment = collect($futureVisits ?? [])
 ->first(function ($visit) {
@@ -219,6 +219,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 $patientRoleIcon = match ($patientType) {
                                 'Faculty' => 'fa-chalkboard-user',
                                 'Student' => 'fa-user-graduate',
+                                'Administrative Personnel' => 'fa-building-user',
                                 default => 'fa-user',
                                 };
                                 @endphp

@@ -24,6 +24,7 @@ use App\Models\ServiceType;
 use App\Models\User;
 use App\Services\FacultyApiService;
 use App\Services\StudentApiService;
+use App\Services\CmsApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -2118,65 +2119,13 @@ class WalkInController extends Controller
         string $search,
         int $limit
     ): array {
-        $baseUrl = rtrim(
-            (string) env(
-                'OCMS_EXTERNAL_API_URL'
-            ),
-            '/'
-        );
-
-        $apiKey = (string) env(
-            'OCMS_EXTERNAL_API_KEY'
-        );
-
-        if (
-            $baseUrl === '' ||
-            $apiKey === ''
-        ) {
+        $cmsApi = app(CmsApiService::class);
+        if (! $cmsApi->isConfigured()) {
             return [];
         }
 
         try {
-            $response = Http::timeout(15)
-                ->acceptJson()
-                ->withHeaders([
-                    'X-External-Api-Key' =>
-                    $apiKey,
-                ])
-                ->get(
-                    $baseUrl .
-                        '/external/admins',
-
-                    array_filter([
-                        'search' =>
-                        $search !== ''
-                            ? $search
-                            : null,
-                    ])
-                );
-
-            if ($response->failed()) {
-                Log::error(
-                    'OCMS external admin search failed during walk-in',
-                    [
-                        'status' =>
-                        $response->status(),
-
-                        'body' =>
-                        $response->body(),
-                    ]
-                );
-
-                return [];
-            }
-
-            return collect(
-                is_array(
-                    $response->json('data')
-                )
-                    ? $response->json('data')
-                    : []
-            )
+            return collect($cmsApi->getAdmins(array_filter(['search' => $search])))
                 ->take($limit)
                 ->map(function (array $admin) {
                     $name = trim(
@@ -2202,9 +2151,7 @@ class WalkInController extends Controller
                     }
 
                     $externalId =
-                        $admin['external_admin_id']
-                        ?? $admin['id']
-                        ?? null;
+                        $admin['admin_id'];
 
                     $email = strtolower(
                         trim(
@@ -2255,7 +2202,7 @@ class WalkInController extends Controller
                         'email' => $email,
 
                         'phone' =>
-                        $admin['emergency_contact_no'] ?? null,
+                        $admin['contact_number'] ?: null,
 
                         'gender' =>
                         $admin['gender'] ?? null,
@@ -2302,11 +2249,7 @@ class WalkInController extends Controller
             Log::warning(
                 'OCMS external admin search unavailable during walk-in',
                 [
-                    'message' =>
-                    $e->getMessage(),
-
-                    'base_url' =>
-                    $baseUrl,
+                    'exception' => get_class($e),
                 ]
             );
 

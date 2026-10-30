@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\ExternalAdminAccess;
+use App\Models\ExternalAdminProfile;
 use App\Models\Faculty;
 use App\Models\MedicalHistory;
 use App\Models\Patient;
@@ -12,6 +13,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\FacultyApiService;
 use App\Services\ConcurrentSessionService;
+use App\Services\CmsApiService;
 use App\Services\StudentApiService;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
@@ -649,36 +651,36 @@ class OIDCController extends Controller
 
         $hasFacultyProfile = false;
 
-        if ($assignedAccess) {
+        $cmsProfile = null;
+        $cmsApi = app(CmsApiService::class);
+
+        if ($cmsApi->isConfigured()) {
             try {
-                $baseUrl = rtrim((string) env('OCMS_EXTERNAL_API_URL'), '/');
-                $apiKey = (string) env('OCMS_EXTERNAL_API_KEY');
+                $cmsProfile = $cmsApi->findByEmail($email);
+                if ($cmsProfile !== null) {
+                    $birthdate = $this->normalizeDate($cmsProfile['birthday'] ?? $birthdate);
+                    $gender = $this->normalizeGenderLabel($cmsProfile['gender'] ?: $gender);
+                    $phone = $cmsProfile['contact_number'] ?: $phone;
+                    $address = $cmsProfile['address'] ?: $address;
 
-                $response = Http::timeout(15)
-                    ->acceptJson()
-                    ->withHeaders([
-                        'X-External-Api-Key' => $apiKey,
-                    ])
-                    ->get($baseUrl . '/external/admins/' . urlencode((string) $assignedAccess->external_admin_id));
-
-                if ($response->successful()) {
-                    $payload = $response->json();
-                    $admin = is_array($payload['data'] ?? null) ? $payload['data'] : [];
-
-                    $birthdate = $this->normalizeDate($admin['birthday'] ?? $birthdate);
-                    $gender = $this->normalizeGenderLabel($admin['gender'] ?? $gender);
-                    $phone = $admin['emergency_contact_no'] ?? $phone;
-                } else {
-                    $gender = $this->normalizeGenderLabel($assignedAccess->gender ?? $gender);
-                    $phone = $assignedAccess->contact_number ?? $phone;
+                    // Repair only an existing assignment's identity; a directory match grants no access.
+                    if ($assignedAccess?->profile && $assignedAccess->external_admin_id !== $cmsProfile['admin_id']
+                        && ! ExternalAdminProfile::whereKeyNot($assignedAccess->profile->id)
+                            ->where('external_admin_id', $cmsProfile['admin_id'])->exists()) {
+                        $assignedAccess->profile->update(['external_admin_id' => $cmsProfile['admin_id']]);
+                    }
                 }
             } catch (\Throwable $e) {
-                Log::error('Admin API fetch failed', [
-                    'email' => $email,
-                    'error' => $e->getMessage(),
-                ]);
+                Log::warning('CMS profile sync unavailable', ['exception' => get_class($e)]);
             }
-        } elseif ($facultyAccess && $facultyAccess->user) {
+        }
+
+        if ($cmsProfile === null && $assignedAccess) {
+            $gender = $this->normalizeGenderLabel($assignedAccess->gender ?: $gender);
+            $phone = $assignedAccess->contact_number ?: $phone;
+        }
+
+        if (! $assignedAccess && $facultyAccess && $facultyAccess->user) {
             try {
                 $localFacultyBirthdate = $facultyAccess->profile?->birthday
                     ?? $facultyAccess->user?->birthdate;
@@ -807,7 +809,9 @@ class OIDCController extends Controller
             $classification = 'faculty';
         } elseif (filled($studentNo) || $studentData !== [] || in_array('student', $incomingRoles, true)) {
             $classification = 'student';
-        } elseif ($assignedAccess) {
+        } elseif ($assignedAccess || ($cmsProfile !== null && in_array(
+            $existingClassification, ['', 'patient', 'dependent', 'dependent_alumni', 'administrative'], true
+        ))) {
             $classification = 'administrative';
         } elseif (
             in_array(

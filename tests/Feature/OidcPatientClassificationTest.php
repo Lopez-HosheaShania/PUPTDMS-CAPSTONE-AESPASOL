@@ -24,6 +24,13 @@ class OidcPatientClassificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.ocms.base_url' => null, 'services.ocms.api_key' => null]);
+        Http::preventStrayRequests();
+    }
+
     public static function categories(): array
     {
         return [
@@ -36,6 +43,7 @@ class OidcPatientClassificationTest extends TestCase
             'faculty API match without code' => [[], [], [], [['email' => 'category@example.test']], 'faculty'],
             'saved student category without identifiers' => [['classification' => 'student'], [], [], [], 'student'],
             'saved faculty category without identifiers' => [['classification' => 'faculty'], [], [], [], 'faculty'],
+            'saved administrative category without API' => [['classification' => 'administrative'], [], [], [], 'administrative'],
             'saved alumni' => [['classification' => 'alumni'], [], [], [], 'alumni'],
             'saved dependent' => [['classification' => 'dependent'], [], [], [], 'dependent'],
             'saved guest' => [['classification' => 'guest'], [], [], [], 'guest'],
@@ -88,6 +96,7 @@ class OidcPatientClassificationTest extends TestCase
             'new student without GUISIS' => [null, ['Student'], 'patient', 'student', 'homepage'],
             'new faculty without faculty API' => [null, 'Faculty', 'patient', 'faculty', 'homepage'],
             'new patient without category evidence' => [null, [], 'patient', 'dependent_alumni', 'homepage'],
+            'CMS membership without local access assignment' => [null, [], 'patient', 'administrative', 'homepage'],
             'dentist unchanged' => ['dentist', ['Dentist'], 'dentist', null, 'dentist.dentist.dashboard'],
             'local admin unchanged' => ['admin', ['Faculty'], 'admin', null, 'admin.admin.dashboard'],
             'custom role unchanged' => ['receptionist', ['Student'], 'receptionist', null, 'login'],
@@ -111,6 +120,12 @@ class OidcPatientClassificationTest extends TestCase
                 'id' => 'sso-1', 'email' => 'login@example.test', 'name' => 'Login Patient', 'roles' => $incomingRoles,
             ]),
         ]);
+        if ($category === 'administrative') {
+            config(['services.ocms.base_url' => 'https://cms.example.test/api', 'services.ocms.api_key' => 'test-cms-key']);
+            Http::fake(['https://cms.example.test/api/external/admins' => Http::response([
+                'success' => true, 'data' => [['admin_uuid' => 'cms-001', 'email' => 'login@example.test', 'access_level' => 'superadmin']],
+            ])]);
+        }
         if ($localRole) {
             $role = Role::firstOrCreate(['slug' => $localRole], ['name' => ucfirst($localRole)]);
             User::create(['name' => 'Login Patient', 'email' => 'login@example.test', 'role_id' => $role->id, 'status' => 'active']);
@@ -135,9 +150,12 @@ class OidcPatientClassificationTest extends TestCase
             $this->assertAuthenticatedAs($user);
             $this->assertSame($user->patient->id, session('patient_id'));
             $homepage = $this->get(route('homepage'))->assertOk();
-            if (in_array($category, ['student', 'faculty'], true)) {
-                $homepage->assertSee('roleLabel: "' . ucfirst($category) . '"', false);
+            if (in_array($category, ['student', 'faculty', 'administrative'], true)) {
+                $label = $category === 'administrative' ? 'Administrative Personnel' : ucfirst($category);
+                $homepage->assertSee('roleLabel: "' . $label . '"', false);
             }
+            $this->assertDatabaseCount('external_admin_accesses', 0);
+            $this->assertDatabaseCount('external_admin_profiles', 0);
             $this->get('/admin/dashboard')->assertForbidden();
             $this->get('/dentist/dashboard')->assertForbidden();
         } elseif ($redirect !== 'login') {

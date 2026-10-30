@@ -7,6 +7,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class DocumentRequest extends Model
 {
+    // Preserve historical approved aliases; the current UI only approves/rejects.
+    public const APPROVED_STATUSES = ['approved', 'ready', 'ready-for-pickup', 'ready-for-release', 'released'];
+    public const CLOSED_STATUSES = [...self::APPROVED_STATUSES, 'rejected'];
+
+    public static function normalizedStatus(?string $status): string
+    {
+        $status = strtolower(str_replace('_', '-', trim($status ?? 'pending')));
+
+        return in_array($status, self::APPROVED_STATUSES, true) ? 'approved'
+            : ($status === 'rejected' ? 'rejected' : 'pending');
+    }
+
+    public function retentionDecisionDate(): ?\Illuminate\Support\Carbon
+    {
+        return match (self::normalizedStatus($this->status)) {
+            'approved' => $this->approved_at,
+            'rejected' => $this->closed_at,
+            default => null,
+        };
+    }
+
     use HasFactory;
     use \App\Models\Concerns\ScopesClinicalPatients;
     use \App\Models\Concerns\StoresOptionalDetails { save as private saveWithDetails; }
@@ -16,7 +37,7 @@ class DocumentRequest extends Model
     protected function detailFields(): array
     {
         return ['review' => ['approved_at', 'approved_by', 'rejection_reason'],
-            'requestState' => ['request_date', 'request_time', 'status']];
+            'requestState' => ['request_date', 'request_time', 'status', 'closed_at']];
     }
 
     public function requestState()
@@ -31,11 +52,26 @@ class DocumentRequest extends Model
 
     public function save(array $options = [])
     {
-        if (! $this->exists && $this->status === null) {
-            $this->status = 'pending';
-        }
+        return $this->getConnection()->transaction(function () use ($options) {
+            if (! $this->exists && $this->status === null) {
+                $this->status = 'pending';
+            }
 
-        return $this->saveWithDetails($options);
+            $previousStatus = $this->exists ? $this->requestState()->lockForUpdate()->value('status') : null;
+            $nextStatus = $this->pendingOptionalDetails['requestState']['status'] ?? $previousStatus;
+            $previousDecision = $previousStatus === null ? null : self::normalizedStatus($previousStatus);
+            $nextDecision = self::normalizedStatus($nextStatus);
+            if ($previousDecision !== $nextDecision) {
+                $this->closed_at = match ($nextDecision) {
+                    'approved' => $this->approved_at,
+                    // Imported historical rows must provide their actual date.
+                    'rejected' => $this->exists ? now() : $this->closed_at,
+                    default => null,
+                };
+            }
+
+            return $this->saveWithDetails($options);
+        });
     }
 
     public function review()
@@ -62,6 +98,7 @@ class DocumentRequest extends Model
         'approved_at',
         'approved_by',
         'rejection_reason',
+        'closed_at',
     ];
 
     protected $casts = [

@@ -424,6 +424,11 @@ class Patient extends Model
         return $this->hasOne(\App\Models\MedicalHistory::class);
     }
 
+    public function recordClosure()
+    {
+        return $this->hasOne(PatientRecordClosure::class);
+    }
+
     public function appointments()
     {
         return $this->hasMany(

@@ -913,7 +913,7 @@
 
         var PROFILE_DATA = {
             name: @json($patient->name ?? 'Guest'),
-            roleLabel: "{{ $patient->classification === 'faculty' || $patient->faculty_code ? 'Faculty' : ($patient->classification === 'student' || $patient->student_no ? 'Student' : 'Patient') }}",
+            roleLabel: "{{ \App\Support\PatientClassification::label($patient) }}",
             facultyCode: "{{ $patient->faculty_code ?? '' }}",
             studentNo: "{{ $patient->student_no ?? '' }}",
             age: "{{ $age ?? '' }}",

@@ -549,13 +549,7 @@ class DocumentRequestController extends Controller
 
         return back()->with('success', 'Request updated.');
     }
-    private const LEGACY_APPROVED_STATUSES = [
-        'approved',
-        'ready',
-        'ready-for-pickup',
-        'ready-for-release',
-        'released',
-    ];
+    private const LEGACY_APPROVED_STATUSES = DocumentRequest::APPROVED_STATUSES;
 
     private function buildDocumentRequestQuery(Request $request)
     {

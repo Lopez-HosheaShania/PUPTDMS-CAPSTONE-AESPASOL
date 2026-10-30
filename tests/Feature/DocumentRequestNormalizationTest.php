@@ -92,6 +92,9 @@ class DocumentRequestNormalizationTest extends TestCase
     {
         $record = $this->requestRecord();
         $record->update(['status' => 'rejected', 'rejection_reason' => 'Preserve review']);
+        // Roll back the newer state extension first, as the migration runner does.
+        $retentionMigration = require database_path('migrations/2026_10_29_000002_add_retention_review_rules_and_lifecycle_dates.php');
+        $retentionMigration->down();
         $before = $record->fresh()->toArray();
         $migration = require database_path('migrations/2026_09_07_150000_separate_document_request_state.php');
         $migration->down();
@@ -99,6 +102,7 @@ class DocumentRequestNormalizationTest extends TestCase
         $this->assertSame(1, DB::table('document_requests')->where('id', $record->id)->whereDate('request_date', '2026-09-07')->count());
         $migration->up();
         $this->assertSame($before, $record->fresh()->toArray());
+        $retentionMigration->up();
     }
 
     public function test_all_dental_records_approval_generates_pdf_without_procedure_patient_column(): void
