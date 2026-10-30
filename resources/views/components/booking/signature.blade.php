@@ -10,10 +10,11 @@
     'required' => true,
     'showResult' => true,
     'drawnFilePrefix' => null,
+    'allowUpload' => true,
 ])
 
 @php
-    $isDrawOnly = $mode === 'draw-only';
+    $isDrawOnly = $mode === 'draw-only' || ($mode === 'patient' && !$allowUpload);
     $isReadOnly = $mode === 'read-only';
 
     $resolvedDrawTitle =
@@ -24,9 +25,9 @@
 
 
 <div class="booking-section-card signature-booking-section-card" data-global-field data-booking-signature
-    data-signature-mode="{{ $mode }}" data-has-existing-signature="{{ $hasExistingSignature ? 'true' : 'false' }}"
+    data-signature-mode="{{ $isDrawOnly ? 'draw-only' : $mode }}" data-has-existing-signature="{{ $hasExistingSignature ? 'true' : 'false' }}"
     data-signature-validation-url="{{ $mode === 'patient' ? route('book.appointment.validate-signature') : '' }}"
-    data-signature-drawn-prefix="{{ $drawnFilePrefix ?? ($isDrawOnly ? 'walk-in-signature' : 'drawn-signature') }}">
+    data-signature-drawn-prefix="{{ $drawnFilePrefix ?? ($mode === 'draw-only' ? 'walk-in-signature' : 'drawn-signature') }}">
 
     <div class="signature-full-row">
 

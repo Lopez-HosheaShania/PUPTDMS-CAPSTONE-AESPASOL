@@ -260,7 +260,7 @@ class ReportSignatoryTest extends TestCase
         $this->postJson(route('reports.signatory.validate-signature'), [
             'signature' => UploadedFile::fake()->image('poster.png', 240, 120),
         ])->assertUnprocessable()->assertJsonPath('accepted', false)
-            ->assertJsonPath('review_required', true);
+            ->assertJsonPath('detected_type', 'verification_unavailable');
         $this->put(route('reports.signatory.update'), [
             'signatory_name' => 'Juan Dela Cruz', 'license_number' => '1234567',
             'signature' => UploadedFile::fake()->image('poster.png', 240, 120),
@@ -320,7 +320,7 @@ class ReportSignatoryTest extends TestCase
             $isDentist = \App\Services\AssignedDentistService::isDentist($user);
             if ($isDentist) {
                 $this->assertStringContainsString('pattern="[0-9]{6,7}"', $html);
-                $this->assertStringContainsString('minlength="6" maxlength="7"', $html);
+                $this->assertMatchesRegularExpression('/minlength="6"\s+maxlength="7"/', $html);
             } else {
                 $this->assertStringNotContainsString('name="license_number"', $html);
             }

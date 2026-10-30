@@ -285,6 +285,7 @@ class RolePermissionController extends Controller
             'access_dentist_dashboard',
             'receive_notifications',
             'view_patient_profiles',
+            'view_dental_records',
             'view_appointments',
             'reschedule_appointments',
             'cancel_appointments',

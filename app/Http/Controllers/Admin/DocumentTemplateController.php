@@ -206,7 +206,9 @@ class DocumentTemplateController extends Controller
 
 
         $templates = $query
+            ->orderByRaw("CASE WHEN status = 'archived' THEN 1 ELSE 0 END")
             ->latest()
+            ->orderByDesc('id')
             ->paginate(
                 $perPage
             )

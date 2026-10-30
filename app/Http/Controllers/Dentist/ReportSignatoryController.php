@@ -29,26 +29,11 @@ class ReportSignatoryController extends Controller
             && $file->getMimeType() === 'image/png';
     }
 
-    private function verifySignature(UploadedFile $file, SignatureAiVerifier $signatureVerifier): array
-    {
-        $result = $signatureVerifier->verify($file);
-
-        if (($result['review_required'] ?? false)
-            || ($result['detected_type'] ?? '') === 'manual_review_required') {
-            $result['accepted'] = false;
-            $result['valid'] = false;
-            $result['is_signature'] = false;
-            $result['message'] = $result['reason'] = 'Signature verification is currently unavailable. Please try again later. The signature has not been saved.';
-        }
-
-        return $result;
-    }
-
     public function validateSignature(Request $request, SignatureAiVerifier $signatureVerifier)
     {
         abort_unless(SignatoryService::canManage($request->user()), 403);
         $request->validate(['signature' => $this->signatureRules(true)]);
-        $result = $this->verifySignature($request->file('signature'), $signatureVerifier);
+        $result = $signatureVerifier->verify($request->file('signature'));
 
         return response()->json(array_merge($result, [
             'valid' => (bool) ($result['accepted'] ?? false),
@@ -90,7 +75,7 @@ class ReportSignatoryController extends Controller
             && str_starts_with($profile?->signature_path ?? '', 'report-signatures/'.$user->id.'/drawn/');
         $result = $isDrawn || $retainingDrawing
             ? ['accepted' => true]
-            : $this->verifySignature($signatureFile, $signatureVerifier);
+            : $signatureVerifier->verify($signatureFile);
         if (! ($result['accepted'] ?? false)) {
             throw ValidationException::withMessages([
                 'signature' => $result['reason'] ?? $result['message'] ?? 'The uploaded image did not pass signature validation.',

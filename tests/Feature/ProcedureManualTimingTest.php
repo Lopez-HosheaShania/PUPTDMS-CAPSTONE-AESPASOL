@@ -50,6 +50,40 @@ class ProcedureManualTimingTest extends TestCase
             'appointment_date' => '2026-10-23', 'appointment_time' => sprintf('08:%02d:00', ++$this->sequence), 'status' => 'upcoming']);
     }
 
+    public function test_dental_records_display_manual_time_in_with_booked_time_as_legacy_fallback(): void
+    {
+        $dentist = $this->actor();
+        $permission = Permission::create(['slug' => 'view_dental_records', 'name' => 'View Dental Records']);
+        $dentist->role->permissions()->attach($permission);
+        $this->actingAs($dentist)->withSession(['role' => 'dentist']);
+
+        foreach ([true, false] as $hasManualTime) {
+            $visit = $this->visit($dentist);
+            $visit->update(['status' => 'completed']);
+            AppointmentProcedure::create([
+                'appointment_id' => $visit->id,
+                'procedure_started_at' => $hasManualTime ? '2026-10-23 09:17:45' : null,
+                'procedure_completed_at' => $hasManualTime ? '2026-10-23 09:27:45' : null,
+                'procedure_duration_seconds' => $hasManualTime ? 600 : null,
+            ]);
+            $expectedTime = $hasManualTime ? '9:17 AM' : \Carbon\Carbon::parse($visit->appointment_time)->format('g:i A');
+
+            $this->getJson(route('dentist.dental-records.show', $visit))->assertOk()
+                ->assertJsonPath('time', $expectedTime)
+                ->assertJsonPath('record_sections.0.rows.2.value', $expectedTime);
+
+            $response = $this->get(route('dentist.dental-records.index'))->assertOk();
+            $record = $response->viewData('records')->getCollection()->firstWhere('id', $visit->id);
+            $this->assertSame($expectedTime, $record->time);
+
+            $html = \Illuminate\Support\Facades\Blade::render(
+                '<x-appointment-record-card :appointment="$appointment" :show-details="true" />',
+                ['appointment' => $visit->fresh()]
+            );
+            $this->assertStringContainsString('"time":"'.$expectedTime.'"', $html);
+        }
+    }
+
     private function payload(array $overrides = []): array
     {
         return array_replace(['odontogram_data' => [], 'has_applied_treatment' => false,

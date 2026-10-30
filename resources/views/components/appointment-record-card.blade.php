@@ -25,6 +25,10 @@ $dateRaw = $get('appointment_date') ?? $get('date');
 
 $timeRaw = $get('appointment_time') ?? $get('time');
 
+if ($showDetails) {
+$timeRaw = $get('procedure.procedure_started_at') ?? $timeRaw;
+}
+
 $apptDate = null;
 $apptTime = null;
 

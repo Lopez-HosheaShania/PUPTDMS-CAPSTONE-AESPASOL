@@ -1026,14 +1026,6 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->middleware('permission:book_appointments')
         ->name('book.appointment.validate-signature');
 
-    Route::get('/signature-review', [AppointmentController::class, 'showSignatureReview'])
-        ->middleware('permission:book_appointments')
-        ->name('patient.signature-review.show');
-
-    Route::post('/signature-review', [AppointmentController::class, 'updateSignatureReview'])
-        ->middleware('permission:book_appointments')
-        ->name('patient.signature-review.update');
-
     Route::get('/appointments', [AppointmentController::class, 'index'])
         ->middleware('permission:view_own_appointments,book_appointments')
         ->name('book.appointment.index');
@@ -1043,11 +1035,6 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
     })->name('patient.appointment.cancelled.view');
 });
 
-Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::post('/patients/{patient}/signature/invalid', [AppointmentController::class, 'markSignatureInvalid'])
-        ->name('admin.patient.signature.invalid');
-});
-
 /*
 |--------------------------------------------------------------------------
 | DENTIST ROUTES
@@ -1055,9 +1042,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 */
 
 Route::prefix('dentist')->middleware(['auth'])->group(function () {
-    Route::post('/patients/{patient}/signature/invalid', [AppointmentController::class, 'markSignatureInvalid'])
-        ->middleware('permission:create_medical_records')
-        ->name('dentist.patient.signature.invalid');
     Route::get('/dashboard', [DentistDashboardController::class, 'index'])
         ->middleware('permission:access_dentist_dashboard')
         ->name('dentist.dentist.dashboard');
