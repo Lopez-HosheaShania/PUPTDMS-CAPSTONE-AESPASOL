@@ -1714,7 +1714,9 @@ class DentistReportController extends Controller
                 $groups[$groupKey][$diagnosis] = 0;
             }
 
-            $groups[$groupKey][$diagnosis]++;
+            $groups[$groupKey][$diagnosis] += \App\Support\DentalCaseTeeth::count(
+                $appointment->procedure?->odontogram_data
+            );
         }
 
         foreach ($groups as $groupKey => $cases) {
@@ -1975,40 +1977,8 @@ class DentistReportController extends Controller
             return null;
         }
 
-        $diagnosis = $this->normalizeReportServiceLabel($diagnosis, '');
-        if ($this->isDentalCaseProcedureLabel($diagnosis)) {
-            return null;
-        }
-
-        return $diagnosis;
-    }
-
-    private function isDentalCaseProcedureLabel(string $diagnosis): bool
-    {
-        static $procedureLabels = null;
-
-        if ($procedureLabels === null) {
-            $procedureLabels = ServiceType::query()
-                ->pluck('name')
-                ->map(fn($name) => $this->normalizeDentalCaseLabel($name))
-                ->filter()
-                ->all();
-        }
-
-        return in_array(
-            $this->normalizeDentalCaseLabel($diagnosis),
-            $procedureLabels,
-            true
-        );
-    }
-
-    private function normalizeDentalCaseLabel(?string $value): string
-    {
-        return preg_replace(
-            '/[^a-z0-9]+/',
-            '',
-            strtolower(trim((string) $value))
-        ) ?? '';
+        // This is an explicitly saved diagnosis, even if a service shares its name.
+        return $this->normalizeReportServiceLabel($diagnosis, '');
     }
 
     private function getMonthlyReportServiceLabel(Appointment $appointment): string
@@ -2115,6 +2085,10 @@ class DentistReportController extends Controller
             160,
             10
         );
+
+        // The source PDF omits this heading in the administrative section.
+        $pdf->SetFont('Helvetica', '', 11.04);
+        $this->drawPdfCell($pdf, 252, 405, 'DIAGNOSIS', 208, 12, 'L');
 
         $this->drawDentalCasesSection(
             $pdf,
