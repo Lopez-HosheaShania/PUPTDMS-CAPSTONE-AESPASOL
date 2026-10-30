@@ -258,6 +258,22 @@ function initializeAccordion(
     summary.addEventListener(
         'click',
         event => {
+            const ignoredTarget =
+                event.target.closest(
+                    `
+                    button,
+                    a,
+                    input,
+                    select,
+                    textarea,
+                    [data-accordion-ignore]
+                `
+                );
+
+            if (ignoredTarget) {
+                return;
+            }
+
             event.preventDefault();
 
             toggleAccordion(

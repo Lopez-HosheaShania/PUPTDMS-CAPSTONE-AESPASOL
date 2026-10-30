@@ -68,7 +68,6 @@
             </button>
 
             <button type="submit" class="ui-btn ui-btn-danger">
-                <i class="fa-solid fa-trash"></i>
                 <span>Delete</span>
             </button>
         </div>

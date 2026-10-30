@@ -231,6 +231,8 @@
 
     @include('partials.global-toast')
 
+    @include('components.global-loading')
+    
     <div id="logoutConfirmModal" class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle"
         aria-describedby="logoutConfirmDescription" aria-hidden="true">
 

@@ -189,7 +189,7 @@
                                 <span>Sync from FLSS</span>
                             </button>
 
-                            <button id="openAddPeriodBtn" type="button" class="ui-btn ui-btn-secondary"
+                            <button id="openAddPeriodBtn" type="button" class="ui-btn ui-btn-primary"
                                 @if ($canCreateAcademicPeriod) data-open-modal="addModal"
                             @else
                                 data-academic-permission-trigger="create"
@@ -264,8 +264,9 @@
                                 </p>
                             </div>
 
-                            <button type="button" id="manageActivePeriodBtn"
-                                data-ui-click="action-7147962c1ff8" data-ui-click-arg-0="{{ json_encode((bool) ($activePeriodPayload)) }}" data-ui-click-arg-1="{{ json_encode($activePeriodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                            <button type="button" id="manageActivePeriodBtn" data-ui-click="action-7147962c1ff8"
+                                data-ui-click-arg-0="{{ json_encode((bool) $activePeriodPayload) }}"
+                                data-ui-click-arg-1="{{ json_encode($activePeriodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                 class="ui-btn ui-btn-primary ">
                                 <i class="fa-solid fa-gear"></i>
                                 <span>Manage Period</span>
@@ -318,8 +319,9 @@
                                     <x-view-toggle id="academicViewToggle" storage-key="academicView"
                                         list-view="#academicListView" grid-view="#academicGridView" />
 
-                                    <button id="externalClearFilterBtn" type="button" data-ui-click="action-72beedf02378"
-                                        class="global-filter-reset-btn hidden" title="Reset filters">
+                                    <button id="externalClearFilterBtn" type="button"
+                                        data-ui-click="action-72beedf02378" class="global-filter-reset-btn hidden"
+                                        title="Reset filters">
                                         <i class="fa-solid fa-rotate-left"></i>
                                     </button>
                                 </form>
@@ -445,7 +447,8 @@
                                                         <div class="ui-action-group">
                                                             <button type="button" class="ui-action-btn ui-action-edit"
                                                                 data-tooltip="Edit period" aria-label="Edit period"
-                                                                data-ui-click="action-e63476c3cb8d" data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                                data-ui-click="action-e63476c3cb8d"
+                                                                data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                 <i class="fa-solid fa-pen"></i>
                                                             </button>
 
@@ -460,7 +463,9 @@
                                                                         class="ui-action-btn ui-action-success"
                                                                         data-tooltip="Set as active"
                                                                         aria-label="Set as active"
-                                                                        data-ui-click="action-03a9835a5e25" data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                                        data-ui-click="action-03a9835a5e25"
+                                                                        data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                        data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                         <i class="fa-solid fa-circle-check"></i>
                                                                     </button>
                                                                 </form>
@@ -616,7 +621,8 @@
                                                     <div class="ui-action-group">
                                                         <button type="button" class="ui-action-btn ui-action-edit"
                                                             data-tooltip="Edit period" aria-label="Edit period"
-                                                            data-ui-click="action-e63476c3cb8d" data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                            data-ui-click="action-e63476c3cb8d"
+                                                            data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                             <i class="fa-solid fa-pen"></i>
                                                         </button>
 
@@ -631,7 +637,9 @@
                                                                     class="ui-action-btn ui-action-success"
                                                                     data-tooltip="Set as active"
                                                                     aria-label="Set as active"
-                                                                    data-ui-click="action-8c24c81f4fa3" data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                                    data-ui-click="action-8c24c81f4fa3"
+                                                                    data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                                     <i class="fa-solid fa-circle-check"></i>
                                                                 </button>
                                                             </form>
@@ -779,7 +787,8 @@
                                                 <div class="ui-action-group">
                                                     <button type="button" class="ui-action-btn ui-action-edit"
                                                         data-tooltip="Edit period" aria-label="Edit period"
-                                                        data-ui-click="action-e63476c3cb8d" data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                        data-ui-click="action-e63476c3cb8d"
+                                                        data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
 
                                                         <i class="fa-solid fa-pen"></i>
                                                     </button>
@@ -791,7 +800,9 @@
                                                             @method('PATCH')
                                                             <button type="button" class="ui-action-btn ui-action-success"
                                                                 data-tooltip="Set as active" aria-label="Set as active"
-                                                                data-ui-click="action-09999bb5940d" data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-1="{{ json_encode($period->academic_year . ' — ' . str_replace(['1st', '2nd'], ['First', 'Second'], $period->semester), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                                data-ui-click="action-09999bb5940d"
+                                                                data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                data-ui-click-arg-1="{{ json_encode($period->academic_year . ' — ' . str_replace(['1st', '2nd'], ['First', 'Second'], $period->semester), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
 
                                                                 <i class="fa-solid fa-circle-check"></i>
                                                             </button>
@@ -947,8 +958,9 @@
                                     <i class="fa-solid fa-plus quick-action-bg-icon"></i>
                                 </button>
 
-                                <button id="openEditPeriodQuickBtn" type="button"
-                                    data-ui-click="action-7147962c1ff8" data-ui-click-arg-0="{{ json_encode((bool) ($activePeriodPayload)) }}" data-ui-click-arg-1="{{ json_encode($activePeriodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                <button id="openEditPeriodQuickBtn" type="button" data-ui-click="action-7147962c1ff8"
+                                    data-ui-click-arg-0="{{ json_encode((bool) $activePeriodPayload) }}"
+                                    data-ui-click-arg-1="{{ json_encode($activePeriodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
                                     class="quick-action quick-action-card">
                                     <span class="quick-action-icon">
                                         <i class="fa-solid fa-pen"></i>
@@ -987,8 +999,8 @@
 
     <x-filter-drawer id="filterModal" title="Filters" close-id="closeFilterModalBtn"
         close-callback="action-770a42e411be" clear-id="clearFiltersModal" clear-label="Clear Filters"
-        cancel-id="cancelFilterBtn" cancel-callback="action-770a42e411be" cancel-label="Cancel"
-        apply-id="applyFilters" apply-label="Show {{ $academicPeriods->total() }} results" results-id="showResultsText">
+        cancel-id="cancelFilterBtn" cancel-callback="action-770a42e411be" cancel-label="Cancel" apply-id="applyFilters"
+        apply-label="Show {{ $academicPeriods->total() }} results" results-id="showResultsText">
 
         <div id="activeFiltersSection" class="filter-active-section hidden">
             <div class="filter-active-header">
@@ -1290,7 +1302,6 @@
                 <button type="button" data-discard-close="addModal" class="ui-btn ui-btn-secondary">Cancel</button>
 
                 <button type="submit" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-floppy-disk"></i>
                     <span>Save Period</span>
                 </button>
             </div>
@@ -1402,7 +1413,8 @@
                                     <input type="text" name="start_date" id="editStart"
                                         class="form-input-custom js-flatpickr-date" placeholder="Select start date"
                                         data-field-label="Start Date" data-required-message="Please select a start date."
-                                        data-validation-rule="strictIsoDate" required readonly>
+                                        data-validation-rule="strictIsoDate" data-flatpickr-append-to-body required
+                                        readonly>
 
                                     <div class="global-field-error" data-error-for="editStart" aria-live="polite"
                                         aria-hidden="true"></div>
@@ -1416,7 +1428,8 @@
                                     <input type="text" name="end_date" id="editEnd"
                                         class="form-input-custom js-flatpickr-date" placeholder="Select end date"
                                         data-field-label="End Date" data-required-message="Please select an end date."
-                                        data-validation-rule="strictIsoDate" required readonly>
+                                        data-validation-rule="strictIsoDate" data-flatpickr-append-to-body required
+                                        readonly>
 
                                     <div class="global-field-error" data-error-for="editEnd" aria-live="polite"
                                         aria-hidden="true"></div>
@@ -1485,7 +1498,6 @@
                 <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="editModal">Cancel</button>
 
                 <button type="submit" class="ui-btn ui-btn-edit">
-                    <i class="fa-solid fa-floppy-disk"></i>
                     <span>Update Period</span>
                 </button>
             </div>
@@ -1494,7 +1506,7 @@
 
     <div id="setActiveModal" class="ui-modal modal-theme-success" aria-hidden="true">
 
-        <form id="setActiveForm" method="POST" action="" class="ui-modal-card modal-sm modal-card-form">
+        <form id="setActiveForm" method="POST" action="" class="ui-modal-card modal-md modal-card-form">
 
             @csrf
             @method('PATCH')
@@ -1519,8 +1531,6 @@
 
             <div class="modal-bd">
                 <div class="global-confirm-alert">
-                    <i class="fa-solid fa-circle-check"></i>
-
                     <div>
                         <p>
                             Set
@@ -1529,7 +1539,7 @@
                             as the active academic period?
                         </p>
 
-                        <span>
+                        <span">
                             The currently active period will be deactivated.
                         </span>
                     </div>
@@ -1542,7 +1552,6 @@
                 </button>
 
                 <button type="submit" class="ui-btn ui-btn-success">
-                    <i class="fa-solid fa-circle-check"></i>
                     <span>Set as Active</span>
                 </button>
             </div>
@@ -1579,13 +1588,7 @@
 
             <div class="modal-bd">
                 <div class="global-confirm-alert">
-                    <i class="fa-solid fa-cloud-arrow-down"></i>
-
                     <div>
-                        <p>
-                            Sync the active academic period from FLSS?
-                        </p>
-
                         <span>
                             The current academic year and semester will be fetched
                             from the FLSS source and applied to the system.
@@ -1600,7 +1603,6 @@
                 </button>
 
                 <button type="submit" id="syncFlssSubmitBtn" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-rotate"></i>
                     <span>Sync Now</span>
                 </button>
             </div>
@@ -2375,8 +2377,28 @@
         window.openEditModal = function(period) {
             document.getElementById('editForm').action = period.update_url || '';
             document.getElementById('editYear').value = period.academic_year ?? '';
-            document.getElementById('editStart').value = period.start_date ?? '';
-            document.getElementById('editEnd').value = period.end_date ?? '';
+            const editStart = document.getElementById('editStart');
+            const editEnd = document.getElementById('editEnd');
+
+            if (editStart?._flatpickr) {
+                editStart._flatpickr.setDate(
+                    period.start_date ?? '',
+                    false
+                );
+            } else if (editStart) {
+                editStart.value =
+                    period.start_date ?? '';
+            }
+
+            if (editEnd?._flatpickr) {
+                editEnd._flatpickr.setDate(
+                    period.end_date ?? '',
+                    false
+                );
+            } else if (editEnd) {
+                editEnd.value =
+                    period.end_date ?? '';
+            }
 
             const editDesc = document.getElementById('editDesc');
             editDesc.value = period.description ?? '';

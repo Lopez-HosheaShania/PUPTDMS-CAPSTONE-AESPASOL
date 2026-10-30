@@ -1212,7 +1212,7 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     margin: 3px 0 0;
     color: var(--text-3);
     font-size: 13px;
-    font-weight: 650;
+    font-weight: 600;
     line-height: 1.35;
 }
 

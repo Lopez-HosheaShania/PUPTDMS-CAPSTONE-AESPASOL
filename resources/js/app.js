@@ -516,6 +516,84 @@ document.addEventListener(
     true
 );
 
+window.GlobalLoading = {
+    show({
+        title =
+        'PUP Dental Management System',
+
+        message =
+        'Loading...'
+    } = {}) {
+        const overlay =
+            document.getElementById(
+                'globalLoadingOverlay'
+            );
+
+        if (!overlay) {
+            return;
+        }
+
+        const titleElement =
+            document.getElementById(
+                'globalLoadingTitle'
+            );
+
+        const messageElement =
+            document.getElementById(
+                'globalLoadingMessage'
+            );
+
+        if (titleElement) {
+            titleElement.textContent =
+                title;
+        }
+
+        if (messageElement) {
+            messageElement.textContent =
+                message;
+        }
+
+        overlay.classList.add(
+            'is-active'
+        );
+
+        overlay.setAttribute(
+            'aria-hidden',
+            'false'
+        );
+
+        overlay.setAttribute(
+            'aria-busy',
+            'true'
+        );
+    },
+
+    hide() {
+        const overlay =
+            document.getElementById(
+                'globalLoadingOverlay'
+            );
+
+        if (!overlay) {
+            return;
+        }
+
+        overlay.classList.remove(
+            'is-active'
+        );
+
+        overlay.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+        overlay.setAttribute(
+            'aria-busy',
+            'false'
+        );
+    }
+};
+
 window.openFilterDrawer =
     async function (...args) {
         const module =

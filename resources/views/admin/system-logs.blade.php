@@ -17,9 +17,9 @@
         $authUser = auth()->user();
         $activeRole = session('impersonated_role') ?: session('role') ?: $authUser?->role?->slug;
         $isSuperAdmin = $authUser?->role?->slug === 'super_admin' && $activeRole === 'super_admin';
-        $canViewSystemLogs = $isSuperAdmin || ($authUser?->hasAnyPermission([
-            'view_system_logs', 'export_system_logs', 'archive_system_logs',
-        ]) ?? false);
+        $canViewSystemLogs =
+            $isSuperAdmin ||
+            ($authUser?->hasAnyPermission(['view_system_logs', 'export_system_logs', 'archive_system_logs']) ?? false);
         $canExportSystemLogs = $isSuperAdmin || ($authUser?->hasPermission('export_system_logs') ?? false);
         $canArchiveSystemLogs = $isSuperAdmin || ($authUser?->hasPermission('archive_system_logs') ?? false);
     @endphp
@@ -277,7 +277,7 @@
                             <tbody id="slTableBody">
                                 @forelse($logs as $log)
                                     @php
-                                        $role = strtolower($log->actor_role ?? 'other');
+                                        $logRole = strtolower($log->actor_role ?? 'other');
                                         $action = strtolower($log->action ?? '');
                                         $moduleName = strtolower($log->module ?? '');
                                         $actionClass = match (true) {
@@ -311,14 +311,14 @@
                                             'export' => 'fa-file-export',
                                             default => 'fa-bolt',
                                         };
-                                        $roleIcon = match ($role) {
+                                        $roleIcon = match ($logRole) {
                                             'admin' => 'fa-user-tie',
                                             'dentist' => 'fa-user-doctor',
                                             'patient' => 'fa-user',
                                             default => 'fa-circle-user',
                                         };
-                                        $avatarLetter = strtoupper(substr($log->actor_name ?? $role, 0, 1));
-                                        $roleBadgeClass = match ($role) {
+                                        $avatarLetter = strtoupper(substr($log->actor_name ?? $logRole, 0, 1));
+                                        $roleBadgeClass = match ($logRole) {
                                             'admin' => 'role-admin',
                                             'dentist' => 'role-dentist',
                                             'patient' => 'role-patient',
@@ -351,7 +351,7 @@
                                             default => ucwords(str_replace('_', ' ', $log->action)),
                                         };
                                     @endphp
-                                    <tr data-live-item-id="{{ $log->id }}" data-role="{{ $role }}"
+                                    <tr data-live-item-id="{{ $log->id }}" data-role="{{ $logRole }}"
                                         data-action="{{ $actionClass }}">
                                         <td><span class="sl-id">#{{ str_pad($log->id, 3, '0', STR_PAD_LEFT) }}</span>
                                         </td>
@@ -361,7 +361,7 @@
                                         </td>
                                         <td><span class="badge-role {{ $roleBadgeClass }}">
                                                 <i class="fa-solid {{ $roleIcon }}"></i>
-                                                {{ ucfirst($role) }}
+                                                {{ ucfirst($logRole) }}
                                             </span>
                                         </td>
                                         <td>
@@ -406,8 +406,7 @@
                                             $fullDescription = trim((string) ($log->display_details ?? ''));
 
                                             $hasMeaningfulDetails =
-                                                $fullDescription !== '' &&
-                                                $fullDescription !== $description;
+                                                $fullDescription !== '' && $fullDescription !== $description;
 
                                             $displayDescription = trim(
                                                 (string) ($log->display_description ?? $description ?:
@@ -473,7 +472,7 @@
                     <div class="table-record-grid" id="slGridBody">
                         @forelse($logs as $log)
                             @php
-                                $role = strtolower($log->actor_role ?? 'other');
+                                $logRole = strtolower($log->actor_role ?? 'other');
                                 $action = strtolower($log->action ?? '');
                                 $moduleName = strtolower($log->module ?? '');
                                 $actionClass = match (true) {
@@ -506,14 +505,14 @@
                                     'export' => 'fa-file-export',
                                     default => 'fa-bolt',
                                 };
-                                $roleIcon = match ($role) {
+                                $roleIcon = match ($logRole) {
                                     'admin' => 'fa-user-tie',
                                     'dentist' => 'fa-user-doctor',
                                     'patient' => 'fa-user',
                                     default => 'fa-circle-user',
                                 };
-                                $avatarLetter = strtoupper(substr($log->actor_name ?? $role, 0, 1));
-                                $roleBadgeClass = match ($role) {
+                                $avatarLetter = strtoupper(substr($log->actor_name ?? $logRole, 0, 1));
+                                $roleBadgeClass = match ($logRole) {
                                     'admin' => 'role-admin',
                                     'dentist' => 'role-dentist',
                                     'patient' => 'role-patient',
@@ -547,7 +546,7 @@
                                 };
                             @endphp
                             <article class="table-record-card" data-live-item-id="{{ $log->id }}"
-                                data-role="{{ $role }}" data-action="{{ $actionClass }}">
+                                data-role="{{ $logRole }}" data-action="{{ $actionClass }}">
                                 <div class="table-record-card-layout">
                                     <div class="table-record-content">
 
@@ -602,7 +601,7 @@
                                                 <span class="table-record-value">
                                                     <span class="badge-role {{ $roleBadgeClass }}">
                                                         <i class="fa-solid {{ $roleIcon }}"></i>
-                                                        {{ ucfirst($role) }}
+                                                        {{ ucfirst($logRole) }}
                                                     </span>
                                                 </span>
                                             </div>
@@ -637,8 +636,7 @@
                                                     );
 
                                                     $hasExpandableDescription =
-                                                        $fullDescription !== '' &&
-                                                        $fullDescription !== $description;
+                                                        $fullDescription !== '' && $fullDescription !== $description;
 
                                                     $gridDetailId = 'sl-grid-detail-' . $log->id;
                                                 @endphp
@@ -2147,14 +2145,14 @@
                     autoApply: true,
 
                     getItems: function(payload) {
-                        return (
-                                payload?.new_ids || []
-                            )
-                            .map(
-                                id => ({
-                                    id,
-                                })
+                        const latestId =
+                            Number(
+                                payload?.latest_id || 0
                             );
+
+                        return latestId > 0 ? [{
+                            id: latestId,
+                        }] : [];
                     },
 
                     getItemId: function(item) {

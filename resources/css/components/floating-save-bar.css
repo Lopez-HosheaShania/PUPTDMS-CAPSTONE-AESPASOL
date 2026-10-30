@@ -182,9 +182,6 @@
 
     border:
         1px solid rgba(255, 255, 255, .18);
-
-    box-shadow:
-        0 10px 22px rgba(139, 0, 0, .32);
 }
 
 .floating-save-bar .btn-save-float:hover:not(:disabled) {
