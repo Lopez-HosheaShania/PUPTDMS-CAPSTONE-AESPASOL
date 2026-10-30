@@ -13,6 +13,128 @@
     font-family: inherit;
 }
 
+.continuity-page .dt-responsibilities .global-form-group {
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.continuity-page .dt-current-dentist-summary .global-info-item {
+    align-items: flex-start;
+}
+
+.continuity-page .dt-current-dentist-summary .global-info-value {
+    display: flex;
+    align-items: center;
+    min-height: 1.5rem;
+}
+
+.continuity-page .dt-current-dentist-summary .patient-avatar {
+    align-self: center;
+}
+
+.continuity-page .dt-current-dentist-setup,
+.continuity-page .dt-current-dentist-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.continuity-page .dt-current-dentist-setup {
+    align-items: flex-end;
+}
+
+.continuity-page .dt-current-dentist-actions {
+    align-items: center;
+}
+
+.continuity-page .dt-current-dentist-actions .global-info-subvalue {
+    flex: 1 1 240px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.continuity-page .dt-current-dentist-setup .global-form-group {
+    flex: 1 1 320px;
+    margin-bottom: 0;
+    min-width: 0;
+}
+
+.continuity-page .dt-responsibility-toolbar {
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.continuity-page .dt-responsibility-default {
+    flex: 0 1 380px;
+}
+
+.continuity-page .dt-responsibilities-table {
+    min-width: 960px;
+    table-layout: fixed;
+}
+
+.continuity-page .dt-responsibilities-table th:nth-child(1) { width: 19%; }
+.continuity-page .dt-responsibilities-table th:nth-child(2) { width: 25%; }
+.continuity-page .dt-responsibilities-table th:nth-child(3) { width: 30%; }
+.continuity-page .dt-responsibilities-table th:nth-child(4) { width: 26%; }
+
+.continuity-page .dt-responsibilities-table td {
+    vertical-align: top;
+}
+
+.continuity-page .dt-responsibility-record,
+.continuity-page .dt-responsibility-patient {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    min-width: 0;
+}
+
+.continuity-page .dt-responsibility-record {
+    cursor: pointer;
+}
+
+.continuity-page .dt-responsibility-record .global-checkbox-input {
+    margin-top: .15rem;
+}
+
+.continuity-page .dt-responsibility-copy {
+    display: grid;
+    gap: .2rem;
+    min-width: 0;
+}
+
+.continuity-page .dt-responsibilities .global-info-value {
+    overflow-wrap: anywhere;
+}
+
+.continuity-page .dt-responsibility-hint {
+    display: block;
+    margin-top: .4rem;
+    line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+    .continuity-page .dt-current-dentist-body .global-info-grid-2 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .continuity-page .dt-current-dentist-setup > .ui-btn,
+    .continuity-page .dt-current-dentist-actions > .ui-btn {
+        width: 100%;
+    }
+
+    .continuity-page .dt-responsibility-default {
+        flex-basis: 100%;
+    }
+
+    .continuity-page .dt-responsibility-toolbar > .ui-btn {
+        width: 100%;
+    }
+}
+
 #mainContent.continuity-page.app-page-shell {
     height: auto !important;
     max-height: none !important;
@@ -888,7 +1010,8 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    margin: 2.05rem auto 0;
+    margin: 0 auto;
+    align-self: center;
     border-radius: 999px;
     background: #fff;
     border: 1px solid #f0d2cd;
@@ -923,6 +1046,55 @@
 
 .continuity-page .dt-form-stage-note-info i {
     color: #6d7ea6;
+}
+
+@media (min-width: 1201px) {
+    .continuity-page .dt-form-handover {
+        grid-template-rows: repeat(4, auto);
+        row-gap: .34rem;
+    }
+
+    .continuity-page .dt-form-handover > .dt-form-stage-field {
+        grid-row: 1 / span 4;
+        grid-template-rows: subgrid;
+    }
+
+    .continuity-page .dt-form-handover > .dt-form-stage-field:first-child {
+        grid-column: 1;
+    }
+
+    .continuity-page .dt-form-handover > .dt-form-stage-field:last-child {
+        grid-column: 3;
+    }
+
+    .continuity-page .dt-form-handover .dt-stage-control {
+        grid-row: 1 / span 3;
+        grid-template-rows: subgrid;
+    }
+
+    .continuity-page .dt-form-handover .dt-label {
+        grid-row: 1;
+        align-self: end;
+    }
+
+    .continuity-page .dt-form-handover .custom-select,
+    .continuity-page .dt-form-handover .dt-select {
+        grid-row: 2;
+    }
+
+    .continuity-page .dt-form-handover .dt-error,
+    .continuity-page .dt-form-handover .global-field-error {
+        grid-row: 3;
+    }
+
+    .continuity-page .dt-form-handover .dt-form-stage-note {
+        grid-row: 4;
+    }
+
+    .continuity-page .dt-form-handover > .dt-form-stage-arrow {
+        grid-column: 2;
+        grid-row: 2;
+    }
 }
 
 .continuity-page .dt-stage-control {
@@ -3052,6 +3224,10 @@
     .continuity-page .dt-form-stage-arrow,
     .continuity-page .dt-form-preview-connector {
         margin: 0 auto;
+    }
+
+    .continuity-page .dt-form-stage-arrow i {
+        transform: rotate(90deg);
     }
 
     .continuity-page .dt-form-datetime {

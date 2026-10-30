@@ -11,10 +11,11 @@ class ClinicalAccessService
     public function scope(Builder $query): void
     {
         $user = auth()->user();
-        if (! $user || ! in_array($user->role?->slug, ['dentist', 'dentist_role'], true)) {
+        if (! AssignedDentistService::isDentist($user)) {
             return;
         }
-        if ($user->status !== 'active' || DB::table('dentist_transitions')
+        $currentDentistId = app(ClinicDentistService::class)->assignment()->dentist_id;
+        if (($currentDentistId && $currentDentistId !== (int) $user->id) || $user->status !== 'active' || DB::table('dentist_transitions')
             ->where('dentist_id', $user->id)->whereNotNull('effective_date')
             ->where(function ($q) {
                 $q->where('status', 'active')->orWhere(function ($q) {

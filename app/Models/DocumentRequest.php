@@ -53,6 +53,9 @@ class DocumentRequest extends Model
     public function save(array $options = [])
     {
         return $this->getConnection()->transaction(function () use ($options) {
+            if (! $this->exists) {
+                app(\App\Services\ClinicDentistService::class)->recordCoverageCare((int) $this->patient_id, $this->assigned_dentist_id ? (int) $this->assigned_dentist_id : null);
+            }
             if (! $this->exists && $this->status === null) {
                 $this->status = 'pending';
             }

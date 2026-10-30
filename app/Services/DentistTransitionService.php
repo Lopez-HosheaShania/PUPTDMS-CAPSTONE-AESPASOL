@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Schema;
 class DentistTransitionService
 {
     public function __construct(
-        private readonly ConcurrentSessionService $concurrentSessionService
+        private readonly ConcurrentSessionService $concurrentSessionService,
+        private readonly ClinicDentistService $clinicDentist
     ) {}
 
     private const ACTIVE_APPOINTMENT_STATUSES = ['pending', 'confirmed', 'upcoming', 'rescheduled'];
@@ -25,6 +26,7 @@ class DentistTransitionService
     {
         $this->authorizeAdministrator($actor);
         return DB::transaction(function () use ($payload, $actor) {
+            $this->clinicDentist->assertSource((int) $payload['dentist_id']);
             User::whereKey($payload['dentist_id'])->lockForUpdate()->firstOrFail();
             if (DentistTransition::where('dentist_id', $payload['dentist_id'])
                 ->whereIn('status', ['draft', 'pending_review', 'handover_in_progress', 'scheduled', 'active'])->exists()) {
@@ -87,29 +89,12 @@ class DentistTransitionService
     public function generateTransitionItems(DentistTransition $transition, bool $atActivation = false): DentistTransition
     {
         return DB::transaction(function () use ($transition, $atActivation) {
+            $this->clinicDentist->lockAssignment();
+            $transition = DentistTransition::lockForUpdate()->findOrFail($transition->id);
             if (! $atActivation && ! in_array($transition->status, ['draft', 'pending_review', 'handover_in_progress'], true)) {
                 return $transition->fresh(['items.patient', 'items.successorDentist', 'items.documentRequest']);
             }
-            $appointments = $this->eligibleAppointmentsQuery($transition)
-                ->with(['patient', 'dentist'])
-                ->get();
-
-            $documentRequests = DocumentRequest::withStateColumns()
-                ->where('document_request_states.status', 'pending')
-                ->where(
-                    'document_requests.assigned_dentist_id',
-                    $transition->dentist_id
-                )
-                ->select('document_requests.*')
-                ->with('patient')
-                ->get();
-
-            $patientIds = DB::table('appointments')->where('dentist_id', $transition->dentist_id)->pluck('patient_id')
-                ->merge($documentRequests->pluck('patient_id'))
-                ->merge(DB::table('patient_care_assignments')->where('dentist_id', $transition->dentist_id)->pluck('patient_id'))
-                ->unique()->filter();
-            $patientIds = $patientIds->diff(DB::table('patient_care_assignments')
-                ->where('dentist_id', '!=', $transition->dentist_id)->pluck('patient_id'));
+            [$appointments, $documentRequests, $patientIds] = $this->responsibilityScope($transition);
             foreach ($patientIds as $patientId) {
                 $transition->items()->firstOrCreate(['item_type' => 'patient', 'record_id' => $patientId], [
                     'patient_id' => $patientId, 'original_dentist_id' => $transition->dentist_id,
@@ -133,8 +118,11 @@ class DentistTransitionService
 
 
 
-                if (in_array($item->transfer_status, ['transferred', 'excluded', 'manually_resolved'], true)) {
+                if ($this->hasReviewedResolution($item)) {
                     continue;
+                }
+                if ($item->resolution_type === 'no_longer_active') {
+                    $item->resolution_type = null;
                 }
                 $item->fill([
                     'patient_id' => $appointment->patient_id,
@@ -158,11 +146,10 @@ class DentistTransitionService
                     'record_id' => $documentRequest->id,
                 ]);
 
-                $isResolved = in_array(
-                    $item->transfer_status,
-                    ['transferred', 'excluded', 'manually_resolved'],
-                    true
-                );
+                $isResolved = $this->hasReviewedResolution($item);
+                if (! $isResolved && $item->resolution_type === 'no_longer_active') {
+                    $item->resolution_type = null;
+                }
 
                 $successorDentistId = $isResolved
                     ? $item->successor_dentist_id
@@ -188,7 +175,7 @@ class DentistTransitionService
                 if ($item->item_type === 'appointment') {
                     $stillExists = $appointments->contains('id', $item->record_id);
 
-                    if (! $stillExists && $item->transfer_status !== 'transferred') {
+                    if (! $stillExists && in_array($item->transfer_status, ['pending', 'ready'], true)) {
                         $item->transfer_status = 'manually_resolved';
                         $item->resolution_type = $item->resolution_type ?: 'no_longer_active';
                         $item->save();
@@ -196,7 +183,7 @@ class DentistTransitionService
                 } elseif ($item->item_type === 'document_request') {
                     $stillExists = $documentRequests->contains('id', $item->record_id);
 
-                    if (! $stillExists && $item->transfer_status !== 'transferred') {
+                    if (! $stillExists && in_array($item->transfer_status, ['pending', 'ready'], true)) {
                         $item->transfer_status = 'manually_resolved';
                         $item->resolution_type = $item->resolution_type ?: 'no_longer_active';
                         $item->save();
@@ -206,6 +193,54 @@ class DentistTransitionService
 
             return $transition->fresh(['items.patient', 'items.successorDentist', 'items.documentRequest']);
         });
+    }
+
+    /** Preview newly eligible work without changing a plan on a GET request. */
+    public function unreviewedResponsibilities(DentistTransition $transition): array
+    {
+        $counts = ['patients' => 0, 'appointments' => 0, 'documents' => 0];
+        if (! in_array($transition->status, ['draft', 'pending_review', 'handover_in_progress', 'scheduled'], true)) {
+            return $counts;
+        }
+
+        [$appointments, $documents, $patientIds] = $this->responsibilityScope($transition);
+        $transition->loadMissing('items');
+
+        foreach (['patient' => $patientIds, 'appointment' => $appointments->pluck('id'), 'document_request' => $documents->pluck('id')] as $type => $ids) {
+            $reviewedIds = $transition->items->where('item_type', $type)
+                ->reject(fn (DentistTransitionItem $item) => $item->transfer_status === 'manually_resolved' && $item->resolution_type === 'no_longer_active')
+                ->pluck('record_id');
+            $key = match ($type) {
+                'patient' => 'patients',
+                'appointment' => 'appointments',
+                'document_request' => 'documents',
+            };
+            $counts[$key] = $ids->diff($reviewedIds)->count();
+        }
+
+        return $counts;
+    }
+
+    private function responsibilityScope(DentistTransition $transition): array
+    {
+        $appointments = $this->eligibleAppointmentsQuery($transition)->get();
+        $documents = DocumentRequest::withStateColumns()
+            ->where('document_request_states.status', 'pending')
+            ->where('document_requests.assigned_dentist_id', $transition->dentist_id)
+            ->select('document_requests.*')->get();
+        $patientIds = DB::table('appointments')->where('dentist_id', $transition->dentist_id)->pluck('patient_id')
+            ->merge($documents->pluck('patient_id'))
+            ->merge(DB::table('patient_care_assignments')->where('dentist_id', $transition->dentist_id)->pluck('patient_id'))
+            ->unique()->filter()
+            ->diff(DB::table('patient_care_assignments')->where('dentist_id', '!=', $transition->dentist_id)->pluck('patient_id'));
+
+        return [$appointments, $documents, $patientIds];
+    }
+
+    private function hasReviewedResolution(DentistTransitionItem $item): bool
+    {
+        return in_array($item->transfer_status, ['transferred', 'excluded'], true)
+            || ($item->transfer_status === 'manually_resolved' && $item->resolution_type !== 'no_longer_active');
     }
 
     public function updateSuccessorAssignments(DentistTransition $transition, array $payload, User $actor): DentistTransition
@@ -231,6 +266,9 @@ class DentistTransitionService
                 $item = $transition->items()->findOrFail($itemId);
 
                 $successorId = $itemPayload['successor_dentist_id'] ?? $transition->default_successor_dentist_id;
+                if ($successorId && (int) $successorId !== (int) $transition->default_successor_dentist_id) {
+                    $this->invalid('items', 'All transferred responsibilities must use the default successor for this single-dentist clinic.');
+                }
                 $transferStatus = $itemPayload['transfer_status'] ?? null;
 
                 $item->successor_dentist_id = $successorId ?: null;
@@ -280,6 +318,7 @@ class DentistTransitionService
     {
         $this->authorizeAdministrator($actor);
         return DB::transaction(function () use ($transition, $actor) {
+            $this->clinicDentist->assertSource((int) $transition->dentist_id);
             $transition = $this->editableTransition($transition);
             if (! $transition->effective_date) {
                 $this->invalid('effective_date', 'Review this legacy draft and set an explicit effective date before approval.');
@@ -343,12 +382,15 @@ class DentistTransitionService
         foreach ($ids as $id) {
             try {
                 DB::transaction(function () use ($id, &$count) {
+                    $this->clinicDentist->lockAssignment();
                     $transition = DentistTransition::lockForUpdate()->findOrFail($id);
                     $actor = User::findOrFail($transition->approved_by ?? $transition->initiated_by);
                     if ($transition->status === 'scheduled') {
                         $this->activateTransition($transition, $actor);
                     } elseif ($transition->status === 'active') {
                         $this->endTemporaryTransition($transition, $actor);
+                    } else {
+                        return;
                     }
                     $count++;
                 });
@@ -367,6 +409,7 @@ class DentistTransitionService
         if ($transition->activated_at) {
             return;
         }
+        $this->clinicDentist->assertSource((int) $transition->dentist_id);
         if ($transition->coverage_type === 'temporary' && $transition->end_date?->lt(today())) {
             $this->invalid('end_date', 'The coverage period has elapsed. Review and replace this scheduled plan.');
         }
@@ -376,6 +419,7 @@ class DentistTransitionService
             $this->invalid('transition', 'New responsibilities require review before this plan can take effect.');
         }
         $this->transferResponsibilities($transition, $actor);
+        $this->clinicDentist->activate($transition, $actor);
         $transition->update(['activated_at' => now(), 'status' => $transition->coverage_type === 'temporary' ? 'active' : 'completed', 'completed_at' => $transition->coverage_type === 'temporary' ? null : now()]);
         if ($transition->coverage_type === 'permanent') {
             $this->deactivateDentistAccount($transition->dentist, $transition, $actor->id, false);
@@ -390,6 +434,7 @@ class DentistTransitionService
     {
         $this->authorizeAdministrator($actor);
         return DB::transaction(function () use ($transition, $actor) {
+            $this->clinicDentist->lockAssignment();
             $transition = DentistTransition::lockForUpdate()->findOrFail($transition->id);
             if ($transition->status !== 'active' || $transition->coverage_type !== 'temporary') {
                 $this->invalid('transition', 'Only active temporary coverage can be ended.');
@@ -401,17 +446,21 @@ class DentistTransitionService
 
     private function endTemporaryTransition(DentistTransition $transition, User $actor): void
     {
+        $this->clinicDentist->returnFromCoverage($transition, $actor);
         $source = User::lockForUpdate()->findOrFail($transition->dentist_id);
-        if ($source->status !== 'active' || ! in_array($source->role?->slug, ['dentist', 'dentist_role'], true) || DentistTransition::where('dentist_id', $source->id)->where('id', '!=', $transition->id)->whereIn('status', ['scheduled', 'active'])->exists()) {
+        if ($source->status !== 'active' || ! AssignedDentistService::isDentist($source) || DentistTransition::where('dentist_id', $source->id)->where('id', '!=', $transition->id)->whereIn('status', ['scheduled', 'active'])->exists()) {
             $this->invalid('transition', 'The returning dentist is unavailable. Arrange onward coverage before ending this plan.');
         }
-        foreach ($transition->items()->where('item_type', 'appointment')->get() as $item) {
-            $appointment = Appointment::lockForUpdate()->find($item->record_id);
-            if ($appointment && in_array($appointment->status, self::ACTIVE_APPOINTMENT_STATUSES, true) && $appointment->procedure()->exists()) {
+        $coverageAppointments = Appointment::where('dentist_id', $transition->default_successor_dentist_id)
+            ->where(function ($query) use ($transition) {
+                $query->whereIn('id', $transition->items()->where('item_type', 'appointment')->where('transfer_status', 'transferred')->pluck('record_id'))
+                    ->orWhereIn('patient_id', DB::table('patient_care_assignments')->where('dentist_transition_id', $transition->id)->select('patient_id'));
+            })->lockForUpdate()->get();
+        foreach ($coverageAppointments as $appointment) {
+            if (in_array($appointment->status, self::ACTIVE_APPOINTMENT_STATUSES, true) && $appointment->procedure()->exists()) {
                 $this->invalid('appointments', 'Resolve unfinished clinical documentation before returning care responsibility.');
             }
-            if ($appointment && in_array($appointment->status, self::ACTIVE_APPOINTMENT_STATUSES, true)
-                && (int) $appointment->dentist_id === (int) $item->successor_dentist_id && ! $appointment->procedure()->exists()) {
+            if (in_array($appointment->status, self::ACTIVE_APPOINTMENT_STATUSES, true)) {
                 $duration = max(5, (int) (\App\Models\ClinicSchedule::active()->first()?->slot_duration_minutes ?: 60));
                 $start = Carbon::parse($appointment->appointment_date . ' ' . $appointment->appointment_time);
                 foreach (Appointment::where('dentist_id', $source->id)->whereDate('appointment_date', $appointment->appointment_date)->whereIn('status', self::ACTIVE_APPOINTMENT_STATUSES)->get() as $other) {
@@ -420,17 +469,34 @@ class DentistTransitionService
                         $this->invalid('appointments', 'Returning appointments conflict with the original dentist schedule. Review coverage before ending it.');
                     }
                 }
-                $appointment->update(['dentist_id' => $source->id, 'transferred_by' => $actor->id, 'transferred_at' => now(), 'transfer_reason' => 'temporary_coverage_ended']);
+                $appointment->update(['dentist_id' => $source->id, 'original_dentist_id' => $appointment->original_dentist_id ?: $transition->default_successor_dentist_id,
+                    'transferred_by' => $actor->id, 'transferred_at' => now(), 'transfer_reason' => 'temporary_coverage_ended']);
+                $this->writeAuditEntry('transition_item_returned', "Returned appointment #{$appointment->id} to dentist #{$source->id} after temporary coverage #{$transition->id}.");
             }
         }
         // Finished visits retain the treating dentist; unresolved documents return.
-        foreach ($transition->items()->where('item_type', 'document_request')->get() as $item) {
-            $document = DocumentRequest::lockForUpdate()->find($item->record_id);
-            if ($document && $document->status === 'pending' && (int) $document->assigned_dentist_id === (int) $item->successor_dentist_id) {
+        $coverageDocuments = DocumentRequest::where('assigned_dentist_id', $transition->default_successor_dentist_id)
+            ->where(function ($query) use ($transition) {
+                $query->whereIn('id', $transition->items()->where('item_type', 'document_request')->where('transfer_status', 'transferred')->pluck('record_id'))
+                    ->orWhereIn('patient_id', DB::table('patient_care_assignments')->where('dentist_transition_id', $transition->id)->select('patient_id'));
+            })->lockForUpdate()->get();
+        foreach ($coverageDocuments as $document) {
+            if ($document->status === 'pending') {
                 $document->update(['assigned_dentist_id' => $source->id]);
             }
         }
-        DB::table('patient_care_assignments')->where('dentist_transition_id', $transition->id)->update(['dentist_id' => $source->id, 'updated_at' => now()]);
+        $patientIds = $coverageAppointments->pluck('patient_id')->merge($coverageDocuments->pluck('patient_id'))
+            ->merge(DB::table('patient_care_assignments')->where('dentist_transition_id', $transition->id)->pluck('patient_id'))->unique();
+        foreach ($patientIds as $patientId) {
+            $existing = DB::table('patient_care_assignments')->where('patient_id', $patientId)->lockForUpdate()->first();
+            if ($existing && ! in_array((int) $existing->dentist_id, [(int) $source->id, (int) $transition->default_successor_dentist_id], true)) {
+                $this->invalid('patients', 'Patient care changed during temporary coverage. Review onward assignments before returning responsibility.');
+            }
+            DB::table('patient_care_assignments')->updateOrInsert(['patient_id' => $patientId], [
+                'dentist_id' => $source->id, 'dentist_transition_id' => $transition->id,
+                'created_at' => $existing?->created_at ?? now(), 'updated_at' => now(),
+            ]);
+        }
         $transition->update(['status' => 'completed', 'completed_at' => now()]);
         $this->auditContinuity('transition_temporary_ended', $transition, $actor);
         DB::afterCommit(fn () => $this->notifyTransitionParticipants($transition->fresh(), 'completed'));
@@ -438,6 +504,7 @@ class DentistTransitionService
 
     private function editableTransition(DentistTransition $transition): DentistTransition
     {
+        $this->clinicDentist->lockAssignment();
         $transition = DentistTransition::lockForUpdate()->findOrFail($transition->id);
         if (! in_array($transition->status, ['draft', 'pending_review', 'handover_in_progress'], true)) {
             $this->invalid('transition', 'Only an unapproved continuity plan can be modified.');
@@ -474,6 +541,10 @@ class DentistTransitionService
             $this->invalid('default_successor_dentist_id', 'Choose a default replacement before approving coverage.');
         }
         foreach ($transition->items as $item) {
+            if (! in_array($item->transfer_status, ['excluded', 'manually_resolved'], true)
+                && $item->successor_dentist_id && (int) $item->successor_dentist_id !== (int) $transition->default_successor_dentist_id) {
+                $this->invalid('items', 'The clinic has one current dentist. Assign every transferred responsibility to the default successor.');
+            }
             if (in_array($item->transfer_status, ['excluded', 'manually_resolved'], true) && ! trim((string) $item->remarks) && ! $item->resolution_type) {
                 $this->invalid('items', 'Document a reason for every excluded or manually resolved responsibility.');
             }
@@ -502,7 +573,7 @@ class DentistTransitionService
         $successorIds = $transition->items->whereNotIn('transfer_status', ['excluded', 'manually_resolved'])->pluck('successor_dentist_id')->push($transition->default_successor_dentist_id)->filter()->unique()->sort();
         foreach ($successorIds as $id) {
             $successor = User::with('role')->lockForUpdate()->find($id);
-            if (! $successor || $id == $transition->dentist_id || $successor->status !== 'active' || ! in_array($successor->role?->slug, ['dentist', 'dentist_role'], true)) {
+            if (! $successor || $id == $transition->dentist_id || $successor->status !== 'active' || ! AssignedDentistService::isDentist($successor)) {
                 $this->invalid('default_successor_dentist_id', 'Every replacement must be an available active dentist.');
             }
             if (DentistTransition::where('dentist_id', $id)->whereIn('status', ['scheduled', 'active'])

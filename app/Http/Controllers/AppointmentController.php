@@ -52,21 +52,7 @@ class AppointmentController extends Controller
 
     private function resolveBookableDentist(int $patientId): ?User
     {
-        $careDentistId = DB::table('patient_care_assignments')->where('patient_id', $patientId)->value('dentist_id');
-
-        return User::query()
-            ->when($careDentistId, fn ($q) => $q->whereKey($careDentistId))
-            ->whereDoesntHave('dentistTransitions', function ($q) {
-                $q->whereNotNull('effective_date')->where(function ($q) {
-                    $q->where('status', 'active')->orWhere(function ($q) {
-                        $q->where('status', 'scheduled')->whereDate('effective_date', '<=', today());
-                    });
-                });
-            })
-            ->where('status', 'active')
-            ->whereHas('role', fn($query) => $query->whereIn('slug', ['dentist', 'dentist_role']))
-            ->orderBy('id')
-            ->first();
+        return app(\App\Services\AssignedDentistService::class)->findForBooking($patientId);
     }
 
     public function verifyPersonalInformation()
@@ -1211,6 +1197,8 @@ class AppointmentController extends Controller
         $appointment = null;
 
         DB::transaction(function () use ($request, $signaturePath, $mysqlTime, $patientId, $patient, $reservedBookingPeriod, $reservedSlot, $preserveExistingDentalHistory, $preserveExistingMedicalHistory, $signatureReviewStatus, $signatureReviewNotes, $aiResult, &$appointment) {
+
+            app(\App\Services\ClinicDentistService::class)->lockAssignment();
 
             $lockedReservedPeriod = null;
 

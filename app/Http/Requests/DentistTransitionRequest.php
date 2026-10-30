@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\DentistTransition;
 use App\Models\User;
+use App\Services\AssignedDentistService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class DentistTransitionRequest extends FormRequest
@@ -107,7 +108,7 @@ class DentistTransitionRequest extends FormRequest
                 $validator->errors()->add('transition_type', 'Please select a valid transition reason.');
             }
 
-            if (!$dentist || !in_array(optional($dentist->role)->slug, ['dentist', 'dentist_role'], true)) {
+            if (!AssignedDentistService::isDentist($dentist)) {
                 $validator->errors()->add('dentist_id', 'The selected departing user must be a dentist.');
             }
 
@@ -115,7 +116,7 @@ class DentistTransitionRequest extends FormRequest
                 $validator->errors()->add('default_successor_dentist_id', 'The departing dentist cannot be their own successor.');
             }
 
-            if ($successor && (!in_array(optional($successor->role)->slug, ['dentist', 'dentist_role'], true) || $successor->status !== 'active')) {
+            if ($successor && (!AssignedDentistService::isDentist($successor) || $successor->status !== 'active')) {
                 $validator->errors()->add('default_successor_dentist_id', 'The successor dentist must be an active dentist.');
             }
 

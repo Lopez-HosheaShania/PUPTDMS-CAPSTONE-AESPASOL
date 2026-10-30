@@ -272,6 +272,7 @@ class DentistAttributionTest extends TestCase
             'role_id' => $adminRole->id, 'status' => 'active',
         ]);
         $this->actingAs($admin)->withSession(['role' => 'admin']);
+        \App\Models\ClinicDentistAssignment::whereKey('primary')->update(['dentist_id' => $current->id]);
         $service = app(DentistTransitionService::class);
         $transition = $service->createTransition([
             'dentist_id' => $current->id, 'transition_type' => 'retirement', 'coverage_type' => 'permanent',

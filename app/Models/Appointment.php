@@ -140,6 +140,9 @@ class Appointment extends Model
         }
 
         return $this->getConnection()->transaction(function () use ($options) {
+            if (! $this->exists) {
+                app(\App\Services\ClinicDentistService::class)->recordCoverageCare((int) $this->patient_id, $this->dentist_id ? (int) $this->dentist_id : null);
+            }
             if (! parent::save($options)) {
                 return false;
             }
@@ -480,13 +483,11 @@ class Appointment extends Model
             return false;
         }
 
-        if (
-            !in_array(
-                $user->role?->slug,
-                ['dentist', 'dentist_role'],
-                true
-            )
-        ) {
+        if ((int) $this->dentist_id !== (int) $user->id) {
+            return false;
+        }
+
+        if (! \App\Services\AssignedDentistService::isDentist($user)) {
             return false;
         }
 

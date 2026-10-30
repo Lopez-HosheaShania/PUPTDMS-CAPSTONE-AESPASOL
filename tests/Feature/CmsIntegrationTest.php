@@ -16,6 +16,7 @@ use App\Services\FacultyApiService;
 use App\Services\StudentApiService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -30,6 +31,9 @@ class CmsIntegrationTest extends TestCase
         $this->withoutVite();
         Http::preventStrayRequests();
         config(['services.ocms.base_url' => 'https://cms.example.test/api', 'services.ocms.api_key' => 'test-cms-key']);
+        foreach (['admin', 'dentist', 'patient'] as $slug) {
+            Role::firstOrCreate(['slug' => $slug], ['name' => ucfirst($slug)]);
+        }
     }
 
     public function test_assign_cms_list_reads_config_and_returns_uuid_and_documented_field_aliases(): void
@@ -117,6 +121,169 @@ class CmsIntegrationTest extends TestCase
         $this->assertSame('patient', $access->fresh()->cms_role);
         $this->assertDatabaseCount('external_admin_profiles', 1);
         $this->assertDatabaseCount('external_admin_accesses', 1);
+    }
+
+    public static function assignedAccounts(): array
+    {
+        $cases = [];
+        foreach (['admin', 'dentist', 'patient'] as $role) {
+            foreach (['active', 'inactive'] as $status) {
+                $cases[$role.' '.$status] = [$role, $status];
+            }
+        }
+
+        return $cases;
+    }
+
+    #[DataProvider('assignedAccounts')]
+    public function test_assignment_immediately_lists_local_account_without_waiting_for_sso(string $role, string $status): void
+    {
+        $this->actingAs($this->operator());
+        Http::fake(['https://cms.example.test/api/external/admins/cms-030' => Http::response(['data' => $this->admin()])]);
+
+        $this->post(route('admin.assign-cms-access.store'), [
+            'external_admin_id' => 'cms-030', 'cms_role' => $role, 'cms_status' => $status,
+        ])->assertSessionHas('success');
+
+        $user = User::where('email', 'cms@example.test')->first();
+        $this->assertNotNull($user, 'A verified CMS assignment should immediately create a local user.');
+        $this->assertSame($role, $user->role->slug);
+        $this->assertSame($status, $user->status);
+        $this->assertSame('CMS Patient', $user->name);
+        $this->assertNull($user->password);
+        $this->assertNull($user->sso_user_id, 'The CMS profile UUID must not be assumed to be the SSO subject.');
+        $this->getJson(route('admin.user_management', ['search' => 'cms@example.test']), [
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->assertOk()->assertJsonCount(1, 'users')
+            ->assertJsonPath('users.0.id', $user->id)
+            ->assertJsonPath('users.0.email', 'cms@example.test')
+            ->assertJsonPath('users.0.status', $status);
+    }
+
+    public function test_reassignment_reuses_existing_account_and_preserves_credentials(): void
+    {
+        $this->actingAs($this->operator());
+        $user = User::create([
+            'name' => 'Existing CMS Account', 'email' => 'CMS@example.test',
+            'role_id' => Role::where('slug', 'patient')->value('id'), 'status' => 'active',
+            'password' => bcrypt('existing-password'), 'sso_user_id' => 'real-idp-subject',
+            'access_token' => 'existing-access-token', 'refresh_token' => 'existing-refresh-token',
+        ]);
+        $password = $user->password;
+        Http::fake(['https://cms.example.test/api/external/admins/cms-030' => Http::response(['data' => $this->admin()])]);
+
+        for ($attempt = 0; $attempt < 2; $attempt++) {
+            $this->post(route('admin.assign-cms-access.store'), [
+                'external_admin_id' => 'cms-030', 'cms_role' => 'patient', 'cms_status' => 'active',
+            ])->assertSessionHas('success');
+        }
+
+        $this->assertSame($user->id, User::where('email', 'cms@example.test')->sole()->id);
+        $this->assertSame($password, $user->fresh()->password);
+        $this->assertSame('real-idp-subject', $user->fresh()->sso_user_id);
+        $this->assertSame('existing-access-token', $user->fresh()->access_token);
+        $this->assertSame('existing-refresh-token', $user->fresh()->refresh_token);
+        $this->assertDatabaseCount('users', 2);
+        $this->assertDatabaseCount('external_admin_profiles', 1);
+        $this->assertDatabaseCount('external_admin_accesses', 1);
+    }
+
+    public function test_account_creation_failure_rolls_back_profile_and_assignment(): void
+    {
+        $this->actingAs($this->operator());
+        User::creating(function (User $user) {
+            if ($user->email === 'cms@example.test') {
+                throw new \RuntimeException('Simulated account creation failure');
+            }
+        });
+        Http::fake(['https://cms.example.test/api/external/admins/cms-030' => Http::response(['data' => $this->admin()])]);
+        $this->post(route('admin.assign-cms-access.store'), [
+            'external_admin_id' => 'cms-030', 'cms_role' => 'patient', 'cms_status' => 'active',
+        ])->assertSessionHas('error');
+        $this->assertDatabaseCount('external_admin_profiles', 0);
+        $this->assertDatabaseCount('external_admin_accesses', 0);
+        $this->assertDatabaseMissing('users', ['email' => 'cms@example.test']);
+    }
+
+    public function test_cms_profile_without_valid_email_cannot_leave_an_unlisted_assignment(): void
+    {
+        $this->actingAs($this->operator());
+        Http::fake(['https://cms.example.test/api/external/admins/cms-030' => Http::response([
+            'data' => array_replace($this->admin(), ['email' => '']),
+        ])]);
+        $this->post(route('admin.assign-cms-access.store'), [
+            'external_admin_id' => 'cms-030', 'cms_role' => 'patient', 'cms_status' => 'active',
+        ])->assertSessionHas('error');
+        $this->assertDatabaseCount('external_admin_profiles', 0);
+        $this->assertDatabaseCount('external_admin_accesses', 0);
+        $this->assertDatabaseCount('users', 1);
+    }
+
+    public static function sessionChanges(): array
+    {
+        return [
+            'role changed' => ['dentist', 'active'],
+            'account deactivated' => ['patient', 'inactive'],
+        ];
+    }
+
+    #[DataProvider('sessionChanges')]
+    public function test_assignment_revokes_existing_sessions_when_role_or_status_changes(string $role, string $status): void
+    {
+        config(['session.driver' => 'database', 'session.table' => 'sessions', 'concurrent-sessions.enabled' => true]);
+        $operator = $this->operator();
+        $this->actingAs($operator);
+        $user = User::create([
+            'name' => 'CMS Patient', 'email' => 'cms@example.test',
+            'role_id' => Role::where('slug', 'patient')->value('id'), 'status' => 'active',
+        ]);
+        DB::table('sessions')->insert([
+            'id' => 'cms-existing-session', 'user_id' => $user->id, 'ip_address' => '127.0.0.1',
+            'user_agent' => 'Test browser', 'payload' => base64_encode(serialize([])), 'last_activity' => now()->timestamp,
+        ]);
+        Http::fake(['https://cms.example.test/api/external/admins/cms-030' => Http::response(['data' => $this->admin()])]);
+        $this->post(route('admin.assign-cms-access.store'), [
+            'external_admin_id' => 'cms-030', 'cms_role' => $role, 'cms_status' => $status,
+        ])->assertSessionHas('success');
+        $this->assertSame($role, $user->fresh()->role->slug);
+        $this->assertSame($status, $user->fresh()->status);
+        $this->assertDatabaseMissing('sessions', ['id' => 'cms-existing-session']);
+        $this->assertAuthenticatedAs($operator);
+    }
+
+    public function test_first_sso_login_reuses_the_account_created_by_assignment(): void
+    {
+        $this->actingAs($this->operator());
+        config(['services.oidc.token_url' => 'https://idp.example.test/token', 'services.oidc.me_url' => 'https://idp.example.test/me']);
+        Http::fake([
+            'https://cms.example.test/api/external/admins/cms-030' => Http::response(['data' => $this->admin()]),
+            'https://cms.example.test/api/external/admins' => Http::response(['data' => [$this->admin()]]),
+            'https://idp.example.test/token' => Http::response(['access_token' => 'new-access-token']),
+            'https://idp.example.test/me' => Http::response([
+                'id' => 'actual-idp-subject', 'email' => 'cms@example.test', 'name' => 'CMS Patient', 'roles' => [],
+            ]),
+        ]);
+        $this->post(route('admin.assign-cms-access.store'), [
+            'external_admin_id' => 'cms-030', 'cms_role' => 'patient', 'cms_status' => 'active',
+        ])->assertSessionHas('success');
+        $accountId = User::where('email', 'cms@example.test')->sole()->id;
+        auth()->logout();
+        $this->mock(StudentApiService::class, function ($mock) {
+            $mock->shouldReceive('getStudentByEmail')->andReturn(['data' => []]);
+            $mock->shouldReceive('searchStudents')->andReturn([]);
+        });
+        $this->mock(FacultyApiService::class)->shouldReceive('getFaculties')->andReturn([]);
+        \Tymon\JWTAuth\Facades\JWTAuth::shouldReceive('fromUser')->once()->andReturn('test-jwt');
+
+        $this->withSession(['oidc_state' => 'cms-state'])->get(route('oidc.callback', [
+            'state' => 'cms-state', 'code' => 'test-code',
+        ]))->assertRedirect(route('homepage'));
+        $user = User::where('email', 'cms@example.test')->sole();
+        $this->assertSame($accountId, $user->id);
+        $this->assertSame('actual-idp-subject', $user->sso_user_id);
+        $this->assertSame('administrative', $user->patient->classification);
+        $this->assertDatabaseCount('users', 2);
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_failed_verification_does_not_create_access(): void
@@ -229,7 +396,7 @@ class CmsIntegrationTest extends TestCase
     private function operator(): User
     {
         $role = Role::firstOrCreate(['slug' => 'admin'], ['name' => 'Admin']);
-        foreach (['view_cms_integration', 'create_cms_integration', 'view_patient_profiles'] as $slug) {
+        foreach (['view_cms_integration', 'create_cms_integration', 'view_patient_profiles', 'view_account_details', 'update_user_role'] as $slug) {
             $permission = Permission::firstOrCreate(['slug' => $slug], ['name' => $slug, 'module' => 'CMS']);
             $role->permissions()->syncWithoutDetaching([$permission->id]);
         }

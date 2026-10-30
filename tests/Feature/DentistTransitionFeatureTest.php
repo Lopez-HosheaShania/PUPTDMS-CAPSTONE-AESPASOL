@@ -304,6 +304,8 @@ class DentistTransitionFeatureTest extends TestCase
             'status' => 'active',
         ]);
 
+        DB::table('clinic_dentist_assignments')->where('slot', 'primary')->update(['dentist_id' => $departingDentist->id, 'assigned_by' => $admin->id]);
+
         return [$admin, $departingDentist, $successor];
     }
 
