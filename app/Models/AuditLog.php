@@ -22,13 +22,24 @@ class AuditLog extends Model
         return $this->hasOne(AuditLogDescription::class);
     }
 
+    public function getDescriptionAttribute(?string $value): ?string
+    {
+        // Format historical events on read without rewriting audit evidence.
+        return \App\Support\AuditDescription::summarize($this->full_description, $this->action, $this->module);
+    }
+
+    public function getDisplayDetailsAttribute(): ?string
+    {
+        return \App\Support\AuditDescription::details($this->full_description, $this->action, $this->module);
+    }
+
     public function getFullDescriptionAttribute(): ?string
     {
         if (array_key_exists('descriptionDetails', $this->pendingDetails)) {
             return $this->pendingDetails['descriptionDetails']['full_description'];
         }
 
-        return $this->descriptionDetails?->full_description ?? $this->description;
+        return $this->descriptionDetails?->full_description ?? ($this->attributes['description'] ?? null);
     }
 
     public function scopeWithDescription($query, string $text)

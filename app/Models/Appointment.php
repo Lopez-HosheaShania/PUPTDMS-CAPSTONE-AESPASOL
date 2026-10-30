@@ -36,6 +36,22 @@ class Appointment extends Model
 
     private array $pendingDetails = [];
 
+    protected static function booted(): void
+    {
+        static::saved(function (Appointment $appointment): void {
+            if ($appointment->isDirty('status')) {
+                $appointment->closure()->updateOrCreate([], [
+                    'closed_at' => in_array($appointment->status, self::FINALIZED_STATUSES, true) ? now() : null,
+                ]);
+            }
+        });
+    }
+
+    public function closure()
+    {
+        return $this->hasOne(AppointmentClosure::class);
+    }
+
     public function reservedBookingDetails()
     {
         return $this->hasOne(AppointmentReservedBooking::class);
@@ -119,7 +135,7 @@ class Appointment extends Model
 
     public function save(array $options = [])
     {
-        if ($this->pendingDetails === []) {
+        if ($this->pendingDetails === [] && $this->exists && ! $this->isDirty('status')) {
             return parent::save($options);
         }
 
@@ -273,6 +289,12 @@ class Appointment extends Model
                     ),
                     'updated_at' => $timestamp,
                 ]);
+
+            foreach (array_chunk($appointmentIds, 500) as $ids) {
+                DB::table('appointment_closures')->upsert(array_map(
+                    fn ($id) => ['appointment_id' => $id, 'closed_at' => $timestamp], $ids
+                ), ['appointment_id'], ['closed_at']);
+            }
 
             AppointmentReservedBooking::query()
                 ->whereIn('appointment_id', $appointmentIds)

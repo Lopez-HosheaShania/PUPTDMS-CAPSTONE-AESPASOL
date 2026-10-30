@@ -138,10 +138,9 @@
                                                         value="{{ old('name') }}"
                                                         class="form-input-custom global-form-icon global-control-with-action"
                                                         placeholder="e.g. Tooth Extraction" autocomplete="off"
-                                                        maxlength="255" pattern="[A-Za-zÑñ ]+"
+                                                        maxlength="255"
                                                         data-field-label="Service Name"
                                                         data-required-message="Please enter a service name."
-                                                        data-pattern-message="Service name can only contain letters and spaces."
                                                         data-clearable-input required>
 
                                                     <button type="button" class="search-clear field-clear-btn"
@@ -486,9 +485,9 @@
 
                                     <input type="text" id="manageServiceName" name="name"
                                         class="form-input-custom global-form-icon global-control-with-action" maxlength="255"
-                                        autocomplete="off" pattern="[A-Za-zÑñ ]+" data-field-label="Service Name"
+                                        autocomplete="off" data-field-label="Service Name"
                                         data-required-message="Please enter a service name."
-                                        data-pattern-message="Service name can only contain letters and spaces." required>
+                                        required>
 
                                 </div>
                             </div>
@@ -1598,39 +1597,17 @@
 
                             addForm.reset();
 
-                            requestAnimationFrame(() => {
-                                addForm
-                                    .querySelectorAll(
-                                        '[data-clearable-input]'
-                                    )
-                                    .forEach(field => {
-                                        field.dispatchEvent(
-                                            new Event(
-                                                'input', {
-                                                    bubbles: true
-                                                }
-                                            )
-                                        );
-                                    });
+                            addForm.querySelectorAll('[data-clearable-input]').forEach(field => {
+                                window.clearFormInputValidation?.(field);
+                                window.syncInputClearButton?.(field);
+                                if (field.hasAttribute('data-char-limit')) {
+                                    window.updateCharCounter?.(
+                                        field.id,
+                                        field.dataset.charLimit,
+                                        field.dataset.charCounter?.replace(/^#/, '')
+                                    );
+                                }
                             });
-
-                            document
-                                .getElementById(
-                                    'serviceNameInput'
-                                )
-                                ?.classList.remove(
-                                    'is-valid',
-                                    'is-invalid'
-                                );
-
-                            document
-                                .getElementById(
-                                    'serviceDescInput'
-                                )
-                                ?.classList.remove(
-                                    'is-valid',
-                                    'is-invalid'
-                                );
 
                             showServiceToast(
                                 'success',

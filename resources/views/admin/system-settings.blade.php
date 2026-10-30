@@ -754,7 +754,7 @@
                         <div class="modal-copy">
                             <h2 id="retentionPasswordTitle" class="modal-title">Confirm retention change</h2>
                             <p id="retentionPasswordDescription" class="modal-subtitle">Enter your current admin password
-                                to save this retention period.</p>
+                                to confirm this retention change.</p>
                         </div>
                     </div>
                     <button type="button" class="modal-x" data-modal-close="retentionPasswordDialog"
@@ -766,7 +766,7 @@
                     <div class="global-confirm-alert">
                         <i class="fa-solid fa-clock" aria-hidden="true"></i>
                         <div>
-                            <p>Retention period</p><strong id="retentionPasswordSummary"></strong>
+                            <p>Policy change</p><strong id="retentionPasswordSummary"></strong>
                         </div>
                     </div>
                     <div class="global-form-group">
@@ -790,7 +790,7 @@
         </div>
         @foreach ($retentionPolicies as $policy)
             <form id="retention-period-{{ $policy->id }}" action="{{ route('admin.retention.update', $policy) }}"
-                method="POST" hidden
+                method="POST" hidden data-global-validation
                 data-retention-label="{{ config('retention.categories.' . $policy->category . '.label', $policy->category) }}">
                 @csrf @method('PUT')
                 <input type="hidden" name="action" value="update">
@@ -799,6 +799,20 @@
                 <input type="hidden" name="return_to" value="system_settings">
                 <input type="hidden" name="retention_policy_id" value="{{ $policy->id }}">
             </form>
+            @foreach (['approve', 'activate', 'deactivate'] as $retentionAction)
+                @if (($retentionAction === 'approve' && $policy->status === 'provisional' && $policy->hasConfiguredRule())
+                    || ($retentionAction === 'activate' && $policy->status === 'approved')
+                    || ($retentionAction === 'deactivate' && $policy->status === 'active'))
+                    <form id="retention-{{ $retentionAction }}-{{ $policy->id }}" action="{{ route('admin.retention.update', $policy) }}" method="POST" hidden data-global-validation
+                        data-retention-label="{{ config('retention.categories.'.$policy->category.'.label') }}" data-retention-action="{{ $retentionAction }}">
+                        @csrf @method('PUT')
+                        <input type="hidden" name="action" value="{{ $retentionAction }}">
+                        <input type="hidden" name="version" value="{{ $policy->version }}">
+                        <input type="hidden" name="confirmed" value="1">
+                        <input type="hidden" name="retention_policy_id" value="{{ $policy->id }}">
+                    </form>
+                @endif
+            @endforeach
         @endforeach
     @endif
 @endsection
@@ -818,13 +832,28 @@
                 form.addEventListener('submit', event => {
                     event.preventDefault();
                     if (submitting) return;
+                    const fields = [...form.elements].filter(field =>
+                        field.matches('input:not([type="hidden"]):not([type="password"]), select, textarea')
+                    );
+                    const invalid = fields.find(field => window.validateFormInputField
+                        ? !window.validateFormInputField(field)
+                        : !field.checkValidity() || (field.required && !field.value.trim()));
+                    if (invalid) {
+                        if (window.focusGlobalInvalidField) window.focusGlobalInvalidField(invalid);
+                        else invalid.focus();
+                        return;
+                    }
                     pendingForm = form;
                     password.value = '';
                     password.setAttribute('form', form.id);
-                    const duration = form.elements.namedItem('duration').value;
-                    const unit = form.elements.namedItem('unit').selectedOptions[0].textContent;
+                    const action = form.dataset.retentionAction || 'update';
+                    const duration = form.elements.namedItem('duration')?.value;
+                    const unit = form.elements.namedItem('unit')?.selectedOptions[0]?.textContent;
+                    const rule = form.elements.namedItem('counting_rule')?.selectedOptions[0]?.textContent;
                     document.getElementById('retentionPasswordSummary').textContent =
-                        `${form.dataset.retentionLabel}: ${duration} ${unit}`;
+                        action === 'update'
+                            ? `${form.dataset.retentionLabel}: ${duration} ${unit} — ${rule}`
+                            : `${action}: ${form.dataset.retentionLabel}`;
                     window.openModal(dialog.id);
                 });
             });
@@ -1026,6 +1055,7 @@
         let settingsInitialState = '';
         let settingsIsDirty = false;
         let settingsIsSubmitting = false;
+        const settingsSaveButtonStates = new WeakMap();
 
         function syncSettingsVisualState() {
             document
@@ -1071,16 +1101,27 @@
             }
 
             saveButtons.forEach(button => {
-                if (!button.dataset.defaultHtml) {
-                    button.dataset.defaultHtml = button.innerHTML;
+                let state = settingsSaveButtonStates.get(button);
+                if (!state) {
+                    state = { content: [...button.childNodes], loading: false };
+                    settingsSaveButtonStates.set(button, state);
                 }
 
                 button.disabled = settingsIsSubmitting;
                 button.classList.toggle('is-disabled', settingsIsSubmitting);
 
-                button.innerHTML = settingsIsSubmitting ?
-                    '<i class="fa-solid fa-spinner spin"></i> Saving...' :
-                    button.dataset.defaultHtml;
+                if (state.loading !== settingsIsSubmitting) {
+                    if (settingsIsSubmitting) {
+                        const icon = document.createElement('i');
+                        icon.className = 'fa-solid fa-spinner spin';
+                        button.replaceChildren(icon, document.createTextNode(' Saving...'));
+                    } else {
+                        // Keep the existing nodes and listeners; serializing CSSOM
+                        // styles back into innerHTML creates CSP-blocked attributes.
+                        button.replaceChildren(...state.content);
+                    }
+                    state.loading = settingsIsSubmitting;
+                }
             });
         }
 
@@ -1338,10 +1379,6 @@
 
             settingsInitialState = serializeSettingsForm(form);
             syncSettingsVisualState();
-
-            document.querySelectorAll('[data-settings-save]').forEach(button => {
-                button.dataset.defaultHtml = button.innerHTML;
-            });
 
             form.addEventListener('input', updateSettingsFloatingBar);
             form.addEventListener('change', updateSettingsFloatingBar);

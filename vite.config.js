@@ -23,7 +23,6 @@ export default defineConfig({
                 'resources/css/pages/admin/dentist-continuity.css',
                 'resources/css/pages/admin/document-templates.css',
                 'resources/css/pages/admin/role-permissions.css',
-                'resources/css/pages/admin/session-management.css',
                 'resources/css/pages/admin/system-logs.css',
                 'resources/css/pages/admin/system-settings.css',
                 'resources/css/pages/admin/user-management.css',

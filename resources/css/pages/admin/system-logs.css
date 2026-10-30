@@ -636,10 +636,14 @@
     min-width: 0;
     max-width: 100%;
 
-    white-space: normal;
+    white-space: pre-line;
 
     overflow-wrap: anywhere;
     word-break: break-word;
+}
+
+.system-logs-page #slGridView .sl-grid-log-detail .sl-desc {
+    white-space: pre-line;
 }
 
 .system-logs-page #slGridView [data-system-log-description-row] {

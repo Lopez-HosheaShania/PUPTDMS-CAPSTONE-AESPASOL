@@ -29,19 +29,7 @@ $docRequestsCollection = $docRequestsSource->getCollection();
 $docRequestsCollection = collect($docRequestsSource);
 }
 
-$normalizeStatus = function ($status) {
-$status = strtolower(str_replace('_', '-', (string) ($status ?: 'pending')));
-
-if (in_array($status, ['ready', 'ready-for-pickup', 'ready-for-release', 'released'], true)) {
-return 'approved';
-}
-
-if (!in_array($status, ['pending', 'approved', 'rejected'], true)) {
-return 'pending';
-}
-
-return $status;
-};
+$normalizeStatus = fn ($status) => \App\Models\DocumentRequest::normalizedStatus($status);
 
 $formatDocumentType = function ($type) {
 return ucwords(str_replace(['_', '-'], ' ', (string) ($type ?: 'Document')));

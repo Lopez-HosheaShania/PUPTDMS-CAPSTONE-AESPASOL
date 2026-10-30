@@ -40,13 +40,6 @@
                         'label' => 'Patients',
                     ],
                     [
-                        'route' => 'admin.dental-records.index',
-                        'permission' => 'view_dental_records',
-                        'active' => ['admin.dental-records*'],
-                        'icon' => 'fa-tooth',
-                        'label' => 'Dental Records',
-                    ],
-                    [
                         'route' => 'admin.admin.appointments',
                         'permission' => 'view_appointments',
                         'active' => ['admin.admin.appointments'],
@@ -612,7 +605,8 @@
     $groups = $sidebarGroups[$sidebarRole] ?? $sidebarGroups['patient'];
 
     if ($authUser) {
-        $isSuperAdmin = $authUser->role?->slug === 'super_admin';
+        $activeRole = session('impersonated_role') ?: session('role') ?: $authUser->role?->slug;
+        $isSuperAdmin = $authUser->role?->slug === 'super_admin' && $activeRole === 'super_admin';
 
         $groups = collect($groups)
             ->map(function ($group) use ($authUser, $isSuperAdmin) {

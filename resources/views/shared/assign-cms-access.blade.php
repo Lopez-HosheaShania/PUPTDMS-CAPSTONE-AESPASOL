@@ -769,6 +769,19 @@
                 showResults();
             }
 
+            function renderLoadError() {
+                renderNoResults('Unable to load CMS users. Please try again.');
+                const retry = document.createElement('button');
+                retry.type = 'button';
+                retry.className = 'search-item';
+                retry.textContent = 'Retry';
+                retry.addEventListener('click', event => {
+                    event.preventDefault();
+                    openUserSearch();
+                });
+                resultsBox.appendChild(retry);
+            }
+
             function renderResults(users) {
                 resultsBox.innerHTML = '';
 
@@ -842,7 +855,7 @@
                     })
                     .catch(error => {
                         console.error('Fetch all users error:', error);
-                        return fullUserList;
+                        throw error;
                     })
                     .finally(() => {
                         usersFetchPromise = null;
@@ -852,16 +865,16 @@
             }
 
             async function openUserSearch() {
-                if (!fullListLoaded) {
-                    await fetchAllUsers();
+                try {
+                    const users = await fetchAllUsers();
+                    const query = searchInput.value.trim();
+                    const filtered = rankUsers(users, query);
+                    filtered.length ? renderResults(filtered) : renderNoResults(
+                        users.length ? 'No matching users found.' : 'No users available.'
+                    );
+                } catch (error) {
+                    renderLoadError();
                 }
-
-                const query = searchInput.value.trim();
-                const filtered = rankUsers(fullUserList, query);
-
-                filtered.length ?
-                    renderResults(filtered) :
-                    renderNoResults('No users available.');
             }
 
             function toggleUserSearchClear() {
@@ -996,7 +1009,7 @@
                     }
                 } catch (error) {
                     console.error('User search error:', error);
-                    renderNoResults('Unable to search users right now.');
+                    renderLoadError();
                 }
             });
 

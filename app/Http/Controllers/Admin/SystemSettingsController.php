@@ -105,7 +105,9 @@ class SystemSettingsController extends Controller
 
         return view('admin.system-settings', [
             'canManageRetention' => $canManageRetention,
-            'retentionPolicies' => $canManageRetention ? RetentionPolicy::orderBy('id')->get() : collect(),
+            'retentionPolicies' => $canManageRetention ? RetentionPolicy::current()->get()
+                ->sortBy(fn ($policy) => array_search($policy->category, array_keys(config('retention.categories')), true))
+                ->values() : collect(),
             'settings' => $settings,
             'notifications' => $notifications,
             'layoutRole' => $this->resolveLayoutRole(),

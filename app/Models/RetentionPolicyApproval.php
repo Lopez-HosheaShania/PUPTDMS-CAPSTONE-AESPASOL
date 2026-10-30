@@ -13,6 +13,7 @@ class RetentionPolicyApproval extends Model
     protected $casts = [
         'approved_by' => 'integer', 'approved_at' => 'datetime',
         'activated_by' => 'integer', 'activated_at' => 'datetime',
+        'effective_from' => 'date', 'policy_version' => 'integer',
     ];
 
     public function policy()

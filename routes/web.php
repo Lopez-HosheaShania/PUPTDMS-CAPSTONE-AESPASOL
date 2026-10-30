@@ -708,6 +708,8 @@ Route::prefix('admin')
 
         Route::get('/retention-policy', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'index'])
             ->middleware('permission:manage_system_settings')->name('admin.retention.index');
+        Route::get('/retention-review', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'review'])
+            ->middleware('permission:manage_system_settings')->name('admin.retention.review');
         Route::put('/retention-policy/{policy}', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'update'])
             ->middleware('permission:manage_system_settings')->name('admin.retention.update');
 

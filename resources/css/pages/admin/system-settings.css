@@ -259,83 +259,177 @@
     margin: 0 0 1rem;
 }
 
+.system-settings-page .retention-header {
+    flex-wrap: wrap;
+}
+
+.system-settings-page .retention-policies {
+    container: retention / inline-size;
+    min-width: 0;
+}
+
 .system-settings-page .retention-setting-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 1.25rem;
-    padding: 1.1rem 0;
+    display: block;
+    min-width: 0;
+    padding: 1.5rem 0;
+    border-color: var(--border);
 }
 
 .system-settings-page .retention-setting-row .setting-row-info {
     padding-right: 0;
+    margin-bottom: 1.25rem;
+}
+
+.system-settings-page .retention-setting-row .setting-row-desc {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.system-settings-page .retention-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+    margin-top: .75rem;
 }
 
 .system-settings-page .retention-period-controls {
     display: grid;
-    grid-template-columns: 112px 140px auto;
+    grid-template-columns: minmax(0, 1fr) 100px 130px auto;
     align-items: end;
-    gap: .75rem;
+    gap: 1rem;
     min-width: 0;
 }
 
-.system-settings-page .retention-period-controls .form-label {
-    display: block;
-    margin-bottom: .4rem;
-    font-size: .72rem;
-    font-weight: 700;
-}
-
-.system-settings-page .retention-period-controls input.form-ctrl,
-.system-settings-page .retention-period-controls select.form-ctrl {
-    display: block;
-    width: 100%;
+.system-settings-page .retention-setting-row .global-form-group,
+.system-settings-page .retention-setting-row .custom-select {
     min-width: 0;
-    height: 42px;
-    padding: 0 13px;
-    border: 1.5px solid #e8e2dd;
-    border-radius: 12px;
-    background: #fff;
-    color: #0d1117;
-    font-size: .84rem;
-    font-weight: 800;
-    transition: border-color .18s ease, box-shadow .18s ease;
+    margin-bottom: 0;
 }
 
-.system-settings-page .retention-period-controls input.form-ctrl:focus-visible,
-.system-settings-page .retention-period-controls select.form-ctrl:focus-visible {
-    outline: none;
-    border-color: var(--settings-primary);
-    box-shadow: 0 0 0 4px rgba(139, 0, 0, .08);
+.system-settings-page .retention-counting-field .custom-select-button span {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    padding-block: .6rem;
 }
 
 .system-settings-page .retention-save-btn {
+    justify-self: end;
+}
+
+.system-settings-page .retention-approval-panel {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    min-width: 0;
+}
+
+.system-settings-page .retention-approval-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.system-settings-page .retention-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .75rem;
+    margin-top: 1rem;
+}
+
+.system-settings-page .retention-approval-summary {
+    margin-top: .75rem;
+}
+
+.system-settings-page .retention-review-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1rem;
+    margin: 1.25rem 0;
+}
+
+.system-settings-page .retention-review-filter .global-form-group {
+    flex: 0 1 420px;
+    min-width: 0;
+    margin: 0;
+}
+
+.system-settings-page .retention-review-summary,
+.system-settings-page .retention-review-notice,
+.system-settings-page .retention-review-table {
+    margin-block: 1.25rem;
+    min-width: 0;
+}
+
+.system-settings-page .retention-review-summary .global-info-value {
+    overflow-wrap: anywhere;
+}
+
+.system-settings-page .retention-review-table {
+    max-width: 100%;
+}
+
+.system-settings-page .retention-review-table .global-pagination {
     width: auto;
-    min-height: 42px;
-    padding: 0 1rem;
-    border-radius: 12px;
-    white-space: nowrap;
-    box-shadow: none;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-@media (max-width: 1280px) {
-    .system-settings-page .retention-setting-row {
-        grid-template-columns: minmax(0, 1fr);
-        gap: .8rem;
-    }
+.system-settings-page .retention-review-table .data-table {
+    min-width: 1110px;
+    table-layout: fixed;
+}
 
+.system-settings-page .retention-review-table th:nth-child(1) {
+    width: 340px;
+}
+
+.system-settings-page .retention-review-table th:nth-child(2) {
+    width: 155px;
+}
+
+.system-settings-page .retention-review-table th:nth-child(3) {
+    width: 175px;
+}
+
+.system-settings-page .retention-review-table th:nth-child(4) {
+    width: 180px;
+}
+
+.system-settings-page .retention-review-table .data-table th,
+.system-settings-page .retention-review-table .data-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+@container retention (max-width: 760px) {
     .system-settings-page .retention-period-controls {
-        grid-template-columns: minmax(100px, 1fr) minmax(120px, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    }
+
+    .system-settings-page .retention-counting-field {
+        grid-column: 1 / -1;
     }
 }
 
-@media (max-width: 540px) {
+@container retention (max-width: 480px) {
     .system-settings-page .retention-period-controls {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .system-settings-page .retention-save-btn {
         grid-column: 1 / -1;
-        justify-self: start;
+    }
+
+    .system-settings-page .retention-approval-controls {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 

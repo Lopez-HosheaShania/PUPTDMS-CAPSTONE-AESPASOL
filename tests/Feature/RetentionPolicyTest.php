@@ -33,13 +33,16 @@ class RetentionPolicyTest extends TestCase
     private function payload(RetentionPolicy $policy, array $overrides = []): array
     {
         return array_replace(['action' => 'update', 'version' => $policy->version, 'confirmed' => '1',
-            'duration' => 24, 'unit' => 'months', 'password' => 'Password123!'], $overrides);
+            'duration' => 24, 'unit' => 'months', 'password' => 'Password123!',
+            'counting_rule' => array_key_first($policy->countingRules()), 'effective_from' => now()->toDateString()], $overrides);
     }
 
     public function test_defaults_and_administrator_interface(): void
     {
         $this->assertFalse(Schema::hasTable('retention_record_reviews'));
         $this->assertFalse(Schema::hasColumn('retention_policies', 'start_event'));
+        $this->assertSame(['users', 'patients', 'clinical_records', 'appointments',
+            'document_requests', 'audit_logs', 'ai_service_logs'], array_keys(config('retention.categories')));
         $this->assertSame(count(config('retention.categories')), RetentionPolicy::count());
         foreach (RetentionPolicy::all() as $policy) {
             $this->assertSame(1, $policy->duration);
@@ -51,12 +54,96 @@ class RetentionPolicyTest extends TestCase
         $this->actingAs($this->administrator())->get(route('admin.retention.index'))
             ->assertRedirect(route('admin.system_settings', ['tab' => 'retention']));
         $this->get(route('admin.system_settings', ['tab' => 'retention']))
-            ->assertOk()->assertSee('Data Retention')->assertDontSee('Pending Review')
+            ->assertOk()->assertSee('Data Retention')->assertSee('Pending Review')
             ->assertDontSee('Changes require policy review')
             ->assertSee('Save Period')->assertDontSee('Manage Policy Approvals')
             ->assertSee('id="retentionPasswordDialog"', false)
             ->assertSee('autocomplete="current-password"', false)
             ->assertDontSee('name="start_event"', false);
+    }
+
+    private function legacyClinicalPolicies(): array
+    {
+        RetentionPolicy::where('category', 'clinical_records')->delete();
+        $appointments = RetentionPolicy::where('category', 'appointments')->firstOrFail();
+        $appointments->update(['duration' => 5, 'unit' => 'years']);
+        $medical = RetentionPolicy::create([
+            'category' => 'medical_histories', 'duration' => 60, 'unit' => 'months',
+            'status' => 'provisional', 'version' => 3,
+        ]);
+        $dental = RetentionPolicy::create([
+            'category' => 'dental_histories', 'duration' => 5, 'unit' => 'years',
+            'status' => 'provisional', 'version' => 2,
+        ]);
+
+        return [$appointments, $medical, $dental];
+    }
+
+    public function test_clinical_consolidation_preserves_legacy_periods_and_approvals_without_reapproving_them(): void
+    {
+        [$appointments, $medical, $dental] = $this->legacyClinicalPolicies();
+        $admin = $this->administrator('super_admin');
+        $medical->update(['status' => 'active', 'approved_by' => $admin->id,
+            'approved_at' => now(), 'approval_reference' => 'Existing medical history policy approval',
+            'activated_by' => $admin->id, 'activated_at' => now()]);
+        $before = $medical->fresh()->getAttributes();
+        $approval = $medical->fresh()->approval->getAttributes();
+        $dentalBefore = $dental->fresh()->getAttributes();
+        $migration = require database_path('migrations/2026_10_29_000001_consolidate_clinical_retention_policy.php');
+        $migration->up();
+
+        $clinical = RetentionPolicy::where('category', 'clinical_records')->firstOrFail();
+        $this->assertSame(5, $clinical->duration);
+        $this->assertSame('years', $clinical->unit);
+        $this->assertSame('provisional', $clinical->status);
+        $this->assertNull($clinical->approval);
+        $this->assertSame($before, $medical->fresh()->getAttributes());
+        $this->assertSame($approval, $medical->fresh()->approval->getAttributes());
+        $this->assertSame($dentalBefore, $dental->fresh()->getAttributes());
+        $this->assertSame(7, RetentionPolicy::current()->count());
+        $this->assertDatabaseCount('retention_policies', 9);
+        $auditCount = AuditLog::count();
+        $clinical->update(['duration' => 8]);
+        $migration->up();
+        $migration->down();
+        $this->assertSame(8, $clinical->fresh()->duration);
+        $this->assertSame($auditCount, AuditLog::count());
+
+        $response = $this->actingAs($admin)->get(route('admin.system_settings', ['tab' => 'retention']))->assertOk();
+        foreach (['Clinical records', 'Appointment records', 'Document requests and issued documents',
+            'Audit and security logs', 'Technical and AI service logs'] as $label) {
+            $response->assertSee($label);
+        }
+        foreach ([$medical, $dental] as $legacy) {
+            $response->assertDontSee('id="retention-duration-'.$legacy->id.'"', false)
+                ->assertDontSee('id="retention-period-'.$legacy->id.'"', false);
+            $this->put(route('admin.retention.update', $legacy), $this->payload($legacy))->assertNotFound();
+        }
+        $this->put(route('admin.retention.update', $clinical), $this->payload($clinical))
+            ->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame(24, $clinical->fresh()->duration);
+        $this->assertSame('months', $clinical->fresh()->unit);
+        $this->assertSame(5, $appointments->fresh()->duration);
+        $this->assertSame($before, $medical->fresh()->getAttributes());
+        $this->assertSame($approval, $medical->fresh()->approval->getAttributes());
+    }
+
+    public function test_conflicting_clinical_periods_block_consolidation_without_changing_policies(): void
+    {
+        [, $medical] = $this->legacyClinicalPolicies();
+        $medical->update(['duration' => 2, 'unit' => 'years']);
+        $before = RetentionPolicy::orderBy('id')->get()->map->getAttributes()->all();
+        $auditCount = AuditLog::count();
+        $migration = require database_path('migrations/2026_10_29_000001_consolidate_clinical_retention_policy.php');
+        try {
+            $migration->up();
+            $this->fail('A conflicting period must require a clinic decision.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('Clinical retention periods differ', $exception->getMessage());
+        }
+        $this->assertSame($before, RetentionPolicy::orderBy('id')->get()->map->getAttributes()->all());
+        $this->assertSame($auditCount, AuditLog::count());
+        $this->assertDatabaseMissing('retention_policies', ['category' => 'clinical_records']);
     }
 
     public function test_admin_changes_are_category_specific_and_audited_without_rewriting_history(): void
@@ -247,7 +334,11 @@ class RetentionPolicyTest extends TestCase
         foreach (['patient', 'dentist', 'admin'] as $role) {
             $user = $this->administrator($role, $role !== 'admin');
             $this->actingAs($user)->get(route('admin.retention.index'))->assertForbidden();
-            $this->put(route('admin.retention.update', $policy), $this->payload($policy))->assertForbidden();
+            foreach (['update', 'approve', 'activate'] as $action) {
+                $this->put(route('admin.retention.update', $policy), $this->payload($policy, [
+                    'action' => $action, 'approval_reference' => 'Documented approval 2026',
+                ]))->assertForbidden();
+            }
         }
         $this->assertSame(1, $policy->fresh()->duration);
     }
@@ -263,10 +354,8 @@ class RetentionPolicyTest extends TestCase
     public function test_approval_activation_and_edits_require_explicit_transitions(): void
     {
         $policy = RetentionPolicy::firstOrFail();
-        $this->actingAs($this->administrator())->put(route('admin.retention.update', $policy),
-            $this->payload($policy, ['action' => 'approve', 'approval_reference' => 'Institutional decision 123']))
-            ->assertForbidden();
-        $this->actingAs($this->administrator('super_admin'));
+        $policy->update(['counting_rule' => array_key_first($policy->countingRules())]);
+        $this->actingAs($this->administrator());
         $this->put(route('admin.retention.update', $policy), $this->payload($policy, ['action' => 'activate']))
             ->assertUnprocessable();
         $this->put(route('admin.retention.update', $policy),
@@ -407,6 +496,7 @@ class RetentionPolicyTest extends TestCase
     {
         $this->actingAs($this->administrator('super_admin'));
         $policy = RetentionPolicy::firstOrFail();
+        $policy->update(['counting_rule' => array_key_first($policy->countingRules())]);
         foreach (['approve', 'activate', 'deactivate'] as $action) {
             $payload = $this->payload($policy, [
                 'action' => $action, 'approval_reference' => 'Institutional decision 123',

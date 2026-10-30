@@ -57,6 +57,7 @@ class SystemLogController extends Controller
 
         $logs = $this->buildFilteredQuery($request)
             ->orderBy('created_at', $sort === 'asc' ? 'asc' : 'desc')
+            ->orderBy('id', $sort === 'asc' ? 'asc' : 'desc')
             ->paginate($perPage)
             ->withQueryString();
 
@@ -451,6 +452,7 @@ class SystemLogController extends Controller
                     ? 'asc'
                     : 'desc'
             )
+            ->orderBy('id', $request->input('sort') === 'asc' ? 'asc' : 'desc')
             ->get();
 
 
@@ -1045,7 +1047,7 @@ class SystemLogController extends Controller
             ),
 
             'full_description' =>
-            $log->full_description,
+            $log->display_details,
 
             'is_archived' =>
             (bool) $log->is_archived,

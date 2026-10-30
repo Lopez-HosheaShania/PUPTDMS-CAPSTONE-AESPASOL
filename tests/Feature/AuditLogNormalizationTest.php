@@ -150,6 +150,99 @@ class AuditLogNormalizationTest extends TestCase
         $this->assertSame('419 | CSRF token mismatch.', \App\Support\AuditDescription::summarize('419 | CSRF token mismatch.'));
     }
 
+    public function test_retention_descriptions_are_readable_for_new_and_existing_logs_without_rewriting_evidence(): void
+    {
+        $this->signIn();
+        $original = json_encode(['category' => 'clinical_records', 'policy_id' => 9, 'version' => 1, 'page' => 1], JSON_THROW_ON_ERROR);
+        $expected = 'Viewed retention records for Clinical records (page 1).';
+        $newLog = AuditLog::create(['action' => 'retention_review_viewed', 'module' => 'data_retention', 'description' => $original]);
+        $this->assertSame($expected, $newLog->fresh()->description);
+        $this->assertSame($original, $newLog->fresh()->full_description);
+
+        $legacyId = DB::table('audit_logs')->insertGetId(['action' => 'retention_review_viewed', 'module' => 'data_retention',
+            'description' => $original, 'created_at' => now(), 'updated_at' => now()]);
+        $before = DB::table('audit_logs')->where('id', $legacyId)->first();
+        $legacy = AuditLog::findOrFail($legacyId);
+        $this->assertSame($expected, $legacy->description);
+        $this->assertSame($original, $legacy->full_description);
+        $this->assertSame($expected, $legacy->toArray()['description']);
+
+        // Older shortened rows can still be described from their retained full evidence.
+        DB::table('audit_logs')->where('id', $newLog->id)->update(['description' => 'Retention review viewed - data retention']);
+        $this->assertSame($expected, $newLog->fresh()->description);
+        $request = Request::create('/system-logs', 'GET', ['search' => 'clinical_records']);
+        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+        $response = app(SystemLogController::class)->index($request)->getData(true);
+        $returnedLog = collect($response['logs'])->firstWhere('id', $legacyId);
+        $this->assertSame($expected, $returnedLog['description']);
+        $this->assertSame($expected, $returnedLog['full_description']);
+        $this->assertEquals($before, DB::table('audit_logs')->where('id', $legacyId)->first());
+        $this->assertDatabaseMissing('audit_log_descriptions', ['audit_log_id' => $legacyId]);
+        $page = app(SystemLogController::class)->index(Request::create('/system-logs', 'GET', ['search' => 'clinical_records']));
+        $page->with('errors', new \Illuminate\Support\ViewErrorBag());
+        $html = $page->render();
+        $this->assertStringContainsString($expected, $html);
+        $this->assertStringNotContainsString(e($original), $html);
+        $latest = app(SystemLogController::class)->fetchLatest(Request::create('/system-logs/latest', 'GET', ['per_page' => 100]))->getData(true);
+        $this->assertSame($expected, collect($latest['logs'])->firstWhere('id', $legacyId)['full_description']);
+        $pdfHtml = view('admin.system-logs-pdf', ['logs' => collect([$legacy]),
+            'filters' => array_fill_keys(['search', 'date_from', 'date_to', 'action_type', 'module'], null), 'generatedAt' => now()])->render();
+        $this->assertStringContainsString($expected, $pdfHtml);
+        $this->assertStringNotContainsString(e($original), $pdfHtml);
+    }
+
+    public function test_retention_period_summaries_keep_original_values_and_handle_incomplete_historical_details(): void
+    {
+        $data = ['category' => 'patients', 'previous' => ['duration' => 1, 'unit' => 'years'],
+            'updated' => ['duration' => 6, 'unit' => 'months']];
+        $original = json_encode($data, JSON_THROW_ON_ERROR);
+        $log = AuditLog::create(['action' => 'retention_period_modified', 'module' => 'data_retention', 'description' => $original]);
+        $this->assertSame('Changed retention period for Patient profiles from 1 year to 6 months.', $log->fresh()->description);
+        $this->assertSame($original, $log->fresh()->full_description);
+
+        $data['previous'] = null;
+        $data['updated'] = ['duration' => [], 'unit' => 'unknown'];
+        $log->description = json_encode($data, JSON_THROW_ON_ERROR);
+        $this->assertSame('Changed retention period for Patient profiles.', $log->description);
+        $this->assertSame($data, json_decode($log->full_description, true));
+        $formatter = \App\Support\AuditDescription::class;
+        $this->assertSame('Original audit note.', $formatter::summarize('Original audit note.', 'retention_review_viewed', 'data_retention'));
+        $this->assertSame('Retention Review Viewed — Data Retention.', $formatter::summarize('{invalid', 'retention_review_viewed', 'data_retention'));
+        $this->assertSame('Unrelated Action — Other Module.', $formatter::summarize('{"page":1}', 'unrelated_action', 'other_module'));
+    }
+
+    public function test_display_details_explain_structured_changes_without_exposing_json_or_changing_evidence(): void
+    {
+        $original = json_encode(['category' => 'patients', 'version' => 7,
+            'previous' => ['duration' => 1, 'unit' => 'years'],
+            'updated' => ['duration' => 6, 'unit' => 'months', 'status' => 'provisional',
+                'counting_rule' => 'linked_account_deactivated', 'policy_version' => 7]], JSON_THROW_ON_ERROR);
+        $log = AuditLog::create(['action' => 'retention_policy_updated', 'module' => 'data_retention', 'description' => $original]);
+        $details = $log->fresh()->display_details;
+        $this->assertStringNotContainsString($log->description, $details);
+        $this->assertStringContainsString('Previous retention period: 1 year', $details);
+        $this->assertStringContainsString('Saved retention period: 6 months', $details);
+        $this->assertStringContainsString('Count from: Linked account deactivation date', $details);
+        $this->assertStringContainsString('Policy status: Pending Review', $details);
+        $this->assertStringNotContainsString('version', strtolower($details));
+        $this->assertSame($original, $log->fresh()->full_description);
+        $this->assertStringNotContainsString('{', $details);
+        $this->assertStringNotContainsString('"', $details);
+
+        $inventoryText = 'Inventory #4 updated | {"previous":{"qty":4},"updated":{"qty":3},"is_volume_bottle":true}';
+        $inventory = AuditLog::create(['action' => 'update_inventory', 'module' => 'inventory', 'description' => $inventoryText]);
+        $this->assertSame('Inventory #4 updated', $inventory->fresh()->description);
+        $this->assertStringContainsString('Before change / Qty: 4', $inventory->fresh()->display_details);
+        $this->assertStringContainsString('After change / Qty: 3', $inventory->fresh()->display_details);
+        $this->assertStringContainsString('Is Volume Bottle: Yes', $inventory->fresh()->display_details);
+        $this->assertSame($inventoryText, $inventory->fresh()->full_description);
+        $this->assertStringNotContainsString($inventory->description, $inventory->fresh()->display_details);
+        $pdfHtml = view('admin.system-logs-pdf', ['logs' => collect([$log->fresh()]),
+            'filters' => array_fill_keys(['search', 'date_from', 'date_to', 'action_type', 'module'], null), 'generatedAt' => now()])->render();
+        $this->assertSame(1, substr_count($pdfHtml, e($log->description)));
+        $this->assertStringContainsString('Saved retention period: 6 months', $pdfHtml);
+    }
+
     private function signIn(): User
     {
         $role = Role::firstOrCreate(['slug' => 'admin'], ['name' => 'Admin']);

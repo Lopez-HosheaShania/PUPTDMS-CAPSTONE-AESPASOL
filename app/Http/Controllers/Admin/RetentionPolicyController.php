@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\RetentionPolicy;
+use App\Services\RetentionReviewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
@@ -58,6 +59,7 @@ class RetentionPolicyController extends Controller
     public function update(Request $request, RetentionPolicy $policy)
     {
         $this->authorizeAdministrator($request);
+        abort_unless($policy->isCurrent(), 404, 'This retention policy has been replaced and is kept for history only.');
         $data = $request->validate([
             'action' => ['required', Rule::in(['update', 'approve', 'activate', 'deactivate'])],
             'version' => ['required', 'integer', 'min:1'],
@@ -65,11 +67,10 @@ class RetentionPolicyController extends Controller
             'return_to' => ['nullable', Rule::in(['system_settings'])],
             'duration' => ['required_if:action,update', 'integer', 'min:1', 'max:1200'],
             'unit' => ['required_if:action,update', Rule::in(['days', 'weeks', 'months', 'years'])],
+            'counting_rule' => ['required_if:action,update', 'nullable', Rule::in(array_keys($policy->countingRules()))],
             'approval_reference' => ['required_if:action,approve', 'nullable', 'string', 'min:10', 'max:2000'],
+            'effective_from' => ['required_if:action,approve', 'nullable', 'date_format:Y-m-d'],
         ]);
-        if (in_array($data['action'], ['approve', 'activate'], true)) {
-            abort_unless($request->user()->hasRole('super_admin'), 403);
-        }
         $this->verifyPassword($request, $policy);
 
         DB::transaction(function () use ($request, $policy, $data) {
@@ -79,20 +80,27 @@ class RetentionPolicyController extends Controller
             $before = $locked->attributesToArray();
             $action = $data['action'];
             if ($action === 'update') {
-                $locked->fill(collect($data)->only(['duration', 'unit'])->all());
+                $locked->fill(collect($data)->only(['duration', 'unit', 'counting_rule'])->all());
                 $locked->fill(['status' => 'provisional', 'approved_by' => null, 'approved_at' => null,
-                    'approval_reference' => null, 'activated_by' => null, 'activated_at' => null]);
+                    'approval_reference' => null, 'activated_by' => null, 'activated_at' => null,
+                    'effective_from' => null, 'policy_version' => null]);
             } elseif ($action === 'approve') {
                 abort_unless($locked->status === 'provisional', 422, 'Only provisional policies can be approved.');
+                abort_unless($locked->hasConfiguredRule(), 422, 'Save a counting rule before recording approval.');
                 $locked->fill(['status' => 'approved', 'approved_by' => $request->user()->id,
-                    'approved_at' => now(), 'approval_reference' => $data['approval_reference']]);
+                    'approved_at' => now(), 'approval_reference' => $data['approval_reference'],
+                    'effective_from' => $data['effective_from'], 'policy_version' => $locked->version + 1]);
             } elseif ($action === 'activate') {
                 abort_unless($locked->status === 'approved' && $locked->approved_by
-                    && $locked->approved_at && $locked->approval_reference, 422, 'Formal approval is required.');
-                $locked->fill(['status' => 'active', 'activated_by' => $request->user()->id, 'activated_at' => now()]);
+                    && $locked->approved_at && $locked->approval_reference && $locked->effective_from
+                    && $locked->hasConfiguredRule() && $locked->policy_version === $locked->version,
+                    422, 'Approve the saved policy settings and counting rule before activation.');
+                $locked->fill(['status' => 'active', 'activated_by' => $request->user()->id,
+                    'activated_at' => now(), 'policy_version' => $locked->version + 1]);
             } else {
                 abort_unless($locked->status === 'active', 422, 'Only active policies can be deactivated.');
-                $locked->fill(['status' => 'approved', 'activated_by' => null, 'activated_at' => null]);
+                $locked->fill(['status' => 'approved', 'activated_by' => null, 'activated_at' => null,
+                    'policy_version' => $locked->version + 1]);
             }
             $locked->fill(['updated_by' => $request->user()->id, 'version' => $locked->version + 1])->save();
             if ($action === 'update' && $locked->approval) {
@@ -114,5 +122,32 @@ class RetentionPolicyController extends Controller
 
         return redirect()->route('admin.system_settings', ['tab' => 'retention'])->with('success',
             'Retention policy saved. Automatic archiving and disposal remain disabled.');
+    }
+
+    public function review(Request $request, RetentionReviewService $review)
+    {
+        $this->authorizeAdministrator($request);
+        $data = $request->validate([
+            'category' => ['nullable', Rule::in(array_keys(config('retention.categories')))],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'per_page' => ['nullable', Rule::in([10, 20, 50, 100])],
+        ]);
+        $category = $data['category'] ?? 'users';
+        $policy = RetentionPolicy::current()->with('approval')->where('category', $category)->firstOrFail();
+        $records = $review->records($policy)->orderBy('id')->paginate((int) ($data['per_page'] ?? 10))->withQueryString();
+        if ($records->currentPage() > $records->lastPage()) {
+            return redirect()->route('admin.retention.review', [
+                'category' => $category, 'per_page' => $records->perPage(), 'page' => $records->lastPage(),
+            ]);
+        }
+        $assessments = $records->getCollection()->mapWithKeys(fn ($record) => [$record->id => $review->assess($policy, $record)]);
+        $policyNotice = $review->policyNotice($policy);
+        AuditLogger::log('retention_review_viewed', 'data_retention', json_encode([
+            'category' => $category, 'policy_id' => $policy->id, 'version' => $policy->version,
+            'page' => $records->currentPage(),
+        ], JSON_THROW_ON_ERROR));
+
+        return response()->view('admin.retention-review', compact('policy', 'records', 'assessments', 'category', 'policyNotice'))
+            ->header('Cache-Control', 'private, no-store');
     }
 }
