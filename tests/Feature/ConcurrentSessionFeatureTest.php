@@ -72,8 +72,8 @@ class ConcurrentSessionFeatureTest extends TestCase
         $targetUser = $this->makeUser('revoked-user@example.com', 'dentist');
 
         $permission = Permission::create([
-            'name' => 'Manage Users',
-            'slug' => 'manage_users',
+            'name' => 'Disable Users',
+            'slug' => 'disable_users',
             'module' => 'Users',
         ]);
 
@@ -278,12 +278,7 @@ class ConcurrentSessionFeatureTest extends TestCase
             'HTTP_USER_AGENT' => 'Mozilla/5.0 Chrome/138.0.0.0 Safari/537.36',
         ]);
 
-        $request->setLaravelSession(new class {
-            public function get($key, $default = null)
-            {
-                return $default;
-            }
-        });
+        $request->setLaravelSession(app('session.store'));
 
         $this->assertSame('Brave', BrowserDetection::detectFromRequest($request));
     }

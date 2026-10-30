@@ -15,9 +15,13 @@
         $perPage = $perPage ?? 10;
         $status = $status ?? 'active';
         $authUser = auth()->user();
-        $canViewSystemLogs = $authUser?->hasPermission('view_system_logs') ?? false;
-        $canExportSystemLogs = $authUser?->hasPermission('export_system_logs') ?? false;
-        $canArchiveSystemLogs = $authUser?->hasPermission('archive_system_logs') ?? false;
+        $activeRole = session('impersonated_role') ?: session('role') ?: $authUser?->role?->slug;
+        $isSuperAdmin = $authUser?->role?->slug === 'super_admin' && $activeRole === 'super_admin';
+        $canViewSystemLogs = $isSuperAdmin || ($authUser?->hasAnyPermission([
+            'view_system_logs', 'export_system_logs', 'archive_system_logs',
+        ]) ?? false);
+        $canExportSystemLogs = $isSuperAdmin || ($authUser?->hasPermission('export_system_logs') ?? false);
+        $canArchiveSystemLogs = $isSuperAdmin || ($authUser?->hasPermission('archive_system_logs') ?? false);
     @endphp
 
     <main id="mainContent" class="app-page-shell system-logs-page page-enter mode-list">
@@ -399,12 +403,11 @@
                                         @php
                                             $description = trim((string) ($log->description ?? ''));
 
-                                            $fullDescription = trim((string) ($log->full_description ?? ''));
+                                            $fullDescription = trim((string) ($log->display_details ?? ''));
 
                                             $hasMeaningfulDetails =
                                                 $fullDescription !== '' &&
-                                                $fullDescription !== $description &&
-                                                mb_strlen($fullDescription) > mb_strlen($description) + 25;
+                                                $fullDescription !== $description;
 
                                             $displayDescription = trim(
                                                 (string) ($log->display_description ?? $description ?:
@@ -627,7 +630,7 @@
                                                         (string) ($log->description ?? 'No description provided.'),
                                                     );
 
-                                                    $fullDescription = trim((string) ($log->full_description ?? ''));
+                                                    $fullDescription = trim((string) ($log->display_details ?? ''));
 
                                                     $displayDescription = trim(
                                                         (string) ($log->display_description ?? $description),
@@ -635,8 +638,7 @@
 
                                                     $hasExpandableDescription =
                                                         $fullDescription !== '' &&
-                                                        $fullDescription !== $description &&
-                                                        mb_strlen($fullDescription) > mb_strlen($description) + 25;
+                                                        $fullDescription !== $description;
 
                                                     $gridDetailId = 'sl-grid-detail-' . $log->id;
                                                 @endphp
@@ -4033,16 +4035,12 @@
 
                     var hasGridExpandableDescription =
                         rawFullDescription !== '' &&
-                        rawFullDescription !== rawDescription &&
-                        rawFullDescription.length >
-                        rawDescription.length + 25;
+                        rawFullDescription !== rawDescription;
 
                     var hasMeaningfulDetails =
                         rawFullDescription !== '' &&
                         rawFullDescription !==
-                        rawDescription &&
-                        rawFullDescription.length >
-                        rawDescription.length + 25;
+                        rawDescription;
 
                     var displayDescription =
                         escapeSlHtml(

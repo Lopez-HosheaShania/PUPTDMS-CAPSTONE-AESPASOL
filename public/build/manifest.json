@@ -110,7 +110,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-Fn1p5PGw.css",
+    "file": "assets/app-CMWvzIUi.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -181,17 +181,8 @@
       "role-permissions.css"
     ]
   },
-  "resources/css/pages/admin/session-management.css": {
-    "file": "assets/session-management-BJflhMx4.css",
-    "src": "resources/css/pages/admin/session-management.css",
-    "isEntry": true,
-    "name": "session-management",
-    "names": [
-      "session-management.css"
-    ]
-  },
   "resources/css/pages/admin/system-logs.css": {
-    "file": "assets/system-logs-BsrfcJYM.css",
+    "file": "assets/system-logs-ByaGTmgF.css",
     "src": "resources/css/pages/admin/system-logs.css",
     "isEntry": true,
     "name": "system-logs",
@@ -407,7 +398,7 @@
     ]
   },
   "resources/css/pages/shared/clinic-schedule.css": {
-    "file": "assets/clinic-schedule-BEvXyx0x.css",
+    "file": "assets/clinic-schedule-DWC578rs.css",
     "src": "resources/css/pages/shared/clinic-schedule.css",
     "isEntry": true,
     "name": "clinic-schedule",
@@ -479,7 +470,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-fewbzmEO.js",
+    "file": "assets/app-opwz6O_w.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -599,13 +590,13 @@
     "isEntry": true
   },
   "resources/js/ui/custom-select.js": {
-    "file": "assets/custom-select-xPKzy9zS.js",
+    "file": "assets/custom-select-C-Dnrgzk.js",
     "name": "custom-select",
     "src": "resources/js/ui/custom-select.js",
     "isDynamicEntry": true
   },
   "resources/js/ui/date-picker.js": {
-    "file": "assets/date-picker-D-VFmFYI.js",
+    "file": "assets/date-picker-C_chSVVU.js",
     "name": "date-picker",
     "src": "resources/js/ui/date-picker.js",
     "isDynamicEntry": true,
@@ -629,7 +620,7 @@
     "isDynamicEntry": true
   },
   "resources/js/ui/filter-drawer.js": {
-    "file": "assets/filter-drawer-BYYAVyNY.js",
+    "file": "assets/filter-drawer-CpW6UnP2.js",
     "name": "filter-drawer",
     "src": "resources/js/ui/filter-drawer.js",
     "isDynamicEntry": true
@@ -689,7 +680,7 @@
     "isDynamicEntry": true
   },
   "resources/js/ui/show-more.js": {
-    "file": "assets/show-more-B5BZW-1W.js",
+    "file": "assets/show-more-2aScRbfX.js",
     "name": "show-more",
     "src": "resources/js/ui/show-more.js",
     "isDynamicEntry": true

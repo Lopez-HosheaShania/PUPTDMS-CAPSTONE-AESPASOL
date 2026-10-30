@@ -57,6 +57,7 @@ class SystemLogController extends Controller
 
         $logs = $this->buildFilteredQuery($request)
             ->orderBy('created_at', $sort === 'asc' ? 'asc' : 'desc')
+            ->orderBy('id', $sort === 'asc' ? 'asc' : 'desc')
             ->paginate($perPage)
             ->withQueryString();
 
@@ -98,22 +99,7 @@ class SystemLogController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'logs' => $logs->map(function ($log) {
-                    return [
-                        'id' => $log->id,
-                        'actor_role' => strtolower($log->actor_role ?? 'other'),
-                        'actor_identifier' => $log->actor_identifier ?? '—',
-                        'actor_name' => $log->actor_name ?? $log->actor_identifier ?? 'Unknown User',
-                        'action' => $log->action ?? '',
-                        'module' => $log->module ?? '',
-                        'description' => $log->description ?? 'No description provided.',
-                        'full_description' => $log->display_details,
-                        'is_archived' => (bool) $log->is_archived,
-                        'archived_at' => optional($log->archived_at)->format('M j, Y h:i A'),
-                        'created_at_day' => optional($log->created_at)->format('M j, Y'),
-                        'created_at_time' => optional($log->created_at)->format('h:i:s A'),
-                    ];
-                }),
+                'logs' => $initialLogsPayload,
                 'pagination' => [
                     'total' => $logs->total(),
                     'from' => $logs->firstItem() ?? 0,
@@ -466,6 +452,7 @@ class SystemLogController extends Controller
                     ? 'asc'
                     : 'desc'
             )
+            ->orderBy('id', $request->input('sort') === 'asc' ? 'asc' : 'desc')
             ->get();
 
 
@@ -1060,7 +1047,7 @@ class SystemLogController extends Controller
             ),
 
             'full_description' =>
-            $log->full_description,
+            $log->display_details,
 
             'is_archived' =>
             (bool) $log->is_archived,
