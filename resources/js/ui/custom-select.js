@@ -1,12 +1,22 @@
+function closeCustomSelect(wrapper) {
+    const menu = wrapper.customSelectMenu;
+    if (menu?.classList.contains('is-portaled')) {
+        menu.classList.remove('is-portaled');
+        wrapper.appendChild(menu);
+        for (const property of ['left', 'right', 'top', 'bottom', 'width']) {
+            menu.style.removeProperty(property);
+        }
+    }
+
+    wrapper.classList.remove('is-open', 'drop-up');
+    wrapper.querySelector('.custom-select-button')?.setAttribute('aria-expanded', 'false');
+}
+
 function closeCustomSelects(except = null) {
     document.querySelectorAll('.custom-select.is-open').forEach(wrapper => {
         if (wrapper === except) return;
 
-        wrapper.classList.remove('is-open', 'drop-up');
-
-        wrapper
-            .querySelector('.custom-select-button')
-            ?.setAttribute('aria-expanded', 'false');
+        closeCustomSelect(wrapper);
     });
 }
 
@@ -29,7 +39,7 @@ export function syncCustomSelect(wrapper) {
 
     button.disabled = select.disabled;
 
-    wrapper
+    (wrapper.customSelectMenu ?? wrapper)
         .querySelectorAll('.custom-select-option')
         .forEach(option => {
             const isActive =
@@ -53,7 +63,7 @@ function positionCustomSelectMenu(
             '.custom-select-button'
         );
 
-    const menu =
+    const menu = wrapper.customSelectMenu ??
         wrapper.querySelector(
             '.custom-select-menu'
         );
@@ -204,7 +214,17 @@ function positionCustomSelectMenu(
             '.filter-drawer-panel'
         );
 
-    if (filterPanel) {
+    if (wrapper.querySelector('select[data-custom-select-floating]')) {
+        // Keep the global menu outside overflow containers such as scrollable tables.
+        const width = Math.min(buttonRect.width, window.innerWidth - 16);
+        menu.classList.add('is-portaled');
+        menu.style.width = `${width}px`;
+        menu.style.left = `${Math.max(8, Math.min(buttonRect.left, window.innerWidth - width - 8))}px`;
+        menu.style.right = 'auto';
+        menu.style.top = shouldOpenUp ? 'auto' : `${buttonRect.bottom + 8}px`;
+        menu.style.bottom = shouldOpenUp ? `${window.innerHeight - buttonRect.top + 8}px` : 'auto';
+        document.body.appendChild(menu);
+    } else if (filterPanel) {
         const panelRect =
             filterPanel.getBoundingClientRect();
 
@@ -296,6 +316,7 @@ export function initCustomSelects(root = document) {
         const menu = document.createElement('div');
         menu.className = 'custom-select-menu';
         menu.setAttribute('role', 'listbox');
+        wrapper.customSelectMenu = menu;
 
         Array.from(select.options).forEach(option => {
             if (option.hidden || option.disabled) return;
@@ -329,15 +350,7 @@ export function initCustomSelects(root = document) {
 
                 syncCustomSelect(wrapper);
 
-                wrapper.classList.remove(
-                    'is-open',
-                    'drop-up'
-                );
-
-                button.setAttribute(
-                    'aria-expanded',
-                    'false'
-                );
+                closeCustomSelect(wrapper);
 
                 select.dispatchEvent(
                     new Event('input', {
@@ -398,7 +411,7 @@ export function initCustomSelects(root = document) {
                     });
                 }
             } else {
-                wrapper.classList.remove('is-open', 'drop-up');
+                closeCustomSelect(wrapper);
             }
 
             button.setAttribute(
@@ -416,6 +429,13 @@ export function initCustomSelects(root = document) {
 }
 
 document.addEventListener('scroll', event => {
+    if (!event.target.closest?.('.custom-select-menu.is-portaled')) {
+        document.querySelectorAll('.custom-select.is-open').forEach(wrapper => {
+            if (wrapper.customSelectMenu?.classList.contains('is-portaled')) {
+                closeCustomSelect(wrapper);
+            }
+        });
+    }
     if (
         event.target instanceof Element &&
         event.target.closest(
@@ -427,6 +447,8 @@ document.addEventListener('scroll', event => {
 },
     true
 );
+
+window.addEventListener('resize', () => closeCustomSelects());
 
 document.addEventListener('pointerdown', event => {
     if (

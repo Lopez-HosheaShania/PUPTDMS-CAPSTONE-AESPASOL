@@ -7,13 +7,18 @@ use App\Http\Requests\AssignDentistSuccessorsRequest;
 use App\Http\Requests\DentistTransitionRequest;
 use App\Models\DentistTransition;
 use App\Models\User;
+use App\Services\AssignedDentistService;
+use App\Services\ClinicDentistService;
 use App\Services\DentistTransitionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DentistTransitionController extends Controller
 {
-    public function __construct(private readonly DentistTransitionService $service) {}
+    public function __construct(
+        private readonly DentistTransitionService $service,
+        private readonly ClinicDentistService $clinicDentist
+    ) {}
 
     public function index(Request $request)
     {
@@ -100,8 +105,23 @@ class DentistTransitionController extends Controller
             ]);
         }
 
+        $clinicAssignment = $this->clinicDentist->assignment();
+        $currentPlan = $clinicAssignment->dentist_id
+            ? DentistTransition::where('dentist_id', $clinicAssignment->dentist_id)
+                ->whereIn('status', ['draft', 'pending_review', 'handover_in_progress', 'scheduled'])->latest('id')->first()
+            : null;
+        if (! $currentPlan && $clinicAssignment->transition?->status === 'active') {
+            $currentPlan = $clinicAssignment->transition;
+        }
+
         return view('admin.dentist-continuity', [
             'pageMode' => 'index',
+            'clinicAssignment' => $clinicAssignment,
+            'currentPlan' => $currentPlan,
+            'currentDentistAvailable' => $clinicAssignment->dentist_id
+                && app(AssignedDentistService::class)->availableDentists()->whereKey($clinicAssignment->dentist_id)->exists(),
+            'availableDentists' => $clinicAssignment->dentist_id
+                ? collect() : $this->clinicDentist->initialCandidates()->orderBy('name')->get(),
             'transitions' => $transitions,
             'stats' => $stats,
             'statuses' => DentistTransition::STATUSES,
@@ -113,14 +133,30 @@ class DentistTransitionController extends Controller
         ]);
     }
 
+    public function assignCurrentDentist(Request $request)
+    {
+        $this->authorizeAction('update_dentist_transitions');
+        $data = $request->validate(['dentist_id' => ['required', 'integer', 'exists:users,id']]);
+        $this->clinicDentist->initialize((int) $data['dentist_id'], $request->user());
+
+        return redirect()->route($this->routeName('index'))->with('success', 'Current clinic dentist assigned. Future changes must use a reviewed continuity plan.');
+    }
+
     public function create()
     {
         $this->authorizeAction('create_dentist_transitions');
+
+        $currentDentistId = $this->clinicDentist->assignment()->dentist_id;
+        if (! $currentDentistId) {
+            return redirect()->route($this->routeName('index'))->with('error', 'Set the current clinic dentist before creating a handover plan.');
+        }
 
         return view('admin.dentist-continuity', [
             'pageMode' => 'form',
             'transition' => new DentistTransition(),
             'dentists' => $this->dentists(),
+            'selectedDentistId' => $currentDentistId,
+            'currentDentistId' => $currentDentistId,
             'types' => DentistTransition::TYPES,
             'formAction' => route($this->routeName('store')),
             'formMethod' => 'POST',
@@ -163,6 +199,7 @@ class DentistTransitionController extends Controller
             'pageMode' => 'show',
             'transition' => $transition,
             'summary' => $this->service->generateImpactSummary($transition),
+            'unreviewedResponsibilities' => $this->service->unreviewedResponsibilities($transition),
             'dentists' => $this->dentists(),
             'readiness' => $this->service->validateTransitionReadiness($transition),
             'layoutRole' => $this->resolveLayoutRole(),
@@ -270,7 +307,7 @@ class DentistTransitionController extends Controller
         return User::query()
             ->with('role')
             ->whereHas('role', function ($query) {
-                $query->whereIn('slug', ['dentist', 'dentist_role']);
+                $query->whereIn('slug', AssignedDentistService::DENTIST_ROLES);
             })
             ->orderBy('name')
             ->get();

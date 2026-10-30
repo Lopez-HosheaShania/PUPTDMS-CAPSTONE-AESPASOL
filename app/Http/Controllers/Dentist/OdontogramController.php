@@ -1917,6 +1917,7 @@ class OdontogramController extends Controller
         Appointment $appointment,
         OdontogramRevisionService $revisionService
     ) {
+        abort_if(\App\Services\AssignedDentistService::isDentist(Auth::user()) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Record subsequent care as a new visit.');
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {

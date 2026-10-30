@@ -49,6 +49,7 @@ class DocumentRequestController extends Controller
 
         try {
             $documentRequest = DB::transaction(function () use ($validated, $patient) {
+                $clinicAssignment = app(\App\Services\ClinicDentistService::class)->lockAssignment();
                 // Serialize document-request submissions for this patient so the
                 // duplicate-request and two-per-day limits cannot be bypassed by
                 // near-simultaneous submissions.
@@ -106,6 +107,13 @@ class DocumentRequestController extends Controller
                     ->orderByDesc('appointment_date')
                     ->orderByDesc('appointment_time')
                     ->value('dentist_id');
+
+                if ($clinicAssignment->dentist_id) {
+                    $assignedDentistId = app(\App\Services\AssignedDentistService::class)->findForBooking($lockedPatient->id)?->id;
+                    if (! $assignedDentistId) {
+                        throw ValidationException::withMessages(['document_type' => 'The current dentist is unavailable or patient care needs handover review. Contact the clinic.']);
+                    }
+                }
 
                 return DocumentRequest::create([
                     'patient_id' => $lockedPatient->id,

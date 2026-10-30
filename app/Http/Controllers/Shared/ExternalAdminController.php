@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Shared;
 use App\Http\Controllers\Controller;
 use App\Models\ExternalAdminAccess;
 use App\Models\ExternalAdminProfile;
+use App\Models\Role;
+use App\Models\User;
 use App\Services\CmsApiService;
+use App\Services\ConcurrentSessionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -81,6 +84,7 @@ class ExternalAdminController extends Controller
                     ['external_admin_profile_id' => $profile->id],
                     ['has_cms_access' => true, 'cms_role' => $validated['cms_role'], 'cms_status' => $validated['cms_status']]
                 );
+                $this->syncLocalAccount($admin, $validated['cms_role'], $validated['cms_status']);
             });
 
             return redirect()
@@ -95,6 +99,43 @@ class ExternalAdminController extends Controller
                 ->back()
                 ->withInput()
                 ->with('error', 'Failed to save access. Please try again.');
+        }
+    }
+
+    private function syncLocalAccount(array $admin, string $roleSlug, string $status): void
+    {
+        $email = strtolower(trim((string) $admin['email']));
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \RuntimeException('A valid verified CMS email is required to create a local account.');
+        }
+
+        $role = Role::where('slug', $roleSlug)->firstOrFail();
+        $users = User::whereRaw('LOWER(TRIM(email)) = ?', [$email])->lockForUpdate()->get();
+        if ($users->count() > 1) {
+            throw new \RuntimeException('Multiple local accounts match the verified CMS email.');
+        }
+
+        $user = $users->first() ?? new User;
+        $roleChanged = $user->exists && (int) $user->role_id !== (int) $role->id;
+        $deactivated = $user->exists && $user->status !== 'inactive' && $status === 'inactive';
+
+        $user->fill([
+            'name' => $admin['full_name'] ?: $email,
+            'email' => $email,
+            'role_id' => $role->id,
+            'status' => $status,
+        ]);
+        foreach (['first_name' => 'fname', 'last_name' => 'lname', 'phone' => 'contact_number'] as $attribute => $field) {
+            if (filled($admin[$field] ?? null)) {
+                $user->{$attribute} = $admin[$field];
+            }
+        }
+        $user->save();
+
+        if ($roleChanged || $deactivated) {
+            app(ConcurrentSessionService::class)->revokeAllSessions(
+                $user, null, $deactivated ? 'account_deactivated' : 'role_changed'
+            );
         }
     }
 

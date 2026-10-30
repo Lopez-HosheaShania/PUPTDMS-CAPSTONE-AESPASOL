@@ -40,6 +40,10 @@ php artisan config:cache
 
 No schema migration is required for these CMS fixes. Assign CMS Access now uses the API's `admin_uuid` as the external identifier. Connection/authentication failures show a load error and Retry instead of an empty-directory message. Successful assignment verifies the profile against the API and reuses an existing profile matched by canonical ID or exact email. Ambiguous local profiles require manual review.
 
+Saving an assignment also creates or updates its local `users` account in the same transaction, so it appears in User Management immediately, subject to that page's role/status filters and viewing permissions. The selected CMS role and account status are applied to the account. Existing passwords, identity-provider subjects, and authentication tokens are preserved. New accounts have no local password; their real identity-provider subject is linked on first SSO login. Role changes or deactivation revoke existing sessions. An invalid verified email or failed account save rolls back the profile and access assignment as well.
+
+For assignments saved before this provisioning fix, select the person again and save their verified assignment to create the missing local account. This reuses existing profiles and accounts; there is no need to delete the assignment or change the database schema.
+
 Preview existing CMS patient repairs in the production terminal:
 
 ```bash

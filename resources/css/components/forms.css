@@ -612,6 +612,17 @@ textarea.form-input-custom.global-form-textarea {
     right: auto;
 }
 
+.custom-select-menu.is-portaled {
+    position: fixed;
+    display: block;
+    right: auto;
+    z-index: 20001;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+}
+
 .custom-select-option {
     width: 100%;
     min-height: 40px;

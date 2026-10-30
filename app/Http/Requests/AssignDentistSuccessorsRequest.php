@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\DentistTransitionItem;
 use App\Models\User;
+use App\Services\AssignedDentistService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AssignDentistSuccessorsRequest extends FormRequest
@@ -39,7 +40,7 @@ class AssignDentistSuccessorsRequest extends FormRequest
             $defaultId = $this->input('default_successor_dentist_id');
             if ($defaultId) {
                 $successor = User::with('role')->find($defaultId);
-                if (! $successor || $defaultId == $transition->dentist_id || ! in_array($successor->role?->slug, ['dentist', 'dentist_role'], true) || $successor->status !== 'active') {
+                if (! $successor || $defaultId == $transition->dentist_id || ! AssignedDentistService::isDentist($successor) || $successor->status !== 'active') {
                     $validator->errors()->add('default_successor_dentist_id', 'Choose an active replacement dentist other than the affected dentist.');
                 }
             }
@@ -66,7 +67,7 @@ class AssignDentistSuccessorsRequest extends FormRequest
 
                 $successor = User::with('role')->find($successorId);
 
-                if (!$successor || ! in_array(optional($successor->role)->slug, ['dentist', 'dentist_role'], true) || $successor->status !== 'active') {
+                if (!$successor || ! AssignedDentistService::isDentist($successor) || $successor->status !== 'active') {
                     $validator->errors()->add("items.{$itemId}.successor_dentist_id", 'Each successor must be an active dentist.');
                 }
             }

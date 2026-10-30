@@ -50,7 +50,9 @@ class RoleMiddleware
             abort(403, 'You no longer have access.');
         }
 
-        if (in_array($user->role?->slug, ['dentist', 'dentist_role'], true)) {
+        if (\App\Services\AssignedDentistService::isDentist($user)) {
+            $currentDentistId = app(\App\Services\ClinicDentistService::class)->assignment()->dentist_id;
+            abort_if($currentDentistId && $currentDentistId !== (int) $user->id, 403, 'Only the current clinic dentist has clinical access. Contact an administrator about continuity handover.');
             $unavailable = \App\Models\DentistTransition::where('dentist_id', $user->id)
                 ->whereNotNull('effective_date')
                 ->where(function ($q) {

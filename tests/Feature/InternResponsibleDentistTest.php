@@ -112,6 +112,7 @@ class InternResponsibleDentistTest extends TestCase
         $successor = $this->user('dentist', 'Successor Dentist');
         $intern = $this->user('dental_intern', 'Intern');
         $patient = $this->patient();
+        DB::table('clinic_dentist_assignments')->where('slot', 'primary')->update(['dentist_id' => $current->id]);
         DentistTransition::create([
             'dentist_id' => $current->id, 'default_successor_dentist_id' => $successor->id,
             'transition_type' => 'retirement', 'coverage_type' => 'permanent', 'status' => 'scheduled',
@@ -121,6 +122,8 @@ class InternResponsibleDentistTest extends TestCase
         $dentistService = app(AssignedDentistService::class);
         $this->assertSame($current->id, $dentistService->requireForPatient($patient->id, $intern)->id);
         $this->travelTo(Carbon::parse('2026-10-29 00:00:00'));
+        $this->assertNull($dentistService->findForPatient($patient->id, $intern));
+        $this->assertSame(1, app(\App\Services\DentistTransitionService::class)->processDueTransitions());
         $this->assertSame($successor->id, $dentistService->requireForPatient($patient->id, $intern)->id);
     }
 }

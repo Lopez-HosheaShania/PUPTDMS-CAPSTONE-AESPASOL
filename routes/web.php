@@ -745,6 +745,9 @@ Route::prefix('admin')
         Route::post('/dentist-transitions', [DentistTransitionController::class, 'store'])
             ->name('admin.dentist-transitions.store');
 
+        Route::put('/dentist-transitions/current-dentist', [DentistTransitionController::class, 'assignCurrentDentist'])
+            ->name('admin.dentist-transitions.assign-current');
+
         Route::get('/dentist-transitions/{transition}', [DentistTransitionController::class, 'show'])
             ->name('admin.dentist-transitions.show');
 
