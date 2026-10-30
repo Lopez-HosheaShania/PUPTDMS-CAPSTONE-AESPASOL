@@ -1221,6 +1221,20 @@
         globalLiveInsertIn .42s cubic-bezier(.22, 1, .36, 1) both;
 }
 
+@keyframes global-loading-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: .8;
+    }
+
+    50% {
+        transform: scale(1.06);
+        opacity: 1;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
     .page-enter,
@@ -1241,7 +1255,8 @@
     .global-carousel-out-right,
     .global-carousel-in-left,
     .global-carousel-in-right,
-    .global-live-insert {
+    .global-live-insert,
+    .global-loading-logo {
         animation: none;
     }
 

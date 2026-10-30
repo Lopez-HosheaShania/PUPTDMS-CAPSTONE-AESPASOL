@@ -20,6 +20,8 @@ function initGlobalActionTooltips() {
     ];
 
     let activeTarget = null;
+    let tooltipInteractionLocked = false;
+    let suppressFocusTooltip = false;
 
     function hideTooltip() {
         tooltip.classList.remove(
@@ -145,15 +147,28 @@ function initGlobalActionTooltips() {
         });
     }
 
-    document.addEventListener('pointerover', event => {
-        const target = event.target.closest('[data-tooltip]');
+    document.addEventListener('pointermove', event => {
+        tooltipInteractionLocked =
+            false;
+
+        const target =
+            event.target.closest(
+                '[data-tooltip]'
+            );
 
         if (!target) {
+            if (activeTarget) {
+                hideTooltip();
+            }
+
             return;
         }
 
-        showTooltip(target);
-    });
+        if (activeTarget !== target) {
+            showTooltip(target);
+        }
+    }
+    );
 
     document.addEventListener('pointerout', event => {
         const target = event.target.closest('[data-tooltip]');
@@ -170,18 +185,127 @@ function initGlobalActionTooltips() {
     });
 
     document.addEventListener('focusin', event => {
-        const target = event.target.closest('[data-tooltip]');
+        if (
+            tooltipInteractionLocked ||
+            document.body.classList.contains(
+                'modal-lock'
+            )
+        ) {
+            return;
+        }
 
-        if (target) {
+        const target =
+            event.target.closest(
+                '[data-tooltip]'
+            );
+
+        if (
+            target &&
+            target.matches(
+                ':focus-visible'
+            )
+        ) {
             showTooltip(target);
         }
-    });
+    }
+    );
 
     document.addEventListener('focusout', event => {
         if (event.target.closest('[data-tooltip]')) {
             hideTooltip();
         }
     });
+
+    document.addEventListener(
+        'pointerdown',
+        event => {
+            const target =
+                event.target.closest(
+                    '[data-tooltip]'
+                );
+
+            if (!target) {
+                return;
+            }
+
+            tooltipInteractionLocked =
+                true;
+
+            hideTooltip();
+        },
+        true
+    );
+
+    document.addEventListener('click', event => {
+        const target =
+            event.target.closest(
+                '[data-tooltip]'
+            );
+
+        if (
+            target ||
+            activeTarget
+        ) {
+            hideTooltip();
+        }
+    },
+        true
+    );
+
+    document.addEventListener(
+        'keydown',
+        event => {
+            if (event.key === 'Tab') {
+                tooltipInteractionLocked =
+                    false;
+
+                return;
+            }
+
+            if (
+                event.key === 'Enter' ||
+                event.key === ' ' ||
+                event.key === 'Escape'
+            ) {
+                tooltipInteractionLocked =
+                    true;
+
+                hideTooltip();
+            }
+        },
+        true
+    );
+
+    window.addEventListener('blur', hideTooltip);
+
+    document.addEventListener(
+        'visibilitychange',
+        () => {
+            if (document.hidden) {
+                hideTooltip();
+            }
+        }
+    );
+
+    document.addEventListener(
+        'ui-modal:opened',
+        () => {
+            tooltipInteractionLocked =
+                true;
+
+            hideTooltip();
+        }
+    );
+
+    document.addEventListener(
+        'ui-modal:closed',
+        () => {
+            tooltipInteractionLocked =
+                true;
+
+            hideTooltip();
+        }
+    );
 
     window.addEventListener('scroll', hideTooltip, true);
     window.addEventListener('resize', hideTooltip);

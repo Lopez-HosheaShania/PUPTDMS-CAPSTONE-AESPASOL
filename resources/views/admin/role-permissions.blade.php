@@ -20,7 +20,6 @@
         $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $logs->total() : $logs->count();
 
         $authUser = auth()->user();
-        $canViewAsRole = $authUser?->hasPermission('access_super_admin_dashboard') ?? false;
         $canCreateRoles = $authUser?->hasPermission('create_custom_roles') ?? false;
         $canUpdateRolePermissions = $authUser?->hasPermission('update_role_permissions') ?? false;
         $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? false;
@@ -33,7 +32,6 @@
                 <div class="page-banner-inner">
                     <div>
                         <h1 class="page-title">Roles & Permissions</h1>
-                        <p class="page-subtitle">Manage role access and permission groups across the system.</p>
                     </div>
 
                     <div class="page-banner-actions">
@@ -51,139 +49,103 @@
 
                 <aside class="role-sidebar-sticky">
                     @php
-                        function getRoleBadge($name, $slug)
+                        function getRoleMeta($name, $slug)
                         {
-                            $n = strtolower($name);
-                            $s = strtolower($slug);
+                            $name = strtolower($name);
+                            $slug = strtolower($slug);
 
-                            if (str_contains($n, 'super') || str_contains($s, 'super')) {
-                                return ['badgeColor' => '#7B0D0D', 'label' => 'Protected'];
+                            if (
+                                $slug === 'admin' ||
+                                str_contains($name, 'admin') ||
+                                str_contains($slug, 'staff') ||
+                                str_contains($slug, 'clinic')
+                            ) {
+                                return [
+                                    'theme' => 'admin',
+                                ];
                             }
 
-                            if ($s === 'admin') {
-                                return ['badgeColor' => '#7B0D0D', 'label' => 'Configured'];
-                            }
-
-                            if (str_contains($n, 'dentist') || str_contains($s, 'dentist')) {
-                                return ['badgeColor' => '#d97706', 'label' => 'Clinical'];
-                            }
-
-                            if (str_contains($n, 'staff') || str_contains($s, 'staff') || str_contains($n, 'clinic')) {
-                                return ['badgeColor' => '#059669', 'label' => 'Front Desk'];
+                            if (str_contains($name, 'dentist') || str_contains($slug, 'dentist')) {
+                                return [
+                                    'theme' => 'dentist',
+                                ];
                             }
 
                             if (
-                                str_contains($n, 'student') ||
-                                str_contains($s, 'student') ||
-                                str_contains($n, 'patient') ||
-                                str_contains($s, 'patient')
+                                str_contains($name, 'patient') ||
+                                str_contains($slug, 'patient') ||
+                                str_contains($name, 'student') ||
+                                str_contains($slug, 'student')
                             ) {
-                                return ['badgeColor' => '#4b5563', 'label' => 'Limited'];
+                                return [
+                                    'theme' => 'patient',
+                                ];
                             }
 
-                            return ['badgeColor' => '#6B7280', 'label' => 'Custom'];
+                            return [
+                                'theme' => 'none',
+                                'label' => 'Custom',
+                            ];
                         }
+
                         $totalPerms = $groupedPermissions->flatten()->count();
                     @endphp
 
                     <div class="role-list-header">Active Roles ({{ $roles->count() }})</div>
+                    <div class="sidebar-stack">
 
-                    <div class="role-list-container role-list-view" id="roleListContainer">
-                        @foreach ($roles as $i => $role)
-                            @php
-                                $c = getRoleBadge($role->name, $role->slug);
-                                $granted = $role->permissions->count();
-                                $pct = $totalPerms > 0 ? round(($granted / $totalPerms) * 100) : 0;
-                                $words = array_slice(explode(' ', $role->name), 0, 2);
-                                $initials = '';
-                                foreach ($words as $_w) {
-                                    $initials .= strtoupper($_w[0]);
-                                }
-                                $isHighlighted = isset($highlightRoleId) && (int) $highlightRoleId === (int) $role->id;
-                                $isFirst = isset($highlightRoleId) ? $isHighlighted : $i === 0;
-                                $isSuperRole =
-                                    in_array(strtolower($role->slug), ['super_admin', 'super-admin', 'superadmin']) ||
-                                    str_contains(strtolower($role->name), 'super');
-                                $isProtectedRole =
-                                    $isSuperRole || in_array(strtolower($role->slug), ['admin', 'patient', 'dentist']);
-                            @endphp
+                        <div class="role-list-container role-list-view" id="roleListContainer">
+                            @foreach ($roles as $i => $role)
+                                @php
+                                    $roleMeta = getRoleMeta($role->name, $role->slug);
+                                    $granted = $role->permissions->count();
+                                    $pct = $totalPerms > 0 ? round(($granted / $totalPerms) * 100) : 0;
+                                    $isHighlighted =
+                                        isset($highlightRoleId) && (int) $highlightRoleId === (int) $role->id;
+                                    $isFirst = isset($highlightRoleId) ? $isHighlighted : $i === 0;
+                                    $isProtectedRole = in_array(strtolower($role->slug), [
+                                        'admin',
+                                        'patient',
+                                        'dentist',
+                                    ]);
+                                @endphp
 
-                            <div class="card role-card {{ $isFirst ? 'active' : '' }}" data-role-id="{{ $role->id }}"
-                                data-role-name="{{ $role->display_name }}" data-granted="{{ $granted }}"
-                                data-total="{{ $totalPerms }}" data-pct="{{ $pct }}"
-                                data-slug="{{ $role->slug }}" data-is-super="{{ $isSuperRole ? '1' : '0' }}"
-                                data-ui-click="action-eee17b73e521">
+                                <div class="card role-card {{ $isFirst ? 'active' : '' }}"
+                                    data-role-id="{{ $role->id }}" data-role-name="{{ $role->display_name }}"
+                                    data-role-theme="{{ $roleMeta['theme'] }}" data-granted="{{ $granted }}"
+                                    data-total="{{ $totalPerms }}" data-pct="{{ $pct }}"
+                                    data-slug="{{ $role->slug }}" data-ui-click="action-eee17b73e521">
 
-                                @if (!$isProtectedRole && $canDeleteCustomRoles)
-                                    <button type="button" class="ui-action-btn ui-action-delete role-delete-action"
-                                        data-ui-click="action-4befe37bff71" data-ui-click-arg-0="{{ $role->id }}"
-                                        data-ui-click-arg-1="{{ json_encode($role->name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
-                                        data-tooltip="Delete role" data-tooltip-tone="delete" aria-label="Delete role">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                @endif
+                                    <div class="role-card-header">
 
-                                <div class="role-card-header">
-                                    <div class="patient-avatar patient-avatar-sm">
-                                        {{ $initials }}</div>
-                                    <div class="role-card-copy">
-                                        <div class="role-card-title-row">
-                                            <span class="role-name-label">
-                                                {{ $role->display_name }}
-                                            </span>
+                                        <div class="role-card-copy">
+                                            <div class="role-card-title-row">
+                                                <span class="role-name-label">
+                                                    {{ $role->display_name }}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div data-ui-presentation="presentation-eb7a770b988a">
-                                            <span class="badge-pill"
-                                                data-ui-style="
-        background: {{ $c['badgeColor'] }}15;
-        color: {{ $c['badgeColor'] }};
-    ">
-                                                {{ $c['label'] }}
-                                            </span>
+
+                                        <div class="count-label">
+                                            Permissions: {{ $granted }} / {{ $totalPerms }}
                                         </div>
+
+                                        @if (!$isProtectedRole && $canDeleteCustomRoles)
+                                            <button type="button" class="ui-action-btn ui-action-delete"
+                                                data-ui-click="action-4befe37bff71"
+                                                data-ui-click-arg-0="{{ $role->id }}"
+                                                data-ui-click-arg-1="{{ json_encode($role->name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-tooltip="Delete role" data-tooltip-tone="delete"
+                                                aria-label="Delete role">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        @endif
+
                                     </div>
+
+                                    <progress class="progress-bar" value="{{ $pct }}" max="100"></progress>
                                 </div>
-
-                                <div data-ui-presentation="presentation-b6d781cbbc10">
-                                    <div class="role-access-meta">
-                                        <span>Access</span>
-
-                                        <span class="pct-label">
-                                            {{ $pct }}%
-                                        </span>
-                                    </div>
-                                    <div class="progress-bar role-access-progress">
-                                        <div class="progress-fill" data-ui-style="width: {{ $pct }}%;"></div>
-                                    </div>
-                                    <div class="count-label">
-                                        {{ $granted }} / {{ $totalPerms }} permissions
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <div class="card accent-card">
-                        @php
-                            $fr = isset($highlightRoleId)
-                                ? $roles->firstWhere('id', (int) $highlightRoleId)
-                                : $roles->first();
-                            $fp = $fr
-                                ? ($totalPerms > 0
-                                    ? round(($fr->permissions->count() / $totalPerms) * 100)
-                                    : 0)
-                                : 0;
-                        @endphp
-                        <div data-ui-presentation="presentation-ce0a19731674" id="accentRoleName">
-                            {{ $fr?->display_name ?? '' }}</div>
-                        <div data-ui-presentation="presentation-c633d1bd1c0e" id="accentPct">
-                            {{ $fp }}%</div>
-                        <div data-ui-presentation="presentation-a2a16eabb7d3" id="accentCount">
-                            {{ $fr?->permissions->count() ?? 0 }} of {{ $totalPerms }} active</div>
-                        <div data-ui-presentation="presentation-547b9ec6e206">
-                            <div id="accentBar"
-                                data-ui-style="height:100%; width:{{ $fp }}%; background:#fff; border-radius:10px; transition:width 0.4s;">
-                            </div>
+                            @endforeach
                         </div>
                     </div>
                 </aside>
@@ -242,60 +204,48 @@
                     </div>
 
                     <div class="role-permission-content">
-                        <div class="protected-banner" id="protectedBanner" data-ui-presentation="presentation-d0466aa33fa8">
-                            <i class="fa-solid fa-shield-halved" data-ui-presentation="presentation-92d1add5cab5"></i>
-                            <div>
-                                <div data-ui-presentation="presentation-af8a65c98908">Protected Role</div>
-                                <div data-ui-presentation="presentation-edf375e4ab95">System roles stay protected from
-                                    deletion, but
-                                    permissions remain explicitly defined.</div>
-                            </div>
-                        </div>
 
                         @foreach ($roles as $ri => $role)
                             @php
-                                $isSuperRole =
-                                    in_array(strtolower($role->slug), ['super_admin', 'super-admin', 'superadmin']) ||
-                                    str_contains(strtolower($role->name), 'super');
                                 $isActiveRole = isset($highlightRoleId)
                                     ? (int) $highlightRoleId === (int) $role->id
                                     : $ri === 0;
-                                $micons = [
-                                    'Dental Records' => ['fa-notes-medical', '#8B0000'],
-                                    'Patients' => ['fa-user-group', '#d97706'],
-                                    'Appointments' => ['fa-calendar-days', '#059669'],
-                                    'Document Requests' => ['fa-envelope-open-text', '#2563eb'],
-                                    'Document Templates' => ['fa-file-lines', '#7c3aed'],
-                                    'Reports' => ['fa-chart-pie', '#7c3aed'],
-                                    'General Access' => ['fa-user-shield', '#059669'],
-                                    'Inventory' => ['fa-boxes-stacked', '#ea580c'],
-                                    'User Management' => ['fa-user-cog', '#dc2626'],
-                                    'System Settings' => ['fa-screwdriver-wrench', '#4b5563'],
+
+                                $moduleIcons = [
+                                    'Dental Records' => 'fa-notes-medical',
+                                    'Patients' => 'fa-user-group',
+                                    'Appointments' => 'fa-calendar-days',
+                                    'Document Requests' => 'fa-envelope-open-text',
+                                    'Document Templates' => 'fa-file-lines',
+                                    'Reports' => 'fa-chart-pie',
+                                    'General Access' => 'fa-user-shield',
+                                    'Inventory' => 'fa-boxes-stacked',
+                                    'User Management' => 'fa-user-cog',
+                                    'System Settings' => 'fa-screwdriver-wrench',
                                 ];
                             @endphp
 
-                            <form id="form-role-{{ $role->id }}" class="role-form"
-                                data-role-id="{{ $role->id }}" data-discard-form
-                                data-discard-title="Discard permission changes?"
+                            <form id="form-role-{{ $role->id }}" class="role-form" data-role-id="{{ $role->id }}"
+                                data-discard-form data-discard-title="Discard permission changes?"
                                 data-discard-subtitle="You have unsaved changes for this role."
                                 data-discard-message="The permission changes for this role will be restored to their last saved state."
-                                data-ui-style="display:{{ $isActiveRole ? 'block' : 'none' }}; height: 100%;">
+                                {{ !$isActiveRole ? 'hidden' : '' }}>
                                 @csrf
                                 <input type="hidden" name="role_id" value="{{ $role->id }}">
 
                                 <div class="groups-container">
                                     @forelse($groupedPermissions as $module => $permissions)
                                         @php
-                                            [$ico, $icol] = $micons[$module] ?? ['fa-shield-halved', '#4b5563'];
-                                            $mSlug = Str::slug($module);
-                                            $mTotal = $permissions->count();
-                                            $roleGranted = 0;
+                                            $moduleIcon = $moduleIcons[$module] ?? 'fa-shield-halved';
+                                            $moduleSlug = Str::slug($module);
+                                            $moduleTotal = $permissions->count();
+                                            $grantedCount = 0;
                                             foreach ($permissions as $_p) {
                                                 if ($role->permissions->contains('id', $_p->id)) {
-                                                    $roleGranted++;
+                                                    $grantedCount++;
                                                 }
                                             }
-                                            $allOn = $roleGranted === $mTotal;
+                                            $allGranted = $grantedCount === $moduleTotal;
                                         @endphp
 
                                         <div class="table-card permission-module-card"
@@ -306,34 +256,29 @@
 
                                                 <div class="table-toolbar-title">
 
-                                                    <div class="perm-group-icon"
-                                                        data-ui-style="--module-color: {{ $icol }};">
-                                                        <i class="fa-solid {{ $ico }}"></i>
+                                                    <div class="card-header-icon">
+                                                        <i class="fa-solid {{ $moduleIcon }}"></i>
                                                     </div>
 
-                                                    <div class="perm-group-info">
-                                                        <div class="perm-group-title">
+                                                    <div>
+                                                        <div class="card-title">
                                                             {{ $module }}
                                                         </div>
 
-                                                        <div class="group-count">
-                                                            {{ $roleGranted }}
-                                                            of
-                                                            {{ $mTotal }}
-                                                            enabled
+                                                        <div class="card-subtitle">
+                                                            {{ $grantedCount }} of {{ $moduleTotal }} enabled
                                                         </div>
                                                     </div>
 
                                                 </div>
 
-                                                <div class="perm-group-actions">
+                                                <div class="table-toolbar-actions">
 
                                                     <div class="dot-row"
-                                                        id="dots-{{ $role->id }}-{{ $mSlug }}">
-                                                        @for ($d = 0; $d < $mTotal; $d++)
-                                                            <div class="dot {{ $d < $roleGranted ? 'is-granted' : '' }}"
-                                                                data-ui-style="--dot-color: {{ $icol }};">
-                                                            </div>
+                                                        id="dots-{{ $role->id }}-{{ $moduleSlug }}">
+                                                        @for ($index = 0; $index < $moduleTotal; $index++)
+                                                            <span
+                                                                class="status-dot {{ $index < $grantedCount ? 'status-granted' : 'status-denied' }}"></span>
                                                         @endfor
                                                     </div>
 
@@ -344,9 +289,10 @@
                                                             <input type="checkbox"
                                                                 class="global-switch-input group-master"
                                                                 data-role="{{ $role->id }}"
-                                                                data-module="{{ $mSlug }}"
-                                                                data-discard-ignore="true" {{ $allOn ? 'checked' : '' }}
-                                                                {{ $isSuperRole || !$canUpdateRolePermissions ? 'disabled' : '' }}
+                                                                data-module="{{ $moduleSlug }}"
+                                                                data-discard-ignore="true"
+                                                                {{ $allGranted ? 'checked' : '' }}
+                                                                {{ !$canUpdateRolePermissions ? 'disabled' : '' }}
                                                                 data-ui-change="action-76cbb6258bf9">
 
                                                             <span class="global-switch-track"></span>
@@ -363,11 +309,11 @@
 
                                                 <div class="table-scroll">
 
-                                                    <table class="data-table permission-table">
-
+                                                    <table class="data-table">
                                                         <thead>
                                                             <tr>
                                                                 <th>Permission</th>
+
                                                                 <th class="table-cell-center">
                                                                     Status
                                                                 </th>
@@ -390,52 +336,41 @@
                                                                 <tr class="perm-row"
                                                                     data-perm-search="{{ strtolower($permission->name . ' ' . $permission->slug) }}">
                                                                     <td class="table-cell-main">
-
                                                                         <span class="table-primary">
                                                                             <strong>
                                                                                 {{ $permission->name }}
                                                                             </strong>
                                                                         </span>
-
                                                                     </td>
 
                                                                     <td class="table-cell-center">
-
                                                                         <span
                                                                             class="status-pill {{ $isGranted ? 'status-granted' : 'status-denied' }}">
                                                                             <span class="status-dot"></span>
 
                                                                             {{ $isGranted ? 'Granted' : 'Denied' }}
                                                                         </span>
-
                                                                     </td>
 
                                                                     <td class="table-cell-center">
-
                                                                         <label class="global-switch">
-
                                                                             <input type="checkbox"
                                                                                 name="permissions[{{ $role->id }}][]"
                                                                                 value="{{ $permission->id }}"
                                                                                 class="global-switch-input perm-toggle"
                                                                                 data-role="{{ $role->id }}"
-                                                                                data-module="{{ $mSlug }}"
-                                                                                data-color="{{ $icol }}"
+                                                                                data-module="{{ $moduleSlug }}"
                                                                                 data-perm-name="{{ $permission->name }}"
                                                                                 data-perm-slug="{{ $permission->slug }}"
                                                                                 {{ $isGranted ? 'checked' : '' }}
-                                                                                {{ $isSuperRole || !$canUpdateRolePermissions ? 'disabled' : '' }}
+                                                                                {{ !$canUpdateRolePermissions ? 'disabled' : '' }}
                                                                                 data-ui-change="action-f71c950e5fcd">
 
                                                                             <span class="global-switch-track"></span>
-
                                                                         </label>
-
                                                                     </td>
-
                                                                 </tr>
                                                             @endforeach
-
                                                         </tbody>
 
                                                     </table>
@@ -453,39 +388,37 @@
 
                                 </div>
 
-                                @if (!$isSuperRole)
-                                    <x-floating-save-bar id="footer-bar-{{ $role->id }}" title="Unsaved changes"
-                                        subtitle="0 changes">
-                                        <x-slot:actions>
+                                <x-floating-save-bar id="footer-bar-{{ $role->id }}" title="Unsaved changes"
+                                    subtitle="0 changes">
+                                    <x-slot:actions>
 
-                                            @if ($canViewAsRole)
-                                                <button type="button" class="ui-action-btn ui-action-view fsb-view-as"
-                                                    data-ui-click="action-e9aac4adc59f" data-tooltip="View as role"
-                                                    data-tooltip-tone="view" aria-label="View as role">
-                                                    <i class="fa-solid fa-eye"></i>
+                                        @if ($canViewAsRole)
+                                            <button type="button" class="ui-action-btn ui-action-view fsb-view-as"
+                                                data-ui-click="action-e9aac4adc59f" data-tooltip="View as role"
+                                                data-tooltip-tone="view" aria-label="View as role">
+                                                <i class="fa-solid fa-eye"></i>
 
-                                                    <span class="va-count-badge">
-                                                        0
-                                                    </span>
-                                                </button>
-                                            @endif
-
-                                            <button type="button" class="ui-btn ui-btn-secondary btn-discard"
-                                                data-ui-click="action-01fe488d50f6"
-                                                data-ui-click-arg-0="{{ $role->id }}">
-                                                Discard
+                                                <span class="va-count-badge">
+                                                    0
+                                                </span>
                                             </button>
+                                        @endif
 
-                                            <button type="button" class="ui-btn ui-btn-primary btn-save-float"
-                                                id="save-btn-{{ $role->id }}" data-ui-click="action-e15c3c78bc8e"
-                                                data-ui-click-arg-0="{{ $role->id }}">
-                                                <i class="fa-solid fa-floppy-disk"></i>
-                                                <span>Save</span>
-                                            </button>
+                                        <button type="button" class="ui-btn ui-btn-secondary btn-discard"
+                                            data-ui-click="action-01fe488d50f6"
+                                            data-ui-click-arg-0="{{ $role->id }}">
+                                            Discard
+                                        </button>
 
-                                        </x-slot:actions>
-                                    </x-floating-save-bar>
-                                @endif
+                                        <button type="button" class="ui-btn ui-btn-primary btn-save-float"
+                                            id="save-btn-{{ $role->id }}" data-ui-click="action-e15c3c78bc8e"
+                                            data-ui-click-arg-0="{{ $role->id }}">
+                                            <i class="fa-solid fa-floppy-disk"></i>
+                                            <span>Save</span>
+                                        </button>
+
+                                    </x-slot:actions>
+                                </x-floating-save-bar>
                             </form>
                         @endforeach
 
@@ -541,12 +474,10 @@
                                 </label>
 
                                 <div class="global-control-wrap">
-                                    <i class="fa-solid fa-tag global-control-icon"></i>
 
-                                    <input type="text" id="newRoleName" name="name"
-                                        class="form-input-custom global-form-icon" placeholder="e.g. Dental Intern"
-                                        data-field-label="Role Name" data-required-message="Please enter a role name."
-                                        required autocomplete="off">
+                                    <input type="text" id="newRoleName" name="name" class="form-input-custom"
+                                        placeholder="e.g. Dental Intern" data-field-label="Role Name"
+                                        data-required-message="Please enter a role name." required autocomplete="off">
                                 </div>
                             </div>
 
@@ -557,11 +488,10 @@
                                 </label>
 
                                 <div class="global-control-wrap">
-                                    <i class="fa-solid fa-link global-control-icon"></i>
 
-                                    <input type="text" id="newRoleSlug" name="slug"
-                                        class="form-input-custom global-form-icon" placeholder="e.g. dental-intern"
-                                        data-field-label="Role Slug" data-required-message="Please enter a role slug."
+                                    <input type="text" id="newRoleSlug" name="slug" class="form-input-custom"
+                                        placeholder="e.g. dental-intern" data-field-label="Role Slug"
+                                        data-required-message="Please enter a role slug."
                                         data-pattern-message="Use lowercase letters, numbers, and hyphens only."
                                         pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required autocomplete="off">
                                 </div>
@@ -576,7 +506,6 @@
                         </button>
 
                         <button type="submit" id="btnSubmitNewRole" class="ui-btn ui-btn-primary">
-                            <i class="fa-solid fa-plus"></i>
                             <span>Create Role</span>
                         </button>
                     </div>
@@ -594,6 +523,7 @@
     <div id="resetConfirmModal" class="ui-modal modal-theme-warning" aria-hidden="true">
         <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle"
             data-ui-click="action-22499e15f3ee">
+
             <div class="modal-hd">
 
                 <div class="modal-heading">
@@ -621,18 +551,20 @@
             <div class="modal-bd">
 
                 <div class="global-confirm-alert">
-
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-
                     <div>
+
                         <p>
-                            Reset permissions for <strong>Admin, Dentist, and Patient?</strong>
+                            Reset permissions for
+                            <strong>
+                                Admin, Dentist, and Patient?
+                            </strong>
                         </p>
 
                         <span>
                             Custom permission changes will be lost.
                             This action cannot be undone.
                         </span>
+
                     </div>
 
                 </div>
@@ -647,67 +579,65 @@
 
                 <button type="button" id="resetConfirmBtn" data-ui-click="action-3fbd142ad2bd"
                     class="ui-btn ui-btn-warning">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>Yes, Reset</span>
+                    <span>Reset</span>
                 </button>
 
             </div>
+
         </div>
     </div>
 
-    <div id="vaOverlay" class="ui-modal modal-theme-view" aria-hidden="true">
-
+    <div id="vaOverlay" class="ui-modal modal-theme-primary" aria-hidden="true">
         <div class="ui-modal-card modal-lg">
+
             <div class="modal-hd">
                 <div class="modal-heading">
+
                     <div class="modal-icon">
                         <i class="fa-solid fa-eye"></i>
                     </div>
 
                     <div class="modal-copy">
-                        <h3 class="modal-title">View As Role</h3>
-                        <p class="modal-subtitle" id="vaSubtitle">
-                            Select a role to preview dashboard access
+                        <h3 class="modal-title">
+                            View As Role
+                        </h3>
+
+                        <p class="modal-subtitle">
+                            Preview the dashboard access assigned to each role.
                         </p>
                     </div>
+
                 </div>
 
-                <button type="button" data-ui-click="action-8a5c973b9806" class="modal-x"
+                <button type="button" class="modal-x" data-modal-close="vaOverlay"
                     aria-label="Close role preview modal">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
             <div class="modal-bd">
-                <div data-ui-presentation="presentation-b82067b51cef">
-                    <i class="fa-solid fa-shield-halved" data-ui-presentation="presentation-d695b66e4b16"></i>
-                    <div>
-                        <div data-ui-presentation="presentation-e49f4a7d996c">
-                            Newly granted & saved</div>
-                        <div><strong data-ui-presentation="presentation-bf9d57d795a3" id="vaTotalPerms">0</strong>
-                            permissions across <strong data-ui-presentation="presentation-bf9d57d795a3"
-                                id="vaTotalRoles">0</strong> roles</div>
-                    </div>
-                </div>
-                <div id="vaRoleList"></div>
+                <div id="vaRoleList" class="modal-form-grid"></div>
             </div>
 
             <div class="modal-ft">
-                <button type="button" data-ui-click="action-8a5c973b9806" class="ui-btn ui-btn-secondary">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="vaOverlay">
                     Close
                 </button>
             </div>
+
         </div>
     </div>
 
-    <div id="patientPickerOverlay" class="ui-modal modal-theme-success" aria-hidden="true">
-
+    <div id="patientPickerOverlay" class="ui-modal" aria-hidden="true">
         <div class="ui-modal-card modal-lg">
+
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-user-injured"></i>
-                    </div>
+
+                    <button type="button" id="patientPickerBackBtn" class="ui-action-btn ui-action-view"
+                        aria-label="Back to View As Role">
+                        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                    </button>
 
                     <div class="modal-copy">
                         <h3 class="modal-title">
@@ -715,89 +645,44 @@
                         </h3>
 
                         <p class="modal-subtitle">
-                            Choose which patient to impersonate
+                            Choose which patient to impersonate.
                         </p>
                     </div>
-                </div>
 
-                <button type="button" data-ui-click="action-d74329a746f8" class="modal-x"
-                    aria-label="Close patient picker modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                </div>
             </div>
 
             <div class="modal-bd">
-                <div class="patient-picker-search-row">
 
-                    <x-search-bar id="patientPickerSearch" placeholder="Search patient name or email..."
-                        callback="handlePatientPickerSearch" :debounce="200" clear-label="Clear patient search"
-                        class="patient-picker-search" />
+                <div class="modal-form-grid">
+
+                    <div class="voice-search-row">
+
+                        <x-search-bar id="patientPickerSearch" placeholder="Search patient name or email..."
+                            callback="handlePatientPickerSearch" :debounce="200" clear-label="Clear patient search" />
+
+                        <x-voice-input target="#patientPickerSearch" status-id="patientPickerVoiceStatus"
+                            label="Voice search patients" title="Voice search" />
+
+                    </div>
+
+                    <x-pagination-bar id="patientPickerPagebar" info-id="patientPickerPageInfo"
+                        pagination-id="patientPickerPagination" position="top" :show-entries="false" :page-size-value="5"
+                        label="patients" :total="0" :from="0" :to="0" :current-page="1"
+                        :last-page="1" />
+
+                    <div id="patientPickerList" class="modal-form-grid"></div>
 
                 </div>
-                <div id="patientPickerList"></div>
+
             </div>
 
-            <div class="modal-ft">
-                <button type="button" data-ui-click="action-d74329a746f8" class="ui-btn ui-btn-secondary">
-                    Close
-                </button>
-            </div>
         </div>
     </div>
-
-    <div class="redirect-overlay" id="redirectOverlay">
-        <div class="redirect-spinner"></div>
-        <div id="redirectText" data-ui-presentation="presentation-528bc4dca1f0"></div>
-        <div id="redirectSub" data-ui-presentation="presentation-5c01c905323a"></div>
-    </div>
-
 @endsection
 
 @section('scripts')
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
-        const PERM_MODULES = [{
-                module: 'Dashboard',
-                color: '#8B0000'
-            },
-            {
-                module: 'Patients',
-                color: '#d97706'
-            },
-            {
-                module: 'Appointments',
-                color: '#059669'
-            },
-            {
-                module: 'Document Requests',
-                color: '#2563eb'
-            },
-            {
-                module: 'Document Template',
-                color: '#7c3aed'
-            },
-            {
-                module: 'Reports',
-                color: '#7c3aed'
-            },
-            {
-                module: 'Academic Periods',
-                color: '#059669'
-            },
-            {
-                module: 'System Logs',
-                color: '#dc2626'
-            },
-            {
-                module: 'System Settings',
-                color: '#4b5563'
-            },
-        ];
-
-        function getModuleColor(module) {
-            const found = PERM_MODULES.find(m => m.module === module);
-            return found ? found.color : '#4b5563';
-        }
-
         let initialStates = {};
         let savedGrants = {};
         let activeRoleId = null;
@@ -805,17 +690,6 @@
 
         function syncScrollStateForSaveBar() {
             updateFABVisibility();
-        }
-
-        const ROLE_TOAST_DURATION = 7000;
-
-        const flashedViewAs = @json(session('saved_view_as') ?? null);
-        if (flashedViewAs && flashedViewAs.role_id) {
-            savedGrants[String(flashedViewAs.role_id)] = (flashedViewAs.permissions || []).map(p => ({
-                name: p.name,
-                slug: p.slug,
-                color: getModuleColor(p.module)
-            }));
         }
 
         function getPermissionStateKey(
@@ -875,15 +749,11 @@
                             savedGrants[
                                 roleId
                             ].push({
-                                name: input.dataset
-                                    .permName || '',
+                                name: input.dataset.permName || '',
 
-                                slug: input.dataset
-                                    .permSlug || '',
+                                slug: input.dataset.permSlug || '',
 
-                                color: input.dataset
-                                    .color ||
-                                    '#4b5563'
+                                module: input.dataset.module || ''
                             });
                         }
                     });
@@ -900,32 +770,11 @@
 
                 const modules = [...new Set(Array.from(form.querySelectorAll('.perm-toggle')).map(t => t.dataset
                     .module).filter(Boolean))];
+
                 modules.forEach(module => {
-                    const sample =
-                        form.querySelector(
-                            `.perm-toggle[data-module="${module}"]`
-                        );
-
-                    if (!sample) {
-                        return;
-                    }
-
-                    syncGroupMaster(
-                        roleId,
-                        module
-                    );
-
-                    updateGroupCount(
-                        roleId,
-                        module
-                    );
-
-                    updateDots(
-                        roleId,
-                        module,
-                        sample.dataset.color ||
-                        '#4b5563'
-                    );
+                    syncGroupMaster(roleId, module);
+                    updateGroupCount(roleId, module);
+                    updateDots(roleId, module);
                 });
 
                 window.DiscardChanges
@@ -969,12 +818,6 @@
             };
 
         document.addEventListener('DOMContentLoaded', () => {
-            const firstCard = document.querySelector('.role-card');
-            const protectedBanner = document.getElementById('protectedBanner');
-
-            if (firstCard && protectedBanner && firstCard.dataset.isSuper === '1') {
-                protectedBanner.style.display = 'flex';
-            }
 
             initRoleForms();
             keepRoleListLayout();
@@ -1007,32 +850,33 @@
         });
 
         function selectRole(card) {
-            document.querySelectorAll('.role-card').forEach(c => {
-                c.classList.remove('active');
-            });
+            document
+                .querySelectorAll('.role-card')
+                .forEach(roleCard => {
+                    roleCard.classList.remove(
+                        'active'
+                    );
+                });
 
             card.classList.add('active');
 
-            const roleId = card.dataset.roleId;
-            const roleName = card.dataset.roleName || '';
-            const granted = parseInt(card.dataset.granted || '0', 10);
-            const total = parseInt(card.dataset.total || '0', 10);
-            const pct = parseInt(card.dataset.pct || '0', 10);
+            const roleId =
+                card.dataset.roleId;
 
-            document.getElementById('accentRoleName').textContent = roleName;
-            document.getElementById('accentPct').textContent = pct + '%';
-            document.getElementById('accentCount').textContent = granted + ' of ' + total + ' active';
-            document.getElementById('accentBar').style.width = pct + '%';
+            document
+                .querySelectorAll('.role-form')
+                .forEach(form => {
+                    form.hidden = true;
+                });
 
-            const slug = (card.dataset.slug || '').toLowerCase();
-            const isSuper = ['super_admin', 'super-admin', 'superadmin'].includes(slug) || roleName.toLowerCase().includes(
-                'super');
-            const banner = document.getElementById('protectedBanner');
-            if (banner) banner.style.display = isSuper ? 'flex' : 'none';
+            const form =
+                document.getElementById(
+                    'form-role-' + roleId
+                );
 
-            document.querySelectorAll('.role-form').forEach(f => f.style.display = 'none');
-            const form = document.getElementById('form-role-' + roleId);
-            if (form) form.style.display = 'block';
+            if (form) {
+                form.hidden = false;
+            }
 
             const permSearch =
                 document.getElementById(
@@ -1041,34 +885,48 @@
 
             if (permSearch) {
                 permSearch.value = '';
-
-                permSearch.dispatchEvent(
-                    new Event(
-                        'input', {
-                            bubbles: true,
-                        }
-                    )
-                );
             }
 
             filterPerms('');
 
             activeRoleId = roleId;
+
             updateFABVisibility();
         }
 
         function updateViewAsBtn() {
             let totalSavedRoles = 0;
 
-            Object.values(
-                savedGrants
-            ).forEach(grants => {
-                if (
-                    grants.length > 0
-                ) {
-                    totalSavedRoles++;
-                }
-            });
+            document
+                .querySelectorAll(
+                    '.role-card'
+                )
+                .forEach(card => {
+                    const roleId =
+                        card.dataset.roleId;
+
+                    const roleSlug =
+                        card.dataset.slug;
+
+                    if (
+                        !canPreviewRole(
+                            roleSlug
+                        )
+                    ) {
+                        return;
+                    }
+
+                    const permissions =
+                        savedGrants[
+                            roleId
+                        ] || [];
+
+                    if (
+                        permissions.length > 0
+                    ) {
+                        totalSavedRoles++;
+                    }
+                });
 
             const topButton =
                 document.getElementById(
@@ -1145,8 +1003,7 @@
         }
 
         function updateFABVisibility() {
-            window.FloatingSaveBar
-                ?.hideAll();
+            window.FloatingSaveBar?.hideAll();
 
             if (!activeRoleId) {
                 return;
@@ -1154,8 +1011,7 @@
 
             const bar =
                 document.getElementById(
-                    'footer-bar-' +
-                    activeRoleId
+                    'footer-bar-' + activeRoleId
                 );
 
             if (!bar) {
@@ -1171,35 +1027,27 @@
 
             const form =
                 document.getElementById(
-                    'form-role-' +
-                    activeRoleId
+                    'form-role-' + activeRoleId
                 );
 
             if (!form) {
                 return;
             }
 
-            let isDirty = false;
-            let changesCount = 0;
-
             const baseline =
-                initialStates[
-                    activeRoleId
-                ];
+                initialStates[activeRoleId];
 
             if (!baseline) {
                 return;
             }
 
+            let changesCount = 0;
+
             form
-                .querySelectorAll(
-                    '.perm-toggle'
-                )
+                .querySelectorAll('.perm-toggle')
                 .forEach(toggle => {
                     const stateKey =
-                        getPermissionStateKey(
-                            toggle
-                        );
+                        getPermissionStateKey(toggle);
 
                     if (
                         !Object.prototype
@@ -1214,102 +1062,57 @@
 
                     if (
                         toggle.checked !==
-                        baseline[
-                            stateKey
-                        ]
+                        baseline[stateKey]
                     ) {
-                        isDirty = true;
                         changesCount++;
                     }
                 });
 
-            let totalSavedRoles = 0;
-
-            Object
-                .values(savedGrants)
-                .forEach(grants => {
-                    if (
-                        grants.length > 0
-                    ) {
-                        totalSavedRoles++;
-                    }
-                });
-
-            const title =
-                bar.querySelector(
-                    '.fsb-title'
-                );
-
-            const sub =
-                bar.querySelector(
-                    '.fsb-sub'
-                );
-
-            const btnDiscard =
-                bar.querySelector(
-                    '.btn-discard'
-                );
-
-            const btnSave =
-                bar.querySelector(
-                    '.btn-save-float'
-                );
-
-            const btnViewAs =
-                bar.querySelector(
-                    '.fsb-view-as'
-                );
-
-            if (!isDirty) {
-                window.FloatingSaveBar
-                    ?.hide(bar);
-
+            if (changesCount === 0) {
+                window.FloatingSaveBar?.hide(bar);
                 return;
             }
+
+            const title =
+                bar.querySelector('.fsb-title');
+
+            const subtitle =
+                bar.querySelector('.fsb-sub');
 
             if (title) {
                 title.textContent =
                     'Unsaved changes';
             }
 
-            if (sub) {
-                sub.textContent =
-                    changesCount +
-                    ' unsaved change' +
-                    (
-                        changesCount > 1 ?
-                        's' :
-                        ''
-                    );
+            if (subtitle) {
+                subtitle.textContent =
+                    `${changesCount} unsaved change${changesCount > 1 ? 's' : ''}`;
             }
 
-            if (btnDiscard) {
-                btnDiscard.style.display =
-                    'inline-flex';
-            }
+            const viewAsButton =
+                bar.querySelector('.fsb-view-as');
 
-            if (btnSave) {
-                btnSave.style.display =
-                    'inline-flex';
-            }
-
-            if (btnViewAs) {
-                btnViewAs.style.display =
-                    'inline-flex';
-
+            if (viewAsButton) {
                 const badge =
-                    btnViewAs.querySelector(
+                    viewAsButton.querySelector(
                         '.va-count-badge'
                     );
 
                 if (badge) {
+                    const totalSavedRoles =
+                        Object.values(savedGrants)
+                        .filter(
+                            grants =>
+                            grants.length > 0
+                        )
+                        .length;
+
                     badge.textContent =
                         totalSavedRoles;
                 }
             }
 
-            window.FloatingSaveBar
-                ?.show(bar);
+            window.FloatingSaveBar?.show(bar);
         }
 
         function requestDiscardRoleChanges(roleId) {
@@ -1323,50 +1126,6 @@
                 form,
                 () => discardChanges(roleId)
             );
-        }
-
-        function hasUnsavedRoleChanges(
-            roleId
-        ) {
-            const form =
-                document.getElementById(
-                    'form-role-' + roleId
-                );
-
-            const baseline =
-                initialStates[
-                    roleId
-                ];
-
-            if (
-                !form ||
-                !baseline
-            ) {
-                return false;
-            }
-
-            return [
-                ...form.querySelectorAll(
-                    '.perm-toggle'
-                )
-            ].some(toggle => {
-
-                const stateKey =
-                    getPermissionStateKey(
-                        toggle
-                    );
-
-                return (
-                    Object.prototype
-                    .hasOwnProperty
-                    .call(
-                        baseline,
-                        stateKey
-                    ) &&
-                    toggle.checked !==
-                    baseline[stateKey]
-                );
-            });
         }
 
         function discardChanges(roleId) {
@@ -1411,16 +1170,17 @@
                     }
                 });
 
-            const modules = [...new Set(Array.from(form.querySelectorAll('.perm-toggle')).map(t => t.dataset.module).filter(
-                Boolean))];
+            const modules = [...new Set(Array.from(form.querySelectorAll('.perm-toggle')).map(t => t.dataset.module)
+                .filter(
+                    Boolean))];
             modules.forEach(module => {
                 const sample = form.querySelector(`.perm-toggle[data-module="${module}"]`);
                 syncGroupMaster(roleId, module);
                 updateGroupCount(roleId, module);
-                updateDots(roleId, module, sample.dataset.color || '#4b5563');
+                updateDots(roleId, module);
             });
 
-            updateAccentCard(roleId);
+            updateRoleCardStats(roleId);
             window.DiscardChanges?.captureForm(form);
             updateFABVisibility();
         }
@@ -1527,9 +1287,7 @@
                     '.role-form'
                 )
             ].find(
-                form =>
-                form.style.display ===
-                'block'
+                form => !form.hidden
             );
 
             if (
@@ -1629,9 +1387,7 @@
 
             updateDots(
                 roleId,
-                mSlug,
-                sample?.dataset.color ||
-                '#4b5563'
+                mSlug
             );
 
             updateGroupCount(
@@ -1639,7 +1395,7 @@
                 mSlug
             );
 
-            updateAccentCard(
+            updateRoleCardStats(
                 roleId
             );
 
@@ -1651,10 +1407,10 @@
             const roleId = input.dataset.role;
             const mSlug = input.dataset.module;
 
-            updateDots(roleId, mSlug, input.dataset.color);
+            updateDots(roleId, mSlug);
             updateGroupCount(roleId, mSlug);
             syncGroupMaster(roleId, mSlug);
-            updateAccentCard(roleId);
+            updateRoleCardStats(roleId);
             updateFABVisibility();
         }
 
@@ -1669,17 +1425,46 @@
             master.indeterminate = checked > 0 && checked < all.length;
         }
 
-        function updateDots(roleId, mSlug, color) {
-            const cont = document.getElementById(`dots-${roleId}-${mSlug}`);
-            if (!cont) return;
-            const form = document.getElementById('form-role-' + roleId);
+        function updateDots(roleId, moduleSlug) {
+            const container =
+                document.getElementById(
+                    `dots-${roleId}-${moduleSlug}`
+                );
+
+            if (!container) return;
+
+            const form =
+                document.getElementById(
+                    'form-role-' + roleId
+                );
+
             if (!form) return;
-            const toggles = [...form.querySelectorAll(`.perm-toggle[data-module="${mSlug}"]`)];
-            const dots = cont.querySelectorAll('.dot');
-            toggles.forEach((t, i) => {
-                if (!dots[i]) return;
-                dots[i].style.setProperty('--dot-color', color || '#8B0000');
-                dots[i].classList.toggle('is-granted', !!t.checked);
+
+            const toggles = [
+                ...form.querySelectorAll(
+                    `.perm-toggle[data-module="${moduleSlug}"]`
+                )
+            ];
+
+            const dots =
+                container.querySelectorAll(
+                    '.status-dot'
+                );
+
+            toggles.forEach((toggle, index) => {
+                const dot = dots[index];
+
+                if (!dot) return;
+
+                dot.classList.toggle(
+                    'status-granted',
+                    toggle.checked
+                );
+
+                dot.classList.toggle(
+                    'status-denied',
+                    !toggle.checked
+                );
             });
         }
 
@@ -1740,7 +1525,7 @@
 
             const countEl =
                 group.querySelector(
-                    '.group-count'
+                    '.card-subtitle'
                 );
 
             if (countEl) {
@@ -1749,26 +1534,70 @@
             }
         }
 
-        function updateAccentCard(roleId) {
-            const form = document.getElementById('form-role-' + roleId);
-            if (!form) return;
-            const all = [...form.querySelectorAll('.perm-toggle')];
-            const total = all.length;
-            const checked = all.filter(t => t.checked).length;
-            const pct = total > 0 ? Math.round(checked / total * 100) : 0;
+        function updateRoleCardStats(roleId) {
+            const form =
+                document.getElementById(
+                    'form-role-' + roleId
+                );
 
-            document.getElementById('accentPct').textContent = pct + '%';
-            document.getElementById('accentCount').textContent = `${checked} of ${total} active`;
-            document.getElementById('accentBar').style.width = pct + '%';
-
-            const card = document.querySelector(`.role-card[data-role-id="${roleId}"]`);
-            if (card) {
-                card.querySelector('.pct-label').textContent = pct + '%';
-                card.querySelector('.count-label').textContent = `${checked} / ${total} permissions`;
-                card.querySelector('.progress-fill').style.width = pct + '%';
-                card.dataset.granted = checked;
-                card.dataset.pct = pct;
+            if (!form) {
+                return;
             }
+
+            const toggles = [
+                ...form.querySelectorAll(
+                    '.perm-toggle'
+                )
+            ];
+
+            const total =
+                toggles.length;
+
+            const granted =
+                toggles.filter(
+                    toggle => toggle.checked
+                ).length;
+
+            const pct =
+                total > 0 ?
+                Math.round(
+                    granted / total * 100
+                ) :
+                0;
+
+            const card =
+                document.querySelector(
+                    `.role-card[data-role-id="${roleId}"]`
+                );
+
+            if (!card) {
+                return;
+            }
+
+            const countLabel =
+                card.querySelector(
+                    '.count-label'
+                );
+
+            const progress =
+                card.querySelector(
+                    '.progress-bar'
+                );
+
+            if (countLabel) {
+                countLabel.textContent =
+                    `Permissions: ${granted} / ${total}`;
+            }
+
+            if (progress) {
+                progress.value = pct;
+            }
+
+            card.dataset.granted =
+                granted;
+
+            card.dataset.pct =
+                pct;
         }
 
         function ajaxSaveRole(roleId) {
@@ -1776,8 +1605,39 @@
             const btn = document.getElementById('save-btn-' + roleId);
             if (!form || !btn) return;
 
-            const checkedIds = [...form.querySelectorAll('.perm-toggle:checked')].map(t => t.value);
-            const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+            const previousState =
+                initialStates[
+                    roleId
+                ] || {};
+
+            const newlyGrantedCount = [
+                ...form.querySelectorAll(
+                    '.perm-toggle'
+                )
+            ].filter(input => {
+                const key =
+                    getPermissionStateKey(
+                        input
+                    );
+
+                return (
+                    input.checked &&
+                    previousState[key] ===
+                    false
+                );
+            }).length;
+
+            const checkedIds = [
+                ...form.querySelectorAll(
+                    '.perm-toggle:checked'
+                )
+            ].map(toggle => toggle.value);
+
+            const csrf =
+                document.querySelector(
+                    'meta[name="csrf-token"]'
+                )?.content ||
+                '{{ csrf_token() }}';
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
@@ -1820,18 +1680,36 @@
                     window.DiscardChanges?.captureForm(form);
 
                     savedGrants[roleId] = [];
-                    form.querySelectorAll('.perm-toggle:checked').forEach(input => {
-                        savedGrants[roleId].push({
-                            name: input.dataset.permName || '',
-                            slug: input.dataset.permSlug || '',
-                            color: input.dataset.color || '#4b5563'
+
+                    form
+                        .querySelectorAll(
+                            '.perm-toggle:checked'
+                        )
+                        .forEach(input => {
+                            savedGrants[
+                                roleId
+                            ].push({
+                                name: input.dataset.permName || '',
+
+                                slug: input.dataset.permSlug || '',
+
+                                module: input.dataset.module || ''
+                            });
                         });
-                    });
 
                     updateViewAsBtn();
 
                     if (typeof showToast === 'function') {
-                        showToast('Success', `Permissions updated successfully.`, 'success');
+                        const toastMessage =
+                            newlyGrantedCount > 0 ?
+                            `${newlyGrantedCount} newly granted permission${newlyGrantedCount === 1 ? '' : 's'} saved successfully.` :
+                            'Permissions updated successfully.';
+
+                        showToast(
+                            'Permissions saved',
+                            toastMessage,
+                            'success'
+                        );
                     }
                 })
                 .catch(err => {
@@ -1855,9 +1733,7 @@
                     '.role-form'
                 )
             ].find(
-                form =>
-                form.style.display ===
-                'block'
+                form => !form.hidden
             );
 
             if (!form) {
@@ -1912,10 +1788,7 @@
                                 q
                             );
 
-                        row.style.display =
-                            matches ?
-                            '' :
-                            'none';
+                        row.hidden = !matches;
 
                         if (matches) {
                             hasVisibleRow =
@@ -1923,10 +1796,7 @@
                         }
                     });
 
-                    moduleCard.style.display =
-                        hasVisibleRow ?
-                        '' :
-                        'none';
+                    moduleCard.hidden = !hasVisibleRow;
 
                     if (hasVisibleRow) {
                         visibleGroups++;
@@ -2170,7 +2040,11 @@
                     });
             });
 
-        const PROTECTED_ROLE_SLUGS = ['admin', 'patient', 'dentist', 'super_admin', 'super-admin', 'superadmin'];
+        const PROTECTED_ROLE_SLUGS = [
+            'admin',
+            'patient',
+            'dentist'
+        ];
 
         function getFallbackRoleName(roleName, roleSlug) {
             const normalizedName = String(roleName || '').toLowerCase();
@@ -2277,22 +2151,56 @@
                 });
         });
 
-        function ajaxResetDefaults() {
-            if (
-                activeRoleId &&
-                hasUnsavedRoleChanges(
-                    activeRoleId
-                )
-            ) {
-                const form =
-                    document.getElementById(
-                        'form-role-' +
-                        activeRoleId
+        document.addEventListener(
+            'click',
+            event => {
+                const button =
+                    event.target.closest(
+                        '[data-patient-impersonate]'
                     );
 
+                if (!button) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const patientId =
+                    button.dataset
+                    .impersonatePatientId;
+
+                const patientName =
+                    button.dataset
+                    .impersonatePatientName ||
+                    'Patient';
+
+                if (!patientId) {
+                    return;
+                }
+
+                startPatientImpersonation(
+                    patientId,
+                    patientName
+                );
+            }
+        );
+
+        function ajaxResetDefaults() {
+            const activeForm =
+                activeRoleId ?
+                document.getElementById(
+                    'form-role-' + activeRoleId
+                ) :
+                null;
+
+            if (
+                activeForm &&
+                window.DiscardChanges
+                ?.isFormDirty(activeForm)
+            ) {
                 window.DiscardChanges
                     ?.confirmClose(
-                        form,
+                        activeForm,
                         () => {
                             discardChanges(
                                 activeRoleId
@@ -2402,8 +2310,7 @@
                                         '.role-form'
                                     )
                                     .forEach(form => {
-                                        form.style.display =
-                                            'none';
+                                        form.hidden = true;
                                     });
 
                                 if (roleCard) {
@@ -2517,74 +2424,446 @@
             registerCreateRoleValidation
         );
 
+        function humanizePermissionToken(value) {
+            return String(value || '')
+                .trim()
+                .replace(/[._-]+/g, ' ')
+                .replace(
+                    /\b\w/g,
+                    character =>
+                    character.toUpperCase()
+                );
+        }
+
+        function resolvePermissionDisplay(
+            permission
+        ) {
+            const slug =
+                String(
+                    permission.slug || ''
+                ).trim();
+
+            const parts =
+                slug
+                .split('.')
+                .filter(Boolean);
+
+            /*
+             * Example:
+             * inventory.view
+             *
+             * module  -> Inventory
+             * action  -> View
+             */
+            if (parts.length > 1) {
+                const moduleKey =
+                    parts[0];
+
+                const actionKey =
+                    parts
+                    .slice(1)
+                    .join(' ');
+
+                return {
+                    groupKey: moduleKey,
+
+                    groupLabel: humanizePermissionToken(
+                        moduleKey
+                    ),
+
+                    permissionLabel: humanizePermissionToken(
+                        actionKey
+                    ),
+                };
+            }
+
+            /*
+             * If the permission slug does not use
+             * dot notation, fall back to the module
+             * already produced by $groupedPermissions.
+             *
+             * This avoids inventing another module.
+             */
+            return {
+                groupKey: permission.module,
+
+                groupLabel: humanizePermissionToken(
+                    permission.module
+                ),
+
+                permissionLabel: permission.name ||
+                    humanizePermissionToken(
+                        slug
+                    ),
+            };
+        }
+
+        function groupPermissions(
+            permissions
+        ) {
+            const groups =
+                new Map();
+
+            permissions.forEach(permission => {
+                const resolved =
+                    resolvePermissionDisplay(
+                        permission
+                    );
+
+                const key =
+                    resolved.groupKey;
+
+                if (!groups.has(key)) {
+                    groups.set(
+                        key, {
+                            label: resolved.groupLabel,
+
+                            permissions: [],
+                        }
+                    );
+                }
+
+                groups
+                    .get(key)
+                    .permissions
+                    .push({
+                        ...permission,
+
+                        displayName: resolved
+                            .permissionLabel,
+                    });
+            });
+
+            return [
+                ...groups.values()
+            ];
+        }
+
+        function canPreviewRole(
+            roleSlug
+        ) {
+            const slug =
+                String(roleSlug || '')
+                .trim()
+                .toLowerCase();
+
+            return [
+                'patient',
+                'patient_role',
+                'dentist'
+            ].includes(slug);
+        }
+
+        function backToViewAs() {
+            window.stopGlobalVoiceInput?.();
+
+            window.closeModal?.(
+                'patientPickerOverlay'
+            );
+
+            window.setTimeout(
+                () => {
+                    openViewAs();
+                },
+                180
+            );
+        }
+
+        document
+            .getElementById(
+                'patientPickerBackBtn'
+            )
+            ?.addEventListener(
+                'click',
+                backToViewAs
+            );
+
         function openViewAs() {
             isModalActive = true;
             updateFABVisibility();
 
-            const overlay = document.getElementById('vaOverlay');
-            if (overlay && overlay.parentElement !== document.body) {
-                document.body.appendChild(overlay);
+            const overlay =
+                document.getElementById(
+                    'vaOverlay'
+                );
+
+            const list =
+                document.getElementById(
+                    'vaRoleList'
+                );
+
+            if (
+                !overlay ||
+                !list
+            ) {
+                return;
             }
-            const list = document.getElementById('vaRoleList');
-            if (!overlay || !list) return;
-            list.innerHTML = '';
-            let totalPerms = 0,
-                totalRoles = 0;
 
-            document.querySelectorAll('.role-card').forEach(card => {
-                const roleId = card.dataset.roleId;
-                const roleName = card.dataset.roleName || 'Role';
-                const roleSlug = (card.dataset.slug || '').toLowerCase();
-                const granted = parseInt(card.dataset.granted || '0', 10);
-                if (granted <= 0) return;
+            if (
+                overlay.parentElement !==
+                document.body
+            ) {
+                document.body.appendChild(
+                    overlay
+                );
+            }
 
-                const form = document.getElementById(`form-role-${roleId}`);
-                if (!form) return;
+            list.replaceChildren();
 
-                const checkedPerms = [...form.querySelectorAll('.perm-toggle:checked')].map(input => ({
-                    name: input.dataset.permName || 'Permission',
-                    color: input.dataset.color || '#4b5563'
-                }));
-                if (!checkedPerms.length) return;
+            let renderedRoles = 0;
 
-                totalRoles++;
-                totalPerms += checkedPerms.length;
-                const initials = roleName.split(' ').slice(0, 2).map(w => w[0].toUpperCase()).join('');
-                const color = checkedPerms[0]?.color || '#4b5563';
-                const isSuperAdmin = ['super_admin', 'super-admin', 'superadmin'].includes(roleSlug) || roleName
-                    .toLowerCase().includes('super');
+            document
+                .querySelectorAll(
+                    '.role-card'
+                )
+                .forEach(card => {
+                    const roleId =
+                        card.dataset.roleId;
 
-                const tags = checkedPerms.map(p =>
-                    `<span data-ui-style="font-size:10px; font-weight:700; color:${window.uiAttribute(p.color)}; background:${window.uiAttribute(p.color)}15; padding:2px 8px; border-radius:12px;">${p.name}</span>`
-                ).join('');
-                const goBtn = !isSuperAdmin ?
-                    `<button class="va-go-btn va-redirect-btn" data-role-id="${roleId}" data-role-name="${roleName}" data-role-slug="${roleSlug}" data-color="${color}">Go to Dashboard <i class="fa-solid fa-arrow-right"></i></button>` :
-                    '';
+                    const roleName =
+                        card.dataset.roleName ||
+                        'Role';
 
-                list.innerHTML += `
-            <div class="va-role-row ${!isSuperAdmin ? 'va-redirect-btn' : ''}" data-role-id="${roleId}" data-role-name="${roleName}" data-role-slug="${roleSlug}" data-color="${color}" data-ui-style="${window.uiAttribute(isSuperAdmin ? 'cursor:default;' : '')}">
-                <div data-ui-style="width:40px; height:40px; border-radius:10px; background:${window.uiAttribute(color)}; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;">${initials}</div>
-                <div data-ui-presentation="presentation-6253876a649a">
-                    <div data-ui-presentation="presentation-893ad62d3536">${roleName}</div>
-                    <div data-ui-presentation="presentation-9cbaa781f2c4">${tags}</div>
+                    const roleSlug =
+                        String(
+                            card.dataset.slug ||
+                            ''
+                        )
+                        .trim()
+                        .toLowerCase();
+
+                    if (
+                        !canPreviewRole(
+                            roleSlug
+                        )
+                    ) {
+                        return;
+                    }
+
+                    const permissions =
+                        savedGrants[
+                            roleId
+                        ] || [];
+
+                    if (
+                        permissions.length ===
+                        0
+                    ) {
+                        return;
+                    }
+
+                    renderedRoles++;
+
+                    const groups =
+                        groupPermissions(
+                            permissions
+                        );
+
+                    const groupHtml =
+                        groups
+                        .map(group => {
+                            const permissionHtml =
+                                group.permissions
+                                .map(permission => {
+                                    return `
+                                        <span
+                                            class="global-info-pill"
+                                        >
+                                            ${escapeHtml(
+                                                permission
+                                                    .displayName
+                                            )}
+                                        </span>
+                                    `;
+                                })
+                                .join('');
+
+                            return `
+                            <div
+                                class="va-permission-row"
+                            >
+                                <div
+                                    class="va-permission-module"
+                                >
+                                    ${escapeHtml(
+                                        group.label
+                                    )}
+                                </div>
+
+                                <div
+                                    class="global-info-group"
+                                >
+                                    ${permissionHtml}
+                                </div>
+                            </div>
+                        `;
+                        })
+                        .join('');
+
+                    const roleIcon =
+                        roleSlug === 'dentist' ?
+                        'fa-user-doctor' :
+                        'fa-user';
+
+                    list.insertAdjacentHTML(
+                        'beforeend',
+                        `
+        <details
+            class="
+                global-accordion
+                modal-option-panel
+                va-role-card
+            "
+            data-role-id="${escapeHtml(roleId)}"
+            data-role-name="${escapeHtml(roleName)}"
+            data-role-slug="${escapeHtml(roleSlug)}"
+        >
+            <summary
+                class="global-accordion-summary"
+            >
+                <div
+                    class="modal-inline-control"
+                >
+                    <div
+                        class="modal-inline-main"
+                    >
+                        <div
+                            class="modal-section-heading"
+                        >
+                            <div
+                                class="modal-section-icon"
+                            >
+                                <i
+                                    class="
+                                        fa-solid
+                                        ${roleIcon}
+                                    "
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+
+                            <div>
+                                <h4>
+                                    ${escapeHtml(
+                                        roleName
+                                    )}
+                                </h4>
+
+                                <p
+                                    class="
+                                        va-role-permission-count
+                                    "
+                                >
+                                    <span>
+                                        ${permissions.length}
+                                        permission${permissions.length === 1 ? '' : 's'}
+                                    </span>
+
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-chevron-down
+                                            global-accordion-chevron
+                                        "
+                                        aria-hidden="true"
+                                    ></i>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="
+                            ui-btn
+                            ui-btn-primary
+                            ui-btn-sm
+                        "
+                        data-va-preview
+                        data-accordion-ignore
+                    >
+                        <i
+                            class="
+                                fa-solid
+                                fa-eye
+                            "
+                            aria-hidden="true"
+                        ></i>
+
+                        <span>
+                            Preview dashboard
+                        </span>
+                    </button>
                 </div>
-                ${goBtn}
-            </div>`;
-            });
+            </summary>
 
-            list.querySelectorAll('.va-redirect-btn').forEach(el => {
-                el.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const t = this.closest('[data-role-id]') || this;
-                    redirectToRole(t.dataset.roleId, t.dataset.roleName, t.dataset.roleSlug, t.dataset
-                        .color);
+            <div
+                class="global-accordion-body"
+            >
+                <div
+                    class="va-permission-list"
+                >
+                    ${groupHtml}
+                </div>
+            </div>
+        </details>
+    `
+                    );
                 });
-            });
 
-            document.getElementById('vaTotalPerms').textContent = totalPerms;
-            document.getElementById('vaTotalRoles').textContent = totalRoles;
-            window.openModal?.('vaOverlay');
+            if (
+                renderedRoles === 0
+            ) {
+                window.EmptyState
+                    ?.render({
+                        host: list,
+
+                        icon: 'fa-user-shield',
+
+                        title: 'No role permissions to preview',
+
+                        message: 'Save at least one permission for a role before previewing its dashboard access.',
+
+                        className: 'empty-state-compact',
+                    });
+            }
+
+            window.openModal?.(
+                'vaOverlay'
+            );
         }
+
+        document.addEventListener(
+            'click',
+            event => {
+                const preview =
+                    event.target.closest(
+                        '[data-va-preview]'
+                    );
+
+                if (!preview) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const role =
+                    preview.closest(
+                        '[data-role-id]'
+                    );
+
+                if (!role) {
+                    return;
+                }
+
+                redirectToRole(
+                    role.dataset.roleId,
+                    role.dataset.roleName,
+                    role.dataset.roleSlug
+                );
+            }
+        );
 
         function closeViewAs() {
             window.closeModal?.('vaOverlay');
@@ -2596,6 +2875,12 @@
         }
 
         let patientAccountsCache = [];
+
+        let patientPickerFilteredPatients = [];
+
+        let patientPickerCurrentPage = 1;
+
+        const PATIENT_PICKER_PER_PAGE = 5;
 
         function escapeHtml(v) {
             return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -2611,18 +2896,51 @@
             }, 180);
         }
 
-        function redirectToRole(roleId, roleName, roleSlug, color) {
-            if (roleSlug === 'patient' || roleSlug === 'patient_role') {
-                closeViewAs();
-                openPatientPicker(roleName, roleSlug, color);
+        function redirectToRole(
+            roleId,
+            roleName,
+            roleSlug
+        ) {
+            if (
+                !canPreviewRole(
+                    roleSlug
+                )
+            ) {
                 return;
             }
 
-            closeViewAs();
-            triggerRedirect(roleName, roleSlug, null, color, `Loading ${roleName} view for Admin`);
+            if (
+                roleSlug === 'patient' ||
+                roleSlug === 'patient_role'
+            ) {
+                closeViewAs();
+
+                openPatientPicker(
+                    roleName,
+                    roleSlug
+                );
+
+                return;
+            }
+
+            if (
+                roleSlug === 'dentist'
+            ) {
+                closeViewAs();
+
+                triggerRedirect(
+                    roleName,
+                    roleSlug,
+                    null,
+                    'Loading Dentist dashboard for Admin'
+                );
+            }
         }
 
-        function openPatientPicker(roleName, roleSlug, color) {
+        function openPatientPicker(
+            roleName,
+            roleSlug
+        ) {
             isModalActive = true;
             updateFABVisibility();
 
@@ -2632,12 +2950,27 @@
                         'Accept': 'application/json'
                     }
                 })
-                .then(async res => {
-                    const d = await res.json();
-                    if (!res.ok) throw new Error(d.message || 'Error');
-                    patientAccountsCache = Array.isArray(d) ? d : [];
-                    renderPatientPicker(patientAccountsCache);
-                    document.getElementById('patientPickerSearch').value = '';
+                .then(async response => {
+                    const data =
+                        await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.message ||
+                            'Unable to load patients'
+                        );
+                    }
+
+                    patientAccountsCache =
+                        Array.isArray(data) ?
+                        data : [];
+
+                    patientPickerFilteredPatients = [
+                        ...patientAccountsCache
+                    ];
+
+                    patientPickerCurrentPage = 1;
+
                     const patientSearch =
                         document.getElementById(
                             'patientPickerSearch'
@@ -2645,21 +2978,38 @@
 
                     if (patientSearch) {
                         patientSearch.value = '';
+                    }
 
-                        patientSearch.dispatchEvent(
-                            new Event(
-                                'input', {
-                                    bubbles: true,
-                                }
-                            )
+                    renderPatientPicker();
+
+                    const patientOverlay =
+                        document.getElementById(
+                            'patientPickerOverlay'
+                        );
+
+                    if (
+                        patientOverlay &&
+                        patientOverlay.parentElement !==
+                        document.body
+                    ) {
+                        document.body.appendChild(
+                            patientOverlay
                         );
                     }
-                    const patientOverlay = document.getElementById('patientPickerOverlay');
 
-                    if (patientOverlay && patientOverlay.parentElement !== document.body) {
-                        document.body.appendChild(patientOverlay);
-                    }
-                    window.openModal?.('patientPickerOverlay');
+                    window.openModal?.(
+                        'patientPickerOverlay'
+                    );
+
+                    document.dispatchEvent(
+                        new CustomEvent(
+                            'voice:refresh', {
+                                detail: {
+                                    root: patientOverlay,
+                                },
+                            }
+                        )
+                    );
                 })
                 .catch(err => {
                     if (typeof showToast === 'function') {
@@ -2668,136 +3018,505 @@
                 });
         }
 
-        function renderPatientPicker(patients, query = '') {
-            const list = document.getElementById('patientPickerList');
-            if (!list) return;
-            if (!patients.length) {
+        function renderPatientPicker() {
+            const list =
+                document.getElementById(
+                    'patientPickerList'
+                );
+
+            const pagebar =
+                document.getElementById(
+                    'patientPickerPagebar'
+                );
+
+            const pageInfo =
+                document.getElementById(
+                    'patientPickerPageInfo'
+                );
+
+            const pagination =
+                document.getElementById(
+                    'patientPickerPagination'
+                );
+
+            if (!list) {
+                return;
+            }
+
+            const patients =
+                patientPickerFilteredPatients;
+
+            const total =
+                patients.length;
+
+            if (total === 0) {
                 list.innerHTML = `
-        <div
-            id="patientPickerEmptyState"
-            class="empty-state-host">
-        </div>
-    `;
+            <div
+                id="patientPickerEmptyState"
+                class="empty-state-host"
+            ></div>
+        `;
 
                 const host =
                     document.getElementById(
                         'patientPickerEmptyState'
                     );
 
+                const search =
+                    document.getElementById(
+                        'patientPickerSearch'
+                    );
+
+                const query =
+                    String(
+                        search?.value || ''
+                    ).trim();
+
                 if (query) {
                     window.EmptyState
                         ?.renderSearch({
                             host,
-                            input: document.getElementById(
-                                'patientPickerSearch'
-                            ),
+
+                            input: search,
+
                             query,
+
                             message: 'Try a different patient name or email.',
                         });
                 } else {
                     window.EmptyState
                         ?.render({
                             host,
+
                             icon: 'fa-user-group',
+
                             title: 'No patients found',
+
                             message: 'Patient accounts will appear here once available.',
                         });
                 }
 
+                window.renderGlobalPagination
+                    ?.({
+                        currentPage: 1,
+                        lastPage: 1,
+
+                        total: 0,
+                        from: 0,
+                        to: 0,
+
+                        containers: [
+                            pagination,
+                        ],
+
+                        infoElements: [
+                            pageInfo,
+                        ],
+
+                        bars: [
+                            pagebar,
+                        ],
+
+                        itemLabel: 'patients',
+
+                        onPageChange: handlePatientPickerPageChange,
+                    });
+
                 return;
             }
-            list.innerHTML = patients.map(p => {
-                const n = (p.name || 'Patient').replace(/'/g, "\\'");
-                const i = (p.name || 'P').charAt(0).toUpperCase();
-                return `<div class="va-role-row" data-ui-click="action-12b6df6f3044" data-ui-click-arg-0="${window.uiAttribute(p.id)}" data-ui-click-arg-1="${window.uiAttribute(n)}">
-            <div data-ui-presentation="presentation-a5ed3463ae30">${i}</div>
-            <div data-ui-presentation="presentation-6253876a649a">
-                <div data-ui-presentation="presentation-6d0e665a80a2">${escapeHtml(p.name || 'Unnamed')}</div>
-                <div data-ui-presentation="presentation-1deab25c2d59">${escapeHtml(p.email || '')} | ID: ${p.id}</div>
-            </div>
-            <button class="va-go-btn">Impersonate <i class="fa-solid fa-arrow-right"></i></button>
-        </div>`;
-            }).join('');
-        }
 
-        function filterPatientPicker(q) {
-            q = String(q || '')
-                .toLowerCase()
-                .trim();
+            const lastPage =
+                Math.max(
+                    1,
 
-            if (!q) {
-                renderPatientPicker(
-                    patientAccountsCache
+                    Math.ceil(
+                        total /
+                        PATIENT_PICKER_PER_PAGE
+                    )
                 );
-                return;
-            }
 
-            const filtered =
-                patientAccountsCache.filter(
-                    patient => {
-                        const searchable =
-                            `${patient.name || ''} ${patient.email || ''}`
-                            .toLowerCase();
+            patientPickerCurrentPage =
+                Math.min(
+                    Math.max(
+                        1,
+                        patientPickerCurrentPage
+                    ),
 
-                        return searchable.includes(q);
+                    lastPage
+                );
+
+            const startIndex =
+                (
+                    patientPickerCurrentPage -
+                    1
+                ) *
+                PATIENT_PICKER_PER_PAGE;
+
+            const endIndex =
+                Math.min(
+                    startIndex +
+                    PATIENT_PICKER_PER_PAGE,
+
+                    total
+                );
+
+            const pagePatients =
+                patients.slice(
+                    startIndex,
+                    endIndex
+                );
+
+            list.innerHTML =
+                pagePatients
+                .map(patient => {
+                    const id =
+                        String(
+                            patient.id ?? ''
+                        );
+
+                    const name =
+                        patient.name ||
+                        'Unnamed Patient';
+
+                    const email =
+                        patient.email ||
+                        'No email address';
+
+                    const phone =
+                        patient.phone || '';
+
+                    const avatarUrl =
+                        patient.avatar_url ||
+                        patient.profile_photo_url ||
+                        '';
+
+                    const phoneHtml =
+                        phone ?
+                        `
+                            <span
+                                class="
+                                    global-info-subvalue
+                                "
+                            >
+                                ${escapeHtml(
+                                    phone
+                                )}
+                            </span>
+                        ` :
+                        '';
+
+                    return `
+                    <div
+                        class="
+                            global-record-card
+                        "
+                    >
+                        <div
+                            class="
+                                global-record-card-body
+                            "
+                        >
+                            <div
+                                class="
+                                    global-record-profile
+                                "
+                            >
+                                <span
+                                    class="
+                                        patient-avatar
+                                        patient-avatar-md
+                                    "
+                                    data-patient-avatar
+                                    data-patient-name="${escapeHtml(name)}"
+                                    data-patient-url="${escapeHtml(avatarUrl)}"
+                                ></span>
+
+                                <div
+                                    class="
+                                        global-record-identity
+                                    "
+                                >
+                                    <span
+                                        class="
+                                            global-record-name
+                                        "
+                                    >
+                                        ${escapeHtml(
+                                            name
+                                        )}
+                                    </span>
+
+                                    <div
+                                        class="
+                                            global-record-subline
+                                        "
+                                    >
+                                        <span
+                                            class="
+                                                global-info-subvalue
+                                            "
+                                        >
+                                            ${escapeHtml(
+                                                email
+                                            )}
+                                        </span>
+
+                                        <span
+                                            class="
+                                                global-info-subvalue
+                                            "
+                                        >
+                                            ID:
+                                            ${escapeHtml(
+                                                id
+                                            )}
+                                        </span>
+
+                                        ${phoneHtml}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="
+                                    global-record-actions
+                                "
+                            >
+                                <button
+                                    type="button"
+                                    class="
+                                        ui-btn
+                                        ui-btn-primary
+                                        ui-btn-sm"
+                                    data-patient-impersonate
+                                    data-impersonate-patient-id="${escapeHtml(id)}"
+                                    data-impersonate-patient-name="${escapeHtml(name)}"
+                                    aria-label="Impersonate ${escapeHtml(name)}">
+                                    <span>
+                                        Impersonate
+                                    </span>
+
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-arrow-right
+                                        "
+                                        aria-hidden="true"
+                                    ></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                })
+                .join('');
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    'patient-avatar:refresh', {
+                        detail: {
+                            root: list,
+                        },
                     }
-                );
-
-            renderPatientPicker(
-                filtered,
-                q
+                )
             );
-        }
 
-        function startPatientImpersonation(roleName, roleSlug, color, patientId, patientName) {
-            closePatientPicker();
-            triggerRedirect(patientName, roleSlug, patientId, color, 'Loading patient dashboard for Admin');
-        }
+            window.renderGlobalPagination
+                ?.({
+                    currentPage: patientPickerCurrentPage,
 
-        function triggerRedirect(title, slug, patientId, color, sub) {
-            const ol = document.getElementById('redirectOverlay');
-            ol.style.background = `linear-gradient(135deg, ${color}, #1f2937)`;
-            document.getElementById('redirectText').textContent = `Redirecting to ${title}…`;
-            document.getElementById('redirectSub').textContent = sub;
-            ol.classList.add('show');
+                    lastPage,
 
-            const body = {
-                role: slug
-            };
-            if (patientId) body.patient_id = patientId;
+                    total,
 
-            fetch("{{ route('admin.impersonate') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                })
-                .then(async res => {
-                    const d = await res.json();
-                    if (!res.ok) throw new Error(d.message || 'Error');
-                    if (d.redirect) {
-                        window.location.href = d.redirect;
-                        return;
-                    }
-                    throw new Error('No redirect');
-                })
-                .catch(err => {
-                    ol.classList.remove('show');
-                    if (typeof showToast === 'function') {
-                        showToast('Error', err.message || 'Something went wrong', 'error');
-                    }
+                    from: startIndex + 1,
+
+                    to: endIndex,
+
+                    containers: [
+                        pagination,
+                    ],
+
+                    infoElements: [
+                        pageInfo,
+                    ],
+
+                    bars: [
+                        pagebar,
+                    ],
+
+                    itemLabel: 'patients',
+
+                    onPageChange: handlePatientPickerPageChange,
                 });
         }
 
-        function hexDarken(hex) {
-            const r = parseInt(hex.slice(1, 3), 16),
-                g = parseInt(hex.slice(3, 5), 16),
-                b = parseInt(hex.slice(5, 7), 16);
-            return '#' + Math.max(0, r - 45).toString(16).padStart(2, '0') + Math.max(0, g - 45).toString(16).padStart(2,
-                '0') + Math.max(0, b - 45).toString(16).padStart(2, '0');
+        function handlePatientPickerPageChange(
+            page
+        ) {
+            const nextPage =
+                Number(page);
+
+            if (
+                !Number.isInteger(
+                    nextPage
+                ) ||
+                nextPage < 1
+            ) {
+                return;
+            }
+
+            patientPickerCurrentPage =
+                nextPage;
+
+            renderPatientPicker();
+
+            const modalBody =
+                document.querySelector(
+                    '#patientPickerOverlay .modal-bd'
+                );
+
+            modalBody?.scrollTo({
+                top: 0,
+                behavior: 'smooth',
+            });
+        }
+
+        function filterPatientPicker(
+            value
+        ) {
+            const query =
+                String(
+                    value || ''
+                )
+                .trim()
+                .toLowerCase();
+
+            patientPickerCurrentPage = 1;
+
+            if (!query) {
+                patientPickerFilteredPatients = [
+                    ...patientAccountsCache
+                ];
+
+                renderPatientPicker();
+
+                return;
+            }
+
+            patientPickerFilteredPatients =
+                patientAccountsCache
+                .filter(patient => {
+                    const searchable = [
+                            patient.name,
+                            patient.email,
+                            patient.phone,
+                            patient.id,
+                        ]
+                        .filter(value =>
+                            value !== null &&
+                            value !== undefined
+                        )
+                        .join(' ')
+                        .toLowerCase();
+
+                    return searchable.includes(
+                        query
+                    );
+                });
+
+            renderPatientPicker();
+        }
+
+        function startPatientImpersonation(
+            patientId,
+            patientName
+        ) {
+            closePatientPicker();
+
+            triggerRedirect(
+                patientName,
+                'patient',
+                patientId,
+                'Loading patient dashboard for Admin'
+            );
+        }
+
+        function triggerRedirect(
+            title,
+            slug,
+            patientId,
+            sub
+        ) {
+            window.GlobalLoading
+                ?.show({
+                    title: `Redirecting to ${title}…`,
+
+                    message: sub,
+                });
+
+            const body = {
+                role: slug,
+            };
+
+            if (patientId) {
+                body.patient_id =
+                    patientId;
+            }
+
+            fetch(
+                    "{{ route('admin.impersonate') }}", {
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type': 'application/json',
+
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+
+                            'Accept': 'application/json',
+                        },
+
+                        body: JSON.stringify(
+                            body
+                        ),
+                    }
+                )
+                .then(async response => {
+                    const data =
+                        await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.message ||
+                            'Unable to switch dashboard.'
+                        );
+                    }
+
+                    if (!data.redirect) {
+                        throw new Error(
+                            'No redirect URL was returned.'
+                        );
+                    }
+
+                    window.location.href =
+                        data.redirect;
+                })
+                .catch(error => {
+                    window.GlobalLoading
+                        ?.hide();
+
+                    if (
+                        typeof showToast ===
+                        'function'
+                    ) {
+                        showToast(
+                            'Error',
+                            error.message ||
+                            'Something went wrong.',
+                            'error'
+                        );
+                    }
+                });
         }
     </script>
 @endsection

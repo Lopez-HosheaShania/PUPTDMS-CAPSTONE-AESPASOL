@@ -252,8 +252,6 @@
     border-bottom: 1px solid var(--border);
     font-size: .76rem;
     vertical-align: middle;
-    transition:
-        background-color .8s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -961,7 +959,8 @@
     white-space: normal;
 }
 
-.table-cell-center {
+.data-table th.table-cell-center,
+.data-table td.table-cell-center {
     text-align: center;
 }
 

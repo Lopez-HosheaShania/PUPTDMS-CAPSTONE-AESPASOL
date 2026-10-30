@@ -17,7 +17,6 @@
 
         <div class="discard-modal-body">
             <div class="discard-modal-warning">
-                <i class="fa-solid fa-circle-info"></i>
                 <p id="globalDiscardMessage">
                     Closing this modal will remove the draft you entered. Do you want to discard your changes?
                 </p>
@@ -30,12 +29,10 @@
             </button>
 
             <button type="button" class="discard-modal-btn discard-modal-btn-save" data-discard-save hidden>
-                <i class="fa-solid fa-floppy-disk"></i>
                 Save Draft
             </button>
 
             <button type="button" class="discard-modal-btn discard-modal-btn-discard" data-discard-confirm>
-                <i class="fa-solid fa-trash"></i>
                 Discard
             </button>
         </div>
@@ -76,7 +73,6 @@
                 return;
             }
 
-            // Firefox skips entries created before a real user gesture when using browser Back.
             if (fromUserInteraction !== true || pendingBrowserBackForm) return;
             if (navigator.userActivation && !navigator.userActivation.isActive) return;
             browserHistoryGuardActive = true;
@@ -109,7 +105,6 @@
                 if (!getDiscardModal()?.classList.contains('open')) {
                     openDiscardModal(form, () => {
                         browserNavigationAllowed = true;
-                        // Skip our base entry only if the browser actually traverses it.
                         window.history.back();
                     });
                 }
@@ -127,7 +122,6 @@
                 return;
             }
 
-            // Reuse the existing entry; pushing a replacement here can be skipped by Firefox.
             pendingBrowserBackForm = form;
             window.history.forward();
         });
@@ -143,7 +137,6 @@
         window.addEventListener('hashchange', () => {
             if (!browserHistoryGuardActive || browserNavigationAllowed) return;
 
-            // Anchor navigation stays on this page and must not open the discard dialog.
             window.history.replaceState({
                 ...window.history.state,
                 [browserHistoryGuardKey]: 'guard',

@@ -208,9 +208,12 @@
 }
 
 .progress-bar {
+    width: 100%;
     height: 4px;
+    display: block;
+    border: 0;
     border-radius: 2px;
-    background: var(--gray-100);
+    background: var(--border);
     margin-top: 10px;
     overflow: hidden;
 }
@@ -224,28 +227,53 @@
     transition: width .3s ease;
 }
 
-.btn-collapse {
-    min-height: 42px;
-    padding: 0 1rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: .5rem;
-    border: 1px solid var(--gray-200);
-    border-radius: 999px;
-    background: var(--color-white);
-    color: var(--gray-600);
-    font-size: .82rem;
-    font-weight: 900;
-    line-height: 1;
-    white-space: nowrap;
-    cursor: pointer;
-    transition:
-        transform .18s ease,
-        background-color .18s ease,
-        border-color .18s ease,
-        color .18s ease,
-        box-shadow .18s ease;
+progress.progress-bar {
+    width: 100%;
+    display: block;
+
+    padding: 0;
+    border: 0;
+
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+progress.progress-bar::-webkit-progress-bar {
+    background: var(--border);
+    border-radius: inherit;
+}
+
+progress.progress-bar::-webkit-progress-value {
+    background:
+        var(--progress-fill-color,
+            var(--crimson));
+
+    border-radius: inherit;
+}
+
+progress.progress-bar::-moz-progress-bar {
+    background:
+        var(--progress-fill-color,
+            var(--crimson));
+
+    border-radius: inherit;
+}
+
+.progress-bar.role-patient,
+.progress-bar.role-student {
+    --progress-fill-color: var(--blue-700);
+}
+
+.progress-bar.role-admin {
+    --progress-fill-color: var(--crimson);
+}
+
+.progress-bar.role-dentist {
+    --progress-fill-color: var(--emerald-800);
+}
+
+.progress-bar.role-none {
+    --progress-fill-color: var(--slate-600);
 }
 
 .btn-reset {
@@ -741,7 +769,7 @@
 
 .ui-muted-text {
     color: var(--text-3);
-    font-size: .82rem;
+    font-size: .76rem;
     font-weight: 400;
     line-height: 1.3;
 }
@@ -1852,13 +1880,6 @@
     -webkit-backdrop-filter: blur(12px);
 }
 
-[data-theme="dark"] .btn-collapse,
-.dark .btn-collapse {
-    background: var(--surface);
-    border-color: var(--border);
-    color: var(--text-2);
-}
-
 [data-theme="dark"] .btn-reset,
 .dark .btn-reset {
     background: var(--alpha-white-8);
@@ -2769,6 +2790,88 @@
     overflow-wrap: anywhere;
 }
 
+.global-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 130000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 1.5rem;
+
+    background:
+        radial-gradient(circle at top,
+            color-mix(in srgb, var(--crimson) 10%, transparent),
+            transparent 34%),
+        color-mix(in srgb, var(--drawer-overlay-bg) 82%, white 18%);
+
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity .2s ease,
+        visibility .2s ease;
+}
+
+.global-loading-overlay.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.global-loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+
+    min-width: min(92vw, 360px);
+    max-width: 380px;
+
+    padding: 2rem 2rem 1.75rem;
+    border-radius: 24px;
+
+    background:
+        linear-gradient(145deg,
+            color-mix(in srgb, var(--card) 94%, var(--crimson-light) 6%),
+            color-mix(in srgb, var(--surface) 96%, white 4%));
+
+    border: 1px solid color-mix(in srgb, var(--crimson) 14%, var(--border));
+    box-shadow:
+        0 24px 60px color-mix(in srgb, black 16%, transparent),
+        inset 0 1px 0 color-mix(in srgb, white 72%, transparent);
+
+    text-align: center;
+}
+
+.global-loading-logo {
+    width: 84px;
+    height: 84px;
+    object-fit: contain;
+    animation: global-loading-pulse 1.5s ease-in-out infinite;
+}
+
+.global-loading-title {
+    color: var(--page-text);
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.global-loading-message {
+    color: var(--text-2);
+    font-size: .92rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
 [data-show-more-panel][hidden] {
     display: none !important;
 }
@@ -3299,7 +3402,6 @@
         justify-content: center;
     }
 
-    .btn-collapse,
     .btn-reset {
         width: 100%;
         min-height: 42px;

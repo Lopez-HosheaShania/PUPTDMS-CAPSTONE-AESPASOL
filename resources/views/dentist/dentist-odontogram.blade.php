@@ -92,9 +92,17 @@
 
         $manualTimeIn = old('procedure_started_at', $procedure?->procedure_started_at?->format('H:i') ?? '');
         $savedDurationSeconds = $procedure?->procedure_duration_seconds;
-        $manualDuration = old('procedure_duration_hms', $savedDurationSeconds !== null
-            ? sprintf('%02d:%02d:%02d', intdiv($savedDurationSeconds, 3600), intdiv($savedDurationSeconds % 3600, 60), $savedDurationSeconds % 60)
-            : '');
+        $manualDuration = old(
+            'procedure_duration_hms',
+            $savedDurationSeconds !== null
+                ? sprintf(
+                    '%02d:%02d:%02d',
+                    intdiv($savedDurationSeconds, 3600),
+                    intdiv($savedDurationSeconds % 3600, 60),
+                    $savedDurationSeconds % 60,
+                )
+                : '',
+        );
         $discardProcedureTitle = $existingAppointmentMode
             ? 'Discard appointment entry?'
             : ($savedVisitEditMode
@@ -251,10 +259,9 @@
                                                     {{ $label }} <span class="required-mark">*</span>
                                                 </label>
                                                 <input type="text" id="{{ $field }}" name="{{ $field }}"
-                                                    class="form-input-custom js-flatpickr-time" value="{{ $value }}" required readonly
-                                                    placeholder="HH:MM" autocomplete="off"
-                                                    data-time-minute-increment="1"
-                                                    data-field-label="{{ $label }}"
+                                                    class="form-input-custom js-flatpickr-time" value="{{ $value }}"
+                                                    required readonly placeholder="HH:MM" autocomplete="off"
+                                                    data-time-minute-increment="1" data-field-label="{{ $label }}"
                                                     data-required-message="Please enter {{ $label }}."
                                                     aria-describedby="{{ $field }}_error">
                                                 <div id="{{ $field }}_error" class="global-field-error"
@@ -262,10 +269,12 @@
                                             </div>
                                         @endforeach
                                         <div class="odontogram-procedure-duration-copy" data-global-field>
-                                            <label for="procedureDurationInput" class="odontogram-appointment-meta-label">Procedure Duration <span class="required-mark">*</span></label>
-                                            <input type="text" id="procedureDurationInput" name="procedure_duration_hms" class="form-input-custom"
-                                                value="{{ $manualDuration }}" placeholder="HH:MM:SS" required
-                                                inputmode="numeric" autocomplete="off"
+                                            <label for="procedureDurationInput"
+                                                class="odontogram-appointment-meta-label">Procedure Duration <span
+                                                    class="required-mark">*</span></label>
+                                            <input type="text" id="procedureDurationInput" name="procedure_duration_hms"
+                                                class="form-input-custom" value="{{ $manualDuration }}"
+                                                placeholder="HH:MM:SS" required inputmode="numeric" autocomplete="off"
                                                 pattern="[0-9]{2}:[0-5][0-9]:[0-5][0-9]"
                                                 data-field-label="Procedure Duration"
                                                 data-required-message="Please enter Procedure Duration."
@@ -499,6 +508,8 @@
                                     <div class="global-form-group">
                                         <label for="oralExaminationNotes" class="global-form-label">
                                             Oral Examination
+                                            <span class="field-optional">
+                                                (Optional) </span>
                                         </label>
 
                                         <textarea id="oralExaminationNotes" rows="4" class="form-input-custom global-form-textarea"
@@ -523,6 +534,8 @@
                                     <div class="global-form-group">
                                         <label for="diagnosisNotes" class="global-form-label">
                                             Diagnosis
+                                            <span class="field-optional">
+                                                (Optional) </span>
                                         </label>
 
                                         <select id="diagnosisNotes" class="form-select-custom js-custom-select"
@@ -878,9 +891,9 @@
                         <span>
                             {{ $savedVisitEditMode
                                 ? 'Are you sure you want to cancel this edit? Any unsaved changes in this saved visit may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        lost.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    lost.'
                                 : 'Are you sure you want to cancel this procedure? Any unsaved progress in this session may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        lost.' }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    lost.' }}
                         </span>
                     </div>
                 </div>
@@ -3988,12 +4001,14 @@
                 const digits = input.value.replace(/\D/g, '').slice(-6);
                 const padded = digits.padStart(6, '0');
                 const clearedByDeletion = event?.inputType?.startsWith('delete') && !/[1-9]/.test(digits);
-                input.value = digits && !clearedByDeletion
-                    ? `${padded.slice(0, 2)}:${padded.slice(2, 4)}:${padded.slice(4, 6)}` : '';
+                input.value = digits && !clearedByDeletion ?
+                    `${padded.slice(0, 2)}:${padded.slice(2, 4)}:${padded.slice(4, 6)}` : '';
                 input.setSelectionRange?.(input.value.length, input.value.length);
             }
 
-            function validateProcedureTimingFields({ focus = true } = {}) {
+            function validateProcedureTimingFields({
+                focus = true
+            } = {}) {
                 let firstInvalid = null;
                 [procedureTimeInInput, procedureDurationInput].forEach(field => {
                     const valid = window.validateFormInputField?.(field) ?? field.checkValidity();
@@ -4005,12 +4020,14 @@
                 }
                 if (!firstInvalid && parseProcedureDurationSeconds() === null) {
                     firstInvalid = procedureDurationInput;
-                    window.showFormInputValidationMessage?.(firstInvalid, 'Enter a valid duration in HH:MM:SS format, e.g. 00:30:00.');
+                    window.showFormInputValidationMessage?.(firstInvalid,
+                        'Enter a valid duration in HH:MM:SS format, e.g. 00:30:00.');
                 }
                 [procedureTimeInInput, procedureDurationInput].forEach(field => {
                     field._flatpickr?.altInput?.classList.toggle('is-invalid', field === firstInvalid);
                 });
-                if (firstInvalid && focus) window.focusGlobalInvalidField?.(firstInvalid._flatpickr?.altInput || firstInvalid);
+                if (firstInvalid && focus) window.focusGlobalInvalidField?.(firstInvalid._flatpickr?.altInput ||
+                    firstInvalid);
                 return !firstInvalid;
             }
 

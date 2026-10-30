@@ -21,11 +21,32 @@ function closeCustomSelects(except = null) {
 }
 
 export function syncCustomSelect(wrapper) {
-    const select = wrapper.querySelector('select');
-    const valueText = wrapper.querySelector('[data-custom-select-value]');
-    const button = wrapper.querySelector('.custom-select-button');
+    if (
+        !wrapper ||
+        typeof wrapper.querySelector !== 'function'
+    ) {
+        return;
+    }
 
-    if (!select || !valueText || !button) return;
+    const select = wrapper.querySelector('select');
+
+    const valueText =
+        wrapper.querySelector(
+            '[data-custom-select-value]'
+        );
+
+    const button =
+        wrapper.querySelector(
+            '.custom-select-button'
+        );
+
+    if (
+        !select ||
+        !valueText ||
+        !button
+    ) {
+        return;
+    }
 
     const selectedOption = select.options[select.selectedIndex];
 
