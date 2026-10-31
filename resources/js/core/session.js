@@ -504,6 +504,35 @@ function initSessionTimeoutModal() {
             }
         };
 
+    window.handleInvalidSessionResponse =
+        async function (
+            payload = {},
+            status = 401
+        ) {
+            if (
+                status !== 401 &&
+                status !== 419 &&
+                payload?.expired !== true
+            ) {
+                return false;
+            }
+
+            const invalidState =
+                await resolveInvalidSession(
+                    payload
+                );
+
+            if (!invalidState) {
+                return false;
+            }
+
+            renderState(
+                invalidState
+            );
+
+            return true;
+        };
+
     const writeSharedActivitySignal =
         () => {
             if (!sharedActivityKey) {

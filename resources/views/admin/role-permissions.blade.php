@@ -627,58 +627,6 @@
 
         </div>
     </div>
-
-    <div id="patientPickerOverlay" class="ui-modal" aria-hidden="true">
-        <div class="ui-modal-card modal-lg">
-
-            <div class="modal-hd">
-                <div class="modal-heading">
-
-                    <button type="button" id="patientPickerBackBtn" class="ui-action-btn ui-action-view"
-                        aria-label="Back to View As Role">
-                        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                    </button>
-
-                    <div class="modal-copy">
-                        <h3 class="modal-title">
-                            Select Patient Account
-                        </h3>
-
-                        <p class="modal-subtitle">
-                            Choose which patient to impersonate.
-                        </p>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="modal-bd">
-
-                <div class="modal-form-grid">
-
-                    <div class="voice-search-row">
-
-                        <x-search-bar id="patientPickerSearch" placeholder="Search patient name or email..."
-                            callback="handlePatientPickerSearch" :debounce="200" clear-label="Clear patient search" />
-
-                        <x-voice-input target="#patientPickerSearch" status-id="patientPickerVoiceStatus"
-                            label="Voice search patients" title="Voice search" />
-
-                    </div>
-
-                    <x-pagination-bar id="patientPickerPagebar" info-id="patientPickerPageInfo"
-                        pagination-id="patientPickerPagination" position="top" :show-entries="false" :page-size-value="5"
-                        label="patients" :total="0" :from="0" :to="0" :current-page="1"
-                        :last-page="1" />
-
-                    <div id="patientPickerList" class="modal-form-grid"></div>
-
-                </div>
-
-            </div>
-
-        </div>
-    </div>
 @endsection
 
 @section('scripts')
@@ -806,13 +754,6 @@
         window.handleRolePermissionSearch =
             function(value) {
                 filterPerms(
-                    String(value || '')
-                );
-            };
-
-        window.handlePatientPickerSearch =
-            function(value) {
-                filterPatientPicker(
                     String(value || '')
                 );
             };
@@ -2177,11 +2118,6 @@
                 if (!patientId) {
                     return;
                 }
-
-                startPatientImpersonation(
-                    patientId,
-                    patientName
-                );
             }
         );
 
@@ -2554,30 +2490,6 @@
             ].includes(slug);
         }
 
-        function backToViewAs() {
-            window.stopGlobalVoiceInput?.();
-
-            window.closeModal?.(
-                'patientPickerOverlay'
-            );
-
-            window.setTimeout(
-                () => {
-                    openViewAs();
-                },
-                180
-            );
-        }
-
-        document
-            .getElementById(
-                'patientPickerBackBtn'
-            )
-            ?.addEventListener(
-                'click',
-                backToViewAs
-            );
-
         function openViewAs() {
             isModalActive = true;
             updateFABVisibility();
@@ -2834,6 +2746,51 @@
         }
 
         document.addEventListener(
+            'DOMContentLoaded',
+            () => {
+                const params =
+                    new URLSearchParams(
+                        window.location.search
+                    );
+
+                if (
+                    params.get(
+                        'open_view_as'
+                    ) !== '1'
+                ) {
+                    return;
+                }
+
+                window.requestAnimationFrame(
+                    () => {
+                        openViewAs();
+                    }
+                );
+
+                params.delete(
+                    'open_view_as'
+                );
+
+                const query =
+                    params.toString();
+
+                const cleanUrl =
+                    window.location.pathname +
+                    (
+                        query ?
+                        `?${query}` :
+                        ''
+                    ) +
+                    window.location.hash;
+
+                window.history.replaceState({},
+                    document.title,
+                    cleanUrl
+                );
+            }
+        );
+
+        document.addEventListener(
             'click',
             event => {
                 const preview =
@@ -2874,26 +2831,28 @@
             }, 180);
         }
 
-        let patientAccountsCache = [];
-
-        let patientPickerFilteredPatients = [];
-
-        let patientPickerCurrentPage = 1;
-
-        const PATIENT_PICKER_PER_PAGE = 5;
-
-        function escapeHtml(v) {
-            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function closePatientPicker() {
-            window.closeModal?.('patientPickerOverlay');
-
-            window.setTimeout(() => {
-                isModalActive = false;
-                updateFABVisibility();
-            }, 180);
+        function escapeHtml(value) {
+            return String(value)
+                .replace(
+                    /&/g,
+                    '&amp;'
+                )
+                .replace(
+                    /</g,
+                    '&lt;'
+                )
+                .replace(
+                    />/g,
+                    '&gt;'
+                )
+                .replace(
+                    /"/g,
+                    '&quot;'
+                )
+                .replace(
+                    /'/g,
+                    '&#039;'
+                );
         }
 
         function redirectToRole(
@@ -2901,571 +2860,53 @@
             roleName,
             roleSlug
         ) {
-            if (
-                !canPreviewRole(
-                    roleSlug
-                )
-            ) {
-                return;
-            }
-
-            if (
-                roleSlug === 'patient' ||
-                roleSlug === 'patient_role'
-            ) {
-                closeViewAs();
-
-                openPatientPicker(
-                    roleName,
-                    roleSlug
-                );
-
-                return;
-            }
-
-            if (
-                roleSlug === 'dentist'
-            ) {
-                closeViewAs();
-
-                triggerRedirect(
-                    roleName,
-                    roleSlug,
-                    null,
-                    'Loading Dentist dashboard for Admin'
-                );
-            }
-        }
-
-        function openPatientPicker(
-            roleName,
-            roleSlug
-        ) {
-            isModalActive = true;
-            updateFABVisibility();
-
-            fetch("{{ route('admin.patients.list') }}", {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(async response => {
-                    const data =
-                        await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(
-                            data.message ||
-                            'Unable to load patients'
-                        );
-                    }
-
-                    patientAccountsCache =
-                        Array.isArray(data) ?
-                        data : [];
-
-                    patientPickerFilteredPatients = [
-                        ...patientAccountsCache
-                    ];
-
-                    patientPickerCurrentPage = 1;
-
-                    const patientSearch =
-                        document.getElementById(
-                            'patientPickerSearch'
-                        );
-
-                    if (patientSearch) {
-                        patientSearch.value = '';
-                    }
-
-                    renderPatientPicker();
-
-                    const patientOverlay =
-                        document.getElementById(
-                            'patientPickerOverlay'
-                        );
-
-                    if (
-                        patientOverlay &&
-                        patientOverlay.parentElement !==
-                        document.body
-                    ) {
-                        document.body.appendChild(
-                            patientOverlay
-                        );
-                    }
-
-                    window.openModal?.(
-                        'patientPickerOverlay'
-                    );
-
-                    document.dispatchEvent(
-                        new CustomEvent(
-                            'voice:refresh', {
-                                detail: {
-                                    root: patientOverlay,
-                                },
-                            }
-                        )
-                    );
-                })
-                .catch(err => {
-                    if (typeof showToast === 'function') {
-                        showToast('Error', err.message || 'Unable to load patients', 'error');
-                    }
-                });
-        }
-
-        function renderPatientPicker() {
-            const list =
-                document.getElementById(
-                    'patientPickerList'
-                );
-
-            const pagebar =
-                document.getElementById(
-                    'patientPickerPagebar'
-                );
-
-            const pageInfo =
-                document.getElementById(
-                    'patientPickerPageInfo'
-                );
-
-            const pagination =
-                document.getElementById(
-                    'patientPickerPagination'
-                );
-
-            if (!list) {
-                return;
-            }
-
-            const patients =
-                patientPickerFilteredPatients;
-
-            const total =
-                patients.length;
-
-            if (total === 0) {
-                list.innerHTML = `
-            <div
-                id="patientPickerEmptyState"
-                class="empty-state-host"
-            ></div>
-        `;
-
-                const host =
-                    document.getElementById(
-                        'patientPickerEmptyState'
-                    );
-
-                const search =
-                    document.getElementById(
-                        'patientPickerSearch'
-                    );
-
-                const query =
-                    String(
-                        search?.value || ''
-                    ).trim();
-
-                if (query) {
-                    window.EmptyState
-                        ?.renderSearch({
-                            host,
-
-                            input: search,
-
-                            query,
-
-                            message: 'Try a different patient name or email.',
-                        });
-                } else {
-                    window.EmptyState
-                        ?.render({
-                            host,
-
-                            icon: 'fa-user-group',
-
-                            title: 'No patients found',
-
-                            message: 'Patient accounts will appear here once available.',
-                        });
-                }
-
-                window.renderGlobalPagination
-                    ?.({
-                        currentPage: 1,
-                        lastPage: 1,
-
-                        total: 0,
-                        from: 0,
-                        to: 0,
-
-                        containers: [
-                            pagination,
-                        ],
-
-                        infoElements: [
-                            pageInfo,
-                        ],
-
-                        bars: [
-                            pagebar,
-                        ],
-
-                        itemLabel: 'patients',
-
-                        onPageChange: handlePatientPickerPageChange,
-                    });
-
-                return;
-            }
-
-            const lastPage =
-                Math.max(
-                    1,
-
-                    Math.ceil(
-                        total /
-                        PATIENT_PICKER_PER_PAGE
-                    )
-                );
-
-            patientPickerCurrentPage =
-                Math.min(
-                    Math.max(
-                        1,
-                        patientPickerCurrentPage
-                    ),
-
-                    lastPage
-                );
-
-            const startIndex =
-                (
-                    patientPickerCurrentPage -
-                    1
-                ) *
-                PATIENT_PICKER_PER_PAGE;
-
-            const endIndex =
-                Math.min(
-                    startIndex +
-                    PATIENT_PICKER_PER_PAGE,
-
-                    total
-                );
-
-            const pagePatients =
-                patients.slice(
-                    startIndex,
-                    endIndex
-                );
-
-            list.innerHTML =
-                pagePatients
-                .map(patient => {
-                    const id =
-                        String(
-                            patient.id ?? ''
-                        );
-
-                    const name =
-                        patient.name ||
-                        'Unnamed Patient';
-
-                    const email =
-                        patient.email ||
-                        'No email address';
-
-                    const phone =
-                        patient.phone || '';
-
-                    const avatarUrl =
-                        patient.avatar_url ||
-                        patient.profile_photo_url ||
-                        '';
-
-                    const phoneHtml =
-                        phone ?
-                        `
-                            <span
-                                class="
-                                    global-info-subvalue
-                                "
-                            >
-                                ${escapeHtml(
-                                    phone
-                                )}
-                            </span>
-                        ` :
-                        '';
-
-                    return `
-                    <div
-                        class="
-                            global-record-card
-                        "
-                    >
-                        <div
-                            class="
-                                global-record-card-body
-                            "
-                        >
-                            <div
-                                class="
-                                    global-record-profile
-                                "
-                            >
-                                <span
-                                    class="
-                                        patient-avatar
-                                        patient-avatar-md
-                                    "
-                                    data-patient-avatar
-                                    data-patient-name="${escapeHtml(name)}"
-                                    data-patient-url="${escapeHtml(avatarUrl)}"
-                                ></span>
-
-                                <div
-                                    class="
-                                        global-record-identity
-                                    "
-                                >
-                                    <span
-                                        class="
-                                            global-record-name
-                                        "
-                                    >
-                                        ${escapeHtml(
-                                            name
-                                        )}
-                                    </span>
-
-                                    <div
-                                        class="
-                                            global-record-subline
-                                        "
-                                    >
-                                        <span
-                                            class="
-                                                global-info-subvalue
-                                            "
-                                        >
-                                            ${escapeHtml(
-                                                email
-                                            )}
-                                        </span>
-
-                                        <span
-                                            class="
-                                                global-info-subvalue
-                                            "
-                                        >
-                                            ID:
-                                            ${escapeHtml(
-                                                id
-                                            )}
-                                        </span>
-
-                                        ${phoneHtml}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="
-                                    global-record-actions
-                                "
-                            >
-                                <button
-                                    type="button"
-                                    class="
-                                        ui-btn
-                                        ui-btn-primary
-                                        ui-btn-sm"
-                                    data-patient-impersonate
-                                    data-impersonate-patient-id="${escapeHtml(id)}"
-                                    data-impersonate-patient-name="${escapeHtml(name)}"
-                                    aria-label="Impersonate ${escapeHtml(name)}">
-                                    <span>
-                                        Impersonate
-                                    </span>
-
-                                    <i
-                                        class="
-                                            fa-solid
-                                            fa-arrow-right
-                                        "
-                                        aria-hidden="true"
-                                    ></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                })
-                .join('');
-
-            document.dispatchEvent(
-                new CustomEvent(
-                    'patient-avatar:refresh', {
-                        detail: {
-                            root: list,
-                        },
-                    }
-                )
-            );
-
-            window.renderGlobalPagination
-                ?.({
-                    currentPage: patientPickerCurrentPage,
-
-                    lastPage,
-
-                    total,
-
-                    from: startIndex + 1,
-
-                    to: endIndex,
-
-                    containers: [
-                        pagination,
-                    ],
-
-                    infoElements: [
-                        pageInfo,
-                    ],
-
-                    bars: [
-                        pagebar,
-                    ],
-
-                    itemLabel: 'patients',
-
-                    onPageChange: handlePatientPickerPageChange,
-                });
-        }
-
-        function handlePatientPickerPageChange(
-            page
-        ) {
-            const nextPage =
-                Number(page);
-
-            if (
-                !Number.isInteger(
-                    nextPage
-                ) ||
-                nextPage < 1
-            ) {
-                return;
-            }
-
-            patientPickerCurrentPage =
-                nextPage;
-
-            renderPatientPicker();
-
-            const modalBody =
-                document.querySelector(
-                    '#patientPickerOverlay .modal-bd'
-                );
-
-            modalBody?.scrollTo({
-                top: 0,
-                behavior: 'smooth',
-            });
-        }
-
-        function filterPatientPicker(
-            value
-        ) {
-            const query =
+            let normalizedRole =
                 String(
-                    value || ''
+                    roleSlug || ''
                 )
                 .trim()
                 .toLowerCase();
 
-            patientPickerCurrentPage = 1;
+            if (
+                normalizedRole ===
+                'patient_role'
+            ) {
+                normalizedRole =
+                    'patient';
+            }
 
-            if (!query) {
-                patientPickerFilteredPatients = [
-                    ...patientAccountsCache
-                ];
-
-                renderPatientPicker();
-
+            if (
+                ![
+                    'patient',
+                    'dentist'
+                ].includes(
+                    normalizedRole
+                )
+            ) {
                 return;
             }
 
-            patientPickerFilteredPatients =
-                patientAccountsCache
-                .filter(patient => {
-                    const searchable = [
-                            patient.name,
-                            patient.email,
-                            patient.phone,
-                            patient.id,
-                        ]
-                        .filter(value =>
-                            value !== null &&
-                            value !== undefined
-                        )
-                        .join(' ')
-                        .toLowerCase();
+            closeViewAs();
 
-                    return searchable.includes(
-                        query
-                    );
-                });
-
-            renderPatientPicker();
-        }
-
-        function startPatientImpersonation(
-            patientId,
-            patientName
-        ) {
-            closePatientPicker();
-
-            triggerRedirect(
-                patientName,
-                'patient',
-                patientId,
-                'Loading patient dashboard for Admin'
+            startRolePreview(
+                roleName,
+                normalizedRole
             );
         }
 
-        function triggerRedirect(
-            title,
-            slug,
-            patientId,
-            sub
+        function startRolePreview(
+            roleName,
+            roleSlug
         ) {
             window.GlobalLoading
                 ?.show({
-                    title: `Redirecting to ${title}…`,
+                    title: `Opening ${roleName} preview…`,
 
-                    message: sub,
+                    message: 'Loading synthetic demo data.',
                 });
 
-            const body = {
-                role: slug,
-            };
-
-            if (patientId) {
-                body.patient_id =
-                    patientId;
-            }
-
             fetch(
-                    "{{ route('admin.impersonate') }}", {
+                    "{{ route('admin.role_preview.start') }}", {
                         method: 'POST',
 
                         headers: {
@@ -3476,47 +2917,56 @@
                             'Accept': 'application/json',
                         },
 
-                        body: JSON.stringify(
-                            body
-                        ),
+                        body: JSON.stringify({
+                            role: roleSlug,
+                        }),
                     }
                 )
-                .then(async response => {
-                    const data =
-                        await response.json();
+                .then(
+                    async response => {
+                        const data =
+                            await response
+                            .json();
 
-                    if (!response.ok) {
-                        throw new Error(
-                            data.message ||
-                            'Unable to switch dashboard.'
-                        );
+                        if (
+                            !response.ok
+                        ) {
+                            throw new Error(
+                                data.message ||
+                                'Unable to start role preview.'
+                            );
+                        }
+
+                        if (
+                            !data.redirect
+                        ) {
+                            throw new Error(
+                                'No preview URL was returned.'
+                            );
+                        }
+
+                        window.location.href =
+                            data.redirect;
                     }
+                )
+                .catch(
+                    error => {
+                        window.GlobalLoading
+                            ?.hide();
 
-                    if (!data.redirect) {
-                        throw new Error(
-                            'No redirect URL was returned.'
-                        );
+                        if (
+                            typeof showToast ===
+                            'function'
+                        ) {
+                            showToast(
+                                'Preview Error',
+                                error.message ||
+                                'Unable to open role preview.',
+                                'error'
+                            );
+                        }
                     }
-
-                    window.location.href =
-                        data.redirect;
-                })
-                .catch(error => {
-                    window.GlobalLoading
-                        ?.hide();
-
-                    if (
-                        typeof showToast ===
-                        'function'
-                    ) {
-                        showToast(
-                            'Error',
-                            error.message ||
-                            'Something went wrong.',
-                            'error'
-                        );
-                    }
-                });
+                );
         }
     </script>
 @endsection

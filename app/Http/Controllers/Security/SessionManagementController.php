@@ -29,8 +29,8 @@ class SessionManagementController extends Controller
         $currentSessionId = $request->session()->getId();
         $sessions = $this->concurrentSessionService->sessionsForDisplay($user, $currentSessionId);
         $history = $this->concurrentSessionService->recentSessionHistoryForUser($user);
-        $role = $this->normalizeRole((string) (session('impersonated_role') ?: optional($user->role)->slug ?: session('role')));
-
+        $role = $this->normalizeRole((string) (optional($user->role)->slug?: session('role')));
+        
         return view('shared.sessions', [
             'role' => $role,
             'sessions' => $sessions,
@@ -53,11 +53,10 @@ class SessionManagementController extends Controller
             ], 401);
         }
 
-        $activeRoleSlug = (string) (
-            $request->session()->get('impersonated_role')
-            ?: $request->session()->get('role')
-            ?: optional($user->role)->slug
-        );
+        $activeRoleSlug =
+            (string) optional(
+                $user->role
+            )->slug;
 
         $timeoutSeconds =
             $user->idleTimeoutSeconds(
@@ -325,11 +324,10 @@ class SessionManagementController extends Controller
             return 0;
         }
 
-        $role = (string) (
-            $request->session()->get('impersonated_role')
-            ?: $request->session()->get('role')
-            ?: optional($user->role)->slug
-        );
+        $role =
+            (string) optional(
+                $user->role
+            )->slug;
 
         return max(
             0,
@@ -353,11 +351,12 @@ class SessionManagementController extends Controller
             return false;
         }
 
-        return $user->isExemptFromIdleTimeout((string) (
-            $request->session()->get('impersonated_role')
-            ?: $request->session()->get('role')
-            ?: optional($user->role)->slug
-        ));
+        return $user
+            ->isExemptFromIdleTimeout(
+                (string) optional(
+                    $user->role
+                )->slug
+            );
     }
 
     private function logoutCurrentSession(
@@ -387,22 +386,31 @@ class SessionManagementController extends Controller
         $request->session()->forget([
             'oidc_id_token',
             'oidc_state',
+
             'role',
             'patient_id',
             'patient_name',
             'email',
+
             'admin_logged_in',
             'admin_id',
             'admin_name',
             'admin_email',
+
             'dentist_id',
             'dentist_name',
             'dentist_email',
+
+            'role_preview_active',
+            'preview_role',
+            'preview_started_at',
+
             'impersonated_role',
             'impersonated_patient_id',
             'impersonator_role',
             'impersonator_admin_id',
             'impersonator_admin_email',
+
             'last_activity_at',
             'session_idle_locked',
         ]);

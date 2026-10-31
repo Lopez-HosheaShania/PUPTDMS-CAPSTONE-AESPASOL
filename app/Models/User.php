@@ -496,36 +496,23 @@ class User extends Authenticatable implements JWTSubject
             return false;
         }
 
-        $candidateSlugs = array_values(array_unique([
-            $permissionSlug,
-            ...self::PERMISSION_ALIASES[$permissionSlug] ?? [],
-        ]));
+        $candidateSlugs =
+            array_values(
+                array_unique([
+                    $permissionSlug,
 
-        $actualRoleSlug = optional($this->role)->slug;
-        if (session()->has('impersonated_role')
-            && ! in_array($permissionSlug, ['access_dentist_dashboard', 'access_patient_dashboard'], true)
-            && ! $this->role->permissions()->whereIn('slug', $candidateSlugs)->exists()) {
-            return false;
-        }
+                    ...(
+                        self::PERMISSION_ALIASES[$permissionSlug] ?? []
+                    ),
+                ])
+            );
 
-        $activeRoleSlug = session('impersonated_role')
-            ?: session('role')
-            ?: $actualRoleSlug;
-
-        if ($activeRoleSlug && $activeRoleSlug !== $actualRoleSlug) {
-            $activeRole = Role::with('permissions')
-                ->where('slug', $activeRoleSlug)
-                ->first();
-
-            if ($activeRole) {
-                return $activeRole->permissions
-                    ->whereIn('slug', $candidateSlugs)
-                    ->isNotEmpty();
-            }
-        }
-
-        return $this->role->permissions()
-            ->whereIn('slug', $candidateSlugs)
+        return $this->role
+            ->permissions()
+            ->whereIn(
+                'slug',
+                $candidateSlugs
+            )
             ->exists();
     }
 
@@ -549,7 +536,7 @@ class User extends Authenticatable implements JWTSubject
         $normalizedRole = $this->activeRoleSlug($activeRoleSlug);
 
         $exemptRoles = array_map(
-            static fn (mixed $role): string => strtolower(trim((string) $role)),
+            static fn(mixed $role): string => strtolower(trim((string) $role)),
             (array) config('session.idle_timeout_exempt_roles', [])
         );
 
@@ -564,7 +551,7 @@ class User extends Authenticatable implements JWTSubject
 
         $roleSlug = $this->activeRoleSlug($activeRoleSlug);
         $coreRoles = array_map(
-            static fn (mixed $role): string => strtolower(trim((string) $role)),
+            static fn(mixed $role): string => strtolower(trim((string) $role)),
             (array) config('session.core_role_slugs', [])
         );
 
@@ -575,14 +562,19 @@ class User extends Authenticatable implements JWTSubject
         return max(0, (int) config('session.idle_timeout_seconds', 600));
     }
 
-    private function activeRoleSlug(?string $activeRoleSlug = null): string
-    {
-        return strtolower(trim((string) (
-            $activeRoleSlug
-            ?: session('impersonated_role')
-            ?: session('role')
-            ?: optional($this->role)->slug
-        )));
+    private function activeRoleSlug(
+        ?string $activeRoleSlug = null
+    ): string {
+        return strtolower(
+            trim(
+                (string) (
+                    $activeRoleSlug
+                    ?: optional(
+                        $this->role
+                    )->slug
+                )
+            )
+        );
     }
 
     public function canAccessAdminArea(?string $activeRoleSlug = null): bool

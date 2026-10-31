@@ -5,11 +5,11 @@
 
     $authUser = auth()->user();
 
-    $drawerDisplayName = $authUser?->name ?? ucwords(str_replace('_', ' ', $sidebarRole));
+    $isRolePreview =
+        (bool) session('role_preview_active') && in_array(session('preview_role'), ['patient', 'dentist'], true);
 
-    $drawerDisplayRole = session()->has('impersonated_role')
-        ? Role::displayNameFor(session('impersonated_role'))
-        : $authUser?->display_role_name ?? Role::displayNameFor($sidebarRole);
+    $drawerDisplayName = $authUser?->name ?? ucwords(str_replace('_', ' ', $sidebarRole));
+    $drawerDisplayRole = $authUser?->display_role_name ?? Role::displayNameFor(optional($authUser?->role)->slug);
 
     $drawerAvatarUrl = !empty($authUser?->profile_image)
         ? asset('storage/' . $authUser->profile_image)
@@ -604,8 +604,8 @@
 
     $groups = $sidebarGroups[$sidebarRole] ?? $sidebarGroups['patient'];
 
-    if ($authUser) {
-        $activeRole = session('impersonated_role') ?: session('role') ?: $authUser->role?->slug;
+    if ($authUser && !$isRolePreview) {
+        $activeRole = $authUser->role?->slug;
         $isSuperAdmin = $authUser->role?->slug === 'super_admin' && $activeRole === 'super_admin';
 
         $groups = collect($groups)
@@ -643,7 +643,20 @@
             ->values()
             ->all();
     }
-    $resolveItemUrl = function ($item) {
+
+    $resolveItemUrl = function ($item) use ($isRolePreview, $sidebarRole) {
+        if ($isRolePreview) {
+            $label = strtolower(trim($item['label'] ?? ''));
+
+            if (in_array($label, ['dashboard', 'home'], true)) {
+                return $sidebarRole === 'patient'
+                    ? route('admin.role_preview.patient')
+                    : route('admin.role_preview.dentist');
+            }
+
+            return '#';
+        }
+
         try {
             if (!empty($item['url'])) {
                 return $item['url'];
@@ -659,7 +672,11 @@
         return null;
     };
 
-    $isItemActive = function ($item) {
+    $isItemActive = function ($item) use ($isRolePreview) {
+        if ($isRolePreview) {
+            return in_array(strtolower(trim($item['label'] ?? '')), ['dashboard', 'home'], true);
+        }
+
         foreach ($item['active'] ?? [$item['route']] as $pattern) {
             if (request()->routeIs($pattern)) {
                 return true;

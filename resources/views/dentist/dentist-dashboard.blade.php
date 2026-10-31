@@ -85,11 +85,14 @@
                                     </span>
                                 </span>
                                 <span class="greeting-line greeting-name-line">
-                                    @if (auth()->user()?->hasRole('dentist'))
-                                        <span class="greeting-name-prefix">Dr.</span>
+                                    @if (($rolePreviewActive ?? false) || auth()->user()?->hasRole('dentist'))
+                                        <span class="greeting-name-prefix">
+                                            Dr.
+                                        </span>
                                     @endif
+
                                     <span id="dentistName">
-                                        {{ auth()->user()->name ?? 'Doctor' }}
+                                        {{ $rolePreviewActive ?? false ? $previewDisplayName ?? 'Demo Dentist' : auth()->user()->name ?? 'Doctor' }}
                                     </span>
                                     <i class="fa-solid fa-heart-pulse text-rose-300"></i>
                                 </span>
@@ -347,7 +350,8 @@
                     Cancel
                 </button>
 
-                <button id="confirmStatusBtn" type="button" class="ui-btn ui-btn-warning" data-ui-click="action-96d2131d8000">
+                <button id="confirmStatusBtn" type="button" class="ui-btn ui-btn-warning"
+                    data-ui-click="action-96d2131d8000">
                     <i class="fa-solid fa-check"></i>
                     Confirm
                 </button>
@@ -796,10 +800,10 @@ ${isToday ? 'is-today' : ''}
 ${
 hasAppointments
 ? `
-                                                                                                                                                                                                                                                                                        <span class="upcoming-date-badge">
-                                                                                                                                                                                                                                                                                        ${count}
-                                                                                                                                                                                                                                                                                        </span>
-                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                            <span class="upcoming-date-badge">
+                                                                                                                                                                                                                                                                                            ${count}
+                                                                                                                                                                                                                                                                                            </span>
+                                                                                                                                                                                                                                                                                            `
 : ''
 }
 
@@ -856,19 +860,19 @@ ${buildAvatar(
             ${buildAppointmentTypeIcons(appt)}
 
             ${appt.is_reserved ? `
-                            <span class="status-pill status-today shrink-0"
-                                data-tooltip="${escHtml(
-                                    appt.reserved_title
-                                        ? `Reserved: ${appt.reserved_title}`
-                                        : 'Reserved appointment'
-                                )}"
-                                data-tooltip-tone="neutral"
-                                aria-label="Reserved appointment"
-                                tabindex="0">
-                                <i class="fa-solid fa-calendar-check"></i>
-                                <span>Reserved</span>
-                            </span>
-                        ` : ''}
+                                <span class="status-pill status-today shrink-0"
+                                    data-tooltip="${escHtml(
+                                        appt.reserved_title
+                                            ? `Reserved: ${appt.reserved_title}`
+                                            : 'Reserved appointment'
+                                    )}"
+                                    data-tooltip-tone="neutral"
+                                    aria-label="Reserved appointment"
+                                    tabindex="0">
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                    <span>Reserved</span>
+                                </span>
+                            ` : ''}
 
         </div>
 
@@ -2656,34 +2660,34 @@ data-tooltip-tone="view"
 ${
 canReschedule
 ? `
-                                                                                                                                                                                                                                                                                        <button
-                                                                                                                                                                                                                                                                                        type="button"
-                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-warning"
-                                                                                                                                                                                                                                                                                        aria-label="Reschedule appointment"
-                                                                                                                                                                                                                                                                                        data-tooltip="Reschedule appointment"
-                                                                                                                                                                                                                                                                                        data-tooltip-tone="reschedule"
-                                                                                                                                                                                                                                                                                        data-ui-click="action-9ac3a192f5ae" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.id))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}" data-ui-click-arg-3="${window.uiAttribute(safeService)}" data-ui-click-arg-4="${window.uiAttribute(escJs(appt.rescheduleUrl || '#'))}"
-                                                                                                                                                                                                                                                                                        >
-                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-rotate-right"></i>
-                                                                                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                            <button
+                                                                                                                                                                                                                                                                                            type="button"
+                                                                                                                                                                                                                                                                                            class="ui-action-btn ui-action-warning"
+                                                                                                                                                                                                                                                                                            aria-label="Reschedule appointment"
+                                                                                                                                                                                                                                                                                            data-tooltip="Reschedule appointment"
+                                                                                                                                                                                                                                                                                            data-tooltip-tone="reschedule"
+                                                                                                                                                                                                                                                                                            data-ui-click="action-9ac3a192f5ae" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.id))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}" data-ui-click-arg-3="${window.uiAttribute(safeService)}" data-ui-click-arg-4="${window.uiAttribute(escJs(appt.rescheduleUrl || '#'))}"
+                                                                                                                                                                                                                                                                                            >
+                                                                                                                                                                                                                                                                                            <i class="fa-solid fa-rotate-right"></i>
+                                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                                            `
 : ''
 }
 
 ${
 canCancel
 ? `
-                                                                                                                                                                                                                                                                                        <button
-                                                                                                                                                                                                                                                                                        type="button"
-                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-delete"
-                                                                                                                                                                                                                                                                                        aria-label="Cancel appointment"
-                                                                                                                                                                                                                                                                                        data-tooltip="Cancel appointment"
-                                                                                                                                                                                                                                                                                        data-tooltip-tone="cancel"
-                                                                                                                                                                                                                                                                                        data-ui-click="action-74913bcfd525" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.cancelUrl || '#'))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}"
-                                                                                                                                                                                                                                                                                        >
-                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-ban"></i>
-                                                                                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                            <button
+                                                                                                                                                                                                                                                                                            type="button"
+                                                                                                                                                                                                                                                                                            class="ui-action-btn ui-action-delete"
+                                                                                                                                                                                                                                                                                            aria-label="Cancel appointment"
+                                                                                                                                                                                                                                                                                            data-tooltip="Cancel appointment"
+                                                                                                                                                                                                                                                                                            data-tooltip-tone="cancel"
+                                                                                                                                                                                                                                                                                            data-ui-click="action-74913bcfd525" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.cancelUrl || '#'))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}"
+                                                                                                                                                                                                                                                                                            >
+                                                                                                                                                                                                                                                                                            <i class="fa-solid fa-ban"></i>
+                                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                                            `
 : ''
 }
 
@@ -2971,34 +2975,34 @@ data-tooltip-tone="view"
 ${
 canReschedule
 ? `
-                                                                                                                                                                                                                                                                                        <button
-                                                                                                                                                                                                                                                                                        type="button"
-                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-warning"
-                                                                                                                                                                                                                                                                                        aria-label="Reschedule appointment"
-                                                                                                                                                                                                                                                                                        data-tooltip="Reschedule appointment"
-                                                                                                                                                                                                                                                                                        data-tooltip-tone="reschedule"
-                                                                                                                                                                                                                                                                                        data-ui-click="action-c90ced68deff" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.id))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}" data-ui-click-arg-3="${window.uiAttribute(safeService)}" data-ui-click-arg-4="${window.uiAttribute(escJs(appt.rescheduleUrl || '#'))}"
-                                                                                                                                                                                                                                                                                        >
-                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-rotate-right"></i>
-                                                                                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                            <button
+                                                                                                                                                                                                                                                                                            type="button"
+                                                                                                                                                                                                                                                                                            class="ui-action-btn ui-action-warning"
+                                                                                                                                                                                                                                                                                            aria-label="Reschedule appointment"
+                                                                                                                                                                                                                                                                                            data-tooltip="Reschedule appointment"
+                                                                                                                                                                                                                                                                                            data-tooltip-tone="reschedule"
+                                                                                                                                                                                                                                                                                            data-ui-click="action-c90ced68deff" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.id))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}" data-ui-click-arg-3="${window.uiAttribute(safeService)}" data-ui-click-arg-4="${window.uiAttribute(escJs(appt.rescheduleUrl || '#'))}"
+                                                                                                                                                                                                                                                                                            >
+                                                                                                                                                                                                                                                                                            <i class="fa-solid fa-rotate-right"></i>
+                                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                                            `
 : ''
 }
 
 ${
 canCancel
 ? `
-                                                                                                                                                                                                                                                                                        <button
-                                                                                                                                                                                                                                                                                        type="button"
-                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-delete"
-                                                                                                                                                                                                                                                                                        aria-label="Cancel appointment"
-                                                                                                                                                                                                                                                                                        data-tooltip="Cancel appointment"
-                                                                                                                                                                                                                                                                                        data-tooltip-tone="cancel"
-                                                                                                                                                                                                                                                                                        data-ui-click="action-69de2f9aeac1" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.cancelUrl || '#'))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}"
-                                                                                                                                                                                                                                                                                        >
-                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-ban"></i>
-                                                                                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                            <button
+                                                                                                                                                                                                                                                                                            type="button"
+                                                                                                                                                                                                                                                                                            class="ui-action-btn ui-action-delete"
+                                                                                                                                                                                                                                                                                            aria-label="Cancel appointment"
+                                                                                                                                                                                                                                                                                            data-tooltip="Cancel appointment"
+                                                                                                                                                                                                                                                                                            data-tooltip-tone="cancel"
+                                                                                                                                                                                                                                                                                            data-ui-click="action-69de2f9aeac1" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.cancelUrl || '#'))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}"
+                                                                                                                                                                                                                                                                                            >
+                                                                                                                                                                                                                                                                                            <i class="fa-solid fa-ban"></i>
+                                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                                            `
 : ''
 }
 
