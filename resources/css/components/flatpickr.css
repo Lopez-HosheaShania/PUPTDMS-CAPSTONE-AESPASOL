@@ -149,10 +149,27 @@
 }
 
 .flatpickr-calendar .custom-flatpickr-selects .custom-select-option {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
     min-height: 30px !important;
     padding: 0 8px !important;
-    border-radius: 7px !important;
-    font-size: 11px !important;
+
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+
+.flatpickr-calendar .custom-flatpickr-selects .custom-select-option>span {
+    flex: 0 1 auto !important;
+
+    min-width: 0 !important;
+
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+
+    text-align: center !important;
 }
 
 .flatpickr-weekdays {

@@ -353,12 +353,7 @@ export function initCustomSelects(root = document) {
             const label = document.createElement('span');
             label.textContent = option.textContent.trim();
 
-            const check = document.createElement('i');
-            check.className =
-                'fa-solid fa-check custom-select-check';
-            check.setAttribute('aria-hidden', 'true');
-
-            item.append(label, check);
+            item.append(label);
 
             item.addEventListener('click', event => {
                 event.preventDefault();

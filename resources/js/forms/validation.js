@@ -1093,11 +1093,171 @@ function clearFormInputValidation(field) {
     showFormInputValidationMessage(field, '', '');
 }
 
+function applyGlobalServerValidationErrors(
+    form,
+    errors = {},
+    options = {}
+) {
+    if (
+        !form ||
+        !errors ||
+        typeof errors !== 'object'
+    ) {
+        return {
+            valid: true,
+            firstInvalid: null
+        };
+    }
+
+    let firstInvalid = null;
+
+    Object.entries(errors).forEach(
+        ([fieldName, rawMessages]) => {
+            const messages =
+                Array.isArray(rawMessages)
+                    ? rawMessages
+                    : [rawMessages];
+
+            const message =
+                String(
+                    messages.find(Boolean) || ''
+                ).trim();
+
+            if (!message) {
+                return;
+            }
+
+            const arrayFieldName =
+                fieldName.replace(
+                    /\.\d+$/,
+                    '[]'
+                );
+
+            const field =
+                form.querySelector(
+                    `[name="${CSS.escape(fieldName)}"]`
+                ) ||
+                form.querySelector(
+                    `[name="${CSS.escape(arrayFieldName)}"]`
+                ) ||
+                document.getElementById(
+                    fieldName
+                );
+
+            if (!field) {
+                return;
+            }
+
+            setPersistentServerFieldError(
+                field,
+                message
+            );
+
+            if (!firstInvalid) {
+                firstInvalid = field;
+            }
+        }
+    );
+
+    if (
+        firstInvalid &&
+        options.focus !== false
+    ) {
+        focusGlobalInvalidField(
+            firstInvalid
+        );
+    }
+
+    if (firstInvalid) {
+        shakeGlobalFieldErrors(
+            form
+        );
+    }
+
+    return {
+        valid: !firstInvalid,
+        firstInvalid
+    };
+}
+
+function setPersistentServerFieldError(
+    field,
+    message
+) {
+    if (!field || !message) {
+        return;
+    }
+
+    field.dataset.serverValidationError =
+        String(message);
+
+    field.dataset.serverValidationValue =
+        String(field.value || '').trim();
+
+    showFormInputValidationMessage(
+        field,
+        message
+    );
+}
+
+function clearPersistentServerFieldError(
+    field
+) {
+    if (!field) {
+        return;
+    }
+
+    delete field.dataset.serverValidationError;
+    delete field.dataset.serverValidationValue;
+}
+
+function getPersistentServerFieldError(
+    field
+) {
+    if (!field) {
+        return '';
+    }
+
+    const message =
+        field.dataset.serverValidationError || '';
+
+    const validatedValue =
+        field.dataset.serverValidationValue || '';
+
+    const currentValue =
+        String(field.value || '').trim();
+
+    if (!message) {
+        return '';
+    }
+
+    if (
+        currentValue ===
+        validatedValue
+    ) {
+        return message;
+    }
+
+    clearPersistentServerFieldError(
+        field
+    );
+
+    return '';
+}
+
 function validateFormInputField(field) {
     if (!field) return true;
 
+    const persistentServerError =
+        getPersistentServerFieldError(
+            field
+        );
+
     const message =
-        getFormInputValidationMessage(field);
+        persistentServerError ||
+        getFormInputValidationMessage(
+            field
+        );
 
     let successMessage = '';
 
@@ -1354,6 +1514,12 @@ function bindFormInputValidation(root = document) {
                         )
                     ) {
                         event.preventDefault();
+
+                        window
+                            .showFormInputValidationMessage?.(
+                                field,
+                                'Contact number can only contain numbers.'
+                            );
 
                         return;
                     }
@@ -2256,6 +2422,10 @@ window.bindFormInputValidation = bindFormInputValidation;
 window.validateFormInputField = validateFormInputField;
 window.showFormInputValidationMessage = showFormInputValidationMessage;
 window.clearFormInputValidation = clearFormInputValidation;
+window.applyGlobalServerValidationErrors = applyGlobalServerValidationErrors;
+window.setPersistentServerFieldError = setPersistentServerFieldError;
+window.clearPersistentServerFieldError = clearPersistentServerFieldError;
+window.getPersistentServerFieldError = getPersistentServerFieldError;
 
 window.setFieldState = setFieldState;
 window.updateCharCounter = updateCharCounter;
