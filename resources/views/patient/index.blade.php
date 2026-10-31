@@ -270,16 +270,15 @@
                         </div>
 
                         <div class="greeting-banner-actions">
-                            <a href="{{ route('patient.book.appointment') }}" class="ui-btn ui-btn-primary ui-btn-shimmer"
-                                data-ui-click="action-fa43d7668e58">
-                                <i class="fa-solid fa-calendar-plus"></i>
-                                <span>Book Appointment</span>
-                            </a>
+                            <x-button href="{{ route('patient.book.appointment') }}" variant="primary"
+                                icon="fa-solid fa-calendar-plus" :shimmer="true" data-ui-click="action-fa43d7668e58">
+                                Book Appointment
+                            </x-button>
 
-                            <a href="{{ route('patient.record') }}" class="ui-btn ui-btn-ghost-light">
-                                <i class="fa-solid fa-folder-open"></i>
-                                <span>View Records</span>
-                            </a>
+                            <x-button href="{{ route('patient.record') }}" variant="ghost-light"
+                                icon="fa-solid fa-folder-open">
+                                View Records
+                            </x-button>
                         </div>
                     </div>
                 </div>
@@ -367,14 +366,11 @@
 
                                     </div>
 
-                                    <a href="{{ route('book.appointment.reserved', $reservedPeriod) }}"
-                                        class="ui-btn ui-btn-primary w-full lg:w-auto">
-
-                                        <span>Book Reserved Appointment</span>
-
-                                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-
-                                    </a>
+                                    <x-button href="{{ route('book.appointment.reserved', $reservedPeriod) }}"
+                                        variant="primary" icon="fa-solid fa-arrow-right" icon-position="right"
+                                        class="w-full lg:w-auto">
+                                        Book Reserved Appointment
+                                    </x-button>
 
                                 </div>
 
@@ -562,7 +558,7 @@
             @endforeach
 
             <div class="pt-2">
-                <a href="{{ route('patient.record') }}" class="ui-btn ui-btn-primary w-full">
+                <x-button href="{{ route('patient.record') }}" variant="primary" class="w-full">
                     <i class="fa-solid fa-folder-open"></i>
 
                     <span>
@@ -570,7 +566,7 @@
                     </span>
 
                     <i class="fa-solid fa-arrow-right text-[11px]"></i>
-                </a>
+                </x-button>
             </div>
 
         </div>
@@ -629,68 +625,52 @@
             </div>
 
             <x-slot:footer>
-                <button type="button" id="appointmentConfirmedDoneBtn" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-check"></i>
+                <x-button id="appointmentConfirmedDoneBtn" type="button" variant="primary" icon="fa-solid fa-check">
                     Done
-                </button>
+                </x-button>
             </x-slot:footer>
 
         </x-booking.confirmed-modal>
     @endif
 
-
-    <div id="privateInformationModal" class="ui-modal modal-theme-warning" role="dialog" aria-modal="true"
-        aria-hidden="true" aria-labelledby="privateInformationModalTitle"
-        aria-describedby="privateInformationModalDescription">
-        <div class="ui-modal-card modal-sm">
-
-            <div class="modal-hd">
-                <div class="modal-heading">
-
-                    <div class="modal-icon" aria-hidden="true">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h2 id="privateInformationModalTitle" class="modal-title" tabindex="-1"
-                            data-modal-initial-focus>
-                            Show Private Information?
-                        </h2>
-
-                        <p id="privateInformationModalDescription" class="modal-subtitle">
-                            Your contact and identification details will be shown.
-                        </p>
-                    </div>
-
+    <x-modal id="privateInformationModal" size="sm" class="modal-theme-warning" :show-close="false"
+        aria-labelledby="privateInformationModalTitle" aria-describedby="privateInformationModalDescription">
+        <x-slot:header>
+            <div class="modal-heading">
+                <div class="modal-icon" aria-hidden="true">
+                    <i class="fa-solid fa-shield-halved"></i>
                 </div>
-            </div>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                <div class="modal-copy">
+                    <h2 id="privateInformationModalTitle" class="modal-title" tabindex="-1" data-modal-initial-focus>
+                        Show Private Information?
+                    </h2>
 
-                    <p>
-                        Make sure no one else can see your screen before continuing.
+                    <p id="privateInformationModalDescription" class="modal-subtitle">
+                        Your contact and identification details will be shown.
                     </p>
                 </div>
             </div>
+        </x-slot:header>
 
-            <div class="modal-ft">
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-eye" aria-hidden="true"></i>
 
-                <button type="button" class="ui-btn ui-btn-secondary" data-ui-click="action-a2822b6ec471">
-                    Cancel
-                </button>
-
-                <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-573f9113de2d">
-                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
-
-                    <span>Show Information</span>
-                </button>
-
-            </div>
-
+            <p>
+                Make sure no one else can see your screen before continuing.
+            </p>
         </div>
-    </div>
+
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-ui-click="action-a2822b6ec471">
+                Cancel
+            </x-button>
+
+            <x-button type="button" variant="primary" icon="fa-regular fa-eye" data-ui-click="action-573f9113de2d">
+                Show Information
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 
     @if ($rolePreviewActive ?? false)
         <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">

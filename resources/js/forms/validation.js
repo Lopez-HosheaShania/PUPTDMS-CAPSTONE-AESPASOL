@@ -212,8 +212,15 @@ function getFormInputValidationMessage(field) {
     }
 
     const type = String(field.type || '').toLowerCase();
-    const value = String(field.value || '').trim();
-    const label = getGlobalFieldLabel(field);
+
+    const rawValue =
+        String(field.value || '');
+
+    const value =
+        rawValue.trim();
+
+    const label =
+        getGlobalFieldLabel(field);
 
     if (type === 'radio') {
         if (!isRequired) {
@@ -307,6 +314,29 @@ function getFormInputValidationMessage(field) {
     }
 
     if (!value) return '';
+
+    const shouldValidateWhitespace =
+        field instanceof HTMLTextAreaElement ||
+        (
+            field instanceof HTMLInputElement &&
+            [
+                'text',
+                'search',
+                'email',
+                'tel',
+                'url'
+            ].includes(type)
+        );
+
+    if (shouldValidateWhitespace) {
+        if (rawValue !== rawValue.trim()) {
+            return `${label} cannot start or end with spaces.`;
+        }
+
+        if (/[ \t]{2,}/.test(rawValue)) {
+            return `${label} cannot contain multiple consecutive spaces.`;
+        }
+    }
 
     if (type === 'email' && !field.validity.valid) {
         return 'Please enter a valid email address.';
@@ -1329,13 +1359,25 @@ function bindFormInputValidation(root = document) {
                     }
 
                     if (
-                        field.dataset.validationRule ===
-                        'personName' &&
+                        [
+                            'personName',
+                            'guestName'
+                        ].includes(
+                            field.dataset.validationRule
+                        ) &&
                         /[^A-Za-zÑñ\s.'-]/.test(
                             insertedText
                         )
                     ) {
                         event.preventDefault();
+
+                        window.showFormInputValidationMessage?.(
+                            field,
+                            field.dataset.patternMessage ||
+                            'Only letters, spaces, apostrophe, period, and hyphen are allowed.'
+                        );
+
+                        return;
                     }
                 },
                 true

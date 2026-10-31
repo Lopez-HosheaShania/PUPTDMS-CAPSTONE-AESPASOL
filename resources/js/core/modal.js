@@ -83,9 +83,26 @@ function syncModalBackground() {
             if (
                 sibling === current ||
                 !(sibling instanceof HTMLElement)
-            ) continue;
+            ) {
+                continue;
+            }
 
-            originalInertStates.set(sibling, sibling.inert);
+            const isModalPortal =
+                sibling.matches(
+                    '[data-modal-portal], ' +
+                    '.flatpickr-mobile-backdrop'
+                );
+
+            if (isModalPortal) {
+                sibling.inert = false;
+                continue;
+            }
+
+            originalInertStates.set(
+                sibling,
+                sibling.inert
+            );
+
             sibling.inert = true;
         }
 

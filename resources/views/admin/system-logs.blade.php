@@ -27,104 +27,25 @@
     <main id="mainContent" class="app-page-shell system-logs-page page-enter mode-list">
         <div class="w-full">
 
-            <div class="page-banner rounded-2xl mb-6">
-                <div class="page-banner-inner">
-                    <div>
-                        <h1 class="page-title">System Logs</h1>
-                    </div>
-                </div>
-            </div>
+            <x-page-banner title="System Logs" class="rounded-2xl mb-6" />
 
             <div id="statCards" class="stat-grid">
-                <div class="stat-card s-crimson">
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                    </div>
+                <x-stat-card label="Total Logs" :value="$totalCount" tone="crimson" icon="fa-solid fa-clipboard-list"
+                    footer="All recorded activity" value-class="stat-num" :value-attributes="['id' => 'statTotal']" />
 
-                    <div class="stat-card-info">
-                        <span class="stat-label">
-                            Total Logs
-                        </span>
+                <x-stat-card label="Admin Actions" :value="$adminCount" tone="red" icon="fa-solid fa-user-tie"
+                    footer="Administrator activity" value-class="stat-num" :value-attributes="['id' => 'statAdmin']" />
 
-                        <span class="stat-num" id="statTotal">
-                            {{ $totalCount }}
-                        </span>
+                <x-stat-card label="Dentist Actions" :value="$dentistCount" tone="blue" icon="fa-solid fa-user-doctor"
+                    footer="Dentist activity" value-class="stat-num" :value-attributes="['id' => 'statDentist']" />
 
-                        <span class="stat-footer">
-                            All recorded activity
-                        </span>
-                    </div>
-                </div>
-
-                <div class="stat-card s-red">
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-user-tie"></i>
-                    </div>
-
-                    <div class="stat-card-info">
-                        <span class="stat-label">
-                            Admin Actions
-                        </span>
-
-                        <span class="stat-num" id="statAdmin">
-                            {{ $adminCount }}
-                        </span>
-
-                        <span class="stat-footer">
-                            Administrator activity
-                        </span>
-                    </div>
-                </div>
-
-                <div class="stat-card s-blue">
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-user-doctor"></i>
-                    </div>
-
-                    <div class="stat-card-info">
-                        <span class="stat-label">
-                            Dentist Actions
-                        </span>
-
-                        <span class="stat-num" id="statDentist">
-                            {{ $dentistCount }}
-                        </span>
-
-                        <span class="stat-footer">
-                            Dentist activity
-                        </span>
-                    </div>
-                </div>
-
-                <div class="stat-card s-green">
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-
-                    <div class="stat-card-info">
-                        <span class="stat-label">
-                            Patient Actions
-                        </span>
-
-                        <span class="stat-num" id="statPatient">
-                            {{ $patientCount }}
-                        </span>
-
-                        <span class="stat-footer">
-                            Patient activity
-                        </span>
-                    </div>
-                </div>
+                <x-stat-card label="Patient Actions" :value="$patientCount" tone="green" icon="fa-solid fa-user"
+                    footer="Patient activity" value-class="stat-num" :value-attributes="['id' => 'statPatient']" />
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <div class="card-header-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-                        <span class="card-title">Audit Trail</span>
-                    </div>
-
-                    <div class="card-header-right system-logs-toolbar">
+                <x-card-header title="Audit Trail" icon="fa-solid fa-clipboard-list" actions-class="system-logs-toolbar">
+                    <x-slot:actions>
 
                         <div class="table-toolbar-search">
                             <div class="global-voice-row">
@@ -251,14 +172,13 @@
                                 grid-view="#slGridView" />
 
                         </div>
-
-                    </div>
-                </div>
+                    </x-slot:actions>
+                </x-card-header>
 
                 <x-pagination-bar id="systemLogsPaginationTopBar" info-id="systemLogsPageInfoTop"
-                    pagination-id="systemLogsPaginationTop" position="top" :show-entries="true" page-size-id="perPageSelect"
-                    page-size-callback="handleSystemLogsPerPageChange" :page-size-value="$perPage" page-size-label="per page"
-                    label="entries" :total="$logs->total()" :from="$logs->firstItem() ?? 0" :to="$logs->lastItem() ?? 0" />
+                    pagination-id="systemLogsPaginationTop" position="top" :show-entries="true"
+                    page-size-id="perPageSelect" page-size-callback="handleSystemLogsPerPageChange" :page-size-value="$perPage"
+                    page-size-label="per page" label="entries" :total="$logs->total()" :from="$logs->firstItem() ?? 0" :to="$logs->lastItem() ?? 0" />
 
                 <div class="table-list-view" id="slListView">
                     <div class="table-scroll">
@@ -451,11 +371,11 @@
                                                         </span>
                                                     </div>
 
-                                                    <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm"
+                                                    <x-button type="button" variant="secondary" size="sm"
+                                                        icon="fa-regular fa-copy"
                                                         data-log-copy-target="{{ $tableCopyId }}">
-                                                        <i class="fa-regular fa-copy"></i>
-                                                        <span>Copy</span>
-                                                    </button>
+                                                        Copy
+                                                    </x-button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -704,14 +624,10 @@
                     Active Filters
                 </span>
 
-                <button id="slClearAllChipsBtn" type="button"
-                    class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm">
-                    <i class="fa-solid fa-rotate-left"></i>
-
-                    <span>
-                        Clear All
-                    </span>
-                </button>
+                <x-button id="slClearAllChipsBtn" type="button" variant="secondary" size="sm"
+                    icon="fa-solid fa-rotate-left" class="filter-clear-all">
+                    Clear All
+                </x-button>
 
             </div>
 
@@ -786,7 +702,7 @@
 
         <x-filter-group title="Action Type">
 
-            <select id="slActionType" class="js-custom-select">
+            <x-select id="slActionType">
                 <option value="">
                     All Actions
                 </option>
@@ -796,7 +712,7 @@
                         {{ $label }}
                     </option>
                 @endforeach
-            </select>
+            </x-select>
 
         </x-filter-group>
 
@@ -867,25 +783,12 @@
 
                                 <div class="modal-inline-main">
 
-                                    <div class="global-number-stepper" data-global-number-stepper>
-                                        <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                            aria-label="Decrease archive age">
-                                            <i class="fa-solid fa-minus"></i>
-                                        </button>
-
-                                        <input type="number" id="slArchiveDaysInput" name="older_than_days"
-                                            value="90" min="1" max="3650" step="1"
-                                            inputmode="numeric" class="global-number-stepper-input"
-                                            data-number-stepper-input data-field-label="Archive Age"
-                                            data-required-message="Please enter the number of days."
-                                            data-validation-rule="wholeNumber" required>
-
-                                        <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                            aria-label="Increase archive age">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </button>
-
-                                    </div>
+                                    <x-number-stepper id="slArchiveDaysInput" name="older_than_days" value="90"
+                                        min="1" max="3650" step="1" inputmode="numeric" required
+                                        decrease-label="Decrease archive age" increase-label="Increase archive age"
+                                        data-field-label="Archive Age"
+                                        data-required-message="Please enter the number of days."
+                                        data-validation-rule="wholeNumber" />
 
                                 </div>
 
@@ -902,16 +805,14 @@
                 </div>
 
                 <div class="modal-ft">
-                    <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="slArchiveModal">
-                        <span>Cancel</span>
-                    </button>
+                    <x-button type="button" variant="secondary" data-discard-close="slArchiveModal">
+                        Cancel
+                    </x-button>
 
-                    <button type="button" id="slArchiveConfirmBtn" class="ui-btn ui-btn-warning"
+                    <x-button id="slArchiveConfirmBtn" type="button" variant="warning" icon="fa-solid fa-box-archive"
                         data-ui-click="action-215d4806d34c">
-
-                        <i class="fa-solid fa-box-archive"></i>
-                        <span>Archive Logs</span>
-                    </button>
+                        Archive Logs
+                    </x-button>
                 </div>
             </form>
         </div>
@@ -981,28 +882,17 @@
                                         <span class="required-mark">*</span>
                                     </label>
 
-                                    <select id="slExportRole" name="role" class="js-custom-select"
-                                        data-field-label="Role" data-required-message="Please select a role." required>
+                                    <x-select id="slExportRole" name="role" required data-field-label="Role"
+                                        data-required-message="Please select a role.">
                                         <option value="" selected disabled>
                                             Select role
                                         </option>
 
-                                        <option value="all">
-                                            All Roles
-                                        </option>
-
-                                        <option value="admin">
-                                            Admin
-                                        </option>
-
-                                        <option value="dentist">
-                                            Dentist
-                                        </option>
-
-                                        <option value="patient">
-                                            Patient
-                                        </option>
-                                    </select>
+                                        <option value="all">All Roles</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="dentist">Dentist</option>
+                                        <option value="patient">Patient</option>
+                                    </x-select>
 
                                     <div class="global-field-error" data-error-for="slExportRole" aria-live="polite"
                                         aria-hidden="true"></div>
@@ -1014,9 +904,8 @@
                                         <span class="required-mark">*</span>
                                     </label>
 
-                                    <select id="slExportAction" name="action_type" class="js-custom-select"
-                                        data-field-label="Action" data-required-message="Please select an action."
-                                        required>
+                                    <x-select id="slExportAction" name="action_type" required data-field-label="Action"
+                                        data-required-message="Please select an action.">
                                         <option value="" selected disabled>
                                             Select action
                                         </option>
@@ -1030,7 +919,7 @@
                                                 {{ $label }}
                                             </option>
                                         @endforeach
-                                    </select>
+                                    </x-select>
 
                                     <div class="global-field-error" data-error-for="slExportAction" aria-live="polite"
                                         aria-hidden="true"></div>
@@ -1107,19 +996,14 @@
                 </div>
 
                 <div class="modal-ft">
-
-                    <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="slExportModal">
+                    <x-button type="button" variant="secondary" data-discard-close="slExportModal">
                         Cancel
-                    </button>
+                    </x-button>
 
-                    <button type="button" id="slExportConfirmBtn" class="ui-btn ui-btn-primary"
+                    <x-button id="slExportConfirmBtn" type="button" variant="primary" icon="fa-solid fa-file-pdf"
                         data-ui-click="action-6a1c2afb8e04">
-                        <i class="fa-solid fa-file-pdf"></i>
-
-                        <span>
-                            Export PDF
-                        </span>
-                    </button>
+                        Export PDF
+                    </x-button>
                 </div>
             </form>
         </div>
@@ -1167,9 +1051,9 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="slDetailsModal">
+                <x-button type="button" variant="secondary" data-modal-close="slDetailsModal">
                     Close
-                </button>
+                </x-button>
             </div>
         </div>
     </div>

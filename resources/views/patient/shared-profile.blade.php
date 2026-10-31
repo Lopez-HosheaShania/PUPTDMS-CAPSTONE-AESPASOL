@@ -38,13 +38,13 @@ $futureCount = isset($futureVisits) ? $futureVisits->count() : 0;
 $pastCount = isset($pastVisits) ? $pastVisits->count() : 0;
 
 $odontogramSnapshotService =
-    app(AppointmentOdontogramSnapshotService::class);
+app(AppointmentOdontogramSnapshotService::class);
 
 $previousOdontogramByVisitId =
-    $canViewClinicalRecords ? $odontogramSnapshotService
-        ->previousSnapshotsByAppointment(
-            collect($pastVisits ?? [])
-        ) : [];
+$canViewClinicalRecords ? $odontogramSnapshotService
+->previousSnapshotsByAppointment(
+collect($pastVisits ?? [])
+) : [];
 
 $medicalAnswers = $canViewClinicalRecords ? (optional($patient->medicalHistory)->answers ?? collect()) : collect();
 $dentalDates = $canViewClinicalRecords ? optional($patient->dentalHistoryDates) : null;
@@ -129,10 +129,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
     <div class="w-full fade-in">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-                <p class="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wider">
-                    <a href="{{ $backUrl }}" class="hover:text-[#8B0000] transition">{{ $backLabel }}</a>
-                    <span class="mx-1">/</span> Patient Record
-                </p>
 
                 <div class="flex items-center gap-3">
                     <a href="{{ $backUrl }}" class="ui-icon-btn neutral" data-tooltip="Back to {{ $backLabel }}"
@@ -148,24 +144,28 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
             @if ($isDentistProfile || ($profileMode === 'admin' && $canBookAppointment))
             <div class="flex items-center gap-2">
+
                 @if ($profileMode === 'admin' && $canBookAppointment)
-                <a href="{{ route('admin.book_appointments.patient', ['patient' => $patient->id]) }}"
-                    class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-calendar-plus text-xs"></i> Book Appointment
-                </a>
+                <x-button href="{{ route('admin.book_appointments.patient', ['patient' => $patient->id]) }}"
+                    variant="primary" icon="fa-solid fa-calendar-plus">
+                    Book Appointment
+                </x-button>
                 @endif
+
                 @if ($isDentistProfile)
-                <a href="{{ route('dentist.odontogram.existing-appointment.create', ['patient' => $patient->id]) }}"
-                    class="ui-btn ui-btn-secondary">
-                    <i class="fa-solid fa-clock-rotate-left text-xs"></i> Add Existing Appointment
-                </a>
+                <x-button
+                    href="{{ route('dentist.odontogram.existing-appointment.create', ['patient' => $patient->id]) }}"
+                    variant="secondary" icon="fa-solid fa-clock-rotate-left">
+                    Add Existing Appointment
+                </x-button>
                 @endif
+
                 @if ($canStartProcedure)
-                <button type="button" data-ui-click="action-0c1e6fd96db0" class="ui-btn ui-btn-success">
-                    <i class="fa-solid fa-play"></i>
-                    <span>Start Procedure</span>
-                </button>
+                <x-button type="button" variant="success" icon="fa-solid fa-play" data-ui-click="action-0c1e6fd96db0">
+                    Start Procedure
+                </x-button>
                 @endif
+
             </div>
             @endif
         </div>
@@ -388,26 +388,14 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                 </div>
 
                 <section class="card profile-section-card treatment-history-card">
-                    <div class="card-header treatment-history-header">
-                        <div class="card-header-left">
-                            <div class="card-header-icon status-upcoming">
-                                <i class="fa-solid fa-folder-open"></i>
-                            </div>
-
-                            <div>
-                                <h2 class="card-title">Treatment History</h2>
-                                <p class="card-subtitle">
-                                    Review upcoming appointments and completed patient visits.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    <x-card-header title="Treatment History"
+                        subtitle="Review upcoming appointments and completed patient visits."
+                        icon="fa-solid fa-folder-open" class="treatment-history-header" />
 
                     <div class="card-body treatment-history-body">
                         <div class="treatment-tabs" role="tablist" aria-label="Treatment history">
                             <button id="futureTab" type="button" class="treatment-tab is-active" role="tab"
-                                aria-selected="true" aria-controls="futureContent"
-                                data-ui-click="action-52d5565ec9b2">
+                                aria-selected="true" aria-controls="futureContent" data-ui-click="action-52d5565ec9b2">
                                 <i class="fa-regular fa-calendar"></i>
 
                                 <span>Upcoming</span>
@@ -468,9 +456,9 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 <div class="space-y-3" data-show-more-list>
                                     @forelse($pastVisits ?? [] as $visit)
 
-                                    <x-appointment-record-card :appointment="$visit" variant="past" :show-details="$canViewClinicalRecords"
-                                        :show-countdown="false" :show-time-range="false"
-                                        :show-reserved="$isDentistProfile"
+                                    <x-appointment-record-card :appointment="$visit" variant="past"
+                                        :show-details="$canViewClinicalRecords" :show-countdown="false"
+                                        :show-time-range="false" :show-reserved="$isDentistProfile"
                                         :previous-odontogram="$previousOdontogramByVisitId[$visit->id] ?? []"
                                         :record-edit-url="$isDentistProfile && $visit->status === 'completed'
                                         ? route('dentist.odontogram.saved.edit', ['appointment' => $visit->id, 'from' => 'appointments'])
@@ -505,37 +493,19 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
                 @if ($canViewClinicalRecords)
                 <section class="card health-lifestyle-card mb-10">
-                    <div class="card-header">
-                        <div class="card-header-left">
-                            <div class="card-header-icon status-completed">
-                                <i class="fa-solid fa-notes-medical"></i>
-                            </div>
-
-                            <div>
-                                <h2 class="card-title">
-                                    Health & Lifestyle Information
-                                </h2>
-
-                                <p class="card-subtitle">
-                                    Patient dental, medical, and lifestyle records.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="card-header-right">
+                    <x-card-header title="Health & Lifestyle Information"
+                        subtitle="Patient dental, medical, and lifestyle records." icon="fa-solid fa-notes-medical">
+                        <x-slot:actions>
                             <span class="status-pill status-completed">
                                 <span class="status-dot"></span>
                                 <span>Latest Record</span>
                             </span>
-                        </div>
-                    </div>
+                        </x-slot:actions>
+                    </x-card-header>
 
                     <div class="card-body">
                         <div class="space-y-6">
 
-                            {{-- =========================
-                            DENTAL HISTORY
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-tooth"></i>
@@ -638,10 +608,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 </div>
                             </div>
 
-
-                            {{-- =========================
-                            DENTAL SYMPTOMS & HABITS
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-notes-medical"></i>
@@ -686,10 +652,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 </div>
                             </div>
 
-
-                            {{-- =========================
-                            MEDICAL HISTORY
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-heart-pulse"></i>
@@ -771,10 +733,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 </div>
                             </div>
 
-
-                            {{-- =========================
-                            MEDICAL CONDITIONS
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-disease"></i>
@@ -808,10 +766,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 </div>
                             </div>
 
-
-                            {{-- =========================
-                            PATIENT ODONTOGRAM
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-teeth"></i>
@@ -852,10 +806,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 @endif
                             </div>
 
-
-                            {{-- =========================
-                            ADDITIONAL CONCERNS
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-regular fa-comment-dots"></i>

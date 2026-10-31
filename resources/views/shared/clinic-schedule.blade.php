@@ -521,11 +521,7 @@
                                                 : true;
                                         @endphp
 
-                                        <div class="table-list-row {{ $loop->first ? 'status-cancelled' : '' }}"
-                                            @if ($loop->first) style="
-                            background: var(--status-bg);
-                            border-left: 3px solid var(--crimson);
-                        " @endif>
+                                        <div class="table-list-row {{ $loop->first ? 'status-cancelled' : '' }}">
 
                                             <div class="flex items-start gap-3 px-4 py-3">
 
@@ -2198,505 +2194,517 @@
         </form>
     </div>
 
-    <div id="reservedPeriodModalBackdrop" class="ui-modal modal-theme-primary" aria-hidden="true">
-        <div class="ui-modal-card modal-xl" data-ui-click="action-22499e15f3ee">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i id="reservedPeriodModalIcon" class="fa-solid fa-calendar-check"></i>
-                    </div>
+    <x-modal id="reservedPeriodModalBackdrop" title="Create Reserved Booking Period" title-id="reservedPeriodModalTitle"
+        size="xl" class="modal-theme-primary" body-class="modal-scroll-body" form-id="reservedPeriodForm"
+        form-class="modal-card-form" :card-attributes="[
+            'data-ui-click' => 'action-22499e15f3ee',
+        ]" :form-attributes="[
+            'method' => 'POST',
+            'action' => route($clinicScheduleRouteNames['reserved_store']),
+            'data-global-validation' => '',
+            'data-form-validation-rule' => 'reservedBookingPeriod',
+        
+            'data-discard-form' => '',
+            'data-discard-title' => 'Discard reserved period changes?',
+            'data-discard-subtitle' => 'You have unsaved reserved booking period details.',
+            'data-discard-message' =>
+                'Closing this modal will remove the reserved period details you entered. Do you want to discard your changes?',
+        
+            'novalidate' => '',
+        ]">
 
-                    <div class="modal-copy">
-                        <h3 id="reservedPeriodModalTitle" class="modal-title">Create Reserved Booking Period</h3>
-                        <p id="reservedPeriodModalSubtitle" class="modal-subtitle">
-                            Reserve part of a clinic day for a selected patient group.
-                        </p>
+        <x-slot:header>
+            <div class="modal-heading">
+                <div class="modal-icon">
+                    <i id="reservedPeriodModalIcon" class="fa-solid fa-calendar-check">
+                    </i>
+                </div>
+
+                <div class="modal-copy">
+                    <h3 id="reservedPeriodModalTitle" class="modal-title">
+                        Create Reserved Booking Period
+                    </h3>
+
+                    <p id="reservedPeriodModalSubtitle" class="modal-subtitle">
+                        Reserve part of a clinic day for a selected patient group.
+                    </p>
+                </div>
+            </div>
+
+            <button type="button" class="modal-x" data-discard-close="reservedPeriodModalBackdrop"
+                aria-label="Close reserved period modal">
+                <i class="fa-solid fa-xmark" aria-hidden="true">
+                </i>
+            </button>
+        </x-slot:header>
+
+        @csrf
+        <div id="reservedPeriodMethodField"></div>
+        <input id="reservedPeriodId" type="hidden" name="reserved_period_id">
+        <input type="hidden" name="allowed_services_present" value="1">
+
+        <div class="modal-form-grid-2">
+            <div class="info-card modal-form-section">
+                <div class="modal-section-heading">
+                    <div class="modal-section-icon">
+                        <i class="fa-solid fa-calendar-day"></i>
+                    </div>
+                    <div>
+                        <h4>Period Details</h4>
+                        <p>Set the purpose, date, and reserved hours.</p>
                     </div>
                 </div>
 
-                <button type="button" class="modal-x" data-discard-close="reservedPeriodModalBackdrop"
-                    aria-label="Close reserved period modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="reservedPeriodForm" method="POST"
-                action="{{ route($clinicScheduleRouteNames['reserved_store']) }}" class="modal-card-form"
-                data-global-validation data-form-validation-rule="reservedBookingPeriod" data-discard-form novalidate>
-
-                <div class="modal-bd modal-scroll-body">
-                    @csrf
-                    <div id="reservedPeriodMethodField"></div>
-                    <input id="reservedPeriodId" type="hidden" name="reserved_period_id">
-                    <input type="hidden" name="allowed_services_present" value="1">
-
-                    <div class="modal-form-grid-2">
-                        <div class="info-card modal-form-section">
-                            <div class="modal-section-heading">
-                                <div class="modal-section-icon">
-                                    <i class="fa-solid fa-calendar-day"></i>
-                                </div>
-                                <div>
-                                    <h4>Period Details</h4>
-                                    <p>Set the purpose, date, and reserved hours.</p>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div data-global-field>
-                                    <label for="reservedTitle" class="form-label">Purpose <span
-                                            class="text-red-500">*</span></label>
-                                    <div class="global-voice-row" data-voice-field>
-                                        <div class="global-voice-control">
-                                            <input id="reservedTitle" name="title" type="text" maxlength="120"
-                                                required
-                                                class="form-input-custom @error('title', 'reservedPeriod') is-invalid @enderror"
-                                                data-field-label="Purpose" placeholder="e.g. Mandatory Oral Check-up">
-                                        </div>
-
-                                        <x-voice-input target="#reservedTitle" status-id="reservedTitleVoiceStatus"
-                                            label="Voice input for reserved period purpose" title="Voice input" />
-                                    </div>
-                                    <div class="global-field-error @error('title', 'reservedPeriod') show @enderror"
-                                        data-error-for="reservedTitle"
-                                        aria-hidden="{{ $reservedErrors->has('title') ? 'false' : 'true' }}">
-                                        @error('title', 'reservedPeriod')
-                                            {{ $message }}
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div data-global-field>
-                                    <label for="reservedDate" class="form-label">
-                                        Date
-                                        <span class="text-red-500">*</span>
-                                    </label>
-
-                                    <div class="fp-date-input-wrap" data-flatpickr-trigger>
-                                        <input id="reservedDate" name="reserved_date" type="text" required readonly
-                                            data-field-label="Date"
-                                            class="form-input-custom fp-date-input js-flatpickr-date-min-today @error('reserved_date', 'reservedPeriod') is-invalid @enderror"
-                                            data-flatpickr-append-to-body
-                                            data-flatpickr-disabled-date-tooltip="This date already has an active reserved booking period"
-                                            data-flatpickr-disabled-dates='[]' placeholder="Select date">
-                                    </div>
-
-                                    <div class="global-field-error @error('reserved_date', 'reservedPeriod') show @enderror"
-                                        data-error-for="reservedDate"
-                                        aria-hidden="{{ $reservedErrors->has('reserved_date') ? 'false' : 'true' }}">
-                                        @error('reserved_date', 'reservedPeriod')
-                                            {{ $message }}
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div class="modal-form-grid-2">
-                                    <div data-global-field>
-                                        <label for="reservedStartTime" class="form-label">Start Time <span
-                                                class="text-red-500">*</span></label>
-                                        <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
-                                            <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
-                                            <input id="reservedStartTime" name="start_time" type="text" required
-                                                readonly data-field-label="Start Time"
-                                                class="form-input-custom global-form-icon js-flatpickr-time @error('start_time', 'reservedPeriod') is-invalid @enderror"
-                                                placeholder="Select start time">
-                                        </div>
-                                        <div class="global-field-error @error('start_time', 'reservedPeriod') show @enderror"
-                                            data-error-for="reservedStartTime"
-                                            aria-hidden="{{ $reservedErrors->has('start_time') ? 'false' : 'true' }}">
-                                            @error('start_time', 'reservedPeriod')
-                                                {{ $message }}
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div data-global-field>
-                                        <label for="reservedEndTime" class="form-label">End Time <span
-                                                class="text-red-500">*</span></label>
-                                        <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
-                                            <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
-                                            <input id="reservedEndTime" name="end_time" type="text" required readonly
-                                                data-field-label="End Time"
-                                                class="form-input-custom global-form-icon js-flatpickr-time @error('end_time', 'reservedPeriod') is-invalid @enderror"
-                                                placeholder="Select end time">
-                                        </div>
-                                        <div class="global-field-error @error('end_time', 'reservedPeriod') show @enderror"
-                                            data-error-for="reservedEndTime"
-                                            aria-hidden="{{ $reservedErrors->has('end_time') ? 'false' : 'true' }}">
-                                            @error('end_time', 'reservedPeriod')
-                                                {{ $message }}
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div data-global-field>
-                                    <span class="form-label">Patient chooses <span class="text-red-500">*</span></span>
-                                    <div id="reservedBookingModeGroup" class="reserved-booking-mode-grid">
-                                        <label class="reserved-booking-mode-card">
-                                            <input type="radio" name="booking_mode" value="timeslot" required
-                                                data-ui-change="action-75f748f7e0aa">
-                                            <span class="reserved-booking-mode-icon"><i
-                                                    class="fa-regular fa-clock"></i></span>
-                                            <span>
-                                                <strong>Date & timeslot</strong>
-                                                <small>Patient selects an available time.</small>
-                                            </span>
-                                        </label>
-                                        <label class="reserved-booking-mode-card">
-                                            <input type="radio" name="booking_mode" value="date_only" required
-                                                data-ui-change="action-75f748f7e0aa">
-                                            <span class="reserved-booking-mode-icon"><i
-                                                    class="fa-solid fa-list-ol"></i></span>
-                                            <span>
-                                                <strong>Date only</strong>
-                                                <small>Queue-based within the period.</small>
-                                            </span>
-                                        </label>
-                                    </div>
-                                    <div class="global-field-error @error('booking_mode', 'reservedPeriod') show @enderror"
-                                        data-error-for="reserved-booking-mode"
-                                        aria-hidden="{{ $reservedErrors->has('booking_mode') ? 'false' : 'true' }}">
-                                        @error('booking_mode', 'reservedPeriod')
-                                            {{ $message }}
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div data-global-field>
-                                    <label for="reservedActivationState" class="form-label">Period State <span
-                                            class="text-red-500">*</span></label>
-                                    <x-select id="reservedActivationState" name="is_active" required
-                                        class="{{ $reservedErrors->has('is_active') ? 'is-invalid' : '' }}"
-                                        data-placeholder="Select period state" data-field-label="Period State"
-                                        data-ui-change="action-e5dcc598a9fd">
-                                        <option value="0" selected>
-                                            Inactive
-                                        </option>
-
-                                        <option value="1">
-                                            Active
-                                        </option>
-                                    </x-select>
-                                    <p class="field-help">
-                                        Inactive saves the setup only. Active reserves the selected date and time and sends
-                                        booking notifications to eligible users.
-                                    </p>
-                                    <div class="global-field-error @error('is_active', 'reservedPeriod') show @enderror"
-                                        data-error-for="reservedActivationState"
-                                        aria-hidden="{{ $reservedErrors->has('is_active') ? 'false' : 'true' }}">
-                                        @error('is_active', 'reservedPeriod')
-                                            {{ $message }}
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-card modal-form-section">
-                            <div class="modal-section-heading">
-                                <div class="modal-section-icon">
-                                    <i class="fa-solid fa-users"></i>
-                                </div>
-                                <div>
-                                    <h4>Target & Capacity</h4>
-                                    <p>Choose who may book and limit the available places.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div data-global-field>
-                                    <label for="reservedPatientType" class="form-label">Patient Type <span
-                                            class="text-red-500">*</span></label>
-                                    <x-select id="reservedPatientType" name="target_patient_type" required
-                                        data-field-label="Patient Type" data-placeholder="Select patient type"
-                                        data-ui-change="action-6aebdfee76f3">
-                                        <option value="student">
-                                            Student
-                                        </option>
-
-                                        <option value="faculty">
-                                            Faculty
-                                        </option>
-
-                                        <option value="administrative">
-                                            Administrative
-                                        </option>
-
-                                        <option value="guest">
-                                            Guest
-                                        </option>
-                                    </x-select>
-                                    @error('target_patient_type', 'reservedPeriod')
-                                        <p class="global-field-error show">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div id="reservedStudentFields" class="info-card modal-form-grid">
-                                    <div data-global-field>
-                                        <label for="reservedProgramCode" class="form-label">Program <span
-                                                class="required-mark">*</span></label>
-
-                                        <x-select id="reservedProgramCode" name="program_code"
-                                            data-field-label="Program" data-placeholder="Select program"
-                                            data-ui-change="action-14444081b07c">
-                                            <option value="">
-                                                Select program
-                                            </option>
-
-                                            @foreach ($studentTargetOptions->unique('course_code') as $studentOption)
-                                                <option value="{{ $studentOption['course_code'] }}">
-                                                    {{ $studentOption['course_code'] }}{{ $studentOption['course_name'] && $studentOption['course_name'] !== $studentOption['course_code'] ? ' — ' . $studentOption['course_name'] : '' }}
-                                                </option>
-                                            @endforeach
-                                        </x-select>
-                                        <p class="field-help">Programs are loaded from the student information system.</p>
-                                        @error('program_code', 'reservedPeriod')
-                                            <p class="global-field-error show">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <div class="modal-form-grid-2">
-                                        <div data-global-field>
-                                            <label for="reservedYearLevel" class="form-label">Year Level <span
-                                                    class="required-mark">*</span></label>
-
-                                            <x-select id="reservedYearLevel" name="year_level"
-                                                data-placeholder="Select year level" data-field-label="Year Level"
-                                                data-ui-change="action-a626fa8e15ce">
-                                                <option value="">
-                                                    Select year
-                                                </option>
-
-                                                @foreach ($studentTargetOptions->pluck('year_level')->filter()->unique()->sort() as $year)
-                                                    <option value="{{ $year }}">
-                                                        Year {{ $year }}
-                                                    </option>
-                                                @endforeach
-                                            </x-select>
-
-                                            @error('year_level', 'reservedPeriod')
-                                                <p class="global-field-error show">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        <div data-global-field>
-                                            <label for="reservedSection" class="form-label">Section <span
-                                                    class="required-mark">*</span></label>
-                                            <x-select id="reservedSection" name="section" data-field-label="Section"
-                                                data-placeholder="Select section">
-                                                <option value="">
-                                                    Select section
-                                                </option>
-
-                                                @foreach ($studentTargetOptions->pluck('section')->filter()->unique() as $sectionOption)
-                                                    <option value="{{ $sectionOption }}">
-                                                        {{ $sectionOption }}
-                                                    </option>
-                                                @endforeach
-                                            </x-select>
-                                            @error('section', 'reservedPeriod')
-                                                <p class="global-field-error show">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div id="reservedOverallCapacityField" data-global-field hidden>
-                                    <label for="reservedMaxCapacity" class="form-label">Maximum Capacity <span
-                                            class="required-mark">*</span></label>
-                                    <x-number-stepper id="reservedMaxCapacity" name="max_capacity" value="10"
-                                        min="1" :max="\App\Models\ReservedBookingPeriod::MAX_CAPACITY" step="1" required
-                                        wrapper-class="reserved-capacity-stepper"
-                                        decrease-label="Decrease maximum capacity"
-                                        increase-label="Increase maximum capacity"
-                                        data-field-label="Maximum Capacity" />
-                                    <p class="field-help">Maximum eligible patients who can book this period, up to
-                                        {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }}.</p>
-                                    @error('max_capacity', 'reservedPeriod')
-                                        <p class="global-field-error show">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-card modal-form-section mt-5" data-global-field>
-                        <div class="modal-section-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-tooth"></i>
-                            </div>
-                            <div>
-                                <h4>
-                                    Allowed Dental Services
-                                </h4>
-                                <span class="required-mark">*</span>
-                                <p>
-                                    Select every service patients may choose during this reserved period.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div id="reservedAllowedServicesGroup" class="global-choice-group">
-                            @foreach ($serviceTypes as $serviceType)
-                                <label class="global-choice-card">
-                                    <input type="checkbox" name="allowed_services[]"
-                                        value="{{ $serviceType->name }}" class="global-choice-input"
-                                        data-reserved-service>
-                                    <span class="global-choice-indicator">
-                                        <i class="fa-solid fa-check"></i>
-                                    </span>
-                                    <span class="global-choice-copy">
-                                        <span class="global-choice-title">{{ $serviceType->name }}</span>
-                                        <span class="global-choice-description">
-                                            {{ $serviceType->description ?: 'Available dental service.' }}
-                                        </span>
-                                    </span>
-                                </label>
-                            @endforeach
-                        </div>
-                        <p class="field-help">Only these services will appear when an eligible patient books this period.
-                        </p>
-                        <div class="global-field-error @error('allowed_services', 'reservedPeriod') show @enderror"
-                            data-error-for="reserved-allowed-services"
-                            aria-hidden="{{ $reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*') ? 'false' : 'true' }}">
-                            @if ($reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*'))
-                                {{ $reservedErrors->first('allowed_services') ?: $reservedErrors->first('allowed_services.*') }}
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="info-card modal-form-section mt-5" data-global-field>
-                        <div class="modal-section-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-note-sticky"></i>
-                            </div>
-
-                            <div>
-                                <h4>
-                                    Additional Notes
-                                </h4>
-
-                                <p>
-                                    Add optional instructions for this reserved booking period.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="global-label-row">
-                            <label for="reservedNotes" class="form-label">
-                                Notes
-                                <span class="field-optional">(Optional)</span>
-                            </label>
-
-                            <span id="reservedNotesCount" class="char-counter">
-                                0 / 500 characters
-                            </span>
-                        </div>
-
+                <div class="space-y-4">
+                    <div data-global-field>
+                        <label for="reservedTitle" class="form-label">Purpose <span class="text-red-500">*</span></label>
                         <div class="global-voice-row" data-voice-field>
                             <div class="global-voice-control">
-                                <div class="global-form-textarea-wrap">
-                                    <textarea id="reservedNotes" name="notes" maxlength="500" rows="3"
-                                        class="form-input-custom global-form-textarea" data-char-limit="500" data-char-counter="#reservedNotesCount"
-                                        data-field-label="Notes" placeholder="Internal instructions for this reserved period.">{{ old('notes') }}</textarea>
-                                </div>
+                                <input id="reservedTitle" name="title" type="text" maxlength="120" required
+                                    class="form-input-custom @error('title', 'reservedPeriod') is-invalid @enderror"
+                                    data-field-label="Purpose" placeholder="e.g. Mandatory Oral Check-up">
                             </div>
 
-                            <x-voice-input target="#reservedNotes" status-id="reservedNotesVoiceStatus"
-                                label="Voice input for reserved period notes" title="Voice input" />
+                            <x-voice-input target="#reservedTitle" status-id="reservedTitleVoiceStatus"
+                                label="Voice input for reserved period purpose" title="Voice input" />
                         </div>
-
-                        <div class="global-field-error @error('notes', 'reservedPeriod') show @enderror"
-                            data-error-for="reservedNotes"
-                            aria-hidden="{{ $reservedErrors->has('notes') ? 'false' : 'true' }}">
-                            @error('notes', 'reservedPeriod')
+                        <div class="global-field-error @error('title', 'reservedPeriod') show @enderror"
+                            data-error-for="reservedTitle"
+                            aria-hidden="{{ $reservedErrors->has('title') ? 'false' : 'true' }}">
+                            @error('title', 'reservedPeriod')
                                 {{ $message }}
                             @enderror
                         </div>
                     </div>
 
-                    <div id="reservedTimeslotBuilder" class="info-card modal-form-section mt-5">
-                        <div class="modal-section-heading reserved-timeslot-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-clock"></i>
-                            </div>
-                            <div>
-                                <h4>Selectable Timeslots</h4>
-                                <p>Create up to
-                                    {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }} times patients can choose. Each
-                                    timeslot is for one patient.</p>
-                            </div>
-                            <div class="reserved-timeslot-total">
-                                <span id="reservedTimeslotTotal">0</span>
-                                <small>total patients</small>
-                            </div>
+                    <div data-global-field>
+                        <label for="reservedDate" class="form-label">
+                            Date
+                            <span class="text-red-500">*</span>
+                        </label>
+
+                        <div class="fp-date-input-wrap" data-flatpickr-trigger>
+                            <input id="reservedDate" name="reserved_date" type="text" required readonly
+                                data-field-label="Date"
+                                class="form-input-custom fp-date-input js-flatpickr-date-min-today @error('reserved_date', 'reservedPeriod') is-invalid @enderror"
+                                data-flatpickr-append-to-body
+                                data-flatpickr-disabled-date-tooltip="This date already has an active reserved booking period"
+                                data-flatpickr-disabled-dates='[]' placeholder="Select date">
                         </div>
 
-                        <div class="reserved-timeslot-add-row">
-                            <div data-global-field>
-                                <label for="reservedSlotDuration" class="form-label">
-                                    Duration (minutes)
-                                </label>
-
-                                <x-number-stepper id="reservedSlotDuration" name="timeslot_duration_minutes"
-                                    value="30" min="5" max="240" step="5" required
-                                    decrease-label="Decrease duration" increase-label="Increase duration"
-                                    autocomplete="off" data-field-label="Duration" data-validation-rule="wholeNumber"
-                                    data-ui-change="action-443e42f7600e" />
-                            </div>
-                            <div data-global-field>
-                                <label for="reservedNewSlotTime" class="form-label">
-                                    Timeslot
-                                </label>
-
-                                <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
-                                    <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
-
-                                    <input id="reservedNewSlotTime" type="text" readonly
-                                        class="form-input-custom global-form-icon js-flatpickr-time" value="09:00"
-                                        placeholder="Select timeslot">
-                                </div>
-                            </div>
-                            <x-button id="reservedAddTimeslotButton" type="button" variant="primary"
-                                icon="fa-solid fa-plus" data-ui-click="action-9f3a82837bcb">
-                                Add Timeslot
-                            </x-button>
+                        <div class="global-field-error @error('reserved_date', 'reservedPeriod') show @enderror"
+                            data-error-for="reservedDate"
+                            aria-hidden="{{ $reservedErrors->has('reserved_date') ? 'false' : 'true' }}">
+                            @error('reserved_date', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
                         </div>
-
-                        <div class="global-field-error" data-error-for="reservedNewSlotTime" aria-hidden="true">
-                        </div>
-
-                        <div id="reservedTimeslotList" class="reserved-timeslot-list"></div>
-                        <p id="reservedTimeslotEmpty" class="reserved-timeslot-empty">
-                            <i class="fa-regular fa-clock"></i>
-                            No timeslots yet. Add the first selectable time above.
-                        </p>
-                        @if ($reservedErrors->has('timeslots') || $reservedErrors->has('timeslots.*.time'))
-                            <p class="global-field-error show">
-                                {{ $reservedErrors->first('timeslots') ?: $reservedErrors->first('timeslots.*.time') }}
-                            </p>
-                        @endif
                     </div>
 
+                    <div class="modal-form-grid-2">
+                        <div data-global-field>
+                            <label for="reservedStartTime" class="form-label">Start Time <span
+                                    class="required-mark">*</span></label>
+
+                            <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                                <i class="fa-regular fa-clock global-control-icon" aria-hidden="true">
+                                </i>
+
+                                <input id="reservedStartTime" name="start_time" type="text" required readonly
+                                    data-field-label="Start Time" data-flatpickr-append-to-body
+                                    class="form-input-custom global-form-icon js-flatpickr-time @error('start_time', 'reservedPeriod') is-invalid @enderror"
+                                    placeholder="Select start time">
+                            </div>
+
+                            <div class="global-field-error @error('start_time', 'reservedPeriod') show @enderror"
+                                data-error-for="reservedStartTime"
+                                aria-hidden="{{ $reservedErrors->has('start_time') ? 'false' : 'true' }}">
+                                @error('start_time', 'reservedPeriod')
+                                    {{ $message }}
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div data-global-field>
+                            <label for="reservedEndTime" class="form-label">End Time <span
+                                    class="required-mark">*</span></label>
+
+                            <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                                <i class="fa-regular fa-clock global-control-icon" aria-hidden="true">
+                                </i>
+
+                                <input id="reservedEndTime" name="end_time" type="text" required readonly
+                                    data-field-label="End Time" data-flatpickr-append-to-body
+                                    class="form-input-custom global-form-icon js-flatpickr-time @error('end_time', 'reservedPeriod') is-invalid @enderror"
+                                    placeholder="Select end time">
+                            </div>
+
+                            <div class="global-field-error @error('end_time', 'reservedPeriod') show @enderror"
+                                data-error-for="reservedEndTime"
+                                aria-hidden="{{ $reservedErrors->has('end_time') ? 'false' : 'true' }}">
+                                @error('end_time', 'reservedPeriod')
+                                    {{ $message }}
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-global-field>
+                        <span class="form-label">Patient chooses <span class="text-red-500">*</span></span>
+                        <div id="reservedBookingModeGroup" class="reserved-booking-mode-grid">
+                            <label class="reserved-booking-mode-card">
+                                <input type="radio" name="booking_mode" value="timeslot" required
+                                    data-ui-change="action-75f748f7e0aa">
+                                <span class="reserved-booking-mode-icon"><i class="fa-regular fa-clock"></i></span>
+                                <span>
+                                    <strong>Date & timeslot</strong>
+                                    <small>Patient selects an available time.</small>
+                                </span>
+                            </label>
+                            <label class="reserved-booking-mode-card">
+                                <input type="radio" name="booking_mode" value="date_only" required
+                                    data-ui-change="action-75f748f7e0aa">
+                                <span class="reserved-booking-mode-icon"><i class="fa-solid fa-list-ol"></i></span>
+                                <span>
+                                    <strong>Date only</strong>
+                                    <small>Queue-based within the period.</small>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="global-field-error @error('booking_mode', 'reservedPeriod') show @enderror"
+                            data-error-for="reserved-booking-mode"
+                            aria-hidden="{{ $reservedErrors->has('booking_mode') ? 'false' : 'true' }}">
+                            @error('booking_mode', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div data-global-field>
+                        <label for="reservedActivationState" class="form-label">Period State <span
+                                class="text-red-500">*</span></label>
+                        <x-select id="reservedActivationState" name="is_active" required
+                            class="{{ $reservedErrors->has('is_active') ? 'is-invalid' : '' }}"
+                            data-placeholder="Select period state" data-field-label="Period State"
+                            data-ui-change="action-e5dcc598a9fd">
+                            <option value="0" selected>
+                                Inactive
+                            </option>
+
+                            <option value="1">
+                                Active
+                            </option>
+                        </x-select>
+                        <p class="field-help">
+                            Inactive saves the setup only. Active reserves the selected date and time and sends
+                            booking notifications to eligible users.
+                        </p>
+                        <div class="global-field-error @error('is_active', 'reservedPeriod') show @enderror"
+                            data-error-for="reservedActivationState"
+                            aria-hidden="{{ $reservedErrors->has('is_active') ? 'false' : 'true' }}">
+                            @error('is_active', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card modal-form-section">
+                <div class="modal-section-heading">
+                    <div class="modal-section-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <h4>Target & Capacity</h4>
+                        <p>Choose who may book and limit the available places.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="modal-ft modal-sticky-footer">
-                    <x-button type="button" variant="secondary" data-discard-close="reservedPeriodModalBackdrop">
-                        Cancel
-                    </x-button>
+                <div class="space-y-4">
+                    <div data-global-field>
+                        <label for="reservedPatientType" class="form-label">Patient Type <span
+                                class="text-red-500">*</span></label>
+                        <x-select id="reservedPatientType" name="target_patient_type" required
+                            data-field-label="Patient Type" data-placeholder="Select patient type"
+                            data-ui-change="action-6aebdfee76f3">
+                            <option value="student">
+                                Student
+                            </option>
 
-                    <x-button id="reservedPeriodSubmitButton" type="submit" variant="primary"
-                        icon="fa-solid fa-floppy-disk">
-                        <span id="reservedPeriodSubmitText">
-                            Save Reserved Period
-                        </span>
-                    </x-button>
+                            <option value="faculty">
+                                Faculty
+                            </option>
+
+                            <option value="administrative">
+                                Administrative
+                            </option>
+
+                            <option value="guest">
+                                Guest
+                            </option>
+                        </x-select>
+                        @error('target_patient_type', 'reservedPeriod')
+                            <p class="global-field-error show">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div id="reservedStudentFields" class="info-card modal-form-grid">
+                        <div data-global-field>
+                            <label for="reservedProgramCode" class="form-label">Program <span
+                                    class="required-mark">*</span></label>
+
+                            <x-select id="reservedProgramCode" name="program_code" data-field-label="Program"
+                                data-placeholder="Select program" data-ui-change="action-14444081b07c">
+                                <option value="">
+                                    Select program
+                                </option>
+
+                                @foreach ($studentTargetOptions->unique('course_code') as $studentOption)
+                                    <option value="{{ $studentOption['course_code'] }}">
+                                        {{ $studentOption['course_code'] }}{{ $studentOption['course_name'] && $studentOption['course_name'] !== $studentOption['course_code'] ? ' — ' . $studentOption['course_name'] : '' }}
+                                    </option>
+                                @endforeach
+                            </x-select>
+                            <p class="field-help">Programs are loaded from the student information system.</p>
+                            @error('program_code', 'reservedPeriod')
+                                <p class="global-field-error show">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="modal-form-grid-2">
+                            <div data-global-field>
+                                <label for="reservedYearLevel" class="form-label">Year Level <span
+                                        class="required-mark">*</span></label>
+
+                                <x-select id="reservedYearLevel" name="year_level"
+                                    data-placeholder="Select year level" data-field-label="Year Level"
+                                    data-ui-change="action-a626fa8e15ce">
+                                    <option value="">
+                                        Select year
+                                    </option>
+
+                                    @foreach ($studentTargetOptions->pluck('year_level')->filter()->unique()->sort() as $year)
+                                        <option value="{{ $year }}">
+                                            Year {{ $year }}
+                                        </option>
+                                    @endforeach
+                                </x-select>
+
+                                @error('year_level', 'reservedPeriod')
+                                    <p class="global-field-error show">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div data-global-field>
+                                <label for="reservedSection" class="form-label">Section <span
+                                        class="required-mark">*</span></label>
+                                <x-select id="reservedSection" name="section" data-field-label="Section"
+                                    data-placeholder="Select section">
+                                    <option value="">
+                                        Select section
+                                    </option>
+
+                                    @foreach ($studentTargetOptions->pluck('section')->filter()->unique() as $sectionOption)
+                                        <option value="{{ $sectionOption }}">
+                                            {{ $sectionOption }}
+                                        </option>
+                                    @endforeach
+                                </x-select>
+                                @error('section', 'reservedPeriod')
+                                    <p class="global-field-error show">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="reservedOverallCapacityField" data-global-field hidden>
+                        <label for="reservedMaxCapacity" class="form-label">Maximum Capacity <span
+                                class="required-mark">*</span></label>
+                        <x-number-stepper id="reservedMaxCapacity" name="max_capacity" value="10" min="1"
+                            :max="\App\Models\ReservedBookingPeriod::MAX_CAPACITY" step="1" required wrapper-class="reserved-capacity-stepper"
+                            decrease-label="Decrease maximum capacity" increase-label="Increase maximum capacity"
+                            data-field-label="Maximum Capacity" />
+                        <p class="field-help">Maximum eligible patients who can book this period, up to
+                            {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }}.</p>
+                        @error('max_capacity', 'reservedPeriod')
+                            <p class="global-field-error show">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
+
+        <div class="info-card modal-form-section mt-5" data-global-field>
+            <div class="modal-section-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-tooth"></i>
+                </div>
+                <div>
+                    <h4>
+                        Allowed Dental Services
+                    </h4>
+                    <span class="required-mark">*</span>
+                    <p>
+                        Select every service patients may choose during this reserved period.
+                    </p>
+                </div>
+            </div>
+
+            <div id="reservedAllowedServicesGroup" class="global-choice-group">
+                @foreach ($serviceTypes as $serviceType)
+                    <label class="global-choice-card">
+                        <input type="checkbox" name="allowed_services[]" value="{{ $serviceType->name }}"
+                            class="global-choice-input" data-reserved-service>
+                        <span class="global-choice-indicator">
+                            <i class="fa-solid fa-check"></i>
+                        </span>
+                        <span class="global-choice-copy">
+                            <span class="global-choice-title">{{ $serviceType->name }}</span>
+                            <span class="global-choice-description">
+                                {{ $serviceType->description ?: 'Available dental service.' }}
+                            </span>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            <p class="field-help">Only these services will appear when an eligible patient books this period.
+            </p>
+            <div class="global-field-error @error('allowed_services', 'reservedPeriod') show @enderror"
+                data-error-for="reserved-allowed-services"
+                aria-hidden="{{ $reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*') ? 'false' : 'true' }}">
+                @if ($reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*'))
+                    {{ $reservedErrors->first('allowed_services') ?: $reservedErrors->first('allowed_services.*') }}
+                @endif
+            </div>
+        </div>
+
+        <div class="info-card modal-form-section mt-5" data-global-field>
+            <div class="modal-section-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-note-sticky"></i>
+                </div>
+
+                <div>
+                    <h4>
+                        Additional Notes
+                    </h4>
+
+                    <p>
+                        Add optional instructions for this reserved booking period.
+                    </p>
+                </div>
+            </div>
+
+            <div class="global-label-row">
+                <label for="reservedNotes" class="form-label">
+                    Notes
+                    <span class="field-optional">(Optional)</span>
+                </label>
+
+                <span id="reservedNotesCount" class="char-counter">
+                    0 / 500 characters
+                </span>
+            </div>
+
+            <div class="global-voice-row" data-voice-field>
+                <div class="global-voice-control">
+                    <div class="global-form-textarea-wrap">
+                        <textarea id="reservedNotes" name="notes" maxlength="500" rows="3"
+                            class="form-input-custom global-form-textarea" data-char-limit="500" data-char-counter="#reservedNotesCount"
+                            data-field-label="Notes" placeholder="Internal instructions for this reserved period.">{{ old('notes') }}</textarea>
+                    </div>
+                </div>
+
+                <x-voice-input target="#reservedNotes" status-id="reservedNotesVoiceStatus"
+                    label="Voice input for reserved period notes" title="Voice input" />
+            </div>
+
+            <div class="global-field-error @error('notes', 'reservedPeriod') show @enderror"
+                data-error-for="reservedNotes" aria-hidden="{{ $reservedErrors->has('notes') ? 'false' : 'true' }}">
+                @error('notes', 'reservedPeriod')
+                    {{ $message }}
+                @enderror
+            </div>
+        </div>
+
+        <div id="reservedTimeslotBuilder" class="info-card modal-form-section mt-5">
+            <div class="modal-section-heading reserved-timeslot-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div>
+                    <h4>Selectable Timeslots</h4>
+                    <p>Create up to
+                        {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }} times patients can choose. Each
+                        timeslot is for one patient.</p>
+                </div>
+                <div class="reserved-timeslot-total">
+                    <span id="reservedTimeslotTotal">0</span>
+                    <small>total patients</small>
+                </div>
+            </div>
+
+            <div class="reserved-timeslot-add-row">
+                <div data-global-field>
+                    <label for="reservedSlotDuration" class="form-label">
+                        Duration (minutes)
+                    </label>
+
+                    <x-number-stepper id="reservedSlotDuration" name="timeslot_duration_minutes" value="30"
+                        min="5" max="240" step="5" required decrease-label="Decrease duration"
+                        increase-label="Increase duration" autocomplete="off" data-field-label="Duration"
+                        data-validation-rule="wholeNumber" data-ui-change="action-443e42f7600e" />
+                </div>
+                <div data-global-field>
+                    <label for="reservedNewSlotTime" class="form-label">
+                        Timeslot
+                    </label>
+
+                    <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                        <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
+
+                        <input id="reservedNewSlotTime" type="text" readonly
+                            class="form-input-custom global-form-icon js-flatpickr-time" value="09:00"
+                            placeholder="Select timeslot">
+                    </div>
+                </div>
+                <x-button id="reservedAddTimeslotButton" type="button" variant="primary" icon="fa-solid fa-plus"
+                    data-ui-click="action-9f3a82837bcb">
+                    Add Timeslot
+                </x-button>
+            </div>
+
+            <div class="global-field-error" data-error-for="reservedNewSlotTime" aria-hidden="true">
+            </div>
+
+            <div id="reservedTimeslotList" class="reserved-timeslot-list"></div>
+            <p id="reservedTimeslotEmpty" class="reserved-timeslot-empty">
+                <i class="fa-regular fa-clock"></i>
+                No timeslots yet. Add the first selectable time above.
+            </p>
+            @if ($reservedErrors->has('timeslots') || $reservedErrors->has('timeslots.*.time'))
+                <p class="global-field-error show">
+                    {{ $reservedErrors->first('timeslots') ?: $reservedErrors->first('timeslots.*.time') }}
+                </p>
+            @endif
+        </div>
+
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-discard-close="reservedPeriodModalBackdrop">
+                Cancel
+            </x-button>
+
+            <x-button id="reservedPeriodSubmitButton" type="submit" variant="primary"
+                icon="fa-solid fa-floppy-disk">
+                <span id="reservedPeriodSubmitText">
+                    Save Reserved Period
+                </span>
+            </x-button>
+        </x-slot:footer>
+
+    </x-modal>
 
     <x-delete-confirm-modal id="scheduleDeleteModal" form-id="scheduleDeleteForm" name-id="scheduleDeleteName"
         title="Delete Schedule Rule" helper="This schedule rule will be permanently removed." />
@@ -4007,7 +4015,7 @@
                 })
             );
 
-            timeFields.style.display = '';
+            timeFields.classList.remove('hidden');
 
             if (mode === 'edit' && rule) {
                 backdrop.classList.remove('modal-theme-primary');
@@ -4127,7 +4135,17 @@
         }
 
         function toggleStatusFields(val) {
-            document.getElementById('ruleTimeFields').style.display = val === 'closed' ? 'none' : '';
+            const timeFields =
+                document.getElementById('ruleTimeFields');
+
+            if (!timeFields) {
+                return;
+            }
+
+            timeFields.classList.toggle(
+                'hidden',
+                val === 'closed'
+            );
         }
 
         function selectBreak(selectedButton) {
@@ -5061,6 +5079,80 @@
             }
         }
 
+        async function openReservedPeriodPicker(input) {
+            if (!input) {
+                return;
+            }
+
+            const modal = document.getElementById(
+                'reservedPeriodModalBackdrop'
+            );
+
+            if (!modal) {
+                return;
+            }
+
+            if (!input._flatpickr) {
+                try {
+                    await window.initGlobalDatePickers?.(
+                        modal
+                    );
+                } catch (error) {
+                    console.error(
+                        'Unable to initialize reserved period picker.',
+                        error
+                    );
+                }
+            }
+
+            input._flatpickr?.open();
+        }
+
+        function bindReservedPeriodPickerTriggers() {
+            const modal = document.getElementById(
+                'reservedPeriodModalBackdrop'
+            );
+
+            if (
+                !modal ||
+                modal.dataset.flatpickrTriggersBound === 'true'
+            ) {
+                return;
+            }
+
+            modal.dataset.flatpickrTriggersBound = 'true';
+
+            modal.addEventListener(
+                'click',
+                async event => {
+                    const trigger =
+                        event.target.closest(
+                            '[data-flatpickr-trigger]'
+                        );
+
+                    if (
+                        !trigger ||
+                        !modal.contains(trigger)
+                    ) {
+                        return;
+                    }
+
+                    const input =
+                        trigger.querySelector(
+                            '.js-flatpickr-date-min-today, .js-flatpickr-time'
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    await openReservedPeriodPicker(
+                        input
+                    );
+                }
+            );
+        }
+
         function openReservedPeriodModal(mode = 'create', periodId = null, period = null) {
             const modal = document.getElementById('reservedPeriodModalBackdrop');
             const form = document.getElementById('reservedPeriodForm');
@@ -5208,15 +5300,21 @@
             window.openModal('reservedPeriodModalBackdrop');
 
             Promise.resolve(
-                window.initGlobalDatePickers?.(
-                    modal
+                    window.initGlobalDatePickers?.(
+                        modal
+                    )
                 )
-            ).catch(error => {
-                console.error(
-                    'Unable to initialize reserved period date picker.',
-                    error
-                );
-            });
+                .then(() => {
+                    syncReservedDateAvailability(
+                        mode === 'edit' ? periodId : null
+                    );
+                })
+                .catch(error => {
+                    console.error(
+                        'Unable to initialize reserved period pickers.',
+                        error
+                    );
+                });
         }
 
         function openReservedPeriodDeleteModal(action, title) {
@@ -5601,6 +5699,8 @@
 
         function initializeClinicScheduleDynamicUi() {
             bindClinicScheduleAjaxForms();
+
+            bindReservedPeriodPickerTriggers();
 
             renderClinicScheduleEmptyStates();
 

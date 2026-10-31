@@ -399,7 +399,6 @@
                         </label>
                     @endif
 
-
                     @if ($showSettings && Route::has('admin.system_settings'))
                         <a href="{{ route('admin.system_settings') }}" class="dropdown-menu-item" role="menuitem">
                             <div class="dropdown-item-content">
@@ -416,7 +415,6 @@
                         </a>
                     @endif
 
-
                     @if ($isPatientHeader && Route::has('security.sessions.index'))
                         <div class="dropdown-menu-divider patient-mobile-theme-divider" role="separator"></div>
                     @endif
@@ -424,7 +422,6 @@
                     @if ($showSettings && Route::has('admin.system_settings') && Route::has('security.sessions.index'))
                         <div class="dropdown-menu-divider" role="separator"></div>
                     @endif
-
 
                     @if (Route::has('security.sessions.index'))
                         <a href="{{ route('security.sessions.index') }}" class="dropdown-menu-item" role="menuitem">
@@ -461,31 +458,9 @@
                         </form>
                     @endif
 
-                    @if ($isPatientHeader)
-                        <div class="dropdown-menu-divider patient-mobile-logout-divider" role="separator"></div>
-
-                        <form action="{{ route('logout') }}" method="POST"
-                            class="js-logout-form header-logout-form patient-mobile-logout-form">
-                            @csrf
-
-                            <button type="submit" class="dropdown-menu-item header-logout-item">
-                                <div class="dropdown-item-content">
-                                    <span class="sidebar-group-icon">
-                                        <i class="fa-solid fa-right-from-bracket"></i>
-                                    </span>
-
-                                    <span class="dropdown-item-text">
-                                        Log Out
-                                    </span>
-                                </div>
-                            </button>
-                        </form>
-                    @endif
-
                 </div>
 
             </div>
         </div>
-    </div>
     </div>
 </header>

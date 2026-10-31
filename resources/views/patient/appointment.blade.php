@@ -76,9 +76,7 @@
 
                 'status' => 'completed',
 
-                'dentist' =>
-                    $appt->dentist_name ??
-                    'Not assigned',
+                'dentist' => $appt->dentist_name ?? 'Not assigned',
 
                 'duration' => $appt->procedure?->procedure_duration_seconds
                     ? \Carbon\CarbonInterval::seconds((int) $appt->procedure->procedure_duration_seconds)
@@ -241,10 +239,10 @@
 
                         </div>
 
-                        <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm" data-ui-click="action-9eb7d8dc0629">
-                            <i class="fa-solid fa-calendar-plus"></i>
-                            <span>Schedule Check-Up</span>
-                        </button>
+                        <x-button type="button" variant="secondary" size="sm" icon="fa-solid fa-calendar-plus"
+                            data-ui-click="action-9eb7d8dc0629">
+                            Schedule Check-Up
+                        </x-button>
 
                     </div>
                 </div>
@@ -349,21 +347,20 @@
                 </div>
 
                 <div class="appt-quick-actions">
-                    <a href="{{ route('patient.book.appointment') }}" class="ui-btn ui-btn-secondary ">
-                        <i class="fa-solid fa-calendar-plus"></i>
-                        <span>Rebook Appointment</span>
-                    </a>
+                    <x-button href="{{ route('patient.book.appointment') }}" variant="secondary"
+                        icon="fa-solid fa-calendar-plus">
+                        Rebook Appointment
+                    </x-button>
 
-                    <button type="button" class="ui-btn ui-btn-secondary "
+                    <x-button type="button" variant="secondary" icon="fa-solid fa-clock-rotate-left"
                         data-ui-click="action-3581bd1ec7b5">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
-                        <span>View Past Visits</span>
-                    </button>
+                        View Past Visits
+                    </x-button>
 
-                    <button type="button" class="ui-btn ui-btn-secondary " data-ui-click="action-8d572863bc05">
-                        <i class="fa-solid fa-calendar-days"></i>
-                        <span>Focus Calendar</span>
-                    </button>
+                    <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-days"
+                        data-ui-click="action-8d572863bc05">
+                        Focus Calendar
+                    </x-button>
                 </div>
             </section>
 
@@ -393,7 +390,8 @@
 
                     <div class="appt-list-tabs" id="apptListTabs">
 
-                        <button type="button" class="appt-tab appt-active" id="apptFutureTab" data-ui-click="action-2600bc4012b8">
+                        <button type="button" class="appt-tab appt-active" id="apptFutureTab"
+                            data-ui-click="action-2600bc4012b8">
                             <i class="fa-regular fa-calendar"></i>
 
                             <span>Future Visits</span>
@@ -568,10 +566,10 @@
                                 Your completed appointments will appear here.
                             </p>
 
-                            <button type="button" data-ui-click="action-2600bc4012b8" class="ui-btn ui-btn-secondary mt-4">
-                                <i class="fa-solid fa-calendar-plus"></i>
+                            <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-plus" class="mt-4"
+                                data-ui-click="action-2600bc4012b8">
                                 Book First Appointment
-                            </button>
+                            </x-button>
                         </div>
                     @endif
                 </div>

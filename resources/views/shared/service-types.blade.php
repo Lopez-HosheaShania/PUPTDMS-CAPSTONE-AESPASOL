@@ -106,7 +106,9 @@
                                                         class="form-input-custom global-form-icon global-control-with-action"
                                                         placeholder="e.g. Tooth Extraction" autocomplete="off"
                                                         maxlength="255" data-field-label="Service Name"
+                                                        data-validation-rule="personName"
                                                         data-required-message="Please enter a service name."
+                                                        data-pattern-message="Only letters, spaces, apostrophe, period, and hyphen are allowed."
                                                         data-clearable-input required>
 
                                                     <button type="button" class="search-clear field-clear-btn"
@@ -416,8 +418,10 @@
 
                             <input type="text" id="manageServiceName" name="name"
                                 class="form-input-custom global-form-icon global-control-with-action" maxlength="255"
-                                autocomplete="off" data-field-label="Service Name"
-                                data-required-message="Please enter a service name." required>
+                                autocomplete="off" data-field-label="Service Name" data-validation-rule="personName"
+                                data-required-message="Please enter a service name."
+                                data-pattern-message="Only letters, spaces, apostrophe, period, and hyphen are allowed."
+                                required>
 
                         </div>
                     </div>
