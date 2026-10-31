@@ -37,15 +37,7 @@
                     </div>
                 </div>
             @else
-                <div class="page-banner mb-6">
-                    <div class="page-banner-inner">
-                        <div class="min-w-0">
-                            <h1 class="page-title">
-                                Faculty Integration
-                            </h1>
-                        </div>
-                    </div>
-                </div>
+                <x-page-banner title="Faculty Integration" class="mb-6" />
             @endif
 
             <form id="facultyIntegrationForm" method="POST" action="{{ route($routePrefix . '.faculty.store') }}"
@@ -95,7 +87,8 @@
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
 
-                                        <div id="progressFacultyBar" class="progress-fill" data-ui-presentation="presentation-72dd1572d65e">
+                                        <div id="progressFacultyBar" class="progress-fill"
+                                            data-ui-presentation="presentation-72dd1572d65e">
                                         </div>
 
                                     </div>
@@ -191,7 +184,8 @@
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
 
-                                        <div id="progressInformationBar" class="progress-fill" data-ui-presentation="presentation-72dd1572d65e">
+                                        <div id="progressInformationBar" class="progress-fill"
+                                            data-ui-presentation="presentation-72dd1572d65e">
                                         </div>
 
                                     </div>
@@ -445,7 +439,8 @@
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
 
-                                        <div id="progressAccessBar" class="progress-fill" data-ui-presentation="presentation-72dd1572d65e">
+                                        <div id="progressAccessBar" class="progress-fill"
+                                            data-ui-presentation="presentation-72dd1572d65e">
                                         </div>
 
                                     </div>
@@ -608,10 +603,9 @@
                                         Reset
                                     </button>
 
-                                    <button type="submit" class="ui-btn ui-btn-primary">
-                                        <i class="fa-solid fa-floppy-disk"></i>
+                                    <x-button type="submit" variant="primary" icon="fa-solid fa-floppy-disk">
                                         Save Faculty
-                                    </button>
+                                    </x-button>
 
                                 </div>
 
@@ -624,27 +618,8 @@
 
                         <section class="card">
 
-                            <div class="card-header">
-
-                                <div class="card-header-left">
-
-                                    <div class="card-header-icon">
-                                        <i class="fa-solid fa-circle-info"></i>
-                                    </div>
-
-                                    <div>
-                                        <h2 class="card-title">
-                                            Quick Notes
-                                        </h2>
-
-                                        <p class="card-subtitle">
-                                            Guidance for a cleaner workflow
-                                        </p>
-                                    </div>
-
-                                </div>
-
-                            </div>
+                            <x-card-header title="Quick Notes" subtitle="Guidance for a cleaner workflow"
+                                icon="fa-solid fa-circle-info" />
 
                             <div class="card-body">
 

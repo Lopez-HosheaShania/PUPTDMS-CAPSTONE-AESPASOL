@@ -31,9 +31,6 @@
             ->values()
             ->all();
 
-        // PUP calendar holiday source may be temporarily unavailable.
-        // Prefer live holidays, then use a backend-provided fallback (if any).
-        // If both are empty, the calendar still renders local academic-period dates.
         $liveHolidays = collect($holidays ?? [])->filter();
         $fallbackHolidaysCollection = collect($fallbackHolidays ?? [])->filter();
 
@@ -42,12 +39,6 @@
 
         $holidaySourceUnavailable = (bool) ($holidaySourceUnavailable ?? $liveHolidays->isEmpty());
 
-        // Normalize both old and new holiday payload shapes before sending them to JavaScript.
-        // Supported examples:
-        //   ['2026-01-01' => 'New Year\'s Day']
-        //   ['2026-01-01' => ['name' => 'New Year\'s Day']]
-        //   [['date' => '2026-01-01', 'name' => 'New Year\'s Day']]
-        //   collection/object items with date + name/title/label fields
         $holidayEvents = $calendarHolidays
             ->map(function ($holiday, $key) {
                 $date = is_string($key) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $key) ? $key : null;
@@ -68,7 +59,6 @@
                             (data_get($holiday, 'label') ??
                                 (data_get($holiday, 'holiday_name') ?? data_get($holiday, 'description'))));
 
-                    // Some APIs/services return the holiday name itself as an object.
                     if (is_array($label) || is_object($label)) {
                         $label =
                             data_get($label, 'name') ??
@@ -160,47 +150,47 @@
                     </div>
 
                     <div class="dentist-hero-actions">
-                        <button type="button" class="ui-btn ui-btn-secondary" data-open-modal="syncFlssModal">
-                            <i class="fa-solid fa-rotate"></i>
-                            <span>Sync from FLSS</span>
-                        </button>
+                        <x-button type="button" variant="secondary" icon="fa-solid fa-rotate"
+                            data-open-modal="syncFlssModal">
+                            Sync from FLSS
+                        </x-button>
 
-                        <button id="openAddPeriodBtn" type="button" class="ui-btn ui-btn-primary"
-                            @if ($canCreateAcademicPeriod) data-open-modal="addModal"
+                        @if ($canCreateAcademicPeriod)
+                            <x-button id="openAddPeriodBtn" type="button" variant="primary" icon="fa-solid fa-plus"
+                                data-open-modal="addModal">
+                                Add Period
+                            </x-button>
                         @else
-                            data-academic-permission-trigger="create"
-                            aria-disabled="true"
-                            title="{{ $createAcademicPeriodUnauthorizedMessage }}" @endif>
-                            <i class="fa-solid fa-plus"></i>
-                            <span>Add Period</span>
-                        </button>
+                            <x-button id="openAddPeriodBtn" type="button" variant="primary" icon="fa-solid fa-plus"
+                                data-academic-permission-trigger="create" aria-disabled="true"
+                                title="{{ $createAcademicPeriodUnauthorizedMessage }}">
+                                Add Period
+                            </x-button>
+                        @endif
                     </div>
                 </div>
             @else
-                <div class="page-banner">
-                    <div class="page-banner-inner">
-                        <div>
-                            <h1 class="page-title">Academic Periods</h1>
-                        </div>
+                <x-page-banner title="Academic Periods" actions-class="admin-banner-actions">
+                    <x-slot:actions>
+                        <x-button type="button" variant="secondary" icon="fa-solid fa-rotate"
+                            data-open-modal="syncFlssModal">
+                            Sync from FLSS
+                        </x-button>
 
-                        <div class="admin-banner-actions">
-                            <button type="button" class="ui-btn ui-btn-secondary" data-open-modal="syncFlssModal">
-                                <i class="fa-solid fa-rotate"></i>
-                                <span>Sync from FLSS</span>
-                            </button>
-
-                            <button id="openAddPeriodBtn" type="button" class="ui-btn ui-btn-primary"
-                                @if ($canCreateAcademicPeriod) data-open-modal="addModal"
-                            @else
-                                data-academic-permission-trigger="create"
-                                aria-disabled="true"
-                                title="{{ $createAcademicPeriodUnauthorizedMessage }}" @endif>
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Add Period</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                        @if ($canCreateAcademicPeriod)
+                            <x-button id="openAddPeriodBtn" type="button" variant="primary" icon="fa-solid fa-plus"
+                                data-open-modal="addModal">
+                                Add Period
+                            </x-button>
+                        @else
+                            <x-button id="openAddPeriodBtn" type="button" variant="primary" icon="fa-solid fa-plus"
+                                data-academic-permission-trigger="create" aria-disabled="true"
+                                title="{{ $createAcademicPeriodUnauthorizedMessage }}">
+                                Add Period
+                            </x-button>
+                        @endif
+                    </x-slot:actions>
+                </x-page-banner>
             @endif
 
             <div class="w-full">
@@ -264,13 +254,12 @@
                                 </p>
                             </div>
 
-                            <button type="button" id="manageActivePeriodBtn" data-ui-click="action-7147962c1ff8"
+                            <x-button id="manageActivePeriodBtn" type="button" variant="primary" icon="fa-solid fa-gear"
+                                data-ui-click="action-7147962c1ff8"
                                 data-ui-click-arg-0="{{ json_encode((bool) $activePeriodPayload) }}"
-                                data-ui-click-arg-1="{{ json_encode($activePeriodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
-                                class="ui-btn ui-btn-primary ">
-                                <i class="fa-solid fa-gear"></i>
-                                <span>Manage Period</span>
-                            </button>
+                                data-ui-click-arg-1="{{ json_encode($activePeriodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                Manage Period
+                            </x-button>
                         </div>
                     </div>
                 </div>
@@ -445,12 +434,10 @@
 
                                                     <td class="table-action-cell">
                                                         <div class="ui-action-group">
-                                                            <button type="button" class="ui-action-btn ui-action-edit"
-                                                                data-tooltip="Edit period" aria-label="Edit period"
-                                                                data-ui-click="action-e63476c3cb8d"
-                                                                data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
-                                                                <i class="fa-solid fa-pen"></i>
-                                                            </button>
+                                                            <x-action-button type="button" variant="edit"
+                                                                icon="fa-solid fa-pen" label="Edit period"
+                                                                tooltip="Edit period" data-ui-click="action-e63476c3cb8d"
+                                                                data-ui-click-arg-0="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
 
                                                             @if (!$period->is_active)
                                                                 <form method="POST"
@@ -459,32 +446,28 @@
                                                                     @csrf
                                                                     @method('PATCH')
 
-                                                                    <button type="button"
-                                                                        class="ui-action-btn ui-action-success"
-                                                                        data-tooltip="Set as active"
-                                                                        aria-label="Set as active"
+                                                                    <x-action-button type="button" variant="success"
+                                                                        icon="fa-solid fa-circle-check"
+                                                                        label="Set as active" tooltip="Set as active"
                                                                         data-ui-click="action-03a9835a5e25"
-                                                                        data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
-                                                                        data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
-                                                                        <i class="fa-solid fa-circle-check"></i>
-                                                                    </button>
+                                                                        data-ui-click-arg-0="{{ json_encode(
+                                                                            route($routeNames['set_active'], $period),
+                                                                            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                        ) }}"
+                                                                        data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                                 </form>
                                                             @else
-                                                                <button type="button"
-                                                                    class="ui-action-btn ui-action-warning"
-                                                                    data-tooltip="Active period"
-                                                                    aria-label="Active period" aria-disabled="true">
-                                                                    <i class="fa-solid fa-star"></i>
-                                                                </button>
+                                                                <x-action-button type="button" variant="warning"
+                                                                    icon="fa-solid fa-star" label="Active period"
+                                                                    tooltip="Active period" aria-disabled="true" />
                                                             @endif
 
-                                                            <button type="button" class="ui-action-btn ui-action-delete"
-                                                                data-tooltip="Delete period" aria-label="Delete period"
+                                                            <x-action-button type="button" variant="delete"
+                                                                icon="fa-solid fa-trash" label="Delete period"
+                                                                tooltip="Delete period"
                                                                 data-delete-url="{{ route($routeNames['destroy'], $period) }}"
                                                                 data-delete-label="{{ $label }}"
-                                                                data-ui-click="action-df6b78ee9bc8">
-                                                                <i class="fa-solid fa-trash"></i>
-                                                            </button>
+                                                                data-ui-click="action-df6b78ee9bc8" />
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -633,15 +616,15 @@
                                                                 @csrf
                                                                 @method('PATCH')
 
-                                                                <button type="button"
-                                                                    class="ui-action-btn ui-action-success"
-                                                                    data-tooltip="Set as active"
-                                                                    aria-label="Set as active"
+                                                                <x-action-button type="button" variant="success"
+                                                                    icon="fa-solid fa-circle-check" label="Set as active"
+                                                                    tooltip="Set as active"
                                                                     data-ui-click="action-8c24c81f4fa3"
-                                                                    data-ui-click-arg-0="{{ json_encode(route($routeNames['set_active'], $period), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
-                                                                    data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
-                                                                    <i class="fa-solid fa-circle-check"></i>
-                                                                </button>
+                                                                    data-ui-click-arg-0="{{ json_encode(
+                                                                        route($routeNames['set_active'], $period),
+                                                                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                    ) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                             </form>
                                                         @endif
 
@@ -1118,508 +1101,417 @@
 
     </x-filter-drawer>
 
-    <div id="addModal" class="ui-modal modal-theme-primary" aria-hidden="true">
-        <form method="POST" id="addPeriodForm" action="{{ route($routeNames['store']) }}"
-            class="ui-modal-card modal-xl modal-card-form" data-global-validation
-            data-form-validation-rule="academicPeriod" data-discard-form data-discard-title="Discard new academic period?"
-            data-discard-subtitle="You have unsaved academic period details."
-            data-discard-message="Closing this modal will remove the academic period draft you entered. Do you want to discard your changes?"
-            novalidate>
+    <x-modal id="addModal" title="Add Academic Period" subtitle="Add new semester or academic term schedule"
+        icon="fa-solid fa-calendar-plus" size="xl" theme="primary" body-class="modal-scroll-body"
+        footer-class="modal-sticky-footer" close-label="Close add academic period modal" :close-attributes="[
+            'data-discard-close' => 'addModal',
+        ]"
+        form-id="addPeriodForm" form-class="modal-card-form" :form-attributes="[
+            'method' => 'POST',
+            'action' => route($routeNames['store']),
+            'data-global-validation' => '',
+            'data-form-validation-rule' => 'academicPeriod',
+            'data-discard-form' => '',
+            'data-discard-title' => 'Discard new academic period?',
+            'data-discard-subtitle' => 'You have unsaved academic period details.',
+            'data-discard-message' =>
+                'Closing this modal will remove the academic period draft you entered. Do you want to discard your changes?',
+            'novalidate' => 'novalidate',
+        ]">
+        @csrf
+        <div class="modal-form-grid">
+            <div class="modal-form-grid-2">
 
-            @csrf
+                <x-form-field label="Academic Year" for="addYear" required :show-error="false" class="info-card">
+                    <div class="modal-inline-control">
+                        <div class="global-control-wrap modal-inline-main" id="addAcademicYearWrap">
+                            <i class="fa-solid fa-calendar global-control-icon" aria-hidden="true"></i>
 
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-calendar-plus"></i>
+                            <input name="academic_year" id="addYear" type="text" placeholder="e.g. 2026-2027"
+                                class="form-input-custom global-form-icon no-voice" data-field-label="Academic Year"
+                                data-required-message="Please enter the academic year."
+                                data-validation-rule="academicYear" required>
+                        </div>
+
+                        <x-voice-input target="#addYear" status-id="addYearVoiceStatus"
+                            label="Voice input for academic year" title="Voice input" />
                     </div>
 
-                    <div class="modal-copy">
-                        <h3 class="modal-title">Add Academic Period</h3>
-                        <p class="modal-subtitle">Add new semester or academic term schedule</p>
+                    <div id="addYearError" class="global-field-error" data-error-for="addYear" aria-live="polite"
+                        aria-hidden="true"></div>
+                </x-form-field>
+
+                <div class="info-card global-form-group" data-global-field>
+                    <label class="global-form-label">
+                        Semester <span class="required-mark">*</span>
+                    </label>
+
+                    <div id="addSemesterGroup" class="ap-semester-grid-redesign">
+                        <label class="ap-semester-item">
+                            <input type="radio" name="semester" value="First Semester" required>
+                            <div class="ap-semester-card">
+                                <i class="fa-solid fa-book"></i>
+                                <span>First Semester</span>
+                            </div>
+                        </label>
+
+                        <label class="ap-semester-item">
+                            <input type="radio" name="semester" value="Second Semester" required>
+                            <div class="ap-semester-card">
+                                <i class="fa-solid fa-book-open"></i>
+                                <span>Second Semester</span>
+                            </div>
+                        </label>
+
+                        <label class="ap-semester-item">
+                            <input type="radio" name="semester" value="Summer" required>
+                            <div class="ap-semester-card">
+                                <i class="fa-solid fa-sun"></i>
+                                <span>Summer</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="global-field-error" data-error-for="semester" aria-live="polite" aria-hidden="true">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-form-grid-2">
+                <div class="info-card">
+                    <div class="modal-form-grid-2">
+                        <x-form-field label="Start Date" for="addStart" required :show-error="false">
+                            <input id="addStart" name="start_date" type="text"
+                                class="form-input-custom js-flatpickr-date" placeholder="Select start date"
+                                data-field-label="Start Date" data-required-message="Please select a start date."
+                                data-validation-rule="strictIsoDate" required readonly>
+
+                            <div class="global-field-error" data-error-for="addStart" aria-live="polite"
+                                aria-hidden="true"></div>
+                        </x-form-field>
+
+                        <x-form-field label="End Date" for="addEnd" required :show-error="false">
+                            <input id="addEnd" name="end_date" type="text"
+                                class="form-input-custom js-flatpickr-date" placeholder="Select end date"
+                                data-field-label="End Date" data-required-message="Please select an end date."
+                                data-validation-rule="strictIsoDate" required readonly>
+
+                            <div class="global-field-error" data-error-for="addEnd" aria-live="polite"
+                                aria-hidden="true"></div>
+                        </x-form-field>
                     </div>
                 </div>
 
-                <button type="button" data-discard-close="addModal" class="modal-x"
-                    aria-label="Close add academic period modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="modal-bd modal-scroll-body">
-                <div class="modal-form-grid">
-                    <div class="modal-form-grid-2">
-                        <div class="info-card global-form-group" data-global-field>
-                            <label class="global-form-label" for="addYear">
-                                Academic Year <span class="required-mark">*</span>
+                <div class="info-card modal-form-section">
+                    <div class="global-label-row">
+                        <div class="global-label-main">
+                            <label class="global-form-label" for="addDesc">
+                                Description <span class="field-optional">(Optional)</span>
                             </label>
-
-                            <div class="modal-inline-control">
-                                <div class="global-control-wrap modal-inline-main" id="addAcademicYearWrap">
-                                    <i class="fa-solid fa-calendar global-control-icon" aria-hidden="true"></i>
-                                    <input name="academic_year" id="addYear" type="text"
-                                        placeholder="e.g. 2026-2027" class="form-input-custom global-form-icon no-voice"
-                                        data-field-label="Academic Year"
-                                        data-required-message="Please enter the academic year."
-                                        data-validation-rule="academicYear" required>
-                                </div>
-
-                                <x-voice-input target="#addYear" status-id="addYearVoiceStatus"
-                                    label="Voice input for academic year" title="Voice input" />
-                            </div>
-
-                            <div id="addYearError" class="global-field-error" data-error-for="addYear"
-                                aria-live="polite" aria-hidden="true"></div>
                         </div>
 
-                        <div class="info-card global-form-group" data-global-field>
-                            <label class="global-form-label">
-                                Semester <span class="required-mark">*</span>
-                            </label>
+                        <span class="char-counter" id="addDescCounter">0 / 150 characters</span>
+                    </div>
 
-                            <div id="addSemesterGroup" class="ap-semester-grid-redesign">
-                                <label class="ap-semester-item">
-                                    <input type="radio" name="semester" value="First Semester" required>
-                                    <div class="ap-semester-card">
-                                        <i class="fa-solid fa-book"></i>
-                                        <span>First Semester</span>
-                                    </div>
-                                </label>
+                    <div class="modal-inline-control">
+                        <div class="modal-inline-main" data-clearable-field>
+                            <textarea name="description" rows="6" class="form-input-custom global-form-textarea no-voice" id="addDesc"
+                                placeholder="Add any notes about this academic period..." maxlength="150" data-char-limit="150"
+                                data-char-counter="#addDescCounter" data-clearable-input></textarea>
 
-                                <label class="ap-semester-item">
-                                    <input type="radio" name="semester" value="Second Semester" required>
-                                    <div class="ap-semester-card">
-                                        <i class="fa-solid fa-book-open"></i>
-                                        <span>Second Semester</span>
-                                    </div>
-                                </label>
+                            <button type="button" id="addDescClearBtn"
+                                class="search-clear field-clear-btn field-clear-btn--textarea" data-field-clear
+                                aria-label="Clear description" title="Clear description">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
 
-                                <label class="ap-semester-item">
-                                    <input type="radio" name="semester" value="Summer" required>
-                                    <div class="ap-semester-card">
-                                        <i class="fa-solid fa-sun"></i>
-                                        <span>Summer</span>
-                                    </div>
-                                </label>
+                        <x-voice-input target="#addDesc" status-id="addDescVoiceStatus"
+                            label="Voice input for description" title="Voice input" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-option-panel">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div class="modal-form-section">
+                        <div class="modal-section-heading">
+                            <div class="modal-section-icon">
+                                <i class="fa-solid fa-star"></i>
                             </div>
 
-                            <div class="global-field-error" data-error-for="semester" aria-live="polite"
+                            <div>
+                                <h4>Set as Active Period</h4>
+                                <p>This will deactivate the currently active semester.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="is_active" value="0">
+
+                    <x-switch id="addIsActive" name="is_active" value="1" wrapper-class="shrink-0"
+                        aria-label="Set as active academic period" />
+                </div>
+            </div>
+        </div>
+
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-discard-close="addModal">
+                Cancel
+            </x-button>
+
+            <x-button type="submit" variant="primary">
+                Save Period
+            </x-button>
+        </x-slot:footer>
+
+    </x-modal>
+
+    <x-modal id="editModal" title="Edit Academic Period" subtitle="Updating period details" subtitle-id="editSubtitle"
+        icon="fa-solid fa-pen" size="xl" theme="edit" body-class="modal-scroll-body"
+        footer-class="modal-sticky-footer" close-label="Close edit academic period modal" :close-attributes="[
+            'data-discard-close' => 'editModal',
+        ]"
+        form-id="editForm" form-class="modal-card-form" :form-attributes="[
+            'method' => 'POST',
+            'data-global-validation' => '',
+            'data-form-validation-rule' => 'academicPeriod',
+            'data-discard-form' => '',
+            'data-discard-title' => 'Discard academic period changes?',
+            'data-discard-subtitle' => 'You have unsaved changes in this academic period.',
+            'data-discard-message' =>
+                'Closing this modal will remove the changes you made. Do you want to discard them?',
+            'novalidate' => 'novalidate',
+        ]">
+        @csrf
+        @method('PUT')
+
+        <div class="modal-form-grid">
+            <div class="modal-form-grid-2">
+
+                <x-form-field label="Academic Year" for="editYear" required :show-error="false" class="info-card">
+                    <div class="modal-inline-control">
+                        <div class="global-control-wrap modal-inline-main" id="editAcademicYearWrap">
+                            <i class="fa-solid fa-calendar global-control-icon" aria-hidden="true"></i>
+
+                            <input type="text" name="academic_year" id="editYear"
+                                class="form-input-custom global-form-icon no-voice" placeholder="e.g. 2026-2027"
+                                data-field-label="Academic Year" data-required-message="Please enter the academic year."
+                                data-validation-rule="academicYear" required>
+                        </div>
+
+                        <x-voice-input target="#editYear" status-id="editYearVoiceStatus"
+                            label="Voice input for academic year" title="Voice input" />
+                    </div>
+
+                    <div class="global-field-error" data-error-for="editYear" aria-live="polite" aria-hidden="true">
+                    </div>
+                </x-form-field>
+
+                <div class="info-card global-form-group" data-global-field>
+                    <label class="global-form-label">
+                        Semester <span class="required-mark">*</span>
+                    </label>
+
+                    <div id="editSemesterGroup" class="ap-semester-grid-redesign">
+                        <label class="ap-semester-item">
+                            <input type="radio" name="semester" id="edit-sem-1" value="First Semester"
+                                class="edit-sem" required>
+                            <div class="ap-semester-card">
+                                <i class="fa-solid fa-book"></i>
+                                <span>First Semester</span>
+                            </div>
+                        </label>
+
+                        <label class="ap-semester-item">
+                            <input type="radio" name="semester" id="edit-sem-2" value="Second Semester"
+                                class="edit-sem" required>
+                            <div class="ap-semester-card">
+                                <i class="fa-solid fa-book-open"></i>
+                                <span>Second Semester</span>
+                            </div>
+                        </label>
+
+                        <label class="ap-semester-item">
+                            <input type="radio" name="semester" id="edit-sem-3" value="Summer" class="edit-sem"
+                                required>
+                            <div class="ap-semester-card">
+                                <i class="fa-solid fa-sun"></i>
+                                <span>Summer</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="global-field-error" data-error-for="semester" aria-live="polite" aria-hidden="true">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-form-grid-2">
+                <div class="info-card">
+                    <div class="modal-form-grid-2">
+                        <div class="global-form-group" data-global-field>
+                            <label class="global-form-label" for="editStart">
+                                Start Date <span class="required-mark">*</span>
+                            </label>
+
+                            <input type="text" name="start_date" id="editStart"
+                                class="form-input-custom js-flatpickr-date" placeholder="Select start date"
+                                data-field-label="Start Date" data-required-message="Please select a start date."
+                                data-validation-rule="strictIsoDate" data-flatpickr-append-to-body required readonly>
+
+                            <div class="global-field-error" data-error-for="editStart" aria-live="polite"
+                                aria-hidden="true"></div>
+                        </div>
+
+                        <div class="global-form-group" data-global-field>
+                            <label class="global-form-label" for="editEnd">
+                                End Date <span class="required-mark">*</span>
+                            </label>
+
+                            <input type="text" name="end_date" id="editEnd"
+                                class="form-input-custom js-flatpickr-date" placeholder="Select end date"
+                                data-field-label="End Date" data-required-message="Please select an end date."
+                                data-validation-rule="strictIsoDate" data-flatpickr-append-to-body required readonly>
+
+                            <div class="global-field-error" data-error-for="editEnd" aria-live="polite"
                                 aria-hidden="true"></div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="modal-form-grid-2">
-                        <div class="info-card">
-                            <div class="modal-form-grid-2">
-                                <div class="global-form-group" data-global-field>
-                                    <label class="global-form-label" for="addStart">
-                                        Start Date <span class="required-mark">*</span>
-                                    </label>
-
-                                    <input id="addStart" name="start_date" type="text"
-                                        class="form-input-custom js-flatpickr-date" placeholder="Select start date"
-                                        data-field-label="Start Date" data-required-message="Please select a start date."
-                                        data-validation-rule="strictIsoDate" required readonly>
-
-                                    <div class="global-field-error" data-error-for="addStart" aria-live="polite"
-                                        aria-hidden="true"></div>
-                                </div>
-
-                                <div class="global-form-group" data-global-field>
-                                    <label class="global-form-label" for="addEnd">
-                                        End Date <span class="required-mark">*</span>
-                                    </label>
-
-                                    <input id="addEnd" name="end_date" type="text"
-                                        class="form-input-custom js-flatpickr-date" placeholder="Select end date"
-                                        data-field-label="End Date" data-required-message="Please select an end date."
-                                        data-validation-rule="strictIsoDate" required readonly>
-
-                                    <div class="global-field-error" data-error-for="addEnd" aria-live="polite"
-                                        aria-hidden="true"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-card modal-form-section">
-                            <div class="global-label-row">
-                                <div class="global-label-main">
-                                    <label class="global-form-label" for="addDesc">
-                                        Description <span class="field-optional">(Optional)</span>
-                                    </label>
-                                </div>
-
-                                <span class="char-counter" id="addDescCounter">0 / 150 characters</span>
-                            </div>
-
-                            <div class="modal-inline-control">
-                                <div class="modal-inline-main" data-clearable-field>
-                                    <textarea name="description" rows="6" class="form-input-custom global-form-textarea no-voice" id="addDesc"
-                                        placeholder="Add any notes about this academic period..." maxlength="150" data-char-limit="150"
-                                        data-char-counter="#addDescCounter" data-clearable-input></textarea>
-
-                                    <button type="button" id="addDescClearBtn"
-                                        class="search-clear field-clear-btn field-clear-btn--textarea" data-field-clear
-                                        aria-label="Clear description" title="Clear description">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
-                                </div>
-
-                                <x-voice-input target="#addDesc" status-id="addDescVoiceStatus"
-                                    label="Voice input for description" title="Voice input" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-option-panel">
-                        <div class="flex items-center justify-between gap-4 flex-wrap">
-                            <div class="modal-form-section">
-                                <div class="modal-section-heading">
-                                    <div class="modal-section-icon">
-                                        <i class="fa-solid fa-star"></i>
-                                    </div>
-
-                                    <div>
-                                        <h4>Set as Active Period</h4>
-                                        <p>This will deactivate the currently active semester.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <input type="hidden" name="is_active" value="0">
-
-                            <label class="global-switch shrink-0">
-                                <input type="checkbox" name="is_active" id="addIsActive" value="1"
-                                    class="global-switch-input" aria-label="Set as active academic period">
-                                <span class="global-switch-track" aria-hidden="true"></span>
+                <div class="info-card modal-form-section">
+                    <div class="global-label-row">
+                        <div class="global-label-main">
+                            <label class="global-form-label" for="editDesc">
+                                Description <span class="field-optional">(Optional)</span>
                             </label>
                         </div>
+
+                        <span class="char-counter" id="editDescCounter">0 / 150 characters</span>
+                    </div>
+
+                    <div class="modal-inline-control">
+                        <div class="modal-inline-main" data-clearable-field>
+                            <textarea name="description" rows="6" class="form-input-custom global-form-textarea no-voice" id="editDesc"
+                                placeholder="Add any notes about this academic period..." maxlength="150" data-char-limit="150"
+                                data-char-counter="#editDescCounter" data-clearable-input></textarea>
+
+                            <button type="button" id="editDescClearBtn"
+                                class="search-clear field-clear-btn field-clear-btn--textarea" data-field-clear
+                                aria-label="Clear description" title="Clear description">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <x-voice-input target="#editDesc" status-id="editDescVoiceStatus"
+                            label="Voice input for description" title="Voice input" />
                     </div>
                 </div>
             </div>
 
-            <div class="modal-ft modal-sticky-footer">
-                <button type="button" data-discard-close="addModal" class="ui-btn ui-btn-secondary">Cancel</button>
-
-                <button type="submit" class="ui-btn ui-btn-primary">
-                    <span>Save Period</span>
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <div id="editModal" class="ui-modal modal-theme-edit" aria-hidden="true">
-        <form method="POST" id="editForm" class="ui-modal-card modal-xl modal-card-form" data-global-validation
-            data-form-validation-rule="academicPeriod" data-discard-form
-            data-discard-title="Discard academic period changes?"
-            data-discard-subtitle="You have unsaved changes in this academic period."
-            data-discard-message="Closing this modal will remove the changes you made. Do you want to discard them?"
-            novalidate>
-
-            @csrf
-            @method('PUT')
-
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-pen"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h3 class="modal-title">Edit Academic Period</h3>
-                        <p class="modal-subtitle" id="editSubtitle">Updating period details</p>
-                    </div>
-                </div>
-
-                <button type="button" class="modal-x" data-discard-close="editModal"
-                    aria-label="Close edit academic period modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="modal-bd modal-scroll-body">
-                <div class="modal-form-grid">
-                    <div class="modal-form-grid-2">
-                        <div class="info-card global-form-group" data-global-field>
-                            <label class="global-form-label" for="editYear">
-                                Academic Year <span class="required-mark">*</span>
-                            </label>
-
-                            <div class="modal-inline-control">
-                                <div class="global-control-wrap modal-inline-main" id="editAcademicYearWrap">
-                                    <i class="fa-solid fa-calendar global-control-icon" aria-hidden="true"></i>
-                                    <input type="text" name="academic_year" id="editYear"
-                                        class="form-input-custom global-form-icon no-voice" placeholder="e.g. 2026-2027"
-                                        data-field-label="Academic Year"
-                                        data-required-message="Please enter the academic year."
-                                        data-validation-rule="academicYear" required>
-                                </div>
-
-                                <x-voice-input target="#editYear" status-id="editYearVoiceStatus"
-                                    label="Voice input for academic year" title="Voice input" />
+            <div class="modal-option-panel">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div class="modal-form-section">
+                        <div class="modal-section-heading">
+                            <div class="modal-section-icon">
+                                <i class="fa-solid fa-star"></i>
                             </div>
 
-                            <div class="global-field-error" data-error-for="editYear" aria-live="polite"
-                                aria-hidden="true"></div>
-                        </div>
-
-                        <div class="info-card global-form-group" data-global-field>
-                            <label class="global-form-label">
-                                Semester <span class="required-mark">*</span>
-                            </label>
-
-                            <div id="editSemesterGroup" class="ap-semester-grid-redesign">
-                                <label class="ap-semester-item">
-                                    <input type="radio" name="semester" id="edit-sem-1" value="First Semester"
-                                        class="edit-sem" required>
-                                    <div class="ap-semester-card">
-                                        <i class="fa-solid fa-book"></i>
-                                        <span>First Semester</span>
-                                    </div>
-                                </label>
-
-                                <label class="ap-semester-item">
-                                    <input type="radio" name="semester" id="edit-sem-2" value="Second Semester"
-                                        class="edit-sem" required>
-                                    <div class="ap-semester-card">
-                                        <i class="fa-solid fa-book-open"></i>
-                                        <span>Second Semester</span>
-                                    </div>
-                                </label>
-
-                                <label class="ap-semester-item">
-                                    <input type="radio" name="semester" id="edit-sem-3" value="Summer"
-                                        class="edit-sem" required>
-                                    <div class="ap-semester-card">
-                                        <i class="fa-solid fa-sun"></i>
-                                        <span>Summer</span>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <div class="global-field-error" data-error-for="semester" aria-live="polite"
-                                aria-hidden="true"></div>
-                        </div>
-                    </div>
-
-                    <div class="modal-form-grid-2">
-                        <div class="info-card">
-                            <div class="modal-form-grid-2">
-                                <div class="global-form-group" data-global-field>
-                                    <label class="global-form-label" for="editStart">
-                                        Start Date <span class="required-mark">*</span>
-                                    </label>
-
-                                    <input type="text" name="start_date" id="editStart"
-                                        class="form-input-custom js-flatpickr-date" placeholder="Select start date"
-                                        data-field-label="Start Date" data-required-message="Please select a start date."
-                                        data-validation-rule="strictIsoDate" data-flatpickr-append-to-body required
-                                        readonly>
-
-                                    <div class="global-field-error" data-error-for="editStart" aria-live="polite"
-                                        aria-hidden="true"></div>
-                                </div>
-
-                                <div class="global-form-group" data-global-field>
-                                    <label class="global-form-label" for="editEnd">
-                                        End Date <span class="required-mark">*</span>
-                                    </label>
-
-                                    <input type="text" name="end_date" id="editEnd"
-                                        class="form-input-custom js-flatpickr-date" placeholder="Select end date"
-                                        data-field-label="End Date" data-required-message="Please select an end date."
-                                        data-validation-rule="strictIsoDate" data-flatpickr-append-to-body required
-                                        readonly>
-
-                                    <div class="global-field-error" data-error-for="editEnd" aria-live="polite"
-                                        aria-hidden="true"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-card modal-form-section">
-                            <div class="global-label-row">
-                                <div class="global-label-main">
-                                    <label class="global-form-label" for="editDesc">
-                                        Description <span class="field-optional">(Optional)</span>
-                                    </label>
-                                </div>
-
-                                <span class="char-counter" id="editDescCounter">0 / 150 characters</span>
-                            </div>
-
-                            <div class="modal-inline-control">
-                                <div class="modal-inline-main" data-clearable-field>
-                                    <textarea name="description" rows="6" class="form-input-custom global-form-textarea no-voice" id="editDesc"
-                                        placeholder="Add any notes about this academic period..." maxlength="150" data-char-limit="150"
-                                        data-char-counter="#editDescCounter" data-clearable-input></textarea>
-
-                                    <button type="button" id="editDescClearBtn"
-                                        class="search-clear field-clear-btn field-clear-btn--textarea" data-field-clear
-                                        aria-label="Clear description" title="Clear description">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
-                                </div>
-
-                                <x-voice-input target="#editDesc" status-id="editDescVoiceStatus"
-                                    label="Voice input for description" title="Voice input" />
+                            <div>
+                                <h4>Set as Active Period</h4>
+                                <p>This will deactivate the currently active semester.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="modal-option-panel">
-                        <div class="flex items-center justify-between gap-4 flex-wrap">
-                            <div class="modal-form-section">
-                                <div class="modal-section-heading">
-                                    <div class="modal-section-icon">
-                                        <i class="fa-solid fa-star"></i>
-                                    </div>
+                    <input type="hidden" name="is_active" value="0">
 
-                                    <div>
-                                        <h4>Set as Active Period</h4>
-                                        <p>This will deactivate the currently active semester.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <input type="hidden" name="is_active" value="0">
-
-                            <label class="global-switch shrink-0">
-                                <input type="checkbox" name="is_active" id="editIsActive" value="1"
-                                    class="global-switch-input" aria-label="Set as active academic period">
-                                <span class="global-switch-track" aria-hidden="true"></span>
-                            </label>
-                        </div>
-                    </div>
+                    <x-switch id="editIsActive" name="is_active" value="1" wrapper-class="shrink-0"
+                        aria-label="Set as active academic period" />
                 </div>
             </div>
+        </div>
 
-            <div class="modal-ft modal-sticky-footer">
-                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="editModal">Cancel</button>
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-discard-close="editModal">
+                Cancel
+            </x-button>
 
-                <button type="submit" class="ui-btn ui-btn-edit">
-                    <span>Update Period</span>
-                </button>
-            </div>
-        </form>
-    </div>
+            <x-button type="submit" variant="edit">
+                Update Period
+            </x-button>
+        </x-slot:footer>
 
-    <div id="setActiveModal" class="ui-modal modal-theme-success" aria-hidden="true">
+    </x-modal>
 
-        <form id="setActiveForm" method="POST" action="" class="ui-modal-card modal-md modal-card-form">
+    <x-modal id="setActiveModal" title="Set Active Period" subtitle="Confirm the active academic period"
+        icon="fa-solid fa-circle-check" size="md" theme="success" :show-close="false" form-id="setActiveForm"
+        form-class="modal-card-form" :form-attributes="[
+            'method' => 'POST',
+            'action' => '',
+        ]">
+        @csrf
+        @method('PATCH')
 
-            @csrf
-            @method('PATCH')
+        <div class="modal-option-panel">
+            <div class="modal-form-section">
+                <div class="modal-section-heading">
+                    <div>
+                        <h4 id="setActivePeriodName">
+                            Selected Academic Period
+                        </h4>
 
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h3 class="modal-title">
-                            Set Active Period
-                        </h3>
-
-                        <p class="modal-subtitle">
-                            Confirm the active academic period
+                        <p>
+                            This academic period will be set as active.
+                            The currently active period will be deactivated.
                         </p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="modal-bd">
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-modal-close="setActiveModal">
+                Cancel
+            </x-button>
 
-                <div class="modal-option-panel">
-
-                    <div class="modal-form-section">
-
-                        <div class="modal-section-heading">
-
-                            <div>
-
-                                <h4 id="setActivePeriodName">
-                                    Selected Academic Period
-                                </h4>
-
-                                <p>
-                                    This academic period will be set as active.
-                                    The currently active period will be deactivated.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="setActiveModal">
-                    Cancel
-                </button>
-
-                <button type="submit" class="ui-btn ui-btn-success">
-                    <span>Set as Active</span>
-                </button>
-            </div>
-        </form>
-    </div>
+            <x-button type="submit" variant="success">
+                Set as Active
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 
     <x-delete-confirm-modal id="deleteModal" form-id="deleteForm" name-id="deletePeriodLabel"
         title="Delete Academic Period" helper="This academic period will be permanently removed." />
 
-    <div id="syncFlssModal" class="ui-modal modal-theme-primary" aria-hidden="true">
+    <x-modal id="syncFlssModal" title="Sync from FLSS" subtitle="Update the active academic year and semester"
+        icon="fa-solid fa-cloud-arrow-down" size="md" theme="primary" :show-close="false" form-id="syncFlssForm"
+        form-class="modal-card-form" :form-attributes="[
+            'method' => 'POST',
+            'action' => route($routeNames['sync_flss']),
+        ]">
+        @csrf
 
-        <form id="syncFlssForm" method="POST" action="{{ route($routeNames['sync_flss']) }}"
-            class="ui-modal-card modal-md modal-card-form">
-
-            @csrf
-
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h3 class="modal-title">
-                            Sync from FLSS
-                        </h3>
-
-                        <p class="modal-subtitle">
-                            Update the active academic year and semester
-                        </p>
-                    </div>
-                </div>
+        <div class="global-confirm-alert">
+            <div>
+                <span>
+                    The current academic year and semester will be fetched
+                    from the FLSS source and applied to the system.
+                </span>
             </div>
+        </div>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <div>
-                        <span>
-                            The current academic year and semester will be fetched
-                            from the FLSS source and applied to the system.
-                        </span>
-                    </div>
-                </div>
-            </div>
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-modal-close="syncFlssModal">
+                Cancel
+            </x-button>
 
-            <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="syncFlssModal">
-                    Cancel
-                </button>
-
-                <button type="submit" id="syncFlssSubmitBtn" class="ui-btn ui-btn-primary">
-                    <span>Sync Now</span>
-                </button>
-            </div>
-        </form>
-    </div>
+            <x-button id="syncFlssSubmitBtn" type="submit" variant="primary">
+                Sync Now
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 @endsection
 
 @section('scripts')

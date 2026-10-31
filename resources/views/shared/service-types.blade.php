@@ -51,55 +51,27 @@
                 </div>
             </div>
         @else
-            <div class="page-banner mb-4">
-                <div class="page-banner-inner">
-                    <div>
-                        <h1 class="page-title">Service Types</h1>
-                    </div>
-                </div>
-            </div>
+            <x-page-banner title="Service Types" class="mb-4" />
         @endif
 
         <div class="stat-grid">
-            <div class="stat-card s-crimson">
-                <div class="stat-card-info">
-                    <span class="stat-label">Total Services</span>
 
-                    <strong class="stat-value" data-service-stat-total>
-                        {{ $services->count() }}
-                    </strong>
-                </div>
-            </div>
+            <x-stat-card label="Total Services" :value="$services->count()" tone="crimson" :value-attributes="[
+                'data-service-stat-total' => '',
+            ]" />
 
-            <div class="stat-card s-active">
-                <div class="stat-card-info">
-                    <span class="stat-label">Visible for Booking</span>
+            <x-stat-card label="Visible for Booking" :value="$services->where('is_active_for_booking', true)->count()" tone="active" :value-attributes="[
+                'data-service-stat-visible' => '',
+            ]" />
 
-                    <strong class="stat-value" data-service-stat-visible>
-                        {{ $services->where('is_active_for_booking', true)->count() }}
-                    </strong>
-                </div>
-            </div>
+            <x-stat-card label="Hidden" :value="$services->where('is_active_for_booking', false)->count()" tone="inactive" :value-attributes="[
+                'data-service-stat-hidden' => '',
+            ]" />
 
-            <div class="stat-card s-inactive">
-                <div class="stat-card-info">
-                    <span class="stat-label">Hidden</span>
+            <x-stat-card label="Default Services" :value="$services->where('is_default', true)->count()" tone="purple" :value-attributes="[
+                'data-service-stat-default' => '',
+            ]" />
 
-                    <strong class="stat-value" data-service-stat-hidden>
-                        {{ $services->where('is_active_for_booking', false)->count() }}
-                    </strong>
-                </div>
-            </div>
-
-            <div class="stat-card s-purple">
-                <div class="stat-card-info">
-                    <span class="stat-label">Default Services</span>
-
-                    <strong class="stat-value" data-service-stat-default>
-                        {{ $services->where('is_default', true)->count() }}
-                    </strong>
-                </div>
-            </div>
         </div>
 
         <div class="content-lift">
@@ -108,12 +80,7 @@
                 @if ($canCreateServiceType)
                     <div class="min-w-0">
                         <div class="card">
-                            <div class="card-header">
-                                <div class="card-header-left">
-                                    <div class="card-header-icon"><i class="fa-solid fa-plus"></i></div>
-                                    <span class="card-title">Add New Service</span>
-                                </div>
-                            </div>
+                            <x-card-header title="Add New Service" icon="fa-solid fa-plus" />
 
                             <div class="card-body">
                                 <form id="addServiceForm" method="POST"
@@ -138,8 +105,7 @@
                                                         value="{{ old('name') }}"
                                                         class="form-input-custom global-form-icon global-control-with-action"
                                                         placeholder="e.g. Tooth Extraction" autocomplete="off"
-                                                        maxlength="255"
-                                                        data-field-label="Service Name"
+                                                        maxlength="255" data-field-label="Service Name"
                                                         data-required-message="Please enter a service name."
                                                         data-clearable-input required>
 
@@ -202,10 +168,9 @@
                                     </div>
 
                                     <div class="flex justify-end">
-                                        <button type="submit" class="ui-btn ui-btn-primary">
-                                            <i class="fa-solid fa-floppy-disk"></i>
-                                            <span>Save Service</span>
-                                        </button>
+                                        <x-button type="submit" variant="primary" icon="fa-solid fa-floppy-disk">
+                                            Save Service
+                                        </x-button>
                                     </div>
                                 </form>
                             </div>
@@ -214,21 +179,13 @@
                 @endif
                 <div class="min-w-0">
                     <div class="card">
-                        <div class="card-header">
-                            <div class="card-header-left">
-                                <div class="card-header-icon">
-                                    <i class="fa-solid fa-list-check"></i>
-                                </div>
-
-                                <span class="card-title">Existing Services</span>
-                            </div>
-
-                            <div class="card-header-right">
+                        <x-card-header title="Existing Services" icon="fa-solid fa-list-check">
+                            <x-slot:actions>
                                 <x-view-toggle id="serviceTypeViewToggle" class="service-type-view-toggle"
                                     storage-key="serviceTypeView" list-view="#serviceTypeListView"
                                     grid-view="#serviceTypeGridView" />
-                            </div>
-                        </div>
+                            </x-slot:actions>
+                        </x-card-header>
 
                         <div id="serviceTypeListView" class="service-type-view table-list-view">
                             <table class="data-table">
@@ -283,33 +240,26 @@
                                             <td class="table-cell-center table-action-cell">
                                                 <div class="ui-action-group">
                                                     @if ($canUpdateServiceType)
-                                                        <button type="button" class="ui-action-btn ui-action-edit"
-                                                            data-tooltip="Manage service" data-tooltip-tone="edit"
-                                                            aria-label="Manage {{ $service->name }}"
+                                                        <x-action-button type="button" variant="edit"
+                                                            icon="fa-solid fa-pen" label="Manage {{ $service->name }}"
+                                                            tooltip="Manage service" data-tooltip-tone="edit"
                                                             data-service-action="edit"
-                                                            data-service-id="{{ $service->id }}">
-                                                            <i class="fa-solid fa-pen"></i>
-                                                        </button>
+                                                            data-service-id="{{ $service->id }}" />
                                                     @endif
 
                                                     @if ($canDeleteServiceType && !$service->is_default)
-                                                        <button type="button" class="ui-action-btn ui-action-delete"
-                                                            data-tooltip="Delete service"
-                                                            aria-label="Delete {{ $service->name }}"
-                                                            data-service-action="delete"
-                                                            data-service-id="{{ $service->id }}">
-                                                            <i class="fa-solid fa-trash"></i>
-                                                        </button>
+                                                        <x-action-button type="button" variant="delete"
+                                                            icon="fa-solid fa-trash" label="Delete {{ $service->name }}"
+                                                            tooltip="Delete service" data-service-action="delete"
+                                                            data-service-id="{{ $service->id }}" />
                                                     @endif
 
                                                     @if ($canViewServiceTypes)
-                                                        <button type="button" class="ui-action-btn ui-action-view"
-                                                            data-tooltip="View details"
-                                                            aria-label="View {{ $service->name }} details"
-                                                            data-service-action="view"
-                                                            data-service-id="{{ $service->id }}">
-                                                            <i class="fa-solid fa-eye"></i>
-                                                        </button>
+                                                        <x-action-button type="button" variant="view"
+                                                            icon="fa-solid fa-eye"
+                                                            label="View {{ $service->name }} details"
+                                                            tooltip="View details" data-service-action="view"
+                                                            data-service-id="{{ $service->id }}" />
                                                     @endif
                                                 </div>
                                             </td>
@@ -325,7 +275,6 @@
                                 </tbody>
                             </table>
                         </div>
-
 
                         <div id="serviceTypeGridView" class="service-type-view table-grid-view" hidden>
                             @if ($services->count())
@@ -387,33 +336,28 @@
                                                 <div class="service-grid-footer">
                                                     <div class="ui-action-group">
                                                         @if ($canUpdateServiceType)
-                                                            <button type="button" class="ui-action-btn ui-action-edit"
-                                                                data-tooltip="Manage service" data-tooltip-tone="edit"
-                                                                aria-label="Manage {{ $service->name }}"
+                                                            <x-action-button type="button" variant="edit"
+                                                                icon="fa-solid fa-pen"
+                                                                label="Manage {{ $service->name }}"
+                                                                tooltip="Manage service" data-tooltip-tone="edit"
                                                                 data-service-action="edit"
-                                                                data-service-id="{{ $service->id }}">
-                                                                <i class="fa-solid fa-pen"></i>
-                                                            </button>
+                                                                data-service-id="{{ $service->id }}" />
                                                         @endif
 
                                                         @if ($canDeleteServiceType && !$service->is_default)
-                                                            <button type="button" class="ui-action-btn ui-action-delete"
-                                                                data-tooltip="Delete service"
-                                                                aria-label="Delete {{ $service->name }}"
-                                                                data-service-action="delete"
-                                                                data-service-id="{{ $service->id }}">
-                                                                <i class="fa-solid fa-trash"></i>
-                                                            </button>
+                                                            <x-action-button type="button" variant="delete"
+                                                                icon="fa-solid fa-trash"
+                                                                label="Delete {{ $service->name }}"
+                                                                tooltip="Delete service" data-service-action="delete"
+                                                                data-service-id="{{ $service->id }}" />
                                                         @endif
 
                                                         @if ($canViewServiceTypes)
-                                                            <button type="button" class="ui-action-btn ui-action-view"
-                                                                data-tooltip="View details"
-                                                                aria-label="View {{ $service->name }} details"
-                                                                data-service-action="view"
-                                                                data-service-id="{{ $service->id }}">
-                                                                <i class="fa-solid fa-eye"></i>
-                                                            </button>
+                                                            <x-action-button type="button" variant="view"
+                                                                icon="fa-solid fa-eye"
+                                                                label="View {{ $service->name }} details"
+                                                                tooltip="View details" data-service-action="view"
+                                                                data-service-id="{{ $service->id }}" />
                                                         @endif
                                                     </div>
                                                 </div>
@@ -436,264 +380,166 @@
             title="Delete Service Type" helper="This service type will be permanently removed." />
     @endif
 
-    <div class="ui-modal modal-theme-edit" id="manageServiceModal" aria-hidden="true">
-        <form id="manageServiceForm" method="POST" class="ui-modal-card modal-lg" role="dialog" aria-modal="true"
-            aria-labelledby="manageServiceTitle" data-global-validation data-discard-form
-            data-discard-title="Discard service changes?" data-discard-subtitle="You have unsaved service updates."
-            data-discard-message="Closing this modal will remove your changes to this service. Do you want to discard them?"
-            novalidate data-ui-click="action-22499e15f3ee">
-            @csrf
-            @method('PUT')
+    <x-modal id="manageServiceModal" title="Manage Service Type" title-id="manageServiceTitle"
+        subtitle="Update service details and booking visibility" icon="fa-solid fa-pen" size="lg" theme="edit"
+        close-label="Close manage service modal" form-id="manageServiceForm" form-class="modal-card-form"
+        :close-attributes="[
+            'data-discard-close' => 'manageServiceModal',
+        ]" :form-attributes="[
+            'method' => 'POST',
+            'data-global-validation' => '',
+            'data-discard-form' => '',
+            'data-discard-title' => 'Discard service changes?',
+            'data-discard-subtitle' => 'You have unsaved service updates.',
+            'data-discard-message' =>
+                'Closing this modal will remove your changes to this service. Do you want to discard them?',
+            'novalidate' => 'novalidate',
+            'data-ui-click' => 'action-22499e15f3ee',
+        ]">
+        @csrf
+        @method('PUT')
 
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-pen"></i>
-                    </div>
+        <div class="modal-form-grid-2">
 
-                    <div class="modal-copy">
-                        <h3 class="modal-title" id="manageServiceTitle">
-                            Manage Service Type
-                        </h3>
+            <div class="global-form-group" data-global-field>
+                <label for="manageServiceName" class="global-form-label">
+                    Service Name
+                    <span class="required-mark">*</span>
+                </label>
 
-                        <p class="modal-subtitle">
-                            Update service details and booking visibility
-                        </p>
-                    </div>
-                </div>
+                <div class="global-voice-row is-textarea" data-voice-field>
 
-                <button type="button" class="modal-x" data-discard-close="manageServiceModal" aria-label="Close modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+                    <div class="global-voice-control">
+                        <div class="global-control-wrap">
 
-            <div class="modal-bd">
-                <div class="modal-form-grid-2">
+                            <i class="fa-solid fa-tag global-control-icon"></i>
 
-                    <div class="global-form-group" data-global-field>
-                        <label for="manageServiceName" class="global-form-label">
-                            Service Name
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="global-voice-row is-textarea" data-voice-field>
-
-                            <div class="global-voice-control">
-                                <div class="global-control-wrap">
-
-                                    <i class="fa-solid fa-tag global-control-icon"></i>
-
-                                    <input type="text" id="manageServiceName" name="name"
-                                        class="form-input-custom global-form-icon global-control-with-action" maxlength="255"
-                                        autocomplete="off" data-field-label="Service Name"
-                                        data-required-message="Please enter a service name."
-                                        required>
-
-                                </div>
-                            </div>
-
-                            <x-voice-input target="#manageServiceName" status-id="manageServiceNameVoiceStatus"
-                                label="Voice input for service name" title="Voice input" />
+                            <input type="text" id="manageServiceName" name="name"
+                                class="form-input-custom global-form-icon global-control-with-action" maxlength="255"
+                                autocomplete="off" data-field-label="Service Name"
+                                data-required-message="Please enter a service name." required>
 
                         </div>
                     </div>
 
-                    <div class="global-form-group" data-global-field>
-                        <div class="global-label-row">
-                            <label for="manageServiceDescription" class="global-form-label">
-                                Description
-                                <span class="field-optional">(Optional)</span>
-                            </label>
-
-                            <button type="button" class="service-copy-bullet-box" data-copy-bullet>
-                                <span class="service-copy-bullet-symbol">•</span>
-
-                                <span class="service-copy-bullet-label">
-                                    Copy this bullet
-                                </span>
-                            </button>
-                        </div>
-
-                        <div class="global-voice-row is-textarea" data-voice-field>
-
-                            <div class="global-voice-control">
-                                <div class="global-form-textarea-wrap">
-
-                                    <textarea id="manageServiceDescription" name="description" class="form-input-custom global-form-textarea"
-                                        maxlength="255" data-char-limit="255" data-char-counter="#manageServiceDescCount"
-                                        placeholder="Brief details about the service..."></textarea>
-
-                                    <span id="manageServiceDescCount" class="char-counter">
-                                        0 / 255 characters
-                                    </span>
-
-                                </div>
-                            </div>
-
-                            <x-voice-input target="#manageServiceDescription" status-id="manageServiceDescVoiceStatus"
-                                label="Voice input for service description" title="Voice input" />
-
-                        </div>
-                    </div>
-
-                    <div class="global-form-group field-group full" data-global-field>
-                        <div class="service-booking-row">
-                            <div class="service-booking-copy">
-                                <div class="service-booking-icon">
-                                    <i class="fa-solid fa-thumbtack"></i>
-                                </div>
-
-                                <div>
-                                    <p class="service-booking-title">
-                                        Show in Book Appointment
-                                    </p>
-
-                                    <p class="service-booking-description">
-                                        Turn this off to hide the service from booking
-                                        while keeping it in Service Types.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <label class="global-switch">
-                                <input type="checkbox" id="manageServiceBookingToggle" name="is_active_for_booking"
-                                    value="1" class="global-switch-input"
-                                    aria-label="Show service in Book Appointment">
-
-                                <span class="global-switch-track" aria-hidden="true"></span>
-                            </label>
-                        </div>
-
-                        <div id="manageDefaultNote" class="modal-helper-text">
-                            This is a default service type. It can be edited
-                            and hidden from booking, but it cannot be deleted.
-                        </div>
-                    </div>
+                    <x-voice-input target="#manageServiceName" status-id="manageServiceNameVoiceStatus"
+                        label="Voice input for service name" title="Voice input" />
 
                 </div>
             </div>
 
-            <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="manageServiceModal">
-                    Cancel
-                </button>
+            <div class="global-form-group" data-global-field>
+                <div class="global-label-row">
+                    <label for="manageServiceDescription" class="global-form-label">
+                        Description
+                        <span class="field-optional">(Optional)</span>
+                    </label>
 
-                <button type="submit" class="ui-btn ui-btn-edit">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Save Changes</span>
-                </button>
-            </div>
-        </form>
-    </div>
+                    <button type="button" class="service-copy-bullet-box" data-copy-bullet>
+                        <span class="service-copy-bullet-symbol">•</span>
 
-    <div id="serviceDetailsModal" class="ui-modal modal-theme-primary" aria-hidden="true">
-        <div class="ui-modal-card modal-md" role="dialog" aria-modal="true" aria-labelledby="serviceDetailsTitle"
-            data-ui-click="action-22499e15f3ee">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-eye"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h3 id="serviceDetailsTitle" class="modal-title">
-                            Service Details
-                        </h3>
-
-                        <p class="modal-subtitle">
-                            Complete service type information
-                        </p>
-                    </div>
+                        <span class="service-copy-bullet-label">
+                            Copy this bullet
+                        </span>
+                    </button>
                 </div>
 
-                <button type="button" class="modal-x" data-ui-click="action-e9850a0605f8"
-                    aria-label="Close service details">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+                <div class="global-voice-row is-textarea" data-voice-field>
 
-            <div class="modal-bd">
+                    <div class="global-voice-control">
+                        <div class="global-form-textarea-wrap">
 
-                <div class="modal-profile-card">
+                            <textarea id="manageServiceDescription" name="description" class="form-input-custom global-form-textarea"
+                                maxlength="255" data-char-limit="255" data-char-counter="#manageServiceDescCount"
+                                placeholder="Brief details about the service..."></textarea>
 
-                    <div class="modal-profile-main">
-
-                        <div class="modal-profile-main-copy">
-
-                            <span class="modal-profile-eyebrow">
-                                Service Type
+                            <span id="manageServiceDescCount" class="char-counter">
+                                0 / 255 characters
                             </span>
 
-                            <strong id="serviceDetailsName" class="modal-profile-name">
-                                —
-                            </strong>
-
-                            <div class="service-details-status-row">
-
-                                <span id="serviceDetailsVisibility" class="status-pill status-active">
-                                    <span class="status-dot"></span>
-                                    Visible
-                                </span>
-
-                                <span id="serviceDetailsDefault" class="status-pill status-default">
-                                    <span class="status-dot"></span>
-                                    Default
-                                </span>
-
-                            </div>
-
                         </div>
-
                     </div>
 
-                    <div class="modal-profile-details modal-profile-details-single">
-
-                        <div class="modal-profile-detail">
-
-                            <div class="modal-profile-detail-icon">
-                                <i class="fa-solid fa-hashtag"></i>
-                            </div>
-
-                            <div>
-                                <span class="modal-profile-label">
-                                    Service ID
-                                </span>
-
-                                <strong id="serviceDetailsId" class="modal-profile-value">
-                                    —
-                                </strong>
-                            </div>
-
-                        </div>
-
-                    </div>
+                    <x-voice-input target="#manageServiceDescription" status-id="manageServiceDescVoiceStatus"
+                        label="Voice input for service description" title="Voice input" />
 
                 </div>
+            </div>
 
-                <div class="modal-form-section">
-
-                    <div class="modal-section-heading">
-
-                        <div class="modal-section-icon">
-                            <i class="fa-solid fa-align-left"></i>
+            <div class="global-form-group field-group full" data-global-field>
+                <div class="service-booking-row">
+                    <div class="service-booking-copy">
+                        <div class="service-booking-icon">
+                            <i class="fa-solid fa-thumbtack"></i>
                         </div>
 
                         <div>
-                            <h4>Description</h4>
+                            <p class="service-booking-title">
+                                Show in Book Appointment
+                            </p>
 
-                            <p>
-                                Information shown for this service.
+                            <p class="service-booking-description">
+                                Turn this off to hide the service from booking
+                                while keeping it in Service Types.
                             </p>
                         </div>
-
                     </div>
 
-                    <div class="global-readonly-field">
+                    <x-switch id="manageServiceBookingToggle" name="is_active_for_booking" value="1"
+                        aria-label="Show service in Book Appointment" />
+                </div>
 
-                        <i class="fa-solid fa-file-lines"></i>
+                <div id="manageDefaultNote" class="modal-helper-text">
+                    This is a default service type. It can be edited
+                    and hidden from booking, but it cannot be deleted.
+                </div>
+            </div>
 
-                        <span id="serviceDetailsDescription">
-                            No description provided.
+        </div>
+
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-discard-close="manageServiceModal">
+                Cancel
+            </x-button>
+
+            <x-button type="submit" variant="edit">
+                Save Changes
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
+
+    <x-modal id="serviceDetailsModal" title="Service Details" title-id="serviceDetailsTitle"
+        subtitle="Complete service type information" icon="fa-solid fa-eye" size="md" theme="primary"
+        close-label="Close service details" :card-attributes="[
+            'data-ui-click' => 'action-22499e15f3ee',
+        ]" :close-attributes="[
+            'data-ui-click' => 'action-e9850a0605f8',
+        ]">
+
+        <div class="modal-profile-card">
+
+            <div class="modal-profile-main">
+
+                <div class="modal-profile-main-copy">
+
+                    <span class="modal-profile-eyebrow">
+                        Service Type
+                    </span>
+
+                    <strong id="serviceDetailsName" class="modal-profile-name">
+                        —
+                    </strong>
+
+                    <div class="service-details-status-row">
+
+                        <span id="serviceDetailsVisibility" class="status-pill status-active">
+                            <span class="status-dot"></span>
+                            Visible
+                        </span>
+
+                        <span id="serviceDetailsDefault" class="status-pill status-default">
+                            <span class="status-dot"></span>
+                            Default
                         </span>
 
                     </div>
@@ -702,13 +548,66 @@
 
             </div>
 
-            <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-ui-click="action-e9850a0605f8">
-                    Close
-                </button>
+            <div class="modal-profile-details modal-profile-details-single">
+
+                <div class="modal-profile-detail">
+
+                    <div class="modal-profile-detail-icon">
+                        <i class="fa-solid fa-hashtag"></i>
+                    </div>
+
+                    <div>
+                        <span class="modal-profile-label">
+                            Service ID
+                        </span>
+
+                        <strong id="serviceDetailsId" class="modal-profile-value">
+                            —
+                        </strong>
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
-    </div>
+
+        <div class="modal-form-section">
+
+            <div class="modal-section-heading">
+
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-align-left"></i>
+                </div>
+
+                <div>
+                    <h4>Description</h4>
+
+                    <p>
+                        Information shown for this service.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="global-readonly-field">
+
+                <i class="fa-solid fa-file-lines"></i>
+
+                <span id="serviceDetailsDescription">
+                    No description provided.
+                </span>
+
+            </div>
+
+        </div>
+
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-ui-click="action-e9850a0605f8">
+                Close
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 @endsection
 
 @php

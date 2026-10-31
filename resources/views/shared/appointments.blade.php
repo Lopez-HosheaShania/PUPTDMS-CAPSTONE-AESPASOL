@@ -264,15 +264,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="page-banner admin-appointment-banner">
-                        <div class="page-banner-inner">
-                            <div class="appointment-banner-title-wrap">
-                                <h1 class="page-title">
-                                    Appointment Management
-                                </h1>
-                            </div>
-                        </div>
-                    </div>
+                    <x-page-banner title="Appointment Management" class="admin-appointment-banner" />
                 @endif
 
                 <div class="today-snapshot-card">
@@ -420,7 +412,8 @@
 
                                 <span>Filter</span>
 
-                                <span id="appointmentFilterBadge" class="filter-badge" data-ui-presentation="presentation-d0466aa33fa8"></span>
+                                <span id="appointmentFilterBadge" class="filter-badge"
+                                    data-ui-presentation="presentation-d0466aa33fa8"></span>
                             </button>
                         </div>
 
@@ -902,10 +895,9 @@
                                                 @endif
 
                                                 @if ($profileUrl)
-                                                    <a href="{{ $profileUrl }}" class="ui-action-btn ui-action-view"
-                                                        data-tooltip="View profile" data-tooltip-tone="view">
-                                                        <i class="fa-regular fa-user"></i>
-                                                    </a>
+                                                    <x-action-button :href="$profileUrl" variant="view"
+                                                        icon="fa-regular fa-user" label="View patient profile"
+                                                        tooltip="View patient profile" />
                                                 @else
                                                     <button type="button" class="ui-action-btn ui-action-view" disabled
                                                         data-tooltip="No patient profile">
@@ -923,8 +915,8 @@
                                                         data-start-locked="{{ $canStartThisAppointment ? '0' : '1' }}"
                                                         aria-disabled="{{ $canStartThisAppointment ? 'false' : 'true' }}"
                                                         {{ $canStartThisAppointment ? '' : 'disabled' }}
-                                                        data-ui-click="action-27b3080a773d"
-                                                        data-id="{{ $appt->id }}" data-name="{{ $patientName }}"
+                                                        data-ui-click="action-27b3080a773d" data-id="{{ $appt->id }}"
+                                                        data-name="{{ $patientName }}"
                                                         data-datetime="{{ $modalDatetime }}"
                                                         data-service="{{ $serviceLabel }}"
                                                         data-start-url="{{ route('dentist.odontogram', ['appointment' => $appt->id]) }}?from=appointments&start_procedure=1">
@@ -939,7 +931,13 @@
                                                         data-tooltip-tone="{{ $isActiveAppointment ? 'reschedule' : 'locked' }}"
                                                         aria-label="Reschedule appointment"
                                                         {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                        data-ui-click="action-29ed24cdc40f" data-ui-click-arg-0="{{ json_encode((bool) ($isActiveAppointment)) }}" data-ui-click-arg-1="{{ $appt->id }}" data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($modalDatetime, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-4="{{ json_encode($appt->service_type_name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-5="{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}">
+                                                        data-ui-click="action-29ed24cdc40f"
+                                                        data-ui-click-arg-0="{{ json_encode((bool) $isActiveAppointment) }}"
+                                                        data-ui-click-arg-1="{{ $appt->id }}"
+                                                        data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-3="{{ json_encode($modalDatetime, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-4="{{ json_encode($appt->service_type_name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-5="{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}">
                                                         <i class="fa-solid fa-rotate-right"></i>
                                                     </button>
                                                 @endif
@@ -951,7 +949,11 @@
                                                         data-tooltip-tone="{{ $isActiveAppointment ? 'cancel' : 'locked' }}"
                                                         aria-label="Cancel appointment"
                                                         {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                        data-ui-click="action-aaaf28f0e0b0" data-ui-click-arg-0="{{ json_encode((bool) ($isActiveAppointment)) }}" data-ui-click-arg-1="{{ route('dentist.dentist.appointments.cancel', $appt->id) }}" data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($dateLabel . ' | ' . $timeLabel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                        data-ui-click="action-aaaf28f0e0b0"
+                                                        data-ui-click-arg-0="{{ json_encode((bool) $isActiveAppointment) }}"
+                                                        data-ui-click-arg-1="{{ route('dentist.dentist.appointments.cancel', $appt->id) }}"
+                                                        data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-3="{{ json_encode($dateLabel . ' | ' . $timeLabel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                         <i class="fa-solid fa-xmark"></i>
                                                     </button>
                                                 @endif
@@ -1331,7 +1333,13 @@
                                                 data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
                                                 data-tooltip-tone="{{ $isActiveAppointment ? 'reschedule' : 'locked' }}"
                                                 {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                data-ui-click="action-ab60db006e21" data-ui-click-arg-0="{{ json_encode((bool) ($isActiveAppointment)) }}" data-ui-click-arg-1="{{ $appt->id }}" data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($modalDatetime, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-4="{{ json_encode($appt->service_type_name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-5="{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}">
+                                                data-ui-click="action-ab60db006e21"
+                                                data-ui-click-arg-0="{{ json_encode((bool) $isActiveAppointment) }}"
+                                                data-ui-click-arg-1="{{ $appt->id }}"
+                                                data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-ui-click-arg-3="{{ json_encode($modalDatetime, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-ui-click-arg-4="{{ json_encode($appt->service_type_name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-ui-click-arg-5="{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}">
                                                 <i class="fa-solid fa-rotate-right"></i>
                                             </button>
                                         @endif
@@ -1342,7 +1350,11 @@
                                                 data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
                                                 data-tooltip-tone="{{ $isActiveAppointment ? 'cancel' : 'locked' }}"
                                                 {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                data-ui-click="action-830526eaba30" data-ui-click-arg-0="{{ json_encode((bool) ($isActiveAppointment)) }}" data-ui-click-arg-1="{{ route('dentist.dentist.appointments.cancel', $appt->id) }}" data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" data-ui-click-arg-3="{{ json_encode($dateLabel . ' | ' . $timeLabel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
+                                                data-ui-click="action-830526eaba30"
+                                                data-ui-click-arg-0="{{ json_encode((bool) $isActiveAppointment) }}"
+                                                data-ui-click-arg-1="{{ route('dentist.dentist.appointments.cancel', $appt->id) }}"
+                                                data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-ui-click-arg-3="{{ json_encode($dateLabel . ' | ' . $timeLabel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         @endif
@@ -1378,9 +1390,8 @@
     </main>
 
     <x-filter-drawer id="filterModal" title="Filters" close-id="closeFilterModalBtn"
-        close-callback="action-9dac37c8b8f2" clear-id="clearFiltersModal"
-        clear-label="Clear Filters" cancel-id="cancelFilterBtn"
-        cancel-callback="action-9dac37c8b8f2" cancel-label="Cancel" apply-id="applyFilters"
+        close-callback="action-9dac37c8b8f2" clear-id="clearFiltersModal" clear-label="Clear Filters"
+        cancel-id="cancelFilterBtn" cancel-callback="action-9dac37c8b8f2" cancel-label="Cancel" apply-id="applyFilters"
         apply-callback="action-e7e704b5c8bd" apply-label="Show 0 results" results-id="showResultsText">
 
         <div id="activeFiltersSection" class="filter-active-section hidden">

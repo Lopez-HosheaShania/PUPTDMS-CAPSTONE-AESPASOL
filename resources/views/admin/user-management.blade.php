@@ -653,146 +653,123 @@
         </div>
     </div>
 
-    <div id="viewModal" class="ui-modal" aria-hidden="true">
-        <div class="ui-modal-card modal-xl">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-id-card-clip"></i>
-                    </div>
+    <x-modal id="viewModal" title="Account Details" subtitle="Review selected account information"
+        icon="fa-solid fa-id-card-clip" size="xl">
+        <div class="modal-profile-card">
+            <div class="modal-profile-main">
+                <div id="viewInitial" class="patient-avatar patient-avatar-lg" data-patient-avatar
+                    data-patient-name="Patient"></div>
 
-                    <div class="modal-copy">
-                        <h3 class="modal-title">Account Details</h3>
-                        <p class="modal-subtitle">
-                            Review selected account information
-                        </p>
-                    </div>
-                </div>
-
-                <button type="button" data-ui-click="action-21e03f3cb038" class="modal-x"
-                    aria-label="Close account details modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="modal-bd">
-                <div class="modal-profile-card">
-                    <div class="modal-profile-main">
-                        <div id="viewInitial" class="patient-avatar patient-avatar-lg" data-patient-avatar
-                            data-patient-name="Patient"></div>
-
-                        <div class="modal-profile-main-copy">
-                            <span class="modal-profile-eyebrow">Selected Account</span>
-                            <strong id="viewName" class="modal-profile-name"></strong>
-                            <span id="viewEmail" class="ui-muted-text"></span>
-                        </div>
-                    </div>
-
-                    <div class="modal-profile-details">
-                        <div class="modal-profile-detail">
-                            <span class="modal-profile-detail-icon">
-                                <i class="fa-solid fa-user-shield"></i>
-                            </span>
-                            <div>
-                                <span class="modal-profile-label">Role</span>
-                                <strong id="viewRole" class="modal-profile-value"></strong>
-                            </div>
-                        </div>
-
-                        <div class="modal-profile-detail">
-                            <span class="modal-profile-detail-icon">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </span>
-                            <div>
-                                <span class="modal-profile-label">Status</span>
-                                <strong id="viewStatus" class="status-pill status-inactive"></strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-profile-details">
-                    <div class="modal-profile-detail">
-                        <span class="modal-profile-detail-icon"><i class="fa-solid fa-hashtag"></i></span>
-                        <div>
-                            <span class="modal-profile-label">User ID</span>
-                            <strong id="viewId" class="modal-profile-value"></strong>
-                        </div>
-                    </div>
-
-                    <div class="modal-profile-detail">
-                        <span class="modal-profile-detail-icon"><i class="fa-solid fa-database"></i></span>
-                        <div>
-                            <span class="modal-profile-label">Source</span>
-                            <strong id="viewSource" class="modal-profile-value"></strong>
-                        </div>
-                    </div>
-
-                    <div class="modal-profile-detail">
-                        <span class="modal-profile-detail-icon"><i class="fa-solid fa-calendar-plus"></i></span>
-                        <div>
-                            <span class="modal-profile-label">Created At</span>
-                            <strong id="viewCreatedAt" class="modal-profile-value"></strong>
-                        </div>
-                    </div>
-
-                    <div class="modal-profile-detail">
-                        <span class="modal-profile-detail-icon"><i class="fa-solid fa-phone"></i></span>
-                        <div>
-                            <span class="modal-profile-label">Phone</span>
-                            <strong id="viewPhone" class="modal-profile-value"></strong>
-                        </div>
-                    </div>
-
-                    <div class="modal-profile-detail">
-                        <span class="modal-profile-detail-icon"><i class="fa-solid fa-cake-candles"></i></span>
-                        <div>
-                            <span class="modal-profile-label">Birthdate</span>
-                            <strong id="viewBirthdate" class="modal-profile-value"></strong>
-                        </div>
-                    </div>
-
-                    <div class="modal-profile-detail">
-                        <span class="modal-profile-detail-icon"><i class="fa-solid fa-venus-mars"></i></span>
-                        <div>
-                            <span class="modal-profile-label">Gender</span>
-                            <strong id="viewGender" class="modal-profile-value"></strong>
-                        </div>
-                    </div>
-
-                    <div class="modal-profile-detail">
-                        <span class="modal-profile-detail-icon"><i class="fa-solid fa-notes-medical"></i></span>
-                        <div>
-                            <span class="modal-profile-label">Patient Profile</span>
-                            <strong id="viewPatientProfile" class="modal-profile-value"></strong>
-                        </div>
-                    </div>
-
-                    <div class="modal-profile-detail">
-                        <span class="modal-profile-detail-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
-                        <div>
-                            <span class="modal-profile-label">Last Login</span>
-                            <strong id="viewLastLoginAt" class="modal-profile-value"></strong>
-                        </div>
-                    </div>
-
-                    <div class="modal-profile-detail">
-                        <span class="modal-profile-detail-icon"><i class="fa-solid fa-pen-to-square"></i></span>
-                        <div>
-                            <span class="modal-profile-label">Updated At</span>
-                            <strong id="viewUpdatedAt" class="modal-profile-value"></strong>
-                        </div>
-                    </div>
+                <div class="modal-profile-main-copy">
+                    <span class="modal-profile-eyebrow">Selected Account</span>
+                    <strong id="viewName" class="modal-profile-name"></strong>
+                    <span id="viewEmail" class="ui-muted-text"></span>
                 </div>
             </div>
 
-            <div class="modal-ft">
-                <button type="button" data-ui-click="action-21e03f3cb038" class="ui-btn ui-btn-secondary">
-                    Close
-                </button>
+            <div class="modal-profile-details">
+                <div class="modal-profile-detail">
+                    <span class="modal-profile-detail-icon">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </span>
+                    <div>
+                        <span class="modal-profile-label">Role</span>
+                        <strong id="viewRole" class="modal-profile-value"></strong>
+                    </div>
+                </div>
+
+                <div class="modal-profile-detail">
+                    <span class="modal-profile-detail-icon">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </span>
+                    <div>
+                        <span class="modal-profile-label">Status</span>
+                        <strong id="viewStatus" class="status-pill status-inactive"></strong>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+
+        <div class="modal-profile-details">
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon"><i class="fa-solid fa-hashtag"></i></span>
+                <div>
+                    <span class="modal-profile-label">User ID</span>
+                    <strong id="viewId" class="modal-profile-value"></strong>
+                </div>
+            </div>
+
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon"><i class="fa-solid fa-database"></i></span>
+                <div>
+                    <span class="modal-profile-label">Source</span>
+                    <strong id="viewSource" class="modal-profile-value"></strong>
+                </div>
+            </div>
+
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon"><i class="fa-solid fa-calendar-plus"></i></span>
+                <div>
+                    <span class="modal-profile-label">Created At</span>
+                    <strong id="viewCreatedAt" class="modal-profile-value"></strong>
+                </div>
+            </div>
+
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon"><i class="fa-solid fa-phone"></i></span>
+                <div>
+                    <span class="modal-profile-label">Phone</span>
+                    <strong id="viewPhone" class="modal-profile-value"></strong>
+                </div>
+            </div>
+
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon"><i class="fa-solid fa-cake-candles"></i></span>
+                <div>
+                    <span class="modal-profile-label">Birthdate</span>
+                    <strong id="viewBirthdate" class="modal-profile-value"></strong>
+                </div>
+            </div>
+
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon"><i class="fa-solid fa-venus-mars"></i></span>
+                <div>
+                    <span class="modal-profile-label">Gender</span>
+                    <strong id="viewGender" class="modal-profile-value"></strong>
+                </div>
+            </div>
+
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon"><i class="fa-solid fa-notes-medical"></i></span>
+                <div>
+                    <span class="modal-profile-label">Patient Profile</span>
+                    <strong id="viewPatientProfile" class="modal-profile-value"></strong>
+                </div>
+            </div>
+
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                <div>
+                    <span class="modal-profile-label">Last Login</span>
+                    <strong id="viewLastLoginAt" class="modal-profile-value"></strong>
+                </div>
+            </div>
+
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon"><i class="fa-solid fa-pen-to-square"></i></span>
+                <div>
+                    <span class="modal-profile-label">Updated At</span>
+                    <strong id="viewUpdatedAt" class="modal-profile-value"></strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-ft">
+            <button type="button" data-ui-click="action-21e03f3cb038" class="ui-btn ui-btn-secondary">
+                Close
+            </button>
+        </div>
+    </x-modal>
 
     <div id="toggleConfirmModal" class="ui-modal modal-theme-warning" aria-hidden="true">
 

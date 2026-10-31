@@ -135,43 +135,40 @@
                         </div>
                     </div>
 
-            <div class="report-hero-actions">
-                @if (\App\Services\ReportSignatory::canManage(auth()->user()))
-                <button type="button" class="ui-btn ui-btn-primary" data-open-modal="reportSignatoryModal" aria-haspopup="dialog" aria-controls="reportSignatoryModal">
-                    <i class="fa-solid fa-signature" aria-hidden="true"></i> Report signatory
-                </button>
-                @endif
-                <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-132d158d6401">
+                    <div class="report-hero-actions">
+                        @if (\App\Services\ReportSignatory::canManage(auth()->user()))
+                            <x-button type="button" variant="primary" icon="fa-solid fa-signature"
+                                data-open-modal="reportSignatoryModal" aria-haspopup="dialog"
+                                aria-controls="reportSignatoryModal">
+                                Report signatory
+                            </x-button>
+                        @endif
 
-                            <i class="fa-solid fa-plus"></i>
+                        <x-button type="button" variant="primary" icon="fa-solid fa-plus"
+                            data-ui-click="action-132d158d6401">
                             Create Report
-                        </button>
+                        </x-button>
                     </div>
                 </div>
             @else
-                <div class="page-banner mb-7">
-                    <div class="page-banner-inner">
-                        <div>
-                            <h1 class="page-title">
-                                Reports &amp; Analytics
-                            </h1>
-                        </div>
-
-                <div class="report-hero-actions">
-                @if (\App\Services\ReportSignatory::canManage(auth()->user()))
-                <button type="button" class="ui-btn ui-btn-primary" data-open-modal="reportSignatoryModal" aria-haspopup="dialog" aria-controls="reportSignatoryModal">
-                    <i class="fa-solid fa-signature" aria-hidden="true"></i> Report signatory
-                </button>
-                @endif
-                        @if ($canGenerateAiReports)
-                            <button type="button" id="openAiReportConfirmModal" class="ui-btn ui-btn-primary">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                AI Generated Report
-                            </button>
+                <x-page-banner title="Reports & Analytics" class="mb-7" actions-class="report-hero-actions">
+                    <x-slot:actions>
+                        @if (\App\Services\ReportSignatory::canManage(auth()->user()))
+                            <x-button type="button" variant="primary" icon="fa-solid fa-signature"
+                                data-open-modal="reportSignatoryModal" aria-haspopup="dialog"
+                                aria-controls="reportSignatoryModal">
+                                Report signatory
+                            </x-button>
                         @endif
-                </div>
-                    </div>
-                </div>
+
+                        @if ($canGenerateAiReports)
+                            <x-button id="openAiReportConfirmModal" type="button" variant="primary"
+                                icon="fa-solid fa-wand-magic-sparkles">
+                                AI Generated Report
+                            </x-button>
+                        @endif
+                    </x-slot:actions>
+                </x-page-banner>
             @endif
 
             @if ($isAdminView)
@@ -926,14 +923,13 @@
                             </div>
 
                             <div class="card-header-right">
-                                <select id="weeklyPeriodSelect" class="js-custom-select"
-                                    data-placeholder="Select period">
+                                <x-select id="weeklyPeriodSelect" data-placeholder="Select period">
                                     @foreach ($cleanPeriods as $opt)
                                         <option value="{{ $opt }}">
                                             {{ $opt }}
                                         </option>
                                     @endforeach
-                                </select>
+                                </x-select>
                             </div>
                         </div>
                         <div class="card-body">
@@ -1147,16 +1143,14 @@
                                                 </div>
                                             </div>
 
-                                            <a href="{{ route('dentist.dentist.report.templates.print', $template->id) }}"
-                                                target="_blank" rel="noopener" class="ui-btn ui-btn-primary ui-btn-sm"
+                                            <x-button :href="route('dentist.dentist.report.templates.print', $template->id)" variant="primary" size="sm"
+                                                icon="fa-solid fa-print" target="_blank" rel="noopener"
                                                 data-tooltip="Print form" data-tooltip-tone="view"
                                                 aria-label="Print {{ $template->name }}">
-                                                <i class="fa-solid fa-print"></i>
-
                                                 <span class="printable-print-label">
                                                     Print
                                                 </span>
-                                            </a>
+                                            </x-button>
                                         </article>
                                     @endforeach
                                 </div>
@@ -1186,10 +1180,10 @@
                         </div>
 
                         <div class="card-header-right">
-                            <a href="{{ route('dentist.dentist.inventory') }}" class="ui-btn ui-btn-secondary ui-btn-sm">
-                                <i class="fa-solid fa-boxes-stacked"></i>
-                                <span>Manage Inventory</span>
-                            </a>
+                            <x-button :href="route('dentist.dentist.inventory')" variant="secondary" size="sm"
+                                icon="fa-solid fa-boxes-stacked">
+                                Manage Inventory
+                            </x-button>
                         </div>
                     </div>
 
@@ -1325,10 +1319,10 @@
 
         @endif
 
-                    </div>
-</main>
+        </div>
+    </main>
 
-@include('shared.report-signatory')
+    @include('shared.report-signatory')
 
     @if ($isDentistView)
         <div id="cancellationBreakdownModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"
@@ -1353,21 +1347,23 @@
                     <div class="modal-form-grid-2">
                         <div class="global-form-group">
                             <label for="cancellationMonth" class="global-form-label">Month</label>
-                            <select id="cancellationMonth" class="js-custom-select" data-placeholder="Select month">
+                            <x-select id="cancellationMonth" data-placeholder="Select month">
                                 @foreach (range(1, 12) as $month)
                                     <option value="{{ $month }}" @selected($month === ($cancellationBreakdown['month'] ?? now()->month))>
-                                        {{ \Carbon\Carbon::create(2000, $month, 1)->format('F') }}</option>
+                                        {{ \Carbon\Carbon::create(2000, $month, 1)->format('F') }}
+                                    </option>
                                 @endforeach
-                            </select>
+                            </x-select>
                         </div>
                         <div class="global-form-group">
                             <label for="cancellationYear" class="global-form-label">Year</label>
-                            <select id="cancellationYear" class="js-custom-select" data-placeholder="Select year">
+                            <x-select id="cancellationYear" data-placeholder="Select year">
                                 @foreach (range(now()->year, min(now()->year - 5, collect($cancellationBreakdown['years'] ?? [now()->year])->min() ?? now()->year)) as $year)
-                                    <option value="{{ $year }}" @selected($year === ($cancellationBreakdown['year'] ?? now()->year))>{{ $year }}
+                                    <option value="{{ $year }}" @selected($year === ($cancellationBreakdown['year'] ?? now()->year))>
+                                        {{ $year }}
                                     </option>
                                 @endforeach
-                            </select>
+                            </x-select>
                         </div>
                     </div>
                     <p id="cancellationLoading" class="modal-helper-text" role="status" hidden>Loading cancellation
@@ -1376,8 +1372,9 @@
                         <div class="global-confirm-alert" role="alert">
                             <p>Cancellation and no-show statistics could not be loaded. Please try again.</p>
                         </div>
-                        <button id="retryCancellationBreakdown" type="button" class="ui-btn ui-btn-secondary mt-2">Try
-                            again</button>
+                        <x-button id="retryCancellationBreakdown" type="button" variant="secondary" class="mt-2">
+                            Try again
+                        </x-button>
                     </div>
                     <div id="cancellationResults" class="space-y-4" @if (!($cancellationBreakdown['available'] ?? false)) hidden @endif>
                         <div id="cancellationReasons" @if (empty($cancellationBreakdown['reasons'])) hidden @endif>
@@ -1402,8 +1399,9 @@
                     </div>
                 </div>
                 <footer class="modal-ft">
-                    <button type="button" class="ui-btn ui-btn-secondary"
-                        data-modal-close="cancellationBreakdownModal">Close</button>
+                    <x-button type="button" variant="secondary" data-modal-close="cancellationBreakdownModal">
+                        Close
+                    </x-button>
                 </footer>
             </div>
         </div>
@@ -1488,19 +1486,17 @@
                 </div>
 
                 <div class="modal-ft">
-                    <button type="button" id="cancelAiReportConfirm" class="ui-btn ui-btn-secondary">
+                    <x-button id="cancelAiReportConfirm" type="button" variant="secondary">
                         Cancel
-                    </button>
+                    </x-button>
 
-                    <button type="button" id="confirmGenerateAiReport" class="ui-btn ui-btn-primary" aria-busy="false">
-
-                        <i class="fa-solid fa-wand-magic-sparkles" data-ai-report-button-icon>
-                        </i>
+                    <x-button id="confirmGenerateAiReport" type="button" variant="primary" aria-busy="false">
+                        <i class="fa-solid fa-wand-magic-sparkles" data-ai-report-button-icon></i>
 
                         <span data-ai-report-button-label>
                             Generate AI Report
                         </span>
-                    </button>
+                    </x-button>
                 </div>
             </div>
         </div>
@@ -1587,10 +1583,9 @@
                                         <span class="required-mark">*</span>
                                     </label>
 
-                                    <select id="reportType" name="document_template_id" class="js-custom-select"
+                                    <x-select id="reportType" name="document_template_id" required
                                         data-placeholder="Select a report type..." data-field-label="Report Type"
-                                        data-required-message="Please select a report type." required>
-
+                                        data-required-message="Please select a report type.">
                                         <option value="" selected disabled>
                                             Select a report type...
                                         </option>
@@ -1605,7 +1600,7 @@
                                                 No active custom report forms available
                                             </option>
                                         @endforelse
-                                    </select>
+                                    </x-select>
 
                                     <div id="reportTypeErr" class="global-field-error" data-error-for="reportType"
                                         aria-live="polite" aria-hidden="true">
@@ -1687,24 +1682,12 @@
 
                                     <div class="modal-inline-control">
                                         <div class="modal-inline-main">
-                                            <div class="global-number-stepper" data-global-number-stepper>
-                                                <button type="button" class="global-number-stepper-btn"
-                                                    data-number-step="-1" aria-label="Decrease quantity">
-                                                    <i class="fa-solid fa-minus"></i>
-                                                </button>
-
-                                                <input id="reportQty" name="quantity" type="number" value="1"
-                                                    min="1" max="100" step="1"
-                                                    class="global-number-stepper-input" data-number-stepper-input
-                                                    data-field-label="Quantity"
-                                                    data-required-message="Please enter a quantity."
-                                                    data-validation-rule="wholeNumber" required>
-
-                                                <button type="button" class="global-number-stepper-btn"
-                                                    data-number-step="1" aria-label="Increase quantity">
-                                                    <i class="fa-solid fa-plus"></i>
-                                                </button>
-                                            </div>
+                                            <x-number-stepper id="reportQty" name="quantity" value="1"
+                                                min="1" max="100" step="1" inputmode="numeric"
+                                                required decrease-label="Decrease quantity"
+                                                increase-label="Increase quantity" data-field-label="Quantity"
+                                                data-required-message="Please enter a quantity."
+                                                data-validation-rule="wholeNumber" />
                                         </div>
 
                                         <span class="modal-helper-text">
@@ -1720,14 +1703,13 @@
                     </div>
 
                     <div class="modal-ft">
-                        <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="createReportModal">
+                        <x-button type="button" variant="secondary" data-discard-close="createReportModal">
                             Cancel
-                        </button>
+                        </x-button>
 
-                        <button type="button" id="downloadReportBtn" class="ui-btn ui-btn-primary">
-                            <i class="fa-solid fa-download"></i>
+                        <x-button id="downloadReportBtn" type="button" variant="primary">
                             Download
-                        </button>
+                        </x-button>
                     </div>
                 </form>
             </div>
@@ -1775,11 +1757,10 @@
                 </div>
 
                 <div class="modal-ft">
-                    <button type="button" id="downloadCompleteDoneBtn" class="ui-btn ui-btn-success"
+                    <x-button id="downloadCompleteDoneBtn" type="button" variant="success" icon="fa-solid fa-check"
                         data-ui-click="action-927eb715f561">
-                        <i class="fa-solid fa-check"></i>
                         Done
-                    </button>
+                    </x-button>
                 </div>
             </div>
         </div>

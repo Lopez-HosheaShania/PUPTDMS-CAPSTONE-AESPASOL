@@ -30,34 +30,23 @@
                 </div>
 
                 <div class="dentist-hero-actions">
-                    <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-dd409da78ef1">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Create Report</span>
-                    </button>
+                    <x-button type="button" variant="primary" icon="fa-solid fa-plus" data-ui-click="action-dd409da78ef1">
+                        Create Report
+                    </x-button>
                 </div>
             </section>
 
             <section class="card service-records-card dtr-card">
-                <div class="card-header dtr-card-header">
-                    <div class="card-header-left">
-                        <div class="card-header-icon">
-                            <i class="fa-solid fa-table-list"></i>
-                        </div>
-
-                        <div>
-                            <h2 class="card-title">Treatment Records</h2>
-                            <p class="card-subtitle">Daily patient treatment entries</p>
-                        </div>
-                    </div>
-
-                    <div class="card-header-right dtr-toolbar search-filter-row">
+                <x-card-header title="Treatment Records" subtitle="Daily patient treatment entries"
+                    icon="fa-solid fa-table-list" class="dtr-card-header" actions-class="dtr-toolbar search-filter-row">
+                    <x-slot:actions>
                         <div class="dtr-month-picker">
                             <input type="text" id="monthPicker" class="form-input-custom" data-month-only-picker
                                 data-month-max-today placeholder="Select month" readonly>
                         </div>
 
                         <div class="voice-search-row">
-                            <x-search-bar id="searchInput" placeholder="Search patient, program, treatment…"
+                            <x-search-bar id="searchInput" placeholder="Search patient, program, treatment..."
                                 callback="handleDailyTreatmentSearch" :debounce="350" clear-label="Clear search" />
 
                             <x-voice-input target="#searchInput" status-id="dailySearchVoiceStatus" label="Use voice search"
@@ -77,8 +66,8 @@
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>
                         </div>
-                    </div>
-                </div>
+                    </x-slot:actions>
+                </x-card-header>
 
                 <x-pagination-bar id="dailyPagebarTop" info-id="dailyPageInfoTop" pagination-id="dailyPaginationTop"
                     position="top" :show-entries="true" page-size-id="dtPerPageSelect" page-size-callback="selectDailyPerPage"
@@ -118,8 +107,8 @@
 
     <x-filter-drawer id="filterModal" title="Filter Records" close-id="dailyCloseFilterBtn"
         close-callback="action-03ef2b7a6a82" clear-id="filterResetBtn" clear-callback="action-cb96a9d9ae02"
-        clear-label="Clear Filters" cancel-id="filterCloseBtn" cancel-callback="action-03ef2b7a6a82"
-        cancel-label="Cancel" apply-id="filterApplyBtn" apply-callback="action-085002056d44" apply-label="Show Results"
+        clear-label="Clear Filters" cancel-id="filterCloseBtn" cancel-callback="action-03ef2b7a6a82" cancel-label="Cancel"
+        apply-id="filterApplyBtn" apply-callback="action-085002056d44" apply-label="Show Results"
         results-id="dailyShowResultsText">
 
         <div id="dailyActiveFiltersSection" class="filter-active-section hidden">
@@ -128,11 +117,10 @@
                     Active Filters
                 </span>
 
-                <button id="dailyClearAllChipsBtn" type="button" class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm"
-                    data-ui-click="action-cb96a9d9ae02">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>Clear All</span>
-                </button>
+                <x-button id="dailyClearAllChipsBtn" type="button" variant="secondary" size="sm"
+                    icon="fa-solid fa-rotate-left" class="filter-clear-all" data-ui-click="action-cb96a9d9ae02">
+                    Clear All
+                </x-button>
             </div>
 
             <div id="dailyActiveChipsContainer" class="active-filters-container"></div>
@@ -198,238 +186,208 @@
             </div>
         </x-filter-group>
 
-</x-filter-drawer>
+    </x-filter-drawer>
 
-    <div id="createReportModal" class="ui-modal" aria-hidden="true">
-        <div class="ui-modal-card modal-lg" role="dialog" aria-modal="true" aria-labelledby="dailyCreateReportTitle">
-
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-file-circle-plus"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h3 id="dailyCreateReportTitle" class="modal-title">
-                            Create Daily Treatment Report
-                        </h3>
-
-                        <p class="modal-subtitle">
-                            Fields marked <span class="text-yellow-500 font-bold">*</span> are required.
-                        </p>
-                    </div>
+    <x-modal id="createReportModal" title="Create Daily Treatment Report" title-id="dailyCreateReportTitle"
+        icon="fa-solid fa-file-circle-plus" size="lg" close-label="Close create report modal" :close-attributes="[
+            'data-discard-close' => 'createReportModal',
+        ]"
+        form-id="reportForm" form-class="modal-card-form" :form-attributes="[
+            'data-global-validation' => '',
+            'data-form-validation-rule' => 'dailyTreatmentReport',
+            'data-discard-form' => '',
+            'data-discard-title' => 'Discard report changes?',
+            'data-discard-subtitle' => 'You have unsaved changes in this report.',
+            'data-discard-message' =>
+                'Closing this modal will remove the report details you entered. Do you want to discard your changes?',
+            'novalidate' => 'novalidate',
+        ]">
+        <x-slot:subtitleContent>
+            Fields marked
+            <span class="text-yellow-500 font-bold">*</span>
+            are required.
+        </x-slot:subtitleContent>
+        <div class="modal-form-section">
+            <div class="modal-section-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-file-lines"></i>
                 </div>
 
-                <button type="button" class="modal-x" data-discard-close="createReportModal"
-                    aria-label="Close create report modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <div>
+                    <h4>Report Details</h4>
+                    <p>Choose the report type, date range, and quantity.</p>
+                </div>
             </div>
 
-            <form id="reportForm" class="modal-card-form" data-global-validation
-                data-form-validation-rule="dailyTreatmentReport" data-discard-form
-                data-discard-title="Discard report changes?"
-                data-discard-subtitle="You have unsaved changes in this report."
-                data-discard-message="Closing this modal will remove the report details you entered. Do you want to discard your changes?"
-                novalidate>
-                <div class="modal-bd">
-                    <div class="modal-form-section">
-                        <div class="modal-section-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-file-lines"></i>
-                            </div>
+            <div class="modal-form-grid">
+                <div class="modal-field" data-global-field>
+                    <div class="global-label-row">
+                        <label for="reportName" class="global-form-label">
+                            Report Name
+                            <span class="required-mark">*</span>
+                        </label>
 
-                            <div>
-                                <h4>Report Details</h4>
-                                <p>Choose the report type, date range, and quantity.</p>
-                            </div>
+                        <span id="reportNameCounter" class="char-counter">
+                            0 / 100
+                        </span>
+                    </div>
+
+                    <div class="global-voice-row" data-voice-field>
+                        <div class="global-voice-control">
+                            <input id="reportName" name="report_name" type="text" minlength="3" maxlength="100"
+                                class="form-input-custom" placeholder="e.g. Daily Treatment Report - Dec 2026"
+                                data-field-label="Report Name" data-required-message="Please enter a report name."
+                                data-char-limit="100" data-char-counter="#reportNameCounter" required>
                         </div>
 
-                        <div class="modal-form-grid">
-                            <div class="modal-field" data-global-field>
-                                <div class="global-label-row">
-                                    <label for="reportName" class="global-form-label">
-                                        Report Name
-                                        <span class="required-mark">*</span>
-                                    </label>
+                        <x-voice-input target="#reportName" status-id="reportNameVoiceStatus"
+                            label="Voice input for report name" title="Voice input" />
+                    </div>
 
-                                    <span id="reportNameCounter" class="char-counter">
-                                        0 / 100
-                                    </span>
-                                </div>
+                    <div id="reportNameErr" class="global-field-error" data-error-for="reportName" aria-live="polite"
+                        aria-hidden="true"></div>
+                </div>
 
-                                <div class="global-voice-row" data-voice-field>
-                                    <div class="global-voice-control">
-                                        <input id="reportName" name="report_name" type="text" minlength="3"
-                                            maxlength="100" class="form-input-custom"
-                                            placeholder="e.g. Daily Treatment Report — Dec 2026"
-                                            data-field-label="Report Name"
-                                            data-required-message="Please enter a report name." data-char-limit="100"
-                                            data-char-counter="#reportNameCounter" required>
-                                    </div>
+                <div class="modal-field" data-global-field>
+                    <label for="reportType" class="global-form-label">
+                        Report Type
+                        <span class="required-mark">*</span>
+                    </label>
 
-                                    <x-voice-input target="#reportName" status-id="reportNameVoiceStatus"
-                                        label="Voice input for report name" title="Voice input" />
-                                </div>
+                    <select id="reportType" name="document_template_id" class="js-custom-select"
+                        data-placeholder="Select a report type" data-field-label="Report Type"
+                        data-required-message="Please select a report type." required>
+                        <option value="">
+                            Select a report type...
+                        </option>
 
-                                <div id="reportNameErr" class="global-field-error" data-error-for="reportName"
-                                    aria-live="polite" aria-hidden="true"></div>
-                            </div>
+                        @foreach ($dailyTreatmentTemplates ?? collect() as $template)
+                            <option value="{{ $template->id }}" data-document-type="{{ $template->document_type }}">
+                                {{ $template->name }}
+                            </option>
+                        @endforeach
+                    </select>
 
-                            <div class="modal-field" data-global-field>
-                                <label for="reportType" class="global-form-label">
-                                    Report Type
-                                    <span class="required-mark">*</span>
-                                </label>
+                    <div id="reportTypeErr" class="global-field-error" data-error-for="reportType" aria-live="polite"
+                        aria-hidden="true"></div>
+                </div>
 
-                                <select id="reportType" name="document_template_id" class="js-custom-select"
-                                    data-placeholder="Select a report type" data-field-label="Report Type"
-                                    data-required-message="Please select a report type." required>
-                                    <option value="">
-                                        Select a report type...
-                                    </option>
+                <div class="modal-form-grid-2">
 
-                                    @foreach ($dailyTreatmentTemplates ?? collect() as $template)
-                                        <option value="{{ $template->id }}"
-                                            data-document-type="{{ $template->document_type }}">
-                                            {{ $template->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                    <div class="modal-field" data-global-field>
+                        <label for="dateFrom" class="global-form-label">
+                            From
+                            <span class="required-mark">*</span>
+                        </label>
 
-                                <div id="reportTypeErr" class="global-field-error" data-error-for="reportType"
-                                    aria-live="polite" aria-hidden="true"></div>
-                            </div>
-
-                            <div class="modal-form-grid-2">
-
-                                <div class="modal-field" data-global-field>
-                                    <label for="dateFrom" class="global-form-label">
-                                        From
-                                        <span class="required-mark">*</span>
-                                    </label>
-
-                                    <div class="fp-date-input-wrap">
-                                        <input id="dateFrom" name="date_from" type="text"
-                                            class="form-input-custom js-flatpickr-date-max-today"
-                                            placeholder="Select start date" data-field-label="From Date"
-                                            data-required-message="Please select a start date."
-                                            data-validation-rule="notFutureDate" readonly required>
-                                    </div>
-
-                                    <div id="dateFromErr" class="global-field-error" data-error-for="dateFrom"
-                                        aria-live="polite" aria-hidden="true"></div>
-                                </div>
-
-                                <div class="modal-field" data-global-field>
-                                    <label for="dateTo" class="global-form-label">
-                                        To
-                                        <span class="field-optional">
-                                            (optional)
-                                        </span>
-                                    </label>
-
-                                    <div class="fp-date-input-wrap">
-                                        <input id="dateTo" name="date_to" type="text"
-                                            class="form-input-custom js-flatpickr-date-max-today"
-                                            placeholder="Select end date" data-field-label="To Date"
-                                            data-validation-rule="notFutureDate" readonly>
-                                    </div>
-
-                                    <div id="dateToErr" class="global-field-error" data-error-for="dateTo"
-                                        aria-live="polite" aria-hidden="true"></div>
-                                </div>
-
-                            </div>
-
-                            <div>
-                                <p class="modal-helper-text">
-                                    <i class="fa-solid fa-circle-info mr-1"></i>
-                                    Leave "To" empty to report on a single date.
-                                </p>
-
-                            </div>
-
-                            <div class="modal-field modal-field-full" data-global-field>
-                                <label class="global-form-label" for="reportQty">
-                                    Quantity
-                                    <span class="required-mark">*</span>
-                                </label>
-
-                                <div class="modal-inline-control">
-                                    <div class="modal-inline-main">
-
-                                        <div class="global-number-stepper" data-global-number-stepper>
-                                            <button type="button" class="global-number-stepper-btn"
-                                                data-number-step="-1" aria-label="Decrease quantity">
-                                                <i class="fa-solid fa-minus"></i>
-                                            </button>
-
-                                            <input id="reportQty" name="quantity" type="number" value="1"
-                                                min="1" max="100" step="1"
-                                                class="global-number-stepper-input" data-number-stepper-input
-                                                data-field-label="Quantity"
-                                                data-required-message="Please enter a quantity."
-                                                data-validation-rule="wholeNumber" required>
-
-                                            <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                                aria-label="Increase quantity">
-                                                <i class="fa-solid fa-plus"></i>
-                                            </button>
-                                        </div>
-
-                                    </div>
-
-                                    <span class="modal-helper-text">
-                                        Whole numbers only
-                                    </span>
-                                </div>
-
-                                <div id="reportQtyErr" class="global-field-error" data-error-for="reportQty"
-                                    aria-live="polite" aria-hidden="true"></div>
-                            </div>
-
-                            <div>
-                                <div id="formErrorBanner" class="modal-error-banner hidden">
-                                    <i class="fa-solid fa-triangle-exclamation"></i>
-                                    <span>Please complete all required fields before downloading.</span>
-                                </div>
-                            </div>
+                        <div class="fp-date-input-wrap">
+                            <input id="dateFrom" name="date_from" type="text"
+                                class="form-input-custom js-flatpickr-date-max-today" placeholder="Select start date"
+                                data-field-label="From Date" data-required-message="Please select a start date."
+                                data-validation-rule="notFutureDate" readonly required>
                         </div>
+
+                        <div id="dateFromErr" class="global-field-error" data-error-for="dateFrom" aria-live="polite"
+                            aria-hidden="true"></div>
+                    </div>
+
+                    <div class="modal-field" data-global-field>
+                        <label for="dateTo" class="global-form-label">
+                            To
+                            <span class="field-optional">
+                                (optional)
+                            </span>
+                        </label>
+
+                        <div class="fp-date-input-wrap">
+                            <input id="dateTo" name="date_to" type="text"
+                                class="form-input-custom js-flatpickr-date-max-today" placeholder="Select end date"
+                                data-field-label="To Date" data-validation-rule="notFutureDate" readonly>
+                        </div>
+
+                        <div id="dateToErr" class="global-field-error" data-error-for="dateTo" aria-live="polite"
+                            aria-hidden="true"></div>
+                    </div>
+
+                </div>
+
+                <div>
+                    <p class="modal-helper-text">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        Leave "To" empty to report on a single date.
+                    </p>
+
+                </div>
+
+                <div class="modal-field modal-field-full" data-global-field>
+                    <label class="global-form-label" for="reportQty">
+                        Quantity
+                        <span class="required-mark">*</span>
+                    </label>
+
+                    <div class="modal-inline-control">
+                        <div class="modal-inline-main">
+
+                            <x-number-stepper id="reportQty" name="quantity" value="1" min="1"
+                                max="100" step="1" required decrease-label="Decrease quantity"
+                                increase-label="Increase quantity" data-field-label="Quantity"
+                                data-required-message="Please enter a quantity." data-validation-rule="wholeNumber" />
+
+                        </div>
+
+                        <span class="modal-helper-text">
+                            Whole numbers only
+                        </span>
+                    </div>
+
+                    <div id="reportQtyErr" class="global-field-error" data-error-for="reportQty" aria-live="polite"
+                        aria-hidden="true"></div>
+                </div>
+
+                <div>
+                    <div id="formErrorBanner" class="modal-error-banner hidden">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>Please complete all required fields before downloading.</span>
                     </div>
                 </div>
-
-                <div class="modal-ft">
-                    <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="createReportModal">
-                        Cancel
-                    </button>
-
-                    <button type="button" id="downloadReportBtn" class="ui-btn ui-btn-primary">
-                        <i class="fa-solid fa-download"></i>
-                        <span>Download</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="downloadCompleteModal" class="ui-modal" data-ui-click="action-a9193769e801">
-        <div class="ui-modal-card modal-box p-0 rounded-2xl overflow-hidden bg-white shadow-2xl max-w-sm">
-            <div class="h-1.5 bg-gradient-to-r from-[#8B0000] to-[#FFD700] w-full"></div>
-            <div class="px-8 py-10 text-center">
-                <div
-                    class="w-16 h-16 bg-green-50 border-2 border-green-200 rounded-full flex items-center justify-center mx-auto mb-5">
-                    <i class="fa-solid fa-check text-green-500 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-[#8B0000] mb-2">Download Complete!</h3>
-                <p class="text-gray-500 text-sm leading-relaxed mb-7">Your report has been successfully generated and
-                    downloaded.
-                </p>
-                <button type="button" data-ui-click="action-927eb715f561"
-                    class="px-8 py-2.5 rounded-xl bg-[#8B0000] hover:bg-[#6b0000] text-white font-bold text-sm shadow-sm transition-all w-full">Done</button>
             </div>
         </div>
-    </div>
+
+        <x-slot:footer>
+            <x-button variant="secondary" data-discard-close="createReportModal">
+                Cancel
+            </x-button>
+
+            <x-button id="downloadReportBtn" variant="primary" icon="fa-solid fa-download">
+                Download
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
+
+    <x-modal id="downloadCompleteModal" title="Download Complete"
+        subtitle="The daily treatment report was generated successfully." title-id="downloadCompleteTitle"
+        icon="fa-solid fa-circle-check" size="sm" theme="success" close-label="Close download complete modal"
+        :close-attributes="[
+            'data-ui-click' => 'action-927eb715f561',
+        ]" data-ui-click="action-a9193769e801">
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-file-circle-check"></i>
+
+            <div>
+                <p>Your report is ready.</p>
+
+                <span>
+                    The generated file has been downloaded to your device.
+                </span>
+            </div>
+        </div>
+
+        <x-slot:footer>
+            <x-button variant="success" icon="fa-solid fa-check" data-ui-click="action-927eb715f561">
+                Done
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 @endsection
 
 @section('scripts')
@@ -497,7 +455,7 @@
         }
 
         function formatDtrClock(value) {
-            if (!value) return '—';
+            if (!value) return '-';
             return escapeDtrHtml(value);
         }
 
@@ -583,8 +541,8 @@
             if (listView) listView.hidden = false;
 
             records.forEach(record => {
-                const contact = [record.patient_email, record.patient_phone].filter(Boolean).join(' / ') || '—';
-                const officeOrProgram = record.office_display || record.office_type || record.program_code || '—';
+                const contact = [record.patient_email, record.patient_phone].filter(Boolean).join(' / ') || '-';
+                const officeOrProgram = record.office_display || record.office_type || record.program_code || '-';
                 const signature = record.has_signature ?
                     `
             <a href="${escapeDtrHtml(record.signature_url || '#')}" class="dtr-signature-preview" target="_blank" rel="noopener noreferrer" aria-label="View patient signature">
@@ -597,25 +555,25 @@
                     tbody.insertAdjacentHTML('beforeend', `
             <tr>
               <td class="whitespace-nowrap min-w-[150px]">
-                <div class="text-gray-800">${escapeDtrHtml(record.requested_date_time || formatDateToMMDDYY(record.treatment_date) || '—')}</div>
+                <div class="text-gray-800">${escapeDtrHtml(record.requested_date_time || formatDateToMMDDYY(record.treatment_date) || '-')}</div>
               </td>
               <td class="min-w-[220px]">
                 <div class="text-gray-800" data-patient-name>
-                    ${escapeDtrHtml(record.patient_name || '—')}
+                    ${escapeDtrHtml(record.patient_name || '-')}
                 </div>
               </td>
             <td class="min-w-[240px] text-[12px] leading-5">${escapeDtrHtml(contact)}</td>
             <td class="min-w-[140px]">
               <div class="text-gray-800">${escapeDtrHtml(officeOrProgram)}</div>
               </td>
-              <td class="text-center">${escapeDtrHtml(record.gender || '—')}</td>
-              <td class="min-w-[220px] text-[12px] leading-5">${escapeDtrHtml(record.treatment_done || '—')}</td>
+              <td class="text-center">${escapeDtrHtml(record.gender || '-')}</td>
+              <td class="min-w-[220px] text-[12px] leading-5">${escapeDtrHtml(record.treatment_done || '-')}</td>
               <td class="whitespace-nowrap min-w-[150px] text-[12px] leading-5">
-                <div class="text-gray-700">${escapeDtrHtml(record.processed_date_time || '—')}</div>
+                <div class="text-gray-700">${escapeDtrHtml(record.processed_date_time || '-')}</div>
               </td>
               <td class="text-center whitespace-nowrap">
                 <span class="inline-flex min-w-[56px] items-center justify-center rounded-full bg-[#fff5f5] px-3 py-1 text-xs font-bold text-[#8B0000]">
-                  ${escapeDtrHtml(record.minutes_processed || '—')}${record.minutes_processed ? ' mins' : ''}
+                  ${escapeDtrHtml(record.minutes_processed || '-')}${record.minutes_processed ? ' mins' : ''}
                 </span>
               </td>
               <td class="text-center">${signature}</td>
@@ -655,7 +613,7 @@
                     host,
                     input: '#searchInput',
                     query: dtrState.search,
-                    title: `No results for “${dtrState.search}”`,
+                    title: `No results for "${dtrState.search}"`,
                     message: 'Try another patient name, program, treatment, email, or contact number.',
                 });
 
@@ -959,6 +917,7 @@
             renderDailyFilterDraft();
             updateDailyDraftCount();
         }
+
         function removeDailyDraftChip(key) {
             dtrDraft[key] = '';
             renderDailyFilterDraft();
@@ -1450,10 +1409,10 @@
                     'char-counter';
             }
 
-    window.initGlobalNumberSteppers?.(
-      form
-    );
-  }
+            window.initGlobalNumberSteppers?.(
+                form
+            );
+        }
 
         function registerDailyTreatmentReportValidation() {
             if (

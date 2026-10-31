@@ -185,15 +185,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 </div>
             </div>
             @else
-            <div class="page-banner">
-                <div class="page-banner-inner">
-                    <div>
-                        <h1 class="page-title">
-                            Document Requests
-                        </h1>
-                    </div>
-                </div>
-            </div>
+            <x-page-banner title="Document Requests" />
             @endif
         </div>
 
@@ -220,7 +212,8 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                         data-tooltip="Filter" data-tooltip-tone="neutral" aria-label="Filter requests">
                         <i class="fa-solid fa-sliders"></i>
                         <span>Filter</span>
-                        <span id="filterBadge" class="filter-badge" data-ui-presentation="presentation-d0466aa33fa8"></span>
+                        <span id="filterBadge" class="filter-badge"
+                            data-ui-presentation="presentation-d0466aa33fa8"></span>
                     </button>
 
                     <x-view-toggle id="documentRequestsViewToggle" root="#mainContent"
@@ -291,10 +284,10 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 Active Filters
             </span>
 
-            <button id="clearAllChipsBtn" type="button" class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm">
-                <i class="fa-solid fa-rotate-left"></i>
-                <span>Clear All</span>
-            </button>
+            <x-button id="clearAllChipsBtn" type="button" variant="secondary" size="sm" icon="fa-solid fa-rotate-left"
+                class="filter-clear-all">
+                Clear All
+            </x-button>
         </div>
 
         <div id="activeChipsContainer" class="active-filters-container"></div>
@@ -323,7 +316,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     <x-filter-group title="Document Details">
 
         <div data-global-selects>
-            <select id="fDocType" class="js-custom-select" aria-label="Document type">
+            <x-select id="fDocType" aria-label="Document type">
                 <option value="">
                     All document types
                 </option>
@@ -333,7 +326,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                     {{ $type }}
                 </option>
                 @endforeach
-            </select>
+            </x-select>
         </div>
 
     </x-filter-group>
@@ -369,15 +362,15 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         <div class="filter-date-grid">
 
             <div class="filter-date-input-wrap">
-                <input type="text" id="fDateFrom" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date" readonly
-                    autocomplete="off">
+                <input type="text" id="fDateFrom" class="form-input-custom js-flatpickr-date-range-from"
+                    placeholder="Start date" readonly autocomplete="off">
 
                 <i class="fa-regular fa-calendar"></i>
             </div>
 
             <div class="filter-date-input-wrap">
-                <input type="text" id="fDateTo" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date" readonly
-                    autocomplete="off">
+                <input type="text" id="fDateTo" class="form-input-custom js-flatpickr-date-range-to"
+                    placeholder="End date" readonly autocomplete="off">
 
                 <i class="fa-regular fa-calendar"></i>
             </div>
@@ -473,14 +466,13 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         </div>
 
         <div class="modal-ft">
-            <button type="button" class="ui-btn ui-btn-secondary" id="approveCancelBtn2">
+            <x-button id="approveCancelBtn2" type="button" variant="secondary">
                 Cancel
-            </button>
+            </x-button>
 
-            <button type="button" class="ui-btn ui-btn-success" id="approveConfirmBtn">
-                <i class="fa-solid fa-check"></i>
-                <span>Confirm Approval</span>
-            </button>
+            <x-button id="approveConfirmBtn" type="button" variant="success" icon="fa-solid fa-check">
+                Confirm Approval
+            </x-button>
         </div>
     </div>
 </div>
@@ -602,14 +594,13 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="rejectModal">
+                <x-button type="button" variant="secondary" data-discard-close="rejectModal">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="submit" class="ui-btn ui-btn-danger" id="rejectConfirmBtn">
-                    <i class="fa-solid fa-ban"></i>
-                    <span>Confirm Rejection</span>
-                </button>
+                <x-button id="rejectConfirmBtn" type="submit" variant="danger" icon="fa-solid fa-ban">
+                    Confirm Rejection
+                </x-button>
             </div>
         </form>
     </div>
@@ -621,10 +612,10 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 @section('scripts')
 <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
-    const ADMIN_DOC_REQUESTS = @json($docRequestsPayload -> values());
+    const ADMIN_DOC_REQUESTS = @json($docRequestsPayload->values());
     const ADMIN_DOC_STATS = @json($docRequestStats);
-    const ADMIN_DOC_TYPES = @json($docRequestTypes -> values());
-    const DOCREQ_DEFAULT_DOC_TYPES = @json($defaultDocumentTypes -> values());
+    const ADMIN_DOC_TYPES = @json($docRequestTypes->values());
+    const DOCREQ_DEFAULT_DOC_TYPES = @json($defaultDocumentTypes->values());
 
     let allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
 
@@ -668,8 +659,10 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     let currentViewMode = 'list';
 
     const DOCREQ_ROUTES = @json($routes ?? []);
-    const CAN_APPROVE_DOCUMENT_REQUESTS = @json(auth()->user()?->hasPermission('approve_document_requests') ?? false);
-    const CAN_REJECT_DOCUMENT_REQUESTS = @json(auth()->user()?->hasPermission('reject_document_requests') ?? false);
+    const CAN_APPROVE_DOCUMENT_REQUESTS = @json(
+        auth()->user()?->hasPermission('approve_document_requests') ?? false);
+    const CAN_REJECT_DOCUMENT_REQUESTS = @json(
+        auth()->user()?->hasPermission('reject_document_requests') ?? false);
     const DOCREQ_METHODS = @json($methods ?? []);
     const DOCREQ_REFRESH_ITEMS = @json($refreshItems ?? []);
     const DOCREQ_INDEX_URL = DOCREQ_ROUTES.index || window.location.pathname;
@@ -2410,30 +2403,18 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 pagination.to ?? null,
 
             containers: [
-                document.getElementById(
-                    'pagControlsTop'
-                ),
-                document.getElementById(
-                    'pagControls'
-                ),
+                document.getElementById('pagControlsTop'),
+                document.getElementById('documentRequestsPaginationBottom'),
             ],
 
             bars: [
-                document.getElementById(
-                    'docreqPaginationTopBar'
-                ),
-                document.getElementById(
-                    'docreqPaginationBottomBar'
-                ),
+                document.getElementById('docreqPaginationTopBar'),
+                document.getElementById('documentRequestsPagebarBottom'),
             ],
 
             infoElements: [
-                document.getElementById(
-                    'pageInfoTop'
-                ),
-                document.getElementById(
-                    'pageInfo'
-                ),
+                document.getElementById('pageInfoTop'),
+                document.getElementById('documentRequestsPageInfoBottom'),
             ],
 
             itemLabel: 'requests',

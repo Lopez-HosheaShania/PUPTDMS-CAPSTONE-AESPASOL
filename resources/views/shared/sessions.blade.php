@@ -12,30 +12,12 @@
 
 @section('content')
 
-    <main id="mainContent"
-        class="
-        session-page
-        page-enter
-        {{ $role === 'admin' ? 'app-page-shell' : ($role === 'dentist' ? 'app-page-shell' : 'app-page-shell') }}
-    ">
+    <main id="mainContent" class="session-page page-enter app-page-shell">
         <div class="session-shell">
 
             @if ($role === 'admin')
-                <section class="page-banner">
-                    <div class="page-banner-inner">
-
-                        <div>
-                            <h1 class="page-title">
-                                Account Sessions
-                            </h1>
-
-                            <p class="page-subtitle">
-                                Review active devices and recent sign-in activity for your account.
-                            </p>
-                        </div>
-
-                    </div>
-                </section>
+                <x-page-banner title="Account Sessions"
+                    subtitle="Review active devices and recent sign-in activity for your account." />
             @elseif ($role === 'dentist')
                 <section class="dentist-hero">
                     <div class="dentist-hero-content">
@@ -132,15 +114,14 @@
                                         @csrf
                                         @method('DELETE')
 
-                                        <button type="button" class="ui-btn ui-btn-secondary" data-session-confirm
-                                            data-form-id="logoutOtherDevicesForm" data-title="Log Out Other Devices?"
-                                            data-subtitle="Confirm other device logout"
+                                        <x-button type="button" variant="secondary" icon="fa-solid fa-right-from-bracket"
+                                            data-session-confirm data-form-id="logoutOtherDevicesForm"
+                                            data-title="Log Out Other Devices?" data-subtitle="Confirm other device logout"
                                             data-message="Are you sure you want to log out all other devices?"
                                             data-helper="Your current browser session will remain active."
                                             data-confirm-label="Log Out Other Devices">
-                                            <i class="fa-solid fa-right-from-bracket"></i>
                                             Log Out Other Devices
-                                        </button>
+                                        </x-button>
                                     </form>
                                 @endif
 
@@ -150,15 +131,15 @@
                                         @csrf
                                         @method('DELETE')
 
-                                        <button type="button" class="ui-btn ui-btn-danger" data-session-confirm
+                                        <x-button type="button" variant="danger"
+                                            icon="fa-solid fa-arrow-right-from-bracket" data-session-confirm
                                             data-form-id="logoutAllDevicesForm" data-title="Log Out All Devices?"
                                             data-subtitle="Confirm account-wide session logout"
                                             data-message="Are you sure you want to log out all signed-in devices?"
                                             data-helper="This will end all active sessions for your account, including the device you are currently using."
                                             data-confirm-label="Log Out All Devices">
-                                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
                                             Log Out All Devices
-                                        </button>
+                                        </x-button>
                                     </form>
                                 @endif
                             </div>
@@ -201,15 +182,15 @@
                                                     @csrf
                                                     @method('DELETE')
 
-                                                    <button type="button" class="ui-btn ui-btn-danger" data-session-confirm
+                                                    <x-button type="button" variant="danger"
+                                                        icon="fa-solid fa-right-from-bracket" data-session-confirm
                                                         data-form-id="logoutDeviceForm{{ $loop->index }}"
                                                         data-title="Log Out This Device?" data-subtitle="Confirm device logout"
                                                         data-message="Are you sure you want to log out this device?"
                                                         data-helper="The selected browser session will be ended. Your current session will remain signed in."
                                                         data-confirm-label="Log Out This Device">
-                                                        <i class="fa-solid fa-right-from-bracket"></i>
                                                         Log Out This Device
-                                                    </button>
+                                                    </x-button>
                                                 </form>
                                             @else
                                                 <form id="logoutCurrentSessionForm" method="POST"
@@ -217,7 +198,7 @@
                                                     @csrf
                                                     @method('DELETE')
 
-                                                    <button type="button" class="ui-btn ui-btn-secondary" data-session-confirm
+                                                    <x-button type="button" variant="secondary" data-session-confirm
                                                         data-form-id="logoutCurrentSessionForm"
                                                         data-title="Log Out This Session?"
                                                         data-subtitle="Confirm current session logout"
@@ -225,7 +206,7 @@
                                                         data-helper="You will be signed out from this browser and will need to sign in again to continue."
                                                         data-confirm-label="Log Out This Session">
                                                         Log Out This Session
-                                                    </button>
+                                                    </x-button>
                                                 </form>
                                             @endunless
                                         </div>
@@ -369,14 +350,14 @@
             </div>
 
             <div class="modal-ft logout-confirm-actions">
-                <button type="button" class="ui-btn ui-btn-secondary" id="cancelSessionLogout">
+                <x-button id="cancelSessionLogout" type="button" variant="secondary">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="button" class="ui-btn ui-btn-danger" id="confirmSessionLogout">
-                    <i class="fa-solid fa-right-from-bracket"></i>
+                <x-button id="confirmSessionLogout" type="button" variant="danger"
+                    icon="fa-solid fa-right-from-bracket">
                     <span>Log Out</span>
-                </button>
+                </x-button>
             </div>
         </div>
     </div>

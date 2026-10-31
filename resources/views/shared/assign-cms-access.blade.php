@@ -29,13 +29,7 @@
                     </div>
                 </div>
             @else
-                <div class="page-banner mb-6">
-                    <div class="page-banner-inner">
-                        <div class="min-w-0">
-                            <h1 class="page-title">Assign CMS Access</h1>
-                        </div>
-                    </div>
-                </div>
+                <x-page-banner title="Assign CMS Access" class="mb-6" />
             @endif
 
             <form id="assignCmsAccessForm" method="POST" action="{{ route($routePrefix . '.assign-cms-access.store') }}"
@@ -74,7 +68,8 @@
                                     </div>
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
-                                        <div id="progressUserBar" class="progress-fill" data-ui-presentation="presentation-72dd1572d65e"></div>
+                                        <div id="progressUserBar" class="progress-fill"
+                                            data-ui-presentation="presentation-72dd1572d65e"></div>
                                     </div>
                                 </div>
 
@@ -136,7 +131,8 @@
                                     </div>
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
-                                        <div id="progressInformationBar" class="progress-fill" data-ui-presentation="presentation-72dd1572d65e"></div>
+                                        <div id="progressInformationBar" class="progress-fill"
+                                            data-ui-presentation="presentation-72dd1572d65e"></div>
                                     </div>
                                 </div>
 
@@ -179,37 +175,43 @@
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">External Admin ID</span>
                                                     <span id="display_admin_id" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">First Name</span>
                                                     <span id="display_fname" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Last Name</span>
                                                     <span id="display_lname" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Birthday</span>
                                                     <span id="display_birthday" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Age</span>
                                                     <span id="display_age" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Gender</span>
                                                     <span id="display_gender" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                             </div>
 
@@ -220,31 +222,36 @@
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Office</span>
                                                     <span id="display_office" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Access Level</span>
                                                     <span id="display_access_level" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Email</span>
                                                     <span id="display_email" class="global-info-value min-w-0 text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Contact Number</span>
                                                     <span id="display_contact" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                                 <div
                                                     class="global-info-item global-info-item-inline justify-between gap-4">
                                                     <span class="ui-muted-text">Senior / PWD</span>
                                                     <span id="display_senior_pwd" class="global-info-value text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                             </div>
 
@@ -255,7 +262,8 @@
                                                     <span class="ui-muted-text">Home Address</span>
                                                     <span id="display_address"
                                                         class="global-info-value min-w-0 text-right"
-                                                        data-ui-presentation="presentation-25a98a3a6a48">Not provided</span>
+                                                        data-ui-presentation="presentation-25a98a3a6a48">Not
+                                                        provided</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -283,7 +291,8 @@
                                     </div>
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
-                                        <div id="progressAccessBar" class="progress-fill" data-ui-presentation="presentation-72dd1572d65e"></div>
+                                        <div id="progressAccessBar" class="progress-fill"
+                                            data-ui-presentation="presentation-72dd1572d65e"></div>
                                     </div>
                                 </div>
 
@@ -377,10 +386,9 @@
                                         <i class="fa-solid fa-rotate-left"></i>
                                         Reset
                                     </button>
-                                    <button type="submit" class="ui-btn ui-btn-primary">
-                                        <i class="fa-solid fa-floppy-disk"></i>
+                                    <x-button type="submit" variant="primary" icon="fa-solid fa-floppy-disk">
                                         Save Access
-                                    </button>
+                                    </x-button>
                                 </div>
                             </div>
                         </section>

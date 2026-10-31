@@ -1,93 +1,64 @@
-<div id="personalInformationVerificationModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"
-    aria-labelledby="personalInformationVerificationTitle" aria-describedby="personalInformationVerificationMessage">
-    <div class="ui-modal-card modal-md">
+<x-modal id="personalInformationVerificationModal" title="Unable to Verify Information"
+    title-id="personalInformationVerificationTitle" description-id="personalInformationVerificationMessage"
+    subtitle="Appointment booking" icon="fa-solid fa-user-pen" size="md" :show-close="false" :initial-focus-title="true"
+    body-class="modal-form-grid">
+    <div class="global-confirm-alert">
+        <p id="personalInformationVerificationMessage">
+            We could not verify your Personal Information from GUISIS.
+        </p>
+    </div>
 
-        <header class="modal-hd">
-            <div class="modal-heading">
-                <div class="modal-icon" aria-hidden="true">
-                    <i class="fa-solid fa-user-pen"></i>
-                </div>
-
-                <div class="modal-copy">
-                    <h2 id="personalInformationVerificationTitle" class="modal-title" tabindex="-1"
-                        data-modal-initial-focus>
-                        Unable to Verify Information
-                    </h2>
-
-                    <p class="modal-subtitle">
-                        Appointment booking
-                    </p>
-                </div>
-            </div>
-        </header>
-
-        <div class="modal-bd modal-form-grid">
-
-            <div class="global-confirm-alert">
-                <p id="personalInformationVerificationMessage">
-                    We could not verify your Personal Information from GUISIS.
-                </p>
-            </div>
-
-            <section class="modal-form-section" aria-labelledby="personalInformationVerificationActions">
-                <div class="modal-section-heading">
-                    <h3 id="personalInformationVerificationActions" class="text-sm font-bold">
-                        What you can do
-                    </h3>
-                </div>
-
-                <ol class="m-0 list-none space-y-3 p-0">
-
-                    <li class="flex items-start gap-3">
-                        <div class="modal-section-icon" aria-hidden="true">
-                            <i class="fa-regular fa-pen-to-square"></i>
-                        </div>
-
-                        <p id="personalInformationVerificationStep"
-                            class="m-0 pt-2 text-sm font-medium leading-relaxed">
-                            Please complete your personal information in GUISIS.
-                        </p>
-                    </li>
-
-                    <li class="flex items-start gap-3">
-                        <div class="modal-section-icon" aria-hidden="true">
-                            <i class="fa-regular fa-calendar-check"></i>
-                        </div>
-
-                        <p id="personalInformationVerificationReturn"
-                            class="m-0 pt-2 text-sm font-medium leading-relaxed">
-                            Return here and try booking again.
-                        </p>
-                    </li>
-
-                </ol>
-            </section>
-
-            <p id="personalInformationVerificationExternalNote" class="modal-helper-text">
-                GUISIS opens in a new tab so you can keep this page open.
-            </p>
-
+    <section class="modal-form-section" aria-labelledby="personalInformationVerificationActions">
+        <div class="modal-section-heading">
+            <h3 id="personalInformationVerificationActions" class="text-sm font-bold">
+                What you can do
+            </h3>
         </div>
 
-        <footer class="modal-ft">
+        <ol class="m-0 list-none space-y-3 p-0">
 
-            <button id="personalInformationVerificationClose" type="button" class="ui-btn ui-btn-secondary"
-                data-modal-close="personalInformationVerificationModal">
-                Close
-            </button>
+            <li class="flex items-start gap-3">
+                <div class="modal-section-icon" aria-hidden="true">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </div>
 
-            <a id="personalInformationVerificationGuisis" class="ui-btn ui-btn-primary"
-                href="https://www.guisis.dllbsit2027.com/" target="_blank" rel="noopener noreferrer"
-                aria-describedby="personalInformationVerificationExternalNote">
-                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                <p id="personalInformationVerificationStep" class="m-0 pt-2 text-sm font-medium leading-relaxed">
+                    Please complete your personal information in GUISIS.
+                </p>
+            </li>
 
-                <span>Go to GUISIS</span>
-            </a>
+            <li class="flex items-start gap-3">
+                <div class="modal-section-icon" aria-hidden="true">
+                    <i class="fa-regular fa-calendar-check"></i>
+                </div>
 
-        </footer>
+                <p id="personalInformationVerificationReturn" class="m-0 pt-2 text-sm font-medium leading-relaxed">
+                    Return here and try booking again.
+                </p>
+            </li>
 
-    </div>
-</div>
+        </ol>
+    </section>
+
+    <p id="personalInformationVerificationExternalNote" class="modal-helper-text">
+        GUISIS opens in a new tab so you can keep this page open.
+    </p>
+
+    <x-slot:footer>
+
+        <x-button id="personalInformationVerificationClose" type="button" variant="secondary"
+            data-modal-close="personalInformationVerificationModal">
+            Close
+        </x-button>
+
+        <x-button id="personalInformationVerificationGuisis" href="https://www.guisis.dllbsit2027.com/"
+            variant="primary" icon="fa-solid fa-arrow-up-right-from-square" target="_blank" rel="noopener noreferrer"
+            aria-describedby="personalInformationVerificationExternalNote">
+            Go to GUISIS
+        </x-button>
+
+    </x-slot:footer>
+</x-modal>
 
 <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (() => {

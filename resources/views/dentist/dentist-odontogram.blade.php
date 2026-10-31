@@ -184,15 +184,10 @@
 
                                 </div>
 
-                                <button type="button" id="cancelProcedureBtn"
-                                    class="ui-btn {{ $savedVisitEditMode ? 'ui-btn-primary' : 'ui-btn-danger' }}">
-
-                                    <i class="fa-solid fa-arrow-left"></i>
-
-                                    <span>
-                                        Cancel Odontogram
-                                    </span>
-                                </button>
+                                <x-button type="button" id="cancelProcedureBtn" :variant="$savedVisitEditMode ? 'primary' : 'danger'"
+                                    icon="fa-solid fa-arrow-left">
+                                    Cancel Odontogram
+                                </x-button>
 
                             </div>
 
@@ -480,11 +475,10 @@
                                                 <p class="ui-muted-text">
                                                     Choose a surface, select a treatment, then apply.
                                                 </p>
-                                                <button type="button" id="reset3DViewBtn"
-                                                    class="ui-btn ui-btn-secondary ui-btn-sm">
-                                                    <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                                                <x-button type="button" id="reset3DViewBtn" variant="secondary"
+                                                    size="sm" icon="fa-solid fa-up-right-and-down-left-from-center">
                                                     Full View
-                                                </button>
+                                                </x-button>
                                             </div>
                                         </div>
                                     </div>
@@ -538,8 +532,7 @@
                                                 (Optional) </span>
                                         </label>
 
-                                        <select id="diagnosisNotes" class="form-select-custom js-custom-select"
-                                            data-placeholder="Select diagnosis">
+                                        <x-select id="diagnosisNotes" data-placeholder="Select diagnosis">
                                             <option value="" {{ $selectedDiagnosis === '' ? 'selected' : '' }}>
                                                 Select
                                                 diagnosis</option>
@@ -553,7 +546,7 @@
                                                 {{ $selectedDiagnosis === 'Others' ? 'selected' : '' }}>
                                                 Others
                                             </option>
-                                        </select>
+                                        </x-select>
 
                                         <input type="text" id="diagnosisCustomNotes" class="form-input-custom mt-3"
                                             placeholder="Enter custom diagnosis..." value="{{ $customDiagnosis }}"
@@ -586,20 +579,18 @@
 
                                     <div class="odontogram-procedure-actions">
                                         @unless ($existingAppointmentMode || $savedVisitEditMode)
-                                            <button type="button" id="followUpBtn" class="ui-btn ui-btn-warning">
-                                                <span>Set Follow-Up Appointment</span>
-                                            </button>
+                                            <x-button type="button" id="followUpBtn" variant="warning">
+                                                Set Follow-Up Appointment
+                                            </x-button>
                                         @endunless
 
-                                        <button type="button" id="finishProcedureBtn" class="ui-btn ui-btn-primary">
-                                            <span>
-                                                {{ $existingAppointmentMode
-                                                    ? 'Save Existing Appointment'
-                                                    : ($savedVisitEditMode
-                                                        ? 'Save Changes'
-                                                        : 'Finish Procedure') }}
-                                            </span>
-                                        </button>
+                                        <x-button type="button" id="finishProcedureBtn" variant="primary">
+                                            {{ $existingAppointmentMode
+                                                ? 'Save Existing Appointment'
+                                                : ($savedVisitEditMode
+                                                    ? 'Save Changes'
+                                                    : 'Finish Procedure') }}
+                                        </x-button>
                                     </div>
                                 </div>
                             </div>
@@ -637,16 +628,14 @@
                         </div>
 
                         <div class="odontogram-target-scope" role="group" aria-label="Treatment target scope">
-                            <button type="button" id="wholeToothScopeBtn" class="ui-btn ui-btn-secondary"
-                                aria-pressed="false">
-                                <i class="fa-solid fa-tooth"></i>
+                            <x-button type="button" id="wholeToothScopeBtn" variant="secondary"
+                                icon="fa-solid fa-tooth" aria-pressed="false">
                                 Whole Tooth
-                            </button>
-                            <button type="button" id="toothSurfaceScopeBtn" class="ui-btn ui-btn-secondary active"
-                                aria-pressed="true">
-                                <i class="fa-solid fa-border-all"></i>
+                            </x-button>
+                            <x-button type="button" id="toothSurfaceScopeBtn" variant="secondary"
+                                icon="fa-solid fa-border-all" class="active" aria-pressed="true">
                                 Tooth Surface
-                            </button>
+                            </x-button>
                         </div>
 
                         <div id="selectedToothDisplay" class="odontogram-selected-display">
@@ -672,14 +661,14 @@
                         </div>
 
                         <div class="odontogram-target-actions">
-                            <button type="button" id="applyTreatmentBtn" class="ui-btn ui-btn-primary w-full" disabled>
+                            <x-button type="button" id="applyTreatmentBtn" variant="primary" class="w-full" disabled>
                                 Apply
-                            </button>
+                            </x-button>
 
-                            <button type="button" id="clearCurrentToothBtn" class="ui-btn ui-btn-secondary w-full"
+                            <x-button type="button" id="clearCurrentToothBtn" variant="secondary" class="w-full"
                                 disabled>
                                 Clear
-                            </button>
+                            </x-button>
                         </div>
                     </div>
 
@@ -687,7 +676,7 @@
                     <span id="drawerSelectedLegendPreview" hidden>None selected</span>
 
                     <div class="odontogram-legend-search-wrap">
-                        <x-search-bar id="legendSearchInput" class="search-compact" placeholder="Search treatments…"
+                        <x-search-bar id="legendSearchInput" class="search-compact" placeholder="Search treatmentsâ€¦"
                             clear-label="Clear treatment search" callback="filterOdontogramLegends" :debounce="150" />
                     </div>
 
@@ -711,7 +700,7 @@
     </main>
 
     @unless ($existingAppointmentMode || $savedVisitEditMode)
-        <x-follow-up-modal :patient-name="$patientName" :patient-avatar-url="$patientAvatarUrl" :service-type="$currentServiceType ?: '—'" :appointment-date="$formattedAppointmentDate" :appointment-time="$formattedAppointmentTime"
+        <x-follow-up-modal :patient-name="$patientName" :patient-avatar-url="$patientAvatarUrl" :service-type="$currentServiceType ?: 'â€”'" :appointment-date="$formattedAppointmentDate" :appointment-time="$formattedAppointmentTime"
             :store-url="route('dentist.dentist.appointments.follow-up.store', $appointment->id)" />
     @endunless
 
@@ -735,7 +724,7 @@
                         </span>
 
                         <strong id="followUpSuccessDate" class="global-info-value">
-                            —
+                            â€”
                         </strong>
                     </div>
                 </div>
@@ -751,7 +740,7 @@
                         </span>
 
                         <strong id="followUpSuccessTime" class="global-info-value">
-                            —
+                            â€”
                         </strong>
                     </div>
                 </div>
@@ -767,7 +756,7 @@
                         </span>
 
                         <strong id="followUpSuccessPatient" class="global-info-value">
-                            —
+                            â€”
                         </strong>
                     </div>
                 </div>
@@ -807,278 +796,193 @@
             </div>
 
             <x-slot:footer>
-                <button type="button" id="followUpSuccessBackBtn" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Back to Appointments</span>
-                </button>
+                <x-button type="button" id="followUpSuccessBackBtn" variant="primary" icon="fa-solid fa-arrow-left">
+                    Back to Appointments
+                </x-button>
             </x-slot:footer>
         </x-booking.confirmed-modal>
     @endunless
 
-    <div id="resetTreatmentModal" class="ui-modal modal-theme-danger" aria-hidden="true" role="dialog"
-        aria-modal="true" aria-labelledby="resetTreatmentModalTitle">
-        <div class="ui-modal-card modal-md">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
+    <x-modal id="resetTreatmentModal" title="Reset Tooth Treatment" title-id="resetTreatmentModalTitle"
+        subtitle="Remove the treatment currently assigned to this target." icon="fa-solid fa-triangle-exclamation"
+        size="md" theme="danger" :show-close="false">
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-eraser"></i>
 
-                    <div class="modal-copy">
-                        <h2 id="resetTreatmentModalTitle" class="modal-title">
-                            Reset Tooth Treatment
-                        </h2>
-                        <p class="modal-subtitle">
-                            Remove the treatment currently assigned to this target.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <div>
+                <strong>Reset selected treatment?</strong>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <i class="fa-solid fa-eraser"></i>
-
-                    <div>
-                        <strong>Reset selected treatment?</strong>
-                        <span id="resetTreatmentMessage">
-                            Are you sure you want to reset the treatment for this tooth?
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-ft">
-                <button type="button" id="cancelResetTreatmentBtn" class="ui-btn ui-btn-secondary">
-                    <span>Keep Treatment</span>
-                </button>
-
-                <button type="button" id="confirmResetTreatmentBtn" class="ui-btn ui-btn-danger">
-                    <span>Reset Treatment</span>
-                </button>
+                <span id="resetTreatmentMessage">
+                    Are you sure you want to reset the treatment for this tooth?
+                </span>
             </div>
         </div>
-    </div>
 
-    <div id="cancelProcedureModal" class="ui-modal modal-theme-danger" aria-hidden="true" role="dialog"
-        aria-modal="true" aria-labelledby="cancelProcedureModalTitle">
-        <div class="ui-modal-card modal-md">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-circle-xmark"></i>
-                    </div>
+        <x-slot:footer>
+            <x-button id="cancelResetTreatmentBtn" type="button" variant="secondary">
+                Keep Treatment
+            </x-button>
 
-                    <div class="modal-copy">
-                        <h2 id="cancelProcedureModalTitle" class="modal-title">
-                            {{ $savedVisitEditMode ? 'Cancel Edit?' : 'Cancel Procedure?' }}
-                        </h2>
-                        <p class="modal-subtitle">
-                            {{ $savedVisitEditMode
-                                ? 'Unsaved changes in this saved visit editor may be lost.'
-                                : 'Unsaved changes in this procedure session may be lost.' }}
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <x-button id="confirmResetTreatmentBtn" type="button" variant="danger">
+                Reset Treatment
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
+    <x-modal id="cancelProcedureModal" :title="$savedVisitEditMode ? 'Cancel Edit?' : 'Cancel Procedure?'" title-id="cancelProcedureModalTitle" :subtitle="$savedVisitEditMode
+        ? 'Unsaved changes in this saved visit editor may be lost.'
+        : 'Unsaved changes in this procedure session may be lost.'"
+        icon="fa-solid fa-circle-xmark" size="md" theme="danger" :show-close="false">
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-triangle-exclamation"></i>
 
-                    <div>
-                        <strong>{{ $savedVisitEditMode ? 'Leave this edit?' : 'Leave this procedure?' }}</strong>
-                        <span>
-                            {{ $savedVisitEditMode
-                                ? 'Are you sure you want to cancel this edit? Any unsaved changes in this saved visit may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    lost.'
-                                : 'Are you sure you want to cancel this procedure? Any unsaved progress in this session may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    lost.' }}
-                        </span>
-                    </div>
-                </div>
-            </div>
+            <div>
+                <strong>
+                    {{ $savedVisitEditMode ? 'Leave this edit?' : 'Leave this procedure?' }}
+                </strong>
 
-            <div class="modal-ft">
-                <button type="button" id="dismissCancelProcedureBtn" class="ui-btn ui-btn-secondary">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>{{ $savedVisitEditMode ? 'Continue Editing' : 'Continue Procedure' }}</span>
-                </button>
-
-                <button type="button" id="confirmCancelProcedureBtn"
-                    class="ui-btn {{ $savedVisitEditMode ? 'ui-btn-primary' : 'ui-btn-danger' }}">
-                    <i class="fa-solid fa-ban"></i>
-                    <span>{{ $savedVisitEditMode ? 'Cancel Edit' : 'Cancel Procedure' }}</span>
-                </button>
+                <span>
+                    {{ $savedVisitEditMode
+                        ? 'Are you sure you want to cancel this edit? Any unsaved changes in this saved visit may be lost.'
+                        : 'Are you sure you want to cancel this procedure? Any unsaved progress in this session may be lost.' }}
+                </span>
             </div>
         </div>
-    </div>
+
+        <x-slot:footer>
+            <x-button id="dismissCancelProcedureBtn" type="button" variant="secondary" icon="fa-solid fa-arrow-left">
+                {{ $savedVisitEditMode ? 'Continue Editing' : 'Continue Procedure' }}
+            </x-button>
+
+            <x-button id="confirmCancelProcedureBtn" type="button" :variant="$savedVisitEditMode ? 'primary' : 'danger'" icon="fa-solid fa-ban">
+                {{ $savedVisitEditMode ? 'Cancel Edit' : 'Cancel Procedure' }}
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 
     @if ($savedVisitEditMode)
-        <div id="correctionReasonModal" class="ui-modal modal-theme-warning" aria-hidden="true" role="dialog"
-            aria-modal="true" aria-labelledby="correctionReasonModalTitle">
+        <x-modal id="correctionReasonModal" title="Reason for Correction" title-id="correctionReasonModalTitle"
+            subtitle="Document why this previously saved odontogram is being corrected." icon="fa-solid fa-pen-to-square"
+            size="md" theme="warning" :show-close="false">
+            <div class="global-confirm-alert">
+                <i class="fa-solid fa-triangle-exclamation"></i>
 
-            <div class="ui-modal-card modal-md">
+                <div>
+                    <strong>Correction will be recorded</strong>
 
-                <div class="modal-hd">
-                    <div class="modal-heading">
-
-                        <div class="modal-icon">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </div>
-
-                        <div class="modal-copy">
-                            <h2 id="correctionReasonModalTitle" class="modal-title">
-                                Reason for Correction
-                            </h2>
-
-                            <p class="modal-subtitle">
-                                Document why this previously saved odontogram is being corrected.
-                            </p>
-                        </div>
-
-                    </div>
+                    <span>
+                        The original version will remain in the revision history
+                        together with your identity, role, date, and reason for this change.
+                    </span>
                 </div>
-
-                <div class="modal-bd">
-
-                    <div class="global-confirm-alert">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-
-                        <div>
-                            <strong>Correction will be recorded</strong>
-                            <span>
-                                The original version will remain in the revision history together with your identity, role,
-                                date, and reason for this change.
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="global-form-group mt-4" data-global-field>
-                        <label for="correctionReasonCategory" class="global-form-label">
-                            Correction Reason
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <select id="correctionReasonCategory" class="form-select-custom js-custom-select"
-                            data-placeholder="Select a reason" data-field-label="Correction Reason">
-                            <option value="">
-                                Select a reason
-                            </option>
-
-                            @foreach ($revisionReasonTypes ?? [] as $reasonType)
-                                <option value="{{ $reasonType->id }}" data-code="{{ $reasonType->code }}"
-                                    data-requires-detail="{{ $reasonType->requires_detail ? '1' : '0' }}">
-                                    {{ $reasonType->label }}
-                                </option>
-                            @endforeach
-                        </select>
-
-                        <div class="global-field-error" data-error-for="correctionReasonCategory" aria-hidden="true">
-                        </div>
-                    </div>
-
-                    <div id="correctionReasonOtherField" class="global-form-group mt-4" data-global-field hidden>
-
-                        <label for="correctionReasonOther" class="global-form-label">
-                            Specify Reason
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <input type="text" id="correctionReasonOther" class="form-input-custom" maxlength="255"
-                            data-field-label="Specify Reason" placeholder="Specify the correction reason...">
-
-                        <div class="global-field-error" data-error-for="correctionReasonOther" aria-hidden="true">
-                        </div>
-
-                    </div>
-
-                    <div class="global-form-group mt-4" data-global-field>
-                        <div class="global-label-row">
-                            <label for="correctionReasonNotes" class="global-form-label">
-                                Correction Notes
-                                <span class="field-optional">(Optional)</span>
-                            </label>
-
-                            <span id="correctionReasonNotesCounter" class="char-counter">
-                                0 / 2000 characters
-                            </span>
-                        </div>
-
-                        <textarea id="correctionReasonNotes" rows="4" maxlength="2000" data-char-limit="2000"
-                            data-char-counter="#correctionReasonNotesCounter" class="form-input-custom global-form-textarea"
-                            placeholder="Add additional details about this correction..."></textarea>
-                    </div>
-
-                </div>
-
-                <div class="modal-ft">
-
-                    <button type="button" id="dismissCorrectionReasonBtn" class="ui-btn ui-btn-secondary">
-                        <span>Continue Editing</span>
-                    </button>
-
-                    <button type="button" id="confirmCorrectionReasonBtn" class="ui-btn ui-btn-warning">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span>Save Correction</span>
-                    </button>
-
-                </div>
-
             </div>
-        </div>
+
+            <x-form-field class="mt-4" label="Correction Reason" for="correctionReasonCategory" required>
+                <x-select id="correctionReasonCategory" data-placeholder="Select a reason"
+                    data-field-label="Correction Reason">
+                    <option value="">
+                        Select a reason
+                    </option>
+
+                    @foreach ($revisionReasonTypes ?? [] as $reasonType)
+                        <option value="{{ $reasonType->id }}" data-code="{{ $reasonType->code }}"
+                            data-requires-detail="{{ $reasonType->requires_detail ? '1' : '0' }}">
+                            {{ $reasonType->label }}
+                        </option>
+                    @endforeach
+                </x-select>
+            </x-form-field>
+
+            <x-form-field id="correctionReasonOtherField" class="mt-4" label="Specify Reason"
+                for="correctionReasonOther" required hidden>
+                <input type="text" id="correctionReasonOther" class="form-input-custom" maxlength="255"
+                    data-field-label="Specify Reason" placeholder="Specify the correction reason...">
+            </x-form-field>
+
+            <x-form-field class="mt-4" :show-error="false">
+                <div class="global-label-row">
+                    <label for="correctionReasonNotes" class="global-form-label">
+                        Correction Notes
+                        <span class="field-optional">(Optional)</span>
+                    </label>
+
+                    <span id="correctionReasonNotesCounter" class="char-counter">
+                        0 / 2000 characters
+                    </span>
+                </div>
+
+                <textarea id="correctionReasonNotes" rows="4" maxlength="2000" data-char-limit="2000"
+                    data-char-counter="#correctionReasonNotesCounter" class="form-input-custom global-form-textarea"
+                    placeholder="Add additional details about this correction..."></textarea>
+            </x-form-field>
+
+            <x-slot:footer>
+                <x-button id="dismissCorrectionReasonBtn" type="button" variant="secondary">
+                    Continue Editing
+                </x-button>
+
+                <x-button id="confirmCorrectionReasonBtn" type="button" variant="warning"
+                    icon="fa-solid fa-floppy-disk">
+                    Save Correction
+                </x-button>
+            </x-slot:footer>
+        </x-modal>
     @endif
 
-    <div id="finishProcedureModal" class="ui-modal modal-theme-success" aria-hidden="true" role="dialog"
-        aria-modal="true" aria-labelledby="finishProcedureModalTitle">
-        <div class="ui-modal-card modal-md">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i id="finishProcedureModalIcon" class="fa-solid fa-clipboard-check"></i>
-                    </div>
+    <x-modal id="finishProcedureModal" title="Procedure Completed!" title-id="finishProcedureModalTitle" size="md"
+        theme="success" :show-close="false">
+        <x-slot:header>
+            <div class="modal-heading">
 
-                    <div class="modal-copy">
-                        <h2 id="finishProcedureModalTitle" class="modal-title">
-                            Procedure Completed!
-                        </h2>
-                        <p id="finishProcedureModalMessage" class="modal-subtitle"></p>
-                    </div>
+                <div class="modal-icon">
+                    <i id="finishProcedureModalIcon" class="fa-solid fa-clipboard-check"></i>
                 </div>
-            </div>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <i class="fa-solid fa-circle-check"></i>
+                <div class="modal-copy">
+                    <h2 id="finishProcedureModalTitle" class="modal-title">
+                        Procedure Completed!
+                    </h2>
 
-                    <div>
-                        <strong id="finishProcedureModalAlertTitle">
-                            Procedure status
-                        </strong>
-                        <span id="finishProcedureModalAlertMessage">
-                            Review the message above before continuing.
-                        </span>
-                    </div>
+                    <p id="finishProcedureModalMessage" class="modal-subtitle"></p>
                 </div>
+
             </div>
+        </x-slot:header>
+
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-circle-check"></i>
+
+            <div>
+                <strong id="finishProcedureModalAlertTitle">
+                    Procedure status
+                </strong>
+
+                <span id="finishProcedureModalAlertMessage">
+                    Review the message above before continuing.
+                </span>
+            </div>
+        </div>
+
+        <x-slot:footerRaw>
 
             <div id="finishProcedureConfirmActions" class="modal-ft hidden">
-                <button type="button" id="dismissFinishProcedureBtn" class="ui-btn ui-btn-secondary">
-                    <span>Back to Review</span>
-                </button>
+                <x-button id="dismissFinishProcedureBtn" type="button" variant="secondary">
+                    Back to Review
+                </x-button>
 
-                <button type="button" id="confirmFinishProcedureBtn" class="ui-btn ui-btn-warning">
-                    <span>Finish Procedure</span>
-                </button>
+                <x-button id="confirmFinishProcedureBtn" type="button" variant="warning">
+                    Finish Procedure
+                </x-button>
             </div>
 
             <div id="finishProcedureResultActions" class="modal-ft">
-                <button type="button" id="finishProcedureModalActionBtn" class="ui-btn ui-btn-primary">
-                    <span>Back to Appointments</span>
-                </button>
+                <x-button id="finishProcedureModalActionBtn" type="button" variant="primary">
+                    Back to Appointments
+                </x-button>
             </div>
-        </div>
-    </div>
+
+        </x-slot:footerRaw>
+    </x-modal>
 @endsection
 
 @section('scripts')
@@ -1377,7 +1281,7 @@
                 RM: '#2563eb',
                 X: '#2563eb',
                 XO: '#2563eb',
-                '✓': '#111827',
+                'âœ“': '#111827',
                 CM: '#111827',
                 SP: '#111827'
             };
@@ -1401,7 +1305,7 @@
                 RM: 'fa-solid fa-teeth',
                 X: 'fa-solid fa-xmark',
                 XO: 'fa-solid fa-skull-crossbones',
-                '✓': 'fa-solid fa-check',
+                'âœ“': 'fa-solid fa-check',
                 CM: 'fa-solid fa-question',
                 SP: 'fa-solid fa-plus'
             };
@@ -3986,7 +3890,6 @@
             }
 
             function getProcedureTime24Hour(field) {
-                // The shared Flatpickr shows h:i K and keeps H:i in the original input.
                 return /^([01]\d|2[0-3]):[0-5]\d$/.test(field.value) ? field.value : null;
             }
 

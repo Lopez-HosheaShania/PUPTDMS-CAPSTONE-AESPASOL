@@ -39,76 +39,27 @@
                 </div>
 
                 <div class="dentist-hero-actions">
-                    <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-9d8b6b4ff613">
-                        <i class="fa-solid fa-plus"></i>
+                    <x-button type="button" variant="primary" icon="fa-solid fa-plus" data-ui-click="action-9d8b6b4ff613">
                         Create Report
-                    </button>
+                    </x-button>
                 </div>
             </section>
 
             <section id="statCards" class="stat-grid" aria-label="Dental service summary">
-                <article class="stat-card s-all">
-                    <div class="stat-card-info">
-                        <div class="stat-num" id="statTotal">0</div>
-                        <div class="stat-label">Total Records</div>
-                    </div>
-
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-file-lines"></i>
-                    </div>
-                </article>
+                <x-stat-card tone="all" label="Total Records" value="0" value-class="stat-num" :value-attributes="['id' => 'statTotal']"
+                    icon="fa-solid fa-file-lines" />
 
 
-                <article class="stat-card s-amber">
-                    <div class="stat-card-info">
-                        <div class="stat-num" id="statEmergency">
-                            0
-                        </div>
-
-                        <div class="stat-label">
-                            Emergency
-                        </div>
-                    </div>
-
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-                </article>
+                <x-stat-card tone="amber" label="Emergency" value="0" value-class="stat-num" :value-attributes="['id' => 'statEmergency']"
+                    icon="fa-solid fa-triangle-exclamation" />
 
 
-                <article class="stat-card s-green">
-                    <div class="stat-card-info">
-                        <div class="stat-num" id="statNonEmergency">
-                            0
-                        </div>
-
-                        <div class="stat-label">
-                            Non-Emergency
-                        </div>
-                    </div>
-
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
-
-                </article>
+                <x-stat-card tone="green" label="Non-Emergency" value="0" value-class="stat-num" :value-attributes="['id' => 'statNonEmergency']"
+                    icon="fa-solid fa-circle-check" />
 
 
-                <article class="stat-card s-blue">
-                    <div class="stat-card-info">
-                        <div class="stat-num" id="statFemale">
-                            0
-                        </div>
-
-                        <div class="stat-label">
-                            Female Patients
-                        </div>
-                    </div>
-
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-venus"></i>
-                    </div>
-                </article>
+                <x-stat-card tone="blue" label="Female Patients" value="0" value-class="stat-num" :value-attributes="['id' => 'statFemale']"
+                    icon="fa-solid fa-venus" />
             </section>
 
             <section class="card">
@@ -131,7 +82,7 @@
                         </div>
 
                         <div class="voice-search-row service-search-row">
-                            <x-search-bar id="searchInput" placeholder="Search name, program, contact…"
+                            <x-search-bar id="searchInput" placeholder="Search name, program, contact..."
                                 callback="handleDentalServicesSearch" :debounce="350" clear-label="Clear search" />
 
                             <x-voice-input target="#searchInput" status-id="dentalServicesVoiceStatus"
@@ -205,10 +156,10 @@
                     Active Filters
                 </span>
 
-                <button id="clearAllChipsBtn" type="button" class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>Clear All</span>
-                </button>
+                <x-button id="clearAllChipsBtn" type="button" variant="secondary" size="sm"
+                    icon="fa-solid fa-rotate-left" class="filter-clear-all">
+                    Clear All
+                </x-button>
             </div>
 
             <div id="activeChipsContainer" class="active-filters-container"></div>
@@ -329,269 +280,198 @@
 
     </x-filter-drawer>
 
-    <div id="createReportModal" class="ui-modal" aria-hidden="true">
-        <div class="ui-modal-card modal-lg" role="dialog" aria-modal="true" aria-labelledby="createReportTitle">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-file-circle-plus"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h3 id="createReportTitle" class="modal-title">
-                            Create Dental Services Report
-                        </h3>
-                        <p class="modal-subtitle">
-                            Fields marked <span class="text-yellow-500 font-bold">*</span> are required.
-                        </p>
-                    </div>
+    <x-modal id="createReportModal" title="Create Dental Services Report" title-id="createReportTitle"
+        icon="fa-solid fa-file-circle-plus" size="lg" close-label="Close create report modal" :close-attributes="[
+            'data-discard-close' => 'createReportModal',
+        ]"
+        form-id="reportForm" form-class="modal-card-form" :form-attributes="[
+            'data-global-validation' => '',
+            'data-form-validation-rule' => 'dentalServicesReport',
+            'data-discard-form' => '',
+            'data-discard-title' => 'Discard dental services report?',
+            'data-discard-subtitle' => 'You have unsaved report details.',
+            'data-discard-message' =>
+                'Closing this modal will remove the report name, selected report type, date range, and quantity you entered. Do you want to discard these changes?',
+            'novalidate' => 'novalidate',
+        ]">
+        <x-slot:subtitleContent>
+            Fields marked
+            <span class="text-yellow-500 font-bold">*</span>
+            are required.
+        </x-slot:subtitleContent>
+        <div class="modal-form-section">
+            <div class="modal-section-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-file-lines"></i>
                 </div>
 
-                <button type="button" class="modal-x" data-discard-close="createReportModal"
-                    aria-label="Close create report modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <div>
+                    <h4>Report Details</h4>
+                    <p>Choose the date range and quantity for the report.</p>
+                </div>
             </div>
 
-            <form id="reportForm" class="modal-card-form" data-global-validation
-                data-form-validation-rule="dentalServicesReport" data-discard-form
-                data-discard-title="Discard dental services report?"
-                data-discard-subtitle="You have unsaved report details."
-                data-discard-message="Closing this modal will remove the report name, selected report type, date range, and quantity you entered. Do you want to discard these changes?"
-                novalidate>
-                <div class="modal-bd">
-                    <div class="modal-form-section">
-                        <div class="modal-section-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-file-lines"></i>
-                            </div>
+            <div class="modal-form-grid">
+                <div class="modal-field" data-global-field>
+                    <div class="global-label-row">
 
-                            <div>
-                                <h4>Report Details</h4>
-                                <p>Choose the date range and quantity for the report.</p>
-                            </div>
-                        </div>
+                        <label for="reportName" class="global-form-label">
+                            Report Name
+                            <span class="required-mark">*</span>
+                        </label>
 
-                        <div class="modal-form-grid">
-                            <div class="modal-field" data-global-field>
-                                <div class="global-label-row">
+                        <span id="reportNameCounter" class="char-counter">
+                            0 / 100
+                        </span>
 
-                                    <label for="reportName" class="global-form-label">
-                                        Report Name
-                                        <span class="required-mark">*</span>
-                                    </label>
-
-                                    <span id="reportNameCounter" class="char-counter">
-                                        0 / 100
-                                    </span>
-
-                                </div>
-
-                                <div class="global-voice-row" data-voice-field>
-                                    <div class="global-voice-control">
-
-                                        <input id="reportName" name="report_name" type="text" minlength="3"
-                                            maxlength="100" class="form-input-custom"
-                                            placeholder="e.g. Dental Services Report — Dec 2026"
-                                            data-field-label="Report Name"
-                                            data-required-message="Please enter a report name." data-char-limit="100"
-                                            data-char-counter="#reportNameCounter" required>
-
-                                    </div>
-
-                                    <x-voice-input target="#reportName" status-id="reportNameVoiceStatus"
-                                        label="Voice input for report name" title="Voice input" />
-                                </div>
-
-                                <div id="reportNameErr" class="global-field-error" data-error-for="reportName"
-                                    aria-live="polite" aria-hidden="true"></div>
-                            </div>
-
-                            <div class="modal-field">
-                                <label class="global-form-label">
-                                    Report Type
-                                </label>
-
-                                <input id="reportType" name="document_template_id" type="hidden"
-                                    value="{{ $dentalServiceTemplate?->id ?? '' }}">
-
-                                <div class="global-readonly-field">
-                                    <i class="fa-solid fa-file-lines"></i>
-
-                                    <span>
-                                        {{ $dentalServiceTemplate?->name ?? 'Dental Services Record' }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="modal-form-grid-2">
-                                <div class="modal-field" data-global-field>
-                                    <label for="dateFrom" class="global-form-label">
-                                        From
-                                        <span class="required-mark">*</span>
-                                    </label>
-
-                                    <input id="dateFrom" name="date_from" type="text"
-                                        class="form-input-custom js-flatpickr-date-max-today"
-                                        placeholder="Select start date" data-field-label="From Date"
-                                        data-required-message="Please select a start date."
-                                        data-validation-rule="notFutureDate" readonly required>
-
-                                    <div id="dateFromErr" class="global-field-error" data-error-for="dateFrom"
-                                        aria-live="polite" aria-hidden="true"></div>
-                                </div>
-
-                                <div class="modal-field" data-global-field>
-                                    <label for="dateTo" class="global-form-label">
-                                        To
-                                        <span class="field-optional">
-                                            (optional)
-                                        </span>
-                                    </label>
-
-                                    <input id="dateTo" name="date_to" type="text"
-                                        class="form-input-custom js-flatpickr-date-max-today"
-                                        placeholder="Select end date" data-field-label="To Date"
-                                        data-validation-rule="notFutureDate" readonly>
-
-                                    <div id="dateToErr" class="global-field-error" data-error-for="dateTo"
-                                        aria-live="polite" aria-hidden="true"></div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <p class="modal-helper-text">
-                                    <i class="fa-solid fa-circle-info mr-1"></i>
-                                    Leave "To" empty to report on a single date.
-                                </p>
-                            </div>
-
-                            <div>
-                                <div class="modal-field modal-field-full" data-global-field>
-                                    <label class="global-form-label" for="reportQty">
-                                        Quantity
-                                        <span class="required-mark">*</span>
-                                    </label>
-
-                                    <div class="modal-inline-control">
-
-                                        <div class="modal-inline-main">
-
-                                            <div class="global-number-stepper" data-global-number-stepper>
-                                                <button type="button" class="global-number-stepper-btn"
-                                                    data-number-step="-1" aria-label="Decrease quantity">
-                                                    <i class="fa-solid fa-minus"></i>
-                                                </button>
-
-                                                <input id="reportQty" name="quantity" type="number" value="1"
-                                                    min="1" max="100" step="1"
-                                                    class="global-number-stepper-input" data-number-stepper-input
-                                                    data-field-label="Quantity"
-                                                    data-required-message="Please enter a quantity."
-                                                    data-validation-rule="wholeNumber" required>
-
-                                                <button type="button" class="global-number-stepper-btn"
-                                                    data-number-step="1" aria-label="Increase quantity">
-                                                    <i class="fa-solid fa-plus"></i>
-                                                </button>
-                                            </div>
-
-                                        </div>
-
-                                        <span class="modal-helper-text">
-                                            Whole numbers only
-                                        </span>
-
-                                    </div>
-
-                                    <div id="reportQtyErr" class="global-field-error" data-error-for="reportQty"
-                                        aria-live="polite" aria-hidden="true"></div>
-                                </div>
-                            </div>
-
-                            <div id="formErrorBanner" class="modal-error-banner hidden">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                                <span>Please complete all required fields before downloading.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-ft">
-                    <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="createReportModal">
-                        Cancel
-                    </button>
-
-                    <button type="button" id="downloadReportBtn" class="ui-btn ui-btn-primary">
-                        <i class="fa-solid fa-download"></i>
-                        <span>Download</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="downloadCompleteModal" class="ui-modal modal-theme-success" aria-hidden="true">
-        <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true" aria-labelledby="downloadCompleteTitle">
-            <div class="modal-hd">
-
-                <div class="modal-heading">
-
-                    <span class="modal-icon">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </span>
-
-                    <div class="modal-copy">
-                        <h2 id="downloadCompleteTitle" class="modal-title">
-                            Download Complete
-                        </h2>
-
-                        <p class="modal-subtitle">
-                            The dental services report was generated successfully.
-                        </p>
                     </div>
 
+                    <div class="global-voice-row" data-voice-field>
+                        <div class="global-voice-control">
+
+                            <input id="reportName" name="report_name" type="text" minlength="3" maxlength="100"
+                                class="form-input-custom" placeholder="e.g. Dental Services Report - Dec 2026"
+                                data-field-label="Report Name" data-required-message="Please enter a report name."
+                                data-char-limit="100" data-char-counter="#reportNameCounter" required>
+
+                        </div>
+
+                        <x-voice-input target="#reportName" status-id="reportNameVoiceStatus"
+                            label="Voice input for report name" title="Voice input" />
+                    </div>
+
+                    <div id="reportNameErr" class="global-field-error" data-error-for="reportName" aria-live="polite"
+                        aria-hidden="true"></div>
                 </div>
 
-                <button type="button" class="modal-x" data-ui-click="action-927eb715f561"
-                    aria-label="Close download complete modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <div class="modal-field">
+                    <label class="global-form-label">
+                        Report Type
+                    </label>
 
-            </div>
+                    <input id="reportType" name="document_template_id" type="hidden"
+                        value="{{ $dentalServiceTemplate?->id ?? '' }}">
 
-
-            <div class="modal-bd">
-
-                <div class="global-confirm-alert">
-
-                    <i class="fa-solid fa-file-circle-check"></i>
-
-                    <div>
-                        <p>
-                            Your report is ready.
-                        </p>
+                    <div class="global-readonly-field">
+                        <i class="fa-solid fa-file-lines"></i>
 
                         <span>
-                            The generated file has been downloaded to your device.
+                            {{ $dentalServiceTemplate?->name ?? 'Dental Services Record' }}
                         </span>
                     </div>
-
                 </div>
 
-            </div>
+                <div class="modal-form-grid-2">
+                    <div class="modal-field" data-global-field>
+                        <label for="dateFrom" class="global-form-label">
+                            From
+                            <span class="required-mark">*</span>
+                        </label>
 
+                        <input id="dateFrom" name="date_from" type="text"
+                            class="form-input-custom js-flatpickr-date-max-today" placeholder="Select start date"
+                            data-field-label="From Date" data-required-message="Please select a start date."
+                            data-validation-rule="notFutureDate" readonly required>
 
-            <div class="modal-ft">
+                        <div id="dateFromErr" class="global-field-error" data-error-for="dateFrom" aria-live="polite"
+                            aria-hidden="true"></div>
+                    </div>
 
-                <button type="button" class="ui-btn ui-btn-success" data-ui-click="action-927eb715f561">
-                    <i class="fa-solid fa-check"></i>
-                    <span>Done</span>
-                </button>
+                    <div class="modal-field" data-global-field>
+                        <label for="dateTo" class="global-form-label">
+                            To
+                            <span class="field-optional">
+                                (optional)
+                            </span>
+                        </label>
 
+                        <input id="dateTo" name="date_to" type="text"
+                            class="form-input-custom js-flatpickr-date-max-today" placeholder="Select end date"
+                            data-field-label="To Date" data-validation-rule="notFutureDate" readonly>
+
+                        <div id="dateToErr" class="global-field-error" data-error-for="dateTo" aria-live="polite"
+                            aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="modal-helper-text">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        Leave "To" empty to report on a single date.
+                    </p>
+                </div>
+
+                <div>
+                    <div class="modal-field modal-field-full" data-global-field>
+                        <label class="global-form-label" for="reportQty">
+                            Quantity
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <div class="modal-inline-control">
+
+                            <div class="modal-inline-main">
+
+                                <x-number-stepper id="reportQty" name="quantity" value="1" min="1"
+                                    max="100" step="1" required decrease-label="Decrease quantity"
+                                    increase-label="Increase quantity" data-field-label="Quantity"
+                                    data-required-message="Please enter a quantity." data-validation-rule="wholeNumber" />
+
+                            </div>
+
+                            <span class="modal-helper-text">
+                                Whole numbers only
+                            </span>
+
+                        </div>
+
+                        <div id="reportQtyErr" class="global-field-error" data-error-for="reportQty" aria-live="polite"
+                            aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <div id="formErrorBanner" class="modal-error-banner hidden">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Please complete all required fields before downloading.</span>
+                </div>
             </div>
         </div>
-    </div>
+
+        <x-slot:footer>
+            <x-button variant="secondary" data-discard-close="createReportModal">
+                Cancel
+            </x-button>
+
+            <x-button id="downloadReportBtn" variant="primary" icon="fa-solid fa-download">
+                Download
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
+
+    <x-modal id="downloadCompleteModal" title="Download Complete"
+        subtitle="The dental services report was generated successfully." title-id="downloadCompleteTitle"
+        icon="fa-solid fa-circle-check" size="sm" theme="success" close-label="Close download complete modal"
+        :close-attributes="[
+            'data-ui-click' => 'action-927eb715f561',
+        ]">
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-file-circle-check"></i>
+
+            <div>
+                <p>Your report is ready.</p>
+
+                <span>
+                    The generated file has been downloaded to your device.
+                </span>
+            </div>
+        </div>
+
+        <x-slot:footer>
+            <x-button variant="success" icon="fa-solid fa-check" data-ui-click="action-927eb715f561">
+                Done
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 
 @endsection
 

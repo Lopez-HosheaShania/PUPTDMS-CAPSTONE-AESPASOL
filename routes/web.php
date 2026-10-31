@@ -144,11 +144,6 @@ Route::get('/dashboard', function () {
     };
 })->name('dashboard');
 
-// Patient Register
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
-
 /*
 |--------------------------------------------------------------------------
 | PUBLIC AUTH ACTIONS
