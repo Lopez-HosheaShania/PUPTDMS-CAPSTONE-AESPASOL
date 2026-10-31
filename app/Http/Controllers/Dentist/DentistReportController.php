@@ -128,8 +128,18 @@ class DentistReportController extends Controller
                 '=',
                 'service_types.id'
             )
-            ->whereYear('appointments.appointment_date', $thisYear)
-            ->whereMonth('appointments.appointment_date', $thisMonth)
+            ->whereYear(
+                'appointments.appointment_date',
+                $thisYear
+            )
+            ->whereMonth(
+                'appointments.appointment_date',
+                $thisMonth
+            )
+            ->where(
+                'appointments.status',
+                'completed'
+            )
             ->select(
                 'service_types.name as name',
                 DB::raw('COUNT(*) as total')
@@ -3539,8 +3549,18 @@ class DentistReportController extends Controller
                 '=',
                 'service_types.id'
             )
-            ->whereYear('appointments.appointment_date', $year)
-            ->whereMonth('appointments.appointment_date', $month)
+            ->whereYear(
+                'appointments.appointment_date',
+                $year
+            )
+            ->whereMonth(
+                'appointments.appointment_date',
+                $month
+            )
+            ->where(
+                'appointments.status',
+                'completed'
+            )
             ->select(
                 'service_types.id',
                 'service_types.name',
@@ -3571,13 +3591,28 @@ class DentistReportController extends Controller
                 '=',
                 'service_types.id'
             )
-            ->whereYear('appointments.appointment_date', $year)
-            ->whereMonth('appointments.appointment_date', $month)
-            ->whereIn('appointments.service_type_id', $topServiceIds)
+            ->whereYear(
+                'appointments.appointment_date',
+                $year
+            )
+            ->whereMonth(
+                'appointments.appointment_date',
+                $month
+            )
+            ->where(
+                'appointments.status',
+                'completed'
+            )
+            ->whereIn(
+                'appointments.service_type_id',
+                $topServiceIds
+            )
             ->select(
                 'appointments.service_type_id',
                 'service_types.name as service_type',
-                DB::raw('CEIL(DAY(appointments.appointment_date) / 7) as week_num'),
+                DB::raw(
+                    'CEIL(DAY(appointments.appointment_date) / 7) as week_num'
+                ),
                 DB::raw('COUNT(*) as total')
             )
             ->groupBy(
@@ -3586,6 +3621,7 @@ class DentistReportController extends Controller
                 'week_num'
             )
             ->get();
+
 
         $chartColors = [
             ['border' => '#8B0000', 'bg' => 'rgba(139,0,0,0.08)'],

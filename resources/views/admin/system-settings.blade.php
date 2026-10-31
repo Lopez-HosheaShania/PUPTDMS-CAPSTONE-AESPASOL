@@ -28,24 +28,14 @@
     <main id="mainContent" class="system-settings-page app-page-shell page-enter">
         <div class="w-full">
 
-            <div class="page-banner">
-                <div class="page-banner-inner">
-
-                    <div>
-                        <h1 class="page-title">System Settings</h1>
-                        <p class="page-subtitle">Manage notification preferences, backups, and system behavior.</p>
-                    </div>
-
-                    <div class="settings-banner-actions">
-
-                        <button type="button" id="settingsBannerSaveBtn" data-settings-save
-                            data-ui-click="action-57cd63974b29" class="ui-btn ui-btn-secondary settings-banner-save">
-                            <i class="fa-solid fa-floppy-disk"></i>
-                            Save Changes
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <x-page-banner title="System Settings" subtitle="Manage notification preferences, backups, and system behavior.">
+                <x-slot:actions>
+                    <x-button id="settingsBannerSaveBtn" type="button" variant="secondary" icon="fa-solid fa-floppy-disk"
+                        class="settings-banner-save" data-settings-save data-ui-click="action-57cd63974b29">
+                        Save Changes
+                    </x-button>
+                </x-slot:actions>
+            </x-page-banner>
 
             <form id="settingsForm" action="{{ route($updateRoute ?? 'admin.system_settings.update') }}" method="POST"
                 data-global-selects>
@@ -117,62 +107,63 @@
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                                 <div>
                                                     <label class="form-label">System Language</label>
-                                                    <select name="language" class="form-ctrl form-sel">
+                                                    <x-select name="language" class="form-ctrl form-sel">
                                                         @foreach (['English (US)', 'Filipino'] as $opt)
-                                                            <option
-                                                                {{ old(
-                                                                    'language',
-                                                                    $settings['language']->value ??
-                                                                        'English
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    (US)',
-                                                                ) === $opt
-                                                                    ? 'selected'
-                                                                    : '' }}>
-                                                                {{ $opt }}</option>
+                                                            <option value="{{ $opt }}"
+                                                                @selected(old('language', $settings['language']->value ?? 'English (US)') === $opt)>
+                                                                {{ $opt }}
+                                                            </option>
                                                         @endforeach
-                                                    </select>
+                                                    </x-select>
                                                 </div>
 
                                                 <div>
                                                     <label class="form-label">Timezone</label>
-                                                    <select name="timezone" class="form-ctrl form-sel" disabled>
+                                                    <x-select name="timezone" class="form-ctrl form-sel" disabled>
                                                         @foreach (['Asia/Manila (UTC+8)', 'UTC'] as $opt)
-                                                            <option
-                                                                {{ old(
-                                                                    'timezone',
-                                                                    $settings['timezone']->value ??
-                                                                        'Asia/Manila
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    (UTC+8)',
-                                                                ) === $opt
-                                                                    ? 'selected'
-                                                                    : '' }}>
-                                                                {{ $opt }}</option>
+                                                            <option value="{{ $opt }}"
+                                                                @selected(old('timezone', $settings['timezone']->value ?? 'Asia/Manila (UTC+8)') === $opt)>
+                                                                {{ $opt }}
+                                                            </option>
                                                         @endforeach
-                                                    </select>
+                                                    </x-select>
                                                     <div class="setting-note">This setting is locked for now.</div>
                                                 </div>
 
                                                 <div>
                                                     <label class="form-label">Date Format</label>
-                                                    <select name="date_format" class="form-ctrl form-sel" disabled>
+                                                    <x-select name="date_format" class="form-ctrl form-sel" disabled>
                                                         @foreach (['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'] as $opt)
-                                                            <option
-                                                                {{ old('date_format', $settings['date_format']->value ?? 'MM/DD/YYYY') === $opt ? 'selected' : '' }}>
-                                                                {{ $opt }}</option>
+                                                            <option value="{{ $opt }}"
+                                                                @selected(old('date_format', $settings['date_format']->value ?? 'MM/DD/YYYY') === $opt)>
+                                                                {{ $opt }}
+                                                            </option>
                                                         @endforeach
-                                                    </select>
+                                                    </x-select>
                                                     <div class="setting-note">This setting is locked for now.</div>
                                                 </div>
 
                                                 <div>
                                                     <label class="form-label">Time Format</label>
-                                                    <select name="time_format" class="form-ctrl form-sel" disabled>
-                                                        @foreach (['12-hour (AM/PM)', '24-hour'] as $opt)
-                                                            <option
-                                                                {{ old('time_format', $settings['time_format']->value ?? '12-hour (AM/PM)') === $opt ? 'selected' : '' }}>
-                                                                {{ $opt }}</option>
-                                                        @endforeach
-                                                    </select>
+                                                    <x-select
+    name="time_format"
+    class="form-ctrl form-sel"
+    disabled
+>
+    @foreach (['12-hour (AM/PM)', '24-hour'] as $opt)
+        <option
+            value="{{ $opt }}"
+            @selected(
+                old(
+                    'time_format',
+                    $settings['time_format']->value ?? '12-hour (AM/PM)'
+                ) === $opt
+            )
+        >
+            {{ $opt }}
+        </option>
+    @endforeach
+</x-select>
                                                     <div class="setting-note">This setting is locked for now.</div>
                                                 </div>
                                             </div>
@@ -183,15 +174,15 @@
                                                     <div class="setting-row-desc">Temporarily disable appointment booking.
                                                         Patients can still access their dashboard.</div>
                                                 </div>
-                                                <label class="global-switch">
-                                                    <input type="hidden" name="maintenance_mode" value="0">
-
-                                                    <input type="checkbox" name="maintenance_mode" value="1"
-                                                        class="global-switch-input"
-                                                        {{ old('maintenance_mode', $settings['maintenance_mode']->value ?? '0') === '1' ? 'checked' : '' }}>
-
-                                                    <span class="global-switch-track"></span>
-                                                </label>
+                                                <x-switch
+    name="maintenance_mode"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'maintenance_mode',
+        $settings['maintenance_mode']->value ?? '0'
+    ) === '1'"
+/>
                                             </div>
 
                                             <div class="mt-5 mb-4 pt-4 border-t border-gray-50">
@@ -202,13 +193,28 @@
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                                 <div>
                                                     <label class="form-label">AI Operating Mode</label>
-                                                    <select name="ai_mode" class="form-ctrl form-sel">
-                                                        @foreach (['normal' => 'Normal', 'degraded' => 'Degraded', 'offline' => 'Offline'] as $value => $label)
-                                                            <option value="{{ $value }}"
-                                                                {{ old('ai_mode', $settings['ai_mode']->value ?? 'normal') === $value ? 'selected' : '' }}>
-                                                                {{ $label }}</option>
-                                                        @endforeach
-                                                    </select>
+                                                    <x-select
+    name="ai_mode"
+    class="form-ctrl form-sel"
+>
+    @foreach ([
+        'normal' => 'Normal',
+        'degraded' => 'Degraded',
+        'offline' => 'Offline',
+    ] as $value => $label)
+        <option
+            value="{{ $value }}"
+            @selected(
+                old(
+                    'ai_mode',
+                    $settings['ai_mode']->value ?? 'normal'
+                ) === $value
+            )
+        >
+            {{ $label }}
+        </option>
+    @endforeach
+</x-select>
                                                     <div class="setting-note">Offline disables AI calls and uses fallback
                                                         workflows only.</div>
                                                 </div>
@@ -220,15 +226,15 @@
                                                     <div class="setting-row-desc">Allow the chatbot to call the AI service
                                                         when available</div>
                                                 </div>
-                                                <label class="global-switch">
-                                                    <input type="hidden" name="ai_chatbot_enabled" value="0">
-
-                                                    <input type="checkbox" name="ai_chatbot_enabled" value="1"
-                                                        class="global-switch-input"
-                                                        {{ old('ai_chatbot_enabled', $settings['ai_chatbot_enabled']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                    <span class="global-switch-track"></span>
-                                                </label>
+                                                <x-switch
+    name="ai_chatbot_enabled"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'ai_chatbot_enabled',
+        $settings['ai_chatbot_enabled']->value ?? '1'
+    ) === '1'"
+/>
                                             </div>
 
                                             <div class="setting-row">
@@ -243,15 +249,15 @@
                                                     </div>
                                                 </div>
 
-                                                <label class="global-switch">
-                                                    <input type="hidden" name="ai_signature_enabled" value="0">
-
-                                                    <input type="checkbox" name="ai_signature_enabled" value="1"
-                                                        class="global-switch-input"
-                                                        {{ old('ai_signature_enabled', $settings['ai_signature_enabled']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                    <span class="global-switch-track"></span>
-                                                </label>
+                                                <x-switch
+    name="ai_signature_enabled"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'ai_signature_enabled',
+        $settings['ai_signature_enabled']->value ?? '1'
+    ) === '1'"
+/>
                                             </div>
 
                                             <div class="setting-row">
@@ -266,15 +272,15 @@
                                                     </div>
                                                 </div>
 
-                                                <label class="global-switch">
-                                                    <input type="hidden" name="ai_reports_enabled" value="0">
-
-                                                    <input type="checkbox" name="ai_reports_enabled" value="1"
-                                                        class="global-switch-input"
-                                                        {{ old('ai_reports_enabled', $settings['ai_reports_enabled']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                    <span class="global-switch-track"></span>
-                                                </label>
+                                                <x-switch
+    name="ai_reports_enabled"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'ai_reports_enabled',
+        $settings['ai_reports_enabled']->value ?? '1'
+    ) === '1'"
+/>
                                             </div>
                                         </div>
                                     </div>
@@ -386,15 +392,15 @@
                                                     </div>
                                                 </div>
 
-                                                <label class="global-switch">
-                                                    <input type="hidden" name="notif_new_appointment" value="0">
-
-                                                    <input type="checkbox" name="notif_new_appointment" value="1"
-                                                        class="global-switch-input"
-                                                        {{ old('notif_new_appointment', $settings['notif_new_appointment']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                    <span class="global-switch-track"></span>
-                                                </label>
+                                                <x-switch
+    name="notif_new_appointment"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_new_appointment',
+        $settings['notif_new_appointment']->value ?? '1'
+    ) === '1'"
+/>
                                             </div>
 
                                             <div class="setting-row">
@@ -408,15 +414,15 @@
                                                     </div>
                                                 </div>
 
-                                                <label class="global-switch">
-                                                    <input type="hidden" name="notif_cancellation" value="0">
-
-                                                    <input type="checkbox" name="notif_cancellation" value="1"
-                                                        class="global-switch-input"
-                                                        {{ old('notif_cancellation', $settings['notif_cancellation']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                    <span class="global-switch-track"></span>
-                                                </label>
+                                                <x-switch
+    name="notif_cancellation"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_cancellation',
+        $settings['notif_cancellation']->value ?? '1'
+    ) === '1'"
+/>
                                             </div>
 
                                             <div class="setting-row">
@@ -431,15 +437,15 @@
                                                     </div>
                                                 </div>
 
-                                                <label class="global-switch">
-                                                    <input type="hidden" name="notif_document_request" value="0">
-
-                                                    <input type="checkbox" name="notif_document_request" value="1"
-                                                        class="global-switch-input"
-                                                        {{ old('notif_document_request', $settings['notif_document_request']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                    <span class="global-switch-track"></span>
-                                                </label>
+                                                <x-switch
+    name="notif_document_request"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_document_request',
+        $settings['notif_document_request']->value ?? '1'
+    ) === '1'"
+/>
                                             </div>
 
                                             <div class="mt-5 mb-4 pt-4 border-t border-gray-50">
@@ -458,15 +464,15 @@
                                                         </div>
                                                     </div>
 
-                                                    <label class="global-switch">
-                                                        <input type="hidden" name="notif_rescheduled" value="0">
-
-                                                        <input type="checkbox" name="notif_rescheduled" value="1"
-                                                            class="global-switch-input"
-                                                            {{ old('notif_rescheduled', $settings['notif_rescheduled']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                        <span class="global-switch-track"></span>
-                                                    </label>
+                                                    <x-switch
+    name="notif_rescheduled"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_rescheduled',
+        $settings['notif_rescheduled']->value ?? '1'
+    ) === '1'"
+/>
                                                 </div>
 
                                                 <div class="setting-row">
@@ -481,15 +487,15 @@
                                                         </div>
                                                     </div>
 
-                                                    <label class="global-switch">
-                                                        <input type="hidden" name="notif_confirmation" value="0">
-
-                                                        <input type="checkbox" name="notif_confirmation" value="1"
-                                                            class="global-switch-input"
-                                                            {{ old('notif_confirmation', $settings['notif_confirmation']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                        <span class="global-switch-track"></span>
-                                                    </label>
+                                                    <x-switch
+    name="notif_confirmation"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_confirmation',
+        $settings['notif_confirmation']->value ?? '1'
+    ) === '1'"
+/>
                                                 </div>
 
                                                 <div class="setting-row">
@@ -504,18 +510,15 @@
                                                         </div>
                                                     </div>
 
-                                                    <label class="global-switch">
-                                                        <input type="hidden" name="notif_follow_up_scheduled"
-                                                            value="0">
-
-                                                        <input type="checkbox" name="notif_follow_up_scheduled"
-                                                            value="1" class="global-switch-input"
-                                                            {{ old('notif_follow_up_scheduled', $settings['notif_follow_up_scheduled']->value ?? '1') === '1'
-                                                                ? 'checked'
-                                                                : '' }}>
-
-                                                        <span class="global-switch-track"></span>
-                                                    </label>
+                                                    <x-switch
+    name="notif_follow_up_scheduled"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_follow_up_scheduled',
+        $settings['notif_follow_up_scheduled']->value ?? '1'
+    ) === '1'"
+/>
                                                 </div>
 
                                                 <div class="setting-row">
@@ -531,16 +534,15 @@
                                                         </div>
                                                     </div>
 
-                                                    <label class="global-switch">
-                                                        <input type="hidden" name="notif_document_approved"
-                                                            value="0">
-
-                                                        <input type="checkbox" name="notif_document_approved"
-                                                            value="1" class="global-switch-input"
-                                                            {{ old('notif_document_approved', $settings['notif_document_approved']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                        <span class="global-switch-track"></span>
-                                                    </label>
+                                                    <x-switch
+    name="notif_document_approved"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_document_approved',
+        $settings['notif_document_approved']->value ?? '1'
+    ) === '1'"
+/>
                                                 </div>
 
                                                 <div class="setting-row">
@@ -555,16 +557,15 @@
                                                         </div>
                                                     </div>
 
-                                                    <label class="global-switch">
-                                                        <input type="hidden" name="notif_document_rejected"
-                                                            value="0">
-
-                                                        <input type="checkbox" name="notif_document_rejected"
-                                                            value="1" class="global-switch-input"
-                                                            {{ old('notif_document_rejected', $settings['notif_document_rejected']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                        <span class="global-switch-track"></span>
-                                                    </label>
+                                                    <x-switch
+    name="notif_document_rejected"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_document_rejected',
+        $settings['notif_document_rejected']->value ?? '1'
+    ) === '1'"
+/>
                                                 </div>
                                             </div>
 
@@ -585,15 +586,15 @@
                                                         </div>
                                                     </div>
 
-                                                    <label class="global-switch">
-                                                        <input type="hidden" name="notif_reminder_24h" value="0">
-
-                                                        <input type="checkbox" name="notif_reminder_24h" value="1"
-                                                            class="global-switch-input"
-                                                            {{ old('notif_reminder_24h', $settings['notif_reminder_24h']->value ?? '1') === '1' ? 'checked' : '' }}>
-
-                                                        <span class="global-switch-track"></span>
-                                                    </label>
+                                                    <x-switch
+    name="notif_reminder_24h"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_reminder_24h',
+        $settings['notif_reminder_24h']->value ?? '1'
+    ) === '1'"
+/>
                                                 </div>
 
                                                 <div class="setting-row">
@@ -609,18 +610,15 @@
                                                         </div>
                                                     </div>
 
-                                                    <label class="global-switch">
-                                                        <input type="hidden" name="notif_follow_up_reminder"
-                                                            value="0">
-
-                                                        <input type="checkbox" name="notif_follow_up_reminder"
-                                                            value="1" class="global-switch-input"
-                                                            {{ old('notif_follow_up_reminder', $settings['notif_follow_up_reminder']->value ?? '1') === '1'
-                                                                ? 'checked'
-                                                                : '' }}>
-
-                                                        <span class="global-switch-track"></span>
-                                                    </label>
+                                                    <x-switch
+    name="notif_follow_up_reminder"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_follow_up_reminder',
+        $settings['notif_follow_up_reminder']->value ?? '1'
+    ) === '1'"
+/>
                                                 </div>
 
                                                 <div class="setting-row">
@@ -636,18 +634,15 @@
                                                         </div>
                                                     </div>
 
-                                                    <label class="global-switch">
-                                                        <input type="hidden" name="notif_follow_up_today_reminder"
-                                                            value="0">
-
-                                                        <input type="checkbox" name="notif_follow_up_today_reminder"
-                                                            value="1" class="global-switch-input"
-                                                            {{ old('notif_follow_up_today_reminder', $settings['notif_follow_up_today_reminder']->value ?? '1') === '1'
-                                                                ? 'checked'
-                                                                : '' }}>
-
-                                                        <span class="global-switch-track"></span>
-                                                    </label>
+                                                    <x-switch
+    name="notif_follow_up_today_reminder"
+    value="1"
+    unchecked-value="0"
+    :checked="old(
+        'notif_follow_up_today_reminder',
+        $settings['notif_follow_up_today_reminder']->value ?? '1'
+    ) === '1'"
+/>
                                                 </div>
                                             </div>
                                         </div>
@@ -781,11 +776,23 @@
                     </div>
                 </div>
                 <div class="modal-ft">
-                    <button id="retentionPasswordCancel" type="button" class="ui-btn ui-btn-secondary"
-                        data-modal-close="retentionPasswordDialog">Cancel</button>
-                    <button id="retentionPasswordConfirm" type="button" class="ui-btn ui-btn-primary">Confirm and
-                        save</button>
-                </div>
+    <x-button
+        id="retentionPasswordCancel"
+        type="button"
+        variant="secondary"
+        data-modal-close="retentionPasswordDialog"
+    >
+        Cancel
+    </x-button>
+
+    <x-button
+        id="retentionPasswordConfirm"
+        type="button"
+        variant="primary"
+    >
+        Confirm and save
+    </x-button>
+</div>
             </div>
         </div>
         @foreach ($retentionPolicies as $policy)
@@ -800,11 +807,15 @@
                 <input type="hidden" name="retention_policy_id" value="{{ $policy->id }}">
             </form>
             @foreach (['approve', 'activate', 'deactivate'] as $retentionAction)
-                @if (($retentionAction === 'approve' && $policy->status === 'provisional' && $policy->hasConfiguredRule())
-                    || ($retentionAction === 'activate' && $policy->status === 'approved')
-                    || ($retentionAction === 'deactivate' && $policy->status === 'active'))
-                    <form id="retention-{{ $retentionAction }}-{{ $policy->id }}" action="{{ route('admin.retention.update', $policy) }}" method="POST" hidden data-global-validation
-                        data-retention-label="{{ config('retention.categories.'.$policy->category.'.label') }}" data-retention-action="{{ $retentionAction }}">
+                @if (
+                    ($retentionAction === 'approve' && $policy->status === 'provisional' && $policy->hasConfiguredRule()) ||
+                        ($retentionAction === 'activate' && $policy->status === 'approved') ||
+                        ($retentionAction === 'deactivate' && $policy->status === 'active'))
+                    <form id="retention-{{ $retentionAction }}-{{ $policy->id }}"
+                        action="{{ route('admin.retention.update', $policy) }}" method="POST" hidden
+                        data-global-validation
+                        data-retention-label="{{ config('retention.categories.' . $policy->category . '.label') }}"
+                        data-retention-action="{{ $retentionAction }}">
                         @csrf @method('PUT')
                         <input type="hidden" name="action" value="{{ $retentionAction }}">
                         <input type="hidden" name="version" value="{{ $policy->version }}">
@@ -833,11 +844,12 @@
                     event.preventDefault();
                     if (submitting) return;
                     const fields = [...form.elements].filter(field =>
-                        field.matches('input:not([type="hidden"]):not([type="password"]), select, textarea')
+                        field.matches(
+                            'input:not([type="hidden"]):not([type="password"]), select, textarea')
                     );
-                    const invalid = fields.find(field => window.validateFormInputField
-                        ? !window.validateFormInputField(field)
-                        : !field.checkValidity() || (field.required && !field.value.trim()));
+                    const invalid = fields.find(field => window.validateFormInputField ?
+                        !window.validateFormInputField(field) :
+                        !field.checkValidity() || (field.required && !field.value.trim()));
                     if (invalid) {
                         if (window.focusGlobalInvalidField) window.focusGlobalInvalidField(invalid);
                         else invalid.focus();
@@ -851,9 +863,9 @@
                     const unit = form.elements.namedItem('unit')?.selectedOptions[0]?.textContent;
                     const rule = form.elements.namedItem('counting_rule')?.selectedOptions[0]?.textContent;
                     document.getElementById('retentionPasswordSummary').textContent =
-                        action === 'update'
-                            ? `${form.dataset.retentionLabel}: ${duration} ${unit} — ${rule}`
-                            : `${action}: ${form.dataset.retentionLabel}`;
+                        action === 'update' ?
+                        `${form.dataset.retentionLabel}: ${duration} ${unit} — ${rule}` :
+                        `${action}: ${form.dataset.retentionLabel}`;
                     window.openModal(dialog.id);
                 });
             });
@@ -1103,7 +1115,10 @@
             saveButtons.forEach(button => {
                 let state = settingsSaveButtonStates.get(button);
                 if (!state) {
-                    state = { content: [...button.childNodes], loading: false };
+                    state = {
+                        content: [...button.childNodes],
+                        loading: false
+                    };
                     settingsSaveButtonStates.set(button, state);
                 }
 

@@ -360,10 +360,7 @@
 
             <div class="modal-bd space-y-5">
                 <section class="modal-form-section">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="inventory-section-label">Item</span>
-                        <span class="h-px flex-1 bg-[var(--border)]" aria-hidden="true"></span>
-                    </div>
+                    <x-section-label label="Item" />
 
                     <div class="modal-form-grid-2">
                         <div class="inventory-field" data-global-field>
@@ -432,10 +429,7 @@
                 </section>
 
                 <section class="modal-form-section">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="inventory-section-label">Stock</span>
-                        <span class="h-px flex-1 bg-[var(--border)]" aria-hidden="true"></span>
-                    </div>
+                    <x-section-label label="Stock" />
 
                     <div id="addStockFieldsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-[0.85rem]">
 
@@ -507,10 +501,7 @@
                 </section>
 
                 <section class="modal-form-section">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="inventory-section-label">Dates</span>
-                        <span class="h-px flex-1 bg-[var(--border)]" aria-hidden="true"></span>
-                    </div>
+                    <x-section-label label="Dates" />
 
                     <div class="modal-form-grid-2">
                         <div class="inventory-field" data-global-field>
@@ -587,10 +578,7 @@
 
             <div class="modal-bd space-y-5">
                 <section class="modal-form-section">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="inventory-section-label">Item</span>
-                        <span class="h-px flex-1 bg-[var(--border)]" aria-hidden="true"></span>
-                    </div>
+                    <x-section-label label="Item" />
 
                     <div class="modal-form-grid-2">
                         <div class="inventory-field" data-global-field>
@@ -659,10 +647,7 @@
                 </section>
 
                 <section class="modal-form-section">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="inventory-section-label">Stock</span>
-                        <span class="h-px flex-1 bg-[var(--border)]" aria-hidden="true"></span>
-                    </div>
+                    <x-section-label label="Stock" />
 
                     <div class="modal-form-grid-2">
                         <div class="inventory-field" data-global-field>
@@ -738,10 +723,7 @@
                 </section>
 
                 <section class="modal-form-section">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="inventory-section-label">Dates</span>
-                        <span class="h-px flex-1 bg-[var(--border)]" aria-hidden="true"></span>
-                    </div>
+                    <x-section-label label="Dates" />
 
                     <div class="modal-form-grid-2">
                         <div class="inventory-field" data-global-field>

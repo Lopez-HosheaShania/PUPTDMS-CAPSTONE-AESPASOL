@@ -132,13 +132,13 @@
 
 @media (max-width: 640px) {
     .sm-grid-1col {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
     }
 }
 
 [data-theme="dark"] #mainContent label,
 [data-theme="dark"] #mainContent .question-text {
-    color: #d1d5db !important;
+    color: #d1d5db;
 }
 
 [data-theme="dark"] .book-container {
@@ -178,79 +178,79 @@
 [data-theme="dark"] #mainContent .border-\[\#f0ebe6\],
 [data-theme="dark"] #mainContent .border-\[\#f1e8e3\],
 [data-theme="dark"] #mainContent .border-\[\#e8e2dd\] {
-    border-color: rgba(255, 255, 255, 0.10) !important;
+    border-color: rgba(255, 255, 255, 0.10);
 }
 
 [data-theme="dark"] #mainContent .medical-condition-grid label,
 [data-theme="dark"] #mainContent .medical-condition-grid span,
 [data-theme="dark"] #mainContent .medical-condition-grid p {
-    color: #d1d5db !important;
+    color: #d1d5db;
 }
 
 [data-theme="dark"] #mainContent .medical-condition-grid input[type="checkbox"] {
-    background: #0b141c !important;
-    border-color: rgba(255, 255, 255, .24) !important;
+    background: #0b141c;
+    border-color: rgba(255, 255, 255, .24);
     accent-color: #8B0000;
 }
 
 [data-theme="dark"] #mainContent .file-upload-zone {
-    background: rgba(139, 0, 0, 0.10) !important;
-    border-color: rgba(252, 165, 165, 0.18) !important;
-    color: #cbd5e1 !important;
+    background: rgba(139, 0, 0, 0.10);
+    border-color: rgba(252, 165, 165, 0.18);
+    color: #cbd5e1;
 }
 
 [data-theme="dark"] #mainContent .file-upload-zone:hover {
-    background: rgba(139, 0, 0, 0.18) !important;
-    border-color: rgba(252, 165, 165, 0.38) !important;
+    background: rgba(139, 0, 0, 0.18);
+    border-color: rgba(252, 165, 165, 0.38);
 }
 
 [data-theme="dark"] #mainContent .file-upload-zone * {
-    color: #cbd5e1 !important;
+    color: #cbd5e1;
 }
 
 [data-theme="dark"] #mainContent #summarySection,
 [data-theme="dark"] #mainContent #confirmationSection {
-    color: #e5e7eb !important;
+    color: #e5e7eb;
 }
 
 [data-theme="dark"] #mainContent #summaryBox>*,
 [data-theme="dark"] #mainContent .confirm-checkbox-wrap {
-    background: linear-gradient(145deg, #0d1117, #111827) !important;
-    border-color: rgba(255, 255, 255, .10) !important;
-    color: #e5e7eb !important;
+    background: linear-gradient(145deg, #0d1117, #111827);
+    border-color: rgba(255, 255, 255, .10);
+    color: #e5e7eb;
 }
 
 [data-theme="dark"] #mainContent .confirm-checkbox-wrap span,
 [data-theme="dark"] #mainContent #summaryBox,
 [data-theme="dark"] #mainContent #summaryBox * {
-    color: #d1d5db !important;
+    color: #d1d5db;
 }
 
 #mainContent .emergency-contact-grid {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-    width: 100% !important;
-    max-width: none !important;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
+    max-width: none;
 }
 
 #mainContent .emergency-fields-stack {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-    width: 100% !important;
-    max-width: 520px !important;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
+    max-width: 520px;
 }
 
 #mainContent .emergency-fields-stack>div {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 100%;
+    max-width: 100%;
 }
 
 #mainContent .signature-full-row {
-    width: 100% !important;
-    max-width: none !important;
-    grid-column: 1 / -1 !important;
+    width: 100%;
+    max-width: none;
+    grid-column: 1 / -1;
 }
 
 [data-theme="dark"] #summaryBox>div,
@@ -258,543 +258,532 @@
 [data-theme="dark"] #summaryBox .bg-\[\#fffdfd\],
 [data-theme="dark"] #summaryBox .bg-\[\#fff7f6\],
 [data-theme="dark"] #summaryBox .bg-\[\#f9e8e8\] {
-    background: linear-gradient(145deg, #0d1117, #111827) !important;
-    border-color: rgba(255, 255, 255, .10) !important;
-    color: #e5e7eb !important;
+    background: linear-gradient(145deg, #0d1117, #111827);
+    border-color: rgba(255, 255, 255, .10);
+    color: #e5e7eb;
 }
 
 [data-theme="dark"] #summaryBox *,
 [data-theme="dark"] #summaryBox b,
 [data-theme="dark"] #summaryBox p,
 [data-theme="dark"] #summaryBox span {
-    color: #d1d5db !important;
+    color: #d1d5db;
 }
 
 [data-theme="dark"] #summaryBox [class*="text-[#8B0000]"],
 [data-theme="dark"] #summaryBox .text-\[\#8B0000\] {
-    color: #fca5a5 !important;
+    color: #fca5a5;
 }
 
 [data-theme="dark"] #summaryBox img {
-    border-color: rgba(255, 255, 255, .14) !important;
+    border-color: rgba(255, 255, 255, .14);
 }
 
 #mainContent #appointmentForm {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 #mainContent .signature-section-card {
-    margin-top: 1rem !important;
+    margin-top: 1rem;
 }
 
 .booking-step-body,
 .walk-in-step-body {
-    width: 100% !important;
-    min-width: 0 !important;
+    width: 100%;
+    min-width: 0;
 }
 
-html body #mainContent #patientAccountSection {
-    background: linear-gradient(180deg, #ffffff 0%, #fffafa 100%) !important;
-    border: 1px solid #ece3de !important;
-    border-radius: 28px !important;
-    padding: 1.35rem !important;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.05) !important;
+#patientAccountSection {
+    background: linear-gradient(180deg, #ffffff 0%, #fffafa 100%);
+    border: 1px solid #ece3de;
+    border-radius: 28px;
+    padding: 1.35rem;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.05);
 }
 
-html body #mainContent #patientAccountSection .section-card,
-html body #mainContent #patientAccountSection .walkin-account-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
+#patientAccountSection .section-card,
+#patientAccountSection .walkin-account-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 
-    margin: 0 !important;
-    padding: 0 !important;
+    margin: 0;
+    padding: 0;
 
-    background: transparent !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
 }
 
-html body #mainContent #patientAccountSection .account-tabs {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 6px !important;
-    padding: 5px !important;
-    border: 1px solid #eadfda !important;
-    border-radius: 18px !important;
-    background: #fff7f6 !important;
-    margin-bottom: 1rem !important;
-    width: 100% !important;
+#patientAccountSection .account-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 5px;
+    border: 1px solid #eadfda;
+    border-radius: 18px;
+    background: #fff7f6;
+    margin-bottom: 1rem;
+    width: 100%;
 }
 
-html body #mainContent #patientAccountSection .account-tab {
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    min-height: 40px !important;
-    border: 0 !important;
-    border-radius: 14px !important;
-    background: transparent !important;
-    color: #7a6f68 !important;
-    font-size: 0.78rem !important;
-    font-weight: 900 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    padding: 0 0.75rem !important;
-    white-space: nowrap !important;
+#patientAccountSection .account-tab {
+    appearance: none;
+    -webkit-appearance: none;
+    min-height: 40px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: #7a6f68;
+    font-size: 0.78rem;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0 0.75rem;
+    white-space: nowrap;
 }
 
-html body #mainContent #patientAccountSection .account-tab:hover {
-    color: #8B0000 !important;
-    background: rgba(139, 0, 0, 0.055) !important;
+#patientAccountSection .account-tab:hover {
+    color: #8B0000;
+    background: rgba(139, 0, 0, 0.055);
 }
 
-html body #mainContent #patientAccountSection .account-tab.active {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #8B0000, #660000) !important;
-    box-shadow: 0 8px 20px rgba(139, 0, 0, 0.2) !important;
+#patientAccountSection .account-tab.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #8B0000, #660000);
+    box-shadow: 0 8px 20px rgba(139, 0, 0, 0.2);
 }
 
-html body #mainContent #patientAccountSection .tab-panel {
-    display: none !important;
+#patientAccountSection .tab-panel {
+    display: none;
 }
 
-html body #mainContent #patientAccountSection .tab-panel.active {
-    display: block !important;
+#patientAccountSection .tab-panel.active {
+    display: block;
 }
 
-html body #mainContent #patientAccountSection .patient-result {
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    width: 100% !important;
-    display: grid !important;
-    grid-template-columns: 40px minmax(0, 1fr) auto !important;
-    gap: 10px !important;
-    align-items: center !important;
-    padding: 10px 12px !important;
-    border: 1px solid #eadfda !important;
-    border-radius: 16px !important;
-    background: #ffffff !important;
-    cursor: pointer !important;
-    text-align: left !important;
-    transition: all 0.18s ease !important;
-    box-shadow: none !important;
-    color: inherit !important;
+#patientAccountSection .patient-result {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #eadfda;
+    border-radius: 16px;
+    background: #ffffff;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+    box-shadow: none;
+    color: inherit;
 }
 
-html body #mainContent #patientAccountSection .patient-result:hover {
-    transform: none !important;
-    border-color: #8B0000 !important;
-    background: linear-gradient(180deg, #fffafa 0%, #fff3f2 100%) !important;
-    box-shadow: 0 10px 24px rgba(139, 0, 0, 0.08) !important;
+#patientAccountSection .patient-result:hover {
+    transform: none;
+    border-color: #8B0000;
+    background: linear-gradient(180deg, #fffafa 0%, #fff3f2 100%);
+    box-shadow: 0 10px 24px rgba(139, 0, 0, 0.08);
 }
 
-html body #mainContent #patientAccountSection .patient-result.selected {
-    border-color: #8B0000 !important;
-    background: linear-gradient(180deg, #fff4f3 0%, #ffffff 100%) !important;
-    box-shadow: 0 8px 20px rgba(139, 0, 0, 0.1) !important;
+#patientAccountSection .patient-result.selected {
+    border-color: #8B0000;
+    background: linear-gradient(180deg, #fff4f3 0%, #ffffff 100%);
+    box-shadow: 0 8px 20px rgba(139, 0, 0, 0.1);
 }
 
-html body #mainContent #patientAccountSection .patient-result-main {
-    display: block !important;
-    min-width: 0 !important;
+#patientAccountSection .patient-result-main {
+    display: block;
+    min-width: 0;
 }
 
-html body #mainContent #patientAccountSection .patient-result-name {
-    display: block !important;
-    font-size: 0.88rem !important;
-    font-weight: 900 !important;
-    line-height: 1.2 !important;
-    color: #1f1714 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+#patientAccountSection .patient-result-name {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 900;
+    line-height: 1.2;
+    color: #1f1714;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-html body #mainContent #patientAccountSection .patient-result-meta {
-    display: block !important;
-    margin-top: 2px !important;
-    font-size: 0.72rem !important;
-    font-weight: 700 !important;
-    color: #8c817a !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+#patientAccountSection .patient-result-meta {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #8c817a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-html body #mainContent #patientAccountSection .patient-select-pill {
-    min-height: 32px !important;
-    padding: 0 12px !important;
-    border-radius: 999px !important;
-    background: #f9e8e8 !important;
-    color: #8B0000 !important;
-    font-size: 0.72rem !important;
-    font-weight: 900 !important;
-    border: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 5px !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
+#patientAccountSection .patient-select-pill {
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: #f9e8e8;
+    color: #8B0000;
+    font-size: 0.72rem;
+    font-weight: 900;
+    border: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
-html body #mainContent #patientAccountSection .patient-result:hover .patient-select-pill,
-html body #mainContent #patientAccountSection .patient-result.selected .patient-select-pill,
-html body #mainContent #patientAccountSection .patient-select-pill.chosen {
-    background: #8B0000 !important;
-    color: #ffffff !important;
+#patientAccountSection .patient-result:hover .patient-select-pill,
+#patientAccountSection .patient-result.selected .patient-select-pill,
+#patientAccountSection .patient-select-pill.chosen {
+    background: #8B0000;
+    color: #ffffff;
 }
 
-html body #mainContent #patientAccountSection .empty-state {
-    border: 1px dashed #eadfda !important;
-    border-radius: 16px !important;
-    background: linear-gradient(180deg, #fffdfd 0%, #fff8f7 100%) !important;
-    color: #8c817a !important;
-    padding: 1rem !important;
-    min-height: 80px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
-    font-size: 0.82rem !important;
-    line-height: 1.45 !important;
+#patientAccountSection .empty-state {
+    border: 1px dashed #eadfda;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #fffdfd 0%, #fff8f7 100%);
+    color: #8c817a;
+    padding: 1rem;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.82rem;
+    line-height: 1.45;
 }
 
-html body #mainContent #patientAccountSection .guest-fields-grid {
-    display: grid !important;
-    gap: 10px !important;
+#patientAccountSection .walkin-three-col {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
 }
 
-html body #mainContent #patientAccountSection .walkin-two-col {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
+#patientAccountSection .walkin-field-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #333333;
 }
 
-html body #mainContent #patientAccountSection .walkin-three-col {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 10px !important;
+#patientAccountSection .selected-patient-box {
+    margin-top: 0.85rem;
+    border: 1px solid rgba(21, 128, 61, 0.28);
+    border-radius: 18px;
+    background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
+    padding: 10px 14px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
 }
 
-html body #mainContent #patientAccountSection .walkin-field-label {
-    display: block !important;
-    margin-bottom: 5px !important;
-    font-size: 0.72rem !important;
-    font-weight: 800 !important;
-    color: #333333 !important;
+#patientAccountSection .selected-patient-box[hidden] {
+    display: none;
 }
 
-html body #mainContent #patientAccountSection .selected-patient-box {
-    margin-top: 0.85rem !important;
-    border: 1px solid rgba(21, 128, 61, 0.28) !important;
-    border-radius: 18px !important;
-    background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%) !important;
-    padding: 10px 14px !important;
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 1px !important;
-}
-
-html body #mainContent #patientAccountSection .selected-patient-box[hidden] {
-    display: none !important;
-}
-
-html body #mainContent #patientAccountSection .selected-patient-box>span {
-    font-size: 0.65rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.14em !important;
-    text-transform: uppercase !important;
-    color: #15803d !important;
-    margin-bottom: 3px !important;
+#patientAccountSection .selected-patient-box>span {
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #15803d;
+    margin-bottom: 3px;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .selected-patient-box>span {
-    color: #86efac !important;
+    color: #86efac;
 }
 
-html body #mainContent #patientAccountSection .selected-patient-box strong {
-    font-size: 0.92rem !important;
-    font-weight: 900 !important;
-    color: #15251b !important;
+#patientAccountSection .selected-patient-box strong {
+    font-size: 0.92rem;
+    font-weight: 900;
+    color: #15251b;
 }
 
-html body #mainContent #patientAccountSection .selected-patient-box small {
-    font-size: 0.74rem !important;
-    color: #647067 !important;
-    margin-top: 1px !important;
+#patientAccountSection .selected-patient-box small {
+    font-size: 0.74rem;
+    color: #647067;
+    margin-top: 1px;
 }
 
 .section-card:has(#calendarSkeletonContainer) {
-    padding: 0 !important;
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
 }
 
 #calendarSkeletonContainer {
-    min-height: 420px !important;
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    width: 100% !important;
+    min-height: 420px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    width: 100%;
 }
 
 #calendarSkeletonContainer .cal-shell {
-    min-height: 420px !important;
-    width: 100% !important;
+    min-height: 420px;
+    width: 100%;
 }
 
 .question-text {
-    color: #333 !important;
+    color: #333;
 }
 
 .q-radio:checked {
-    border-color: #8B0000 !important;
-    background: #8B0000 !important;
-    box-shadow: inset 0 0 0 3px white !important;
+    border-color: #8B0000;
+    background: #8B0000;
+    box-shadow: inset 0 0 0 3px white;
 }
 
 .q-radio:hover:not(:checked) {
-    border-color: #8B0000 !important;
+    border-color: #8B0000;
 }
 
 #navBtns {
-    width: calc(100% - 2.7rem) !important;
-    max-width: calc(100% - 2.7rem) !important;
-    margin: 1rem auto 0 !important;
-    padding: 0 !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
-    gap: 0.75rem !important;
-    position: static !important;
+    width: calc(100% - 2.7rem);
+    max-width: calc(100% - 2.7rem);
+    margin: 1rem auto 0;
+    padding: 0;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    position: static;
 }
 
 [data-theme="dark"] .section-card,
 [data-theme="dark"] .signature-draw-card {
-    background: linear-gradient(145deg, #0d1117, #111827) !important;
-    border-color: rgba(255, 255, 255, 0.10) !important;
-    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.38) !important;
+    background: linear-gradient(145deg, #0d1117, #111827);
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.38);
 }
 
 [data-theme="dark"] .patient-result-meta {
-    color: #9ca3af !important;
+    color: #9ca3af;
 }
 
 [data-theme="dark"] .step-counter-pill {
-    background: #0d1117 !important;
-    border-color: rgba(255, 255, 255, 0.10) !important;
-    color: #cbd5e1 !important;
+    background: #0d1117;
+    border-color: rgba(255, 255, 255, 0.10);
+    color: #cbd5e1;
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection,
-[data-theme="dark"] html body #mainContent #patientAccountSection .section-card,
-[data-theme="dark"] html body #mainContent #patientAccountSection .walkin-account-card,
+[data-theme="dark"] #patientAccountSection,
+[data-theme="dark"] #patientAccountSection .section-card,
+[data-theme="dark"] #patientAccountSection .walkin-account-card,
 html[data-theme="dark"] body #mainContent #patientAccountSection .section-card,
 html[data-theme="dark"] body #mainContent #patientAccountSection .walkin-account-card {
-    background: transparent !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .account-tabs {
-    background: #0b141c !important;
-    border-color: rgba(255, 255, 255, 0.10) !important;
+[data-theme="dark"] #patientAccountSection .account-tabs {
+    background: #0b141c;
+    border-color: rgba(255, 255, 255, 0.10);
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .account-tab {
-    color: #cbd5e1 !important;
+[data-theme="dark"] #patientAccountSection .account-tab {
+    color: #cbd5e1;
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .account-tab:hover {
-    color: #fca5a5 !important;
-    background: rgba(252, 165, 165, 0.10) !important;
+[data-theme="dark"] #patientAccountSection .account-tab:hover {
+    color: #fca5a5;
+    background: rgba(252, 165, 165, 0.10);
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .account-tab.active {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #8B0000, #660000) !important;
+[data-theme="dark"] #patientAccountSection .account-tab.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #8B0000, #660000);
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .walkin-field-label,
+[data-theme="dark"] #patientAccountSection .walkin-field-label,
 [data-theme="dark"] label,
 [data-theme="dark"] .question-text {
-    color: #d1d5db !important;
+    color: #d1d5db;
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .patient-result,
-[data-theme="dark"] html body #mainContent #patientAccountSection .empty-state {
-    background: #111827 !important;
-    border-color: rgba(255, 255, 255, 0.10) !important;
-    color: #9ca3af !important;
+[data-theme="dark"] #patientAccountSection .patient-result,
+[data-theme="dark"] #patientAccountSection .empty-state {
+    background: #111827;
+    border-color: rgba(255, 255, 255, 0.10);
+    color: #9ca3af;
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .patient-result:hover,
-[data-theme="dark"] html body #mainContent #patientAccountSection .patient-result.selected {
-    background: #1f2937 !important;
-    border-color: rgba(252, 165, 165, 0.38) !important;
+[data-theme="dark"] #patientAccountSection .patient-result:hover,
+[data-theme="dark"] #patientAccountSection .patient-result.selected {
+    background: #1f2937;
+    border-color: rgba(252, 165, 165, 0.38);
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .patient-result-name {
-    color: #f9fafb !important;
+[data-theme="dark"] #patientAccountSection .patient-result-name {
+    color: #f9fafb;
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .patient-result-meta {
-    color: #9ca3af !important;
+[data-theme="dark"] #patientAccountSection .patient-result-meta {
+    color: #9ca3af;
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .selected-patient-box {
-    background: linear-gradient(145deg, rgba(21, 128, 61, 0.16), #111827) !important;
-    border-color: rgba(74, 222, 128, 0.25) !important;
+[data-theme="dark"] #patientAccountSection .selected-patient-box {
+    background: linear-gradient(145deg, rgba(21, 128, 61, 0.16), #111827);
+    border-color: rgba(74, 222, 128, 0.25);
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .selected-patient-box strong {
-    color: #dcfce7 !important;
+[data-theme="dark"] #patientAccountSection .selected-patient-box strong {
+    color: #dcfce7;
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .selected-patient-box small {
-    color: #a7f3d0 !important;
+[data-theme="dark"] #patientAccountSection .selected-patient-box small {
+    color: #a7f3d0;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection {
     background:
         radial-gradient(circle at top left, rgba(139, 0, 0, 0.22), transparent 38%),
-        linear-gradient(145deg, #0d1117, #111827) !important;
-    border-color: rgba(255, 255, 255, 0.10) !important;
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42) !important;
+        linear-gradient(145deg, #0d1117, #111827);
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
 }
 
-[data-theme="dark"] html body #mainContent #patientAccountSection .section-card,
-[data-theme="dark"] html body #mainContent #patientAccountSection .walkin-account-card,
+[data-theme="dark"] #patientAccountSection .section-card,
+[data-theme="dark"] #patientAccountSection .walkin-account-card,
 html[data-theme="dark"] body #mainContent #patientAccountSection .section-card,
 html[data-theme="dark"] body #mainContent #patientAccountSection .walkin-account-card {
-    background: transparent !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .booking-step-eyebrow {
-    color: #fca5a5 !important;
+    color: #fca5a5;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .account-tabs {
-    background: rgba(2, 11, 20, 0.78) !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(2, 11, 20, 0.78);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .account-tab {
-    color: #cbd5e1 !important;
+    color: #cbd5e1;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .account-tab:hover {
-    color: #fecaca !important;
-    background: rgba(248, 113, 113, 0.12) !important;
+    color: #fecaca;
+    background: rgba(248, 113, 113, 0.12);
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .account-tab.active {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #b91c1c, #7f1d1d) !important;
-    box-shadow: 0 12px 24px rgba(127, 29, 29, 0.38) !important;
+    color: #ffffff;
+    background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+    box-shadow: 0 12px 24px rgba(127, 29, 29, 0.38);
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .empty-state {
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.96)) !important;
-    border-color: rgba(255, 255, 255, 0.14) !important;
-    color: #a8b3c2 !important;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.96));
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #a8b3c2;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result {
-    background: #111827 !important;
-    border-color: rgba(255, 255, 255, 0.11) !important;
+    background: #111827;
+    border-color: rgba(255, 255, 255, 0.11);
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result:hover,
 html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result.selected {
-    background: #1f2937 !important;
-    border-color: rgba(252, 165, 165, 0.38) !important;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24) !important;
+    background: #1f2937;
+    border-color: rgba(252, 165, 165, 0.38);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result-name,
 html[data-theme="dark"] body #mainContent #patientAccountSection .selected-patient-box strong {
-    color: #f8fafc !important;
+    color: #f8fafc;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .patient-result-meta,
 html[data-theme="dark"] body #mainContent #patientAccountSection .selected-patient-box small {
-    color: #9ca3af !important;
+    color: #9ca3af;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .patient-select-pill {
-    background: rgba(248, 113, 113, 0.14) !important;
-    color: #fecaca !important;
+    background: rgba(248, 113, 113, 0.14);
+    color: #fecaca;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .walkin-field-label {
-    color: #d1d5db !important;
+    color: #d1d5db;
 }
 
 html[data-theme="dark"] body #mainContent #patientAccountSection .selected-patient-box {
-    background: linear-gradient(135deg, rgba(20, 83, 45, 0.32), rgba(17, 24, 39, 0.94)) !important;
-    border-color: rgba(74, 222, 128, 0.24) !important;
+    background: linear-gradient(135deg, rgba(20, 83, 45, 0.32), rgba(17, 24, 39, 0.94));
+    border-color: rgba(74, 222, 128, 0.24);
 }
 
 [data-theme="dark"] .signature-pad-help {
-    color: #9ca3af !important;
+    color: #9ca3af;
 }
 
 @media (max-width: 767px) {
 
     #calendarSkeletonContainer,
     #calendarSkeletonContainer .cal-shell {
-        min-height: auto !important;
+        min-height: auto;
     }
 
     #navBtns {
-        width: 100% !important;
-        max-width: 100% !important;
-        display: flex !important;
-        justify-content: stretch !important;
-        align-items: center !important;
-        gap: 0.65rem !important;
-        margin: 1rem 0 0 !important;
-        padding: 0 !important;
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        justify-content: stretch;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 1rem 0 0;
+        padding: 0;
     }
 }
 
 @media (max-width: 640px) {
-    html body #mainContent #patientAccountSection .account-tabs {
-        grid-template-columns: 1fr !important;
+    #patientAccountSection .account-tabs {
+        grid-template-columns: 1fr;
     }
 
-    html body #mainContent #patientAccountSection .walkin-three-col {
-        grid-template-columns: 1fr !important;
+    #patientAccountSection .walkin-three-col {
+        grid-template-columns: 1fr;
     }
 
-    html body #mainContent #patientAccountSection .walkin-two-col {
-        grid-template-columns: 1fr !important;
+    #patientAccountSection .walkin-two-col {
+        grid-template-columns: 1fr;
     }
 
-    html body #mainContent #patientAccountSection .patient-result {
-        grid-template-columns: 40px minmax(0, 1fr) !important;
+    #patientAccountSection .patient-result {
+        grid-template-columns: 40px minmax(0, 1fr);
     }
 
-    html body #mainContent #patientAccountSection .patient-select-pill {
-        grid-column: 1 / -1 !important;
-        width: 100% !important;
+    #patientAccountSection .patient-select-pill {
+        grid-column: 1 / -1;
+        width: 100%;
     }
 }

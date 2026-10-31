@@ -21,7 +21,7 @@
     justify-content: flex-end;
 }
 
-#reportSignatoryModal .modal-ft > button {
+#reportSignatoryModal .modal-ft>button {
     flex: 0 1 9rem;
     width: 9rem;
     min-width: 0;
@@ -92,7 +92,7 @@
     font-weight: 750;
 }
 
-#reportSignatoryModal .report-signature-upload-copy > span {
+#reportSignatoryModal .report-signature-upload-copy>span {
     color: var(--text-3);
     font-size: .75rem;
     line-height: 1.5;
@@ -180,7 +180,7 @@
 }
 
 .section-label i {
-    color: var(--crimson-1, #8B0000) !important;
+    color: var(--crimson-1, #8B0000);
 }
 
 .section-label::before {
@@ -200,17 +200,17 @@ hr.section-divider {
 
 [data-theme="dark"] .section-label,
 .dark .section-label {
-    color: var(--text-muted, #8B949E) !important;
+    color: var(--text-muted, #8B949E);
 }
 
 [data-theme="dark"] .section-label i,
 .dark .section-label i {
-    color: #FCA5A5 !important;
+    color: #FCA5A5;
 }
 
 [data-theme="dark"] hr.section-divider,
 .dark hr.section-divider {
-    border-top-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
+    border-top-color: var(--border-dark, rgba(255, 255, 255, .10));
 }
 
 .chart-legend {
@@ -251,7 +251,7 @@ hr.section-divider {
 
 .chart-wrap canvas {
     display: block;
-    width: 100% !important;
+    width: 100%;
     max-width: 100%;
 }
 
@@ -273,7 +273,7 @@ hr.section-divider {
     }
 
     .chart-wrap[style] {
-        height: 220px !important;
+        height: 220px;
     }
 
     .dentist-report-page .dentist-hero {
@@ -304,7 +304,7 @@ hr.section-divider {
 
 @media (max-width: 480px) {
     .chart-wrap[style] {
-        height: 205px !important;
+        height: 205px;
     }
 
 }
@@ -327,7 +327,7 @@ hr.section-divider {
 
 .alert-warning i {
     margin-top: .12rem;
-    color: var(--status-pending-solid, #D97706) !important;
+    color: var(--status-pending-solid, #D97706);
 }
 
 .alert-warning strong {
@@ -356,12 +356,12 @@ hr.section-divider {
 
 [data-theme="dark"] .alert-warning i,
 .dark .alert-warning i {
-    color: var(--status-pending-solid, #FBBF24) !important;
+    color: var(--status-pending-solid, #FBBF24);
 }
 
 [data-theme="dark"] .item-cell,
 .dark .item-cell {
-    color: var(--text-primary, #F3F4F6) !important;
+    color: var(--text-primary, #F3F4F6);
 }
 
 @media (max-width: 767px) {
@@ -394,7 +394,7 @@ hr.section-divider {
 
 .forecast-note i {
     margin-top: .12rem;
-    color: var(--crimson-1, #8B0000) !important;
+    color: var(--crimson-1, #8B0000);
     flex-shrink: 0;
 }
 
@@ -418,83 +418,83 @@ hr.section-divider {
 }
 
 .report-movement-table .forecast-opening {
-    color: #7C3AED !important;
+    color: #7C3AED;
 }
 
 .report-movement-table .forecast-stock-in {
-    color: #0F766E !important;
+    color: #0F766E;
 }
 
 .report-movement-table .forecast-used {
-    color: #2563EB !important;
+    color: #2563EB;
 }
 
 .report-movement-table .forecast-ending {
-    color: #15803D !important;
+    color: #15803D;
 }
 
 .report-movement-table .forecast-average {
-    color: #D97706 !important;
+    color: #D97706;
 }
 
 .report-movement-table .forecast-days {
-    color: #475569 !important;
+    color: #475569;
 }
 
 .report-movement-table .forecast-reorder {
-    color: #B45309 !important;
+    color: #B45309;
 }
 
 [data-theme="dark"] .forecast-note,
 .dark .forecast-note {
-    color: var(--text-muted, #8B949E) !important;
-    background: rgba(139, 0, 0, .14) !important;
-    border-color: rgba(252, 165, 165, .16) !important;
+    color: var(--text-muted, #8B949E);
+    background: rgba(139, 0, 0, .14);
+    border-color: rgba(252, 165, 165, .16);
 }
 
 [data-theme="dark"] .forecast-note i,
 .dark .forecast-note i {
-    color: #FCA5A5 !important;
+    color: #FCA5A5;
 }
 
 [data-theme="dark"] .report-movement-table-wrap,
 .dark .report-movement-table-wrap {
-    border-top-color: rgba(255, 255, 255, .08) !important;
+    border-top-color: rgba(255, 255, 255, .08);
 }
 
 [data-theme="dark"] .report-movement-table .forecast-opening,
 .dark .report-movement-table .forecast-opening {
-    color: #C4B5FD !important;
+    color: #C4B5FD;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-stock-in,
 .dark .report-movement-table .forecast-stock-in {
-    color: #5EEAD4 !important;
+    color: #5EEAD4;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-used,
 .dark .report-movement-table .forecast-used {
-    color: #60A5FA !important;
+    color: #60A5FA;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-ending,
 .dark .report-movement-table .forecast-ending {
-    color: #86EFAC !important;
+    color: #86EFAC;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-average,
 .dark .report-movement-table .forecast-average {
-    color: #FCD34D !important;
+    color: #FCD34D;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-days,
 .dark .report-movement-table .forecast-days {
-    color: #CBD5E1 !important;
+    color: #CBD5E1;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-reorder,
 .dark .report-movement-table .forecast-reorder {
-    color: #FDBA74 !important;
+    color: #FDBA74;
 }
 
 @media (max-width: 767px) {
@@ -537,13 +537,13 @@ hr.section-divider {
         width: 100%;
         padding: 0;
         border-bottom: 0;
-        text-align: right !important;
+        text-align: right;
         font-size: .77rem;
         line-height: 1.35;
     }
 
     .report-movement-table td::before {
-        content: attr(data-label) !important;
+        content: attr(data-label);
         flex-shrink: 0;
         color: var(--um-muted, #6B7280);
         font-size: .64rem;
@@ -556,156 +556,156 @@ hr.section-divider {
     .report-movement-table .item-cell {
         display: block;
         padding-bottom: .65rem;
-        text-align: left !important;
+        text-align: left;
         font-size: .9rem;
         border-bottom: 1px solid var(--um-border, #ebe7e2);
     }
 
     .report-movement-table .item-cell::before {
-        display: none !important;
+        display: none;
     }
 
     .report-movement-table .report-stock-pill {
         max-width: 70%;
-        white-space: normal !important;
+        white-space: normal;
         text-align: center;
-        line-height: 1.2 !important;
+        line-height: 1.2;
     }
 
     [data-theme="dark"] .report-movement-table tr,
     .dark .report-movement-table tr {
-        background: rgba(13, 17, 23, .58) !important;
-        border-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
-        box-shadow: 0 10px 24px rgba(0, 0, 0, .30) !important;
+        background: rgba(13, 17, 23, .58);
+        border-color: var(--border-dark, rgba(255, 255, 255, .10));
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .30);
     }
 
     [data-theme="dark"] .report-movement-table td::before,
     .dark .report-movement-table td::before {
-        color: var(--text-muted, #8B949E) !important;
+        color: var(--text-muted, #8B949E);
     }
 
     [data-theme="dark"] .report-movement-table .item-cell,
     .dark .report-movement-table .item-cell {
-        border-bottom-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
+        border-bottom-color: var(--border-dark, rgba(255, 255, 255, .10));
     }
 }
 
 @media (max-width: 767px) {
     #mainContent .page-banner .page-banner-inner>div:first-child {
-        width: 100% !important;
-        text-align: left !important;
-        align-items: flex-start !important;
+        width: 100%;
+        text-align: left;
+        align-items: flex-start;
     }
 
     #mainContent .page-banner .page-title {
-        width: 100% !important;
-        text-align: left !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
+        width: 100%;
+        text-align: left;
+        margin-left: 0;
+        margin-right: auto;
     }
 }
 
 @media (min-width: 768px) and (max-width: 1280px) {
 
     #mainContent.app-page-shell {
-        overflow-x: hidden !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        padding-bottom: calc(6rem + env(safe-area-inset-bottom)) !important;
+        overflow-x: hidden;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        padding-bottom: calc(6rem + env(safe-area-inset-bottom));
     }
 
     #mainContent.app-page-shell .page-banner,
     #mainContent .page-banner {
-        width: 100% !important;
-        text-align: left !important;
+        width: 100%;
+        text-align: left;
     }
 
     #mainContent.app-page-shell .page-banner .page-banner-inner,
     #mainContent .page-banner .page-banner-inner {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 1rem !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        text-align: left !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        width: 100%;
+        min-width: 0;
+        text-align: left;
     }
 
     #mainContent.app-page-shell .page-banner .page-banner-inner>div:first-child,
     #mainContent .page-banner .page-banner-inner>div:first-child {
-        flex: 1 1 auto !important;
-        min-width: 0 !important;
-        width: auto !important;
-        max-width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
-        text-align: left !important;
-        align-items: flex-start !important;
-        justify-content: center !important;
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: auto;
+        text-align: left;
+        align-items: flex-start;
+        justify-content: center;
     }
 
     #mainContent.app-page-shell .page-banner .page-title,
     #mainContent .page-banner .page-title {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
-        text-align: left !important;
-        justify-content: flex-start !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: auto;
+        text-align: left;
+        justify-content: flex-start;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     #mainContent.app-page-shell .page-banner .page-subtitle,
     #mainContent .page-banner .page-subtitle {
-        text-align: left !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
-        max-width: 100% !important;
+        text-align: left;
+        margin-left: 0;
+        margin-right: auto;
+        max-width: 100%;
     }
 
     #mainContent.app-page-shell .page-banner .page-banner-inner>div:last-child,
     #mainContent .page-banner .page-banner-inner>div:last-child {
-        flex: 0 0 auto !important;
-        margin-left: auto !important;
-        justify-content: flex-end !important;
+        flex: 0 0 auto;
+        margin-left: auto;
+        justify-content: flex-end;
     }
 
     .chart-wrap[style] {
-        height: 260px !important;
+        height: 260px;
     }
 
     .chart-legend {
-        gap: .45rem .75rem !important;
-        margin-bottom: .8rem !important;
-        font-size: .72rem !important;
+        gap: .45rem .75rem;
+        margin-bottom: .8rem;
+        font-size: .72rem;
     }
 
     .forecast-note {
-        margin: .95rem 1.05rem !important;
-        padding: .75rem .85rem !important;
-        font-size: .72rem !important;
+        margin: .95rem 1.05rem;
+        padding: .75rem .85rem;
+        font-size: .72rem;
     }
 
     .report-movement-table-wrap {
-        width: 100% !important;
-        max-width: 100% !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .item-cell {
-        max-width: 280px !important;
+        max-width: 280px;
     }
 
     .report-movement-table {
-        min-width: 980px !important;
+        min-width: 980px;
     }
 
     .report-movement-table th,
     .report-movement-table td {
-        font-size: .72rem !important;
+        font-size: .72rem;
     }
 }
 
@@ -713,86 +713,86 @@ hr.section-divider {
 
     #mainContent.app-page-shell .page-banner .page-banner-inner,
     #mainContent .page-banner .page-banner-inner {
-        align-items: flex-start !important;
+        align-items: flex-start;
     }
 
     #mainContent.app-page-shell .page-banner .page-title,
     #mainContent .page-banner .page-title {
-        white-space: normal !important;
-        line-height: 1.15 !important;
+        white-space: normal;
+        line-height: 1.15;
     }
 
     .chart-wrap[style] {
-        height: 235px !important;
+        height: 235px;
     }
 }
 
 .report-movement-table,
 .report-inventory-table {
-    table-layout: auto !important;
-    min-width: 1180px !important;
+    table-layout: auto;
+    min-width: 1180px;
 }
 
 .report-movement-table th:first-child,
 .report-movement-table td:first-child,
 .report-inventory-table th:first-child,
 .report-inventory-table td:first-child {
-    width: 220px !important;
-    min-width: 220px !important;
-    max-width: 260px !important;
-    text-align: left !important;
+    width: 220px;
+    min-width: 220px;
+    max-width: 260px;
+    text-align: left;
 }
 
 .item-cell,
 .report-movement-table .item-cell,
 .report-inventory-table .item-cell {
-    width: 220px !important;
-    min-width: 220px !important;
-    max-width: 260px !important;
-    white-space: normal !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-    line-height: 1.3 !important;
-    text-align: left !important;
+    width: 220px;
+    min-width: 220px;
+    max-width: 260px;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    line-height: 1.3;
+    text-align: left;
 }
 
 .item-cell {
-    hyphens: none !important;
+    hyphens: none;
 }
 
 @media (min-width: 768px) and (max-width: 1280px) {
 
     .report-movement-table,
     .report-inventory-table {
-        min-width: 1240px !important;
+        min-width: 1240px;
     }
 
     .report-movement-table th:first-child,
     .report-movement-table td:first-child,
     .report-inventory-table th:first-child,
     .report-inventory-table td:first-child {
-        width: 240px !important;
-        min-width: 240px !important;
-        max-width: 280px !important;
+        width: 240px;
+        min-width: 240px;
+        max-width: 280px;
     }
 
     .item-cell,
     .report-movement-table .item-cell,
     .report-inventory-table .item-cell {
-        width: 240px !important;
-        min-width: 240px !important;
-        max-width: 280px !important;
-        white-space: normal !important;
-        word-break: normal !important;
-        overflow-wrap: normal !important;
+        width: 240px;
+        min-width: 240px;
+        max-width: 280px;
+        white-space: normal;
+        word-break: normal;
+        overflow-wrap: normal;
     }
 }
 
 .printable-form-card,
 .report-template-card,
 .template-card {
-    min-width: 0 !important;
-    overflow: visible !important;
+    min-width: 0;
+    overflow: visible;
 }
 
 .printable-form-card h3,
@@ -801,13 +801,13 @@ hr.section-divider {
 .report-template-card .template-title,
 .template-card h3,
 .template-card .template-title {
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: unset !important;
-    display: block !important;
-    line-height: 1.25 !important;
-    max-width: 100% !important;
-    word-break: break-word !important;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    display: block;
+    line-height: 1.25;
+    max-width: 100%;
+    word-break: break-word;
 }
 
 .report-preview-wrapper,
@@ -817,12 +817,12 @@ hr.section-divider {
 .print-preview-body,
 .template-preview-wrapper,
 .template-preview-body {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;
-    overflow-y: auto !important;
-    padding: 2rem 1rem !important;
-    box-sizing: border-box !important;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
 }
 
 .report-paper,
@@ -832,11 +832,11 @@ hr.section-divider {
 .report-sheet,
 .print-sheet,
 .preview-sheet {
-    box-sizing: border-box !important;
-    overflow: visible !important;
-    flex-shrink: 0 !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    box-sizing: border-box;
+    overflow: visible;
+    flex-shrink: 0;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .report-paper.legal,
@@ -846,8 +846,8 @@ hr.section-divider {
 .report-sheet.legal,
 .print-sheet.legal,
 .preview-sheet.legal {
-    width: 8.5in !important;
-    min-height: 14in !important;
+    width: 8.5in;
+    min-height: 14in;
 }
 
 .report-paper.letter,
@@ -857,8 +857,8 @@ hr.section-divider {
 .report-sheet.letter,
 .print-sheet.letter,
 .preview-sheet.letter {
-    width: 8.5in !important;
-    min-height: 11in !important;
+    width: 8.5in;
+    min-height: 11in;
 }
 
 .report-paper.a4,
@@ -868,8 +868,8 @@ hr.section-divider {
 .report-sheet.a4,
 .print-sheet.a4,
 .preview-sheet.a4 {
-    width: 210mm !important;
-    min-height: 297mm !important;
+    width: 210mm;
+    min-height: 297mm;
 }
 
 .report-paper img,
@@ -879,9 +879,9 @@ hr.section-divider {
 .report-sheet img,
 .print-sheet img,
 .preview-sheet img {
-    max-width: 100% !important;
-    height: auto !important;
-    object-fit: contain !important;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
 }
 
 @media screen and (max-width: 1024px) {
@@ -893,8 +893,8 @@ hr.section-divider {
     .print-preview-body,
     .template-preview-wrapper,
     .template-preview-body {
-        justify-content: flex-start !important;
-        align-items: flex-start !important;
+        justify-content: flex-start;
+        align-items: flex-start;
     }
 
     .report-paper,
@@ -904,8 +904,8 @@ hr.section-divider {
     .report-sheet,
     .print-sheet,
     .preview-sheet {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
+        margin-left: 0;
+        margin-right: 0;
     }
 }
 
@@ -918,10 +918,10 @@ hr.section-divider {
     .print-preview-body,
     .template-preview-wrapper,
     .template-preview-body {
-        padding: 0 !important;
-        margin: 0 !important;
-        overflow: visible !important;
-        background: #fff !important;
+        padding: 0;
+        margin: 0;
+        overflow: visible;
+        background: #fff;
     }
 
     .report-paper,
@@ -931,11 +931,11 @@ hr.section-divider {
     .report-sheet,
     .print-sheet,
     .preview-sheet {
-        margin: 0 auto !important;
-        overflow: visible !important;
-        box-shadow: none !important;
-        transform: none !important;
-        zoom: 1 !important;
+        margin: 0 auto;
+        overflow: visible;
+        box-shadow: none;
+        transform: none;
+        zoom: 1;
     }
 }
 
@@ -1372,58 +1372,58 @@ hr.section-divider {
 [data-theme="dark"] #mainContent .stock-name,
 .dark #mainContent .service-name,
 .dark #mainContent .stock-name {
-    color: #F8FAFC !important;
+    color: #F8FAFC;
 }
 
 [data-theme="dark"] #mainContent .metric-chip,
 .dark #mainContent .metric-chip {
-    background: rgba(139, 0, 0, 0.18) !important;
-    border-color: rgba(252, 165, 165, 0.22) !important;
-    color: #FCA5A5 !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    background: rgba(139, 0, 0, 0.18);
+    border-color: rgba(252, 165, 165, 0.22);
+    color: #FCA5A5;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 #mainContent .report-hero-actions {
-    margin-left: 0 !important;
-    align-self: flex-end !important;
-    margin-top: 12px !important;
+    margin-left: 0;
+    align-self: flex-end;
+    margin-top: 12px;
 }
 
 #mainContent .chart-loading {
-    background: transparent !important;
-    border-radius: 16px !important;
+    background: transparent;
+    border-radius: 16px;
 }
 
 #mainContent .service-name,
 #mainContent .stock-name {
-    color: #111827 !important;
+    color: #111827;
 }
 
 [data-theme="dark"] #mainContent .chart-loading,
 .dark #mainContent .chart-loading {
-    background: transparent !important;
-    color: #C9D1D9 !important;
+    background: transparent;
+    color: #C9D1D9;
 }
 
 [data-theme="dark"] #mainContent .stock-bar-bg,
 .dark #mainContent .stock-bar-bg {
-    background: var(--surface) !important;
+    background: var(--surface);
 }
 
 #mainContent.app-page-shell .report-hero-actions {
-    position: relative !important;
-    z-index: 4 !important;
-    margin-left: auto !important;
-    margin-top: 0 !important;
-    padding-right: 0 !important;
-    align-self: center !important;
-    display: flex !important;
-    justify-content: flex-end !important;
-    flex: 0 0 auto !important;
+    position: relative;
+    z-index: 4;
+    margin-left: auto;
+    margin-top: 0;
+    padding-right: 0;
+    align-self: center;
+    display: flex;
+    justify-content: flex-end;
+    flex: 0 0 auto;
 }
 
 #mainContent.app-page-shell .analytics-section-label {
-    letter-spacing: .08em !important;
+    letter-spacing: .08em;
 }
 
 .report-panel-title {
@@ -1449,123 +1449,123 @@ hr.section-divider {
 
 @media only screen and (max-width: 600px) {
     #mainContent.app-page-shell {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-        padding-bottom: 28px !important;
-        overflow-x: hidden !important;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: 28px;
+        overflow-x: hidden;
     }
 
     #mainContent.app-page-shell .analytics-section-label {
-        font-size: 0.58rem !important;
-        line-height: 1.25 !important;
-        margin-top: 18px !important;
-        margin-bottom: 12px !important;
+        font-size: 0.58rem;
+        line-height: 1.25;
+        margin-top: 18px;
+        margin-bottom: 12px;
     }
 
     #mainContent.app-page-shell .analytics-main-grid,
     #mainContent.app-page-shell .analytics-secondary-grid {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 14px !important;
-        margin-bottom: 22px !important;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 22px;
     }
 
     #mainContent.app-page-shell #gadChartWrap,
     #mainContent.app-page-shell #weeklyChartWrap {
-        min-height: 230px !important;
+        min-height: 230px;
     }
 
     #mainContent.app-page-shell .relative.h-\[280px\] {
-        height: 230px !important;
+        height: 230px;
     }
 
     #mainContent.app-page-shell .metric-chip {
-        font-size: 0.6rem !important;
-        padding: 5px 8px !important;
-        white-space: nowrap !important;
+        font-size: 0.6rem;
+        padding: 5px 8px;
+        white-space: nowrap;
     }
 
     #mainContent.app-page-shell .service-row {
-        padding: 10px 11px !important;
-        gap: 10px !important;
-        border-radius: 13px !important;
+        padding: 10px 11px;
+        gap: 10px;
+        border-radius: 13px;
     }
 
     #mainContent.app-page-shell .service-meta {
-        min-width: 0 !important;
+        min-width: 0;
     }
 
     #mainContent.app-page-shell .service-name {
-        font-size: 0.76rem !important;
-        line-height: 1.2 !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        font-size: 0.76rem;
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     #mainContent.app-page-shell .service-count {
-        font-size: 0.68rem !important;
-        white-space: nowrap !important;
+        font-size: 0.68rem;
+        white-space: nowrap;
     }
 
     #createReportModal .ui-modal-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: auto !important;
-        max-height: 90dvh !important;
-        margin: 0 !important;
-        border-radius: 24px 24px 0 0 !important;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 90dvh;
+        margin: 0;
+        border-radius: 24px 24px 0 0;
     }
 
     #createReportModal .grid.grid-cols-2 {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     #createReportModal #reportQty {
-        width: 100% !important;
+        width: 100%;
     }
 
     #createReportModal #reportQty+span {
-        display: block !important;
-        margin-left: 0 !important;
-        margin-top: 5px !important;
+        display: block;
+        margin-left: 0;
+        margin-top: 5px;
     }
 
     #createReportModal .border-t {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     #createReportModal .border-t button {
-        width: 100% !important;
-        justify-content: center !important;
+        width: 100%;
+        justify-content: center;
     }
 
     #downloadCompleteModal .ui-modal-card {
-        width: calc(100vw - 24px) !important;
-        max-width: calc(100vw - 24px) !important;
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
     }
 }
 
 @media only screen and (min-width: 601px) and (max-width: 991px) {
     #mainContent.dentist-report-page .dentist-hero-content {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        align-items: flex-start !important;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        align-items: flex-start;
     }
 
     #mainContent.dentist-report-page .dentist-hero-content>.min-w-0 {
-        flex: 1 1 auto !important;
-        width: auto !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
+        flex: 1 1 auto;
+        width: auto;
+        max-width: 100%;
+        min-width: 0;
     }
 
     #mainContent.dentist-report-page .dentist-hero-icon {
-        align-self: flex-start !important;
-        margin-top: 18px !important;
+        align-self: flex-start;
+        margin-top: 18px;
     }
 }
 
@@ -1573,90 +1573,90 @@ hr.section-divider {
 
     #mainContent.app-page-shell .analytics-main-grid,
     #mainContent.app-page-shell .analytics-secondary-grid {
-        grid-template-columns: 1fr !important;
-        gap: 16px !important;
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 }
 
 @media only screen and (min-width: 768px) {
     #mainContent.app-page-shell {
-        padding-left: 1.25rem !important;
-        padding-right: 1.25rem !important;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
     }
 
     #mainContent.app-page-shell .dentist-hero-content {
-        padding-right: 0 !important;
+        padding-right: 0;
     }
 
     #mainContent.app-page-shell .dentist-hero-title {
-        font-size: 1.9rem !important;
+        font-size: 1.9rem;
     }
 
     #mainContent.app-page-shell .report-hero-actions {
-        margin-left: auto !important;
-        flex-shrink: 0 !important;
+        margin-left: auto;
+        flex-shrink: 0;
     }
 
     #mainContent.app-page-shell .analytics-main-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 18px !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
     }
 
 
     #mainContent.app-page-shell .analytics-secondary-grid {
-        grid-template-columns: 1fr !important;
-        gap: 18px !important;
+        grid-template-columns: 1fr;
+        gap: 18px;
     }
 }
 
 @media only screen and (min-width: 992px) {
     #mainContent.app-page-shell .dentist-hero-title {
-        font-size: 2rem !important;
+        font-size: 2rem;
     }
 
     #mainContent.app-page-shell .analytics-main-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 18px !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
     }
 
     #mainContent.app-page-shell .analytics-secondary-grid {
-        grid-template-columns: 1.35fr .9fr !important;
-        gap: 18px !important;
+        grid-template-columns: 1.35fr .9fr;
+        gap: 18px;
     }
 }
 
 @media only screen and (min-width: 1200px) {
     #mainContent.app-page-shell {
-        padding-left: 1.5rem !important;
-        padding-right: 1.5rem !important;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
     }
 
     #mainContent.app-page-shell .dentist-hero-title {
-        font-size: 2rem !important;
+        font-size: 2rem;
     }
 
     #mainContent.app-page-shell .analytics-main-grid {
-        grid-template-columns: 1.2fr 1.2fr .9fr !important;
-        gap: 20px !important;
+        grid-template-columns: 1.2fr 1.2fr .9fr;
+        gap: 20px;
     }
 
     #mainContent.app-page-shell .analytics-secondary-grid {
-        grid-template-columns: 1.5fr .9fr !important;
-        gap: 20px !important;
+        grid-template-columns: 1.5fr .9fr;
+        gap: 20px;
     }
 }
 
 #mainContent.app-page-shell .report-inventory-grid {
-    align-items: stretch !important;
+    align-items: stretch;
 }
 
 #mainContent.app-page-shell .inventory-chart-panel,
 #mainContent.app-page-shell .low-stock-alert-card {
-    min-width: 0 !important;
+    min-width: 0;
 }
 
 #mainContent.app-page-shell .chart-loading.hidden {
-    display: none !important;
+    display: none;
 }
 
 .dentist-report-page .analytics-main-grid .card-header,
@@ -1697,22 +1697,36 @@ hr.section-divider {
     white-space: nowrap;
 }
 
+.dentist-report-page .analytics-main-grid>.card {
+    position: relative;
+}
+
+.dentist-report-page .analytics-main-grid>.card:has(.custom-select.is-open) {
+    z-index: 100;
+    overflow: visible;
+}
+
+.dentist-report-page .analytics-main-grid>.card:has(.custom-select.is-open) .card-header,
+.dentist-report-page .analytics-main-grid>.card:has(.custom-select.is-open) .card-body {
+    overflow: visible;
+}
+
 @media only screen and (max-width: 600px) {
 
     #mainContent.app-page-shell .printable-template-grid,
     #mainContent.app-page-shell .report-inventory-grid {
-        grid-template-columns: 1fr !important;
-        gap: 14px !important;
+        grid-template-columns: 1fr;
+        gap: 14px;
     }
 
     #mainContent.app-page-shell .inventory-chart-panel .relative {
-        height: 235px !important;
-        min-height: 235px !important;
+        height: 235px;
+        min-height: 235px;
     }
 
     #mainContent.app-page-shell .low-stock-alert-card {
-        padding: 14px !important;
-        border-radius: 16px !important;
+        padding: 14px;
+        border-radius: 16px;
     }
 }
 
@@ -1720,11 +1734,11 @@ hr.section-divider {
 
     #mainContent.app-page-shell .printable-template-grid,
     #mainContent.app-page-shell .report-inventory-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     #mainContent.app-page-shell .low-stock-alert-card {
-        grid-column: 1 / -1 !important;
+        grid-column: 1 / -1;
     }
 }
 
@@ -1732,45 +1746,45 @@ hr.section-divider {
 
     #mainContent.app-page-shell .printable-template-grid,
     #mainContent.app-page-shell .report-inventory-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     #mainContent.app-page-shell .low-stock-alert-card {
-        grid-column: auto !important;
+        grid-column: auto;
     }
 }
 
 #createReportModal {
-    z-index: 99999 !important;
+    z-index: 99999;
 }
 
 #createReportModal.open {
-    display: flex !important;
+    display: flex;
 }
 
 #createReportModal .um-user-modal-body {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 #createReportModal .um-user-main-card {
-    width: 100% !important;
+    width: 100%;
 }
 
 #createReportModal .fp-date-input-wrap {
-    position: relative !important;
-    width: 100% !important;
+    position: relative;
+    width: 100%;
 }
 
 #createReportModal .fp-date-icon {
-    position: absolute !important;
-    right: 14px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    color: #9CA3AF !important;
-    font-size: 14px !important;
-    pointer-events: none !important;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    font-size: 14px;
+    pointer-events: none;
 }
 
 #mainContent.dentist-report-page .card-body {
@@ -1915,9 +1929,9 @@ hr.section-divider {
     }
 
     .printable-template-grid {
-        display: grid !important;
+        display: grid;
 
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
 
         gap: .7rem;
 
@@ -1999,56 +2013,56 @@ hr.section-divider {
 
 .report-inventory-content>canvas {
     display: block;
-    width: 100% !important;
-    height: 100% !important;
+    width: 100%;
+    height: 100%;
 }
 
 .report-inventory-content>.empty-state-host {
     width: 100%;
-    height: auto !important;
-    min-height: 0 !important;
+    height: auto;
+    min-height: 0;
 }
 
 .dentist-report-page .analytics-main-grid .card-header {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: flex-start !important;
-    justify-content: space-between !important;
-    gap: .65rem !important;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .65rem;
 }
 
 .dentist-report-page .analytics-main-grid .card-header-left {
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .dentist-report-page .analytics-main-grid .card-header-right {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    min-width: 0 !important;
-    margin-left: auto !important;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    margin-left: auto;
 }
 
 .dentist-report-page .analytics-main-grid .card-header-right .custom-select {
-    width: 112px !important;
-    min-width: 112px !important;
-    max-width: 112px !important;
+    width: 128px;
+    min-width: 128px;
+    max-width: 128px;
 }
 
 .dentist-report-page .analytics-main-grid .card-header-right .custom-select-button {
-    min-height: 34px !important;
-    padding: 0 .6rem !important;
-    gap: .4rem !important;
+    min-height: 34px;
+    padding: 0 .6rem;
+    gap: .4rem;
 
-    border-radius: 10px !important;
+    border-radius: 10px;
 
-    font-size: .68rem !important;
+    font-size: .68rem;
 }
 
 .dentist-report-page .analytics-main-grid .card-header-right .custom-select-option {
-    min-height: 34px !important;
-    padding: 0 .6rem !important;
-    font-size: .68rem !important;
+    min-height: 34px;
+    padding: 0 .6rem;
+    font-size: .68rem;
 }
 
 .inventory-chart-panel,
@@ -2097,61 +2111,61 @@ hr.section-divider {
 }
 
 .report-inventory-content>canvas {
-    width: 100% !important;
-    height: 100% !important;
+    width: 100%;
+    height: 100%;
 }
 
 .report-inventory-grid .empty-state {
-    min-height: 0 !important;
-    height: auto !important;
-    padding: 1rem .75rem !important;
+    min-height: 0;
+    height: auto;
+    padding: 1rem .75rem;
 }
 
 .report-inventory-grid .empty-state.empty-state-compact {
-    min-height: 0 !important;
-    height: auto !important;
-    padding: 1rem .75rem !important;
+    min-height: 0;
+    height: auto;
+    padding: 1rem .75rem;
 }
 
 .report-inventory-grid .empty-state-icon {
-    width: 46px !important;
-    height: 46px !important;
-    min-width: 46px !important;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
 
-    margin-bottom: .65rem !important;
+    margin-bottom: .65rem;
 
-    border-radius: 14px !important;
+    border-radius: 14px;
 }
 
 .report-inventory-grid .empty-state-icon i {
-    font-size: 18px !important;
+    font-size: 18px;
 }
 
 .report-inventory-grid .empty-state-title {
-    font-size: .86rem !important;
-    line-height: 1.2 !important;
+    font-size: .86rem;
+    line-height: 1.2;
 }
 
 .report-inventory-grid .empty-state-sub {
-    max-width: 240px !important;
-    margin-top: .35rem !important;
+    max-width: 240px;
+    margin-top: .35rem;
 
-    font-size: .68rem !important;
-    line-height: 1.4 !important;
+    font-size: .68rem;
+    line-height: 1.4;
 }
 
 .report-inventory-grid .empty-state .ui-btn {
-    min-height: 28px !important;
-    margin-top: .7rem !important;
-    padding: 0 .7rem !important;
+    min-height: 28px;
+    margin-top: .7rem;
+    padding: 0 .7rem;
 
-    font-size: .62rem !important;
+    font-size: .62rem;
 }
 
 @media (min-width: 601px) and (max-width: 991px) {
     .report-inventory-grid {
         grid-template-columns:
-            repeat(2, minmax(0, 1fr)) !important;
+            repeat(2, minmax(0, 1fr));
     }
 
     .low-stock-alert-card {
@@ -2167,164 +2181,164 @@ hr.section-divider {
 
     .dentist-report-page .analytics-main-grid .card-header,
     .dentist-report-page .analytics-secondary-grid .card-header {
-        display: grid !important;
+        display: grid;
 
         grid-template-columns:
-            minmax(0, 1fr) auto !important;
+            minmax(0, 1fr) auto;
 
-        align-items: start !important;
+        align-items: start;
 
-        column-gap: .5rem !important;
-        row-gap: 0 !important;
+        column-gap: .5rem;
+        row-gap: 0;
 
-        width: 100% !important;
+        width: 100%;
     }
 
     .dentist-report-page .analytics-main-grid .card-header-left,
     .dentist-report-page .analytics-secondary-grid .card-header-left {
-        grid-column: 1 !important;
-        grid-row: 1 !important;
+        grid-column: 1;
+        grid-row: 1;
 
-        display: flex !important;
-        align-items: flex-start !important;
+        display: flex;
+        align-items: flex-start;
 
-        min-width: 0 !important;
-        width: 100% !important;
+        min-width: 0;
+        width: 100%;
     }
 
     .dentist-report-page .analytics-main-grid .card-header-left>div {
-        flex: 1 1 auto !important;
-        min-width: 0 !important;
+        flex: 1 1 auto;
+        min-width: 0;
     }
 
     .dentist-report-page .analytics-main-grid .card-header-right,
     .dentist-report-page .analytics-secondary-grid .card-header-right {
-        grid-column: 2 !important;
-        grid-row: 1 !important;
+        grid-column: 2;
+        grid-row: 1;
 
-        width: auto !important;
+        width: auto;
 
-        margin: 0 !important;
+        margin: 0;
 
-        align-self: start !important;
-        justify-self: end !important;
+        align-self: start;
+        justify-self: end;
     }
 
     .dentist-report-page .analytics-main-grid .card-header-right .custom-select {
-        width: 88px !important;
-        min-width: 88px !important;
-        max-width: 88px !important;
+        width: 88px;
+        min-width: 88px;
+        max-width: 88px;
     }
 
     .dentist-report-page .analytics-main-grid .card-header-right .custom-select-button {
-        min-height: 30px !important;
+        min-height: 30px;
 
-        padding: 0 .5rem !important;
+        padding: 0 .5rem;
 
-        gap: .35rem !important;
+        gap: .35rem;
 
-        border-radius: 9px !important;
+        border-radius: 9px;
 
-        font-size: .6rem !important;
+        font-size: .6rem;
     }
 
     .dentist-report-page .analytics-main-grid .card-header-right .custom-select-button i {
-        font-size: .52rem !important;
+        font-size: .52rem;
     }
 
     .dentist-report-page .analytics-main-grid .card-title {
-        white-space: nowrap !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
     }
 
     .dentist-report-page .analytics-main-grid .card-subtitle {
-        white-space: normal !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
     }
 
     .report-inventory-shell .card-header {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: flex-start !important;
-        justify-content: space-between !important;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
 
-        gap: .6rem !important;
+        gap: .6rem;
     }
 
     .report-inventory-shell .card-header-right .ui-btn {
-        min-height: 30px !important;
-        padding: 0 9px !important;
-        font-size: .58rem !important;
+        min-height: 30px;
+        padding: 0 9px;
+        font-size: .58rem;
     }
 
     .report-inventory-shell .card-header-right .ui-btn i {
-        font-size: .58rem !important;
+        font-size: .58rem;
     }
 
     .report-inventory-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1rem !important;
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
     .report-inventory-content {
-        height: 210px !important;
-        min-height: 210px !important;
+        height: 210px;
+        min-height: 210px;
     }
 
     .inventory-chart-panel,
     .report-inventory-panel,
     .low-stock-alert-card {
-        padding: .8rem !important;
-        border-radius: 14px !important;
+        padding: .8rem;
+        border-radius: 14px;
     }
 
     .report-panel-heading {
-        gap: .55rem !important;
-        margin-bottom: .55rem !important;
+        gap: .55rem;
+        margin-bottom: .55rem;
     }
 
     .report-panel-heading .card-header-icon {
-        width: 30px !important;
-        height: 30px !important;
-        min-width: 30px !important;
-        border-radius: 9px !important;
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        border-radius: 9px;
     }
 
     .report-panel-heading .card-title {
-        font-size: .72rem !important;
-        line-height: 1.2 !important;
+        font-size: .72rem;
+        line-height: 1.2;
     }
 
     .report-panel-heading .card-subtitle {
-        margin-top: 2px !important;
-        font-size: .6rem !important;
-        line-height: 1.25 !important;
+        margin-top: 2px;
+        font-size: .6rem;
+        line-height: 1.25;
     }
 
     .report-panel-heading .card-header-icon {
-        width: 32px !important;
-        height: 32px !important;
-        min-width: 32px !important;
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
     }
 
     .report-panel-heading .card-title {
-        font-size: .74rem !important;
+        font-size: .74rem;
     }
 
     .report-panel-heading .card-subtitle {
-        font-size: .6rem !important;
+        font-size: .6rem;
     }
 
     .report-inventory-content:has(canvas) {
-        height: 190px !important;
-        min-height: 190px !important;
+        height: 190px;
+        min-height: 190px;
     }
 
     .report-inventory-content:has(.empty-state-host) {
-        height: auto !important;
-        min-height: 0 !important;
+        height: auto;
+        min-height: 0;
     }
 }
 
@@ -2342,7 +2356,7 @@ hr.section-divider {
 @media (max-width: 991px) {
 
     .report-inventory-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .low-stock-alert-card {

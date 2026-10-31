@@ -17,7 +17,6 @@
     flex-wrap: nowrap;
 }
 
-.admin-banner-pill,
 .admin-banner-action {
     display: inline-flex;
     align-items: center;
@@ -30,12 +29,6 @@
     font-weight: 800;
     line-height: 1;
     white-space: nowrap;
-}
-
-.admin-banner-pill {
-    color: var(--color-white);
-    background: var(--alpha-white-12);
-    border: 1px solid var(--alpha-white-18);
 }
 
 .period-pill {

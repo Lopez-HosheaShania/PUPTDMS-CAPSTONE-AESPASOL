@@ -88,17 +88,6 @@
     margin-bottom: 0;
 }
 
-.inventory-section-label {
-    display: block;
-    margin: 0;
-    color: var(--crimson);
-    font-size: .7rem;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: .065em;
-    text-transform: uppercase;
-}
-
 .inventory-date-control {
     position: relative;
     width: 100%;

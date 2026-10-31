@@ -7,14 +7,7 @@
 @section('content')
     <main id="mainContent" class="app-page-shell pb-11">
         <div class="w-full">
-            <section class="page-banner mb-4">
-                <div class="page-banner-inner">
-                    <div class="page-banner-copy">
-                        <h1 class="page-title">Session Dashboard</h1>
-                    </div>
-
-                </div>
-            </section>
+            <x-page-banner title="Session Dashboard" class="mb-4" />
 
             <section id="statCards" class="stat-grid">
                 <article class="stat-card s-crimson">
@@ -270,15 +263,14 @@
                                             <td>
                                                 <div class="flex justify-end">
                                                     @if (!$hasCurrentSession)
-                                                        <button type="button"
-                                                            class="ui-btn ui-btn-danger ui-btn-sm trigger-session-logout-all"
+                                                        <x-button type="button" variant="danger" size="sm"
+                                                            class="trigger-session-logout-all"
                                                             data-action="{{ route('admin.session_management.destroy_user_sessions', $firstSession->user_id) }}"
                                                             data-user="{{ $firstSession->user_name }}"
                                                             data-count="{{ $sessionCount }}"
                                                             aria-label="Sign out all {{ $sessionCount }} sessions for {{ $firstSession->user_name }}">
-                                                            Sign out all
-                                                            ({{ $sessionCount }})
-                                                        </button>
+                                                            Sign out all ({{ $sessionCount }})
+                                                        </x-button>
                                                     @endif
                                                 </div>
                                             </td>
@@ -380,11 +372,10 @@
                                                             @csrf
                                                             @method('DELETE')
 
-                                                            <button type="submit"
-                                                                class="ui-btn ui-btn-secondary ui-btn-sm"
+                                                            <x-button type="submit" variant="secondary" size="sm"
                                                                 aria-label="Sign out {{ $session->user_name }} on {{ $session->browser_label }}, {{ $session->os_label }}">
                                                                 Sign out
-                                                            </button>
+                                                            </x-button>
                                                         </form>
                                                     @endif
                                                 </div>
@@ -461,14 +452,14 @@
                                             </span>
 
                                             @if ($sessionCount > 1 && !$hasCurrentSession)
-                                                <button type="button"
-                                                    class="ui-btn ui-btn-danger ui-btn-sm trigger-session-logout-all"
+                                                <x-button type="button" variant="danger" size="sm"
+                                                    class="trigger-session-logout-all"
                                                     data-action="{{ route('admin.session_management.destroy_user_sessions', $firstSession->user_id) }}"
                                                     data-user="{{ $firstSession->user_name }}"
                                                     data-count="{{ $sessionCount }}"
                                                     aria-label="Sign out all {{ $sessionCount }} sessions for {{ $firstSession->user_name }}">
                                                     Sign out all ({{ $sessionCount }})
-                                                </button>
+                                                </x-button>
                                             @endif
                                         </div>
 
@@ -558,11 +549,11 @@
                                                                 @csrf
                                                                 @method('DELETE')
 
-                                                                <button type="submit"
-                                                                    class="ui-btn ui-btn-secondary ui-btn-sm"
+                                                                <x-button type="submit" variant="secondary"
+                                                                    size="sm"
                                                                     aria-label="Sign out {{ $session->user_name }} on {{ $session->browser_label }}, {{ $session->os_label }}">
                                                                     Sign out
-                                                                </button>
+                                                                </x-button>
                                                             </form>
                                                         @endif
                                                     </div>
@@ -617,68 +608,47 @@
         </div>
     </main>
 
-    <div id="sessionConfirmModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"
-        aria-labelledby="confirmModalTitle">
-        <form id="sessionConfirmForm" method="POST" action="" class="ui-modal-card modal-sm">
-            @csrf
-            @method('DELETE')
+    <x-modal id="sessionConfirmModal" title="Sign out all sessions?" title-id="confirmModalTitle"
+        subtitle="This action affects every active device for this user." icon="fa-solid fa-right-from-bracket"
+        size="sm" form-id="sessionConfirmForm" form-class="modal-card-form" :form-attributes="[
+            'method' => 'POST',
+            'action' => '',
+        ]" :close-attributes="[
+            'data-modal-close' => 'sessionConfirmModal',
+        ]">
+        @csrf
+        @method('DELETE')
 
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </div>
+        <div class="global-confirm-alert">
+            <div>
+                <strong id="confirmModalAffected">
+                    Multiple devices will be signed out.
+                </strong>
 
-                    <div class="modal-copy">
-                        <h3 id="confirmModalTitle" class="modal-title">
-                            Sign out all sessions?
-                        </h3>
-
-                        <p class="modal-subtitle">
-                            This action affects every active device for this user.
-                        </p>
-                    </div>
-                </div>
-
-                <button type="button" class="modal-x" data-modal-close="sessionConfirmModal"
-                    aria-label="Close sign out confirmation">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <span>
+                    The user will need to sign in again on those devices.
+                </span>
             </div>
+        </div>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <div>
-                        <strong id="confirmModalAffected">
-                            Multiple devices will be signed out.
-                        </strong>
+        <div class="confirmed-modal-schedule-note">
+            <i class="fa-solid fa-triangle-exclamation"></i>
 
-                        <span>
-                            The user will need to sign in again on those devices.
-                        </span>
-                    </div>
-                </div>
+            <span>
+                Any unsaved changes on those devices will be lost.
+            </span>
+        </div>
 
-                <div class="confirmed-modal-schedule-note">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-modal-close="sessionConfirmModal">
+                Cancel
+            </x-button>
 
-                    <span>
-                        Any unsaved changes on those devices will be lost.
-                    </span>
-                </div>
-            </div>
-
-            <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="sessionConfirmModal">
-                    Cancel
-                </button>
-
-                <button type="submit" class="ui-btn ui-btn-danger">
-                    Sign out all
-                </button>
-            </div>
-        </form>
-    </div>
+            <x-button type="submit" variant="danger">
+                Sign out all
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 
     <form data-ui-submit="action-44daeba3893a" id="sessionFilterForm">
         <x-filter-drawer id="filterModal" title="Filters" close-id="sessionFilterCloseBtn"
@@ -692,11 +662,10 @@
                         Active Filters
                     </span>
 
-                    <button id="sessionClearAllChipsBtn" type="button"
-                        class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm">
-                        <i class="fa-solid fa-rotate-left"></i>
-                        <span>Clear All</span>
-                    </button>
+                    <x-button id="sessionClearAllChipsBtn" type="button" variant="secondary" size="sm"
+                        icon="fa-solid fa-rotate-left" class="filter-clear-all">
+                        Clear All
+                    </x-button>
                 </div>
 
                 <div id="sessionActiveChipsContainer" class="active-filters-container"></div>

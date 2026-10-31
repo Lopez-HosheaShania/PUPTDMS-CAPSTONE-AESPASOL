@@ -24,6 +24,102 @@
     box-shadow: 0 0 0 3px rgba(139, 0, 0, .1);
 }
 
+.global-section-label {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+
+    width: 100%;
+    min-width: 0;
+
+    margin: 0 0 .9rem;
+
+    color: var(--crimson-1);
+    font-size: .72rem;
+    font-weight: 800;
+    line-height: 1.2;
+
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.global-section-label::after {
+    content: "";
+
+    flex: 1;
+    min-width: 0;
+    height: 1px;
+
+    background: var(--border);
+}
+
+.global-section-label>i {
+    flex: 0 0 auto;
+
+    color: currentColor;
+    font-size: .72rem;
+}
+
+.global-section-label>span {
+    flex: 0 0 auto;
+}
+
+[data-theme="dark"] .global-section-label::after,
+.dark .global-section-label::after {
+    background: rgba(255, 255, 255, .12);
+}
+
+.global-reveal-field {
+    display: grid;
+    grid-template-rows: 0fr;
+
+    min-width: 0;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transform: translateY(-6px);
+
+    transition:
+        grid-template-rows .28s ease,
+        opacity .2s ease,
+        transform .28s ease,
+        visibility 0s linear .28s;
+}
+
+.global-reveal-field.is-visible {
+    grid-template-rows: 1fr;
+
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+
+    transform: translateY(0);
+
+    transition:
+        grid-template-rows .28s ease,
+        opacity .22s ease,
+        transform .28s ease,
+        visibility 0s;
+}
+
+.global-reveal-field-inner {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.global-reveal-field .global-form-group {
+    margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .global-reveal-field {
+        transition: none;
+        transform: none;
+    }
+}
+
 .global-form-group {
     position: relative;
     width: 100%;
@@ -244,10 +340,41 @@
     box-shadow: 0 0 0 3px rgba(239, 68, 68, .10);
 }
 
-.form-grid-2 {
+.form-grid-2,
+.form-grid-3,
+.form-grid-4 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 14px;
+    align-items: start;
+
+    width: 100%;
+    min-width: 0;
+
+    gap: 14px;
+}
+
+.form-grid-2 {
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+}
+
+.form-grid-3 {
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+}
+
+.form-grid-4 {
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+}
+
+.form-grid-slot-after-first {
+    grid-column: 2 / -1;
+    grid-row: 1;
+}
+
+.form-grid-slot-second {
+    grid-column: 2;
+    grid-row: 1;
 }
 
 .form-input-custom,
@@ -626,20 +753,39 @@ textarea.form-input-custom.global-form-textarea {
 .custom-select-option {
     width: 100%;
     min-height: 40px;
-    padding: 0 .8rem;
+    height: auto;
+
+    padding: .55rem .8rem;
+
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: .75rem;
+
     border: 0;
     border-radius: 10px;
+
     background: transparent;
     color: var(--text-2);
+
     font: inherit;
     font-size: .70rem;
     font-weight: 700;
+    line-height: 1.4;
+
     text-align: left;
     cursor: pointer;
+}
+
+.custom-select-option+.custom-select-option {
+    margin-top: .2rem;
+}
+
+.custom-select-option>span {
+    min-width: 0;
+    flex: 1;
+
+    overflow-wrap: anywhere;
 }
 
 .custom-select-option:hover {
@@ -658,6 +804,7 @@ textarea.form-input-custom.global-form-textarea {
 .custom-select-option .custom-select-check {
     display: none;
     opacity: 0;
+    margin-top: .1rem;
     visibility: hidden;
     flex: 0 0 auto;
 }
@@ -1814,6 +1961,24 @@ textarea.form-input-custom.global-form-textarea {
     }
 }
 
+@media (max-width: 1024px) {
+    .form-grid-4 {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .form-grid-3 {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .form-grid-slot-after-first,
+    .form-grid-slot-second {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+}
+
 @media (max-width:767px) {
 
     .access-input,
@@ -1824,9 +1989,17 @@ textarea.form-input-custom.global-form-textarea {
         border-radius: 10px;
     }
 
-    .form-grid-2 {
+    .form-grid-2,
+    .form-grid-3,
+    .form-grid-4 {
         grid-template-columns: 1fr;
         gap: 12px;
+    }
+
+    .form-grid-slot-after-first,
+    .form-grid-slot-second {
+        grid-column: 1;
+        grid-row: auto;
     }
 }
 

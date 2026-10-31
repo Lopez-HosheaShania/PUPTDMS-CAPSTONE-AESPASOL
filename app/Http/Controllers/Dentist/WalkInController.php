@@ -25,6 +25,8 @@ use App\Models\User;
 use App\Services\FacultyApiService;
 use App\Services\StudentApiService;
 use App\Services\CmsApiService;
+use App\Services\StudentTargetOptionService;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -39,8 +41,9 @@ use App\Helpers\BookingQuestions;
 
 class WalkInController extends Controller
 {
-    public function index()
-    {
+    public function index(
+        StudentTargetOptionService $studentTargetOptionService
+    ) {
         $serviceTypes = ServiceType::query()
             ->orderBy('name')
             ->get()
@@ -64,6 +67,9 @@ class WalkInController extends Controller
 
         $blockedDates = BlockedDate::orderBy('date')
             ->get();
+
+        $studentTargetOptions =
+            $studentTargetOptionService->get();
 
         $startDate = now()->startOfMonth()->subMonth();
         $endDate = now()->endOfMonth()->addMonths(3);
@@ -89,6 +95,7 @@ class WalkInController extends Controller
                 'diseases',
                 'schedules',
                 'blockedDates',
+                'studentTargetOptions',
                 'appointmentCountsPerDay',
                 'philippineHolidays',
                 'dentalQuestions',
@@ -2486,8 +2493,10 @@ class WalkInController extends Controller
         }
     }
 
-    public function storeGuest(Request $request)
-    {
+    public function storeGuest(
+        Request $request,
+        StudentTargetOptionService $studentTargetOptionService
+    ) {
         $validated = $request->validate([
             'guest_first_name' => [
                 'required',
@@ -2545,6 +2554,7 @@ class WalkInController extends Controller
                 'nullable',
                 'string',
                 'max:255',
+                'required_if:guest_patient_type,student',
             ],
 
             'guest_student_number' => [
@@ -2565,12 +2575,14 @@ class WalkInController extends Controller
                 'nullable',
                 'string',
                 'max:50',
+                'required_if:guest_patient_type,student',
             ],
 
             'guest_section' => [
                 'nullable',
                 'string',
                 'max:50',
+                'required_if:guest_patient_type,student',
             ],
 
             'guest_is_pwd' => [
@@ -2644,6 +2656,12 @@ class WalkInController extends Controller
 
                     'program' =>
                     $validated['guest_program'] ?? null,
+
+                    'program_code' =>
+                    $validated['guest_program'] ?? null,
+
+                    'program_name' =>
+                    $validated['guest_program_name'] ?? null,
 
                     'faculty_code' =>
                     $guestPatientType === 'faculty'
@@ -2845,6 +2863,117 @@ class WalkInController extends Controller
                 'exists:diseases,code',
             ],
         ]);
+
+        if (
+            ($validated['guest_patient_type'] ?? null) ===
+            'student'
+        ) {
+            $selectedProgram =
+                strtoupper(
+                    trim(
+                        (string) (
+                            $validated['guest_program']
+                            ?? ''
+                        )
+                    )
+                );
+
+            $selectedYear =
+                trim(
+                    (string) (
+                        $validated['guest_year_level']
+                        ?? ''
+                    )
+                );
+
+            $selectedSection =
+                trim(
+                    (string) (
+                        $validated['guest_section']
+                        ?? ''
+                    )
+                );
+
+            $studentTarget =
+                $studentTargetOptionService
+                ->get()
+                ->first(
+                    function ($option) use (
+                        $selectedProgram,
+                        $selectedYear,
+                        $selectedSection
+                    ) {
+                        return
+                            strtoupper(
+                                trim(
+                                    (string) (
+                                        $option['course_code']
+                                        ?? ''
+                                    )
+                                )
+                            ) ===
+                            $selectedProgram
+                            &&
+                            trim(
+                                (string) (
+                                    $option['year_level']
+                                    ?? ''
+                                )
+                            ) ===
+                            $selectedYear
+                            &&
+                            strcasecmp(
+                                trim(
+                                    (string) (
+                                        $option['section']
+                                        ?? ''
+                                    )
+                                ),
+                                $selectedSection
+                            ) === 0;
+                    }
+                );
+
+            if (! $studentTarget) {
+                throw ValidationException::withMessages([
+                    'guest_section' => [
+                        'The selected program, year level, and section combination is not available.',
+                    ],
+                ]);
+            }
+
+            $validated['guest_program'] =
+                trim(
+                    (string) (
+                        $studentTarget['course_code']
+                        ?? ''
+                    )
+                );
+
+            $validated['guest_program_name'] =
+                trim(
+                    (string) (
+                        $studentTarget['course_name']
+                        ?? $validated['guest_program']
+                    )
+                );
+
+            $validated['guest_year_level'] =
+                trim(
+                    (string) (
+                        $studentTarget['year_level']
+                        ?? ''
+                    )
+                );
+
+            $validated['guest_section'] =
+                trim(
+                    (string) (
+                        $studentTarget['section']
+                        ?? ''
+                    )
+                );
+        }
 
         $patient = Patient::findOrFail(
             $validated['patient_id']
@@ -3808,16 +3937,32 @@ class WalkInController extends Controller
                 (bool) $data['is_pwd'];
         }
 
-        if (
-            array_key_exists('program', $data) &&
-            filled($data['program'])
-        ) {
+        $programCode =
+            trim(
+                (string) (
+                    $data['program_code']
+                    ?? $data['program']
+                    ?? ''
+                )
+            );
 
+        $programName =
+            trim(
+                (string) (
+                    $data['program_name']
+                    ?? $data['program']
+                    ?? $programCode
+                )
+            );
+
+        if ($programCode !== '') {
             $patientData['course_code'] =
-                $data['program'];
+                $programCode;
+        }
 
+        if ($programName !== '') {
             $patientData['course_name'] =
-                $data['program'];
+                $programName;
         }
 
         if (

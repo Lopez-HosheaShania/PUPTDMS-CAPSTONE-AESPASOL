@@ -699,15 +699,43 @@ function initGlobalFlatpickr() {
             options.maxDate = "today";
         }
 
-        window.flatpickr(el, options);
+        const instance =
+            window.flatpickr(
+                el,
+                options
+            );
+
+        instance
+            .calendarContainer
+            ?.setAttribute(
+                'data-modal-portal',
+                ''
+            );
     });
 
-    const timeInputs = document.querySelectorAll('.js-flatpickr-time');
+    const timeInputs =
+        document.querySelectorAll(
+            '.js-flatpickr-time'
+        );
 
     timeInputs.forEach(el => {
-        if (el._flatpickr) return;
+        if (el._flatpickr) {
+            return;
+        }
 
-        const initialTime = String(el.value || '').trim();
+        const parentPopup =
+            el.closest(
+                'dialog, .ui-modal, .modal-overlay'
+            );
+
+        const shouldPortalToBody =
+            el.hasAttribute(
+                'data-flatpickr-append-to-body'
+            );
+
+        const initialTime =
+            String(el.value || '').trim();
+
         const visibleInputClass = el.className
             .split(/\s+/)
             .filter(className => className && className !== 'js-flatpickr-time')
@@ -730,11 +758,28 @@ function initGlobalFlatpickr() {
             clickOpens: true,
             disableMobile: true,
             position: "auto center",
-            appendTo: document.body,
+
+            appendTo:
+                shouldPortalToBody
+                    ? document.body
+                    : (parentPopup || document.body),
+
+            positionElement:
+                parentPopup &&
+                    !shouldPortalToBody
+                    ? el
+                    : undefined,
 
             onReady: (_dates, _str, instance) => {
-                if (/^([01]\d|2[0-3]):[0-5]\d$/.test(initialTime)) {
-                    instance.setDate(initialTime, false, 'H:i');
+                if (
+                    /^([01]\d|2[0-3]):[0-5]\d$/
+                        .test(initialTime)
+                ) {
+                    instance.setDate(
+                        initialTime,
+                        false,
+                        'H:i'
+                    );
                 }
             },
 
@@ -747,7 +792,18 @@ function initGlobalFlatpickr() {
             },
         };
 
-        window.flatpickr(el, options);
+        const instance =
+            window.flatpickr(
+                el,
+                options
+            );
+
+        instance
+            .calendarContainer
+            ?.setAttribute(
+                'data-modal-portal',
+                ''
+            );
     });
 }
 

@@ -183,17 +183,15 @@
                                         </button>
                                     @endif
 
-                                    <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm" id="collapseBtn"
-                                        data-ui-click="action-b1ec55a9368e">
-                                        <i class="fa-solid fa-angles-up"></i>
-                                        <span>Collapse All</span>
-                                    </button>
+                                    <x-button id="collapseBtn" type="button" variant="secondary" size="sm"
+                                        icon="fa-solid fa-angles-up" data-ui-click="action-b1ec55a9368e">
+                                        Collapse All
+                                    </x-button>
 
-                                    <button type="button" class="ui-btn ui-btn-warning ui-btn-sm" id="resetDefaultsBtn"
-                                        data-ui-click="action-93a40e63c926">
-                                        <i class="fa-solid fa-rotate-left"></i>
-                                        <span>Reset Defaults</span>
-                                    </button>
+                                    <x-button id="resetDefaultsBtn" type="button" variant="warning" size="sm"
+                                        icon="fa-solid fa-rotate-left" data-ui-click="action-93a40e63c926">
+                                        Reset Defaults
+                                    </x-button>
 
                                 </div>
 
@@ -285,18 +283,10 @@
                                                     <div class="all-toggle-wrap" data-ui-click="action-2b6cb68857e5">
                                                         <span>All</span>
 
-                                                        <label class="global-switch">
-                                                            <input type="checkbox"
-                                                                class="global-switch-input group-master"
-                                                                data-role="{{ $role->id }}"
-                                                                data-module="{{ $moduleSlug }}"
-                                                                data-discard-ignore="true"
-                                                                {{ $allGranted ? 'checked' : '' }}
-                                                                {{ !$canUpdateRolePermissions ? 'disabled' : '' }}
-                                                                data-ui-change="action-76cbb6258bf9">
-
-                                                            <span class="global-switch-track"></span>
-                                                        </label>
+                                                        <x-switch class="group-master" :checked="$allGranted" :disabled="!$canUpdateRolePermissions"
+                                                            data-role="{{ $role->id }}"
+                                                            data-module="{{ $moduleSlug }}" data-discard-ignore="true"
+                                                            data-ui-change="action-76cbb6258bf9" />
                                                     </div>
 
                                                     <i class="fa-solid fa-chevron-up chevron"></i>
@@ -353,21 +343,16 @@
                                                                     </td>
 
                                                                     <td class="table-cell-center">
-                                                                        <label class="global-switch">
-                                                                            <input type="checkbox"
-                                                                                name="permissions[{{ $role->id }}][]"
-                                                                                value="{{ $permission->id }}"
-                                                                                class="global-switch-input perm-toggle"
-                                                                                data-role="{{ $role->id }}"
-                                                                                data-module="{{ $moduleSlug }}"
-                                                                                data-perm-name="{{ $permission->name }}"
-                                                                                data-perm-slug="{{ $permission->slug }}"
-                                                                                {{ $isGranted ? 'checked' : '' }}
-                                                                                {{ !$canUpdateRolePermissions ? 'disabled' : '' }}
-                                                                                data-ui-change="action-f71c950e5fcd">
-
-                                                                            <span class="global-switch-track"></span>
-                                                                        </label>
+                                                                        <x-switch
+                                                                            name="permissions[{{ $role->id }}][]"
+                                                                            value="{{ $permission->id }}"
+                                                                            class="perm-toggle" :checked="$isGranted"
+                                                                            :disabled="!$canUpdateRolePermissions"
+                                                                            data-role="{{ $role->id }}"
+                                                                            data-module="{{ $moduleSlug }}"
+                                                                            data-perm-name="{{ $permission->name }}"
+                                                                            data-perm-slug="{{ $permission->slug }}"
+                                                                            data-ui-change="action-f71c950e5fcd" />
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -404,18 +389,18 @@
                                             </button>
                                         @endif
 
-                                        <button type="button" class="ui-btn ui-btn-secondary btn-discard"
+                                        <x-button type="button" variant="secondary" class="btn-discard"
                                             data-ui-click="action-01fe488d50f6"
                                             data-ui-click-arg-0="{{ $role->id }}">
                                             Discard
-                                        </button>
+                                        </x-button>
 
-                                        <button type="button" class="ui-btn ui-btn-primary btn-save-float"
-                                            id="save-btn-{{ $role->id }}" data-ui-click="action-e15c3c78bc8e"
+                                        <x-button id="save-btn-{{ $role->id }}" type="button" variant="primary"
+                                            icon="fa-solid fa-floppy-disk" class="btn-save-float"
+                                            data-ui-click="action-e15c3c78bc8e"
                                             data-ui-click-arg-0="{{ $role->id }}">
-                                            <i class="fa-solid fa-floppy-disk"></i>
-                                            <span>Save</span>
-                                        </button>
+                                            Save
+                                        </x-button>
 
                                     </x-slot:actions>
                                 </x-floating-save-bar>
@@ -463,10 +448,11 @@
                     data-discard-subtitle="You have unsaved role information."
                     data-discard-message="Closing this modal will remove the role information you entered. Do you want to discard these changes?"
                     novalidate>
-
                     @csrf
+
                     <div class="modal-bd">
                         <div class="modal-form-grid">
+
                             <div class="global-form-group" data-global-field>
                                 <label class="global-form-label" for="newRoleName">
                                     Role Name
@@ -474,7 +460,6 @@
                                 </label>
 
                                 <div class="global-control-wrap">
-
                                     <input type="text" id="newRoleName" name="name" class="form-input-custom"
                                         placeholder="e.g. Dental Intern" data-field-label="Role Name"
                                         data-required-message="Please enter a role name." required autocomplete="off">
@@ -488,7 +473,6 @@
                                 </label>
 
                                 <div class="global-control-wrap">
-
                                     <input type="text" id="newRoleSlug" name="slug" class="form-input-custom"
                                         placeholder="e.g. dental-intern" data-field-label="Role Slug"
                                         data-required-message="Please enter a role slug."
@@ -501,13 +485,13 @@
                     </div>
 
                     <div class="modal-ft">
-                        <button type="button" data-discard-close="newRoleModal" class="ui-btn ui-btn-secondary">
+                        <x-button type="button" variant="secondary" data-discard-close="newRoleModal">
                             Cancel
-                        </button>
+                        </x-button>
 
-                        <button type="submit" id="btnSubmitNewRole" class="ui-btn ui-btn-primary">
-                            <span>Create Role</span>
-                        </button>
+                        <x-button id="btnSubmitNewRole" type="submit" variant="primary">
+                            Create Role
+                        </x-button>
                     </div>
                 </form>
             </div>
@@ -572,16 +556,13 @@
             </div>
 
             <div class="modal-ft">
-
-                <button type="button" data-ui-click="action-394b0354d213" class="ui-btn ui-btn-secondary">
+                <x-button type="button" variant="secondary" data-ui-click="action-394b0354d213">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="button" id="resetConfirmBtn" data-ui-click="action-3fbd142ad2bd"
-                    class="ui-btn ui-btn-warning">
-                    <span>Reset</span>
-                </button>
-
+                <x-button id="resetConfirmBtn" type="button" variant="warning" data-ui-click="action-3fbd142ad2bd">
+                    Reset
+                </x-button>
             </div>
 
         </div>
@@ -620,9 +601,9 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="vaOverlay">
+                <x-button type="button" variant="secondary" data-modal-close="vaOverlay">
                     Close
-                </button>
+                </x-button>
             </div>
 
         </div>
