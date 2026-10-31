@@ -151,7 +151,7 @@
 
         $dashboardDisplayName = optional($patient)->name ?? (auth()->user()->name ?? 'Patient User');
         $dashboardPatientImage = optional($patient)->profile_image ?? null;
-        $dashboardUserImage = auth()->user()->profile_image ?? null;
+        $dashboardUserImage = $rolePreviewActive ?? false ? null : auth()->user()->profile_image ?? null;
 
         if (!empty($dashboardPatientImage)) {
             $dashboardAvatarUrl = asset('storage/' . $dashboardPatientImage);
@@ -692,40 +692,165 @@
         </div>
     </div>
 
+    @if ($rolePreviewActive ?? false)
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => {
+                    const container =
+                        document.getElementById(
+                            'calendarSkeletonContainer'
+                        );
 
-    @include('components.appointment-calendar-script', [
-        'mode' => 'patient-dashboard',
-        'renderStyle' => 'patient',
-        'calendarContainerId' => 'calendarSkeletonContainer',
-        'hasActiveAppointment' => $hasActiveAppointment,
-    
-        'dateInputId' => null,
-        'timeInputId' => null,
-    
-        'slotEndpoint' => route('book.appointment.slots'),
-        'bookingUrl' => route('patient.book.appointment'),
-    
-        'scheduleRules' => isset($schedules)
-            ? $schedules
-            : (isset($scheduleRules)
-                ? $scheduleRules
-                : \App\Models\ClinicSchedule::active()->get()->values()->toArray()),
-    
-        'blockedDates' => $unavailableDates ?? [],
-        'appointmentCountsPerDay' => $appointmentCountsPerDay ?? [],
-        'philippineHolidays' => $philippineHolidays ?? [],
-        'personalAppointments' => $calendarAppointments ?? [],
-        'completedAppointments' => $completedCalendarAppointments ?? [],
-    
-        'useDynamicScheduleRules' => true,
-        'disallowToday' => true,
-        'allowToggleOffDate' => false,
-    
-        'maxFutureMonths' => 6,
-        'historyMonths' => 12,
-    
-        'appointmentHistoryUrl' => route('patient.record'),
-    ])
+                    if (!container) {
+                        return;
+                    }
+
+                    container.innerHTML = `
+                    <section
+                        class="
+                            card
+                            h-full
+                            min-h-[420px]
+                        "
+                    >
+
+                        <div
+                            class="
+                                card-header
+                            "
+                        >
+                            <div
+                                class="
+                                    card-header-left
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        card-header-icon
+                                    "
+                                >
+                                    <i
+                                        class="
+                                            fa-regular
+                                            fa-calendar
+                                        "
+                                    ></i>
+                                </span>
+
+                                <div>
+                                    <h3
+                                        class="
+                                            card-title
+                                        "
+                                    >
+                                        Appointment Calendar
+                                    </h3>
+
+                                    <p
+                                        class="
+                                            card-subtitle
+                                        "
+                                    >
+                                        Demo preview
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div
+                            class="
+                                card-body
+                                flex
+                                items-center
+                                justify-center
+                                min-h-[330px]
+                            "
+                        >
+
+                            <div
+                                class="
+                                    empty-state
+                                    empty-state-compact
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        empty-state-icon
+                                    "
+                                >
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-calendar-days
+                                        "
+                                    ></i>
+                                </div>
+
+                                <h3
+                                    class="
+                                        empty-state-title
+                                    "
+                                >
+                                    Demo calendar
+                                </h3>
+
+                                <p
+                                    class="
+                                        empty-state-sub
+                                    "
+                                >
+                                    Live clinic availability is hidden during Role Preview.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+                `;
+
+                    container.classList
+                        .remove(
+                            'skeleton-fade-swap',
+                            'skeleton-section'
+                        );
+                }
+            );
+        </script>
+    @else
+        @include('components.appointment-calendar-script', [
+            'mode' => 'patient-dashboard',
+            'renderStyle' => 'patient',
+            'calendarContainerId' => 'calendarSkeletonContainer',
+            'hasActiveAppointment' => $hasActiveAppointment,
+            'dateInputId' => null,
+            'timeInputId' => null,
+            'slotEndpoint' => route('book.appointment.slots'),
+            'bookingUrl' => route('patient.book.appointment'),
+        
+            'scheduleRules' => isset($schedules)
+                ? $schedules
+                : (isset($scheduleRules)
+                    ? $scheduleRules
+                    : \App\Models\ClinicSchedule::active()->get()->values()->toArray()),
+        
+            'blockedDates' => $unavailableDates ?? [],
+            'appointmentCountsPerDay' => $appointmentCountsPerDay ?? [],
+            'philippineHolidays' => $philippineHolidays ?? [],
+            'personalAppointments' => $calendarAppointments ?? [],
+            'completedAppointments' => $completedCalendarAppointments ?? [],
+            'useDynamicScheduleRules' => true,
+            'disallowToday' => true,
+            'allowToggleOffDate' => false,
+            'maxFutureMonths' => 6,
+            'historyMonths' => 12,
+            'appointmentHistoryUrl' => route('patient.record'),
+        ])
+    @endif
 @endsection
 
 @section('scripts')

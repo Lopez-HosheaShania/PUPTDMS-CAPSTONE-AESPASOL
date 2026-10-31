@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\SystemLogController;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\RolePreviewController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Auth\BackupLoginController;
 use App\Http\Controllers\Auth\LogoutController;
@@ -104,27 +105,42 @@ Route::get('/login', function (IdpHealthService $idpHealthService) {
 Route::get('/backup-login', [BackupLoginController::class, 'show'])->name('backup.login');
 
 Route::get('/dashboard', function () {
-    if (! Auth::check()) {
-        return redirect()->route('login');
+    if (!Auth::check()) {
+        return redirect()
+            ->route('login');
     }
 
-    $impersonatedRole = session('impersonated_role');
-
-    if ($impersonatedRole === 'patient') {
-        return redirect()->route('patient.dashboard');
-    }
-
-    if ($impersonatedRole === 'dentist') {
-        return redirect()->route('dentist.dentist.dashboard');
-    }
-
-    $role = strtolower((string) optional(Auth::user()->role)->slug);
+    $role = strtolower(
+        (string) optional(
+            Auth::user()->role
+        )->slug
+    );
 
     return match ($role) {
-        'admin', 'super_admin' => redirect()->route('admin.admin.dashboard'),
-        'dentist', 'dentist_role' => redirect()->route('dentist.dentist.dashboard'),
-        'patient', 'patient_role' => redirect()->route('patient.dashboard'),
-        default => redirect()->route('login'),
+        'admin',
+        'super_admin' =>
+        redirect()
+            ->route(
+                'admin.admin.dashboard'
+            ),
+
+        'dentist',
+        'dentist_role' =>
+        redirect()
+            ->route(
+                'dentist.dentist.dashboard'
+            ),
+
+        'patient',
+        'patient_role' =>
+        redirect()
+            ->route(
+                'patient.dashboard'
+            ),
+
+        default =>
+        redirect()
+            ->route('login'),
     };
 })->name('dashboard');
 
@@ -388,6 +404,27 @@ Route::prefix('admin')
 
         /*
         |--------------------------------------------------------------------------
+        | ROLE PREVIEW
+        |--------------------------------------------------------------------------
+        */
+        Route::post('/role-preview/start', [RolePreviewController::class, 'start'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.start');
+
+        Route::get('/role-preview/patient', [RolePreviewController::class, 'patient'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.patient');
+
+        Route::get('/role-preview/dentist', [RolePreviewController::class, 'dentist'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.dentist');
+
+        Route::post('/role-preview/stop', [RolePreviewController::class, 'stop'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.stop');
+
+        /*
+        |--------------------------------------------------------------------------
         | SYSTEM LOGS
         |--------------------------------------------------------------------------
         */
@@ -480,48 +517,7 @@ Route::prefix('admin')
         Route::post('/patients/{patient}/existing-appointment/save', [\App\Http\Controllers\Dentist\OdontogramController::class, 'storeExistingAppointment'])
             ->middleware('permission:create_procedure_records')
             ->name('admin.odontogram.existing-appointment.store');
-
-        /*
-        |--------------------------------------------------------------------------
-        | PATIENT LIST (FOR IMPERSONATION)
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/patients/list', function () {
-            $user = Auth::user();
-
-            if (! $user || ! $user->hasPermission('view_patient_profiles')) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-            $patients = Patient::query()
-                ->with([
-                    'information' => function ($query) {
-                        $query->select([
-                            'id',
-                            'patient_id',
-                            'phone',
-                        ]);
-                    },
-                ])
-                ->select([
-                    'id',
-                    'name',
-                    'email',
-                ])
-                ->orderBy('name')
-                ->get()
-                ->map(function (Patient $patient) {
-                    return [
-                        'id' => $patient->id,
-                        'name' => $patient->name,
-                        'email' => $patient->email,
-                        'phone' => $patient->information?->phone,
-                    ];
-                })
-                ->values();
-
-            return response()->json($patients);
-        })->name('admin.patients.list');
-
+            
         /*
         |--------------------------------------------------------------------------
         | ACADEMIC PERIODS
@@ -796,117 +792,6 @@ Route::prefix('admin')
             ->middleware('permission:delete_service_type')
             ->name('service-types.destroy');
     });
-
-/*
-|--------------------------------------------------------------------------
-| ADMIN IMPERSONATION ROUTES
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/impersonate', function (Request $request) {
-
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-
-    if (! $user || ! $user->hasPermission('access_super_admin_dashboard')) {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    $request->validate([
-        'role' => 'required|string',
-    ]);
-
-    $targetRole = strtolower(trim($request->role));
-
-    if (! session()->has('impersonator_role')) {
-        session([
-            'impersonator_role' => optional(Auth::user()->role)->slug,
-            'impersonator_admin_id' => Auth::id(),
-            'impersonator_admin_email' => Auth::user()->email,
-        ]);
-    }
-
-    if (in_array($targetRole, ['dentist', 'dentist_role'], true)) {
-
-        session([
-            'impersonated_role' => 'dentist',
-        ]);
-
-        session()->forget(['impersonated_patient_id']);
-
-        AuditLogger::log(
-            'impersonation_started',
-            'authentication',
-            'Admin started impersonating Dentist dashboard'
-        );
-
-        return response()->json([
-            'redirect' => route('dentist.dentist.dashboard'),
-        ]);
-    }
-
-    if (in_array($targetRole, ['patient', 'patient_role'], true)) {
-
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-        ]);
-
-        $patient = Patient::find($request->patient_id);
-
-        if (! $patient) {
-            return response()->json([
-                'message' => 'Selected patient not found.',
-            ], 422);
-        }
-
-        session([
-            'impersonated_role' => 'patient',
-            'impersonated_patient_id' => $patient->id,
-        ]);
-
-        AuditLogger::log(
-            'impersonation_started',
-            'authentication',
-            'Admin started impersonating Patient ID ' . $patient->id
-        );
-
-        return response()->json([
-            'redirect' => route('patient.dashboard'),
-        ]);
-    }
-
-    return response()->json([
-        'message' => 'Unsupported role: ' . $targetRole,
-    ], 422);
-})->name('admin.impersonate');
-
-Route::post('/stop-impersonation', function () {
-
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-
-    if (! $user || ! $user->hasAnyRole(['super_admin', 'admin'])) {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    if (session()->has('impersonator_role')) {
-        AuditLogger::log(
-            'impersonation_stopped',
-            'authentication',
-            'Admin stopped impersonation'
-        );
-    }
-
-    session()->forget([
-        'impersonated_role',
-        'impersonated_patient_id',
-        'impersonator_role',
-        'impersonator_admin_id',
-        'impersonator_admin_email',
-    ]);
-
-    return redirect()->route('admin.admin.dashboard');
-})->name('admin.stop_impersonation');
 
 /*
 |--------------------------------------------------------------------------

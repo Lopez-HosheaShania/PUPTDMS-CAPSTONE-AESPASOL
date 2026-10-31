@@ -3,7 +3,14 @@
 
     $authUser = auth()->user();
 
-    $role = $role ?? (optional(optional($authUser)->role)->slug ?? (session('role') ?? 'patient'));
+    $actualRole = optional(optional($authUser)->role)->slug ?? (session('role') ?? 'patient');
+
+    $isRolePreview =
+        (bool) session('role_preview_active') && in_array(session('preview_role'), ['patient', 'dentist'], true);
+
+    $role = $role ?? $actualRole;
+
+    $notificationRole = $isRolePreview ? $actualRole : $role;
     $resolveNotificationUrl = function (array $payload, string $activeRole): string {
         $fallbackUrl = data_get($payload, 'url') ?? (data_get($payload, 'action_url') ?? '#');
 
@@ -83,7 +90,7 @@
             ->latest()
             ->take(15)
             ->get()
-            ->map(function ($notification) use ($resolveNotificationUrl, $role) {
+            ->map(function ($notification) use ($resolveNotificationUrl, $notificationRole) {
                 $payload = $notification->data ?? [];
                 $title =
                     data_get($payload, 'title') ??
@@ -102,7 +109,9 @@
                     'DentistTransitionNotification',
                 );
 
-                $actionUrl = $isDentistContinuityNotification ? '#' : $resolveNotificationUrl($payload, $role);
+                $actionUrl = $isDentistContinuityNotification
+                    ? '#'
+                    : $resolveNotificationUrl($payload, $notificationRole);
 
                 return [
                     'id' => $notification->id,
@@ -157,17 +166,32 @@
 
     $showMobileMenu = $showMobileMenu ?? in_array($role, ['admin', 'super_admin', 'dentist'], true);
     $showSettings = $showSettings ?? in_array($role, ['admin', 'super_admin'], true);
-    $activeHeaderRole = session('impersonated_role') ?: $role;
+    $activeHeaderRole = $role;
     $isPatientHeader = in_array($activeHeaderRole, ['patient', 'patient_role'], true);
     $clinicTitle = $clinicTitle ?? 'PUP TAGUIG DENTAL CLINIC';
 
-    if ($role === 'patient') {
+    if ($isRolePreview) {
+        $displayName = $authUser?->name ?? 'Administrator';
+
+        $displayRole = $authUser?->display_role_name ?? Role::displayNameFor($actualRole);
+
+        if (!empty($authUser?->profile_image)) {
+            $avatarUrl = asset('storage/' . $authUser->profile_image);
+        } else {
+            $avatarUrl =
+                'https://ui-avatars.com/api/?name=' .
+                urlencode($displayName) .
+                '&background=8B0000&color=ffffff&bold=true';
+        }
+    } elseif ($role === 'patient') {
         $displayName = ucwords(strtolower(optional($patient)->name ?? ($authUser->name ?? 'Patient User')));
+
         $displayName = preg_replace_callback(
             '/\b(ii|iii|iv|v|vi|vii|viii|ix|x)\.?$/i',
             fn($matches) => strtoupper($matches[0]),
             $displayName,
         );
+
         $displayRole = 'Patient';
         $patientImage = optional($patient)->profile_image ?? null;
         $userImage = $authUser->profile_image ?? null;
@@ -184,9 +208,7 @@
         }
     } else {
         $displayName = $authUser->name ?? 'User';
-        $displayRole = session()->has('impersonated_role')
-            ? Role::displayNameFor(session('impersonated_role'))
-            : $authUser?->display_role_name ?? Role::displayNameFor($role);
+        $displayRole = $authUser?->display_role_name ?? Role::displayNameFor($role);
 
         if (!empty($authUser->profile_image)) {
             $avatarUrl = asset('storage/' . $authUser->profile_image);

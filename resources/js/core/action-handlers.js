@@ -581,7 +581,7 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/partials/impersonation-banner.blade.php
     'action-004507b18ecc': function (event) {
-        returnToAdmin()
+        window.returnToAdminPreview?.();
     },
     // resources/views/patient/appointment.blade.php
     'action-265f97b3419b': function (event) {

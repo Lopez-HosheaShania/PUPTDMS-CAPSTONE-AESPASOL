@@ -815,8 +815,9 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
 
 .global-confirm-alert {
     display: grid;
+
     grid-template-columns:
-        40px minmax(0, 1fr);
+        minmax(0, 1fr);
 
     align-items: flex-start;
 
@@ -837,7 +838,14 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
         var(--modal-accent-dark);
 }
 
+.global-confirm-alert:has(> i) {
+    grid-template-columns:
+        40px minmax(0, 1fr);
+}
+
 .global-confirm-alert>i {
+    grid-column: 1;
+
     width: 40px;
     height: 40px;
 
@@ -859,6 +867,18 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
         var(--modal-accent);
 
     font-size: 14px;
+}
+
+.global-confirm-alert:has(> i)>:not(i) {
+    grid-column: 2;
+
+    min-width: 0;
+}
+
+.global-confirm-alert:not(:has(> i))>* {
+    grid-column: 1;
+
+    min-width: 0;
 }
 
 .global-confirm-alert p {
@@ -894,11 +914,6 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     font-size: .72rem;
     font-weight: 600;
     line-height: 1.45;
-}
-
-.global-confirm-alert>div:only-child {
-    grid-column: 1 / -1;
-    min-width: 0;
 }
 
 [data-theme="dark"] .ui-modal .global-confirm-alert,

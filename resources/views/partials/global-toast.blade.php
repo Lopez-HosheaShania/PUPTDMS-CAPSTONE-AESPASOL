@@ -2,16 +2,17 @@
 
 @php
     $flashToasts = [];
-    $activeSessionRole =
-        (string) (session('impersonated_role') ?:
-        $layoutRole ?? (session('role') ?? optional(auth()->user()?->role)->slug));
+    $authUser = auth()->user();
+    $activeSessionRole = (string) (optional($authUser?->role)->slug ?: session('role'));
+
     $idleTimeoutSeconds =
-        auth()->user()?->idleTimeoutSeconds($activeSessionRole) ??
-        max(0, (int) config('session.idle_timeout_seconds', 600));
+        $authUser?->idleTimeoutSeconds($activeSessionRole) ?? max(0, (int) config('session.idle_timeout_seconds', 600));
+
     $idleWarningSeconds =
         $idleTimeoutSeconds > 0
             ? min(max(1, $idleTimeoutSeconds - 1), max(10, min(120, (int) floor($idleTimeoutSeconds * 0.2))))
             : 0;
+
     $showSessionTimeout = $idleTimeoutSeconds > 0;
 
     if (session('success')) {
