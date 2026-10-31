@@ -3,14 +3,6 @@
     margin-top: 1rem;
 }
 
-.admin-mt-4 {
-    margin-top: 1rem;
-}
-
-.admin-mb-xs {
-    margin-bottom: .3rem;
-}
-
 .admin-card-pad {
     padding: 1.25rem;
 }
@@ -153,93 +145,12 @@
     overflow-x: auto;
 }
 
-.admin-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    background: rgba(0, 0, 0, .45);
-}
-
-.admin-modal-card {
-    width: min(460px, 92vw);
-    border-radius: 18px;
-    padding: 1.5rem;
-    background: #fff;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, .2);
-}
-
-.admin-modal-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.admin-modal-title {
-    font-size: 1rem;
-    font-weight: 800;
-    color: var(--gray-800);
-}
-
-.admin-modal-subtitle {
-    margin-top: .2rem;
-    font-size: .75rem;
-    color: #9ca3af;
-}
-
 .admin-icon-button {
     border: none;
     background: transparent;
     color: #9ca3af;
     cursor: pointer;
     font-size: 1rem;
-}
-
-.admin-modal-grid {
-    display: grid;
-    gap: 1rem;
-}
-
-.admin-modal-field-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: .45rem;
-    color: var(--gray-700);
-    font-size: .8rem;
-    font-weight: 800;
-}
-
-.admin-modal-input {
-    width: 100%;
-    height: 40px;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    padding: 0 .8rem;
-    background: #fff;
-    color: var(--gray-700);
-}
-
-.admin-modal-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    color: #fff;
-    background: linear-gradient(135deg, var(--crimson), var(--crimson-dark));
-}
-
-.admin-modal-icon i {
-    color: currentColor;
-    font-size: 1.2rem;
 }
 
 .admin-progress-track {
@@ -264,19 +175,6 @@
     text-align: right;
 }
 
-.admin-modal-message-title {
-    margin-bottom: .3rem;
-    color: var(--gray-800);
-    font-size: .95rem;
-    font-weight: 800;
-}
-
-.admin-modal-message-subtitle {
-    margin-bottom: 1.25rem;
-    color: #9ca3af;
-    font-size: .76rem;
-}
-
 [data-theme="dark"] .period-pill {
     background: rgba(17, 24, 39, 0.42);
     border-color: rgba(255, 255, 255, 0.08);
@@ -288,34 +186,6 @@
 
 [data-theme="dark"] .period-divider {
     background: rgba(255, 255, 255, 0.12);
-}
-
-[data-theme="dark"] .admin-modal-card,
-.dark .admin-modal-card {
-    background: #161b22;
-    border: 1px solid #30363d;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, .42);
-}
-
-[data-theme="dark"] .admin-modal-title,
-[data-theme="dark"] .admin-modal-message-title,
-.dark .admin-modal-title,
-.dark .admin-modal-message-title {
-    color: var(--gray-100);
-}
-
-[data-theme="dark"] .admin-modal-subtitle,
-[data-theme="dark"] .admin-modal-message-subtitle,
-.dark .admin-modal-subtitle,
-.dark .admin-modal-message-subtitle {
-    color: #9ca3af;
-}
-
-[data-theme="dark"] .admin-modal-input,
-.dark .admin-modal-input {
-    background: #0d0f12;
-    border-color: #30363d;
-    color: var(--gray-100);
 }
 
 [data-theme="dark"] .admin-progress-track,
@@ -450,210 +320,10 @@
     box-shadow: 0 0 0 3px rgba(139, 0, 0, .08);
 }
 
-.action-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    height: 28px;
-    padding: 0 9px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    transition: all .15s ease;
-    white-space: nowrap;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.action-btn-view {
-    background: #fff;
-    color: var(--crimson);
-    border: 1.5px solid rgba(139, 0, 0, .3);
-}
-
-.action-btn-view:hover {
-    background: var(--crimson);
-    color: rgb(239, 239, 239);
-    transform: scale(1.08);
-}
-
-.action-btn-start {
-    background: #15803d;
-    color: white;
-    border: 1.5px solid #15803d;
-}
-
-.action-btn-start:hover {
-    background: #166534;
-    box-shadow: 0 2px 8px rgba(21, 128, 61, .3);
-}
-
-.action-btn-start:disabled {
-    background: var(--gray-300);
-    border-color: var(--gray-300);
-    color: #9ca3af;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-.action-btn.edit {
-    background: #FFF0F0;
-    color: var(--crimson);
-}
-
-.action-btn.edit:hover {
-    background: var(--crimson);
-    color: #fff;
-    transform: scale(1.05);
-}
-
-.action-btn.delete {
-    background: #FFF0F0;
-    color: var(--validation-red);
-}
-
-.action-btn.delete:hover {
-    background: var(--validation-red);
-    color: #fff;
-    transform: scale(1.05);
-}
-
-.action-btn-reschedule {
-    background: #fffbeb;
-    color: #92400e;
-    border: 1.5px solid #fcd34d;
-}
-
-.action-btn-reschedule:hover {
-    background: #fef3c7;
-    box-shadow: 0 2px 8px rgba(251, 191, 36, .25);
-}
-
-.action-btn.dl {
-    background: #dbeafe;
-    color: var(--blue-600);
-}
-
-.action-btn.dl:hover {
-    background: var(--blue-600);
-    color: #fff;
-}
-
-.action-btn.restore {
-    background: #fef2f2;
-    color: var(--crimson);
-}
-
-.action-btn.restore:hover {
-    background: var(--crimson);
-    color: #fff;
-}
-
-.action-btn.del {
-    background: #fff;
-    color: var(--red-600);
-    border: 1px solid #f3d3d3;
-}
-
-.action-btn.del:hover {
-    background: #fef2f2;
-}
-
-.action-btn.tog-on {
-    background: #f0fdf4;
-    color: #166534;
-}
-
-.action-btn.tog-on:hover {
-    background: #166534;
-    color: #fff;
-}
-
-.action-btn.copy {
-    background: #dbeafe;
-    color: var(--blue-600);
-}
-
-.action-btn.copy:hover {
-    background: var(--blue-600);
-    color: #fff;
-}
-
 [data-theme="dark"] .form-ctrl {
     background: #0d0f12;
     border-color: #30363d;
     color: #e6edf3;
-}
-
-[data-theme="dark"] .action-btn {
-    transform: none;
-    height: 28px;
-    min-width: auto;
-    box-shadow: none;
-    background: #21262d;
-    color: var(--gray-200);
-}
-
-[data-theme="dark"] .action-btn-view {
-    background: rgba(59, 130, 246, .15);
-    border: 1px solid rgba(59, 130, 246, .35);
-    color: #93c5fd;
-}
-
-[data-theme="dark"] .action-btn.view:hover {
-    background: var(--crimson);
-    color: #fff;
-}
-
-[data-theme="dark"] .action-btn.tog-on {
-    background: rgba(22, 101, 52, .14);
-    color: #86efac;
-}
-
-[data-theme="dark"] .action-btn.tog-on:hover {
-    background: #166534;
-    color: #fff;
-}
-
-[data-theme="dark"] .action-btn.del {
-    color: #f87171;
-}
-
-[data-theme="dark"] .action-btn.del:hover {
-    background: rgba(239, 68, 68, .12);
-}
-
-[data-theme="dark"] .action-btn-start {
-    background: rgba(34, 197, 94, .15);
-    border: 1px solid rgba(34, 197, 94, .35);
-    color: #86efac;
-}
-
-[data-theme="dark"] .action-btn-start:disabled {
-    background: rgba(156, 163, 175, .10);
-    border-color: rgba(156, 163, 175, .18);
-    color: rgba(255, 255, 255, .36);
-}
-
-[data-theme="dark"] .action-btn-reschedule {
-    background: rgba(251, 191, 36, .15);
-    border: 1px solid rgba(251, 191, 36, .35);
-    color: #fde68a;
-}
-
-[data-theme="dark"] .action-btn-cancel {
-    background: rgba(239, 68, 68, .15);
-    border: 1px solid rgba(239, 68, 68, .35);
-    color: #fca5a5;
-}
-
-[data-theme="dark"] .action-btn:hover:not(:disabled) {
-    transform: none;
-    filter: brightness(1.12);
-    border-color: rgba(255, 255, 255, .25);
-    box-shadow: none;
 }
 
 [data-theme="dark"] .toolbar select {

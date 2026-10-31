@@ -50,8 +50,7 @@
 
         <footer class="modal-ft">
             <button type="button" class="ui-btn ui-btn-primary" data-modal-close="bookingMaintenanceModal">
-                <i class="fa-solid fa-check" aria-hidden="true"></i>
-                <span>Okay, Got It</span>
+                <span>Got It</span>
             </button>
         </footer>
     </div>

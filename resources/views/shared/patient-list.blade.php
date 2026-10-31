@@ -93,13 +93,7 @@
                     </div>
                 </div>
             @else
-                <div class="page-banner mt-2 mb-6">
-                    <div class="page-banner-inner">
-                        <div>
-                            <h1 class="page-title">{{ $pageHeading }}</h1>
-                        </div>
-                    </div>
-                </div>
+                <x-page-banner :title="$pageHeading" class="mt-2 mb-6" />
             @endif
 
             <div class="w-full">
@@ -179,7 +173,8 @@
                                             aria-label="Filter patients" data-tooltip="Filter" data-tooltip-tone="neutral">
                                             <i class="fa-solid fa-sliders"></i>
                                             <span>Filter</span>
-                                            <span id="filterBadge" class="filter-badge" data-ui-presentation="presentation-d0466aa33fa8"></span>
+                                            <span id="filterBadge" class="filter-badge"
+                                                data-ui-presentation="presentation-d0466aa33fa8"></span>
                                         </button>
                                     </div>
 
@@ -285,60 +280,43 @@
 
                                 <div id="patientContainer">
 
-                       @php
-                                    $appointments = collect($appointments)
-                                        ->sort(function ($a, $b) {
-                                            $aStatus = strtolower(
-                                                trim((string) ($a->status ?? 'upcoming'))
-                                            );
+                                    @php
+                                        $appointments = collect($appointments)
+                                            ->sort(function ($a, $b) {
+                                                $aStatus = strtolower(trim((string) ($a->status ?? 'upcoming')));
 
-                                            $bStatus = strtolower(
-                                                trim((string) ($b->status ?? 'upcoming'))
-                                            );
+                                                $bStatus = strtolower(trim((string) ($b->status ?? 'upcoming')));
 
-                                            $activeStatuses = [
-                                                'upcoming',
-                                                'rescheduled',
-                                                'pending',
-                                                'confirmed',
-                                            ];
+                                                $activeStatuses = ['upcoming', 'rescheduled', 'pending', 'confirmed'];
 
-                                            $aIsActive = in_array(
-                                                $aStatus,
-                                                $activeStatuses,
-                                                true
-                                            );
+                                                $aIsActive = in_array($aStatus, $activeStatuses, true);
 
-                                            $bIsActive = in_array(
-                                                $bStatus,
-                                                $activeStatuses,
-                                                true
-                                            );
+                                                $bIsActive = in_array($bStatus, $activeStatuses, true);
 
-                                            if ($aIsActive !== $bIsActive) {
-                                                return $aIsActive ? -1 : 1;
-                                            }
+                                                if ($aIsActive !== $bIsActive) {
+                                                    return $aIsActive ? -1 : 1;
+                                                }
 
-                                            $aDateTime = Carbon::parse(
-                                                ($a->appointment_date ?? '1970-01-01') .
-                                                    ' ' .
-                                                    ($a->appointment_time ?? '00:00:00')
-                                            );
+                                                $aDateTime = Carbon::parse(
+                                                    ($a->appointment_date ?? '1970-01-01') .
+                                                        ' ' .
+                                                        ($a->appointment_time ?? '00:00:00'),
+                                                );
 
-                                            $bDateTime = Carbon::parse(
-                                                ($b->appointment_date ?? '1970-01-01') .
-                                                    ' ' .
-                                                    ($b->appointment_time ?? '00:00:00')
-                                            );
+                                                $bDateTime = Carbon::parse(
+                                                    ($b->appointment_date ?? '1970-01-01') .
+                                                        ' ' .
+                                                        ($b->appointment_time ?? '00:00:00'),
+                                                );
 
-                                            if ($aIsActive && $bIsActive) {
-                                                return $aDateTime <=> $bDateTime;
-                                            }
+                                                if ($aIsActive && $bIsActive) {
+                                                    return $aDateTime <=> $bDateTime;
+                                                }
 
-                                            return $bDateTime <=> $aDateTime;
-                                        })
-                                        ->values();
-                                @endphp
+                                                return $bDateTime <=> $aDateTime;
+                                            })
+                                            ->values();
+                                    @endphp
 
                                     @foreach ($appointments as $appt)
                                         @php
@@ -387,7 +365,6 @@
 
                                             $patientCourseCode = trim((string) ($patient?->course_code ?? ''));
                                             $patientCourseName = trim((string) ($patient?->course_name ?? ''));
-                                           
 
                                             $patientCourse =
                                                 $patientCourseCode !== ''
@@ -406,7 +383,6 @@
                                             if ($patientCourseFull === '') {
                                                 $patientCourseFull = 'No program';
                                             }
-                                           
 
                                             $patientYearLevel = $patient?->year_level ?? '';
                                             $patientSection = $patient?->section ?? '';
@@ -414,13 +390,11 @@
                                             $patientImage = $patient?->profile_image
                                                 ? asset('storage/' . $patient->profile_image)
                                                 : null;
-                                          
 
                                             $dateLabel = Carbon::parse($appt->appointment_date)->format('l, F j, Y');
 
                                             $gridDayLabel = Carbon::parse($appt->appointment_date)->format('l');
                                             $gridDateLabel = Carbon::parse($appt->appointment_date)->format('F j, Y');
-                                      
 
                                             $timeLabel = Carbon::parse($appt->appointment_time)->format('g:i A');
                                             $serviceLabel =
@@ -431,7 +405,6 @@
 
                                             $serviceLower = strtolower($serviceLabel);
                                             $badgeClass = 'service-badge-default';
-                                          
 
                                             if (str_contains($serviceLower, 'surgery')) {
                                                 $badgeClass = 'service-badge-surgery';
@@ -618,16 +591,13 @@
 
                                                 <div class="appt-actions-wrap ui-action-group ml-auto">
                                                     @if ($patientProfileUrl)
-                                                        <a href="{{ $patientProfileUrl }}"
-                                                            class="ui-action-btn ui-action-view"
-                                                            data-tooltip="View profile" aria-label="View profile">
-                                                            <i class="fa-regular fa-user"></i>
-                                                        </a>
+                                                        <x-action-button :href="$patientProfileUrl" variant="view"
+                                                            icon="fa-regular fa-user" label="View profile"
+                                                            tooltip="View profile" />
                                                     @else
-                                                        <button type="button" class="ui-action-btn ui-action-view"
-                                                            disabled data-tooltip="No patient profile">
-                                                            <i class="fa-regular fa-user"></i>
-                                                        </button>
+                                                        <x-action-button type="button" variant="view"
+                                                            icon="fa-regular fa-user" label="No patient profile"
+                                                            tooltip="No patient profile" disabled />
                                                     @endif
                                                 </div>
                                             </div>
@@ -721,16 +691,13 @@
                                                 </div>
                                                 <div class="mobile-appt-actions ui-action-group">
                                                     @if ($patientProfileUrl)
-                                                        <a href="{{ $patientProfileUrl }}"
-                                                            class="ui-action-btn ui-action-view"
-                                                            data-tooltip="View profile" aria-label="View profile">
-                                                            <i class="fa-regular fa-user"></i>
-                                                        </a>
+                                                        <x-action-button :href="$patientProfileUrl" variant="view"
+                                                            icon="fa-regular fa-user" label="View profile"
+                                                            tooltip="View profile" />
                                                     @else
-                                                        <button type="button" class="ui-action-btn ui-action-view"
-                                                            disabled data-tooltip="No patient profile">
-                                                            <i class="fa-regular fa-user"></i>
-                                                        </button>
+                                                        <x-action-button type="button" variant="view"
+                                                            icon="fa-regular fa-user" label="No patient profile"
+                                                            tooltip="No patient profile" disabled />
                                                     @endif
                                                 </div>
                                             </div>
@@ -767,19 +734,10 @@
                     Active Filters
                 </span>
 
-                <button id="clearAllChipsBtn" type="button"
-                    class="
-                    filter-clear-all
-                    ui-btn
-                    ui-btn-secondary
-                    ui-btn-sm
-                ">
-                    <i class="fa-solid fa-rotate-left"></i>
-
-                    <span>
-                        Clear All
-                    </span>
-                </button>
+                <x-button id="clearAllChipsBtn" type="button" variant="secondary" size="sm"
+                    icon="fa-solid fa-rotate-left" class="filter-clear-all">
+                    Clear All
+                </x-button>
 
             </div>
 
@@ -845,8 +803,8 @@
 
                 <div class="filter-date-input-wrap">
 
-                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date"
-                        readonly autocomplete="off">
+                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from"
+                        placeholder="Start date" readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
 
@@ -854,8 +812,8 @@
 
                 <div class="filter-date-input-wrap">
 
-                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date"
-                        readonly autocomplete="off">
+                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to"
+                        placeholder="End date" readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
 
@@ -880,7 +838,7 @@
             'BSME',
             'BSBA - MM',
             'BSED
-                - MATH',
+                                - MATH',
             'DOMT',
         ] as $course)
                     <label class="choice-chip">
@@ -1105,9 +1063,9 @@
                 var searchKeyword = "";
 
                 function normalizePatientStatusValues(value) {
-                    var rawValues = Array.isArray(value)
-                        ? value
-                        : String(value || 'all').split(',');
+                    var rawValues = Array.isArray(value) ?
+                        value :
+                        String(value || 'all').split(',');
 
                     var allowed = [
                         'all',

@@ -25,7 +25,8 @@
 
 
 <div class="booking-section-card signature-booking-section-card" data-global-field data-booking-signature
-    data-signature-mode="{{ $isDrawOnly ? 'draw-only' : $mode }}" data-has-existing-signature="{{ $hasExistingSignature ? 'true' : 'false' }}"
+    data-signature-mode="{{ $isDrawOnly ? 'draw-only' : $mode }}"
+    data-has-existing-signature="{{ $hasExistingSignature ? 'true' : 'false' }}"
     data-signature-validation-url="{{ $mode === 'patient' ? route('book.appointment.validate-signature') : '' }}"
     data-signature-drawn-prefix="{{ $drawnFilePrefix ?? ($mode === 'draw-only' ? 'walk-in-signature' : 'drawn-signature') }}">
 
@@ -62,17 +63,17 @@
                     <span>View Only</span>
                 </span>
             @else
-                <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm" id="editExistingSignatureBtn">
-                    <i class="fa-solid fa-pen"></i>
+                <x-button id="editExistingSignatureBtn" type="button" variant="secondary" size="sm"
+                    icon="fa-solid fa-pen">
                     Edit Signature
-                </button>
+                </x-button>
             @endif
 
         </div>
 
         @if (!$isReadOnly)
-            <input type="hidden" @if ($inputName) name="reuse_existing_signature" @endif id="reuse_existing_signature"
-                value="{{ $hasExistingSignature ? '1' : '0' }}">
+            <input type="hidden" @if ($inputName) name="reuse_existing_signature" @endif
+                id="reuse_existing_signature" value="{{ $hasExistingSignature ? '1' : '0' }}">
         @endif
 
         @if (!$isReadOnly)
@@ -82,17 +83,18 @@
                 <label class="global-form-label" for="{{ $inputId }}">
                     {{ $label }}
                     @if ($required)
-                    <span class="required-mark">
-                        *
-                    </span>
+                        <span class="required-mark">
+                            *
+                        </span>
                     @endif
                 </label>
 
                 @if ($isDrawOnly)
-                    <input type="file" @if ($inputName) name="{{ $inputName }}" @endif id="{{ $inputId }}" data-signature-input class="hidden"
-                        accept=".png,image/png">
+                    <input type="file" @if ($inputName) name="{{ $inputName }}" @endif
+                        id="{{ $inputId }}" data-signature-input class="hidden" accept=".png,image/png">
 
-                    <input type="hidden" @if ($inputName) name="signature_source" @endif id="signature_source" value="drawn">
+                    <input type="hidden" @if ($inputName) name="signature_source" @endif
+                        id="signature_source" value="drawn">
 
                     <div class="signature-methods-grid signature-drawing-only">
 
@@ -128,39 +130,28 @@
 
                                 <div class="signature-pad-actions">
 
-                                    <button type="button" id="signatureUndoBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-undo
-                                        data-tooltip="Undo" data-tooltip-tone="neutral"
-                                        aria-label="Undo signature stroke">
-
-                                        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                                    <x-button id="signatureUndoBtn" type="button" variant="secondary" size="sm"
+                                        icon="fa-solid fa-rotate-left" data-signature-undo data-tooltip="Undo"
+                                        data-tooltip-tone="neutral" aria-label="Undo signature stroke">
                                         <span class="signature-action-label">Undo</span>
+                                    </x-button>
 
-                                    </button>
-
-                                    <button type="button" id="signatureRedoBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-redo
-                                        data-tooltip="Redo" data-tooltip-tone="neutral"
-                                        aria-label="Redo signature stroke">
-
-                                        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                                    <x-button id="signatureRedoBtn" type="button" variant="secondary" size="sm"
+                                        icon="fa-solid fa-rotate-right" data-signature-redo data-tooltip="Redo"
+                                        data-tooltip-tone="neutral" aria-label="Redo signature stroke">
                                         <span class="signature-action-label">Redo</span>
+                                    </x-button>
 
-                                    </button>
-
-                                    <button type="button" id="signatureClearBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-clear
-                                        data-tooltip="Clear" data-tooltip-tone="neutral" aria-label="Clear signature">
-
-                                        <i class="fa-solid fa-eraser" aria-hidden="true"></i>
+                                    <x-button id="signatureClearBtn" type="button" variant="secondary" size="sm"
+                                        icon="fa-solid fa-eraser" data-signature-clear data-tooltip="Clear"
+                                        data-tooltip-tone="neutral" aria-label="Clear signature">
                                         <span class="signature-action-label">Clear</span>
+                                    </x-button>
 
-                                    </button>
-
-                                    <button type="button" id="signatureUseDrawnBtn"
-                                        class="ui-btn ui-btn-primary ui-btn-sm" data-signature-use-drawn>
-                                        <span>Use Signature</span>
-                                    </button>
+                                    <x-button id="signatureUseDrawnBtn" type="button" variant="primary" size="sm"
+                                        data-signature-use-drawn>
+                                        Use Signature
+                                    </x-button>
 
                                 </div>
 
@@ -194,10 +185,13 @@
                                 <label class="ui-btn ui-btn-primary ui-btn-sm cursor-pointer">
                                     <i class="fa-solid fa-upload"></i>
                                     Browse
-                                    <input type="file" @if ($inputName) name="{{ $inputName }}" @endif id="{{ $inputId }}" data-signature-input class="hidden"
+                                    <input type="file"
+                                        @if ($inputName) name="{{ $inputName }}" @endif
+                                        id="{{ $inputId }}" data-signature-input class="hidden"
                                         accept=".jpg,.jpeg,.png">
-                                    <input type="hidden" @if ($inputName) name="signature_source" @endif id="signature_source"
-                                        value="">
+                                    <input type="hidden"
+                                        @if ($inputName) name="signature_source" @endif
+                                        id="signature_source" value="">
                                 </label>
 
                             </div>
@@ -235,40 +229,31 @@
 
                                 <div class="signature-pad-actions">
 
-                                    <button type="button" id="signatureUndoBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-undo
+                                    <x-button id="signatureUndoBtn" type="button" variant="secondary"
+                                        size="sm" icon="fa-solid fa-rotate-left" data-signature-undo
                                         data-tooltip="Undo" data-tooltip-tone="neutral"
                                         aria-label="Undo signature stroke">
-
-                                        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
                                         <span class="signature-action-label">Undo</span>
+                                    </x-button>
 
-                                    </button>
-
-                                    <button type="button" id="signatureRedoBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-redo
+                                    <x-button id="signatureRedoBtn" type="button" variant="secondary"
+                                        size="sm" icon="fa-solid fa-rotate-right" data-signature-redo
                                         data-tooltip="Redo" data-tooltip-tone="neutral"
                                         aria-label="Redo signature stroke">
-
-                                        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
                                         <span class="signature-action-label">Redo</span>
+                                    </x-button>
 
-                                    </button>
-
-                                    <button type="button" id="signatureClearBtn"
-                                        class="ui-btn ui-btn-secondary ui-btn-sm" data-signature-clear
+                                    <x-button id="signatureClearBtn" type="button" variant="secondary"
+                                        size="sm" icon="fa-solid fa-eraser" data-signature-clear
                                         data-tooltip="Clear" data-tooltip-tone="neutral"
                                         aria-label="Clear signature">
-
-                                        <i class="fa-solid fa-eraser" aria-hidden="true"></i>
                                         <span class="signature-action-label">Clear</span>
+                                    </x-button>
 
-                                    </button>
-
-                                    <button type="button" id="signatureUseDrawnBtn"
-                                        class="ui-btn ui-btn-primary ui-btn-sm" data-signature-use-drawn>
-                                        <span>Use Signature</span>
-                                    </button>
+                                    <x-button id="signatureUseDrawnBtn" type="button" variant="primary"
+                                        size="sm" data-signature-use-drawn>
+                                        Use Signature
+                                    </x-button>
 
                                 </div>
 
@@ -332,22 +317,22 @@
                 </div>
 
                 @if ($showResult)
-                <div id="signature_result_box" class="signature-result-box hidden">
-                    <p id="signature_filename"></p>
-                    <div id="signature_error" class="signature-result-message hidden">
+                    <div id="signature_result_box" class="signature-result-box hidden">
+                        <p id="signature_filename"></p>
+                        <div id="signature_error" class="signature-result-message hidden">
+                        </div>
                     </div>
-                </div>
                 @endif
 
             </div>
         @endif
         @if ($inputName)
-        @error($inputName)
-            <p class="global-field-error show">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                {{ $message }}
-            </p>
-        @enderror
+            @error($inputName)
+                <p class="global-field-error show">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    {{ $message }}
+                </p>
+            @enderror
         @endif
 
     </div>

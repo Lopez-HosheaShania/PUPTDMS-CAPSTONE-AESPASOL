@@ -45,15 +45,7 @@
     <main id="mainContent" class="app-page-shell existing-record-page page-enter">
         <div class="w-full">
             @if ($isAdminView)
-                <div class="page-banner mb-6">
-                    <div class="page-banner-inner">
-                        <div class="min-w-0">
-                            <h1 class="page-title">
-                                Add Existing Record
-                            </h1>
-                        </div>
-                    </div>
-                </div>
+                <x-page-banner title="Add Existing Record" class="mb-6" />
             @else
                 <div class="dentist-hero page-title-row mb-6">
                     <div class="dentist-hero-content">
@@ -143,18 +135,18 @@
             const recordUrlTemplate =
                 @json(route($existingAppointmentRoute, ['patient' => '__PATIENT__']));
 
-        const resolveExternalPatientEndpoint =
-            @json(route('shared.existing-record.resolve-external-patient'));
+            const resolveExternalPatientEndpoint =
+                @json(route('shared.existing-record.resolve-external-patient'));
 
-        const csrfToken =
-            @json(csrf_token());
+            const csrfToken =
+                @json(csrf_token());
 
-    window.initGlobalSearchBars?.();
-    window.initGlobalVoiceInputs?.();
+            window.initGlobalSearchBars?.();
+            window.initGlobalVoiceInputs?.();
 
-    let activeRequestId = 0;
-    let patientFetchController = null;
-    let renderedPatients = [];
+            let activeRequestId = 0;
+            let patientFetchController = null;
+            let renderedPatients = [];
 
             const patientResponseCache = new Map();
             let patientCurrentPage = 1;
@@ -330,8 +322,7 @@
                     Array.isArray(result) ?
                     result :
                     Array.isArray(result?.data) ?
-                    result.data :
-                    [];
+                    result.data : [];
 
                 patientPaginationMeta = {
                     currentPage: Number(result?.current_page) || 1,
@@ -651,186 +642,177 @@
                     .replaceAll("'", '&#039;');
             }
 
-    function buildRecordUrl(patient) {
-        return recordUrlTemplate.replace(
-            '__PATIENT__',
-            encodeURIComponent(
-                String(patient.id || '')
-            )
-        );
-    }
+            function buildRecordUrl(patient) {
+                return recordUrlTemplate.replace(
+                    '__PATIENT__',
+                    encodeURIComponent(
+                        String(patient.id || '')
+                    )
+                );
+            }
 
-    async function openExistingRecord(patient, button) {
-        if (!patient) {
-            return;
-        }
+            async function openExistingRecord(patient, button) {
+                if (!patient) {
+                    return;
+                }
 
-        const isExternal =
-            patient.is_local === false ||
-            String(patient.id || '')
-                .startsWith('external:');
+                const isExternal =
+                    patient.is_local === false ||
+                    String(patient.id || '')
+                    .startsWith('external:');
 
-        if (!isExternal) {
-            window.location.href =
-                buildRecordUrl(patient);
+                if (!isExternal) {
+                    window.location.href =
+                        buildRecordUrl(patient);
 
-            return;
-        }
+                    return;
+                }
 
-        if (!patient.selection_token) {
-            window.showToast?.({
-                type: 'error',
-                title: 'Unable to Select Patient',
-                message:
-                    'The selected patient could not be verified. Please search for the patient again.',
-            });
+                if (!patient.selection_token) {
+                    window.showToast?.({
+                        type: 'error',
+                        title: 'Unable to Select Patient',
+                        message: 'The selected patient could not be verified. Please search for the patient again.',
+                    });
 
-            return;
-        }
+                    return;
+                }
 
-        const originalButtonHtml =
-            button?.innerHTML || '';
+                const originalButtonHtml =
+                    button?.innerHTML || '';
 
-        if (button) {
-            button.disabled = true;
-            button.setAttribute(
-                'aria-busy',
-                'true'
-            );
+                if (button) {
+                    button.disabled = true;
+                    button.setAttribute(
+                        'aria-busy',
+                        'true'
+                    );
 
-            button.innerHTML = `
+                    button.innerHTML = `
                 <i class="fa-solid fa-spinner fa-spin"></i>
                 <span>Preparing...</span>
             `;
-        }
+                }
 
-        try {
-            const response =
-                await fetch(
-                    resolveExternalPatientEndpoint,
-                    {
-                        method: 'POST',
+                try {
+                    const response =
+                        await fetch(
+                            resolveExternalPatientEndpoint, {
+                                method: 'POST',
 
-                        headers: {
-                            'Content-Type':
-                                'application/json',
+                                headers: {
+                                    'Content-Type': 'application/json',
 
-                            Accept:
-                                'application/json',
+                                    Accept: 'application/json',
 
-                            'X-Requested-With':
-                                'XMLHttpRequest',
+                                    'X-Requested-With': 'XMLHttpRequest',
 
-                            'X-CSRF-TOKEN':
-                                csrfToken,
-                        },
+                                    'X-CSRF-TOKEN': csrfToken,
+                                },
 
-                        body: JSON.stringify({
-                            selection_token:
-                                patient.selection_token,
-                        }),
+                                body: JSON.stringify({
+                                    selection_token: patient.selection_token,
+                                }),
+                            }
+                        );
+
+                    let result = {};
+
+                    try {
+                        result =
+                            await response.json();
+                    } catch (_) {
+                        result = {};
                     }
-                );
 
-            let result = {};
+                    if (
+                        !response.ok ||
+                        !result.success ||
+                        !result.patient?.id
+                    ) {
+                        throw new Error(
+                            result.message ||
+                            'Unable to prepare the selected patient.'
+                        );
+                    }
 
-            try {
-                result =
-                    await response.json();
-            } catch (_) {
-                result = {};
+                    window.location.href =
+                        buildRecordUrl(
+                            result.patient
+                        );
+
+                } catch (error) {
+                    console.error(
+                        'Existing-record patient resolution error:',
+                        error
+                    );
+
+                    window.showToast?.({
+                        type: 'error',
+                        title: 'Unable to Select Patient',
+
+                        message: error.message ||
+                            'Unable to prepare the selected patient right now.',
+                    });
+
+                    if (button) {
+                        button.disabled = false;
+                        button.removeAttribute(
+                            'aria-busy'
+                        );
+
+                        button.innerHTML =
+                            originalButtonHtml;
+                    }
+                }
             }
 
-            if (
-                !response.ok ||
-                !result.success ||
-                !result.patient?.id
-            ) {
-                throw new Error(
-                    result.message ||
-                    'Unable to prepare the selected patient.'
-                );
-            }
+            patientGrid?.addEventListener(
+                'click',
+                function(event) {
+                    const button =
+                        event.target.closest(
+                            '[data-existing-record-patient-index]'
+                        );
 
-            window.location.href =
-                buildRecordUrl(
-                    result.patient
-                );
+                    if (
+                        !button ||
+                        !patientGrid.contains(button)
+                    ) {
+                        return;
+                    }
 
-        } catch (error) {
-            console.error(
-                'Existing-record patient resolution error:',
-                error
+                    const index =
+                        Number(
+                            button.dataset
+                            .existingRecordPatientIndex
+                        );
+
+                    const patient =
+                        renderedPatients[index];
+
+                    if (!patient) {
+                        return;
+                    }
+
+                    openExistingRecord(
+                        patient,
+                        button
+                    );
+                }
             );
-
-            window.showToast?.({
-                type: 'error',
-                title:
-                    'Unable to Select Patient',
-
-                message:
-                    error.message ||
-                    'Unable to prepare the selected patient right now.',
-            });
-
-            if (button) {
-                button.disabled = false;
-                button.removeAttribute(
-                    'aria-busy'
-                );
-
-                button.innerHTML =
-                    originalButtonHtml;
-            }
-        }
-    }
-
-    patientGrid?.addEventListener(
-        'click',
-        function (event) {
-            const button =
-                event.target.closest(
-                    '[data-existing-record-patient-index]'
-                );
-
-            if (
-                !button ||
-                !patientGrid.contains(button)
-            ) {
-                return;
-            }
-
-            const index =
-                Number(
-                    button.dataset
-                        .existingRecordPatientIndex
-                );
-
-            const patient =
-                renderedPatients[index];
-
-            if (!patient) {
-                return;
-            }
-
-            openExistingRecord(
-                patient,
-                button
-            );
-        }
-    );
 
             function renderPatients(patients) {
                 if (!patientGrid) return;
 
-        renderedPatients =
-            Array.isArray(patients)
-                ? patients
-                : [];
+                renderedPatients =
+                    Array.isArray(patients) ?
+                    patients :
+                    [];
 
-        if (!renderedPatients.length) {
-            const query =
-                input.value.trim();
+                if (!renderedPatients.length) {
+                    const query =
+                        input.value.trim();
 
                     patientGrid.innerHTML = '';
 
@@ -863,11 +845,11 @@
                     '#existingRecordEmptyState'
                 );
 
-        const html = renderedPatients.map(function (patient, index) {
-            const patientName = patient.name || 'Patient';
-            const patientEmail = patient.email || '';
-            const patientType =
-                patient.type || 'Patient';
+                const html = renderedPatients.map(function(patient, index) {
+                    const patientName = patient.name || 'Patient';
+                    const patientEmail = patient.email || '';
+                    const patientType =
+                        patient.type || 'Patient';
 
                     const avatarUrl =
                         window.PatientUI
@@ -916,18 +898,18 @@
                 <span class="patient-avatar patient-avatar-md">
                     ${avatarUrl
                     ? `
-                                    <img
-                                        src="${escapeHtml(avatarUrl)}"
-                                        alt="${escapeHtml(patientName)}"
-                                        loading="lazy"
-                                        data-ui-error="action-65226e9bb18e" data-ui-error-arg-0="&lt;span&gt;${window.uiAttribute(escapeHtml(patientInitials))}&lt;/span&gt;"
-                                    >
-                                `
+                                        <img
+                                            src="${escapeHtml(avatarUrl)}"
+                                            alt="${escapeHtml(patientName)}"
+                                            loading="lazy"
+                                            data-ui-error="action-65226e9bb18e" data-ui-error-arg-0="&lt;span&gt;${window.uiAttribute(escapeHtml(patientInitials))}&lt;/span&gt;"
+                                        >
+                                    `
                     : `
-                                    <span>
-                                        ${escapeHtml(patientInitials)}
-                                    </span>
-                                `
+                                        <span>
+                                            ${escapeHtml(patientInitials)}
+                                        </span>
+                                    `
                 }
                 </span>
 
@@ -947,13 +929,13 @@
 
                     ${patientEmail
                     ? `
-                                <div class="global-record-subline">
-                                    <span class="ui-muted-text">
-                                        <i class="fa-regular fa-envelope"></i>
-                                        ${escapeHtml(patientEmail)}
-                                    </span>
-                                </div>
-                            `
+                                    <div class="global-record-subline">
+                                        <span class="ui-muted-text">
+                                            <i class="fa-regular fa-envelope"></i>
+                                            ${escapeHtml(patientEmail)}
+                                        </span>
+                                    </div>
+                                `
                     : ''
                 }
 
@@ -963,10 +945,10 @@
 
             ${tags.length
                     ? `
-                            <div class="global-record-subline">
-                                ${tags.join('')}
-                            </div>
-                        `
+                                <div class="global-record-subline">
+                                    ${tags.join('')}
+                                </div>
+                            `
                     : ''
                 }
 

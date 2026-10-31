@@ -60,63 +60,36 @@
                                 </div>
                             </div>
                             @if ($canViewProcedureInventoryNotes)
-                                <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm shrink-0"
+                                <x-button type="button" variant="secondary" size="sm" class="shrink-0"
                                     data-open-modal="procedureInventoryNotesModal" aria-label="Procedure Inventory Notes"
                                     aria-haspopup="dialog" aria-controls="procedureInventoryNotesModal">
                                     <span>Procedure Inventory Notes</span>
-                                    <span id="procedureInventoryNotesCount" class="filter-badge">0</span>
-                                </button>
+                                    <span id="procedureInventoryNotesCount" class="filter-badge">
+                                        0
+                                    </span>
+                                </x-button>
                             @endif
                         </div>
                     </div>
                 </div>
             @else
-                <div class="page-banner inventory-admin-banner">
-                    <div class="page-banner-inner">
-                        <div class="min-w-0">
-                            <h1 class="page-title">
-                                Admin Inventory
-                            </h1>
-                        </div>
-                    </div>
-                </div>
+                <x-page-banner title="Admin Inventory" class="inventory-admin-banner" />
             @endif
 
             <div class="relative z-10 mt-4 pb-8 inventory-page-content">
 
                 <div class="stat-grid inventory-stat-grid" id="inventoryStats">
-                    <div class="stat-card s-crimson">
-                        <div class="stat-card-info">
-                            <div class="stat-label">Total Items</div>
-                            <div class="stat-value" id="statTotal">—</div>
-                            <div class="stat-footer">all categories</div>
-                        </div>
-                        <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-                    </div>
-                    <div class="stat-card s-blue">
-                        <div class="stat-card-info">
-                            <div class="stat-label">Medicines</div>
-                            <div class="stat-value" id="statMedicine">—</div>
-                            <div class="stat-footer">pharmaceutical</div>
-                        </div>
-                        <div class="stat-icon"><i class="fa-solid fa-pills"></i></div>
-                    </div>
-                    <div class="stat-card s-green">
-                        <div class="stat-card-info">
-                            <div class="stat-label">Supplies</div>
-                            <div class="stat-value" id="statSupplies">—</div>
-                            <div class="stat-footer">consumables</div>
-                        </div>
-                        <div class="stat-icon"><i class="fa-solid fa-syringe"></i></div>
-                    </div>
-                    <div class="stat-card s-amber">
-                        <div class="stat-card-info">
-                            <div class="stat-label">Low Stock</div>
-                            <div class="stat-value" id="statLow">—</div>
-                            <div class="stat-footer">need restocking</div>
-                        </div>
-                        <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                    </div>
+                    <x-stat-card label="Total Items" value="—" tone="crimson" icon="fa-solid fa-boxes-stacked"
+                        footer="all categories" :value-attributes="['id' => 'statTotal']" />
+
+                    <x-stat-card label="Medicines" value="—" tone="blue" icon="fa-solid fa-pills"
+                        footer="pharmaceutical" :value-attributes="['id' => 'statMedicine']" />
+
+                    <x-stat-card label="Supplies" value="—" tone="green" icon="fa-solid fa-syringe"
+                        footer="consumables" :value-attributes="['id' => 'statSupplies']" />
+
+                    <x-stat-card label="Low Stock" value="—" tone="amber" icon="fa-solid fa-triangle-exclamation"
+                        footer="need restocking" :value-attributes="['id' => 'statLow']" />
                 </div>
 
                 <div class="table-card">
@@ -175,12 +148,10 @@
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>
 
-                            <button type="button" data-ui-click="action-0d547826d7f9"
-                                class="ui-btn ui-btn-primary ui-btn-sm table-toolbar-primary-action">
-
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Add Item</span>
-                            </button>
+                            <x-button type="button" variant="primary" size="sm" class="table-toolbar-primary-action"
+                                icon="fa-solid fa-plus" data-ui-click="action-0d547826d7f9">
+                                Add Item
+                            </x-button>
 
                         </div>
 
@@ -233,16 +204,10 @@
                     Active Filters
                 </span>
 
-                <button id="clearAllChipsBtn" type="button"
-                    class="
-                    filter-clear-all
-                    ui-btn
-                    ui-btn-secondary
-                    ui-btn-sm
-                ">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>Clear All</span>
-                </button>
+                <x-button id="clearAllChipsBtn" type="button" variant="secondary" size="sm"
+                    icon="fa-solid fa-rotate-left" class="filter-clear-all">
+                    Clear All
+                </x-button>
 
             </div>
 
@@ -407,13 +372,12 @@
                                 <span class="required-mark">*</span>
                             </label>
 
-                            <select id="addCategory" name="category" class="js-custom-select"
-                                data-placeholder="Select category" data-field-label="Category"
-                                data-required-message="Please select a category." required>
+                            <x-select id="addCategory" name="category" required data-placeholder="Select category"
+                                data-field-label="Category" data-required-message="Please select a category.">
                                 <option value="">Select category</option>
                                 <option value="Medicine">Medicine</option>
                                 <option value="Supplies">Supplies</option>
-                            </select>
+                            </x-select>
                         </div>
 
                         <div class="inventory-field" data-global-field>
@@ -493,24 +457,12 @@
                                     <span class="required-mark">*</span>
                                 </label>
 
-                                <div class="global-number-stepper" data-global-number-stepper>
-
-                                    <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                        aria-label="Decrease volume per bottle">
-                                        <i class="fa-solid fa-minus"></i>
-                                    </button>
-
-                                    <input id="addBottleCapacity" name="volume_per_bottle_ml" type="number"
-                                        class="global-number-stepper-input" placeholder="e.g. 100" min="0.01"
-                                        max="99999999.99" step="1" inputmode="decimal" data-number-stepper-input
-                                        data-field-label="Volume per Bottle"
-                                        data-required-message="Please enter the volume per bottle." disabled>
-
-                                    <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                        aria-label="Increase volume per bottle">
-                                        <i class="fa-solid fa-plus"></i>
-                                    </button>
-                                </div>
+                                <x-number-stepper id="addBottleCapacity" name="volume_per_bottle_ml" min="0.01"
+                                    max="99999999.99" step="1" inputmode="decimal" disabled
+                                    decrease-label="Decrease volume per bottle"
+                                    increase-label="Increase volume per bottle" placeholder="e.g. 100"
+                                    data-field-label="Volume per Bottle"
+                                    data-required-message="Please enter the volume per bottle." />
                             </div>
                         </div>
 
@@ -520,24 +472,11 @@
                                 <span class="required-mark">*</span>
                             </label>
 
-                            <div class="global-number-stepper" data-global-number-stepper>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                    aria-label="Decrease quantity">
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
-                                <input id="addQty" name="qty" type="number" class="global-number-stepper-input"
-                                    value="1" min="1" max="99999" step="1" inputmode="numeric"
-                                    data-number-stepper-input data-field-label="Quantity"
-                                    data-required-message="Please enter a quantity." data-validation-rule="wholeNumber"
-                                    data-ui-input="action-ea53196008ea" required>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                    aria-label="Increase quantity">
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                            </div>
+                            <x-number-stepper id="addQty" name="qty" value="1" min="1"
+                                max="99999" step="1" inputmode="numeric" required
+                                decrease-label="Decrease quantity" increase-label="Increase quantity"
+                                data-field-label="Quantity" data-required-message="Please enter a quantity."
+                                data-validation-rule="wholeNumber" data-ui-input="action-ea53196008ea" />
                         </div>
 
                         <div class="inventory-field" data-global-field>
@@ -546,24 +485,11 @@
                                 <span class="field-optional">(Optional)</span>
                             </label>
 
-                            <div class="global-number-stepper" data-global-number-stepper>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                    aria-label="Decrease consumed quantity">
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
-                                <input id="addUsed" name="used" type="number" class="global-number-stepper-input"
-                                    value="0" min="0" max="99999" step="1" inputmode="numeric"
-                                    data-number-stepper-input data-field-label="Consumed"
-                                    data-required-message="Please enter the consumed quantity."
-                                    data-validation-rule="inventoryConsumed" data-ui-input="action-ea53196008ea" required>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                    aria-label="Increase consumed quantity">
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                            </div>
+                            <x-number-stepper id="addUsed" name="used" value="0" min="0"
+                                max="99999" step="1" inputmode="numeric" required
+                                decrease-label="Decrease consumed quantity" increase-label="Increase consumed quantity"
+                                data-field-label="Consumed" data-required-message="Please enter the consumed quantity."
+                                data-validation-rule="inventoryConsumed" data-ui-input="action-ea53196008ea" />
                         </div>
                     </div>
 
@@ -617,13 +543,13 @@
             </div>
 
             <div class="modal-ft items-center">
-                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="addModal">
+                <x-button type="button" variant="secondary" data-discard-close="addModal">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="submit" id="btnSaveAdd" class="ui-btn ui-btn-primary">
-                    <span>Save Item</span>
-                </button>
+                <x-button id="btnSaveAdd" type="submit" variant="primary">
+                    Save Item
+                </x-button>
             </div>
         </form>
     </div>
@@ -673,13 +599,12 @@
                                 <span class="required-mark">*</span>
                             </label>
 
-                            <select id="editCategory" name="category" class="js-custom-select"
-                                data-placeholder="Select category" data-field-label="Category"
-                                data-required-message="Please select a category." required>
+                            <x-select id="editCategory" name="category" required data-placeholder="Select category"
+                                data-field-label="Category" data-required-message="Please select a category.">
                                 <option value="">Select category</option>
                                 <option value="Medicine">Medicine</option>
                                 <option value="Supplies">Supplies</option>
-                            </select>
+                            </x-select>
                         </div>
 
                         <div class="inventory-field" data-global-field>
@@ -746,23 +671,11 @@
                                 <span class="required-mark">*</span>
                             </label>
 
-                            <div class="global-number-stepper" data-global-number-stepper>
-                                <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                    aria-label="Decrease quantity">
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
-                                <input id="editQty" name="qty" type="number" class="global-number-stepper-input"
-                                    min="1" max="99999" step="1" inputmode="numeric"
-                                    data-number-stepper-input data-field-label="Quantity"
-                                    data-required-message="Please enter a quantity." data-validation-rule="wholeNumber"
-                                    data-ui-input="action-8fba7d16f720" required>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                    aria-label="Increase quantity">
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                            </div>
+                            <x-number-stepper id="editQty" name="qty" min="1" max="99999"
+                                step="1" inputmode="numeric" required decrease-label="Decrease quantity"
+                                increase-label="Increase quantity" data-field-label="Quantity"
+                                data-required-message="Please enter a quantity." data-validation-rule="wholeNumber"
+                                data-ui-input="action-8fba7d16f720" />
                         </div>
 
                         <div class="inventory-field" data-global-field>
@@ -771,23 +684,11 @@
                                 <span class="field-optional">(Optional)</span>
                             </label>
 
-                            <div class="global-number-stepper" data-global-number-stepper>
-                                <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                    aria-label="Decrease consumed quantity">
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
-                                <input id="editUsed" name="used" type="number" class="global-number-stepper-input"
-                                    min="0" max="99999" step="1" inputmode="numeric"
-                                    data-number-stepper-input data-field-label="Consumed"
-                                    data-required-message="Please enter the consumed quantity."
-                                    data-validation-rule="inventoryConsumed" data-ui-input="action-8fba7d16f720" required>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                    aria-label="Increase consumed quantity">
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                            </div>
+                            <x-number-stepper id="editUsed" name="used" min="0" max="99999"
+                                step="1" inputmode="numeric" required decrease-label="Decrease consumed quantity"
+                                increase-label="Increase consumed quantity" data-field-label="Consumed"
+                                data-required-message="Please enter the consumed quantity."
+                                data-validation-rule="inventoryConsumed" data-ui-input="action-8fba7d16f720" />
                         </div>
                     </div>
 
@@ -873,13 +774,13 @@
             </div>
 
             <div class="modal-ft items-center">
-                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="editModal">
+                <x-button type="button" variant="secondary" data-discard-close="editModal">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="submit" class="ui-btn ui-btn-primary">
-                    <span>Save Changes</span>
-                </button>
+                <x-button type="submit" variant="primary">
+                    Save Changes
+                </x-button>
             </div>
         </form>
     </div>
