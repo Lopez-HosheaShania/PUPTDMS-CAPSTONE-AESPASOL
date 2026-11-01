@@ -137,9 +137,12 @@
                                                                 name="guest_first_name" class="form-input-custom"
                                                                 placeholder="Enter first name" autocomplete="given-name"
                                                                 data-validation-rule="guestName"
+                                                                data-capitalize-words="name"
                                                                 data-required-message="Please enter the guest's first name."
                                                                 data-pattern-message="Only letters, spaces, apostrophe, period, and hyphen are allowed."
-                                                                maxlength="50" disabled>
+                                                                minlength="2" maxlength="20" data-enforce-maxlength="true"
+                                                                data-maxlength-message="First Name must not exceed 20 characters."
+                                                                disabled>
                                                         </x-form-field>
 
                                                         <x-form-field label="Middle Name" for="guestMiddleName" optional
@@ -149,8 +152,11 @@
                                                                 placeholder="Enter middle name"
                                                                 autocomplete="additional-name"
                                                                 data-validation-rule="guestName"
+                                                                data-capitalize-words="name"
                                                                 data-pattern-message="Only letters, spaces, apostrophe, period, and hyphen are allowed."
-                                                                maxlength="50" disabled>
+                                                                minlength="1" maxlength="20" data-enforce-maxlength="true"
+                                                                data-maxlength-message="Middle Name must not exceed 20 characters."
+                                                                disabled>
                                                         </x-form-field>
 
                                                         <x-form-field label="Last Name" for="guestLastName" required
@@ -159,9 +165,12 @@
                                                                 name="guest_last_name" class="form-input-custom"
                                                                 placeholder="Enter last name" autocomplete="family-name"
                                                                 data-validation-rule="guestName"
+                                                                data-capitalize-words="name"
                                                                 data-required-message="Please enter the guest's last name."
                                                                 data-pattern-message="Only letters, spaces, apostrophe, period, and hyphen are allowed."
-                                                                maxlength="50" disabled>
+                                                                minlength="2" maxlength="20" data-enforce-maxlength="true"
+                                                                data-maxlength-message="Last Name must not exceed 20 characters."
+                                                                disabled>
                                                         </x-form-field>
 
                                                         <x-form-field label="Suffix" for="guestSuffix" optional
@@ -188,6 +197,7 @@
                                                                 name="guest_birthdate"
                                                                 class="form-input-custom js-flatpickr-date"
                                                                 placeholder="Select birthday"
+                                                                min="1900-01-01"
                                                                 max="{{ now()->subDay()->format('Y-m-d') }}"
                                                                 data-flatpickr-min-year="1900"
                                                                 data-validation-rule="notFutureDate"
@@ -220,7 +230,7 @@
                                                                 class="form-input-custom"
                                                                 placeholder="Enter email address" autocomplete="email"
                                                                 data-required-message="Please enter the guest's email address."
-                                                                disabled>
+                                                                minlength="5" maxlength="255" disabled>
                                                         </x-form-field>
 
 
@@ -229,7 +239,9 @@
                                                             <input type="tel" id="guestPhone" name="guest_phone"
                                                                 class="form-input-custom" placeholder="0000 000 0000"
                                                                 autocomplete="tel" inputmode="numeric"
-                                                                data-validation-rule="philippineMobile" maxlength="13"
+                                                                data-validation-rule="philippineMobile" minlength="13" maxlength="13"
+                                                                data-minlength-message="Contact number must contain exactly 11 digits."
+                                                                data-maxlength-message="Contact number must contain exactly 11 digits."
                                                                 data-required-message="Please enter the guest's contact number."
                                                                 data-pattern-message="Contact number must start with 09 and contain exactly 11 digits."
                                                                 disabled>
@@ -346,7 +358,9 @@
                                                                             autocomplete="off"
                                                                             data-validation-rule="studentNumber"
                                                                             data-required-message="Please enter the guest's student number."
-                                                                            maxlength="15" disabled>
+                                                                            minlength="15" maxlength="15"
+                                                                            data-minlength-message="Student number must follow the format 0000-00000-TG-0 (15 characters)."
+                                                                            disabled>
                                                                     </x-form-field>
 
                                                                 </div>
@@ -367,7 +381,9 @@
                                                                         placeholder="FA0000TG0000" autocomplete="off"
                                                                         data-validation-rule="facultyCode"
                                                                         data-required-message="Please enter the guest's faculty code."
-                                                                        maxlength="12" disabled>
+                                                                        minlength="12" maxlength="12"
+                                                                        data-minlength-message="Faculty code must follow the format FA0000TG0000 (12 characters)."
+                                                                        disabled>
                                                                 </x-form-field>
 
                                                             </div>
@@ -2536,6 +2552,10 @@
         }
 
         function selectGuestPatient(shouldProceed = true) {
+            if (!validateGuestOnboardingFields()) {
+                return false;
+            }
+
             const firstName =
                 guestFirstName?.value?.trim() || "";
 
@@ -2594,10 +2614,6 @@
                 document.querySelector(
                     'input[name="guest_is_pwd"]:checked'
                 )?.value;
-
-            if (!validateGuestOnboardingFields()) {
-                return false;
-            }
 
             const patientType =
                 guestPatientType?.value || "";

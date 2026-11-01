@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Appointment;
+use App\Support\DentalServicesPatientName;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use setasign\Fpdi\Fpdi;
@@ -16,7 +17,7 @@ class DptReport
 
     public function records(Carbon $from, Carbon $to, bool $emergency): Collection
     {
-        return Appointment::with(['patient.user', 'patient.information', 'dentist', 'procedure'])
+        return Appointment::with(['patient.user.profile', 'patient.information', 'dentist', 'procedure'])
             ->where('status', 'completed')->whereHas('patient')
             ->whereDate('appointment_date', '>=', $from->toDateString())
             ->whereDate('appointment_date', '<=', $to->toDateString())
@@ -35,8 +36,7 @@ class DptReport
                     'id' => $appointment->id,
                     'date' => Carbon::parse($appointment->appointment_date)->format('m/d/y'),
                     'classification' => $classification,
-                    // Preserve compound surnames; use the stored display name for legacy profiles.
-                    'surname' => $patient->user?->last_name ?: $patient->name,
+                    'surname' => DentalServicesPatientName::surname($patient),
                     'minutes' => $appointment->procedure?->procedure_duration_seconds !== null
                         ? max(0, $appointment->procedure->procedure_duration_seconds) / 60 : null,
                     'dentist' => $appointment->dentist_name ?? '',

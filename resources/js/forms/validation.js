@@ -399,6 +399,12 @@ function getFormInputValidationMessage(field) {
 
 const globalValidationRules = new Map();
 
+registerGlobalValidationRule('roleName', function (field) {
+    return /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(field.value)
+        ? ''
+        : field.dataset.patternMessage || 'Only letters and single spaces between words are allowed.';
+});
+
 function registerGlobalValidationRule(name, validator) {
     if (!name || typeof validator !== 'function') return;
 
@@ -1248,6 +1254,8 @@ function getPersistentServerFieldError(
 function validateFormInputField(field) {
     if (!field) return true;
 
+    capitalizeGlobalWords(field);
+
     const persistentServerError =
         getPersistentServerFieldError(
             field
@@ -1430,6 +1438,53 @@ function normalizeGlobalPersonName(field) {
     }
 }
 
+function normalizeGlobalSpaces(field) {
+    if (field?.dataset.normalizeSpaces === 'true') {
+        field.value = String(field.value || '').trim().replace(/ +/g, ' ');
+    }
+}
+
+function capitalizeGlobalWords(field) {
+    const mode = field?.dataset.capitalizeWords;
+    if (mode !== 'true' && mode !== 'name') return;
+
+    const value = String(field.value || '');
+    const normalized = mode === 'name'
+        ? value.toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (_, separator, letter) => separator + letter.toUpperCase())
+        : value.replace(/(^|\s)([a-z])/g, (_, space, letter) => space + letter.toUpperCase());
+    if (normalized === field.value) return;
+
+    const start = field.selectionStart;
+    const end = field.selectionEnd;
+    const direction = field.selectionDirection;
+    field.value = normalized;
+
+    if (typeof start === 'number' && typeof field.setSelectionRange === 'function') {
+        field.setSelectionRange(start, end, direction);
+    }
+}
+
+function getGlobalTextInsertionMessage(field, insertedText) {
+    if (!insertedText || (
+        field.dataset.validationRule !== 'roleName' &&
+        field.dataset.enforceMaxlength !== 'true'
+    )) return '';
+
+    if (field.dataset.validationRule === 'roleName' && /[^A-Za-z ]/.test(insertedText)) {
+        return field.dataset.patternMessage || 'Only letters and spaces are allowed.';
+    }
+
+    const nextLength = field.value.length -
+        ((field.selectionEnd ?? 0) - (field.selectionStart ?? 0)) + insertedText.length;
+
+    if (field.maxLength >= 0 && nextLength > field.maxLength) {
+        return field.dataset.maxlengthMessage ||
+            `${getGlobalFieldLabel(field)} must not exceed ${field.maxLength} characters.`;
+    }
+
+    return '';
+}
+
 function bindFormInputValidation(root = document) {
     const scope =
         root && typeof root.querySelectorAll === 'function'
@@ -1483,6 +1538,17 @@ function bindFormInputValidation(root = document) {
                 );
             });
 
+            form.addEventListener('paste', event => {
+                const field = event.target;
+                if (!(field instanceof HTMLInputElement)) return;
+
+                const message = getGlobalTextInsertionMessage(field, event.clipboardData?.getData('text'));
+                if (message) {
+                    event.preventDefault();
+                    showFormInputValidationMessage(field, message);
+                }
+            }, true);
+
             form.addEventListener(
                 'beforeinput',
                 event => {
@@ -1502,6 +1568,13 @@ function bindFormInputValidation(root = document) {
                         event.data;
 
                     if (!insertedText) {
+                        return;
+                    }
+
+                    const insertionMessage = getGlobalTextInsertionMessage(field, insertedText);
+                    if (insertionMessage) {
+                        event.preventDefault();
+                        showFormInputValidationMessage(field, insertionMessage);
                         return;
                     }
 
@@ -1592,6 +1665,10 @@ function bindFormInputValidation(root = document) {
                 normalizeGlobalPersonName(
                     field
                 );
+
+                if (event.type === 'blur') {
+                    normalizeGlobalSpaces(field);
+                }
 
                 validateFormInputField(
                     field
@@ -2327,6 +2404,8 @@ function validateGlobalForm(form, options = {}) {
     let firstInvalid = null;
 
     fields.forEach(field => {
+        normalizeGlobalSpaces(field);
+
         if (
             field.type === 'radio' &&
             processedRadioGroups.has(field.name)

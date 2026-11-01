@@ -51,7 +51,6 @@ class OIDCController extends Controller
         $clientId     = config('services.oidc.client_id');
         $redirectUri  = config('services.oidc.redirect');
         $scope        = config('services.oidc.scope', 'openid profile email');
-        $forceReauth  = $request->boolean('reauth');
 
         if (!$clientId || !$redirectUri) {
             return redirect()->route('login')
@@ -72,7 +71,7 @@ class OIDCController extends Controller
             'scope'         => $scope,
             'state'         => $state,
             'prompt'        => 'login',
-            'max_age'       => $forceReauth ? 0 : null,
+            'max_age'       => 0,
         ]);
 
         if ($loginUrl) {
@@ -396,6 +395,8 @@ class OIDCController extends Controller
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
         $request->session()->put('oidc_id_token', $idToken);
+        $request->session()->put('oidc_access_token', $accessToken);
+        $request->session()->put('auth_jwt_token', $jwt);
         session()->save();
         $this->concurrentSessionService->syncCurrentSessionMetadata($request);
 

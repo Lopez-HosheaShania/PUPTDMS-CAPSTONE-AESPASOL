@@ -12,6 +12,10 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
 use Tests\TestCase;
 
 class ConcurrentSessionFeatureTest extends TestCase
@@ -130,7 +134,7 @@ class ConcurrentSessionFeatureTest extends TestCase
         $this->actingAs($dentist)
             ->withSession($this->sessionStateFor($dentist))
             ->post(route('logout'))
-            ->assertOk();
+            ->assertRedirect(route('login', ['logged_out' => 1, 'reason' => 'manual']));
 
         $this->assertGuest();
         $this->assertSame(1, $this->logoutCountFor($dentist));
@@ -143,6 +147,97 @@ class ConcurrentSessionFeatureTest extends TestCase
         ]);
     }
 
+    public function test_logout_revokes_the_idp_token_and_local_jwt_then_redirects_to_landing(): void
+    {
+        config(['services.oidc.logout_url' => 'https://idp.example.test/api/v1/auth/logout',
+            'services.oidc.client_id' => 'clinic-client', 'jwt.blacklist_enabled' => true]);
+        Http::fake(['https://idp.example.test/api/v1/auth/logout' => Http::response('', 302,
+            ['Location' => 'https://idp.example.test/login'])]);
+        $dentist = $this->makeUser('revoke-tokens@example.com', 'dentist');
+        $dentist->update(['access_token' => 'stored-idp-token', 'refresh_token' => 'stored-refresh-token']);
+        $jwt = JWTAuth::fromUser($dentist);
+
+        $this->actingAs($dentist)->withSession(array_merge($this->sessionStateFor($dentist), [
+            'oidc_access_token' => 'session-idp-token', 'auth_jwt_token' => $jwt, 'oidc_id_token' => 'id-token',
+        ]))->post(route('logout'))
+            ->assertRedirect(route('login', ['logged_out' => 1, 'reason' => 'manual']))
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertCookieExpired('jwt_token')
+            ->assertSessionMissing('oidc_access_token')->assertSessionMissing('auth_jwt_token');
+
+        Http::assertSent(fn ($request) => $request->method() === 'POST'
+            && $request->hasHeader('Authorization', 'Bearer session-idp-token')
+            && $request['client_id'] === 'clinic-client');
+        Http::assertSentCount(1);
+        $this->assertGuest();
+        $this->assertNull($dentist->fresh()->access_token);
+        $this->assertNull($dentist->fresh()->refresh_token);
+        $this->expectException(TokenBlacklistedException::class);
+        JWTAuth::setToken($jwt)->getPayload();
+    }
+
+    public function test_logged_out_session_cannot_be_reused_by_another_browser(): void
+    {
+        $dentist = $this->makeUser('session-replay@example.com', 'dentist');
+        $this->actingAs($dentist)->withSession(array_merge($this->sessionStateFor($dentist), [
+            Auth::guard('web')->getName() => $dentist->id,
+        ]));
+        session()->save();
+        $oldSessionId = session()->getId();
+
+        Auth::forgetGuards();
+        $this->withCookie(config('session.cookie'), $oldSessionId)
+            ->get('/dashboard')->assertRedirect(route('dentist.dentist.dashboard'));
+
+        $this->withCookie(config('session.cookie'), $oldSessionId)
+            ->post(route('logout'))->assertRedirect();
+        $this->assertDatabaseMissing('sessions', ['id' => $oldSessionId]);
+
+        Auth::forgetGuards();
+        $this->withCookie(config('session.cookie'), $oldSessionId)
+            ->get('/dashboard')->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
+    public function test_logout_also_blocks_refresh_of_an_expired_jwt(): void
+    {
+        $dentist = $this->makeUser('expired-jwt-logout@example.com', 'dentist');
+        $this->travel(-2)->hours();
+        $jwt = JWTAuth::fromUser($dentist);
+        $this->travelBack();
+
+        $this->actingAs($dentist)->withSession(['auth_jwt_token' => $jwt])
+            ->post(route('logout'))->assertRedirect();
+
+        $this->expectException(TokenBlacklistedException::class);
+        JWTAuth::setToken($jwt)->refresh();
+    }
+
+    public function test_provider_failure_still_ends_the_local_session_and_reports_incomplete_sso_logout(): void
+    {
+        config(['services.oidc.logout_url' => 'https://idp.example.test/api/v1/auth/logout',
+            'services.oidc.client_id' => 'clinic-client']);
+        Http::fake(['*' => Http::response([], 503)]);
+        $dentist = $this->makeUser('idp-unavailable-logout@example.com', 'dentist');
+        $dentist->update(['access_token' => 'idp-token']);
+        $this->actingAs($dentist)->withSession($this->sessionStateFor($dentist))
+            ->post(route('logout'))->assertRedirect()->assertSessionHas('error');
+        $this->assertGuest();
+        $this->assertNull($dentist->fresh()->access_token);
+    }
+
+    public function test_oidc_sign_in_always_requests_fresh_credentials(): void
+    {
+        config(['services.idp.login_url' => 'https://idp.example.test/login',
+            'services.oidc.client_id' => 'clinic-client',
+            'services.oidc.redirect' => 'https://clinic.example.test/auth/oidc/callback']);
+        $response = $this->get(route('oidc.redirect'))->assertRedirect();
+        parse_str(parse_url($response->headers->get('Location'), PHP_URL_QUERY), $query);
+        $this->assertSame('login', $query['prompt']);
+        $this->assertSame('0', $query['max_age']);
+        $this->assertNotEmpty($query['state']);
+    }
+
     public function test_session_history_includes_sign_in_and_sign_out_entries_in_chronological_order(): void
     {
         $dentist = $this->makeUser('history-dentist@example.com', 'dentist');
@@ -153,7 +248,7 @@ class ConcurrentSessionFeatureTest extends TestCase
         $this->actingAs($dentist)
             ->withSession($this->sessionStateFor($dentist))
             ->post(route('logout'))
-            ->assertOk();
+            ->assertRedirect();
 
         $this->insertAuditLog($dentist, 'login', 'authentication', 'Clinical user (dentist) logged in via OIDC', '2026-09-03 09:10:00');
 
@@ -175,7 +270,7 @@ class ConcurrentSessionFeatureTest extends TestCase
         $this->actingAs($dentist)
             ->withSession($this->sessionStateFor($dentist))
             ->post(route('logout'))
-            ->assertOk();
+            ->assertRedirect();
 
         $this->assertSame(1, $this->logoutCountFor($dentist));
     }
@@ -188,12 +283,12 @@ class ConcurrentSessionFeatureTest extends TestCase
         $this->actingAs($dentist)
             ->withSession($this->sessionStateFor($dentist))
             ->post(route('logout'))
-            ->assertOk();
+            ->assertRedirect();
 
         $this->actingAs($intern)
             ->withSession($this->sessionStateFor($intern))
             ->post(route('logout'))
-            ->assertOk();
+            ->assertRedirect();
 
         $this->assertAuditLogHas([
             'actor_id' => $dentist->id,
