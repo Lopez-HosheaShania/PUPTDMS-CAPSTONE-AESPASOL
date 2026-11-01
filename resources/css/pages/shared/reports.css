@@ -2363,7 +2363,7 @@ hr.section-divider {
         grid-column: 1 / -1;
     }
 }
-/* Monthly counts use the shared table, form validation, and number controls. */
+
 .monthly-report-counts {
     min-width: 0;
     display: grid;
