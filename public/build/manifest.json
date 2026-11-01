@@ -478,6 +478,7 @@
       "_preload-helper-I4rgV-VL.js"
     ],
     "dynamicImports": [
+      "resources/js/reports/monthly-report.js",
       "resources/js/records/patient-record-modal.js",
       "resources/js/odontogram/odontogram-preview.js",
       "resources/js/odontogram/odontogram-primary-stacked-three.js",
@@ -559,6 +560,15 @@
     "name": "patient-records-page",
     "src": "resources/js/records/patient-records-page.js",
     "isDynamicEntry": true
+  },
+  "resources/js/reports/monthly-report.js": {
+    "file": "assets/monthly-report-BRnn6fL6.js",
+    "name": "monthly-report",
+    "src": "resources/js/reports/monthly-report.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/forms/validation.js"
+    ]
   },
   "resources/js/reports/pdf-tools.js": {
     "file": "assets/pdf-tools-B4hmG6Cz.js",

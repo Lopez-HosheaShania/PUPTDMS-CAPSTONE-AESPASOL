@@ -380,7 +380,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="addStock" class="inventory-field-label">
                                 Stock Number
-                                <span class="required-mark">*</span>
+                                <span class="field-optional">(Optional)</span>
                             </label>
 
                             <div class="global-voice-row" data-voice-field>
@@ -388,10 +388,8 @@
                                     <input id="addStock" name="stock_no"
                                         class="field-input form-input-custom inventory-stock-input" placeholder="00-000"
                                         maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
-                                        data-required-message="Please enter a stock number."
                                         data-pattern-message="Stock number must use the format 00-000."
-                                        data-validation-rule="uniqueInventoryStock" data-ui-input="action-32e9868b0600"
-                                        required>
+                                        data-validation-rule="uniqueInventoryStock" data-ui-input="action-32e9868b0600">
                                 </div>
 
                                 <x-voice-input target="#addStock" status-id="addStockVoiceStatus"
@@ -598,7 +596,7 @@
                         <div class="inventory-field" data-global-field>
                             <label for="editStock" class="inventory-field-label">
                                 Stock Number
-                                <span class="required-mark">*</span>
+                                <span class="field-optional">(Optional)</span>
                             </label>
 
                             <div class="global-voice-row" data-voice-field>
@@ -607,10 +605,9 @@
                                     <input id="editStock" name="stock_no"
                                         class="field-input form-input-custom inventory-stock-input" placeholder="00-000"
                                         maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
-                                        data-required-message="Please enter a stock number."
                                         data-pattern-message="Stock number must use the format 00-000."
                                         data-validation-rule="uniqueInventoryStockEdit"
-                                        data-ui-input="action-32e9868b0600" required>
+                                        data-ui-input="action-32e9868b0600">
                                 </div>
 
                                 <x-voice-input target="#editStock" status-id="editStockVoiceStatus"
@@ -3116,7 +3113,7 @@ aria-label="Delete inventory item"
                         category: document.getElementById('addCategory').value,
                         date_received: document.getElementById('addDate').value,
                         expiration_date: document.getElementById('addExpirationDate').value || null,
-                        stock_no: document.getElementById('addStock').value.trim(),
+                        stock_no: document.getElementById('addStock').value.trim() || null,
                         name: document.getElementById('addName').value.trim(),
                         unit: document.getElementById('addUnit').value.trim(),
                         qty: Number(document.getElementById('addQty').value),
@@ -3395,7 +3392,7 @@ aria-label="Delete inventory item"
                         category: document.getElementById('editCategory').value,
                         date_received: document.getElementById('editDate').value,
                         expiration_date: document.getElementById('editExpirationDate').value || null,
-                        stock_no: document.getElementById('editStock').value.trim(),
+                        stock_no: document.getElementById('editStock').value.trim() || null,
                         name: document.getElementById('editName').value.trim(),
                         unit: document.getElementById('editUnit').value.trim(),
                         qty: Number(document.getElementById('editQty').value),

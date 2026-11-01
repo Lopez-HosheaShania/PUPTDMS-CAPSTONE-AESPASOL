@@ -1511,7 +1511,7 @@
                 <form id="reportForm" class="modal-card-form" data-global-validation
                     data-form-validation-rule="customReport" data-discard-form data-discard-title="Discard custom report?"
                     data-discard-subtitle="You have unsaved report details."
-                    data-discard-message="Closing this modal will remove the report name, selected type, date range, and quantity you entered. Do you want to discard these changes?"
+                    data-discard-message="Closing this modal will remove the report details and any monthly counts you entered. Do you want to discard these changes?"
                     novalidate>
                     <div class="modal-hd">
                         <div class="modal-heading">
@@ -1673,6 +1673,8 @@
                                         Leave “To” empty to report on a single date.
                                     </p>
                                 </div>
+
+                                <x-reports.monthly-counts />
 
                                 <div class="modal-field modal-field-full" data-global-field>
                                     <label class="global-form-label" for="reportQty">
@@ -4066,6 +4068,11 @@
                 reportForm?.addEventListener('change', hideReportBanner);
 
                 downloadButton?.addEventListener('click', async function() {
+                    if (reportType.selectedOptions?.[0]?.dataset?.documentType === 'monthly_report'
+                        && !window.MonthlyDentalReportForm?.ready()) {
+                        showReportBanner('Load and review the monthly counts for the selected dates before downloading.');
+                        return;
+                    }
                     const validation =
                         window.validateGlobalForm?.(reportForm) || {
                             valid: reportForm?.checkValidity?.() ?? true,
@@ -4153,6 +4160,10 @@
 
                         if (dateTo) {
                             formData.append('date_to', dateTo);
+                        }
+
+                        if (documentType === 'monthly_report') {
+                            window.MonthlyDentalReportForm.appendTo(formData);
                         }
 
                         const response = await fetch(endpoint, {
