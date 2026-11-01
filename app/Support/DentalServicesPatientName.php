@@ -6,6 +6,13 @@ use App\Models\Patient;
 
 class DentalServicesPatientName
 {
+    public static function surname(?Patient $patient): string
+    {
+        $surname = trim((string) ($patient?->user?->last_name ?? ''));
+
+        return $surname !== '' ? $surname : trim(explode(',', self::surnameFirst($patient), 2)[0]);
+    }
+
     public static function surnameFirst(?Patient $patient): string
     {
         $user = $patient?->user;

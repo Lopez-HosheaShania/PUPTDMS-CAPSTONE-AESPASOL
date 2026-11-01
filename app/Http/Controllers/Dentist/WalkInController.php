@@ -3764,7 +3764,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'first_name') &&
             array_key_exists('first_name', $data)
         ) {
             $userData['first_name'] =
@@ -3774,7 +3773,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'middle_name') &&
             array_key_exists('middle_name', $data)
         ) {
             $userData['middle_name'] =
@@ -3784,7 +3782,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'last_name') &&
             array_key_exists('last_name', $data)
         ) {
             $userData['last_name'] =
@@ -3794,7 +3791,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'suffix_name') &&
             array_key_exists('suffix_name', $data)
         ) {
             $userData['suffix_name'] =
