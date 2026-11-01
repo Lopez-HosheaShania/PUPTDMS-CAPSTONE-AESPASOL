@@ -614,8 +614,22 @@ class RolePermissionController extends Controller
 
     public function storeRole(Request $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:roles,name'],
+        if (is_string($request->input('name'))) {
+            $request->merge([
+                'name' => ucwords(preg_replace('/ +/', ' ', trim($request->input('name')))),
+            ]);
+        }
+
+        $validated = $request->validate([
+            'name' => [
+                'bail', 'required', 'string', 'min:3', 'max:50',
+                'regex:/\A[A-Za-z]+(?: [A-Za-z]+)*\z/',
+                function ($attribute, $value, $fail) {
+                    if (Role::whereRaw('LOWER(name) = ?', [strtolower($value)])->exists()) {
+                        $fail('A role with this name already exists.');
+                    }
+                },
+            ],
             'slug' => [
                 'required',
                 'string',
@@ -624,14 +638,17 @@ class RolePermissionController extends Controller
                 'regex:/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/',
             ],
         ], [
-            'name.unique' => 'A role with this name already exists.',
+            'name.required' => 'Please enter a role name.',
+            'name.min' => 'Role Name must contain at least 3 characters.',
+            'name.max' => 'Role Name must not exceed 50 characters.',
+            'name.regex' => 'Role Name may only contain letters and single spaces between words.',
             'slug.unique' => 'A role with this slug already exists.',
             'slug.regex' => 'Slug may only contain lowercase letters, numbers, hyphens, and underscores.',
         ]);
 
         $role = Role::create([
-            'name' => $request->name,
-            'slug' => $request->slug,
+            'name' => $validated['name'],
+            'slug' => $validated['slug'],
         ]);
 
         $role->permissions()->sync([]);

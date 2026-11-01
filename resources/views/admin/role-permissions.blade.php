@@ -462,6 +462,9 @@
                                 <div class="global-control-wrap">
                                     <input type="text" id="newRoleName" name="name" class="form-input-custom"
                                         placeholder="e.g. Dental Intern" data-field-label="Role Name"
+                                        minlength="3" maxlength="50" pattern="[A-Za-z]+(?: [A-Za-z]+)*"
+                                        data-validation-rule="roleName" data-normalize-spaces="true" data-capitalize-words="true"
+                                        data-pattern-message="Role Name may only contain letters and single spaces between words."
                                         data-required-message="Please enter a role name." required autocomplete="off">
                                 </div>
                             </div>
@@ -1897,6 +1900,9 @@
                     .then(async res => {
                         const data = await res.json().catch(() => ({}));
                         if (!res.ok) {
+                            if (data.errors) {
+                                window.applyGlobalServerValidationErrors?.(form, data.errors);
+                            }
                             let errorMsg = 'Could not create role.';
                             if (data.errors) errorMsg = Object.values(data.errors).flat().join(' ');
                             else if (data.message) errorMsg = data.message;

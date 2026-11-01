@@ -84,6 +84,10 @@ class SecurityHeaders
         }
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        if ($request->user() || $request->routeIs('logout', 'oidc.*', 'login', 'backup.login', 'dashboard')) {
+            $response->headers->set('Cache-Control', 'no-store, private');
+            $response->headers->set('Pragma', 'no-cache');
+        }
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->remove('Content-Security-Policy');
         $response->headers->remove('Content-Security-Policy-Report-Only');

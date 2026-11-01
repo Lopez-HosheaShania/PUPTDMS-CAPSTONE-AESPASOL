@@ -18,14 +18,14 @@ class Role extends Model
             strtolower((string) $role->slug) === $normalizedSlug &&
             filled($role->name)
         ) {
-            return $role->name;
+            return ucwords($role->name);
         }
 
         return match ($normalizedSlug) {
             'super_admin', 'admin' => 'Administrator',
             'dentist', 'dentist_role' => 'Dentist',
             'patient', 'patient_role' => 'Patient',
-            default => $role?->name ?: ucwords(str_replace(['-', '_'], ' ', $normalizedSlug ?: 'user')),
+            default => ucwords($role?->name ?: str_replace(['-', '_'], ' ', $normalizedSlug ?: 'user')),
         };
     }
 
