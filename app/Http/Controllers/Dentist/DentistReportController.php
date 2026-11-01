@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use setasign\Fpdi\Fpdi;
 use App\Models\ServiceType;
+use App\Services\MonthlyDentalReport;
 
 class DentistReportController extends Controller
 {
@@ -293,7 +294,8 @@ class DentistReportController extends Controller
 
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($templatePage, 0, 0, $size['width'], $size['height'], true);
-            app(\App\Services\ReportSignatory::class)->draw($pdf, $template->document_type);
+            app(\App\Services\ReportSignatory::class)->draw($pdf,
+                $template->document_type === 'monthly_report' ? 'monthly_dental_report' : $template->document_type);
         }
 
         AuditLogger::log(
@@ -325,7 +327,7 @@ class DentistReportController extends Controller
             'gad_report' => 'gad-accomplishment-template.pdf',
             'dental_supplies_inventory' => 'dental-supplies-inventory-template.pdf',
             'medicine_inventory' => 'medicine-inventory-template.pdf',
-            'monthly_report' => 'monthly-report-template.pdf',
+            'monthly_report' => 'dental-monthly-report-template.pdf',
             'dental_cases' => 'dental-cases-template.pdf',
         ];
 
@@ -340,7 +342,7 @@ class DentistReportController extends Controller
             'GADR-DEFAULT' => 'gad-accomplishment-template.pdf',
             'DINV-DEFAULT' => 'dental-supplies-inventory-template.pdf',
             'MINV-DEFAULT' => 'medicine-inventory-template.pdf',
-            'MONTHLY-REPORT' => 'monthly-report-template.pdf',
+            'MONTHLY-REPORT' => 'dental-monthly-report-template.pdf',
             'DCASE-DEFAULT' => 'dental-cases-template.pdf',
         ];
 
@@ -1382,28 +1384,50 @@ class DentistReportController extends Controller
             ->header('Pragma', 'no-cache');
     }
 
-    public function downloadMonthlyReport(Request $request)
+    private function monthlyReportRules(): array
+    {
+        return [
+            'document_template_id' => ['required', 'integer', Rule::exists('document_templates', 'id')
+                ->where('document_type', 'monthly_report')->where('status', 'active')->whereNull('deleted_at')],
+            'date_from' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'date_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date_from', 'before_or_equal:today'],
+        ];
+    }
+
+    public function monthlyReportCounts(Request $request, MonthlyDentalReport $report)
+    {
+        abort_unless(Auth::check(), 403);
+        $validated = $request->validate($this->monthlyReportRules());
+        $from = Carbon::parse($validated['date_from'])->startOfDay();
+        $to = Carbon::parse($validated['date_to'] ?? $validated['date_from'])->endOfDay();
+        $preview = $report->preview($report->appointments($from, $to));
+
+        return response()->json([
+            ...$preview,
+            'counts_period' => $from->toDateString().'|'.$to->toDateString(),
+        ]);
+    }
+
+    public function downloadMonthlyReport(Request $request, MonthlyDentalReport $report)
     {
         if (! Auth::check()) {
             abort(403, 'Unauthorized');
         }
 
-        $validated = $request->validate([
-            'report_name' => ['required', 'string', 'max:100'],
-            'document_template_id' => ['required', 'integer', 'exists:document_templates,id'],
-            'date_from' => ['required', 'date', 'before_or_equal:today'],
-            'date_to' => ['nullable', 'date', 'after_or_equal:date_from', 'before_or_equal:today'],
-            'quantity' => ['required', 'integer', 'min:1', 'max:100'],
-        ]);
-
-        $templateRecord = DocumentTemplate::query()
-            ->whereKey($validated['document_template_id'])
-            ->where('status', 'active')
-            ->firstOrFail();
-
-        if ($templateRecord->document_type !== 'monthly_report') {
-            abort(422, 'This download route is only for Monthly Report.');
+        $countRules = ['report_counts' => ['required', 'array:'.implode(',', array_keys(MonthlyDentalReport::ROWS))]];
+        foreach (MonthlyDentalReport::ROWS as $row => $label) {
+            $countRules['report_counts.'.$row] = ['required', 'array:'.implode(',', array_keys(MonthlyDentalReport::COLUMNS))];
+            foreach (MonthlyDentalReport::COLUMNS as $column => $name) {
+                $countRules['report_counts.'.$row.'.'.$column] = ['required', 'integer', 'min:0', 'max:99999'];
+            }
         }
+        $validated = $request->validate([
+            ...$this->monthlyReportRules(),
+            ...$countRules,
+            'report_name' => ['required', 'string', 'max:100'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:100'],
+            'counts_confirmed' => ['required', 'accepted'],
+        ]);
 
         $from = Carbon::parse($validated['date_from'])->startOfDay();
 
@@ -1411,7 +1435,9 @@ class DentistReportController extends Controller
             ? Carbon::parse($validated['date_to'])->endOfDay()
             : $from->copy()->endOfDay();
 
-        $templatePath = storage_path('app/report-templates/monthly-report-template.pdf');
+        $request->validate(['counts_period' => ['required', Rule::in([$from->toDateString().'|'.$to->toDateString()])]]);
+
+        $templatePath = storage_path('app/report-templates/dental-monthly-report-template.pdf');
 
         if (! file_exists($templatePath)) {
             return response()->json([
@@ -1419,22 +1445,8 @@ class DentistReportController extends Controller
             ], 404);
         }
 
-        $appointments = Appointment::with(['patient', 'procedure'])
-            ->where('status', 'completed')
-            ->whereDate('appointment_date', '>=', $from->toDateString())
-            ->whereDate('appointment_date', '<=', $to->toDateString())
-            ->orderBy('appointment_date')
-            ->orderBy('appointment_time')
-            ->get()
-            ->filter(fn($appointment) => $appointment->patient);
-
-        if ($appointments->isEmpty()) {
-            return response()->json([
-                'message' => 'No completed dental services found for the selected Monthly Report date range.',
-            ], 422);
-        }
-
-        $reportData = $this->buildMonthlyReportData($appointments);
+        $appointments = $report->appointments($from, $to);
+        $counts = $validated['report_counts'];
 
         $pdf = new Fpdi('L', 'pt');
         $pdf->SetAutoPageBreak(false);
@@ -1450,14 +1462,15 @@ class DentistReportController extends Controller
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($template, 0, 0, $size['width'], $size['height'], true);
 
-            $this->drawMonthlyReportPage($pdf, $reportData, $from, $to);
-            app(\App\Services\ReportSignatory::class)->draw($pdf, 'monthly_report', $appointments);
+            $report->draw($pdf, $counts, $from, $to);
+            app(\App\Services\ReportSignatory::class)->draw($pdf, 'monthly_dental_report', $appointments);
         }
 
         AuditLogger::log(
             'download',
             'dentist_reports',
-            'Dentist downloaded Monthly Report PDF for ' . $appointments->count() . ' completed appointment(s).'
+            'Dentist downloaded Monthly Dental Report PDF with reviewed generation-only counts for '
+                .$appointments->count().' completed appointment(s).'
         );
 
         $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $validated['report_name']);
@@ -1744,167 +1757,6 @@ class DentistReportController extends Controller
         return $groups;
     }
 
-    private function buildMonthlyReportData($appointments): array
-    {
-        $rows = ['student', 'faculty', 'administrative', 'dependent'];
-
-        $columns = [
-            'actual_patient',
-            'rde',
-            'charting',
-            'inquiry',
-            'rx',
-            'med_rx',
-            'extraction',
-            'prophylaxis',
-            'temporary',
-            'permanent',
-            'panoramic',
-            'periapical',
-            'consent',
-            'clearance',
-            'certification',
-            'referral_dentist',
-            'referral_medical',
-            'suture_removal',
-            'reinstall_jacket',
-        ];
-
-        $data = [];
-
-        foreach ($rows as $row) {
-            foreach ($columns as $column) {
-                $data[$row][$column] = 0;
-            }
-
-            $data[$row]['patient_ids'] = [];
-        }
-
-        foreach ($appointments as $appointment) {
-            $patient = $appointment->patient;
-
-            if (! $patient) {
-                continue;
-            }
-
-            $rowKey = $this->classifyMonthlyReportPatient($patient);
-            $data[$rowKey]['patient_ids'][$patient->id] = true;
-
-            $columnKey = $this->classifyMonthlyReportService(
-                $this->getMonthlyReportServiceLabel($appointment)
-            );
-
-            if ($columnKey && array_key_exists($columnKey, $data[$rowKey])) {
-                $data[$rowKey][$columnKey]++;
-            }
-        }
-
-        foreach ($rows as $row) {
-            $data[$row]['actual_patient'] = count($data[$row]['patient_ids']);
-            unset($data[$row]['patient_ids']);
-        }
-
-        $data['total'] = [];
-
-        foreach ($columns as $column) {
-            $data['total'][$column] = 0;
-
-            foreach ($rows as $row) {
-                $data['total'][$column] += (int) ($data[$row][$column] ?? 0);
-            }
-        }
-
-        return $data;
-    }
-
-    private function classifyMonthlyReportPatient($patient): string
-    {
-        return $this->categorizePatientForReports($patient);
-    }
-
-    private function classifyMonthlyReportService(?string $serviceType): ?string
-    {
-        $service = strtolower(trim((string) $serviceType));
-
-        if ($service === '') {
-            return null;
-        }
-
-        if (str_contains($service, 'rde')) {
-            return 'rde';
-        }
-
-        if (str_contains($service, 'chart')) {
-            return 'charting';
-        }
-
-        if (str_contains($service, 'inquiry') || str_contains($service, 'consult')) {
-            return 'inquiry';
-        }
-
-        if (str_contains($service, 'med') && str_contains($service, 'rx')) {
-            return 'med_rx';
-        }
-
-        if (str_contains($service, 'rx') || str_contains($service, 'prescription')) {
-            return 'rx';
-        }
-
-        if (str_contains($service, 'extract')) {
-            return 'extraction';
-        }
-
-        if (str_contains($service, 'prophy') || str_contains($service, 'cleaning') || str_contains($service, 'oral prophylaxis')) {
-            return 'prophylaxis';
-        }
-
-        if (str_contains($service, 'temporary')) {
-            return 'temporary';
-        }
-
-        if (str_contains($service, 'permanent')) {
-            return 'permanent';
-        }
-
-        if (str_contains($service, 'panoramic')) {
-            return 'panoramic';
-        }
-
-        if (str_contains($service, 'periapical')) {
-            return 'periapical';
-        }
-
-        if (str_contains($service, 'consent')) {
-            return 'consent';
-        }
-
-        if (str_contains($service, 'clearance')) {
-            return 'clearance';
-        }
-
-        if (str_contains($service, 'cert')) {
-            return 'certification';
-        }
-
-        if (str_contains($service, 'dentist') && str_contains($service, 'referral')) {
-            return 'referral_dentist';
-        }
-
-        if (str_contains($service, 'medical') && str_contains($service, 'referral')) {
-            return 'referral_medical';
-        }
-
-        if (str_contains($service, 'suture')) {
-            return 'suture_removal';
-        }
-
-        if (str_contains($service, 'jacket')) {
-            return 'reinstall_jacket';
-        }
-
-        return 'inquiry';
-    }
-
     private function dentalCasesPages(
         array $caseGroups,
         int $rowsPerSection = 3
@@ -1991,82 +1843,11 @@ class DentistReportController extends Controller
         return $this->normalizeReportServiceLabel($diagnosis, '');
     }
 
-    private function getMonthlyReportServiceLabel(Appointment $appointment): string
-    {
-        $service = trim((string) ($appointment->service_type_name ?? ''));
-        if ($service === '' && filled($appointment->procedure?->diagnosis)) {
-            $service = trim((string) $appointment->procedure->diagnosis);
-        }
-
-        return $this->normalizeReportServiceLabel($service, 'Dental Service');
-    }
-
     private function normalizeReportServiceLabel(?string $value, string $fallback = 'Dental Service'): string
     {
         $value = preg_replace('/\s+/', ' ', trim((string) $value)) ?? '';
 
         return $value !== '' ? $value : $fallback;
-    }
-
-    private function drawMonthlyReportPage(Fpdi $pdf, array $reportData, Carbon $from, Carbon $to): void
-    {
-        $pdf->SetTextColor(0, 0, 0);
-
-        $pdf->SetFillColor(255, 255, 255);
-        $pdf->Rect(318, 50, 165, 18, 'F');
-
-        $pdf->SetFont('Helvetica', 'B', 8);
-        $this->drawCenteredPdfText(
-            $pdf,
-            397,
-            59,
-            $this->formatReportPeriodLabel($from, $to, 'As of'),
-            165,
-            8
-        );
-
-        $rowY = [
-            'student' => 176.8,
-            'faculty' => 207.2,
-            'administrative' => 237.8,
-            'dependent' => 268.3,
-            'total' => 304.8,
-        ];
-
-        $colX = [
-            'actual_patient' => 73.7,
-            'rde' => 134.6,
-            'charting' => 169.4,
-            'inquiry' => 205.2,
-            'rx' => 238.0,
-            'med_rx' => 273.1,
-            'extraction' => 308.9,
-            'prophylaxis' => 345.4,
-            'temporary' => 383.5,
-            'permanent' => 421.0,
-            'panoramic' => 458.9,
-            'periapical' => 497.3,
-            'consent' => 531.8,
-            'clearance' => 564.8,
-            'certification' => 602.4,
-            'referral_dentist' => 635.0,
-            'referral_medical' => 661.7,
-            'suture_removal' => 696.0,
-            'reinstall_jacket' => 735.5,
-        ];
-
-        foreach ($rowY as $rowKey => $y) {
-            foreach ($colX as $colKey => $x) {
-                $value = (int) ($reportData[$rowKey][$colKey] ?? 0);
-
-                if ($value === 0) {
-                    continue;
-                }
-
-                $pdf->SetFont('Helvetica', 'B', 7);
-                $this->drawPdfCell($pdf, $x, $y, (string) $value, 18, 7, 'C');
-            }
-        }
     }
 
     private function classifyDentalCasesPatient($patient): string
@@ -4215,10 +3996,7 @@ class DentistReportController extends Controller
             $isPwd = (bool) ($patient->is_pwd ?? false);
 
             $procedure = $appointment->procedure;
-            $visitType = strtolower(trim((string) ($appointment->visit_type ?? $appointment->concern ?? '')));
-            $isWalkIn = (bool) ($appointment->is_walk_in ?? false);
-
-            $isEmergency = $isWalkIn || str_contains($visitType, 'emergency');
+            $isEmergency = $appointment->is_emergency;
             $isNonEmergency = ! $isEmergency;
 
             $timeProcessed = DentalServicesProcedureTiming::timeProcessed($appointment)?->format('h:i A') ?? '';

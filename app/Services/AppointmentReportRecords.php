@@ -60,7 +60,8 @@ class AppointmentReportRecords
                     'minutes_processed' => round(($procedure?->procedure_duration_seconds ?? 0) / 60, 2),
                     'has_signature' => filled($signature), 'signature_path' => $signature,
                     'is_walk_in' => (bool) $appointment->is_walk_in,
-                    'visit_type' => $appointment->is_walk_in ? 'Emergency' : 'Non-Emergency',
+                    'is_emergency' => $appointment->is_emergency,
+                    'visit_type' => $appointment->is_emergency ? 'Emergency' : 'Non-Emergency',
                 ];
             });
     }

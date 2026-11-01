@@ -557,9 +557,7 @@ class DocumentTemplateRenderer
             $context['contact_number_' . $i] = $record?->contact ?? '—';
             $context['time_processed_' . $i] = $record?->dental_services_time_processed?->format('h:i A') ?? '—';
             $context['processing_time_' . $i] = $processingTime;
-            $isWalkIn = (bool) ($record?->is_walk_in ?? false);
-            $visitType = trim((string) ($record?->visit_type ?? ''));
-            $isEmergency = $isWalkIn || strcasecmp($visitType, 'Emergency') === 0;
+            $isEmergency = (bool) ($record?->is_emergency ?? false);
 
             $context['emergency_case_' . $i] = $isEmergency ? '✓' : '—';
             $context['non_emergency_case_' . $i] = $isEmergency ? '—' : '✓';

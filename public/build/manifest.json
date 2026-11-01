@@ -110,7 +110,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-BKUKIdFt.css",
+    "file": "assets/app-gLNeumzY.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -137,7 +137,7 @@
     ]
   },
   "resources/css/pages/admin/admin-shared.css": {
-    "file": "assets/admin-shared-DtvvoKs4.css",
+    "file": "assets/admin-shared-B2Qdd4z_.css",
     "src": "resources/css/pages/admin/admin-shared.css",
     "isEntry": true,
     "name": "admin-shared",
@@ -164,7 +164,7 @@
     ]
   },
   "resources/css/pages/admin/document-templates.css": {
-    "file": "assets/document-templates-DnS1oZMR.css",
+    "file": "assets/document-templates-Djxh7ubv.css",
     "src": "resources/css/pages/admin/document-templates.css",
     "isEntry": true,
     "name": "document-templates",
@@ -173,7 +173,7 @@
     ]
   },
   "resources/css/pages/admin/role-permissions.css": {
-    "file": "assets/role-permissions-CdUu6KFv.css",
+    "file": "assets/role-permissions-BuaCieas.css",
     "src": "resources/css/pages/admin/role-permissions.css",
     "isEntry": true,
     "name": "role-permissions",
@@ -272,7 +272,7 @@
     ]
   },
   "resources/css/pages/dentist/dentist-walk-in.css": {
-    "file": "assets/dentist-walk-in-C0CWXNtj.css",
+    "file": "assets/dentist-walk-in-CWY2mICf.css",
     "src": "resources/css/pages/dentist/dentist-walk-in.css",
     "isEntry": true,
     "name": "dentist-walk-in",
@@ -389,7 +389,7 @@
     ]
   },
   "resources/css/pages/shared/appointments.css": {
-    "file": "assets/appointments-CnFB7d7v.css",
+    "file": "assets/appointments-dD-Jrycz.css",
     "src": "resources/css/pages/shared/appointments.css",
     "isEntry": true,
     "name": "appointments",
@@ -425,7 +425,7 @@
     ]
   },
   "resources/css/pages/shared/inventory.css": {
-    "file": "assets/inventory-BIRLjjwq.css",
+    "file": "assets/inventory-DU4ivRRy.css",
     "src": "resources/css/pages/shared/inventory.css",
     "isEntry": true,
     "name": "inventory",
@@ -443,7 +443,7 @@
     ]
   },
   "resources/css/pages/shared/reports.css": {
-    "file": "assets/reports-5KLplZkK.css",
+    "file": "assets/reports-Br8txZlJ.css",
     "src": "resources/css/pages/shared/reports.css",
     "isEntry": true,
     "name": "reports",
@@ -470,7 +470,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-B588RZ_6.js",
+    "file": "assets/app-CArm4YIg.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -478,6 +478,7 @@
       "_preload-helper-I4rgV-VL.js"
     ],
     "dynamicImports": [
+      "resources/js/reports/monthly-report.js",
       "resources/js/records/patient-record-modal.js",
       "resources/js/odontogram/odontogram-preview.js",
       "resources/js/odontogram/odontogram-primary-stacked-three.js",
@@ -521,7 +522,7 @@
     "isDynamicEntry": true
   },
   "resources/js/forms/validation.js": {
-    "file": "assets/validation-DK-SuPAZ.js",
+    "file": "assets/validation-CG7I_x2y.js",
     "name": "validation",
     "src": "resources/js/forms/validation.js",
     "isDynamicEntry": true
@@ -560,6 +561,15 @@
     "src": "resources/js/records/patient-records-page.js",
     "isDynamicEntry": true
   },
+  "resources/js/reports/monthly-report.js": {
+    "file": "assets/monthly-report-BRnn6fL6.js",
+    "name": "monthly-report",
+    "src": "resources/js/reports/monthly-report.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/forms/validation.js"
+    ]
+  },
   "resources/js/reports/pdf-tools.js": {
     "file": "assets/pdf-tools-B4hmG6Cz.js",
     "name": "pdf-tools",
@@ -574,7 +584,7 @@
     ]
   },
   "resources/js/reports/report-signatory.js": {
-    "file": "assets/report-signatory-5GVgopzf.js",
+    "file": "assets/report-signatory-1imDiCj6.js",
     "name": "report-signatory",
     "src": "resources/js/reports/report-signatory.js",
     "isDynamicEntry": true,
@@ -584,19 +594,19 @@
     ]
   },
   "resources/js/security.js": {
-    "file": "assets/security-DyR4--37.js",
+    "file": "assets/security-RDuG0h5V.js",
     "name": "security",
     "src": "resources/js/security.js",
     "isEntry": true
   },
   "resources/js/ui/custom-select.js": {
-    "file": "assets/custom-select-DG7S4s1t.js",
+    "file": "assets/custom-select-CBKE4Jci.js",
     "name": "custom-select",
     "src": "resources/js/ui/custom-select.js",
     "isDynamicEntry": true
   },
   "resources/js/ui/date-picker.js": {
-    "file": "assets/date-picker-68p0YQPt.js",
+    "file": "assets/date-picker-Djv5hD8l.js",
     "name": "date-picker",
     "src": "resources/js/ui/date-picker.js",
     "isDynamicEntry": true,

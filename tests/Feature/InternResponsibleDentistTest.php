@@ -70,6 +70,7 @@ class InternResponsibleDentistTest extends TestCase
         $this->actingAs($intern)->withSession(['role' => 'dental_intern']);
         $response = $this->postJson(route('dentist.walk-in.start'), [
             'patient_id' => $patient->id, 'service_type' => 'Oral Check-up',
+            'is_emergency' => '1',
             'emergency_person' => 'Emergency Contact', 'emergency_number' => '09123456789',
             'emergency_relation' => 'Parent', 'diseases' => [],
         ])->assertOk();

@@ -51,6 +51,34 @@
                                 </div>
 
                                 <div class="booking-step-body">
+                                    <div class="booking-section-card">
+                                        <p class="booking-section-card-title">
+                                            <i class="fa-solid fa-notes-medical text-xs" aria-hidden="true"></i>
+                                            Case type
+                                            <span class="booking-section-card-title-line"></span>
+                                        </p>
+
+                                        <x-form-field label="Walk-in case type" required error-for="is_emergency">
+                                            <div class="global-question-options global-choice-group" role="radiogroup"
+                                                aria-label="Walk-in case type" data-global-choice-group>
+                                                <label class="global-radio-option">
+                                                    <input type="radio" name="is_emergency" value="1"
+                                                        class="global-radio-input" required
+                                                        data-required-message="Please select Emergency or Non-Emergency."
+                                                        @checked(old('is_emergency') === '1')>
+                                                    <span>Emergency</span>
+                                                </label>
+                                                <label class="global-radio-option">
+                                                    <input type="radio" name="is_emergency" value="0"
+                                                        class="global-radio-input" required
+                                                        data-required-message="Please select Emergency or Non-Emergency."
+                                                        @checked(old('is_emergency') === '0')>
+                                                    <span>Non-Emergency</span>
+                                                </label>
+                                            </div>
+                                        </x-form-field>
+                                    </div>
+
                                     <div class="booking-section-card" data-global-field data-walkin-patient-group>
                                         <p class="booking-section-card-title">
                                             <i class="fa-solid fa-user-magnifying-glass text-xs"></i>
@@ -4873,6 +4901,7 @@
             }
 
             document.getElementById("summaryBox").innerHTML = `
+${summaryCard("Case Type", "fa-notes-medical", row("Walk-in case type", get("is_emergency") === "1" ? "Emergency" : "Non-Emergency"))}
 ${summaryCard(
             "Patient Information",
             "fa-user",

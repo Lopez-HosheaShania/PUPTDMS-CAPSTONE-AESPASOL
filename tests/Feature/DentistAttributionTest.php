@@ -236,6 +236,12 @@ class DentistAttributionTest extends TestCase
             $response = $this->postJson(route('dentist.dentist.report.' . $route), [
                 'report_name' => 'Provider attribution', 'document_template_id' => $template->id,
                 'date_from' => today()->toDateString(), 'date_to' => today()->toDateString(), 'quantity' => 1,
+                ...($type === 'monthly_report' ? [
+                    'report_counts' => array_fill_keys(array_keys(\App\Services\MonthlyDentalReport::ROWS),
+                        array_fill_keys(array_keys(\App\Services\MonthlyDentalReport::COLUMNS), 0)),
+                    'counts_period' => today()->toDateString().'|'.today()->toDateString(),
+                    'counts_confirmed' => '1',
+                ] : []),
             ])->assertOk();
             $pdf = $response->getContent();
             preg_match_all('/stream\r?\n(.*?)\r?\nendstream/s', $pdf, $streams);

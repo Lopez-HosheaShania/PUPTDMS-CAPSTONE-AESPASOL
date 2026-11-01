@@ -112,6 +112,16 @@ class ReportSignatory
         return null;
     }
     private const LAYOUTS = [
+        'monthly_dental_report' => [
+            'name_y' => 374.4, 'role_y' => 385.8,
+            'font_size' => 8.4, 'role_font_size' => 8.4,
+            'font_family' => 'Times', 'role_style' => 'B',
+            'signature_y' => 352, 'signature_height' => 12,
+            'dentist' => [
+                'x' => 30.72, 'width' => 260, 'mask' => [29, 338, 265, 56],
+                'label' => ['Submitted by:', 30.72, 351.6, 8.4, 'B'],
+            ],
+        ],
         'gad_report' => [
             'name_y' => 518.569, 'role_y' => 532.819,
             'font_size' => 10.725, 'role_font_size' => 10.725,

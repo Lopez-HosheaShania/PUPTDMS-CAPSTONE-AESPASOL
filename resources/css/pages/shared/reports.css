@@ -2363,3 +2363,72 @@ hr.section-divider {
         grid-column: 1 / -1;
     }
 }
+/* Monthly counts use the shared table, form validation, and number controls. */
+.monthly-report-counts {
+    min-width: 0;
+    display: grid;
+    gap: .85rem;
+}
+
+.monthly-report-counts[hidden] {
+    display: none;
+}
+
+.monthly-report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+}
+
+.monthly-report-table-wrap {
+    overflow: auto;
+    max-height: 58vh;
+    max-width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.monthly-report-table {
+    width: 100%;
+    min-width: 980px;
+    table-layout: fixed;
+}
+
+.monthly-report-table th:first-child {
+    width: 200px;
+    white-space: normal;
+}
+
+.monthly-report-table td {
+    vertical-align: top;
+}
+
+.monthly-report-counts .monthly-report-table tbody td,
+.monthly-report-counts .monthly-report-table tfoot td,
+.monthly-report-table thead th {
+    padding: .55rem .35rem;
+}
+
+.monthly-report-table th:last-child {
+    width: 60px;
+}
+
+.monthly-report-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface);
+}
+
+.monthly-report-source {
+    display: block;
+    margin-top: .35rem;
+    color: var(--text-2);
+    font-size: .7rem;
+    font-weight: 400;
+    white-space: normal;
+}
+
+.monthly-report-table tfoot {
+    font-weight: 700;
+}

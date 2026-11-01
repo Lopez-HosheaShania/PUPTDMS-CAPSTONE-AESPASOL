@@ -20,12 +20,7 @@ class DptReport
             ->where('status', 'completed')->whereHas('patient')
             ->whereDate('appointment_date', '>=', $from->toDateString())
             ->whereDate('appointment_date', '<=', $to->toDateString())
-            ->where(function ($query) use ($emergency) {
-                $query->where('is_walk_in', $emergency);
-                if (! $emergency) {
-                    $query->orWhereNull('is_walk_in');
-                }
-            })
+            ->emergencyCase($emergency)
             ->orderBy('appointment_date')->orderBy('appointment_time')->orderBy('id')
             ->get()->map(function (Appointment $appointment) {
                 $patient = $appointment->patient;
