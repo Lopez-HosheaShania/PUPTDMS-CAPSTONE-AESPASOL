@@ -756,11 +756,29 @@ function loadDatePickerModule() {
 
 window.loadDatePickerModule = loadDatePickerModule;
 
-if ([...document.querySelectorAll('.js-flatpickr-time')].some(input => input.value.trim())) {
-    loadDatePickerModule()
-        .then(module => module.initGlobalDatePickers(document))
+if (
+    hasAny(
+        flatpickrSelectors
+    )
+) {
+    Promise.all([
+        loadCustomSelectModule(),
+        loadDatePickerModule(),
+    ])
+        .then(([
+            _customSelectModule,
+            datePickerModule,
+        ]) => {
+            datePickerModule
+                .initGlobalDatePickers(
+                    document
+                );
+        })
         .catch(error => {
-            console.error('Unable to initialize saved time display.', error);
+            console.error(
+                'Unable to initialize date pickers.',
+                error
+            );
         });
 }
 

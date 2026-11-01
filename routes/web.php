@@ -512,7 +512,7 @@ Route::prefix('admin')
         Route::post('/patients/{patient}/existing-appointment/save', [\App\Http\Controllers\Dentist\OdontogramController::class, 'storeExistingAppointment'])
             ->middleware('permission:create_procedure_records')
             ->name('admin.odontogram.existing-appointment.store');
-            
+
         /*
         |--------------------------------------------------------------------------
         | ACADEMIC PERIODS
@@ -1114,9 +1114,18 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.patient-booking-information');
 
+    Route::get('/walk-in/guest/check-identity', [WalkInController::class, 'checkGuestIdentity'])
+        ->middleware('permission:manage_walk_in_patients')
+        ->name('dentist.walk-in.guest.identity.check');
+
     Route::post('/walk-in/guest', [WalkInController::class, 'storeGuest'])
         ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.guest.store');
+
+    Route::post('/walk-in/guest', [WalkInController::class, 'storeGuest'])
+        ->middleware('permission:manage_walk_in_patients')
+        ->name('dentist.walk-in.guest.store');
+
     Route::post('/walk-in/start', [WalkInController::class, 'startWalkIn'])
         ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.start');
