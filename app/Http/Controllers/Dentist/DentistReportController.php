@@ -3358,28 +3358,10 @@ class DentistReportController extends Controller
                 $procedure = $appointment->procedure;
                 $demographics = $this->getPatientDemographics($patient);
 
-                $requestedDateTime = '';
-
-                if (!empty($appointment->appointment_date)) {
-                    $requestedDateTime = Carbon::parse($appointment->appointment_date)->format('m/d/y');
-                }
-
-                if (!empty($appointment->appointment_time)) {
-                    $timeText = $this->formatPdfTime($appointment->appointment_time);
-                    $requestedDateTime .= $requestedDateTime !== '' ? '  |  ' . $timeText : $timeText;
-                }
-
-                $processedDateTime = '';
-
-                if ($procedure?->procedure_completed_at) {
-                    $processedDateTime = Carbon::parse($procedure->procedure_completed_at)->format('m/d/y')
-                        . '  |  '
-                        . Carbon::parse($procedure->procedure_completed_at)->format('h:i A');
-                } elseif (!empty($appointment->updated_at)) {
-                    $processedDateTime = Carbon::parse($appointment->updated_at)->format('m/d/y')
-                        . '  |  '
-                        . Carbon::parse($appointment->updated_at)->format('h:i A');
-                }
+                $timeIn = DentalServicesProcedureTiming::requestedTimeIn($appointment);
+                $timeProcessed = DentalServicesProcedureTiming::timeProcessed($appointment);
+                $requestedDateTime = $timeIn?->format('m/d/y  |  h:i A') ?? '';
+                $processedDateTime = $timeProcessed?->format('m/d/y  |  h:i A') ?? '';
 
                 return [
                     'id' => $appointment->id,
@@ -3397,12 +3379,8 @@ class DentistReportController extends Controller
                     'minutes_processed' => $this->formatPdfDurationMinutes(
                         (int) ($procedure?->procedure_duration_seconds ?? 0)
                     ),
-                    'time_in' => !empty($appointment->appointment_time)
-                        ? $this->formatPdfTime($appointment->appointment_time)
-                        : null,
-                    'time_out' => $procedure?->procedure_completed_at
-                        ? Carbon::parse($procedure->procedure_completed_at)->format('h:i A')
-                        : null,
+                    'time_in' => $timeIn?->format('h:i A'),
+                    'time_out' => $timeProcessed?->format('h:i A'),
                     'has_signature' => filled($patient?->medicalHistory?->patient_signature),
                     'signature_path' => $patient?->medicalHistory?->patient_signature,
                     'signature_url' => filled($patient?->medicalHistory?->patient_signature)
@@ -4579,16 +4557,7 @@ class DentistReportController extends Controller
 
             $patient = $appointment->patient;
 
-            $requestedDateTime = '';
-
-            if (! empty($appointment->appointment_date)) {
-                $requestedDateTime = Carbon::parse($appointment->appointment_date)->format('m/d/y');
-            }
-
-            if (! empty($appointment->appointment_time)) {
-                $timeText = $this->formatPdfTime($appointment->appointment_time);
-                $requestedDateTime .= $requestedDateTime !== '' ? '  |  ' . $timeText : $timeText;
-            }
+            $requestedDateTime = DentalServicesProcedureTiming::requestedTimeIn($appointment)?->format('m/d/y  |  h:i A') ?? '';
 
             $patientName = trim((string) ($patient->name ?? 'Unknown Patient'));
 
@@ -4614,17 +4583,7 @@ class DentistReportController extends Controller
             }
 
             $procedure = $appointment->procedure;
-            $processedDateTime = '';
-
-            if ($procedure?->procedure_completed_at) {
-                $processedDateTime = Carbon::parse($procedure->procedure_completed_at)->format('m/d/y')
-                    . '  |  '
-                    . Carbon::parse($procedure->procedure_completed_at)->format('h:i A');
-            } elseif (! empty($appointment->updated_at)) {
-                $processedDateTime = Carbon::parse($appointment->updated_at)->format('m/d/y')
-                    . '  |  '
-                    . Carbon::parse($appointment->updated_at)->format('h:i A');
-            }
+            $processedDateTime = DentalServicesProcedureTiming::timeProcessed($appointment)?->format('m/d/y  |  h:i A') ?? '';
 
             $minutesProcessed = $this->formatPdfDurationMinutes(
                 (int) ($procedure?->procedure_duration_seconds ?? 0)

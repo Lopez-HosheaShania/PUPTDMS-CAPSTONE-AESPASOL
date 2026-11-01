@@ -81,6 +81,39 @@ class DptReportTest extends TestCase
         }
     }
 
+    public function test_guest_surname_is_saved(): void
+    {
+        $this->withoutMiddleware();
+        $response = $this->postJson(route('dentist.walk-in.guest.store'), [
+            'guest_first_name' => 'Levi', 'guest_middle_name' => 'P.', 'guest_last_name' => 'Dela Cruz',
+            'guest_suffix' => 'Jr.', 'guest_email' => 'dpt-guest@example.test',
+            'guest_phone' => '09123456789', 'guest_gender' => 'Male',
+            'guest_birthdate' => '2000-01-01', 'guest_patient_type' => 'dependent', 'guest_is_pwd' => false,
+        ])->assertOk()->assertJsonPath('patient.last_name', 'Dela Cruz');
+
+        $patient = Patient::findOrFail($response->json('patient.id'));
+        $this->assertSame('Dela Cruz', $patient->user->fresh()->last_name);
+        $appointment = $this->appointment(true);
+        $appointment->update(['patient_id' => $patient->id]);
+        $rows = app(DptReport::class)->records(Carbon::parse('2026-09-01'), Carbon::parse('2026-09-03'), true);
+        $this->assertSame('Dela Cruz', $rows->firstWhere('id', $appointment->id)->surname);
+    }
+
+    public function test_dpt_shows_surname_only(): void
+    {
+        foreach ([true, false] as $walkIn) {
+            foreach (['Levi Romero' => 'Romero', 'Levi Dela Cruz Jr.' => 'Dela Cruz', 'Del Rosario, Levi' => 'Del Rosario'] as $name => $surname) {
+                $appointment = $this->appointment($walkIn);
+                $patient = $appointment->patient;
+                $patient->user->update(['last_name' => null]);
+                $patient->update(['name' => $name]);
+                $rows = app(DptReport::class)->records(Carbon::parse('2026-09-01'), Carbon::parse('2026-09-03'), $walkIn);
+                $this->assertSame($surname, $rows->firstWhere('id', $appointment->id)->surname);
+                $this->assertSame($name, $patient->fresh()->getRawOriginal('name'));
+            }
+        }
+    }
+
     public function test_empty_ranges_invalid_dates_and_inactive_templates_are_rejected(): void
     {
         $this->travelTo(Carbon::parse('2026-09-15'));

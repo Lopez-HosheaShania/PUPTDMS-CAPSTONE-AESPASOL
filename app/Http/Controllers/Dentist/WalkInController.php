@@ -2559,30 +2559,34 @@ class WalkInController extends Controller
             'guest_first_name' => [
                 'required',
                 'string',
-                'max:100',
+                'min:2',
+                'max:20',
             ],
 
             'guest_middle_name' => [
                 'nullable',
                 'string',
-                'max:100',
+                'min:1',
+                'max:20',
             ],
 
             'guest_last_name' => [
                 'required',
                 'string',
-                'max:100',
+                'min:2',
+                'max:20',
             ],
 
             'guest_suffix' => [
                 'nullable',
                 'string',
-                'max:20',
+                'in:Jr.,Sr.,II,III,IV,V',
             ],
 
             'guest_email' => [
                 'required',
                 'email',
+                'min:5',
                 'max:255',
                 'unique:users,email',
                 'unique:patients,email',
@@ -2591,6 +2595,7 @@ class WalkInController extends Controller
             'guest_phone' => [
                 'required',
                 'string',
+                'size:11',
                 'regex:/^09\d{9}$/',
             ],
 
@@ -2607,12 +2612,14 @@ class WalkInController extends Controller
             'guest_birthdate' => [
                 'required',
                 'date',
+                'after_or_equal:1900-01-01',
                 'before:today',
             ],
 
             'guest_program' => [
                 'nullable',
                 'string',
+                'min:1',
                 'max:255',
                 'required_if:guest_patient_type,student',
             ],
@@ -2620,7 +2627,7 @@ class WalkInController extends Controller
             'guest_student_number' => [
                 'nullable',
                 'string',
-                'max:100',
+                'size:15',
                 'required_if:guest_patient_type,student',
                 'unique:patient_student_information,student_no',
             ],
@@ -2628,7 +2635,7 @@ class WalkInController extends Controller
             'guest_faculty_code' => [
                 'nullable',
                 'string',
-                'max:100',
+                'size:12',
                 'required_if:guest_patient_type,faculty',
                 'unique:patient_faculty_information,faculty_code',
             ],
@@ -2636,6 +2643,7 @@ class WalkInController extends Controller
             'guest_year_level' => [
                 'nullable',
                 'string',
+                'min:1',
                 'max:50',
                 'required_if:guest_patient_type,student',
             ],
@@ -2643,6 +2651,7 @@ class WalkInController extends Controller
             'guest_section' => [
                 'nullable',
                 'string',
+                'min:1',
                 'max:50',
                 'required_if:guest_patient_type,student',
             ],
@@ -2652,6 +2661,10 @@ class WalkInController extends Controller
                 'boolean',
             ],
         ], [
+            'guest_first_name.max' => 'First Name must not exceed 20 characters.',
+            'guest_middle_name.max' => 'Middle Name must not exceed 20 characters.',
+            'guest_last_name.max' => 'Last Name must not exceed 20 characters.',
+
             'guest_email.unique' =>
             'This email is already associated with an existing patient account. Please select the patient from Existing / Unified DB instead.',
 
@@ -2772,6 +2785,16 @@ class WalkInController extends Controller
                         ?? ''
                     )
                 );
+        }
+
+        foreach (['guest_first_name', 'guest_middle_name', 'guest_last_name'] as $field) {
+            if (isset($validated[$field])) {
+                $validated[$field] = mb_convert_case(
+                    mb_strtolower(trim($validated[$field]), 'UTF-8'),
+                    MB_CASE_TITLE,
+                    'UTF-8'
+                );
+            }
         }
 
         $selectedPatientType = $this->normalizeGuestPatientType(
@@ -3741,7 +3764,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'first_name') &&
             array_key_exists('first_name', $data)
         ) {
             $userData['first_name'] =
@@ -3751,7 +3773,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'middle_name') &&
             array_key_exists('middle_name', $data)
         ) {
             $userData['middle_name'] =
@@ -3761,7 +3782,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'last_name') &&
             array_key_exists('last_name', $data)
         ) {
             $userData['last_name'] =
@@ -3771,7 +3791,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'suffix_name') &&
             array_key_exists('suffix_name', $data)
         ) {
             $userData['suffix_name'] =

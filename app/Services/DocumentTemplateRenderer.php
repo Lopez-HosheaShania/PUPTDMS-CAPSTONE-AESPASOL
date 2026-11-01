@@ -489,13 +489,13 @@ class DocumentTemplateRenderer
 
             $officeOrProgram = $record?->office_type ?: ($record?->program_code ?: '—');
 
-            $context['row_' . $i . '_date'] = $record?->treatment_date?->format('m/d/y') ?? '—';
+            $context['row_' . $i . '_date'] = $record?->time_in?->format('m/d/y g:i A') ?? '—';
             $context['row_' . $i . '_patient_name'] = $record?->patient_name ?? '—';
             $context['row_' . $i . '_contact'] = $contact !== '' ? $contact : '—';
             $context['row_' . $i . '_office'] = $officeOrProgram;
             $context['row_' . $i . '_gender'] = $record?->gender ?? '—';
             $context['row_' . $i . '_treatment'] = $record?->treatment_done ?? '—';
-            $context['row_' . $i . '_processed'] = $record?->updated_at?->format('m/d/y g:i A') ?? '—';
+            $context['row_' . $i . '_processed'] = $record?->time_out?->format('m/d/y g:i A') ?? '—';
             $context['row_' . $i . '_minutes'] = $record ? (string) $record->minutes_processed : '—';
             $context['row_' . $i . '_signature'] = $record?->has_signature ? '✓' : '—';
         }
