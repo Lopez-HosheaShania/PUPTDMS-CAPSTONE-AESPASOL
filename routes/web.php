@@ -1072,6 +1072,10 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.monthly-report-download');
 
+    Route::post('/report/monthly-report-counts', [\App\Http\Controllers\Dentist\DentistReportController::class, 'monthlyReportCounts'])
+        ->middleware('permission:create_report_files')
+        ->name('dentist.dentist.report.monthly-report-counts');
+
     Route::get('/report/weekly-data', [\App\Http\Controllers\Dentist\DentistReportController::class, 'weeklyData'])
         ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.weekly-data');

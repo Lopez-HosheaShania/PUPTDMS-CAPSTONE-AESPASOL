@@ -194,7 +194,8 @@ abstract class InventoryController extends Controller
             ],
 
             'stock_no' => [
-                'required',
+                'nullable',
+                'string',
                 'regex:/^\d{2}-\d{3}$/',
                 $stockNumberRule,
             ],

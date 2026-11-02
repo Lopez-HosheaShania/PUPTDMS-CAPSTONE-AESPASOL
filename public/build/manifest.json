@@ -110,7 +110,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-DHhLylyF.css",
+    "file": "assets/app-gLNeumzY.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -443,7 +443,7 @@
     ]
   },
   "resources/css/pages/shared/reports.css": {
-    "file": "assets/reports-gkx-9sME.css",
+    "file": "assets/reports-BXRLkR1e.css",
     "src": "resources/css/pages/shared/reports.css",
     "isEntry": true,
     "name": "reports",
@@ -470,7 +470,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BsjQAz03.js",
+    "file": "assets/app-BF1lkTty.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -478,6 +478,7 @@
       "_preload-helper-I4rgV-VL.js"
     ],
     "dynamicImports": [
+      "resources/js/reports/monthly-report.js",
       "resources/js/records/patient-record-modal.js",
       "resources/js/odontogram/odontogram-preview.js",
       "resources/js/odontogram/odontogram-primary-stacked-three.js",
@@ -521,7 +522,7 @@
     "isDynamicEntry": true
   },
   "resources/js/forms/validation.js": {
-    "file": "assets/validation-g9FB6Sp4.js",
+    "file": "assets/validation-DleHcTDN.js",
     "name": "validation",
     "src": "resources/js/forms/validation.js",
     "isDynamicEntry": true
@@ -560,6 +561,15 @@
     "src": "resources/js/records/patient-records-page.js",
     "isDynamicEntry": true
   },
+  "resources/js/reports/monthly-report.js": {
+    "file": "assets/monthly-report-BdV4Mo6n.js",
+    "name": "monthly-report",
+    "src": "resources/js/reports/monthly-report.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/forms/validation.js"
+    ]
+  },
   "resources/js/reports/pdf-tools.js": {
     "file": "assets/pdf-tools-B4hmG6Cz.js",
     "name": "pdf-tools",
@@ -574,7 +584,7 @@
     ]
   },
   "resources/js/reports/report-signatory.js": {
-    "file": "assets/report-signatory-C6CHYWsB.js",
+    "file": "assets/report-signatory-BFhXafFO.js",
     "name": "report-signatory",
     "src": "resources/js/reports/report-signatory.js",
     "isDynamicEntry": true,

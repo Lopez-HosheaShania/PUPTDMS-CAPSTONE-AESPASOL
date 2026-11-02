@@ -86,8 +86,6 @@ class DentalServicesRecordController extends Controller
         $gender = strtolower(trim((string) ($patient->gender ?? $patient->user?->gender ?? '')));
         $isMale = str_starts_with($gender, 'm');
         $isFemale = str_starts_with($gender, 'f');
-        $visitType = strtolower(trim((string) ($appointment->visit_type ?? $appointment->concern ?? '')));
-        $isWalkIn = (bool) ($appointment->is_walk_in ?? false);
 
         $programDisplay = trim((string) ($patient->course_code ?? ''));
 
@@ -142,7 +140,7 @@ class DentalServicesRecordController extends Controller
             'contact' => trim((string) ($patient->phone ?? '')),
             'timeOut' => $timeOut,
             'duration' => $duration,
-            'type' => ($isWalkIn || str_contains($visitType, 'emergency')) ? 'Emergency' : 'Non-Emergency',
+            'type' => $appointment->is_emergency ? 'Emergency' : 'Non-Emergency',
             'department' => $this->departmentLabel($patient),
             'has_signature' => filled($patient?->medicalHistory?->patient_signature),
             'signature_url' => filled($patient?->medicalHistory?->patient_signature)

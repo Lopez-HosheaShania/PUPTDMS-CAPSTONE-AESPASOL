@@ -16,6 +16,7 @@ class Appointment extends Model
     use \App\Models\Concerns\ScopesClinicalPatients;
 
     private const DETAIL_FIELDS = [
+        'is_emergency' => 'caseClassification',
         'reserved_booking_period_id' => 'reservedBookingDetails',
         'reserved_booking_period_slot_id' => 'reservedBookingDetails',
         'is_follow_up' => 'followUpDetails',
@@ -30,9 +31,9 @@ class Appointment extends Model
         'follow_up_one_day_reminder_sent_at' => 'reminderState',
     ];
 
-    protected $with = ['transferDetails', 'reminderState', 'reservedBookingDetails', 'followUpDetails'];
+    protected $with = ['transferDetails', 'reminderState', 'reservedBookingDetails', 'followUpDetails', 'caseClassification'];
 
-    protected $hidden = ['transferDetails', 'reminderState', 'reservedBookingDetails', 'followUpDetails'];
+    protected $hidden = ['transferDetails', 'reminderState', 'reservedBookingDetails', 'followUpDetails', 'caseClassification'];
 
     private array $pendingDetails = [];
 
@@ -50,6 +51,27 @@ class Appointment extends Model
     public function closure()
     {
         return $this->hasOne(AppointmentClosure::class);
+    }
+
+    public function caseClassification()
+    {
+        return $this->hasOne(AppointmentCaseClassification::class);
+    }
+
+    public function scopeEmergencyCase(Builder $query, bool $emergency = true): Builder
+    {
+        return $query->where(function (Builder $cases) use ($emergency) {
+            $cases->whereHas('caseClassification', fn (Builder $classification) => $classification->where('is_emergency', $emergency))
+                ->orWhere(function (Builder $legacy) use ($emergency) {
+                    $legacy->whereDoesntHave('caseClassification')
+                        ->where(function (Builder $walkIns) use ($emergency) {
+                            $walkIns->where('is_walk_in', $emergency);
+                            if (! $emergency) {
+                                $walkIns->orWhereNull('is_walk_in');
+                            }
+                        });
+                });
+        });
     }
 
     public function reservedBookingDetails()
@@ -101,6 +123,11 @@ class Appointment extends Model
             }
 
             $value = $this->getRelationValue($relation)?->getAttribute($key);
+
+            if ($key === 'is_emergency') {
+                // Explicit classification wins; unclassified legacy records retain their old meaning.
+                return $value !== null ? (bool) $value : (bool) $this->is_walk_in;
+            }
 
             return $key === 'is_follow_up' ? (bool) $value : $value;
         }
@@ -204,6 +231,7 @@ class Appointment extends Model
         'follow_up_today_reminder_sent_at',
         'follow_up_one_day_reminder_sent_at',
         'is_walk_in',
+        'is_emergency',
     ];
 
     protected $casts = [

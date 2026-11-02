@@ -393,7 +393,6 @@
 @section('scripts')
     <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const DTR_LIST_URL = "{{ route('dentist.dentist.reports.daily-treatment-record.list') }}";
-        const DTR_STORE_URL = "{{ route('dentist.dentist.reports.daily-treatment-record.store') }}";
         const DTR_DOWNLOAD_URL = "{{ route('dentist.dentist.report.daily-treatment-record-download') }}";
         const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
             "{{ csrf_token() }}";

@@ -18,6 +18,21 @@ class DailyTreatmentRecordRoutingTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_daily_treatment_page_opens_without_the_removed_manual_entry_route(): void
+    {
+        $this->withoutExceptionHandling();
+        $dentist = $this->makeDentist();
+
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('dentist.dentist.reports.daily-treatment-record.store'));
+        $this->actingAs($dentist)->withSession(['role' => 'dentist'])
+            ->get(route('dentist.dentist.report.daily-treatment'))
+            ->assertOk()->assertViewIs('dentist.daily-treatment')
+            ->assertSee('Daily Treatment Record')
+            ->assertSee(route('dentist.dentist.reports.daily-treatment-record.list'), false)
+            ->assertSee(route('dentist.dentist.report.daily-treatment-record-download'), false)
+            ->assertDontSee('DTR_STORE_URL', false);
+    }
+
     public function test_daily_treatment_list_groups_alumni_and_dependent_records_without_affecting_existing_classifications(): void
     {
         $dentist = $this->makeDentist();

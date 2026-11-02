@@ -2363,3 +2363,137 @@ hr.section-divider {
         grid-column: 1 / -1;
     }
 }
+
+#createReportModal .monthly-report-counts {
+    min-width: 0;
+    display: grid;
+    gap: .6rem;
+}
+
+#createReportModal .monthly-report-counts[hidden] {
+    display: none;
+}
+
+#createReportModal .monthly-report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+}
+
+#createReportModal .monthly-report-counts > .modal-helper-text {
+    margin: 0;
+    font-size: .74rem;
+    font-style: normal;
+    line-height: 1.45;
+}
+
+#createReportModal .monthly-report-table-wrap {
+    overflow: auto;
+    max-height: 58vh;
+    max-width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+#createReportModal [data-monthly-count-group] {
+    min-width: 0;
+}
+
+#createReportModal [data-monthly-count-group] > .global-field-error {
+    white-space: normal;
+}
+
+#createReportModal [data-monthly-count-group] > .global-field-error.show {
+    margin-bottom: .625rem;
+}
+
+#createReportModal .monthly-report-table {
+    width: 100%;
+    min-width: 760px;
+    table-layout: fixed;
+}
+
+#createReportModal .monthly-report-table th:first-child {
+    width: 190px;
+    white-space: normal;
+}
+
+#createReportModal .monthly-report-table tbody th,
+#createReportModal .monthly-report-table tfoot th {
+    padding: .4rem .6rem;
+    font-size: .78rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: left;
+    vertical-align: middle;
+}
+
+#createReportModal .monthly-report-table tbody td,
+#createReportModal .monthly-report-table tfoot td,
+#createReportModal .monthly-report-table thead th {
+    padding: .35rem .3rem;
+    vertical-align: middle;
+}
+
+#createReportModal .monthly-report-table th:last-child {
+    width: 54px;
+}
+
+#createReportModal .monthly-report-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface);
+    font-size: .65rem;
+    line-height: 1.3;
+}
+
+#createReportModal .monthly-report-source {
+    display: block;
+    margin-top: .15rem;
+    color: var(--text-2);
+    font-size: .66rem;
+    font-weight: 400;
+    white-space: normal;
+    line-height: 1.3;
+}
+
+#createReportModal .monthly-report-table output {
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+#createReportModal .monthly-count-stepper {
+    grid-template-columns: 28px minmax(42px, 1fr) 28px;
+    gap: 2px;
+    height: 34px;
+    min-height: 34px;
+    padding: 2px;
+    border-radius: 9px;
+}
+
+#createReportModal .monthly-count-stepper .global-number-stepper-btn {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    min-height: 28px;
+    border-radius: 6px;
+    font-size: .7rem;
+}
+
+#createReportModal .monthly-count-stepper .global-number-stepper-input {
+    height: 28px;
+    min-height: 28px;
+    padding: 0 .1rem;
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+#createReportModal .monthly-report-counts .global-checkbox-label {
+    font-size: .76rem;
+    line-height: 1.4;
+}
+
+#createReportModal .monthly-report-table tfoot {
+    font-weight: 700;
+}

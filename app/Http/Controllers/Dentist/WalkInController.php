@@ -3038,6 +3038,7 @@ class WalkInController extends Controller
 
         $validated = $request->validate([
             'patient_id' => ['required', 'exists:patients,id'],
+            'is_emergency' => ['required', 'boolean'],
             'service_type' => ['required', 'string', 'max:255'],
             'concern' => ['nullable', 'string', 'max:1000'],
 
@@ -3111,6 +3112,7 @@ class WalkInController extends Controller
 
         $appointmentData = [
             'patient_id' => $patient->id,
+            'is_emergency' => (bool) $validated['is_emergency'],
             'dentist_id' => app(\App\Services\AssignedDentistService::class)->requireForPatient($patient->id, Auth::user())->id,
             'service_type_id' => $serviceType->id,
             'appointment_date' => $now->toDateString(),
