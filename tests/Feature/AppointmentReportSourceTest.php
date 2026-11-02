@@ -71,6 +71,23 @@ class AppointmentReportSourceTest extends TestCase
         $this->travelBack();
     }
 
+    public function test_dental_services_pdf_department_uses_category_for_non_students(): void
+    {
+        $method = new \ReflectionMethod(DentistReportController::class, 'dentalServicesCourseYearSectionDisplay');
+        $controller = new DentistReportController;
+        foreach ([
+            ['faculty', 'Bachelor of Secondary Education', 'Faculty'],
+            ['administrative', null, 'Administrative'],
+            ['administrative', 'Old program', 'Administrative'],
+            ['dependent_alumni', null, 'Dependent'],
+            ['student', 'BSIT', 'BSIT - Y3 / 1'],
+        ] as [$classification, $program, $expected]) {
+            $patient = new Patient(['classification' => $classification, 'course_code' => $program,
+                'course_name' => $program, 'year_level' => '3', 'section' => '1']);
+            $this->assertSame($expected, $method->invoke($controller, $patient));
+        }
+    }
+
     public function test_dental_services_templates_preserve_compound_surnames_without_changing_daily_treatment_names(): void
     {
         $this->travelTo(Carbon::parse('2026-09-07'));

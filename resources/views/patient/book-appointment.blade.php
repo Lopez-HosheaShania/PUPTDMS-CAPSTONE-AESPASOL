@@ -2901,7 +2901,8 @@
             window.verifyPersonalInformationBeforeBooking(() => {
                 formSubmitting = true;
                 clearTimeout(draftAutosaveTimer);
-                form.submit();
+                window.DiscardChanges?.markSubmitting(form);
+                HTMLFormElement.prototype.submit.call(form);
             });
 
             return true;

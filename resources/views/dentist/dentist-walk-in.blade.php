@@ -475,7 +475,8 @@
 
                                 <div class="booking-step-body">
                                     <x-booking.medical-history-fields :questions="$medicalQuestions" :diseases="$diseases" mode="standard"
-                                        :defaults="[]" :selected-diseases="old('diseases', [])" :dynamic-female="true" />
+                                        :defaults="[]" :selected-diseases="old('diseases', [])" :dynamic-female="true"
+                                        emergency-name-rule="emergencyContactName" />
 
                                     <x-booking.signature mode="draw-only" label="Patient's Signature"
                                         draw-title="Draw the patient's signature here"

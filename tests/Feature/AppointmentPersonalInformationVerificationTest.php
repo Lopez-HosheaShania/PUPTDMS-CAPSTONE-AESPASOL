@@ -233,6 +233,53 @@ class AppointmentPersonalInformationVerificationTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public static function facultyStudentIdentifiers(): array
+    {
+        return [
+            'no student identifiers' => [null, null],
+            'course code present' => [null, 'BSIT'],
+            'old student number present' => ['2026-001', 'BSIT'],
+        ];
+    }
+
+    #[DataProvider('facultyStudentIdentifiers')]
+    public function test_incomplete_faculty_can_continue_booking_even_with_student_identifiers(?string $studentNumber, ?string $course): void
+    {
+        $this->withoutVite();
+        auth()->user()->patient->update([
+            'classification' => 'faculty', 'student_no' => $studentNumber,
+            'course_code' => $course, 'phone' => null,
+        ]);
+
+        $this->getJson(route('book.appointment.verify-personal-information'))->assertOk()
+            ->assertJsonPath('verified', true)
+            ->assertJsonPath('warning.code', 'faculty_information_incomplete')
+            ->assertJsonPath('warning.can_continue', true)
+            ->assertJsonPath('warning.title', 'Please Complete Your Information');
+
+        foreach (['patient.book.appointment', 'book.appointment.create', 'appointment.create'] as $route) {
+            $this->get(route($route))->assertOk()->assertViewIs('patient.book-appointment')
+                ->assertSee('id="personalInformationVerificationContinue"', false)
+                ->assertSee('Continue Booking');
+        }
+        foreach (['appointment.store', 'book.appointment.store'] as $route) {
+            $response = $this->postJson(route($route));
+            $response->assertUnprocessable()->assertJsonValidationErrors('appointment_date');
+            $this->assertArrayNotHasKey('code', $response->json());
+        }
+        Http::assertNothingSent();
+    }
+
+    public function test_complete_faculty_does_not_receive_a_completion_reminder(): void
+    {
+        auth()->user()->patient->update(['classification' => 'faculty']);
+        $this->completeLocalProfile();
+
+        $this->getJson(route('book.appointment.verify-personal-information'))->assertOk()
+            ->assertExactJson(['verified' => true]);
+        Http::assertNothingSent();
+    }
+
     public function test_default_patient_category_without_identifiers_cannot_bypass_verification(): void
     {
         auth()->user()->patient->update(['classification' => 'dependent_alumni', 'student_no' => null, 'course_code' => null]);

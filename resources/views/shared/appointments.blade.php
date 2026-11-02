@@ -554,7 +554,10 @@
                                         $isFacultyPatient =
                                             $patient?->classification === 'faculty' || filled($patient?->faculty_code);
 
-                                        if ($isFacultyPatient) {
+                                        if (in_array(strtolower(trim((string) $patient?->classification)), ['administrative', 'administrative personnel'], true)) {
+                                            $program = 'Administrative';
+                                            $programFull = 'Administrative';
+                                        } elseif ($isFacultyPatient) {
                                             $program = 'Faculty';
                                             $programFull = 'Faculty';
                                         } else {
@@ -585,8 +588,9 @@
 
                                         $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
 
-                                        $timeLabel = $appt->appointment_time
-                                            ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
+                                        $displayTime = \App\Support\DentalServicesProcedureTiming::requestedTimeIn($appt);
+                                        $timeLabel = $displayTime
+                                            ? $displayTime->format('g:i A')
                                             : '—';
 
                                         $serviceLabel =
@@ -739,7 +743,7 @@
                                     <div class="appt-card {{ $shouldHighlightToday ? 'is-today' : '' }}"
                                         data-appt-id="{{ $appt->id }}" data-period="{{ $period }}"
                                         data-date="{{ $appt->appointment_date }}"
-                                        data-time="{{ $appt->appointment_time ?? '' }}"
+                                        data-time="{{ $displayTime?->format('H:i:s') ?? '' }}"
                                         data-patient="{{ strtolower($patientName) }}"
                                         data-student-no="{{ strtolower($studentNumber) }}"
                                         data-program="{{ strtolower($programFull) }}"
@@ -1000,7 +1004,10 @@
                                     $isFacultyPatient =
                                         $patient?->classification === 'faculty' || filled($patient?->faculty_code);
 
-                                    if ($isFacultyPatient) {
+                                    if (in_array(strtolower(trim((string) $patient?->classification)), ['administrative', 'administrative personnel'], true)) {
+                                        $program = 'Administrative';
+                                        $programFull = 'Administrative';
+                                    } elseif ($isFacultyPatient) {
                                         $program = 'Faculty';
                                         $programFull = 'Faculty';
                                     } else {
@@ -1027,8 +1034,9 @@
 
                                     $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
 
-                                    $timeLabel = $appt->appointment_time
-                                        ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
+                                    $displayTime = \App\Support\DentalServicesProcedureTiming::requestedTimeIn($appt);
+                                    $timeLabel = $displayTime
+                                        ? $displayTime->format('g:i A')
                                         : '—';
 
                                     $serviceLabel =
@@ -1160,7 +1168,7 @@
                                 <div class="mobile-appt-card {{ $shouldHighlightToday ? 'is-today' : '' }}"
                                     data-appt-id="{{ $appt->id }}" data-period="{{ $period }}"
                                     data-date="{{ $appt->appointment_date }}"
-                                    data-time="{{ $appt->appointment_time ?? '' }}"
+                                    data-time="{{ $displayTime?->format('H:i:s') ?? '' }}"
                                     data-patient="{{ strtolower($patientName) }}"
                                     data-student-no="{{ strtolower($studentNumber) }}"
                                     data-program="{{ strtolower($programFull) }}"

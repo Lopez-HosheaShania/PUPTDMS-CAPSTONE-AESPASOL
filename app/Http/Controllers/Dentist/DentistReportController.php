@@ -3189,8 +3189,13 @@ class DentistReportController extends Controller
             return '';
         }
 
-        if ($this->categorizePatientForReports($patient) === 'faculty') {
-            return 'Faculty';
+        $category = $this->categorizePatientForReports($patient);
+        if ($category !== 'student') {
+            return match ($category) {
+                'faculty' => 'Faculty',
+                'administrative' => 'Administrative',
+                default => 'Dependent',
+            };
         }
 
         $programOrDept = trim((string) ($patient->course_code ?? ''));
@@ -3228,11 +3233,7 @@ class DentistReportController extends Controller
         }
 
         if ($category === 'faculty') {
-            return trim((string) (
-                $patient->faculty_code
-                ?? $patient->course_name
-                ?? 'Faculty'
-            )) ?: 'Faculty';
+            return 'Faculty';
         }
 
         if ($category === 'dependent') {

@@ -150,6 +150,12 @@ class CmsIntegrationTest extends TestCase
         $this->assertSame($role, $user->role->slug);
         $this->assertSame($status, $user->status);
         $this->assertSame('CMS Patient', $user->name);
+        if ($role === 'patient') {
+            $this->assertSame('administrative', $user->patient->classification);
+            $this->assertSame('09123456789', $user->patient->phone);
+        } else {
+            $this->assertNull($user->patient);
+        }
         $this->assertNull($user->password);
         $this->assertNull($user->sso_user_id, 'The CMS profile UUID must not be assumed to be the SSO subject.');
         $this->getJson(route('admin.user_management', ['search' => 'cms@example.test']), [
@@ -170,6 +176,11 @@ class CmsIntegrationTest extends TestCase
             'access_token' => 'existing-access-token', 'refresh_token' => 'existing-refresh-token',
         ]);
         $password = $user->password;
+        $patient = Patient::create([
+            'user_id' => $user->id, 'name' => $user->name, 'email' => $user->email,
+            'password' => bcrypt('patient-password'), 'classification' => 'dependent_alumni',
+        ]);
+        $patientPassword = $patient->password;
         Http::fake(['https://cms.example.test/api/external/admins/cms-030' => Http::response(['data' => $this->admin()])]);
 
         for ($attempt = 0; $attempt < 2; $attempt++) {
@@ -180,12 +191,64 @@ class CmsIntegrationTest extends TestCase
 
         $this->assertSame($user->id, User::where('email', 'cms@example.test')->sole()->id);
         $this->assertSame($password, $user->fresh()->password);
+        $this->assertSame('administrative', $patient->fresh()->classification);
+        $this->assertSame($patientPassword, $patient->fresh()->password);
+        $this->assertSame($patient->id, $user->fresh()->patient->id);
+        $this->assertDatabaseCount('patients', 1);
         $this->assertSame('real-idp-subject', $user->fresh()->sso_user_id);
         $this->assertSame('existing-access-token', $user->fresh()->access_token);
         $this->assertSame('existing-refresh-token', $user->fresh()->refresh_token);
         $this->assertDatabaseCount('users', 2);
         $this->assertDatabaseCount('external_admin_profiles', 1);
         $this->assertDatabaseCount('external_admin_accesses', 1);
+    }
+
+    public function test_cms_assignment_moves_existing_completed_visits_to_administrative_reports(): void
+    {
+        $this->travelTo(\Carbon\Carbon::parse('2026-11-02 09:00:00'));
+        $this->actingAs($this->operator());
+        $user = User::create([
+            'name' => 'CMS Patient', 'email' => 'cms@example.test',
+            'role_id' => Role::where('slug', 'patient')->value('id'), 'status' => 'active',
+        ]);
+        $patient = Patient::create([
+            'user_id' => $user->id, 'name' => $user->name, 'email' => $user->email,
+            'password' => bcrypt('test'), 'classification' => 'dependent_alumni', 'gender' => 'Male',
+        ]);
+        $appointment = \App\Models\Appointment::create([
+            'patient_id' => $patient->id, 'appointment_date' => '2026-11-02',
+            'appointment_time' => '09:00:00', 'status' => 'completed',
+            'service_type' => 'Oral Check-Up', 'is_emergency' => false,
+        ]);
+        \App\Models\AppointmentProcedure::create([
+            'appointment_id' => $appointment->id, 'diagnosis' => 'Dental Caries',
+            'odontogram_data' => [['tooth' => 11, 'status' => ['code' => 'D', 'label' => 'Decayed']]],
+        ]);
+        Http::fake(['https://cms.example.test/api/external/admins/cms-030' => Http::response(['data' => $this->admin()])]);
+        $this->post(route('admin.assign-cms-access.store'), [
+            'external_admin_id' => 'cms-030', 'cms_role' => 'patient', 'cms_status' => 'active',
+        ])->assertSessionHas('success');
+
+        $from = now()->startOfMonth();
+        $to = now()->endOfMonth();
+        $records = app(\App\Services\AppointmentReportRecords::class)->between($from, $to);
+        $this->assertSame('Administrative', $records->sole()->office_type);
+        $this->assertSame('administrative', app(\App\Services\DptReport::class)->records($from, $to, false)->sole()->classification);
+        $monthly = app(\App\Services\MonthlyDentalReport::class);
+        $counts = $monthly->preview($monthly->appointments($from, $to))['counts'];
+        $this->assertSame(1, $counts['administrative']['actual_patient']);
+        $this->assertSame(0, $counts['dependent']['actual_patient']);
+
+        $renderer = app(\App\Services\DocumentTemplateRenderer::class);
+        $invoke = fn ($method, ...$args) => (new \ReflectionMethod($renderer, $method))->invoke($renderer, ...$args);
+        $this->assertSame('Administrative', $invoke('buildDailyTreatmentRecordContext')['row_1_office']);
+        $this->assertSame('Administrative', $invoke('buildDentalServicesContext')['course_section_department_1']);
+        $cases = $invoke('buildDentalCasesContext');
+        $this->assertSame('1', $cases['admin_cases_1']);
+        $this->assertSame('Dental Caries', $cases['admin_diagnosis_1']);
+        $gad = $invoke('buildGadReportContext', []);
+        $this->assertSame('1', $gad['header_administrative']);
+        $this->assertSame('', $gad['header_dependent']);
     }
 
     public function test_account_creation_failure_rolls_back_profile_and_assignment(): void

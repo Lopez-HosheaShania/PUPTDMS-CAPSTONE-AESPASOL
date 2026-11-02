@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shared;
 use App\Http\Controllers\Controller;
 use App\Models\ExternalAdminAccess;
 use App\Models\ExternalAdminProfile;
+use App\Models\Patient;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\CmsApiService;
@@ -16,6 +17,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ExternalAdminController extends Controller
@@ -131,6 +134,27 @@ class ExternalAdminController extends Controller
             }
         }
         $user->save();
+
+        if ($roleSlug === 'patient') {
+            $patient = Patient::where('user_id', $user->id)->lockForUpdate()->first()
+                ?? Patient::whereNull('user_id')->whereRaw('LOWER(TRIM(email)) = ?', [$email])->lockForUpdate()->first()
+                ?? new Patient;
+            $patient->fill([
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'email' => $email,
+                'classification' => 'administrative',
+            ]);
+            foreach (['phone' => 'contact_number', 'gender' => 'gender', 'address' => 'address'] as $attribute => $field) {
+                if (filled($admin[$field] ?? null)) {
+                    $patient->{$attribute} = $admin[$field];
+                }
+            }
+            if (blank($patient->password)) {
+                $patient->password = Hash::make(Str::random(32));
+            }
+            $patient->save();
+        }
 
         if ($roleChanged || $deactivated) {
             app(ConcurrentSessionService::class)->revokeAllSessions(
