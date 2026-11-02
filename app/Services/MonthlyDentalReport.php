@@ -147,6 +147,8 @@ class MonthlyDentalReport
         $boundaries = [149.6, 209.12, 262.56, 308.64, 354.72, 408.16, 455.68, 509.76, 561.92, 614.72, 668.8, 722.24, 765.6, 815.04, 880.64, 918.08, 958.08, 1018.88, 1075.04];
         $services = array_values(array_diff(array_keys(self::COLUMNS), ['actual_patient']));
         $totals = $this->totals($counts);
+        // The yellow header below "Actual Number of Patient" contains the patient total.
+        $this->cell($pdf, 30, 157, 81, (string) $totals['patients']);
         foreach ([...array_keys(self::ROWS), 'total'] as $index => $row) {
             $y = $row === 'total' ? 320.88 : (248.56 + $index * 42.72) * 0.75;
             $values = $row === 'total' ? $totals['columns'] : $counts[$row];

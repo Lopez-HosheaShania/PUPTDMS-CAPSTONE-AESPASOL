@@ -51,34 +51,6 @@
                                 </div>
 
                                 <div class="booking-step-body">
-                                    <div class="booking-section-card">
-                                        <p class="booking-section-card-title">
-                                            <i class="fa-solid fa-notes-medical text-xs" aria-hidden="true"></i>
-                                            Case type
-                                            <span class="booking-section-card-title-line"></span>
-                                        </p>
-
-                                        <x-form-field label="Walk-in case type" required error-for="is_emergency">
-                                            <div class="global-question-options global-choice-group" role="radiogroup"
-                                                aria-label="Walk-in case type" data-global-choice-group>
-                                                <label class="global-radio-option">
-                                                    <input type="radio" name="is_emergency" value="1"
-                                                        class="global-radio-input" required
-                                                        data-required-message="Please select Emergency or Non-Emergency."
-                                                        @checked(old('is_emergency') === '1')>
-                                                    <span>Emergency</span>
-                                                </label>
-                                                <label class="global-radio-option">
-                                                    <input type="radio" name="is_emergency" value="0"
-                                                        class="global-radio-input" required
-                                                        data-required-message="Please select Emergency or Non-Emergency."
-                                                        @checked(old('is_emergency') === '0')>
-                                                    <span>Non-Emergency</span>
-                                                </label>
-                                            </div>
-                                        </x-form-field>
-                                    </div>
-
                                     <div class="booking-section-card" data-global-field data-walkin-patient-group>
                                         <p class="booking-section-card-title">
                                             <i class="fa-solid fa-user-magnifying-glass text-xs"></i>
@@ -452,6 +424,33 @@
 
                                         </div>
                                     </div>
+
+                                    <section id="walkInCaseTypeSection" class="booking-section-card">
+                                        <p class="booking-section-card-title">
+                                            <i class="fa-solid fa-notes-medical text-xs" aria-hidden="true"></i>
+                                            Case type
+                                            <span class="booking-section-card-title-line"></span>
+                                        </p>
+                                        <x-form-field label="Walk-in case type" required error-for="is_emergency">
+                                            <div class="global-question-options global-choice-group" role="radiogroup"
+                                                aria-label="Walk-in case type" data-global-choice-group>
+                                                <label class="global-radio-option">
+                                                    <input type="radio" name="is_emergency" value="1"
+                                                        class="global-radio-input" required
+                                                        data-required-message="Please select Emergency or Non-Emergency."
+                                                        @checked(old('is_emergency') === '1')>
+                                                    <span>Emergency</span>
+                                                </label>
+                                                <label class="global-radio-option">
+                                                    <input type="radio" name="is_emergency" value="0"
+                                                        class="global-radio-input" required
+                                                        data-required-message="Please select Emergency or Non-Emergency."
+                                                        @checked(old('is_emergency') === '0')>
+                                                    <span>Non-Emergency</span>
+                                                </label>
+                                            </div>
+                                        </x-form-field>
+                                    </section>
                                 </div>
                             </div>
                         </div>
@@ -3771,7 +3770,34 @@
                 });
         }
 
+        function validateWalkInCaseType({ revealStep = false } = {}) {
+            const section = document.getElementById('walkInCaseTypeSection');
+            const selected = section?.querySelector('input[name="is_emergency"]:checked');
+            if (selected && ['0', '1'].includes(selected.value)) {
+                window.validateGlobalSection?.(section, { focus: false });
+                return true;
+            }
+
+            if (revealStep) {
+                bookingWorkflow?.goTo(0);
+            }
+            window.validateGlobalSection?.(section);
+            return false;
+        }
+
+        document.querySelectorAll('#walkInCaseTypeSection input[name="is_emergency"]').forEach(input => {
+            input.addEventListener('change', () => {
+                validateWalkInCaseType();
+                const confirmation = document.getElementById('finalConfirm');
+                if (confirmation) confirmation.checked = false;
+            });
+        });
+
         function showStep5Confirmation() {
+            if (!validateWalkInCaseType({ revealStep: true })) {
+                return false;
+            }
+
             step5ConfirmationActive =
                 true;
 
@@ -3799,6 +3825,8 @@
                     behavior: 'smooth',
                     block: 'start',
                 });
+
+            return true;
         }
 
 
@@ -3909,6 +3937,10 @@
                     walkInPatientGroup,
                     'walkin-patient'
                 );
+
+                if (!validateWalkInCaseType()) {
+                    return false;
+                }
             }
 
             if (s === 1) {
@@ -4141,9 +4173,7 @@
                         if (
                             !step5ConfirmationActive
                         ) {
-                            showStep5Confirmation();
-
-                            return true;
+                            return showStep5Confirmation();
                         }
 
                         if (
@@ -4171,6 +4201,10 @@
                     },
 
                     onStepChange: currentStep => {
+                        if (currentStep !== 4) {
+                            bookingWorkflow?.resetNextButton();
+                        }
+
                         if (
                             currentStep !== 3
                         ) {
@@ -4375,6 +4409,7 @@
             const data = new FormData(form);
             const get = n => data.get(n) || "N/A";
             const getAll = n => data.getAll(n);
+            const caseTypeLabel = { '1': 'Emergency', '0': 'Non-Emergency' }[data.get('is_emergency')] || 'Not selected';
 
             const emergencyRelation = data.get("emergency_relation") || "N/A";
 
@@ -4917,7 +4952,7 @@
             }
 
             document.getElementById("summaryBox").innerHTML = `
-${summaryCard("Case Type", "fa-notes-medical", row("Walk-in case type", get("is_emergency") === "1" ? "Emergency" : "Non-Emergency"))}
+${summaryCard("Case Type", "fa-notes-medical", row("Walk-in case type", caseTypeLabel))}
 ${summaryCard(
             "Patient Information",
             "fa-user",
@@ -5098,6 +5133,10 @@ ${summaryCard(
                 !appointmentForm ||
                 appointmentSubmitRunning
             ) {
+                return;
+            }
+
+            if (!validateWalkInCaseType({ revealStep: true })) {
                 return;
             }
 

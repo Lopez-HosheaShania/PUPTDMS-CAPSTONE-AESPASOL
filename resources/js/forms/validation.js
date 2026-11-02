@@ -954,6 +954,40 @@ function ensureGlobalFieldError(field) {
     return error;
 }
 
+const globalGroupedFieldMessages = new WeakMap();
+
+function showGroupedFieldValidationMessage(field, group, message) {
+    const key = group.dataset.globalValidationGroup;
+    const error = ensureGlobalGroupError(group, key);
+    if (!error) return;
+
+    error.id ||= `${key}-group-error`;
+    globalGroupedFieldMessages.set(field, message);
+    const descriptions = new Set((field.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));
+    if (message) {
+        field.setAttribute('aria-invalid', 'true');
+        descriptions.add(error.id);
+    } else {
+        field.removeAttribute('aria-invalid');
+        descriptions.delete(error.id);
+    }
+    if (descriptions.size) field.setAttribute('aria-describedby', [...descriptions].join(' '));
+    else field.removeAttribute('aria-describedby');
+
+    const firstInvalid = [...group.querySelectorAll('input, select, textarea')]
+        .find(input => !input.disabled && input.classList.contains('is-invalid'));
+    const groupMessage = firstInvalid
+        ? group.dataset.groupValidationMessage || globalGroupedFieldMessages.get(firstInvalid) || 'Please correct the highlighted fields.'
+        : '';
+
+    // Announce once for the group, rather than rebuilding the same notice for every cell.
+    if (error.dataset.validationMessage !== groupMessage
+        || Boolean(groupMessage) !== error.classList.contains('show')) {
+        showGlobalGroupError(group, key, groupMessage);
+        error.dataset.validationMessage = groupMessage;
+    }
+}
+
 function showFormInputValidationMessage(
     field,
     message = '',
@@ -1017,6 +1051,12 @@ function showFormInputValidationMessage(
         'is-valid',
         !hasError && hasValue
     );
+
+    const validationGroup = field.closest('[data-global-validation-group]');
+    if (validationGroup?.dataset.globalValidationGroup) {
+        showGroupedFieldValidationMessage(field, validationGroup, message);
+        return;
+    }
 
     const indicator =
         ensureGlobalFieldError(field);

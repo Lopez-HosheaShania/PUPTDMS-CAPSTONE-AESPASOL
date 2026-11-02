@@ -4080,9 +4080,13 @@
                         };
 
                     if (!validation.valid) {
-                        showReportBanner(
-                            'Please correct the highlighted fields before downloading.'
-                        );
+                        if (validation.firstInvalid?.closest('[data-global-validation-group]')) {
+                            hideReportBanner();
+                        } else {
+                            showReportBanner(
+                                'Please correct the highlighted fields before downloading.'
+                            );
+                        }
 
                         window.focusGlobalInvalidField?.(
                             validation.firstInvalid

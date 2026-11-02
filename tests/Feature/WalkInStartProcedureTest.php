@@ -90,6 +90,9 @@ class WalkInStartProcedureTest extends TestCase
         $this->assertSame(['1', '0'], array_map(fn ($input) => $input->getAttribute('value'), iterator_to_array($choices)));
         $this->assertSame(0, $xpath->query('//input[@name="is_emergency"][@checked]')->length);
         $this->assertSame(2, $xpath->query('//input[@name="is_emergency"][@required][@class="global-radio-input"][ancestor::div[@data-global-field]]')->length);
+        $this->assertSame(0, $xpath->query('//div[@id="summarySection"]//input[@name="is_emergency"]')->length);
+        $this->assertSame(2, $xpath->query('//div[@id="patientAccountSection"]//div[@id="selectedPatientBox"]/parent::div/following-sibling::section[@id="walkInCaseTypeSection"]//input[@name="is_emergency"]')->length);
+        $this->assertSame(0, $xpath->query('//div[@id="summaryBox"]//input[@name="is_emergency"]')->length);
     }
 
     private function prepareIntake(): array

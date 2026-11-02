@@ -12,11 +12,15 @@
         confirm that medicine was dispensed. Manual entries apply only to this download.
     </p>
     <div class="monthly-report-actions">
-        <x-button type="button" variant="secondary" data-monthly-load>Load counts for selected dates</x-button>
-        <x-button type="button" variant="secondary" data-monthly-zero disabled>Confirm remaining blanks as zero</x-button>
+        <x-button type="button" variant="secondary" size="sm" data-monthly-load>Load counts for selected dates</x-button>
+        <x-button type="button" variant="secondary" size="sm" data-monthly-zero disabled>Confirm remaining blanks as zero</x-button>
     </div>
     <p class="modal-helper-text" role="status" aria-live="polite" data-monthly-status>Select dates and load counts.</p>
-    <div class="monthly-report-table-wrap" tabindex="0" role="region" aria-label="Monthly counts by patient classification">
+    <div data-global-field data-monthly-count-group data-global-validation-group="monthly-counts"
+        data-group-validation-message="Enter whole-number counts from 0 to 99,999 in the highlighted boxes, or confirm remaining blanks as zero.">
+        <div id="monthly-counts-group-error" class="global-field-error" data-error-for="monthly-counts"
+            aria-live="polite" aria-hidden="true"></div>
+        <div class="monthly-report-table-wrap" tabindex="0" role="region" aria-label="Monthly counts by patient classification">
         <table class="data-table monthly-report-table">
             <thead>
                 <tr>
@@ -34,11 +38,11 @@
                             {{ $label }}
                             <span class="monthly-report-source">
                                 @if (in_array($column, ['extraction', 'temporary', 'permanent']))
-                                    Tooth suggestions · review existing markings
+                                    Per tooth · review
                                 @elseif (in_array($column, ['actual_patient', 'inquiry', 'rx', 'prophylaxis']))
-                                    Automatic · editable
+                                    Auto · editable
                                 @else
-                                    Enter count or confirm zero
+                                    Manual / confirm zero
                                 @endif
                             </span>
                         </th>
@@ -46,6 +50,7 @@
                             <td data-global-field>
                                 <x-number-stepper :id="'monthly-'.$row.'-'.$column"
                                     :name="'report_counts['.$row.']['.$column.']'" min="0" max="99999" disabled
+                                    wrapper-class="monthly-count-stepper"
                                     :aria-label="$rowLabel.' — '.$label" :data-field-label="$rowLabel.' '.$label"
                                     data-required-message="Enter a count, or confirm remaining blanks as zero."
                                     data-validation-rule="wholeNumber" data-monthly-count :data-row="$row" :data-column="$column" />
@@ -65,6 +70,7 @@
                 </tr>
             </tfoot>
         </table>
+        </div>
     </div>
     <div data-global-field>
         <label class="global-checkbox-row" for="monthlyCountsConfirmed">

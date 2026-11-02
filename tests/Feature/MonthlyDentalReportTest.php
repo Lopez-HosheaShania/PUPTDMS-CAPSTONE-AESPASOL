@@ -132,10 +132,13 @@ class MonthlyDentalReportTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'download', 'module' => 'dentist_reports']);
     }
 
-    public function test_pdf_places_service_grand_total_separately_from_patient_count(): void
+    public function test_pdf_places_total_patients_in_the_yellow_header_and_services_in_the_footer(): void
     {
         $counts = $this->counts();
         $counts['student']['actual_patient'] = 1;
+        $counts['faculty']['actual_patient'] = 2;
+        $counts['administrative']['actual_patient'] = 3;
+        $counts['dependent']['actual_patient'] = 4;
         $counts['student']['extraction'] = 4;
         $pdf = new class('L', 'pt', 'A4') extends Fpdi
         {
@@ -149,6 +152,7 @@ class MonthlyDentalReportTest extends TestCase
         };
         $pdf->AddPage();
         app(MonthlyDentalReport::class)->draw($pdf, $counts, \Carbon\Carbon::parse('2026-10-01'), \Carbon\Carbon::parse('2026-10-31'));
+        $this->assertContains([30.0, 157.0, '10'], $pdf->cells);
         $this->assertContains([31.0, 315.88, '4'], $pdf->cells);
         $this->assertContains([92.0, 181.42, '1'], $pdf->cells);
     }
