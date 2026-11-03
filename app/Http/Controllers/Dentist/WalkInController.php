@@ -3045,8 +3045,9 @@ class WalkInController extends Controller
             'emergency_person' => [
                 'required',
                 'string',
+                'min:3',
                 'max:50',
-                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+                'regex:/^(?=.*[A-Za-zÑñ])[A-Za-zÑñ\s.\'-]+$/u',
             ],
 
             'emergency_number' => ['required', 'string', 'size:11', 'regex:/^09\d{9}$/'],
@@ -3076,7 +3077,18 @@ class WalkInController extends Controller
                 'string',
                 'exists:diseases,code',
             ],
+        ], [
+            'emergency_person.required' => "Please enter the emergency contact person's name.",
+            'emergency_person.regex' => 'Only letters, spaces, apostrophe, period, and hyphen are allowed.',
+            'emergency_person.min' => 'Emergency contact name must contain at least 3 characters.',
+            'emergency_person.max' => 'Emergency contact name must not exceed 50 characters.',
         ]);
+
+        $validated['emergency_person'] = preg_replace_callback(
+            '/(^|[\s-])(\p{L})/u',
+            fn ($match) => $match[1].mb_strtoupper($match[2], 'UTF-8'),
+            mb_strtolower(trim($validated['emergency_person']), 'UTF-8')
+        );
 
         $patient = Patient::findOrFail(
             $validated['patient_id']

@@ -95,6 +95,37 @@ class WalkInStartProcedureTest extends TestCase
         $this->assertSame(0, $xpath->query('//div[@id="summaryBox"]//input[@name="is_emergency"]')->length);
     }
 
+    public function test_invalid_emergency_contact_names_cannot_start_a_walk_in(): void
+    {
+        [$patient, $history, $service] = $this->prepareIntake();
+        $payload = [
+            'patient_id' => $patient->id, 'service_type' => $service->name,
+            'is_emergency' => '0', 'emergency_number' => '09123456789',
+            'emergency_relation' => 'Parent',
+        ];
+
+        foreach (['', '   ', 'Jo', 'Juan123 Cruz', 'Juan @Cruz', '--- ...', str_repeat('A', 51)] as $name) {
+            $this->postJson(route('dentist.walk-in.start'), [...$payload, 'emergency_person' => $name])
+                ->assertUnprocessable()->assertJsonValidationErrors('emergency_person');
+        }
+
+        $this->assertDatabaseCount('appointments', 0);
+        $this->assertSame('Test Contact', $history->fresh()->emergency_person);
+    }
+
+    public function test_emergency_contact_name_accepts_enye_and_name_punctuation(): void
+    {
+        [$patient, $history, $service] = $this->prepareIntake();
+
+        $this->postJson(route('dentist.walk-in.start'), [
+            'patient_id' => $patient->id, 'service_type' => $service->name,
+            'is_emergency' => '0', 'emergency_person' => "maria-jose o'peña jr.",
+            'emergency_number' => '09123456789', 'emergency_relation' => 'Parent',
+        ])->assertOk();
+
+        $this->assertSame("Maria-Jose O'peña Jr.", $history->fresh()->emergency_person);
+    }
+
     private function prepareIntake(): array
     {
         $this->withoutMiddleware(ValidateCsrfToken::class);

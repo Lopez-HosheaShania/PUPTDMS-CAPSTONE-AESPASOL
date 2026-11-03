@@ -7,6 +7,7 @@
 'selectedDiseases' => [],
 'isFemale' => false,
 'dynamicFemale' => false,
+'emergencyNameRule' => 'personName',
 ])
 
 @php
@@ -357,7 +358,10 @@ return old($code, $defaults[$code] ?? $fallback);
             :show-error="false">
             <input type="text" id="emergency_person" name="emergency_person" maxlength="50"
                 value="{{ old('emergency_person', $defaults['emergency_person'] ?? '') }}" class="form-input-custom"
-                placeholder="Full name" data-validation-rule="personName"
+                placeholder="Full name" data-validation-rule="{{ $emergencyNameRule }}"
+                @if ($emergencyNameRule === 'emergencyContactName')
+                    minlength="3" data-capitalize-words="name"
+                @endif
                 data-required-message="Please enter the emergency contact person's name." required>
         </x-form-field>
 

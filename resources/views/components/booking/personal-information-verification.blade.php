@@ -1,6 +1,6 @@
 <x-modal id="personalInformationVerificationModal" title="Unable to Verify Information"
     title-id="personalInformationVerificationTitle" description-id="personalInformationVerificationMessage"
-    subtitle="Appointment booking" icon="fa-solid fa-user-pen" size="md" :show-close="false" :initial-focus-title="true"
+    subtitle="Appointment booking" icon="fa-solid fa-user-pen" size="md" :show-close="true" :initial-focus-title="true"
     body-class="modal-form-grid">
     <div class="global-confirm-alert">
         <p id="personalInformationVerificationMessage">
@@ -22,7 +22,7 @@
                     <i class="fa-regular fa-pen-to-square"></i>
                 </div>
 
-                <p id="personalInformationVerificationStep" class="m-0 pt-2 text-sm font-medium leading-relaxed">
+                <p id="personalInformationVerificationStep" class="m-0 pt-2 text-xs font-medium leading-relaxed">
                     Please complete your personal information in GUISIS.
                 </p>
             </li>
@@ -32,7 +32,7 @@
                     <i class="fa-regular fa-calendar-check"></i>
                 </div>
 
-                <p id="personalInformationVerificationReturn" class="m-0 pt-2 text-sm font-medium leading-relaxed">
+                <p id="personalInformationVerificationReturn" class="m-0 pt-2 text-xs font-medium leading-relaxed">
                     Return here and try booking again.
                 </p>
             </li>
@@ -51,10 +51,20 @@
             Close
         </x-button>
 
+        <x-button id="personalInformationVerificationContinue" type="button" variant="secondary" hidden>
+            Continue Booking
+        </x-button>
+
         <x-button id="personalInformationVerificationGuisis" href="https://www.guisis.dllbsit2027.com/"
             variant="primary" icon="fa-solid fa-arrow-up-right-from-square" target="_blank" rel="noopener noreferrer"
             aria-describedby="personalInformationVerificationExternalNote">
             Go to GUISIS
+        </x-button>
+
+        <x-button id="personalInformationVerificationFlss" href="https://flss.alquatrilixbsit2027.com/login"
+            variant="primary" icon="fa-solid fa-arrow-up-right-from-square" target="_blank" rel="noopener noreferrer"
+            aria-describedby="personalInformationVerificationExternalNote" hidden>
+            Go to FLSS
         </x-button>
 
     </x-slot:footer>
@@ -63,6 +73,7 @@
 <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (() => {
         let verifying = false;
+        let pendingBooking = null;
 
         const modalId = 'personalInformationVerificationModal';
 
@@ -71,7 +82,28 @@
             message: 'We could not verify your Personal Information from GUISIS.'
         };
 
-        function showFailure(failure = verificationError) {
+        function continueBooking(target) {
+            if (typeof target === 'function') {
+                target();
+            } else {
+                window.location.assign(target);
+            }
+        }
+
+        document.getElementById('personalInformationVerificationContinue').addEventListener('click', () => {
+            if (pendingBooking === null) return;
+            const target = pendingBooking;
+            pendingBooking = null;
+            window.closeModal(modalId);
+            continueBooking(target);
+        });
+
+        document.getElementById('personalInformationVerificationClose').addEventListener('click', () => {
+            pendingBooking = null;
+        });
+
+        function showFailure(failure = verificationError, bookingTarget = null) {
+            pendingBooking = null;
             if (failure?.code === 'booking_maintenance') {
                 window.openModal('bookingMaintenanceModal');
                 return;
@@ -79,6 +111,16 @@
 
             const incomplete =
                 failure?.code === 'personal_information_incomplete';
+            const canContinue = failure?.can_continue === true && bookingTarget !== null;
+            pendingBooking = canContinue ? bookingTarget : null;
+
+            document.getElementById('personalInformationVerificationContinue').hidden = !canContinue;
+            document.getElementById('personalInformationVerificationClose').hidden = canContinue;
+            document.getElementById('personalInformationVerificationGuisis').hidden = canContinue;
+            document.getElementById('personalInformationVerificationFlss').hidden = !canContinue;
+            document.getElementById('personalInformationVerificationExternalNote').textContent = canContinue ?
+                'FLSS opens in a new tab so you can keep this page open.' :
+                'GUISIS opens in a new tab so you can keep this page open.';
 
             const title = document.getElementById(
                 'personalInformationVerificationTitle'
@@ -104,10 +146,12 @@
                 "Your personal information in GUISIS is not yet complete, so we can't book your appointment. Complete your details in GUISIS, then come back to continue." :
                 (failure?.message || verificationError.message);
 
-            step.textContent =
+            step.textContent = canContinue ?
+                'Please complete your missing information in FLSS' :
                 'Please complete your personal information in GUISIS.';
 
-            returnStep.textContent = incomplete ?
+            returnStep.textContent = canContinue ?
+                'Select Continue Booking to proceed with your appointment.' : incomplete ?
                 'Return here and book your appointment' :
                 'Return here and try booking again.';
 
@@ -139,11 +183,13 @@
                 const result = await response.json();
 
                 if (response.ok && result.verified === true) {
-                    if (typeof url === 'function') {
-                        url();
-                    } else {
-                        window.location.assign(url);
+                    // The reminder belongs to booking entry. A verified final
+                    // submission must continue even when the profile is incomplete.
+                    if (result.warning?.can_continue === true && typeof url !== 'function') {
+                        showFailure(result.warning, url);
+                        return;
                     }
+                    continueBooking(url);
 
                     return;
                 }

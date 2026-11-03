@@ -84,6 +84,36 @@ class ProcedureManualTimingTest extends TestCase
         }
     }
 
+    public function test_appointments_display_procedure_time_in_on_desktop_and_mobile_with_booked_time_fallback(): void
+    {
+        $dentist = $this->actor();
+        $this->actingAs($dentist)->withSession(['role' => 'dentist']);
+
+        $expected = [];
+        foreach ([true, false] as $hasManualTime) {
+            $visit = $this->visit($dentist);
+            $visit->update(['status' => 'completed', 'is_walk_in' => $hasManualTime]);
+            AppointmentProcedure::create([
+                'appointment_id' => $visit->id,
+                'procedure_started_at' => $hasManualTime ? '2026-10-23 14:17:00' : null,
+            ]);
+            $expected[$visit->id] = $hasManualTime ? '14:17:00' : $visit->appointment_time;
+        }
+
+        $html = $this->get(route('dentist.dentist.appointments'))->assertOk()->getContent();
+        $dom = new \DOMDocument;
+        @$dom->loadHTML($html);
+        $xpath = new \DOMXPath($dom);
+        foreach ($expected as $id => $time) {
+            $cards = $xpath->query('//div[@data-appt-id="'.$id.'"][@data-time]');
+            $this->assertCount(2, $cards);
+            foreach ($cards as $card) {
+                $this->assertSame($time, $card->getAttribute('data-time'));
+                $this->assertStringContainsString(\Carbon\Carbon::parse($time)->format('g:i A'), $card->textContent);
+            }
+        }
+    }
+
     private function payload(array $overrides = []): array
     {
         return array_replace(['odontogram_data' => [], 'has_applied_treatment' => false,

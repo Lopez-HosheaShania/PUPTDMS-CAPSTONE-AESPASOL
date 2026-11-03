@@ -61,7 +61,22 @@ class AppointmentController extends Controller
         abort_unless($patient, 401);
         $failure = $this->maintenanceBookingFailure() ?? $this->personalInformationBookingFailure($patient);
 
-        return response()->json($failure ?? ['verified' => true], $failure['status'] ?? 200)
+        $result = $failure ?? ['verified' => true];
+        if (! $failure && $this->usesFacultyBooking($patient)) {
+            $required = [$patient->name, $patient->email, $patient->phone, $patient->birthdate,
+                $patient->gender, $patient->medicalHistory?->emergency_person,
+                $patient->medicalHistory?->emergency_number, $patient->medicalHistory?->emergency_relation];
+            if (collect($required)->contains(fn ($value) => blank($value))) {
+                $result['warning'] = [
+                    'code' => 'faculty_information_incomplete',
+                    'can_continue' => true,
+                    'title' => 'Please Complete Your Information',
+                    'message' => 'Some of your personal information is incomplete. Please complete your information when available. You can still continue booking your appointment.',
+                ];
+            }
+        }
+
+        return response()->json($result, $failure['status'] ?? 200)
             ->header('Cache-Control', 'no-store');
     }
 
@@ -80,16 +95,17 @@ class AppointmentController extends Controller
         ];
     }
 
+    private function usesFacultyBooking(Patient $patient): bool
+    {
+        $classification = strtolower(trim((string) $patient->classification));
+
+        return in_array($classification, ['faculty', 'administrative'], true)
+            || ($classification !== 'student' && filled($patient->faculty_code));
+    }
+
     private function personalInformationBookingFailure(Patient $patient): ?array
     {
-        $isStudent = strtolower(trim((string) $patient->classification)) === 'student'
-            || ! empty($patient->student_no)
-            || (! empty($patient->email) && ! empty($patient->course_code));
-
-        $usesFacultyIntegration = in_array(strtolower(trim((string) $patient->classification)), ['faculty', 'administrative'], true)
-            || filled($patient->faculty_code);
-
-        if (! $isStudent && $usesFacultyIntegration) {
+        if ($this->usesFacultyBooking($patient)) {
             return null;
         }
 
@@ -1077,9 +1093,6 @@ class AppointmentController extends Controller
                 ->withInput()
                 ->with('error', 'Sorry, that time slot was already taken. Please choose another time.');
         }
-
-        // The database also prevents a patient from holding two records at one
-        // exact date and time. Check it here to return a normal form error.
         $duplicatePatientSchedule = Appointment::query()
             ->where('patient_id', $patientId)
             ->whereDate('appointment_date', $request->appointment_date)
@@ -1264,7 +1277,6 @@ class AppointmentController extends Controller
 
             $serviceType = ServiceType::where('name', $request->service_type)->firstOrFail();
 
-            // 1) APPOINTMENT
             $appointment = Appointment::create([
                 'patient_id'       => $patientId,
                 'reserved_booking_period_id' => $lockedReservedPeriod?->id,
@@ -1285,10 +1297,8 @@ class AppointmentController extends Controller
 
             $patient->save();
 
-            // Notify the dentist who will handle this appointment.
             $assignedDentist->notify(new AppointmentBookedNotification($appointment, $appointment->patient));
 
-            //  Notify admins
             $admins = User::whereHas('role', function ($q) {
                 $q->where('slug', 'admin');
             })->get();
@@ -1297,7 +1307,6 @@ class AppointmentController extends Controller
                 $admin->notify(new AppointmentBookedNotification($appointment, $appointment->patient));
             }
 
-            // 2) DENTAL HISTORY (patient-based)
             if (! $preserveExistingDentalHistory) {
                 DentalHistory::updateOrCreate(
                     ['patient_id' => $patientId],
@@ -1323,7 +1332,6 @@ class AppointmentController extends Controller
                     ]
                 );
 
-                // YES/NO answers (dental_history_answers)
                 $dentalAnswerMap = [
                     'bleeding_gums'      => $request->bleeding_gums,
                     'sensitive_temp'     => $request->sensitive_temp,
@@ -1369,7 +1377,6 @@ class AppointmentController extends Controller
                 }
             }
 
-            // 3) MEDICAL HISTORY (patient-based)
             if (! $preserveExistingMedicalHistory) {
                 $medicalHistory = MedicalHistory::updateOrCreate(
                     ['patient_id' => $patientId],
@@ -1387,9 +1394,7 @@ class AppointmentController extends Controller
 
                 $tobaccoUse = $this->yesNoValue($request->input('tobacco_use'));
 
-                // Medical answers map
                 $medicalAnswerMap = [
-                    // bool
                     'good_health'       => $request->good_health,
                     'had_medical_exam'  => $request->had_medical_exam,
                     'under_treatment'   => $request->under_treatment,
@@ -1405,7 +1410,6 @@ class AppointmentController extends Controller
                     'earaches'          => $request->earaches,
                     'neck_aches'        => $request->neck_aches,
 
-                    // text
                     'good_health_details' => $request->good_health_details,
                     'treatment_details'   => $request->treatment_details,
                     'hospital_details'    => $request->hospital_details,
@@ -1419,7 +1423,6 @@ class AppointmentController extends Controller
                         ? $request->input('tobacco_per_week')
                         : null,
 
-                    // date
                     'medical_exam_date'   => $request->medical_exam_date,
                 ];
 
@@ -1431,7 +1434,6 @@ class AppointmentController extends Controller
                     $q = $questions->get($code);
                     if (!$q) continue;
 
-                    // Normalize by type
                     if ($q->type === 'bool') {
                         $bool = ($this->yesNoValue($rawValue) === 'YES');
 
@@ -1833,6 +1835,10 @@ class AppointmentController extends Controller
 
     private function backfillStudentEmergencyContactIfNeeded(Patient $patient): void
     {
+        if ($this->usesFacultyBooking($patient)) {
+            return;
+        }
+
         $isStudent = ! empty($patient->student_no) || (! empty($patient->email) && ! empty($patient->course_code));
 
         if (! $isStudent) {

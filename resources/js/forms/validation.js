@@ -616,6 +616,24 @@ registerGlobalValidationRule('personName', function (field) {
 }
 );
 
+registerGlobalValidationRule('emergencyContactName', function (field) {
+    const value = String(field.value || '').trim();
+
+    if (!value) return '';
+
+    if (value.length < 3) {
+        return 'Emergency contact name must contain at least 3 characters.';
+    }
+
+    if (value.length > 50) {
+        return 'Emergency contact name must not exceed 50 characters.';
+    }
+
+    return /[A-Za-zÑñ]/.test(value) && /^[A-Za-zÑñ\s.'-]+$/.test(value)
+        ? ''
+        : 'Only letters, spaces, apostrophe, period, and hyphen are allowed.';
+});
+
 registerGlobalValidationRule('studentNumber', function (field) {
     const value = String(field.value || '').trim();
 
@@ -1455,8 +1473,7 @@ function isGlobalPhoneField(field) {
 function normalizeGlobalPersonName(field) {
     if (
         !field ||
-        field.dataset.validationRule !==
-        'personName'
+        !['personName', 'emergencyContactName'].includes(field.dataset.validationRule)
     ) {
         return;
     }
@@ -1505,6 +1522,10 @@ function capitalizeGlobalWords(field) {
 }
 
 function getGlobalTextInsertionMessage(field, insertedText) {
+    if (field.dataset.validationRule === 'emergencyContactName' && /[^A-Za-zÑñ\s.'-]/.test(insertedText || '')) {
+        return 'Only letters, spaces, apostrophe, period, and hyphen are allowed.';
+    }
+
     if (!insertedText || (
         field.dataset.validationRule !== 'roleName' &&
         field.dataset.enforceMaxlength !== 'true'
@@ -1640,6 +1661,7 @@ function bindFormInputValidation(root = document) {
                     if (
                         [
                             'personName',
+                            'emergencyContactName',
                             'guestName'
                         ].includes(
                             field.dataset.validationRule
