@@ -1014,6 +1014,71 @@
             var(--status-approved-solid) 16%);
 }
 
+.data-table .signature-preview-trigger {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 108px;
+    min-width: 108px;
+    max-width: 108px;
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+    padding: 5px 8px;
+    margin: 0;
+    border: 1px solid var(--status-completed-border);
+    border-radius: 10px;
+    background: var(--card);
+    box-shadow: none;
+    overflow: hidden;
+    vertical-align: middle;
+    cursor: zoom-in;
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.data-table .signature-preview-trigger:hover {
+    border-color: var(--status-completed-solid);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--status-completed-solid) 12%, transparent);
+}
+
+.data-table .signature-preview-trigger:focus-visible {
+    outline: 2px solid var(--crimson);
+    outline-offset: 2px;
+}
+
+.data-table .signature-preview-trigger .signature-preview-thumbnail {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    flex-shrink: 1;
+}
+
+.data-table td:has(> .signature-preview-trigger) {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.data-table .signature-preview-empty {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 98px;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--status-default-border);
+    background: var(--status-default-bg);
+    color: var(--status-default-text);
+    font-size: .72rem;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
 [data-theme="dark"] .data-table tbody tr.is-active td,
 .dark .data-table tbody tr.is-active td {
     background:

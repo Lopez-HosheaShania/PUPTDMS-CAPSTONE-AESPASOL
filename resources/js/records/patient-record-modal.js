@@ -2,6 +2,11 @@ import {
     setOdontogramPreviewData
 } from '../odontogram/odontogram-preview';
 
+import {
+    getOdontogramTreatmentColor
+} from '../odontogram/treatment-colors';
+
+
 function parseRecordDatasetJson(value, fallback) {
     if (!value) {
         return fallback;
@@ -584,60 +589,50 @@ function safeRecordText(
         );
 }
 
+
 function renderRecordTreatments(
     containerId,
     treatments,
     fallbackText = ''
 ) {
-    const container =
-        document.getElementById(
-            containerId
+    const container = document.getElementById(containerId);
+
+    if (!container) return;
+
+    if (!Array.isArray(treatments) || treatments.length === 0) {
+        container.textContent = String(
+            fallbackText || 'No treatment record yet.'
+        ).trim();
+
+        return;
+    }
+
+    container.innerHTML = treatments.map(treatment => {
+        const code = String(treatment?.code || '').trim();
+
+        const color = getOdontogramTreatmentColor(
+            code,
+            treatment?.colorHex || treatment?.color_hex
         );
 
-    if (!container) {
-        return;
-    }
+        return `
+            <span class="odontogram-preview-marking">
+                <span
+                    class="odontogram-preview-marking-swatch"
+                    data-ui-style="background:${window.uiAttribute(color)};"
+                    aria-hidden="true"
+                ></span>
 
-    if (
-        !Array.isArray(
-            treatments
-        ) ||
-        treatments.length === 0
-    ) {
-        container.textContent =
-            String(
-                fallbackText ||
-                'No treatment record yet.'
-            ).trim();
-
-        return;
-    }
-
-    container.innerHTML =
-        treatments
-            .map(
-                treatment => `
-                    <span class="odontogram-preview-marking">
-                        <i
-                            class="odontogram-preview-marking-swatch"
-                            style="background:${safeRecordText(
-                    treatment.colorHex ||
-                    '#111827'
-                )}"
-                        ></i>
-
-                        <span>${safeRecordText(
-                    treatment.surface
-                )}: ${safeRecordText(
-                    treatment.code
-                )} - ${safeRecordText(
-                    treatment.label
-                )}</span>
-                    </span>
-                `
-            )
-            .join('');
+                <span>
+                    ${safeRecordText(treatment?.surface || 'Tooth')}:
+                    ${safeRecordText(code)} -
+                    ${safeRecordText(treatment?.label || code)}
+                </span>
+            </span>
+        `;
+    }).join('');
 }
+
 
 function formatRecordRevisionRole(role) {
     const normalized =
@@ -1786,15 +1781,18 @@ function setRecordModalData(
     `;
     }
 
-    const treatments =
-        Array.isArray(
-            data.treatmentItems
-        ) &&
-            data.treatmentItems.length
-            ? data.treatmentItems
-            : formatRecordTreatments(
-                data.odontogramData
-            );
+    const odontogramTreatments = formatRecordTreatments(
+        data.odontogramData
+    );
+
+    const treatments = odontogramTreatments.length
+        ? odontogramTreatments
+        : (
+            Array.isArray(data.treatmentItems)
+                ? data.treatmentItems
+                : []
+        );
+
 
     renderRecordTreatments(
         'm_remarks',

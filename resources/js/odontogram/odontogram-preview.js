@@ -1,3 +1,7 @@
+import {
+    getOdontogramTreatmentColor
+} from './treatment-colors';
+
 let odontogramThreeModulePromise = null;
 
 async function loadOdontogramThreeModule() {
@@ -16,30 +20,6 @@ async function loadOdontogramThreeModule() {
 
     return odontogramThreeModulePromise;
 }
-
-const ODONTOGRAM_PREVIEW_COLORS = {
-    D: '#ef4444',
-    RC: '#ef4444',
-    M: '#111827',
-    F: '#2563eb',
-    I: '#ef4444',
-    RF: '#ef4444',
-    MO: '#111827',
-    IM: '#111827',
-    J: '#2563eb',
-    A: '#2563eb',
-    AB: '#2563eb',
-    P: '#2563eb',
-    IN: '#2563eb',
-    LC: '#2563eb',
-    TP: '#2563eb',
-    RM: '#2563eb',
-    X: '#2563eb',
-    XO: '#2563eb',
-    '✓': '#111827',
-    CM: '#111827',
-    SP: '#111827'
-};
 
 const ODONTOGRAM_PREVIEW_SURFACES = [
     'top',
@@ -147,41 +127,31 @@ function getOdontogramPreviewToothName(
     };
 }
 
-function normalizeOdontogramPreviewRecord(
-    record
-) {
+
+function normalizeOdontogramPreviewRecord(record) {
     if (!record) return null;
 
-    const code =
-        String(
-            record.code ||
-            ''
-        )
-            .trim()
-            .toUpperCase();
+    const rawCode = String(record.code || '')
+        .trim()
+        .toUpperCase();
 
-    if (!code) return null;
+    if (!rawCode) return null;
+
+    const code = ['PT', '+'].includes(rawCode)
+        ? '✓'
+        : rawCode;
 
     return {
         ...record,
-
-        code:
-            ['PT', '+'].includes(code)
-                ? '✓'
-                : code,
-
-        label:
-            record.label ||
+        code,
+        label: record.label || code,
+        colorHex: getOdontogramTreatmentColor(
             code,
-
-        colorHex:
-            record.colorHex ||
-            ODONTOGRAM_PREVIEW_COLORS[
-            code
-            ] ||
-            '#111827'
+            record.colorHex || record.color_hex
+        )
     };
 }
+
 
 function normalizeOdontogramPreviewEntry(
     entry
@@ -556,7 +526,9 @@ function openOdontogramPreviewTooth(
             pill.innerHTML = `
                 <i
                     class="odontogram-preview-marking-swatch"
-                    style="background:${item.record.colorHex}">
+                    data-ui-style="background:${window.uiAttribute(
+                getOdontogramTreatmentColor(item.record.code)
+            )};">
                 </i>
 
                 <span>
@@ -715,7 +687,7 @@ export function initOdontogramPreviews(
                         [];
                 }
             }
-            
+
             showOdontogramPreviewEmptyState(
                 preview
             );

@@ -3,8 +3,7 @@
 }
 
 .dental-services-page .service-dental-table {
-    min-width: var(--service-table-min);
-    width: max-content;
+    width: max(100%, var(--service-table-min));
     table-layout: auto;
 }
 
@@ -140,79 +139,6 @@
     min-width: 84px;
     text-align: center;
 }
-
-.dental-services-page .service-toolbar,
-.dental-services-page .service-search-row,
-.dental-services-page .voice-input-toggle {
-    position: relative;
-    overflow: visible;
-}
-
-.dental-services-page .service-toolbar {
-    z-index: 100;
-}
-
-.dental-services-page .service-search-row {
-    z-index: 150;
-}
-
-.dental-services-page .voice-input-toggle {
-    z-index: 200;
-}
-
-.dental-services-page .voice-status {
-    z-index: 9999;
-}
-
-.dental-services-page .service-signature-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 108px;
-    max-width: 100%;
-    min-height: 40px;
-    padding: 4px 6px;
-    border-radius: 12px;
-    border: 1px solid var(--status-completed-border);
-    background: linear-gradient(135deg, var(--status-completed-bg), var(--status-completed-soft));
-    box-shadow: 0 8px 18px color-mix(in srgb, var(--status-completed-solid) 12%, transparent);
-}
-
-.dental-services-page .service-signature-image {
-    display: block;
-    width: 96px;
-    max-width: 100%;
-    height: 28px;
-    object-fit: contain;
-    mix-blend-mode: multiply;
-}
-
-.dental-services-page .service-signature-empty {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 98px;
-    min-height: 36px;
-    padding: 0 12px;
-    border-radius: 999px;
-    border: 1px solid var(--status-default-border);
-    background: var(--status-default-bg);
-    color: var(--status-default-text);
-    font-size: 0.72rem;
-    font-weight: 900;
-    line-height: 1;
-    white-space: nowrap;
-}
-
-
-
-
-[data-theme="dark"] .dental-services-page .service-signature-image,
-.dark .dental-services-page .service-signature-image {
-    filter: brightness(0) invert(1);
-    mix-blend-mode: screen;
-}
-
 
 .service-record-grid {
     display: grid;
