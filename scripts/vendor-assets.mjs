@@ -18,6 +18,45 @@ if (!script.includes(styleBranch)) throw new Error('Review Sienna DOM style hand
 script = script.replace(styleBranch,
     'a==="style"?(typeof f==="object"?Object.assign(r.style,f):String(f).split(";").forEach(d=>{const c=d.indexOf(":");if(c>0){const v=d.slice(c+1).trim();r.style.setProperty(d.slice(0,c).trim(),v.replace(/\\s*!important\\s*$/i,""),/!important\\s*$/i.test(v)?"important":"")}})):');
 script = script.replaceAll('https://cdn.jsdelivr.net/npm/sienna-accessibility/dist/', '/vendor/sienna/');
+// Normalize only Sienna's widget-appearance CSS priorities.
+// Keep accessibility feature styles and runtime behavior unchanged.
+const themeSelectorPattern =
+    /\.asw-(?:menu|card|select|btn|profile|footer|items)\b/;
+
+let normalizedThemeDeclarations = 0;
+
+script = script.replace(
+    /([^{}]*\{)([^{}]*)(\})/g,
+    (original, opening, declarations, closing) => {
+        if (
+            !themeSelectorPattern.test(opening) ||
+            !/\s*!important\b/i.test(declarations)
+        ) {
+            return original;
+        }
+
+        const cleaned = declarations.replace(
+            /\s*!important\b/gi,
+            () => {
+                normalizedThemeDeclarations++;
+                return '';
+            }
+        );
+
+        return opening + cleaned + closing;
+    }
+);
+
+if (normalizedThemeDeclarations === 0) {
+    throw new Error(
+        'No Sienna theme declarations were normalized. ' +
+        'Inspect the installed UMD bundle before continuing.'
+    );
+}
+
+console.log(
+    `Normalized ${normalizedThemeDeclarations} Sienna theme declarations.`
+);
 writeFileSync(`${to}sienna-accessibility.umd.js`, script);
 cpSync(`${from}fonts`, `${to}fonts`, { recursive: true });
 cpSync(`${from}locales`, `${to}locales`, { recursive: true });

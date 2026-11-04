@@ -1333,3 +1333,25 @@
         animation: none;
     }
 }
+
+.chatbot-panel.show:not(.closing) {
+    animation: modalEnter .34s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.asw-menu.asw-menu {
+    animation: modalEnter .34s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .chatbot-panel.show:not(.closing),
+    .asw-menu.asw-menu {
+        animation: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .chatbot-panel.show:not(.closing) {
+        animation: none;
+    }
+}

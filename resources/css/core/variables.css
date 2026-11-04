@@ -983,6 +983,41 @@
     --calendar-slot-disabled-border: var(--border);
 }
 
+:root {
+    /* Sienna accessibility widget */
+    --asw-card-surface: rgba(255, 255, 255, 0.82);
+    --asw-card-border: rgba(139, 0, 0, 0.14);
+
+    --asw-text-primary: #1f2937;
+    --asw-text-secondary: #4b5563;
+    --asw-text-heading: #6b0000;
+
+    --asw-icon-color: #8b0000;
+
+    --asw-toggle-track-off: #e7e7e7;
+    --asw-toggle-track-off-border: #adadad;
+    --asw-toggle-thumb: #ffffff;
+    --asw-toggle-track-on-start: #ca0808;
+    --asw-toggle-track-on-end: #8b0000;
+}
+
+[data-theme="dark"] {
+    --asw-card-surface: rgba(15, 23, 42, 0.84);
+    --asw-card-border: rgba(255, 255, 255, 0.12);
+
+    --asw-text-primary: #f8fafc;
+    --asw-text-secondary: #cbd5e1;
+    --asw-text-heading: #fecaca;
+
+    --asw-icon-color: #fecaca;
+
+    --asw-toggle-track-off: #334155;
+    --asw-toggle-track-off-border: #475569;
+    --asw-toggle-thumb: #ffffff;
+    --asw-toggle-track-on-start: #ef4444;
+    --asw-toggle-track-on-end: #7f1d1d;
+}
+
 @media (max-width: 1199px) {
     :root {
         --float-right: 18px;

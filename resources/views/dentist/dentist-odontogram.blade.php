@@ -676,7 +676,7 @@
                     <span id="drawerSelectedLegendPreview" hidden>None selected</span>
 
                     <div class="odontogram-legend-search-wrap">
-                        <x-search-bar id="legendSearchInput" class="search-compact" placeholder="Search treatmentsâ€¦"
+                        <x-search-bar id="legendSearchInput" class="search-compact" placeholder="Search treatments..."
                             clear-label="Clear treatment search" callback="filterOdontogramLegends" :debounce="150" />
                     </div>
 
@@ -700,7 +700,7 @@
     </main>
 
     @unless ($existingAppointmentMode || $savedVisitEditMode)
-        <x-follow-up-modal :patient-name="$patientName" :patient-avatar-url="$patientAvatarUrl" :service-type="$currentServiceType ?: 'â€”'" :appointment-date="$formattedAppointmentDate" :appointment-time="$formattedAppointmentTime"
+        <x-follow-up-modal :patient-name="$patientName" :patient-avatar-url="$patientAvatarUrl" :service-type="$currentServiceType ?: '-'" :appointment-date="$formattedAppointmentDate" :appointment-time="$formattedAppointmentTime"
             :store-url="route('dentist.dentist.appointments.follow-up.store', $appointment->id)" />
     @endunless
 
@@ -724,7 +724,7 @@
                         </span>
 
                         <strong id="followUpSuccessDate" class="global-info-value">
-                            â€”
+                            -
                         </strong>
                     </div>
                 </div>
@@ -740,7 +740,7 @@
                         </span>
 
                         <strong id="followUpSuccessTime" class="global-info-value">
-                            â€”
+                            -
                         </strong>
                     </div>
                 </div>
@@ -756,7 +756,7 @@
                         </span>
 
                         <strong id="followUpSuccessPatient" class="global-info-value">
-                            â€”
+                            -
                         </strong>
                     </div>
                 </div>
@@ -1281,7 +1281,7 @@
                 RM: '#2563eb',
                 X: '#2563eb',
                 XO: '#2563eb',
-                'âœ“': '#111827',
+                '✓': '#111827',
                 CM: '#111827',
                 SP: '#111827'
             };
@@ -1305,7 +1305,7 @@
                 RM: 'fa-solid fa-teeth',
                 X: 'fa-solid fa-xmark',
                 XO: 'fa-solid fa-skull-crossbones',
-                'âœ“': 'fa-solid fa-check',
+                '✓': 'fa-solid fa-check',
                 CM: 'fa-solid fa-question',
                 SP: 'fa-solid fa-plus'
             };
