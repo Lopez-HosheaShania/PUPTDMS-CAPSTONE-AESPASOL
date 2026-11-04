@@ -10,6 +10,7 @@ import './core/session';
 import './ui/accordion';
 import './ui/header';
 import './ui/floating-save-bar';
+import './ui/chatbot';
 
 if (document.querySelector('[data-monthly-report]')) {
     import('./reports/monthly-report.js');

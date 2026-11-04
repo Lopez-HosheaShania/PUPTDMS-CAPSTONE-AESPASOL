@@ -1,7 +1,3 @@
-#personalInformationVerificationModal [hidden] {
-    display: none !important;
-}
-
 .modal-profile-card {
     position: relative;
     display: grid;

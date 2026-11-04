@@ -130,12 +130,10 @@ function initAccessibilitySheetGesture() {
         );
 
         menu.classList.remove('asw-dragging');
+        menu.style.removeProperty('transform');
 
         if (difference > 90) {
             menu.querySelector('.asw-menu-close')?.click();
-        } else {
-            menu.style.transform =
-                'translateX(-50%) translateY(0)';
         }
 
         dragging = false;
@@ -152,105 +150,6 @@ function initAccessibilitySheetGesture() {
         menu.classList.remove('asw-dragging');
         menu.style.removeProperty('transform');
     });
-}
-
-function initAccessibilityCloseIsolation() {
-    const bindCloseButtons = () => {
-        document
-            .querySelectorAll('.asw-menu-close')
-            .forEach(closeButton => {
-                if (
-                    closeButton.dataset.closeIsolationInitialized ===
-                    'true'
-                ) {
-                    return;
-                }
-
-                closeButton.dataset.closeIsolationInitialized =
-                    'true';
-
-                closeButton.addEventListener('click', event => {
-                    const assistiveGroup =
-                        document.getElementById(
-                            'assistiveFabGroup'
-                        );
-
-                    const assistiveMainFab =
-                        document.getElementById(
-                            'assistiveMainFab'
-                        );
-
-                    const shouldKeepWandOpen =
-                        assistiveGroup?.classList.contains(
-                            'open'
-                        );
-
-                    event.stopPropagation();
-
-                    if (!shouldKeepWandOpen) return;
-
-                    setTimeout(() => {
-                        assistiveGroup.classList.add('open');
-
-                        document.body.classList.add(
-                            'assistive-menu-open'
-                        );
-
-                        assistiveMainFab?.setAttribute(
-                            'aria-expanded',
-                            'true'
-                        );
-                    }, 0);
-                });
-            });
-    };
-
-    bindCloseButtons();
-
-    const observer =
-        new MutationObserver(
-            mutations => {
-                const hasAccessibilityChange =
-                    mutations.some(
-                        mutation =>
-                            Array.from(
-                                mutation.addedNodes
-                            ).some(node => {
-                                if (
-                                    !(
-                                        node instanceof
-                                        Element
-                                    )
-                                ) {
-                                    return false;
-                                }
-
-                                return (
-                                    node.matches(
-                                        '.asw-menu, .asw-menu-close'
-                                    ) ||
-                                    node.querySelector(
-                                        '.asw-menu-close'
-                                    )
-                                );
-                            })
-                    );
-
-                if (!hasAccessibilityChange) {
-                    return;
-                }
-
-                bindCloseButtons();
-            }
-        );
-
-    observer.observe(
-        document.body,
-        {
-            childList: true,
-            subtree: true
-        }
-    );
 }
 
 function fixSiennaPosition() {
@@ -288,7 +187,7 @@ function fixSiennaPosition() {
         .sort((first, second) => second.rect.top - first.rect.top)[0];
 
     const right = isMobile ? 18 : 22;
-    const fabSize = isMobile ? 48 : 46;
+    const fabSize = isMobile ? 40 : 46;
     const gap = 14;
 
     let navClearance = 0;
@@ -308,71 +207,43 @@ function fixSiennaPosition() {
 
     const root = document.documentElement;
 
-    root.style.setProperty('--float-right', `${right}px`, 'important');
-    root.style.setProperty('--float-right-final', `${right}px`, 'important');
-    root.style.setProperty('--patient-nav-height', `${navClearance}px`, 'important');
-    root.style.setProperty('--fab-final-size', `${fabSize}px`, 'important');
-    root.style.setProperty('--accessibility-bottom', `${assistiveGroupBottom}px`, 'important');
-    root.style.setProperty('--accessibility-bottom-final', `${assistiveGroupBottom}px`, 'important');
-    root.style.setProperty('--chatbot-bottom-final', `${assistiveGroupBottom}px`, 'important');
-    root.style.setProperty('--back-top-bottom', `${backTopBottom}px`, 'important');
-    root.style.setProperty('--back-top-bottom-final', `${backTopBottom}px`, 'important');
+    const variables = {
+        '--float-right': `${right}px`,
+        '--float-right-final': `${right}px`,
+        '--patient-nav-height': `${navClearance}px`,
+        '--fab-final-size': `${fabSize}px`,
+        '--accessibility-bottom': `${assistiveGroupBottom}px`,
+        '--accessibility-bottom-final': `${assistiveGroupBottom}px`,
+        '--chatbot-bottom-final': `${assistiveGroupBottom}px`,
+        '--back-top-bottom': `${backTopBottom}px`,
+        '--back-top-bottom-final': `${backTopBottom}px`
+    };
+
+    Object.entries(variables).forEach(([name, value]) => {
+        root.style.setProperty(name, value);
+    });
 
     const assistiveGroup =
         document.getElementById('assistiveFabGroup');
 
     if (assistiveGroup) {
-        assistiveGroup.style.setProperty(
-            'right',
-            `${right}px`,
-            'important'
-        );
-
-        assistiveGroup.style.setProperty(
-            'bottom',
-            `${assistiveGroupBottom}px`,
-            'important'
-        );
+        assistiveGroup.style.removeProperty('right');
+        assistiveGroup.style.removeProperty('bottom');
     }
 
     document
         .querySelectorAll('.asw-widget, .asw-menu-btn')
         .forEach(element => {
-            element.style.setProperty(
-                '--asw-off-x',
-                `${right}px`,
-                'important'
-            );
-
-            element.style.setProperty(
-                '--asw-off-y',
-                `${assistiveGroupBottom}px`,
-                'important'
-            );
-
-            element.style.setProperty(
-                '--asw-right',
-                `${right}px`,
-                'important'
-            );
-
-            element.style.setProperty(
-                '--asw-bottom',
-                `${assistiveGroupBottom}px`,
-                'important'
-            );
-
-            element.style.setProperty(
+            [
                 'right',
-                `${right}px`,
-                'important'
-            );
-
-            element.style.setProperty(
                 'bottom',
-                `${assistiveGroupBottom}px`,
-                'important'
-            );
+                '--asw-off-x',
+                '--asw-off-y',
+                '--asw-right',
+                '--asw-bottom'
+            ].forEach(property => {
+                element.style.removeProperty(property);
+            });
         });
 }
 
@@ -420,7 +291,6 @@ document.addEventListener(
     () => {
         initAssistiveHelpPopover();
         initAccessibilitySheetGesture();
-        initAccessibilityCloseIsolation();
         syncAssistiveFloatingState();
         scheduleSiennaPosition();
     }

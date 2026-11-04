@@ -573,7 +573,7 @@ export const actionHandlers = Object.freeze({
     },
     // resources/views/partials/chatbot.blade.php
     'action-15220cbe0457': function (event) {
-        closeAssistiveMenu(); toggleChat();
+        toggleChat();
     },
     // resources/views/partials/chatbot.blade.php
     'action-907ec5cc753e': function (event) {

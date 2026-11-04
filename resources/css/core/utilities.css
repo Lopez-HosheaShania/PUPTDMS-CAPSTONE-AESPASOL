@@ -380,7 +380,6 @@ progress.progress-bar::-moz-progress-bar {
 }
 
 .ui-btn {
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
@@ -392,6 +391,10 @@ progress.progress-bar::-moz-progress-bar {
     line-height: 1;
     cursor: pointer;
     transition: all .18s ease;
+}
+
+.ui-btn:not([hidden]) {
+    display: inline-flex;
 }
 
 .ui-btn-sm {
@@ -2873,7 +2876,7 @@ progress.progress-bar::-moz-progress-bar {
 }
 
 [data-show-more-panel][hidden] {
-    display: none !important;
+    display: none;
 }
 
 [data-theme="dark"] #mainContent .time-chip,
