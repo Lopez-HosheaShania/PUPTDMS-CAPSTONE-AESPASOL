@@ -559,3 +559,66 @@
         font-size: 10px;
     }
 }
+
+.table-card:has(.voice-status:not(.hidden)),
+.table-card:has(.global-voice-waveform.is-active),
+.table-card:has(.global-voice-waveform.is-leaving) {
+    overflow: visible;
+}
+
+.table-card:has(.voice-status:not(.hidden)) .table-toolbar,
+.table-card:has(.global-voice-waveform.is-active) .table-toolbar,
+.table-card:has(.global-voice-waveform.is-leaving) .table-toolbar {
+    position: relative;
+    z-index: 100;
+}
+
+.card:has(.voice-status:not(.hidden))>.card-header,
+.card:has(.global-voice-waveform.is-active)>.card-header,
+.card:has(.global-voice-waveform.is-leaving)>.card-header {
+    position: relative;
+    z-index: 100;
+}
+
+.voice-search-row:has(.voice-status:not(.hidden)),
+.voice-search-row:has(.global-voice-waveform.is-active),
+.voice-search-row:has(.global-voice-waveform.is-leaving) {
+    position: relative;
+    z-index: 150;
+}
+
+.voice-input-toggle:has(.voice-status:not(.hidden)),
+.voice-input-toggle:has(.global-voice-waveform.is-active),
+.voice-input-toggle:has(.global-voice-waveform.is-leaving) {
+    z-index: 200;
+}
+
+.card:has(.voice-search-row .voice-status:not(.hidden),
+    .voice-search-row .global-voice-waveform.is-active,
+    .voice-search-row .global-voice-waveform.is-leaving) {
+    overflow: visible;
+}
+
+.card:has(.voice-search-row .voice-status:not(.hidden),
+    .voice-search-row .global-voice-waveform.is-active,
+    .voice-search-row .global-voice-waveform.is-leaving)>.card-header {
+    position: relative;
+    z-index: 100;
+    overflow: visible;
+}
+
+.card-header:has(.voice-search-row .voice-status:not(.hidden),
+    .voice-search-row .global-voice-waveform.is-active,
+    .voice-search-row .global-voice-waveform.is-leaving) .card-header-right {
+    position: relative;
+    z-index: 101;
+    overflow: visible;
+}
+
+.voice-search-row:has(.voice-status:not(.hidden),
+    .global-voice-waveform.is-active,
+    .global-voice-waveform.is-leaving) {
+    position: relative;
+    z-index: 102;
+    overflow: visible;
+}

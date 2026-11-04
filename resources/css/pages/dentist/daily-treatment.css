@@ -21,23 +21,6 @@
     min-width: 0;
 }
 
-.daily-treatment-page .dtr-toolbar,
-.daily-treatment-page .dtr-card-header,
-.daily-treatment-page .voice-search-row,
-.daily-treatment-page .voice-input-toggle,
-.daily-treatment-page .dtr-month-picker {
-    position: relative;
-    overflow: visible;
-}
-
-.daily-treatment-page .voice-input-toggle {
-    z-index: 200;
-}
-
-.daily-treatment-page .voice-status {
-    z-index: 9999;
-}
-
 .daily-treatment-page .dtr-month-picker,
 .daily-treatment-page .global-search {
     width: 100%;
@@ -118,35 +101,6 @@
     color: var(--status-default-text);
     border: 1px solid var(--status-default-border);
 }
-
-.daily-treatment-page .dtr-signature-preview {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 92px;
-    min-width: 92px;
-    height: 38px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    box-shadow: 0 6px 16px var(--alpha-slate-900-6);
-    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-
-.daily-treatment-page .dtr-signature-preview:hover {
-    transform: translateY(-1px);
-    border-color: var(--status-completed-border);
-    box-shadow: 0 10px 24px color-mix(in srgb, var(--status-completed-solid) 12%, transparent);
-}
-
-.daily-treatment-page .dtr-signature-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
 
 .daily-treatment-page .dtr-month-picker {
     position: relative;

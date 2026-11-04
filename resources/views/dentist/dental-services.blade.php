@@ -107,7 +107,7 @@
                     page-size-id="servicePerPageSelect" page-size-callback="selectDentalServicesPerPage" :page-size-value="10"
                     label="entries" hidden />
 
-                <div id="dentalServicesListView" class="table-size">
+                <div id="dentalServicesListView" class="table-scroll">
                     <table class="data-table service-table service-dental-table">
                         <thead>
                             <tr>
@@ -473,6 +473,7 @@
         </x-slot:footer>
     </x-modal>
 
+    <x-signature-preview-modal />
 @endsection
 
 @section('scripts')
@@ -816,7 +817,6 @@
                 }
             );
         }
-
 
         window.addEventListener(
             'global-validation-ready',
@@ -1447,13 +1447,25 @@
 
                 const signatureCell = signatureUrl ?
                     `
-                    <a href="${encodeURI(signatureUrl)}" target="_blank" rel="noopener noreferrer"
-                        class="service-signature-link" aria-label="View patient signature">
-                        <img src="${encodeURI(signatureUrl)}" alt="Patient signature"
-                            class="service-signature-image">
-                    </a>
-                ` :
-                    '<span class="service-signature-empty">No signature</span>';
+        <button
+            type="button"
+            class="signature-preview-trigger"
+            data-signature-preview
+            data-signature-preview-url="${escapeDentalText(signatureUrl)}"
+            data-signature-preview-name="${safeName}"
+            aria-label="Preview signature of ${safeName}"
+            title="View patient signature"
+        >
+            <img
+                src="${escapeDentalText(signatureUrl)}"
+                alt=""
+                class="signature-preview-thumbnail"
+                loading="lazy"
+            >
+        </button>
+    ` :
+                    '<span class="signature-preview-empty">No signature</span>';
+
 
                 tbody.innerHTML += `
             <tr>

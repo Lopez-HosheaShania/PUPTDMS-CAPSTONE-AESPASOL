@@ -388,6 +388,8 @@
             </x-button>
         </x-slot:footer>
     </x-modal>
+
+    <x-signature-preview-modal />
 @endsection
 
 @section('scripts')
@@ -542,13 +544,30 @@
             records.forEach(record => {
                 const contact = [record.patient_email, record.patient_phone].filter(Boolean).join(' / ') || '-';
                 const officeOrProgram = record.office_display || record.office_type || record.program_code || '-';
-                const signature = record.has_signature ?
+
+                const signatureUrl = String(record.signature_url || '').trim();
+
+                const signature = record.has_signature && signatureUrl ?
                     `
-            <a href="${escapeDtrHtml(record.signature_url || '#')}" class="dtr-signature-preview" target="_blank" rel="noopener noreferrer" aria-label="View patient signature">
-              <img src="${escapeDtrHtml(record.signature_url || '')}" alt="Patient signature" class="dtr-signature-image">
-            </a>
-          ` :
-                    '<span class="dtr-signature no">No signature</span>';
+        <button
+            type="button"
+            class="signature-preview-trigger"
+            data-signature-preview
+            data-signature-preview-url="${escapeDtrHtml(signatureUrl)}"
+            data-signature-preview-name="${escapeDtrHtml(record.patient_name || '')}"
+            aria-label="Preview signature of ${escapeDtrHtml(record.patient_name || 'patient')}"
+            title="View patient signature"
+        >
+            <img
+                src="${escapeDtrHtml(signatureUrl)}"
+                alt=""
+                class="signature-preview-thumbnail"
+                loading="lazy"
+            >
+        </button>
+    ` :
+                    '<span class="signature-preview-empty">No signature</span>';
+
 
                 if (tbody) {
                     tbody.insertAdjacentHTML('beforeend', `
@@ -908,13 +927,6 @@
           </button>
         </span>
       `).join('');
-        }
-        }
-
-        function removeDailyDraftChip(key) {
-            dtrDraft[key] = '';
-            renderDailyFilterDraft();
-            updateDailyDraftCount();
         }
 
         function removeDailyDraftChip(key) {

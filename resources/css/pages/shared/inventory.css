@@ -131,12 +131,6 @@
     color: var(--status-rejected-text);
 }
 
-#mainContent.inventory-page .table-card {
-    background: var(--card);
-    border-color: var(--border);
-    overflow: hidden;
-}
-
 #mainContent.inventory-page .inventory-list-view,
 #mainContent.inventory-page .inventory-list-body,
 #mainContent.inventory-page .inventory-list-header,

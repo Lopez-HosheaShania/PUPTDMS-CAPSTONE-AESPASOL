@@ -11,6 +11,7 @@ import './ui/accordion';
 import './ui/header';
 import './ui/floating-save-bar';
 import './ui/chatbot';
+import './ui/signature-preview';
 
 if (document.querySelector('[data-monthly-report]')) {
     import('./reports/monthly-report.js');
