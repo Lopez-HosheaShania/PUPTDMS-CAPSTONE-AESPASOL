@@ -171,10 +171,15 @@
 }
 
 .odontogram-preview-marking-swatch {
+    display: inline-block;
+    flex: 0 0 9px;
     width: 9px;
     height: 9px;
+    min-width: 9px;
+    min-height: 9px;
     border-radius: 3px;
     border: 1px solid rgba(0, 0, 0, .12);
+    box-sizing: border-box;
 }
 
 .odontogram-preview-empty-marking {

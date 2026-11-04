@@ -1066,9 +1066,35 @@
                         addText(procedureCell, 'strong', 'global-info-value m-0', note.procedure_name || 'Unavailable');
                         addText(procedureCell, 'p', 'modal-helper-text', `Visit #${note.appointment_id ?? 'Unavailable'}`);
 
-                        const itemsCell = addText(layout, 'div', 'min-w-0', '');
-                        addText(itemsCell, 'span', 'status-pill status-pending whitespace-pre-wrap break-words', note
-                            .inventory_notes || 'No items recorded');
+
+                        const itemsCell = addText(layout, 'div', 'min-w-0 w-full', '');
+
+                        const inventoryItems = String(note.inventory_notes ?? '')
+                            .split(/[\r\n,]+/)
+                            .map(item => item.trim())
+                            .filter(Boolean);
+
+                        if (inventoryItems.length === 0) {
+                            addText(itemsCell, 'span', 'modal-helper-text', 'No items recorded');
+                        } else {
+                            const itemsList = addText(
+                                itemsCell,
+                                'ul',
+                                'flex flex-col items-start gap-1 min-w-0 w-full m-0 p-0 list-none',
+                                ''
+                            );
+
+                            inventoryItems.forEach(item => {
+                                addText(
+                                    itemsList,
+                                    'li',
+                                    'status-pill status-pending !text-[10px] !font-semibold !leading-[1.3] !px-2 !py-1 !rounded-md !whitespace-normal break-words !text-left max-w-full min-w-0',
+                                    item
+                                );
+                            });
+
+                        }
+
                     }
 
                     const hasResults =

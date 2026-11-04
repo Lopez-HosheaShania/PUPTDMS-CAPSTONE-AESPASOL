@@ -574,7 +574,7 @@
                                         </label>
                                         <textarea id="inventoryNotes" name="inventory_notes" rows="3" maxlength="10000"
                                             class="form-input-custom global-form-textarea"
-                                            placeholder="List medicines, materials, or supplies used during this procedure...">{{ old('inventory_notes', $procedure?->inventory_notes) }}</textarea>
+                                            placeholder="Enter one item per line, e.g.&#10;2x Paracetamol&#10;1x Dental Gloves&#10;1x Composite Resin">{{ old('inventory_notes', $procedure?->inventory_notes) }}</textarea>
                                     </div>
 
                                     <div class="odontogram-procedure-actions">
@@ -985,6 +985,9 @@
     </x-modal>
 @endsection
 
+@vite('resources/js/odontogram/treatment-colors.js')
+
+
 @section('scripts')
     @unless ($existingAppointmentMode || $savedVisitEditMode)
         @include('components.appointment-calendar-script', [
@@ -1262,29 +1265,7 @@
                 }
             ];
 
-            const legendColors = {
-                D: '#ef4444',
-                RC: '#ef4444',
-                M: '#111827',
-                F: '#2563eb',
-                I: '#ef4444',
-                RF: '#ef4444',
-                MO: '#111827',
-                IM: '#111827',
-                J: '#2563eb',
-                A: '#2563eb',
-                AB: '#2563eb',
-                P: '#2563eb',
-                IN: '#2563eb',
-                LC: '#2563eb',
-                TP: '#2563eb',
-                RM: '#2563eb',
-                X: '#2563eb',
-                XO: '#2563eb',
-                '✓': '#111827',
-                CM: '#111827',
-                SP: '#111827'
-            };
+            const legendColors = window.OdontogramTreatmentColors;
 
             const legendIcons = {
                 D: 'fa-solid fa-bug',
