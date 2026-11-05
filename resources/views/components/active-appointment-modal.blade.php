@@ -11,10 +11,6 @@
                     <h2 id="activeAppointmentModalTitle" class="modal-title">
                         Active Appointment
                     </h2>
-
-                    <p id="activeAppointmentModalDescription" class="modal-subtitle">
-                        You already have an active appointment scheduled.
-                    </p>
                 </div>
             </div>
 
@@ -25,7 +21,6 @@
 
         <div class="modal-bd">
             <div class="global-confirm-alert">
-                <i class="fa-solid fa-calendar-check"></i>
                 <div>
                     <p>
                         You currently have an active appointment.
@@ -44,7 +39,6 @@
             </button>
 
             <a href="{{ route('patient.appointment.index') }}" class="ui-btn ui-btn-primary">
-                <i class="fa-regular fa-calendar-check"></i>
                 View My Appointments
             </a>
         </div>
